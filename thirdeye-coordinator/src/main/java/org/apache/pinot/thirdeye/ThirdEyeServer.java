@@ -9,7 +9,9 @@ import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.resources.RootResource;
+import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +38,16 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
   }
 
   @Override
-  public void run(final ThirdEyeServerConfiguration configuration, final Environment environment) {
+  public void run(final ThirdEyeServerConfiguration configuration, final Environment env) {
 
-    final Injector injector = Guice.createInjector(
-        new ThirdEyeServerModule(configuration,
-            environment.metrics()));
+    final DataSource dataSource = new DataSourceBuilder()
+        .build(configuration.getDatabaseConfiguration());
 
-    environment.jersey().register(injector.getInstance(RootResource.class));
+    final Injector injector = Guice.createInjector(new ThirdEyeServerModule(
+        configuration,
+        dataSource,
+        env.metrics()));
+
+    env.jersey().register(injector.getInstance(RootResource.class));
   }
 }

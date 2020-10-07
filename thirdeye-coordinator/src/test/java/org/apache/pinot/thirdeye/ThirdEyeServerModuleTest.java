@@ -6,6 +6,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.pinot.thirdeye.resources.RootResource;
+import org.apache.tomcat.jdbc.pool.DataSource;
 import org.testng.annotations.Test;
 
 public class ThirdEyeServerModuleTest {
@@ -13,8 +14,9 @@ public class ThirdEyeServerModuleTest {
   @Test
   public void testRootResourceInjection() {
     final Injector injector = Guice.createInjector(new ThirdEyeServerModule(
-       mock(ThirdEyeServerConfiguration.class),
-       mock(MetricRegistry.class)
+        mock(ThirdEyeServerConfiguration.class),
+        mock(DataSource.class),
+        mock(MetricRegistry.class)
     ));
     assertThat(injector.getInstance(RootResource.class)).isNotNull();
   }

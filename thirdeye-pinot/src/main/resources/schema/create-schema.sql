@@ -428,7 +428,7 @@ create table if not exists rootcause_template_index (
     application VARCHAR(128),
     owner varchar(32) not null,
     metric_id bigint(20) not null,
-    create_time timestamp default 0,
+    create_time timestamp,
     update_time timestamp default current_timestamp,
     version int(10)
 ) ENGINE=InnoDB;
@@ -442,7 +442,7 @@ create table if not exists online_detection_data_index (
     base_id bigint(20) not null,
     dataset varchar(200),
     metric varchar(200),
-    create_time timestamp default 0,
+    create_time timestamp,
     update_time timestamp default current_timestamp,
     version int(10)
 ) ENGINE=InnoDB;
@@ -454,7 +454,7 @@ create table if not exists anomaly_subscription_group_notification_index (
     base_id bigint(20) not null,
     anomaly_id bigint(20) not null,
     detection_config_id bigint(20) not null,
-    create_time timestamp default 0,
+    create_time timestamp,
     update_time timestamp default current_timestamp,
     version int(10)
 ) ENGINE=InnoDB;

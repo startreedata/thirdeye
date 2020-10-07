@@ -24,7 +24,7 @@ Online monitoring and analysis of business and system metrics from multiple data
 * Connectors for discrete event data sources, such as holidays from Google calendar
 * Plugin support for detection and analysis components
 
-## What isn't it? (limitations)
+## What it isn't? (limitations)
 
 ThirdEye maintains a dedicated meta-data store to capture data sources, anomalies, and relationships between entities but does not store raw time series data. It relies on systems such as Pinot, Presto, MySQL, RocksDB, and Kafka to obtain both realtime and historic time series data.
 
@@ -44,3 +44,7 @@ Detailed documentation can be found at [ThirdEye documentation](https://thirdeye
 - [Data Sources Setup](https://thirdeye.readthedocs.io/en/latest/datasources.html)
 - [Production Settings](https://thirdeye.readthedocs.io/en/latest/production.html)
 - [Alert Setup](https://thirdeye.readthedocs.io/en/latest/alert_setup.html)
+
+## Developer Guide
+
+Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.

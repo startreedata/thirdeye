@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -111,8 +112,8 @@ public abstract class ThirdEyeUtils {
 
   public static final long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
 
-  private ThirdEyeUtils () {
-
+  public static <T> Optional<T> optional(T o) {
+    return Optional.ofNullable(o);
   }
 
   /**

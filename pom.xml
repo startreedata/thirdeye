@@ -498,6 +498,13 @@
 
       <!-- test dependencies -->
       <dependency>
+        <groupId>org.apache.pinot.thirdeye</groupId>
+        <artifactId>thirdeye-pinot</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
         <version>${testng.version}</version>

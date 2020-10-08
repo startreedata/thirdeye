@@ -36,6 +36,7 @@ public class TestApplicationManager {
   @BeforeClass
   void beforeClass() {
     db = new TestDatabase();
+    db.init();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     applicationManager = daoRegistry.getApplicationDAO();
   }

@@ -56,6 +56,12 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>thirdeye-pinot</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
     <!-- ################################### -->
     <!-- test dependencies end               -->
@@ -63,4 +69,14 @@
 
   </dependencies>
 
+  <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>../thirdeye-pinot/src/main/resources</directory>
+      </testResource>
+    </testResources>
+  </build>
 </project>

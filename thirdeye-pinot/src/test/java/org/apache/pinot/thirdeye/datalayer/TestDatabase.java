@@ -18,10 +18,6 @@ public class TestDatabase {
 
   private static final Logger log = LoggerFactory.getLogger(TestDatabase.class);
 
-  public TestDatabase() {
-    init();
-  }
-
   public void cleanup() {
     /* tmp file gets deleted automatically */
   }

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.common.time;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
@@ -180,6 +181,14 @@ public class TimeGranularity {
    */
   public String toAggregationGranularityString() {
     return size + "_" + unit;
+  }
+
+  public Duration toDuration() {
+    return Duration.ofMillis(toMillis());
+  }
+
+  public static TimeGranularity fromDuration(Duration d) {
+    return new TimeGranularity(Math.toIntExact(d.toMillis()), TimeUnit.MILLISECONDS);
   }
 
   /**

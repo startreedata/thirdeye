@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.auth;
 
+import java.time.Duration;
 import javax.validation.constraints.NotNull;
-import org.joda.time.Duration;
 
 public class JwtConfiguration {
 
@@ -11,7 +11,7 @@ public class JwtConfiguration {
   @NotNull
   private String issuer;
 
-  private Duration accessTokenExpiry = Duration.standardDays(1);
+  private Duration accessTokenExpiry = Duration.ofDays(1);
 
   public String getSigningKey() {
     return signingKey;

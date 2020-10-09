@@ -10,10 +10,10 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.inject.Singleton;
+import java.time.Duration;
+import java.util.Date;
 import java.util.Optional;
 import javax.inject.Inject;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class JwtService {
     try {
       final JWTCreator.Builder builder = JWT.create()
           .withIssuer(issuer)
-          .withExpiresAt(new DateTime().plus(accessTokenExpiry).toDate());
+          .withExpiresAt(Date.from(new Date().toInstant().plus(accessTokenExpiry)));
 
       optional(principal)
           .ifPresent(v -> builder.withClaim(PRINCIPAL, v));

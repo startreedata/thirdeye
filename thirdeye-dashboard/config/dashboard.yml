@@ -23,8 +23,12 @@ alerterConfiguration:
   smtpConfiguration:
     smtpHost: localhost
     smtpPort: 25
+
 logging:
-  type: external
+  level: INFO
+  loggers:
+    org.apache.pinot.thirdeye: DEBUG
+
 server:
   type: default
   applicationConnectors:

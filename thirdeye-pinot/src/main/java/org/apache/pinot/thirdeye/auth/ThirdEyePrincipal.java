@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.auth;
 
+import com.google.common.base.MoreObjects;
 import java.security.Principal;
 
 public class ThirdEyePrincipal implements Principal {
@@ -42,5 +43,13 @@ public class ThirdEyePrincipal implements Principal {
 
   public String getSessionKey() {
     return sessionKey;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("name", name)
+        .add("sessionKey", sessionKey)
+        .toString();
   }
 }

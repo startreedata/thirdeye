@@ -3,7 +3,9 @@ package org.apache.pinot.thirdeye;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import io.dropwizard.auth.Authenticator;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
@@ -26,17 +28,15 @@ public class ThirdEyeServerModule extends AbstractModule {
   @Override
   protected void configure() {
     install(new ThirdEyePersistenceModule(dataSource));
+
+    bind(new TypeLiteral<Authenticator<ThirdEyeCredentials, ThirdEyePrincipal>>(){})
+        .to(ThirdEyeAuthenticatorDisabled.class)
+        .in(Scopes.SINGLETON);
   }
 
   @Singleton
   @Provides
   public JwtConfiguration getJwtConfiguration() {
     return configuration.getAuthConfiguration().getJwtConfiguration();
-  }
-
-  @Singleton
-  @Provides
-  public Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> getAuthenticator() {
-    return new ThirdEyeAuthenticatorDisabled();
   }
 }

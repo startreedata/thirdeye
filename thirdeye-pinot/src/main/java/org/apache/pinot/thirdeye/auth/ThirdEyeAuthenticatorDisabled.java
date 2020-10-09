@@ -33,7 +33,7 @@ public class ThirdEyeAuthenticatorDisabled implements Authenticator<ThirdEyeCred
    *  {@inheritDoc}
    */
   @Override
-  public Optional<ThirdEyePrincipal> authenticate(ThirdEyeCredentials credentials) throws AuthenticationException {
+  public Optional<ThirdEyePrincipal> authenticate(ThirdEyeCredentials credentials) {
     LOG.info("Authentication is disabled. Accepting any credentials for {}.", credentials.getPrincipal());
 
     return Optional.of(new ThirdEyePrincipal(credentials.getPrincipal()));

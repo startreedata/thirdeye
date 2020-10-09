@@ -27,15 +27,15 @@ import java.util.Date;
 @JsonInclude(Include.NON_NULL)
 public class UserApi {
 
-  private Integer id;
+  private Long id;
   private String principal;
   private Date created;
 
-  public Integer getId() {
+  public Long getId() {
     return id;
   }
 
-  public UserApi setId(final Integer id) {
+  public UserApi setId(final Long id) {
     this.id = id;
     return this;
   }

@@ -1,11 +1,10 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.authenticate;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.unauthenticatedException;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.swagger.annotations.ApiParam;
-import java.util.Optional;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotAuthorizedException;
@@ -41,24 +40,35 @@ public class AuthResource {
   ) {
     try {
       final GrantType grantType = GrantType.fromValue(grantTypeStr);
-      authenticate(grantType != null);
+      ResourceUtils.authenticate(grantType != null);
 
-      Optional<ThirdEyePrincipal> thirdEyePrincipal = Optional.empty();
-      switch (grantType) {
-        case PASSWORD:
-          thirdEyePrincipal = authService.authenticate(principal, password);
-          break;
-        case AUTHORIZATION_CODE:
-          thirdEyePrincipal = authService.authenticate(authHeader);
-      }
-      authenticate(thirdEyePrincipal.isPresent());
+      final ThirdEyePrincipal thirdEyePrincipal = authenticate(
+          authHeader,
+          grantType,
+          principal,
+          password
+      );
 
-      return Response.ok(authApi(thirdEyePrincipal.get())).build();
+      return Response.ok(authApi(thirdEyePrincipal)).build();
     } catch (NotAuthorizedException e) {
       throw e;
     } catch (Exception e) {
-      throw new NotAuthorizedException("Authentication Failure");
+      throw unauthenticatedException();
     }
+  }
+
+  private ThirdEyePrincipal authenticate(
+      final String authHeader,
+      final GrantType grantType,
+      final String principal,
+      final String password) {
+    switch (grantType) {
+      case PASSWORD:
+        return authService.authenticate(principal, password);
+      case AUTHORIZATION_CODE:
+        return authService.authenticate(authHeader);
+    }
+    throw unauthenticatedException();
   }
 
   private AuthApi authApi(final ThirdEyePrincipal thirdEyePrincipal) {

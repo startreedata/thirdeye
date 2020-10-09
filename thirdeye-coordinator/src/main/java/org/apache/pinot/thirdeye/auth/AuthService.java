@@ -1,11 +1,13 @@
 package org.apache.pinot.thirdeye.auth;
 
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.unauthenticatedException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import java.util.Optional;
 import javax.ws.rs.NotAuthorizedException;
+import org.apache.pinot.thirdeye.resources.ResourceUtils;
 
 @Singleton
 public class AuthService {
@@ -26,30 +28,43 @@ public class AuthService {
   }
 
   /**
-   * Checks auth headers, validates JWT token and returns username if valid.
+   * Checks auth headers, validates JWT token and returns principal if valid.
    *
    * @param authHeader HTTP Authorization header
-   * @return username if valid token found, else empty.
+   * @return principal
+   * @throws NotAuthorizedException when credentials are invalid
    */
-  public Optional<ThirdEyePrincipal> authenticate(String authHeader) {
+  public ThirdEyePrincipal authenticate(String authHeader) {
     if (authHeader != null && authHeader.startsWith(OAUTH2_BEARER_PREFIX)) {
       String jwtTokenString = authHeader.substring(OAUTH2_BEARER_PREFIX.length());
-      return jwtService
+      final Optional<ThirdEyePrincipal> principal = jwtService
           .readPrincipal(jwtTokenString)
           .map(p -> new ThirdEyePrincipal(p, null));
+      ResourceUtils.authenticate(principal.isPresent());
+      return principal.get();
     }
-    return Optional.empty();
+    throw unauthenticatedException();
+  }
+
+  /**
+   *
+   * @param principal principal identifier for user. username/email
+   * @param password password for the user.
+   * @return the principal
+   * @throws NotAuthorizedException when credentials are invalid
+   */
+  public ThirdEyePrincipal authenticate(String principal, String password) {
+    try {
+      final Optional<ThirdEyePrincipal> thirdEyePrincipal = authenticator
+          .authenticate(new ThirdEyeCredentials(principal, password));
+      ResourceUtils.authenticate(thirdEyePrincipal.isPresent());
+      return thirdEyePrincipal.get();
+    } catch (AuthenticationException e) {
+      throw unauthenticatedException();
+    }
   }
 
   public String createAccessToken(String principal) {
     return jwtService.createAccessToken(principal);
-  }
-
-  public Optional<ThirdEyePrincipal> authenticate(String principal, String password) {
-    try {
-      return authenticator.authenticate(new ThirdEyeCredentials(principal, password));
-    } catch (AuthenticationException e) {
-      throw new NotAuthorizedException("Authentication Failure");
-    }
   }
 }

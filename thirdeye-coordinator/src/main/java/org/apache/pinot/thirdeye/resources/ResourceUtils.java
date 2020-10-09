@@ -7,8 +7,12 @@ public class ResourceUtils {
 
   public static void authenticate(boolean condition) {
     if (!condition) {
-      throw new NotAuthorizedException("Authentication Failure."); // throw 401
+      throw unauthenticatedException();
     }
+  }
+
+  public static NotAuthorizedException unauthenticatedException() {
+    return new NotAuthorizedException("Authentication Failure.");  // throw 401
   }
 
   public static void ensure(boolean condition, String message) {

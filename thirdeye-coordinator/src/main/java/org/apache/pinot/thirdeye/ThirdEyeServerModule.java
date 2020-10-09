@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Authenticator;
+import org.apache.pinot.thirdeye.auth.JwtConfiguration;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import org.apache.pinot.thirdeye.auth.ThirdEyeCredentials;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
@@ -25,6 +26,12 @@ public class ThirdEyeServerModule extends AbstractModule {
   @Override
   protected void configure() {
     install(new ThirdEyePersistenceModule(dataSource));
+  }
+
+  @Singleton
+  @Provides
+  public JwtConfiguration getJwtConfiguration() {
+    return configuration.getAuthConfiguration().getJwtConfiguration();
   }
 
   @Singleton

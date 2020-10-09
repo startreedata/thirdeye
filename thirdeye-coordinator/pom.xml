@@ -37,6 +37,10 @@
       <artifactId>thirdeye-pinot</artifactId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>com.auth0</groupId>
+      <artifactId>java-jwt</artifactId>
+    </dependency>
 
     <!-- ################################### -->
     <!-- test dependencies start             -->

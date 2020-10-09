@@ -5,16 +5,23 @@ import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApplicationApi;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApplicationDto;
 import static org.apache.pinot.thirdeye.util.ThirdEyeUtils.optional;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
@@ -24,6 +31,13 @@ import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SwaggerDefinition(
+    securityDefinition = @SecurityDefinition(
+        apiKeyAuthDefinitions = {
+            @ApiKeyAuthDefinition(key = "user", name = "Authorization", in = ApiKeyLocation.HEADER)
+        }
+    )
+)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class ApplicationResource {
@@ -38,7 +52,10 @@ public class ApplicationResource {
   }
 
   @GET
-  public Response getAll() {
+  public Response getAll(
+      @ApiParam(hidden = true) @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader
+      ) {
+    log.warn("authheader: " + authHeader);
     final List<ApplicationDTO> all = applicationManager.findAll();
     return Response
         .ok(all.stream().map(ApiBeanMapper::toApplicationApi))

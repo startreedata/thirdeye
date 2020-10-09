@@ -7,7 +7,6 @@ import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApplicationDto;
 import static org.apache.pinot.thirdeye.util.ThirdEyeUtils.optional;
 import io.swagger.annotations.ApiKeyAuthDefinition;
 import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
@@ -25,6 +24,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
+import org.apache.pinot.thirdeye.auth.AuthService;
+import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
@@ -43,19 +44,24 @@ import org.slf4j.LoggerFactory;
 public class ApplicationResource {
 
   private static final Logger log = LoggerFactory.getLogger(ApplicationResource.class);
+
   private final ApplicationManager applicationManager;
+  private final AuthService authService;
 
   @Inject
   public ApplicationResource(
-      final ApplicationManager applicationManager) {
+      final ApplicationManager applicationManager,
+      final AuthService authService) {
     this.applicationManager = applicationManager;
+    this.authService = authService;
   }
 
   @GET
   public Response getAll(
-      @ApiParam(hidden = true) @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader
-      ) {
-    log.warn("authheader: " + authHeader);
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader
+  ) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+
     final List<ApplicationDTO> all = applicationManager.findAll();
     return Response
         .ok(all.stream().map(ApiBeanMapper::toApplicationApi))
@@ -63,7 +69,11 @@ public class ApplicationResource {
   }
 
   @POST
-  public Response createMultiple(List<ApplicationApi> applicationApiList) {
+  public Response createMultiple(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      List<ApplicationApi> applicationApiList) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+
     ensureExists(applicationApiList, "Invalid request");
     ensure(applicationApiList.size() == 1, "Only 1 insert supported at this time.");
 
@@ -75,7 +85,11 @@ public class ApplicationResource {
   }
 
   @PUT
-  public Response editMultiple(List<ApplicationApi> applicationApiList) {
+  public Response editMultiple(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      List<ApplicationApi> applicationApiList) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+
     ensureExists(applicationApiList, "Invalid request");
     ensure(applicationApiList.size() == 1, "Only 1 insert supported at this time.");
 
@@ -84,7 +98,6 @@ public class ApplicationResource {
     final ApplicationDTO applicationDTO = applicationManager
         .findById(ensureExists(id, "Invalid id"));
     ensureExists(applicationDTO, "Invalid id");
-
 
     optional(applicationApi.getName())
         .ifPresent(applicationDTO::setApplication);
@@ -97,7 +110,10 @@ public class ApplicationResource {
 
   @GET
   @Path("{id}")
-  public Response get(@PathParam("id") Long id) {
+  public Response get(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @PathParam("id") Long id) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     final ApplicationDTO applicationDTO = applicationManager.findById(id);
     ensureExists(applicationDTO, "Invalid id");
 
@@ -108,7 +124,10 @@ public class ApplicationResource {
 
   @DELETE
   @Path("{id}")
-  public Response delete(@PathParam("id") Long id) {
+  public Response delete(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @PathParam("id") Long id) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     final ApplicationDTO applicationDTO = applicationManager.findById(id);
     if (applicationDTO != null) {
       applicationManager.delete(applicationDTO);

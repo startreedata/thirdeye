@@ -68,8 +68,9 @@ public class JwtService {
       final DecodedJWT jwt = verifier.verify(jwtToken);
       return optional(jwt.getClaim(PRINCIPAL))
           .map(Claim::asString);
-    } catch (JWTVerificationException exception) {
-      log.error("Invalid signature/claims. Token: " + jwtToken);
+    } catch (RuntimeException e) {
+      log.error(String.format("Invalid signature/claims. errorMsg: '%s' Token: %s",
+          e.getMessage(), jwtToken));
     }
     return Optional.empty();
   }

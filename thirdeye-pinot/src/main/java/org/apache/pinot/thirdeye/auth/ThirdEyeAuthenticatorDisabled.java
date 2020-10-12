@@ -19,22 +19,20 @@
 
 package org.apache.pinot.thirdeye.auth;
 
-import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+public class ThirdEyeAuthenticatorDisabled implements
+    Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> {
 
-public class ThirdEyeAuthenticatorDisabled implements Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> {
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeAuthenticatorDisabled.class);
 
-  /**
-   *  {@inheritDoc}
-   */
   @Override
   public Optional<ThirdEyePrincipal> authenticate(ThirdEyeCredentials credentials) {
-    LOG.info("Authentication is disabled. Accepting any credentials for {}.", credentials.getPrincipal());
+    LOG.warn("Authentication is disabled. Accepting any credentials for {}.",
+        credentials.getPrincipal());
 
     return Optional.of(new ThirdEyePrincipal(credentials.getPrincipal()));
   }

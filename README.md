@@ -98,4 +98,7 @@ Usage:
 ```shell script
 $ localtoken 
 Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJwcmluY2lwYWwiOiJhZG1pbiIsImlzcyI6InRoaXJkZXllIiwiZXhwIjoxNjAyNjI4NTA1fQ.hKp-z-BJBrEPc-k_qVgqnitkPeCBvW2bTXGYIFJ5FNunLcQqDhvAj8NRG0Dvgb97YfvC1bxRsg9-S1VEsP6QZg
+
+# Create token and copy to clipboard (MacOS)
+$ localtoken | pbcopy
 ```

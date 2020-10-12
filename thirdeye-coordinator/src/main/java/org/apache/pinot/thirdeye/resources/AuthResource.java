@@ -4,6 +4,7 @@ import static org.apache.pinot.thirdeye.resources.ResourceUtils.unauthenticatedE
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
@@ -19,6 +20,7 @@ import org.apache.pinot.thirdeye.auth.GrantType;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 
 @Singleton
+@Api(tags = "Auth")
 public class AuthResource {
 
   private final AuthService authService;

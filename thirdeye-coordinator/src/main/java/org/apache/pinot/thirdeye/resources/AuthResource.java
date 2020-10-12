@@ -11,7 +11,9 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.AuthApi;
 import org.apache.pinot.thirdeye.api.UserApi;
@@ -21,6 +23,7 @@ import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 
 @Singleton
 @Api(tags = "Auth")
+@Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
   private final AuthService authService;

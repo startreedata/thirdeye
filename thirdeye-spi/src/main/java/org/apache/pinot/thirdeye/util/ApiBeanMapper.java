@@ -2,9 +2,11 @@ package org.apache.pinot.thirdeye.util;
 
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.api.DatasetApi;
+import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
 
 public abstract class ApiBeanMapper {
@@ -37,6 +39,18 @@ public abstract class ApiBeanMapper {
             .setTimezone(dto.getTimezone())
         )
         .setExpectedDelay(dto.getExpectedDelay().toDuration())
+        ;
+  }
+
+  public static MetricApi toMetricApi(final MetricConfigDTO dto) {
+    return new MetricApi()
+        .setId(dto.getId())
+        .setActive(dto.isActive())
+        .setName(dto.getName())
+        .setUpdated(dto.getUpdateTime())
+        .setDataset(new DatasetApi()
+            .setName(dto.getDataset())
+        )
         ;
   }
 }

@@ -8,14 +8,17 @@ public class ApiResource {
   private final AuthResource authResource;
   private final ApplicationResource applicationResource;
   private final DatasetResource datasetResource;
+  private final MetricResource metricResource;
 
   @Inject
   public ApiResource(final AuthResource authResource,
       final ApplicationResource applicationResource,
-      final DatasetResource datasetResource) {
+      final DatasetResource datasetResource,
+      final MetricResource metricResource) {
     this.authResource = authResource;
     this.applicationResource = applicationResource;
     this.datasetResource = datasetResource;
+    this.metricResource = metricResource;
   }
 
   @Path("auth")
@@ -31,5 +34,10 @@ public class ApiResource {
   @Path("datasets")
   public DatasetResource getDatasetResource() {
     return datasetResource;
+  }
+
+  @Path("metrics")
+  public MetricResource getMetricResource() {
+    return metricResource;
   }
 }

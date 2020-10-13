@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
-public class ThirdEyeAnomalyApplication
+public class ThirdEyeWorker
     extends BaseThirdEyeApplication<ThirdEyeAnomalyConfiguration> {
 
   private TaskDriver taskDriver = null;
@@ -82,7 +82,7 @@ public class ThirdEyeAnomalyApplication
     String detectorApplicationConfigFile = thirdEyeConfigDir + "/" + "detector.yml";
     argList.set(lastIndex, detectorApplicationConfigFile); // replace config dir with the
                                                            // actual config file
-    new ThirdEyeAnomalyApplication().run(argList.toArray(new String[argList.size()]));
+    new ThirdEyeWorker().run(argList.toArray(new String[argList.size()]));
   }
 
   @Override

@@ -34,7 +34,7 @@ The ``org.apache.pinot.thirdeye.dashboard.ThirdEyeDashboardApplication`` class i
 
 - Backend servers are used to schedule tasks or run the tasks. 
 
-The ``org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyApplication`` class is the entry point.
+The ``org.apache.pinot.thirdeye.anomaly.ThirdEyeWorker`` class is the entry point.
 
 :ref:`detector.yml`, :ref:`persistence.yml` and :ref:`data-sources-config.yml` are used to configure backend servers.
 

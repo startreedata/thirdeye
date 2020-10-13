@@ -33,6 +33,7 @@
     <module>thirdeye-coordinator</module>
     <module>thirdeye-dist</module>
     <module>thirdeye-dashboard</module>
+    <module>thirdeye-worker</module>
   </modules>
 
   <properties>

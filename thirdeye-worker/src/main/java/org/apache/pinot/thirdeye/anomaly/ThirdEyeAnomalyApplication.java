@@ -108,7 +108,7 @@ public class ThirdEyeAnomalyApplication
     }
 
     env.getObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-    env.getObjectMapper().registerModule(makeMapperModule());
+    env.getObjectMapper().registerModule(BaseThirdEyeApplication.makeMapperModule());
 
     env.lifecycle().manage(lifecycleManager(config, env));
   }

@@ -34,7 +34,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-pinot</artifactId>
+      <artifactId>thirdeye-core</artifactId>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -62,7 +62,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-pinot</artifactId>
+      <artifactId>thirdeye-core</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -79,7 +79,7 @@
         <directory>src/test/resources</directory>
       </testResource>
       <testResource>
-        <directory>../thirdeye-pinot/src/main/resources</directory>
+        <directory>../thirdeye-core/src/main/resources</directory>
       </testResource>
     </testResources>
   </build>

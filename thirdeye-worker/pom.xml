@@ -33,7 +33,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-pinot</artifactId>
+      <artifactId>thirdeye-core</artifactId>
       <scope>compile</scope>
     </dependency>
 

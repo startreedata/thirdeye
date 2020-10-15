@@ -29,7 +29,7 @@
   <modules>
     <module>thirdeye-frontend</module>
     <module>thirdeye-spi</module>
-    <module>thirdeye-pinot</module>
+    <module>thirdeye-core</module>
     <module>thirdeye-coordinator</module>
     <module>thirdeye-dist</module>
     <module>thirdeye-dashboard</module>
@@ -174,12 +174,22 @@
       </dependency>
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
-        <artifactId>thirdeye-pinot</artifactId>
+        <artifactId>thirdeye-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
         <artifactId>thirdeye-coordinator</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.pinot.thirdeye</groupId>
+        <artifactId>thirdeye-dashboard</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.pinot.thirdeye</groupId>
+        <artifactId>thirdeye-worker</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -500,7 +510,7 @@
       <!-- test dependencies -->
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
-        <artifactId>thirdeye-pinot</artifactId>
+        <artifactId>thirdeye-core</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
         <scope>test</scope>

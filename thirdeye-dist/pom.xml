@@ -38,6 +38,14 @@
       <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-coordinator</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>thirdeye-dashboard</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>thirdeye-worker</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

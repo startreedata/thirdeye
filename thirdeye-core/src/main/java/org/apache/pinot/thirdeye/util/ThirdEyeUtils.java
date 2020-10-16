@@ -71,7 +71,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.COMPARE_MODE;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeDataUtils;
+import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
@@ -111,10 +111,6 @@ public abstract class ThirdEyeUtils {
   private static final long CACHING_PERIOD_LOOKBACK_MINUTELY = -1;
 
   public static final long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
-
-  public static <T> Optional<T> optional(T o) {
-    return Optional.ofNullable(o);
-  }
 
   /**
    * Returns or modifies a filter that can be for querying the results corresponding to the given dimension map.
@@ -185,7 +181,7 @@ public abstract class ThirdEyeUtils {
 
   public static String getSortedFiltersFromJson(String filterJson) {
     Multimap<String, String> filterMultiMap = convertToMultiMap(filterJson);
-    String sortedFilters = ThirdEyeDataUtils.getSortedFiltersFromMultiMap(filterMultiMap);
+    String sortedFilters = ThirdEyeSpiUtils.getSortedFiltersFromMultiMap(filterMultiMap);
 
     if (StringUtils.isBlank(sortedFilters)) {
       return null;

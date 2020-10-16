@@ -4,7 +4,7 @@ import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApplicationApi;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApplicationDto;
-import static org.apache.pinot.thirdeye.util.ThirdEyeUtils.optional;
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import io.swagger.annotations.ApiKeyAuthDefinition;
 import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.SecurityDefinition;

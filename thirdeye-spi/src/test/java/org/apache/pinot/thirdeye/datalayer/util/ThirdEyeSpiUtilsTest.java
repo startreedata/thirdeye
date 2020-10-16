@@ -4,12 +4,12 @@ import java.util.Properties;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+public class ThirdEyeSpiUtilsTest {
 
-public class ThirdEyeStringUtilsTest {
   @Test
-  public void testDecodeCompactedProperties(){
+  public void testDecodeCompactedProperties() {
     String propertiesString = "a=a;b=";
-    Properties props = ThirdEyeStringUtils.decodeCompactedProperties(propertiesString);
+    Properties props = ThirdEyeSpiUtils.decodeCompactedProperties(propertiesString);
 
     Assert.assertEquals(2, props.size());
     Assert.assertEquals("a", props.getProperty("a"));

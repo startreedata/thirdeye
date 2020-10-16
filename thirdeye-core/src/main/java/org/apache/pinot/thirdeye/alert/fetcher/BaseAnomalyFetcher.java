@@ -25,7 +25,7 @@ import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeStringUtils;
+import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.Collection;
 import java.util.Properties;
@@ -58,7 +58,7 @@ public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
   public void init(AnomalyFetcherConfig anomalyFetcherConfig) {
     mergedAnomalyResultDAO = DAO_REGISTRY.getMergedAnomalyResultDAO();
     this.anomalyFetcherConfig = anomalyFetcherConfig;
-    this.properties = ThirdEyeStringUtils.decodeCompactedProperties(anomalyFetcherConfig.getProperties());
+    this.properties = ThirdEyeSpiUtils.decodeCompactedProperties(anomalyFetcherConfig.getProperties());
   }
 
   @Override

@@ -32,7 +32,7 @@ import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeDataUtils;
+import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
@@ -416,7 +416,7 @@ public class AnomalyDetectionInputContextBuilder {
     // Get the original filter
     Multimap<String, String> filters;
     if (StringUtils.isNotBlank(filterString)) {
-      filters = ThirdEyeDataUtils.getFilterSet(filterString);
+      filters = ThirdEyeSpiUtils.getFilterSet(filterString);
     } else {
       filters = HashMultimap.create();
     }

@@ -38,7 +38,7 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeStringUtils;
+import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
@@ -160,7 +160,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
         detectionConfig.getName(), detectionConfig.getDescription(), anomaly.getMetric(),
         getDateString(anomaly.getStartTime(), dateTimeZone), getDateString(anomaly.getEndTime(), dateTimeZone),
         getTimezoneString(dateTimeZone), getIssueType(anomaly), anomaly.getType().getLabel(),
-        ThirdEyeStringUtils.encodeCompactedProperties(props), anomaly.getMetricUrn());
+        ThirdEyeSpiUtils.encodeCompactedProperties(props), anomaly.getMetricUrn());
 
     // Extract out the whitelisted metrics
     if (anomaly.getProperties() != null && anomaly.getProperties().containsKey(PROP_SUB_ENTITY_NAME)

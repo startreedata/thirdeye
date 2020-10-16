@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.detection.algorithm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
@@ -41,7 +40,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeDataUtils;
+import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -384,7 +383,7 @@ public class LegacyMergeWrapper extends DetectionPipeline {
       throw new IllegalArgumentException("Different local and global metrics not supported");
     }
 
-    Multimap<String, String> globalFilters = ThirdEyeDataUtils.getFilterSet(spec.getGlobalMetricFilters());
+    Multimap<String, String> globalFilters = ThirdEyeSpiUtils.getFilterSet(spec.getGlobalMetricFilters());
     MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
     return MetricSlice.from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), globalFilters);
   }

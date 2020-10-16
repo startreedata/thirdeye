@@ -21,7 +21,7 @@
 package org.apache.pinot.thirdeye.datalayer.dto;
 
 import org.apache.pinot.thirdeye.datalayer.pojo.AnomalyFunctionBean;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeStringUtils;
+import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +83,7 @@ public class AnomalyFunctionDTO extends AnomalyFunctionBean {
     if (properties == null || properties.isEmpty()) {
       return new Properties();
     }
-    return ThirdEyeStringUtils.decodeCompactedProperties(properties);
+    return ThirdEyeSpiUtils.decodeCompactedProperties(properties);
   }
 
   /**
@@ -96,6 +96,6 @@ public class AnomalyFunctionDTO extends AnomalyFunctionBean {
     for (Map.Entry<String, String> entry : config.entrySet()) {
       properties.setProperty(entry.getKey(), entry.getValue());
     }
-    setProperties(ThirdEyeStringUtils.encodeCompactedProperties(properties));
+    setProperties(ThirdEyeSpiUtils.encodeCompactedProperties(properties));
   }
 }

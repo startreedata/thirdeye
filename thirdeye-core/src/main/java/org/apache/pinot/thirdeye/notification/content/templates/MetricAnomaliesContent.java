@@ -42,7 +42,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeStringUtils;
+import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
@@ -164,7 +164,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
           getTimezoneString(dateTimeZone),
           getIssueType(anomaly),
           anomaly.getType().getLabel(),
-          ThirdEyeStringUtils.encodeCompactedProperties(props),
+          ThirdEyeSpiUtils.encodeCompactedProperties(props),
           anomaly.getMetricUrn()
       );
 

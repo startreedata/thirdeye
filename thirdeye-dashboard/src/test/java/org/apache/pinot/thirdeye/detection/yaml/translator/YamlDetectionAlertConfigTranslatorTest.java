@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 public class YamlDetectionAlertConfigTranslatorTest {
 
   private DAOTestBase testDAOProvider;
-  private DetectionConfigManager detectionConfigManager;
+  private AlertManager alertManager;
 
   @Test
   public void testTranslateAlert() throws Exception {
@@ -110,10 +110,10 @@ public class YamlDetectionAlertConfigTranslatorTest {
   public void setUp() {
     testDAOProvider = DAOTestBase.getInstance();
     DAORegistry daoRegistry = DAORegistry.getInstance();
-    detectionConfigManager = daoRegistry.getDetectionConfigManager();
+    alertManager = daoRegistry.getDetectionConfigManager();
     DetectionConfigDTO detectionConfigDTO = new DetectionConfigDTO();
     detectionConfigDTO.setName("test_pipeline_1");
-    detectionConfigManager.save(detectionConfigDTO);
+    alertManager.save(detectionConfigDTO);
 
     DetectionAlertRegistry.getInstance().registerAlertFilter("DEFAULT_ALERTER_PIPELINE", "RECIPIENTClass");
   }

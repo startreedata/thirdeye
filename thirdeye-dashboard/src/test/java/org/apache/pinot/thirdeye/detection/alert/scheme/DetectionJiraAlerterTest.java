@@ -29,7 +29,7 @@ import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
@@ -62,7 +62,7 @@ public class DetectionJiraAlerterTest {
   private DAOTestBase testDAOProvider;
   private DetectionAlertConfigManager alertConfigDAO;
   private MergedAnomalyResultManager anomalyDAO;
-  private DetectionConfigManager detectionDAO;
+  private AlertManager detectionDAO;
   private DetectionAlertConfigDTO alertConfigDTO;
   private Long detectionConfigId;
   private ThirdEyeAnomalyConfiguration thirdEyeConfig;

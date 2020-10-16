@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
@@ -32,14 +32,14 @@ public class AlertResource {
 
   private static final Logger log = LoggerFactory.getLogger(AlertResource.class);
 
-  private final DetectionConfigManager detectionConfigManager;
+  private final AlertManager alertManager;
   private final AuthService authService;
 
   @Inject
   public AlertResource(
-      final DetectionConfigManager detectionConfigManager,
+      final AlertManager alertManager,
       final AuthService authService) {
-    this.detectionConfigManager = detectionConfigManager;
+    this.alertManager = alertManager;
     this.authService = authService;
   }
 
@@ -49,7 +49,7 @@ public class AlertResource {
   ) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
-    final List<DetectionConfigDTO> all = detectionConfigManager.findAll();
+    final List<DetectionConfigDTO> all = alertManager.findAll();
     return Response
         .ok(all.stream().map(ApiBeanMapper::toAlertApi))
         .build();
@@ -83,7 +83,7 @@ public class AlertResource {
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    final DetectionConfigDTO dto = detectionConfigManager.findById(id);
+    final DetectionConfigDTO dto = alertManager.findById(id);
     ensureExists(dto, "Invalid id");
 
     return Response

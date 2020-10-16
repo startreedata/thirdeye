@@ -45,7 +45,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
@@ -107,7 +107,7 @@ public class ThirdEyeDashboardModule extends AbstractModule {
     bind(MergedAnomalyResultManager.class).toInstance(DAO_REGISTRY.getMergedAnomalyResultDAO());
     bind(DatasetConfigManager.class).toInstance(DAO_REGISTRY.getDatasetConfigDAO());
     bind(MetricConfigManager.class).toInstance(DAO_REGISTRY.getMetricConfigDAO());
-    bind(DetectionConfigManager.class).toInstance(DAO_REGISTRY.getDetectionConfigManager());
+    bind(AlertManager.class).toInstance(DAO_REGISTRY.getDetectionConfigManager());
     bind(RootcauseSessionManager.class).toInstance(DAO_REGISTRY.getRootcauseSessionDAO());
     bind(SessionManager.class).toInstance(DAO_REGISTRY.getSessionDAO());
     bind(DetectionAlertConfigManager.class)

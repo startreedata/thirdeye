@@ -40,7 +40,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
@@ -63,18 +63,18 @@ public class ApplicationResource {
 
   private final ApplicationManager applicationManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final DetectionConfigManager detectionConfigManager;
+  private final AlertManager alertManager;
   private final DetectionAlertConfigManager detectionAlertConfigManager;
 
   @Inject
   public ApplicationResource(
       ApplicationManager applicationManager,
       MergedAnomalyResultManager mergedAnomalyResultManager,
-      DetectionConfigManager detectionConfigManager,
+      AlertManager alertManager,
       DetectionAlertConfigManager detectionAlertConfigManager) {
     this.applicationManager = applicationManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.detectionConfigManager = detectionConfigManager;
+    this.alertManager = alertManager;
     this.detectionAlertConfigManager = detectionAlertConfigManager;
   }
 
@@ -140,14 +140,14 @@ public class ApplicationResource {
     for (DetectionAlertConfigDTO subsGroup : subsGroupList) {
       for (long id : ConfigUtils
           .getLongs(subsGroup.getProperties().get(PROP_DETECTION_CONFIG_IDS))) {
-        DetectionConfigDTO function = this.detectionConfigManager.findById(id);
+        DetectionConfigDTO function = this.alertManager.findById(id);
         if (function != null) {
           List<MergedAnomalyResultDTO> anomalies =
               new ArrayList<>(
                   mergedAnomalyResultManager
                       .findByPredicate(Predicate.EQ("detectionConfigId", function.getId())));
           anomalies.forEach(mergedAnomalyResultManager::delete);
-          detectionConfigManager.delete(function);
+          alertManager.delete(function);
           LOG.debug("[APPLICATION] detection function " + function.getName()
               + " and all anomalies have been deleted.");
         }

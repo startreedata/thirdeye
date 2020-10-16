@@ -32,7 +32,7 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskInfo;
 import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
@@ -46,9 +46,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
-import org.apache.pinot.thirdeye.detection.health.DetectionHealth;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,7 +142,7 @@ public class MonitorTaskRunner implements TaskRunner {
    * Disable the alert if it was updated before {@MAX_TASK_FAIL_DAYS} but there is no success run since then.
    */
   private void disableLongFailedAlerts() {
-    DetectionConfigManager detectionDAO = DAO_REGISTRY.getDetectionConfigManager();
+    AlertManager detectionDAO = DAO_REGISTRY.getDetectionConfigManager();
     List<DetectionConfigDTO> detectionConfigs = detectionDAO.findAllActive();
     long currentTimeMillis = System.currentTimeMillis();
     long maxTaskFailMillis = TimeUnit.DAYS.toMillis(MAX_FAILED_DISABLE_DAYS);

@@ -29,7 +29,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DataCompletenessConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
@@ -56,7 +56,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataCompletenessConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionAlertConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionConfigManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EntityToEntityMappingManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EvaluationManagerImpl;
@@ -73,7 +73,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseSessionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseTemplateManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SessionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.TaskManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.dto.RootcauseTemplateDTO;
 import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 
 /**
@@ -189,8 +188,8 @@ public class DAORegistry {
     return DaoProviderUtil.getInstance(SessionManagerImpl.class);
   }
 
-  public DetectionConfigManager getDetectionConfigManager() {
-    return DaoProviderUtil.getInstance(DetectionConfigManagerImpl.class);
+  public AlertManager getDetectionConfigManager() {
+    return DaoProviderUtil.getInstance(AlertManagerImpl.class);
   }
 
   public DetectionAlertConfigManager getDetectionAlertConfigManager() {

@@ -23,7 +23,7 @@ package org.apache.pinot.thirdeye.dashboard.resources.v2.alerts;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
@@ -37,7 +37,7 @@ public class AlertSearcherTest {
   @BeforeMethod
   public void setUp() {
     testDAOProvider = DAOTestBase.getInstance();
-    DetectionConfigManager detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
+    AlertManager detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
     DetectionConfigDTO detectionConfig1 = new DetectionConfigDTO();
     detectionConfig1.setName("test_detection1");
     DetectionConfigDTO detectionConfig2 = new DetectionConfigDTO();

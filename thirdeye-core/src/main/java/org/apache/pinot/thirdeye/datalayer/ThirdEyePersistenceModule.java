@@ -19,7 +19,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DataCompletenessConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
@@ -46,7 +46,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataCompletenessConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionAlertConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionConfigManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EntityToEntityMappingManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EvaluationManagerImpl;
@@ -174,7 +174,7 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(RootcauseTemplateManager.class).to(RootcauseTemplateManagerImpl.class)
         .in(Scopes.SINGLETON);
     bind(SessionManager.class).to(SessionManagerImpl.class).in(Scopes.SINGLETON);
-    bind(DetectionConfigManager.class).to(DetectionConfigManagerImpl.class).in(Scopes.SINGLETON);
+    bind(AlertManager.class).to(AlertManagerImpl.class).in(Scopes.SINGLETON);
     bind(DetectionAlertConfigManager.class).to(DetectionAlertConfigManagerImpl.class).in(
         Scopes.SINGLETON);
     bind(EvaluationManager.class).to(EvaluationManagerImpl.class).in(Scopes.SINGLETON);

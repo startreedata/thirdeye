@@ -24,17 +24,18 @@ import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
 
 
 @Singleton
-public class DetectionConfigManagerImpl extends AbstractManagerImpl<DetectionConfigDTO> implements DetectionConfigManager {
+public class AlertManagerImpl extends AbstractManagerImpl<DetectionConfigDTO> implements
+    AlertManager {
 
   @Inject
-  public DetectionConfigManagerImpl(GenericPojoDao genericPojoDao) {
+  public AlertManagerImpl(GenericPojoDao genericPojoDao) {
     super(DetectionConfigDTO.class, DetectionConfigBean.class, genericPojoDao);
   }
 

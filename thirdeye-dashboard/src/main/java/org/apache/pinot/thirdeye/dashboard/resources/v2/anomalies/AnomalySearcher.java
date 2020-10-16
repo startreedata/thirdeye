@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.ResourceUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -49,7 +49,7 @@ import static org.apache.pinot.thirdeye.constant.AnomalyFeedbackType.*;
  */
 public class AnomalySearcher {
   private final MergedAnomalyResultManager anomalyDAO;
-  private final DetectionConfigManager detectionConfigDAO;
+  private final AlertManager detectionConfigDAO;
   private final DetectionAlertConfigManager detectionAlertConfigDAO;
 
   /**

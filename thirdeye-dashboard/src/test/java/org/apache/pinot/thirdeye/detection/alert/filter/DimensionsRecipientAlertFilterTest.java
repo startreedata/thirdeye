@@ -29,7 +29,7 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
@@ -87,7 +87,7 @@ public class DimensionsRecipientAlertFilterTest {
     app.setRecipients("test@thirdeye.com");
     appDAO.save(app);
 
-    DetectionConfigManager detDAO = DAORegistry.getInstance().getDetectionConfigManager();
+    AlertManager detDAO = DAORegistry.getInstance().getDetectionConfigManager();
     DetectionConfigDTO detectionConfig1 = new DetectionConfigDTO();
     detectionConfig1.setName("test detection 1");
     detectionConfig1.setActive(true);

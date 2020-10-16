@@ -56,7 +56,7 @@ public class AnomalyDetectionResourceTest {
   private DAOTestBase testDAOProvider;
   private AnomalyDetectionResource anomalyDetectionResource;
   private DAORegistry daoRegistry;
-  private DetectionConfigManager detectionDAO;
+  private AlertManager detectionDAO;
   private DatasetConfigManager datasetDAO;
   private MetricConfigManager metricDAO;
   private ThirdEyePrincipal user;

@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.dataset;
 
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -40,7 +40,7 @@ import javax.ws.rs.core.MediaType;
 public class DatasetAutoOnboardResource {
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private final MetricConfigManager metricDAO;
-  private final DetectionConfigManager detectionDAO;
+  private final AlertManager detectionDAO;
   private final DatasetConfigManager datasetDAO;
 
   public DatasetAutoOnboardResource() {

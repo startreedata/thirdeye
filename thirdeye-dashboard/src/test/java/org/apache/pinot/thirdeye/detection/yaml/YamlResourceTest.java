@@ -28,7 +28,7 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.dashboard.DetectionPreviewConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
@@ -70,7 +70,7 @@ public class YamlResourceTest {
     this.user = new ThirdEyePrincipal("test", "test");
     this.yamlResource = new YamlResource(null, new DetectionPreviewConfiguration());
     this.daoRegistry = DAORegistry.getInstance();
-    DetectionConfigManager detectionDAO = this.daoRegistry.getDetectionConfigManager();
+    AlertManager detectionDAO = this.daoRegistry.getDetectionConfigManager();
     DetectionConfigDTO config1 = new DetectionConfigDTO();
     config1.setName("test_detection_1");
     alertId1 = detectionDAO.save(config1);

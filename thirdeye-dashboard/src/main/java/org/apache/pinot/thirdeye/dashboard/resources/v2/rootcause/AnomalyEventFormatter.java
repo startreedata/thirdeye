@@ -22,14 +22,13 @@ package org.apache.pinot.thirdeye.dashboard.resources.v2.rootcause;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.SetMultimap;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.ResourceUtils;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.RootCauseEventEntityFormatter;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.pojo.RootCauseEventEntity;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
@@ -70,7 +69,7 @@ public class AnomalyEventFormatter extends RootCauseEventEntityFormatter {
   private final MergedAnomalyResultManager anomalyDAO;
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
-  private final DetectionConfigManager detectionDAO;
+  private final AlertManager detectionDAO;
 
   public AnomalyEventFormatter() {
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
@@ -80,7 +79,7 @@ public class AnomalyEventFormatter extends RootCauseEventEntityFormatter {
   }
 
   public AnomalyEventFormatter(MergedAnomalyResultManager anomalyDAO, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
-      DetectionConfigManager detectionDAO) {
+      AlertManager detectionDAO) {
     this.anomalyDAO = anomalyDAO;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;

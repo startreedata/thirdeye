@@ -36,7 +36,7 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
@@ -61,7 +61,7 @@ public class TestEntityGroupKeyContent {
   private int id = 0;
   private String dashboardHost = "http://localhost:8080/dashboard";
   private DAOTestBase testDAOProvider;
-  private DetectionConfigManager detectionDAO;
+  private AlertManager detectionDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
   private MetricConfigManager metricDAO;
 

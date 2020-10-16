@@ -20,12 +20,11 @@
 package org.apache.pinot.thirdeye.scheduler;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -58,11 +57,11 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   public static final TimeUnit DEFAULT_ALERT_DELAY_UNIT = TimeUnit.MINUTES;
   public static final String QUARTZ_DETECTION_GROUPER = TaskConstants.TaskType.DETECTION.toString();
 
-  final DetectionConfigManager detectionDAO;
+  final AlertManager detectionDAO;
   final Scheduler scheduler;
   final ScheduledExecutorService executorService;
 
-  public DetectionCronScheduler(DetectionConfigManager detectionDAO) throws Exception {
+  public DetectionCronScheduler(AlertManager detectionDAO) throws Exception {
     this.detectionDAO = detectionDAO;
     this.scheduler = StdSchedulerFactory.getDefaultScheduler();
     this.executorService = Executors.newSingleThreadScheduledExecutor();

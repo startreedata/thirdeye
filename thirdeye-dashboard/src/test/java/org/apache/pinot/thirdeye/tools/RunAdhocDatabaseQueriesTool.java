@@ -28,7 +28,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DataCompletenessConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
 import org.apache.pinot.thirdeye.datalayer.bao.JobManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
@@ -43,7 +43,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ClassificationConfigManagerI
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataCompletenessConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionAlertConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionConfigManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EventManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.JobManagerImpl;
@@ -108,7 +108,7 @@ public class RunAdhocDatabaseQueriesTool {
 
   private static final Logger LOG = LoggerFactory.getLogger(RunAdhocDatabaseQueriesTool.class);
 
-  private DetectionConfigManager detectionConfigDAO;
+  private AlertManager detectionConfigDAO;
   private DetectionAlertConfigManager detectionAlertConfigDAO;
   private EventManagerImpl eventDAO;
   private AnomalyFunctionManager anomalyFunctionDAO;
@@ -137,7 +137,7 @@ public class RunAdhocDatabaseQueriesTool {
 
   public void init(File persistenceFile) throws Exception {
     DaoProviderUtil.init(persistenceFile);
-    detectionConfigDAO = DaoProviderUtil.getInstance(DetectionConfigManagerImpl.class);
+    detectionConfigDAO = DaoProviderUtil.getInstance(AlertManagerImpl.class);
     detectionAlertConfigDAO = DaoProviderUtil.getInstance(DetectionAlertConfigManagerImpl.class);
     eventDAO = DaoProviderUtil.getInstance(EventManagerImpl.class);
     anomalyFunctionDAO = DaoProviderUtil.getInstance(AnomalyFunctionManagerImpl.class);

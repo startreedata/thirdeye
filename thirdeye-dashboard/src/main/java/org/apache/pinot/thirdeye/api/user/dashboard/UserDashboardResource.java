@@ -50,7 +50,7 @@ import org.apache.pinot.thirdeye.dashboard.resources.v2.ResourceUtils;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.pojo.AnomalySummary;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
@@ -75,14 +75,14 @@ public class UserDashboardResource {
   private final MergedAnomalyResultManager anomalyDAO;
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
-  private final DetectionConfigManager detectionDAO;
+  private final AlertManager detectionDAO;
   private final DetectionAlertConfigManager detectionAlertDAO;
 
   @Inject
   public UserDashboardResource(MergedAnomalyResultManager anomalyDAO,
       MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO,
-      DetectionConfigManager detectionDAO,
+      AlertManager detectionDAO,
       DetectionAlertConfigManager detectionAlertDAO) {
     this.anomalyDAO = anomalyDAO;
     this.metricDAO = metricDAO;

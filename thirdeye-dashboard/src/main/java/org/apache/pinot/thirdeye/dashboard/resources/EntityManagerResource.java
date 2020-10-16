@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
@@ -90,7 +90,7 @@ public class EntityManagerResource {
   private final ApplicationManager applicationManager;
   private final EntityToEntityMappingManager entityToEntityMappingManager;
   private final SessionManager sessionManager;
-  private final DetectionConfigManager detectionConfigManager;
+  private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final DetectionAlertConfigManager detectionAlertConfigManager;
   private final ThirdEyeConfiguration config;
@@ -111,7 +111,7 @@ public class EntityManagerResource {
     this.applicationManager = DAO_REGISTRY.getApplicationDAO();
     this.entityToEntityMappingManager = DAO_REGISTRY.getEntityToEntityMappingDAO();
     this.sessionManager = DAO_REGISTRY.getSessionDAO();
-    this.detectionConfigManager = DAO_REGISTRY.getDetectionConfigManager();
+    this.alertManager = DAO_REGISTRY.getDetectionConfigManager();
     this.mergedAnomalyResultManager = DAO_REGISTRY.getMergedAnomalyResultDAO();
     this.detectionAlertConfigManager = DAO_REGISTRY.getDetectionAlertConfigManager();
     this.config = configuration;
@@ -175,7 +175,7 @@ public class EntityManagerResource {
         return entityToEntityMappingManager.findAll();
 
       case DETECTION_CONFIG:
-        return detectionConfigManager.findAll();
+        return alertManager.findAll();
 
       case MERGED_ANOMALY:
         return mergedAnomalyResultManager.findByPredicate(Predicate.GT("detectionConfigId", 0));
@@ -229,7 +229,8 @@ public class EntityManagerResource {
           return assertNotNull(entityToEntityMappingManager.save(OBJECT_MAPPER.readValue(jsonPayload, EntityToEntityMappingDTO.class)));
 
         case DETECTION_CONFIG:
-          return assertNotNull(detectionConfigManager.save(OBJECT_MAPPER.readValue(jsonPayload, DetectionConfigDTO.class)));
+          return assertNotNull(
+              alertManager.save(OBJECT_MAPPER.readValue(jsonPayload, DetectionConfigDTO.class)));
 
         case MERGED_ANOMALY:
           return assertNotNull(mergedAnomalyResultManager.save(OBJECT_MAPPER.readValue(jsonPayload, MergedAnomalyResultDTO.class)));

@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.detection;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -54,7 +54,7 @@ public class CurrentAndBaselineLoaderTest {
 
   private DAOTestBase testDAOProvider;
   private MergedAnomalyResultManager anomalyDAO;
-  private DetectionConfigManager detectionDAO;
+  private AlertManager detectionDAO;
   private MetricConfigManager metricDAO;
   private DatasetConfigManager dataSetDAO;
   private Long detectionConfigId;

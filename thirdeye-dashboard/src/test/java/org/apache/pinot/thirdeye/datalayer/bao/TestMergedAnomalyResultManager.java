@@ -40,7 +40,7 @@ public class TestMergedAnomalyResultManager{
   private MergedAnomalyResultDTO mergedResult = null;
 
   private DAOTestBase testDAOProvider;
-  private DetectionConfigManager detectionConfigDAO;
+  private AlertManager detectionConfigDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
 
   @BeforeClass

@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -50,7 +50,7 @@ public class DatasetTriggerInfoRepo {
   private static int refreshFreqInMin = 30;
   private Map<String, Long> datasetRefreshTimeMap;
   private ScheduledThreadPoolExecutor executorService;
-  private DetectionConfigManager detectionConfigDAO;
+  private AlertManager detectionConfigDAO;
 
   private DatasetTriggerInfoRepo() {
     this.detectionConfigDAO = DAO_REGISTRY.getDetectionConfigManager();

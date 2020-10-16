@@ -32,7 +32,7 @@ import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
@@ -87,7 +87,7 @@ public class TestMetricAnomaliesContent {
   private String dashboardHost = "http://localhost:8080/dashboard";
   private String detectionConfigFile = "/sample-detection-config.yml";
   private DAOTestBase testDAOProvider;
-  private DetectionConfigManager detectionConfigDAO;
+  private AlertManager detectionConfigDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
   private MetricConfigManager metricDAO;
   private DatasetConfigManager datasetDAO;

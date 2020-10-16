@@ -38,7 +38,7 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
@@ -76,7 +76,7 @@ public class DataProviderTest {
   private MetricConfigManager metricDAO;
   private DatasetConfigManager datasetDAO;
   private EvaluationManager evaluationDAO;
-  private DetectionConfigManager detectionDAO;
+  private AlertManager detectionDAO;
   private QueryCache queryCache;
   private TimeSeriesLoader timeseriesLoader;
   private AggregationLoader aggregationLoader;

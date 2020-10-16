@@ -102,7 +102,7 @@ public class AnomalyDetectionResource {
   private static final long MAX_ONLINE_PAYLOAD_SIZE = 10 * 1024 * 1024L;
   private static final int ANOMALIES_LIMIT = 500;
 
-  private final DetectionConfigManager detectionConfigDAO;
+  private final AlertManager detectionConfigDAO;
   private final DataProvider provider;
   private final MetricConfigManager metricConfigDAO;
   private final DatasetConfigManager datasetConfigDAO;

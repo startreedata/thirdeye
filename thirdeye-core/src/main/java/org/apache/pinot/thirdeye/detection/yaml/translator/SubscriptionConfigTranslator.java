@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.detection.yaml.translator;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Preconditions;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
@@ -75,7 +75,7 @@ public class SubscriptionConfigTranslator extends ConfigTranslator<DetectionAler
   private static final Set<String> PROPERTY_KEYS = new HashSet<>(
       Arrays.asList(PROP_RECIPIENTS, PROP_DIMENSION, PROP_DIMENSION_RECIPIENTS, PROP_SEVERITY_RECIPIENTS));
 
-  private final DetectionConfigManager detectionConfigDAO = DAORegistry.getInstance().getDetectionConfigManager();
+  private final AlertManager detectionConfigDAO = DAORegistry.getInstance().getDetectionConfigManager();
 
   public SubscriptionConfigTranslator(String yamlConfig) {
     this(yamlConfig, new SubscriptionConfigValidator());

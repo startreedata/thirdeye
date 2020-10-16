@@ -27,7 +27,7 @@ import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.dashboard.resources.AnomalyFlattenResource;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TestMergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -43,7 +43,7 @@ import static org.apache.pinot.thirdeye.dashboard.resources.AnomalyFlattenResour
 public class TestAnomalyFlattenResource {
   private DAOTestBase testDAOProvider;
 
-  private DetectionConfigManager detectionConfigDAO;
+  private AlertManager detectionConfigDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
   private long detectionConfigId;
   @BeforeClass

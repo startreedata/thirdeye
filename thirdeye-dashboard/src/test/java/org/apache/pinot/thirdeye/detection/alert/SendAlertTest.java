@@ -16,14 +16,12 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -35,11 +33,8 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -58,7 +53,7 @@ public class SendAlertTest {
   private DetectionAlertTaskRunner taskRunner;
   private DetectionAlertConfigManager alertConfigDAO;
   private MergedAnomalyResultManager anomalyDAO;
-  private DetectionConfigManager detectionDAO;
+  private AlertManager detectionDAO;
   private MetricConfigManager metricDAO;
   private DatasetConfigManager dataSetDAO;
   private DetectionAlertConfigDTO alertConfigDTO;

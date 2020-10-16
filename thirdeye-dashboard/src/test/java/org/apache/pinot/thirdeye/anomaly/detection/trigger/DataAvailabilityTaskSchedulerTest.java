@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -56,7 +56,7 @@ public class DataAvailabilityTaskSchedulerTest {
   private static String TEST_DATASET_PREFIX = "ds_trigger_scheduler_";
   private DAOTestBase testDAOProvider;
   private DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler;
-  private DetectionConfigManager detectionConfigDAO;
+  private AlertManager detectionConfigDAO;
   private long metricId1;
   private long metricId2;
 

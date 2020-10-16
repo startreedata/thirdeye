@@ -24,16 +24,14 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DatasetTriggerInfoRepo;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -46,7 +44,7 @@ public class DatasetTriggerInfoRepoTest {
   @BeforeMethod
   public void BeforeMethod() {
     testDAOProvider = DAOTestBase.getInstance();
-    DetectionConfigManager detectionConfigManager = DAORegistry.getInstance().getDetectionConfigManager();
+    AlertManager alertManager = DAORegistry.getInstance().getDetectionConfigManager();
     MetricConfigManager metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
     DatasetConfigManager datasetConfigDAO = DAORegistry.getInstance().getDatasetConfigDAO();
 
@@ -73,7 +71,7 @@ public class DatasetTriggerInfoRepoTest {
     metricUrns.add("thirdeye:metric:" + metricId2);
     props.put("nestedMetricUrns", metricUrns);
     detect1.setProperties(props);
-    detectionConfigManager.save(detect1);
+    alertManager.save(detect1);
 
     DatasetConfigDTO ds1 = new DatasetConfigDTO();
     ds1.setDataset(TEST_DATASET_PREFIX + 1);
@@ -113,7 +111,7 @@ public class DatasetTriggerInfoRepoTest {
 
   @Test(dependsOnMethods = { "testSetLastUpdateTimestamp" })
   public void testRefresh() throws InterruptedException {
-    DetectionConfigManager detectionConfigManager = DAORegistry.getInstance().getDetectionConfigManager();
+    AlertManager alertManager = DAORegistry.getInstance().getDetectionConfigManager();
     MetricConfigManager metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
     DatasetConfigManager datasetConfigDAO = DAORegistry.getInstance().getDatasetConfigDAO();
     DatasetTriggerInfoRepo datasetTriggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
@@ -133,7 +131,7 @@ public class DatasetTriggerInfoRepoTest {
     metricUrns.add("thirdeye:metric:" + metricId);
     props.put("nestedMetricUrns", metricUrns);
     detect2.setProperties(props);
-    detectionConfigManager.save(detect2);
+    alertManager.save(detect2);
 
     DatasetConfigDTO ds = new DatasetConfigDTO();
     ds.setDataset(TEST_DATASET_PREFIX + 3);

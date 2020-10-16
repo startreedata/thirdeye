@@ -25,7 +25,7 @@ import org.apache.pinot.thirdeye.dashboard.resources.v2.pojo.AnomalySummary;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -52,7 +52,7 @@ public class UserDashboardResourceTest {
   UserDashboardResource resource;
 
   MergedAnomalyResultManager anomalyDAO;
-  DetectionConfigManager detectionDAO;
+  AlertManager detectionDAO;
   DetectionAlertConfigManager detectionAlertDAO;
   MetricConfigManager metricDAO;
   DatasetConfigManager datasetDAO;

@@ -44,7 +44,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -86,7 +85,7 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.pinot.thirdeye.detection.GrouperWrapperConstants.PROP_DETECTOR_COMPONENT_NAME;
+import static org.apache.pinot.thirdeye.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
 import static org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
 
 public abstract class ThirdEyeUtils {
@@ -652,9 +651,11 @@ public abstract class ThirdEyeUtils {
         parent.put(key, child.get(key));
       } else {
         // combine detectorComponentName
-        if (key.equals(PROP_DETECTOR_COMPONENT_NAME)) {
-          String component = ThirdEyeUtils.combineComponents(parent.get(PROP_DETECTOR_COMPONENT_NAME), child.get(PROP_DETECTOR_COMPONENT_NAME));
-          parent.put(PROP_DETECTOR_COMPONENT_NAME, component);
+        if (key.equals(GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME)) {
+          String component = ThirdEyeUtils.combineComponents(parent.get(
+              GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME), child.get(
+              GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME));
+          parent.put(GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME, component);
         }
         // combine time series snapshot of parent and child anomalies
         if (key.equals(MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY)) {
@@ -700,7 +701,8 @@ public abstract class ThirdEyeUtils {
    * @return if the anomaly is detected by multiple components
    */
   public static boolean isDetectedByMultipleComponents(MergedAnomalyResultDTO anomaly) {
-    String componentName = anomaly.getProperties().getOrDefault(PROP_DETECTOR_COMPONENT_NAME, "");
+    String componentName = anomaly.getProperties().getOrDefault(
+        GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME, "");
     return componentName.contains(PROP_DETECTOR_COMPONENT_NAME_DELIMETER);
   }
 

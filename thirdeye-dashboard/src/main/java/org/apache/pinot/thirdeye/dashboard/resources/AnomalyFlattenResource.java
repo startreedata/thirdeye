@@ -37,13 +37,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import org.apache.commons.collections4.map.ListOrderedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
@@ -60,7 +59,7 @@ import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 /**
  * Provide a table combining metrics data and anomaly feedback for UI representation
  */
-@Api(tags = {Constants.ANOMALY_TAG})
+@Api(tags = {SwaggerTag.ANOMALY_TAG})
 @Singleton
 public class AnomalyFlattenResource {
   private final MergedAnomalyResultManager mergedAnomalyResultDAO;

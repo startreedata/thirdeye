@@ -38,7 +38,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import joptsimple.internal.Strings;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.dashboard.resources.SummaryResource;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.pojo.RootCauseEntity;
@@ -57,7 +57,7 @@ import static org.apache.pinot.thirdeye.dashboard.resources.SummaryResource.*;
 
 @Path(value = "/rootcause")
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = {Constants.RCA_TAG})
+@Api(tags = {SwaggerTag.RCA_TAG})
 public class RootCauseResource {
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseResource.class);
 

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -35,7 +36,6 @@ import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.detection.GrouperWrapperConstants;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
 import org.apache.pinot.thirdeye.detection.spi.components.Grouper;
 
@@ -107,7 +107,7 @@ public class GrouperWrapper extends DetectionPipeline {
       if (anomaly.getProperties() == null) {
         anomaly.setProperties(new HashMap<>());
       }
-      anomaly.getProperties().put(GrouperWrapperConstants.PROP_DETECTOR_COMPONENT_NAME, this.grouperName);
+      anomaly.getProperties().put(Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME, this.grouperName);
       anomaly.getProperties().put(PROP_SUB_ENTITY_NAME, this.entityName);
     }
 

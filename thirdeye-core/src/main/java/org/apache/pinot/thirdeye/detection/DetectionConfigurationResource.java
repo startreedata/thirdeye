@@ -23,19 +23,16 @@ package org.apache.pinot.thirdeye.detection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Singleton;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.detection.annotation.Components;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 
 
-@Api(tags = {Constants.DETECTION_TAG})
+@Api(tags = {SwaggerTag.DETECTION_TAG})
 @Singleton
 public class DetectionConfigurationResource {
   private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();

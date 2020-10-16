@@ -17,17 +17,17 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.anomaly.job;
+package org.apache.pinot.thirdeye;
 
-public class JobConstants {
+public interface Constants {
 
-  public enum JobStatus {
+  String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
+
+  enum JobStatus {
     SCHEDULED,
     COMPLETED,
     FAILED,
     TIMEOUT,
     UNKNOWN
-  };
-
-
+  }
 }

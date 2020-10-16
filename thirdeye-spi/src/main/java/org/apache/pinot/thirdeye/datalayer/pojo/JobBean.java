@@ -20,7 +20,7 @@
 
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
-import org.apache.pinot.thirdeye.anomaly.job.JobConstants.JobStatus;
+import org.apache.pinot.thirdeye.Constants.JobStatus;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import java.sql.Timestamp;
 import java.util.Objects;

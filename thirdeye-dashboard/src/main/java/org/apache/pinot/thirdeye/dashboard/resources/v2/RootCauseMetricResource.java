@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.dashboard.resources.v2;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
@@ -79,7 +79,7 @@ import static org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUt
  */
 @Path(value = "/rootcause/metric")
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = {Constants.RCA_TAG})
+@Api(tags = {SwaggerTag.RCA_TAG})
 public class RootCauseMetricResource {
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseMetricResource.class);
 

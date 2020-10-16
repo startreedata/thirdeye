@@ -26,7 +26,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import org.apache.pinot.thirdeye.anomaly.job.JobConstants.JobStatus;
+import org.apache.pinot.thirdeye.Constants.JobStatus;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 
 public class TestAnomalyJobManager {

@@ -23,7 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboard;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardUtility;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
@@ -42,7 +42,7 @@ import javax.ws.rs.core.Response.Status;
  * Endpoints for triggering adhoc onboard on auto onboard services
  */
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = {Constants.DASHBOARD_TAG})
+@Api(tags = {SwaggerTag.DASHBOARD_TAG})
 @Singleton
 public class AutoOnboardResource {
 

@@ -20,7 +20,7 @@
 
 package org.apache.pinot.thirdeye.detection.spi.model;
 
-import static org.apache.pinot.thirdeye.detection.GrouperWrapperConstants.PROP_DETECTOR_COMPONENT_NAME;
+import static org.apache.pinot.thirdeye.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -184,8 +184,9 @@ public class AnomalySlice {
     // (root entity) anomaly. Therefore, when matching based on detectionComponentNames, we will not consider
     // isTaggedAsChild filter as it can take either of the values (true or false).
     if (!this.detectionComponentNames.isEmpty()) {
-      return anomaly.getProperties().containsKey(PROP_DETECTOR_COMPONENT_NAME) &&
-          this.detectionComponentNames.contains(anomaly.getProperties().get(PROP_DETECTOR_COMPONENT_NAME));
+      return anomaly.getProperties().containsKey(GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME) &&
+          this.detectionComponentNames.contains(anomaly.getProperties().get(
+              GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME));
     } else {
       return isTaggedAsChild == anomaly.isChild();
     }

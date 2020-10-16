@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.dashboard.resources.v2;
 
 import com.google.inject.Inject;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 import org.apache.pinot.thirdeye.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
@@ -48,7 +48,7 @@ import org.joda.time.DateTime;
 
 
 @Path(value = "/session")
-@Api(tags = { Constants.RCA_TAG })
+@Api(tags = { SwaggerTag.RCA_TAG })
 @Produces(MediaType.APPLICATION_JSON)
 public class RootCauseSessionResource {
   private final RootcauseSessionManager sessionDAO;

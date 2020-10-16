@@ -44,7 +44,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.ResourceUtils;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.pojo.AnomalySummary;
@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Endpoints for user-customized dashboards (currently alerts only)
  */
-@Api(tags = {Constants.DASHBOARD_TAG})
+@Api(tags = {SwaggerTag.DASHBOARD_TAG})
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class UserDashboardResource {

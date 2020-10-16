@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.dashboard.resources.v2;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
@@ -40,7 +40,7 @@ import javax.ws.rs.core.MediaType;
 /**
  * Endpoints for detection alert (aka "groups") management
  */
-@Api(tags = {Constants.DASHBOARD_TAG})
+@Api(tags = {SwaggerTag.DASHBOARD_TAG})
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class DetectionAlertResource {

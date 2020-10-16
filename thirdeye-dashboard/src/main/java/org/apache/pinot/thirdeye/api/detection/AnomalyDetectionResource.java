@@ -31,7 +31,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.api.user.dashboard.UserDashboardResource;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.common.metric.MetricType;
@@ -70,7 +70,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-@Api(tags = { Constants.DETECTION_TAG })
+@Api(tags = { SwaggerTag.DETECTION_TAG })
 public class AnomalyDetectionResource {
   protected static final Logger LOG = LoggerFactory.getLogger(AnomalyDetectionResource.class);
 

@@ -52,7 +52,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.common.time.TimeRange;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.dashboard.views.heatmap.HeatMapViewHandler;
@@ -101,7 +101,7 @@ import org.slf4j.LoggerFactory;
  *    c. Add a web filter / intercepter to catch and convert RTEs to web exception
  */
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = {Constants.DASHBOARD_TAG})
+@Api(tags = {SwaggerTag.DASHBOARD_TAG})
 @Singleton
 public class DataResource {
   private static final Logger LOG = LoggerFactory.getLogger(DataResource.class);

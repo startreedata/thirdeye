@@ -34,7 +34,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.rootcause.DimensionAnalysisModuleConfig;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
@@ -42,11 +42,9 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseTemplateDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-import scala.Array;
-
 
 @Path(value = "/rootcause/template")
-@Api(tags = { Constants.RCA_TAG })
+@Api(tags = { SwaggerTag.RCA_TAG })
 @Produces(MediaType.APPLICATION_JSON)
 public class RootCauseTemplateResource {
   private final static String DIM_ANALYSIS_TEMPLATE_NAME_PREFIX = "dim_analysis::";

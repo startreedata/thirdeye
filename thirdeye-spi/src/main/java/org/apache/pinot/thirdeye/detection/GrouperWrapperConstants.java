@@ -22,5 +22,4 @@ package org.apache.pinot.thirdeye.detection;
 
 public class GrouperWrapperConstants {
 
-  public static final String PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
 }

@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import org.apache.pinot.thirdeye.anomaly.alert.util.AlertFilterHelper;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 
 
 @Path(value = "/dashboard")
-@Api(tags = { Constants.ANOMALY_TAG })
+@Api(tags = { SwaggerTag.ANOMALY_TAG })
 @Produces(MediaType.APPLICATION_JSON)
 public class AnomalyResource {
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyResource.class);

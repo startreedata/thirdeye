@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.dashboard.resources;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.anomaly.events.EventType;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.ResourceUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
@@ -41,7 +41,7 @@ import javax.ws.rs.QueryParam;
 /**
  * Customized events resource.
  */
-@Api(tags = {Constants.RCA_TAG})
+@Api(tags = {SwaggerTag.RCA_TAG})
 @Singleton
 public class CustomizedEventResource {
 

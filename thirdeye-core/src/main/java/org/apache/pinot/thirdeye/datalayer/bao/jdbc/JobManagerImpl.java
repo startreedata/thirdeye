@@ -30,7 +30,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.pinot.thirdeye.anomaly.job.JobConstants.JobStatus;
+import org.apache.pinot.thirdeye.Constants.JobStatus;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.bao.JobManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;

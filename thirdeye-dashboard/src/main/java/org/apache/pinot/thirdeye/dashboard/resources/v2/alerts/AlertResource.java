@@ -30,14 +30,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.api.Constants;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
 
 
 /**
  * The Alert resource.
  */
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = {Constants.DETECTION_TAG})
+@Api(tags = {SwaggerTag.DETECTION_TAG})
 @Singleton
 public class AlertResource {
   private final AlertSearcher alertSearcher;

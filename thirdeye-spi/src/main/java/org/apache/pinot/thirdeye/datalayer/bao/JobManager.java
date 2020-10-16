@@ -23,7 +23,7 @@ package org.apache.pinot.thirdeye.datalayer.bao;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import java.util.List;
 
-import org.apache.pinot.thirdeye.anomaly.job.JobConstants.JobStatus;
+import org.apache.pinot.thirdeye.Constants.JobStatus;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 
 

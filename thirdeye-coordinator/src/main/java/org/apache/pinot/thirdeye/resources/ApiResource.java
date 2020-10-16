@@ -10,18 +10,21 @@ public class ApiResource {
   private final DatasetResource datasetResource;
   private final MetricResource metricResource;
   private final AlertResource alertResource;
+  private final SubscriptionGroupResource subscriptionGroupResource;
 
   @Inject
   public ApiResource(final AuthResource authResource,
       final ApplicationResource applicationResource,
       final DatasetResource datasetResource,
       final MetricResource metricResource,
-      final AlertResource alertResource) {
+      final AlertResource alertResource,
+      final SubscriptionGroupResource subscriptionGroupResource) {
     this.authResource = authResource;
     this.applicationResource = applicationResource;
     this.datasetResource = datasetResource;
     this.metricResource = metricResource;
     this.alertResource = alertResource;
+    this.subscriptionGroupResource = subscriptionGroupResource;
   }
 
   @Path("auth")
@@ -45,7 +48,12 @@ public class ApiResource {
   }
 
   @Path("alerts")
-  public AlertResource getRuleResource() {
+  public AlertResource getAlertResource() {
     return alertResource;
+  }
+
+  @Path("subscription-groups")
+  public SubscriptionGroupResource getSubscriptionGroupResource() {
+    return subscriptionGroupResource;
   }
 }

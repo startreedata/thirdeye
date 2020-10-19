@@ -38,10 +38,10 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -50,11 +50,11 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * This email formatter lists the anomalies by their functions or metric.
  */
 public class MetricAnomaliesContent extends BaseNotificationContent {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetricAnomaliesContent.class);
 
   private AlertManager configDAO = null;
@@ -78,7 +78,8 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
           this.thirdEyeAnomalyConfig.getThirdEyeRestClientConfiguration().getAdminUser(),
           this.thirdEyeAnomalyConfig.getThirdEyeRestClientConfiguration().getSessionKey()
       );
-      this.rcaClient = new ThirdEyeRcaRestClient(principal, this.thirdEyeAnomalyConfig.getDashboardHost());
+      this.rcaClient = new ThirdEyeRcaRestClient(principal,
+          this.thirdEyeAnomalyConfig.getDashboardHost());
     }
   }
 
@@ -88,7 +89,8 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
   }
 
   @Override
-  public Map<String, Object> format(Collection<AnomalyResult> anomalies, DetectionAlertConfigDTO subsConfig) {
+  public Map<String, Object> format(Collection<AnomalyResult> anomalies,
+      SubscriptionGroupDTO subsConfig) {
     Map<String, Object> templateData = super.getTemplateData(subsConfig, anomalies);
     enrichMetricInfo(templateData, anomalies);
 
@@ -112,7 +114,8 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
 
     for (AnomalyResult anomalyResult : anomalies) {
       if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
-        LOG.warn("Anomaly result {} isn't an instance of MergedAnomalyResultDTO. Skip from alert.", anomalyResult);
+        LOG.warn("Anomaly result {} isn't an instance of MergedAnomalyResultDTO. Skip from alert.",
+            anomalyResult);
         continue;
       }
       MergedAnomalyResultDTO anomaly = (MergedAnomalyResultDTO) anomalyResult;
@@ -135,9 +138,10 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       String funcDescription = "";
       Long id = -1L;
 
-      if ( anomaly.getDetectionConfigId() != null) {
+      if (anomaly.getDetectionConfigId() != null) {
         DetectionConfigDTO config = this.configDAO.findById(anomaly.getDetectionConfigId());
-        Preconditions.checkNotNull(config, String.format("Cannot find detection config %d", anomaly.getDetectionConfigId()));
+        Preconditions.checkNotNull(config,
+            String.format("Cannot find detection config %d", anomaly.getDetectionConfigId()));
         functionName = config.getName();
         funcDescription = config.getDescription() == null ? "" : config.getDescription();
         id = config.getId();
@@ -145,7 +149,8 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
 
       Properties props = new Properties();
       props.putAll(anomaly.getProperties());
-      double lift = BaseNotificationContent.getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
+      double lift = BaseNotificationContent
+          .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
       AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
           getAnomalyURL(anomaly, this.thirdEyeAnomalyConfig.getDashboardHost()),
           getPredictedValue(anomaly),
@@ -173,7 +178,6 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
         anomalyDimensions.put(entry.getKey(), entry.getValue());
       }
 
-
       // include notified alerts only in the email
       if (!includeSentAnomaliesOnly || anomaly.isNotified()) {
         anomalyDetails.add(anomalyReport);
@@ -189,7 +193,8 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     final DateTime eventEnd = windowEnd.plus(postEventCrawlOffset);
     Map<String, List<String>> targetDimensions = new HashMap<>();
     if (thirdEyeAnomalyConfig.getHolidayCountriesWhitelist() != null) {
-      targetDimensions.put(EVENT_FILTER_COUNTRY, thirdEyeAnomalyConfig.getHolidayCountriesWhitelist());
+      targetDimensions
+          .put(EVENT_FILTER_COUNTRY, thirdEyeAnomalyConfig.getHolidayCountriesWhitelist());
     }
     List<EventDTO> holidays = getHolidayEvents(eventStart, eventEnd, targetDimensions);
     Collections.sort(holidays, new Comparator<EventDTO>() {
@@ -203,9 +208,11 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     if (anomalyDetails.size() == 1) {
       AnomalyReportEntity singleAnomaly = anomalyDetails.get(0);
       try {
-        this.imgPath = AlertScreenshotHelper.takeGraphScreenShot(singleAnomaly.getAnomalyId(), thirdEyeAnomalyConfig);
+        this.imgPath = AlertScreenshotHelper
+            .takeGraphScreenShot(singleAnomaly.getAnomalyId(), thirdEyeAnomalyConfig);
       } catch (Exception e) {
-        LOG.error("Exception while embedding screenshot for anomaly {}", singleAnomaly.getAnomalyId(), e);
+        LOG.error("Exception while embedding screenshot for anomaly {}",
+            singleAnomaly.getAnomalyId(), e);
       }
     }
 
@@ -222,12 +229,16 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     if (this.rcaClient != null && metricAnomalyReports.keySet().size() == 1) {
       String anomalyId = metricAnomalyReports.values().iterator().next().getAnomalyId();
       try {
-        Map<String, Object> rcaHighlights = this.rcaClient.getRootCauseHighlights(Long.parseLong(anomalyId));
-        templateData.put("cubeDimensions", ConfigUtils.getMap(rcaHighlights.get("cubeResults")).get("dimensions"));
-        templateData.put("cubeResponseRows", ConfigUtils.getMap(rcaHighlights.get("cubeResults")).get("responseRows"));
+        Map<String, Object> rcaHighlights = this.rcaClient
+            .getRootCauseHighlights(Long.parseLong(anomalyId));
+        templateData.put("cubeDimensions",
+            ConfigUtils.getMap(rcaHighlights.get("cubeResults")).get("dimensions"));
+        templateData.put("cubeResponseRows",
+            ConfigUtils.getMap(rcaHighlights.get("cubeResults")).get("responseRows"));
       } catch (Exception e) {
         // alert notification shouldn't fail if rca insights are not available
-        LOG.error("Skip Embedding RCA in email. Failed to retrieve the RCA Highlights for anomaly " + anomalyId, e);
+        LOG.error("Skip Embedding RCA in email. Failed to retrieve the RCA Highlights for anomaly "
+            + anomalyId, e);
       }
     }
 

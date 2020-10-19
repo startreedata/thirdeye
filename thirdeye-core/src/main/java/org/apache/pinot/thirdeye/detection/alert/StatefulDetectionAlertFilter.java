@@ -19,27 +19,25 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
+import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.DataProvider;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.collections4.MapUtils;
-
-import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.*;
-
+import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
+import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.detection.DataProvider;
 
 public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter {
 
@@ -51,7 +49,8 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
   // Time beyond which we do not want to notify anomalies
   private static final long ANOMALY_NOTIFICATION_LOOKBACK_TIME = TimeUnit.DAYS.toMillis(14);
 
-  public StatefulDetectionAlertFilter(DataProvider provider, DetectionAlertConfigDTO config, long endTime) {
+  public StatefulDetectionAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
+      long endTime) {
     super(provider, config, endTime);
   }
 
@@ -60,7 +59,8 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
     Set<MergedAnomalyResultDTO> allAnomalies = new HashSet<>();
     for (Long detectionId : vectorClocks.keySet()) {
       // Ignore disabled detections
-      DetectionConfigDTO detection = DAORegistry.getInstance().getDetectionConfigManager().findById(detectionId);
+      DetectionConfigDTO detection = DAORegistry.getInstance().getDetectionConfigManager()
+          .findById(detectionId);
       if (detection == null || !detection.isActive()) {
         continue;
       }
@@ -71,8 +71,9 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
         startTime = this.endTime - ANOMALY_NOTIFICATION_LOOKBACK_TIME;
       }
 
-      Collection<MergedAnomalyResultDTO> candidates = DAORegistry.getInstance().getMergedAnomalyResultDAO()
-          .findByCreatedTimeInRangeAndDetectionConfigId(startTime + 1,  this.endTime, detectionId);
+      Collection<MergedAnomalyResultDTO> candidates = DAORegistry.getInstance()
+          .getMergedAnomalyResultDAO()
+          .findByCreatedTimeInRangeAndDetectionConfigId(startTime + 1, this.endTime, detectionId);
 
       long finalStartTime = startTime;
       Collection<MergedAnomalyResultDTO> anomalies =
@@ -82,8 +83,10 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
               return anomaly != null && !anomaly.isChild()
                   && !AlertUtils.hasFeedback(anomaly)
                   && anomaly.getCreatedTime() > finalStartTime
-                  && (anomaly.getAnomalyResultSource().equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) ||
-                  anomaly.getAnomalyResultSource().equals(AnomalyResultSource.DATA_QUALITY_DETECTION));
+                  && (anomaly.getAnomalyResultSource()
+                  .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) ||
+                  anomaly.getAnomalyResultSource()
+                      .equals(AnomalyResultSource.DATA_QUALITY_DETECTION));
             }
           });
 
@@ -106,7 +109,8 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
     Set<String> filteredRecipients = new HashSet<>();
     if (recipient != null) {
       filteredRecipients.addAll(recipient);
-      filteredRecipients = filteredRecipients.stream().map(String::trim).collect(Collectors.toSet());
+      filteredRecipients = filteredRecipients.stream().map(String::trim)
+          .collect(Collectors.toSet());
       filteredRecipients.removeIf(rec -> rec == null || "".equals(rec));
     }
     return filteredRecipients;
@@ -116,14 +120,16 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
    * Extracts the alert schemes from config and also merges (overrides)
    * recipients explicitly defined outside the scope of alert schemes.
    */
-  protected Map<String, Object> generateAlertSchemeProps(DetectionAlertConfigDTO config,
+  protected Map<String, Object> generateAlertSchemeProps(SubscriptionGroupDTO config,
       Set<String> to, Set<String> cc, Set<String> bcc) {
     Map<String, Object> notificationSchemeProps = new HashMap<>();
 
     // Make a copy of the current alert schemes
     if (config.getAlertSchemes() != null) {
-      for (Map.Entry<Object, Object> alertSchemeEntry : ConfigUtils.getMap(config.getAlertSchemes()).entrySet()) {
-        notificationSchemeProps.put(alertSchemeEntry.getKey().toString(), ConfigUtils.getMap(alertSchemeEntry.getValue()));
+      for (Map.Entry<Object, Object> alertSchemeEntry : ConfigUtils.getMap(config.getAlertSchemes())
+          .entrySet()) {
+        notificationSchemeProps.put(alertSchemeEntry.getKey().toString(),
+            ConfigUtils.getMap(alertSchemeEntry.getValue()));
       }
     }
 

@@ -48,10 +48,10 @@ import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.COMPARE_MODE;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -65,12 +65,12 @@ import org.joda.time.Weeks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * This class (helper) defines the overall alert message content. This will
  * be derived to implement various anomaly alerting templates.
  */
 public abstract class BaseNotificationContent implements NotificationContent {
+
   private static final Logger LOG = LoggerFactory.getLogger(BaseNotificationContent.class);
 
   /*  The Event Crawl Offset takes the standard period format, ex: P1D for 1 day, P1W for 1 week
@@ -115,7 +115,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
         properties.getProperty(INCLUDE_SUMMARY, DEFAULT_INCLUDE_SUMMARY));
     this.dateTimeZone = DateTimeZone.forID(properties.getProperty(TIME_ZONE, DEFAULT_TIME_ZONE));
 
-    Period defaultPeriod = Period.parse(properties.getProperty(EVENT_CRAWL_OFFSET, DEFAULT_EVENT_CRAWL_OFFSET));
+    Period defaultPeriod = Period
+        .parse(properties.getProperty(EVENT_CRAWL_OFFSET, DEFAULT_EVENT_CRAWL_OFFSET));
     this.preEventCrawlOffset = defaultPeriod;
     this.postEventCrawlOffset = defaultPeriod;
     if (properties.getProperty(PRE_EVENT_CRAWL_OFFSET) != null) {
@@ -145,7 +146,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
   /**
    * Generate subject based on configuration.
    */
-  public static String makeSubject(AlertConfigBean.SubjectType subjectType, DetectionAlertConfigDTO notificationConfig, Map<String, Object> templateData) {
+  public static String makeSubject(AlertConfigBean.SubjectType subjectType,
+      SubscriptionGroupDTO notificationConfig, Map<String, Object> templateData) {
     String baseSubject = "Thirdeye Alert : " + notificationConfig.getName();
 
     switch (subjectType) {
@@ -159,11 +161,13 @@ public abstract class BaseNotificationContent implements NotificationContent {
         return baseSubject + " - " + templateData.get("datasets");
 
       default:
-        throw new IllegalArgumentException(String.format("Unknown type '%s'", notificationConfig.getSubjectType()));
+        throw new IllegalArgumentException(
+            String.format("Unknown type '%s'", notificationConfig.getSubjectType()));
     }
   }
 
-  protected void enrichMetricInfo(Map<String, Object> templateData, Collection<AnomalyResult> anomalies) {
+  protected void enrichMetricInfo(Map<String, Object> templateData,
+      Collection<AnomalyResult> anomalies) {
     Set<String> metrics = new TreeSet<>();
     Set<String> datasets = new TreeSet<>();
 
@@ -174,7 +178,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
         datasets.add(mergedAnomaly.getCollection());
         metrics.add(mergedAnomaly.getMetric());
 
-        MetricConfigDTO metric = this.metricDAO.findByMetricAndDataset(mergedAnomaly.getMetric(), mergedAnomaly.getCollection());
+        MetricConfigDTO metric = this.metricDAO
+            .findByMetricAndDataset(mergedAnomaly.getMetric(), mergedAnomaly.getCollection());
         if (metric != null) {
           metricsMap.put(metric.getId().toString(), metric);
         }
@@ -188,7 +193,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
     templateData.put("metricsMap", metricsMap);
   }
 
-  protected Map<String, Object> getTemplateData(DetectionAlertConfigDTO notificationConfig, Collection<AnomalyResult> anomalies) {
+  protected Map<String, Object> getTemplateData(SubscriptionGroupDTO notificationConfig,
+      Collection<AnomalyResult> anomalies) {
     Map<String, Object> templateData = new HashMap<>();
 
     DateTimeZone timeZone = DateTimeZone.forTimeZone(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
@@ -210,7 +216,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
       }
     }
 
-    PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(new DummyAlertFilter(), mergedAnomalyResults);
+    PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(
+        new DummyAlertFilter(), mergedAnomalyResults);
 
     templateData.put("anomalyCount", anomalies.size());
     templateData.put("startTime", getDateString(startTime));
@@ -224,7 +231,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
     templateData.put("alertConfigName", notificationConfig.getName());
     templateData.put("includeSummary", includeSummary);
     templateData.put("reportGenerationTimeMillis", System.currentTimeMillis());
-    if(precisionRecallEvaluator.getTotalResponses() > 0) {
+    if (precisionRecallEvaluator.getTotalResponses() > 0) {
       templateData.put("precision", precisionRecallEvaluator.getPrecisionInResponse());
       templateData.put("recall", precisionRecallEvaluator.getRecall());
       templateData.put("falseNegative", precisionRecallEvaluator.getFalseNegativeRate());
@@ -248,7 +255,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
     if (expected == 0) {
       return 1d;
     } else {
-      return current/expected - 1;
+      return current / expected - 1;
     }
   }
 
@@ -256,7 +263,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
    * Get the sign of the severity change
    */
   protected static boolean getLiftDirection(double lift) {
-    return lift < 0 ? false : true;
+    return !(lift < 0);
   }
 
   /**
@@ -272,7 +279,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
    */
   protected static String getTimeDiffInHours(long start, long end) {
     double duration = Double.valueOf((end - start) / 1000) / 3600;
-    String durationString = ThirdEyeUtils.getRoundedValue(duration) + ((duration == 1) ? (" hour") : (" hours"));
+    String durationString =
+        ThirdEyeUtils.getRoundedValue(duration) + ((duration == 1) ? (" hour") : (" hours"));
     return durationString;
   }
 
@@ -292,7 +300,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
   /**
    * Get the url of given anomaly result
    */
-  protected static String getAnomalyURL(MergedAnomalyResultDTO anomalyResultDTO, String dashboardUrl) {
+  protected static String getAnomalyURL(MergedAnomalyResultDTO anomalyResultDTO,
+      String dashboardUrl) {
     String urlPart = "/app/#/rootcause?anomalyId=";
     return dashboardUrl + urlPart;
   }
@@ -302,7 +311,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
    */
   protected static String getIssueType(MergedAnomalyResultDTO anomalyResultDTO) {
     Map<String, String> properties = anomalyResultDTO.getProperties();
-    if (MapUtils.isNotEmpty(properties) && properties.containsKey(MergedAnomalyResultDTO.ISSUE_TYPE_KEY)) {
+    if (MapUtils.isNotEmpty(properties) && properties
+        .containsKey(MergedAnomalyResultDTO.ISSUE_TYPE_KEY)) {
       return properties.get(MergedAnomalyResultDTO.ISSUE_TYPE_KEY);
     }
     return null;
@@ -320,7 +330,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
     }
 
     return liftValue;
-   }
+  }
 
   /**
    * The lift value for an SLA anomaly is delay from the configured sla. (Ex: 2 days & 3 hours)
@@ -333,7 +343,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
       return Strings.EMPTY;
     }
 
-    long delayInMillis = anomaly.getEndTime() - Long.parseLong(anomaly.getProperties().get("datasetLastRefreshTime"));
+    long delayInMillis = anomaly.getEndTime() - Long
+        .parseLong(anomaly.getProperties().get("datasetLastRefreshTime"));
     long days = TimeUnit.MILLISECONDS.toDays(delayInMillis);
     long hours = TimeUnit.MILLISECONDS.toHours(delayInMillis) % TimeUnit.DAYS.toHours(1);
     long minutes = TimeUnit.MILLISECONDS.toMinutes(delayInMillis) % TimeUnit.HOURS.toMinutes(1);
@@ -391,6 +402,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
     }
     return current;
   }
+
   /**
    * Convert Feedback value to user readable values
    */
@@ -417,9 +429,12 @@ public abstract class BaseNotificationContent implements NotificationContent {
 
   /**
    * Taking advantage of event data provider, extract the events around the given start and end time
+   *
    * @param eventTypes the list of event types
-   * @param start the start time of the event, preEventCrawlOffset is added before the given date time
-   * @param end the end time of the event, postEventCrawlOffset is added after the given date time
+   * @param start the start time of the event, preEventCrawlOffset is added before the given
+   *     date time
+   * @param end the end time of the event, postEventCrawlOffset is added after the given date
+   *     time
    * @param metricName the affected metric name
    * @param serviceName the affected service name
    * @param targetDimensions the affected dimensions
@@ -453,24 +468,30 @@ public abstract class BaseNotificationContent implements NotificationContent {
 
   /**
    * Taking advantage of event data provider, extract the events around the given start and end time
-   * @param start the start time of the event, preEventCrawlOffset is added before the given date time
-   * @param end the end time of the event, postEventCrawlOffset is added after the given date time
+   *
+   * @param start the start time of the event, preEventCrawlOffset is added before the given
+   *     date time
+   * @param end the end time of the event, postEventCrawlOffset is added after the given date
+   *     time
    * @param targetDimensions the affected dimensions
    * @return a list of related events
    */
-  protected List<EventDTO> getHolidayEvents(DateTime start, DateTime end, Map<String, List<String>> targetDimensions) {
+  protected List<EventDTO> getHolidayEvents(DateTime start, DateTime end,
+      Map<String, List<String>> targetDimensions) {
     EventFilter eventFilter = new EventFilter();
     eventFilter.setEventType(EventType.HOLIDAY.name());
     eventFilter.setStartTime(start.minus(preEventCrawlOffset).getMillis());
     eventFilter.setEndTime(end.plus(postEventCrawlOffset).getMillis());
     eventFilter.setTargetDimensionMap(targetDimensions);
 
-    LOG.info("Fetching holidays with preEventCrawlOffset {} and postEventCrawlOffset {}", preEventCrawlOffset, postEventCrawlOffset);
+    LOG.info("Fetching holidays with preEventCrawlOffset {} and postEventCrawlOffset {}",
+        preEventCrawlOffset, postEventCrawlOffset);
     return new HolidayEventProvider().getEvents(eventFilter);
   }
 
   /**
    * Get the value of matched filter key of given anomaly result
+   *
    * @param anomaly a MergedAnomalyResultDTO instance
    * @param matchText a text to be matched in the filter keys
    * @return a list of filter values
@@ -487,6 +508,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class AnomalyReportEntity {
+
     String metric;
     String startDateTime;
     String lift; // percentage change
@@ -525,9 +547,12 @@ public abstract class BaseNotificationContent implements NotificationContent {
     String properties;
     String metricUrn;
 
-    public AnomalyReportEntity(String anomalyId, String anomalyURL, String baselineVal, String currentVal, String lift,
-        boolean positiveLift, Double swi, List<String> dimensions, String duration, String feedback, String function,
-        String funcDescription, String metric, String startTime, String endTime, String timezone, String issueType,
+    public AnomalyReportEntity(String anomalyId, String anomalyURL, String baselineVal,
+        String currentVal, String lift,
+        boolean positiveLift, Double swi, List<String> dimensions, String duration, String feedback,
+        String function,
+        String funcDescription, String metric, String startTime, String endTime, String timezone,
+        String issueType,
         String anomalyType, String properties, String metricUrn) {
       this.anomalyId = anomalyId;
       this.anomalyURL = anomalyURL;

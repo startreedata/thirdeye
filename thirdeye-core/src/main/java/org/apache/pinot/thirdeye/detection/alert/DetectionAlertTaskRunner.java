@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.anomaly.task.TaskInfo;
 import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
@@ -26,28 +29,26 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * The Detection alert task runner. This runner looks for the new anomalies and run the detection alert filter to get
+ * The Detection alert task runner. This runner looks for the new anomalies and run the detection
+ * alert filter to get
  * mappings from anomalies to recipients and then send email to the recipients.
  */
 public class DetectionAlertTaskRunner implements TaskRunner {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertTaskRunner.class);
 
   private final DetectionAlertTaskFactory detAlertTaskFactory;
-  private DetectionAlertConfigManager subscriptionConfigDAO;
-  private MergedAnomalyResultManager mergedAnomalyDAO;
+  private final DetectionAlertConfigManager subscriptionConfigDAO;
+  private final MergedAnomalyResultManager mergedAnomalyDAO;
 
   public DetectionAlertTaskRunner() {
     this.detAlertTaskFactory = new DetectionAlertTaskFactory();
@@ -55,8 +56,9 @@ public class DetectionAlertTaskRunner implements TaskRunner {
     this.mergedAnomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
   }
 
-  private DetectionAlertConfigDTO loadDetectionAlertConfig(long detectionAlertConfigId) {
-    DetectionAlertConfigDTO detectionAlertConfig = this.subscriptionConfigDAO.findById(detectionAlertConfigId);
+  private SubscriptionGroupDTO loadDetectionAlertConfig(long detectionAlertConfigId) {
+    SubscriptionGroupDTO detectionAlertConfig = this.subscriptionConfigDAO
+        .findById(detectionAlertConfigId);
     if (detectionAlertConfig == null) {
       throw new RuntimeException("Cannot find detection alert config id " + detectionAlertConfigId);
     }
@@ -67,11 +69,12 @@ public class DetectionAlertTaskRunner implements TaskRunner {
     return detectionAlertConfig;
   }
 
-  private void updateSubscriptionWatermarks(DetectionAlertFilterResult result, DetectionAlertConfigDTO subscriptionConfig) {
+  private void updateSubscriptionWatermarks(DetectionAlertFilterResult result,
+      SubscriptionGroupDTO subscriptionConfig) {
     if (!result.getAllAnomalies().isEmpty()) {
       subscriptionConfig.setVectorClocks(
           AlertUtils.mergeVectorClock(subscriptionConfig.getVectorClocks(),
-          AlertUtils.makeVectorClock(result.getAllAnomalies())));
+              AlertUtils.makeVectorClock(result.getAllAnomalies())));
 
       LOG.info("Updating watermarks for subscription config : {}", subscriptionConfig.getId());
       this.subscriptionConfigDAO.save(subscriptionConfig);
@@ -84,10 +87,11 @@ public class DetectionAlertTaskRunner implements TaskRunner {
 
     try {
       long alertId = ((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId();
-      DetectionAlertConfigDTO alertConfig = loadDetectionAlertConfig(alertId);
+      SubscriptionGroupDTO alertConfig = loadDetectionAlertConfig(alertId);
 
       // Load all the anomalies along with their recipients
-      DetectionAlertFilter alertFilter = detAlertTaskFactory.loadAlertFilter(alertConfig, System.currentTimeMillis());
+      DetectionAlertFilter alertFilter = detAlertTaskFactory
+          .loadAlertFilter(alertConfig, System.currentTimeMillis());
       DetectionAlertFilterResult result = alertFilter.run();
 
       // TODO: The old UI relies on notified tag to display the anomalies. After the migration
@@ -98,14 +102,16 @@ public class DetectionAlertTaskRunner implements TaskRunner {
       }
 
       // Suppress alerts if any and get the filtered anomalies to be notified
-      Set<DetectionAlertSuppressor> alertSuppressors = detAlertTaskFactory.loadAlertSuppressors(alertConfig);
+      Set<DetectionAlertSuppressor> alertSuppressors = detAlertTaskFactory
+          .loadAlertSuppressors(alertConfig);
       for (DetectionAlertSuppressor alertSuppressor : alertSuppressors) {
         result = alertSuppressor.run(result);
       }
 
       // Send out alert notifications (email and/or iris)
       Set<DetectionAlertScheme> alertSchemes =
-          detAlertTaskFactory.loadAlertSchemes(alertConfig, taskContext.getThirdEyeAnomalyConfiguration(), result);
+          detAlertTaskFactory
+              .loadAlertSchemes(alertConfig, taskContext.getThirdEyeAnomalyConfiguration(), result);
       for (DetectionAlertScheme alertScheme : alertSchemes) {
         alertScheme.run();
         alertScheme.destroy();

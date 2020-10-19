@@ -21,34 +21,32 @@ package org.apache.pinot.thirdeye.detection.alert;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 
 /**
  * Container class for notification properties
  */
 public class DetectionAlertFilterNotification {
 
-  DetectionAlertConfigDTO subsConfig;
+  SubscriptionGroupDTO subsConfig;
   Multimap<String, String> dimensionFilters;
 
-  public DetectionAlertFilterNotification(DetectionAlertConfigDTO subsConfig) {
+  public DetectionAlertFilterNotification(SubscriptionGroupDTO subsConfig) {
     this(subsConfig, ArrayListMultimap.create());
   }
 
-  public DetectionAlertFilterNotification(DetectionAlertConfigDTO subsConfig, Multimap<String, String> dimensionFilters) {
+  public DetectionAlertFilterNotification(SubscriptionGroupDTO subsConfig,
+      Multimap<String, String> dimensionFilters) {
     this.subsConfig = subsConfig;
     this.dimensionFilters = dimensionFilters;
   }
 
-  public DetectionAlertConfigDTO getSubscriptionConfig() {
+  public SubscriptionGroupDTO getSubscriptionConfig() {
     return subsConfig;
   }
 
-  public void setSubscriptionConfig(DetectionAlertConfigDTO subsConfig) {
+  public void setSubscriptionConfig(SubscriptionGroupDTO subsConfig) {
     this.subsConfig = subsConfig;
   }
 
@@ -69,7 +67,8 @@ public class DetectionAlertFilterNotification {
       return false;
     }
     DetectionAlertFilterNotification that = (DetectionAlertFilterNotification) o;
-    return Objects.equals(subsConfig, that.subsConfig) && Objects.equals(dimensionFilters, that.dimensionFilters);
+    return Objects.equals(subsConfig, that.subsConfig) && Objects
+        .equals(dimensionFilters, that.dimensionFilters);
   }
 
   @Override

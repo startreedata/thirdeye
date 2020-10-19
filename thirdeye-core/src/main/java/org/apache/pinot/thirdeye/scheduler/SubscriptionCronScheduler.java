@@ -19,19 +19,19 @@
 
 package org.apache.pinot.thirdeye.scheduler;
 
-import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AbstractBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.DetectionAlertConfigBean;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
+import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datalayer.pojo.AbstractBean;
+import org.apache.pinot.thirdeye.datalayer.pojo.DetectionAlertConfigBean;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertJob;
 import org.quartz.CronScheduleBuilder;
@@ -49,21 +49,23 @@ import org.quartz.utils.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * The Detection alert scheduler. Schedule new detection alert jobs or update existing detection alert jobs
+ * The Detection alert scheduler. Schedule new detection alert jobs or update existing detection
+ * alert jobs
  * in the cron scheduler.
  */
 public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
+
   private static final Logger LOG = LoggerFactory.getLogger(SubscriptionCronScheduler.class);
 
   private static final int DEFAULT_ALERT_DELAY = 1;
   private static final TimeUnit DEFAULT_ALERT_DELAY_UNIT = TimeUnit.MINUTES;
-  public static final String QUARTZ_SUBSCRIPTION_GROUPER = TaskConstants.TaskType.DETECTION_ALERT.toString();
+  public static final String QUARTZ_SUBSCRIPTION_GROUPER = TaskConstants.TaskType.DETECTION_ALERT
+      .toString();
 
   final Scheduler scheduler;
-  private ScheduledExecutorService scheduledExecutorService;
-  private DetectionAlertConfigManager alertConfigDAO;
+  private final ScheduledExecutorService scheduledExecutorService;
+  private final DetectionAlertConfigManager alertConfigDAO;
 
   public SubscriptionCronScheduler() throws SchedulerException {
     this.scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -74,7 +76,8 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void start() throws SchedulerException {
     this.scheduler.start();
-    this.scheduledExecutorService.scheduleWithFixedDelay(this, 0, DEFAULT_ALERT_DELAY, DEFAULT_ALERT_DELAY_UNIT);
+    this.scheduledExecutorService
+        .scheduleWithFixedDelay(this, 0, DEFAULT_ALERT_DELAY, DEFAULT_ALERT_DELAY_UNIT);
   }
 
   @Override
@@ -82,17 +85,19 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
     try {
       // read all alert configs
       LOG.info("Scheduling all the subscription configs");
-      List<DetectionAlertConfigDTO> alertConfigs = alertConfigDAO.findAll();
+      List<SubscriptionGroupDTO> alertConfigs = alertConfigDAO.findAll();
 
       // get active jobs
       Set<JobKey> scheduledJobs = getScheduledJobs();
-      LOG.info("Scheduled jobs {}", scheduledJobs.stream().map(Key::getName).collect(Collectors.toList()));
+      LOG.info("Scheduled jobs {}",
+          scheduledJobs.stream().map(Key::getName).collect(Collectors.toList()));
 
-      for (DetectionAlertConfigDTO alertConfig : alertConfigs) {
+      for (SubscriptionGroupDTO alertConfig : alertConfigs) {
         try {
           createOrUpdateAlertJob(scheduledJobs, alertConfig);
         } catch (Exception e) {
-          LOG.error("Could not write job for alert config id {}. Skipping. {}", alertConfig.getId(), alertConfig, e);
+          LOG.error("Could not write job for alert config id {}. Skipping. {}", alertConfig.getId(),
+              alertConfig, e);
         }
       }
 
@@ -124,7 +129,8 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void startJob(AbstractBean config, JobDetail job) throws SchedulerException {
     Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
-        CronScheduleBuilder.cronSchedule(((DetectionAlertConfigBean) config).getCronExpression())).build();
+        CronScheduleBuilder.cronSchedule(((DetectionAlertConfigBean) config).getCronExpression()))
+        .build();
     this.scheduler.scheduleJob(job, trigger);
     LOG.info(String.format("scheduled subscription pipeline job %s", job.getKey().getName()));
   }
@@ -132,7 +138,8 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void stopJob(JobKey key) throws SchedulerException {
     if (!scheduler.checkExists(key)) {
-      throw new IllegalStateException("Cannot stop alert config " + key + ", it has not been scheduled");
+      throw new IllegalStateException(
+          "Cannot stop alert config " + key + ", it has not been scheduled");
     }
     scheduler.deleteJob(key);
     LOG.info("Stopped alert config {}", key);
@@ -145,19 +152,20 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
 
   private void deleteAlertJob(JobKey scheduledJobKey) throws SchedulerException {
     Long configId = TaskUtils.getIdFromJobKey(scheduledJobKey.getName());
-    DetectionAlertConfigDTO alertConfigSpec = alertConfigDAO.findById(configId);
+    SubscriptionGroupDTO alertConfigSpec = alertConfigDAO.findById(configId);
     if (alertConfigSpec == null) {
       LOG.info("Found scheduled, but not in database {}", configId);
       stopJob(scheduledJobKey);
     }
   }
 
-  private void createOrUpdateAlertJob(Set<JobKey> scheduledJobs, DetectionAlertConfigDTO alertConfig)
+  private void createOrUpdateAlertJob(Set<JobKey> scheduledJobs, SubscriptionGroupDTO alertConfig)
       throws SchedulerException {
     Long id = alertConfig.getId();
     boolean isActive = alertConfig.isActive();
 
-    JobKey key = new JobKey(getJobKey(id, TaskConstants.TaskType.DETECTION_ALERT), QUARTZ_SUBSCRIPTION_GROUPER);
+    JobKey key = new JobKey(getJobKey(id, TaskConstants.TaskType.DETECTION_ALERT),
+        QUARTZ_SUBSCRIPTION_GROUPER);
     JobDetail job = JobBuilder.newJob(DetectionAlertJob.class).withIdentity(key).build();
     boolean isScheduled = scheduledJobs.contains(key);
 
@@ -171,7 +179,8 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
         // cron expression has been updated, restart this job
         if (!cronInDatabase.equals(cronInSchedule)) {
           LOG.info(
-              "Cron expression for config {} with jobKey {} has been changed from {}  to {}. " + "Restarting schedule",
+              "Cron expression for config {} with jobKey {} has been changed from {}  to {}. "
+                  + "Restarting schedule",
               id, key, cronInSchedule, cronInDatabase);
           stopJob(key);
           startJob(alertConfig, job);

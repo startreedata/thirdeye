@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,15 @@
 
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_BCC;
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_BCC_VALUE;
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_CC;
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_CC_VALUE;
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_RECIPIENTS;
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_TO;
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_TO_VALUE;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,13 +35,13 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -45,11 +54,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.*;
-import static org.mockito.Mockito.*;
-
-
 public class DetectionEmailAlerterTest {
+
   private static final String PROP_CLASS_NAME = "className";
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   private static final String FROM_ADDRESS_VALUE = "test3@test.test";
@@ -63,7 +69,7 @@ public class DetectionEmailAlerterTest {
   private DetectionAlertConfigManager alertConfigDAO;
   private MergedAnomalyResultManager anomalyDAO;
   private AlertManager detectionDAO;
-  private DetectionAlertConfigDTO alertConfigDTO;
+  private SubscriptionGroupDTO alertConfigDTO;
   private Long detectionConfigId;
   private ThirdEyeAnomalyConfiguration thirdEyeConfig;
 
@@ -79,9 +85,10 @@ public class DetectionEmailAlerterTest {
     detectionConfig.setName(DETECTION_NAME_VALUE);
     this.detectionConfigId = this.detectionDAO.save(detectionConfig);
 
-    this.alertConfigDTO = new DetectionAlertConfigDTO();
+    this.alertConfigDTO = new SubscriptionGroupDTO();
     Map<String, Object> properties = new HashMap<>();
-    properties.put(PROP_CLASS_NAME, "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
+    properties.put(PROP_CLASS_NAME,
+        "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(this.detectionConfigId));
 
     Map<String, Set<String>> recipients = new HashMap<>();
@@ -134,14 +141,15 @@ public class DetectionEmailAlerterTest {
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
-    DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO, this.thirdEyeConfig, null);
+    DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO,
+        this.thirdEyeConfig, null);
     alertTaskInfo.run();
   }
 
   @Test
   public void testSendEmailSuccessful() throws Exception {
     Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result = new HashMap<>();
-    DetectionAlertConfigDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
+    SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
         this.alertConfigDTO,
         ConfigUtils.getMap(this.alertConfigDTO.getAlertSchemes()),
         new HashMap<>());
@@ -157,7 +165,8 @@ public class DetectionEmailAlerterTest {
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
     MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient);
 
-    DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(this.alertConfigDTO, this.thirdEyeConfig, notificationResults) {
+    DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(this.alertConfigDTO,
+        this.thirdEyeConfig, notificationResults) {
       @Override
       protected HtmlEmail getHtmlContent(EmailEntity emailEntity) {
         return htmlEmail;

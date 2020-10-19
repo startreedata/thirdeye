@@ -19,28 +19,30 @@
 
 package org.apache.pinot.thirdeye.detection.yaml;
 
+import static org.apache.pinot.thirdeye.detection.yaml.YamlResource.PROP_DETECTION_ID;
+import static org.apache.pinot.thirdeye.detection.yaml.YamlResource.PROP_SUBSCRIPTION_ID;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.Response;
+import org.apache.commons.io.IOUtils;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.dashboard.DetectionPreviewConfiguration;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
-import java.io.IOException;
-import org.apache.commons.io.IOUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
@@ -50,10 +52,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.yaml.YamlResource.*;
-
-
 public class YamlResourceTest {
+
   private DAOTestBase testDAOProvider;
   private YamlResource yamlResource;
   private DAORegistry daoRegistry;
@@ -96,13 +96,16 @@ public class YamlResourceTest {
     datasetConfigDTO.setDataSource(PinotThirdEyeDataSource.class.getSimpleName());
     daoRegistry.getDatasetConfigDAO().save(datasetConfigDTO);
 
-    DetectionRegistry.getInstance().registerYamlConvertor(DetectionConfigTranslator.class.getName(), "COMPOSITE");
+    DetectionRegistry.getInstance()
+        .registerYamlConvertor(DetectionConfigTranslator.class.getName(), "COMPOSITE");
     DetectionRegistry.registerComponent(ThresholdRuleDetector.class.getName(), "THRESHOLD");
     DetectionAlertRegistry.getInstance().registerAlertScheme("EMAIL", "EmailClass");
     DetectionAlertRegistry.getInstance().registerAlertScheme("IRIS", "IrisClass");
     DetectionAlertRegistry.getInstance().registerAlertSuppressor("TIME_WINDOW", "TimeWindowClass");
-    DetectionAlertRegistry.getInstance().registerAlertFilter("DIMENSIONAL_ALERTER_PIPELINE", "DimClass");
-    DetectionAlertRegistry.getInstance().registerAlertFilter("DEFAULT_ALERTER_PIPELINE", "DefClass");
+    DetectionAlertRegistry.getInstance()
+        .registerAlertFilter("DIMENSIONAL_ALERTER_PIPELINE", "DimClass");
+    DetectionAlertRegistry.getInstance()
+        .registerAlertFilter("DEFAULT_ALERTER_PIPELINE", "DefClass");
   }
 
   @AfterMethod(alwaysRun = true)
@@ -113,8 +116,10 @@ public class YamlResourceTest {
   @Test
   public void testValidateCreateAlertYaml() throws IOException {
     // No validation error should be thrown for valid yaml payload
-    String detectionPayload = IOUtils.toString(this.getClass().getResourceAsStream("detection/detection-config-2.yaml"));
-    String subscriptionPayload = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-5.yaml"));
+    String detectionPayload = IOUtils
+        .toString(this.getClass().getResourceAsStream("detection/detection-config-2.yaml"));
+    String subscriptionPayload = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-5.yaml"));
     Map<String, String> config = new HashMap<>();
     config.put("detection", detectionPayload);
     config.put("subscription", subscriptionPayload);
@@ -126,18 +131,22 @@ public class YamlResourceTest {
     }
 
     // Throw error if the subscription group is not subscribed to the detection
-    detectionPayload = IOUtils.toString(this.getClass().getResourceAsStream("detection/detection-config-2.yaml"));
-    subscriptionPayload = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-2.yaml"));
+    detectionPayload = IOUtils
+        .toString(this.getClass().getResourceAsStream("detection/detection-config-2.yaml"));
+    subscriptionPayload = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-2.yaml"));
     config.put("detection", detectionPayload);
     config.put("subscription", subscriptionPayload);
     try {
       this.yamlResource.validateCreateAlertYaml(config);
     } catch (ConfigValidationException e) {
-      Assert.assertEquals(e.getMessage(), "You have not subscribed to the alert. Please configure the"
-          + " detectionName under the subscribedDetections field in your subscription group.");
+      Assert
+          .assertEquals(e.getMessage(), "You have not subscribed to the alert. Please configure the"
+              + " detectionName under the subscribedDetections field in your subscription group.");
       return;
     }
-    Assert.fail("Since the subscription group has not subscribed to the alert, an error should have been thrown.");
+    Assert.fail(
+        "Since the subscription group has not subscribed to the alert, an error should have been thrown.");
   }
 
   @Test
@@ -151,18 +160,21 @@ public class YamlResourceTest {
     }
 
     // Create a new detection
-    String validYaml = IOUtils.toString(this.getClass().getResourceAsStream("detection/detection-config-1.yaml"));
+    String validYaml = IOUtils
+        .toString(this.getClass().getResourceAsStream("detection/detection-config-1.yaml"));
     try {
       long id = this.yamlResource.createOrUpdateDetectionConfig(user, validYaml);
       DetectionConfigDTO detection = daoRegistry.getDetectionConfigManager().findById(id);
       Assert.assertNotNull(detection);
       Assert.assertEquals(detection.getName(), "test_detection_1");
     } catch (Exception e) {
-      Assert.fail("Exception should not be thrown for valid yaml. Message: " + e + " Cause: " + e.getCause(), e);
+      Assert.fail("Exception should not be thrown for valid yaml. Message: " + e + " Cause: " + e
+          .getCause(), e);
     }
 
     // Update above created detection
-    String updatedYaml = IOUtils.toString(this.getClass().getResourceAsStream("detection/detection-config-2.yaml"));
+    String updatedYaml = IOUtils
+        .toString(this.getClass().getResourceAsStream("detection/detection-config-2.yaml"));
     try {
       long id = this.yamlResource.createOrUpdateDetectionConfig(user, updatedYaml);
       DetectionConfigDTO detection = daoRegistry.getDetectionConfigManager().findById(id);
@@ -170,33 +182,39 @@ public class YamlResourceTest {
       Assert.assertEquals(detection.getName(), "test_detection_2");
       Assert.assertEquals(detection.getDescription(), "My modified pipeline");
     } catch (Exception e) {
-      Assert.fail("Exception should not be thrown if detection already exists. Message: " + e + " Cause: " + e.getCause());
+      Assert.fail(
+          "Exception should not be thrown if detection already exists. Message: " + e + " Cause: "
+              + e.getCause());
     }
   }
 
   @Test
   public void testCreateOrUpdateSubscriptionConfig() throws IOException {
     // Create a new subscription
-    String validYaml = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-2.yaml"));
+    String validYaml = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-2.yaml"));
     try {
       long id = this.yamlResource.createOrUpdateSubscriptionConfig(user, validYaml);
-      DetectionAlertConfigDTO subscription = daoRegistry.getDetectionAlertConfigManager().findById(id);
+      SubscriptionGroupDTO subscription = daoRegistry.getDetectionAlertConfigManager().findById(id);
       Assert.assertNotNull(subscription);
       Assert.assertEquals(subscription.getName(), "Subscription Group Name");
     } catch (Exception e) {
-      Assert.fail("Exception should not be thrown for valid yaml. Message: " + e + " Cause: " + e.getCause(), e);
+      Assert.fail("Exception should not be thrown for valid yaml. Message: " + e + " Cause: " + e
+          .getCause(), e);
     }
 
     // Update above created subscription based on subscriptionGroupName
-    String updatedYaml = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-4.yaml"));
+    String updatedYaml = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-4.yaml"));
     try {
       long id = this.yamlResource.createOrUpdateSubscriptionConfig(user, updatedYaml);
-      DetectionAlertConfigDTO subscription = daoRegistry.getDetectionAlertConfigManager().findById(id);
+      SubscriptionGroupDTO subscription = daoRegistry.getDetectionAlertConfigManager().findById(id);
       Assert.assertNotNull(subscription);
       Assert.assertEquals(subscription.getName(), "Subscription Group Name");
       Assert.assertEquals(subscription.getApplication(), "test_application");
     } catch (Exception e) {
-      Assert.fail("Exception should not be thrown if subscription already exists. Message: " + e + " Cause: " + e.getCause());
+      Assert.fail("Exception should not be thrown if subscription already exists. Message: " + e
+          + " Cause: " + e.getCause());
     }
   }
 
@@ -229,7 +247,8 @@ public class YamlResourceTest {
           "\"alertSchemes\",\"subscriptionGroupName\""));
     }
 
-    String appFieldMissingYaml = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-1.yaml"));
+    String appFieldMissingYaml = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-1.yaml"));
     try {
       this.yamlResource.createSubscriptionConfig(appFieldMissingYaml);
       Assert.fail("Exception not thrown on empty yaml");
@@ -238,7 +257,8 @@ public class YamlResourceTest {
           "\"application\""));
     }
 
-    String appMissingYaml = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-1.yaml"));
+    String appMissingYaml = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-1.yaml"));
     appMissingYaml = appMissingYaml + "\napplication: missing_app";
     try {
       this.yamlResource.createSubscriptionConfig(appMissingYaml);
@@ -248,7 +268,7 @@ public class YamlResourceTest {
           + " Please use an existing application name or reach out to the ThirdEye team to setup a new one.");
     }
 
-    DetectionAlertConfigDTO oldAlertDTO = new DetectionAlertConfigDTO();
+    SubscriptionGroupDTO oldAlertDTO = new SubscriptionGroupDTO();
     oldAlertDTO.setName("test_group");
     daoRegistry.getDetectionAlertConfigManager().save(oldAlertDTO);
 
@@ -257,15 +277,18 @@ public class YamlResourceTest {
     request.setRecipients("abc@abc.in");
     daoRegistry.getApplicationDAO().save(request);
 
-    String groupExists = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-3.yaml"));
+    String groupExists = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-3.yaml"));
     try {
       this.yamlResource.createSubscriptionConfig(groupExists);
       Assert.fail("Exception not thrown on empty yaml");
     } catch (Exception e) {
-      Assert.assertEquals(e.getMessage(), "subscriptionGroupName is already taken. Please use a different one.");
+      Assert.assertEquals(e.getMessage(),
+          "subscriptionGroupName is already taken. Please use a different one.");
     }
 
-    String validYaml = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-4.yaml"));
+    String validYaml = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-4.yaml"));
     try {
       long id = this.yamlResource.createSubscriptionConfig(validYaml);
       DetectionConfigDTO detection = daoRegistry.getDetectionConfigManager().findById(id);
@@ -283,7 +306,8 @@ public class YamlResourceTest {
     request.setRecipients("abc@abc.in");
     daoRegistry.getApplicationDAO().save(request);
 
-    String validYaml = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-4.yaml"));
+    String validYaml = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-4.yaml"));
     long oldId = -1;
     try {
       oldId = this.yamlResource.createSubscriptionConfig(validYaml);
@@ -291,7 +315,7 @@ public class YamlResourceTest {
       Assert.fail("Exception should not be thrown for valid yaml. Message = " + e);
     }
 
-    DetectionAlertConfigDTO alertDTO;
+    SubscriptionGroupDTO alertDTO;
 
     try {
       this.yamlResource.updateSubscriptionGroup(user, -1, "");
@@ -327,7 +351,8 @@ public class YamlResourceTest {
           "\"alertSchemes\",\"subscriptionGroupName\""));
     }
 
-    String appFieldMissingYaml = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-1.yaml"));
+    String appFieldMissingYaml = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-1.yaml"));
     try {
       this.yamlResource.updateSubscriptionGroup(user, oldId, appFieldMissingYaml);
       Assert.fail("Exception not thrown on empty yaml");
@@ -336,7 +361,8 @@ public class YamlResourceTest {
           "\"application\""));
     }
 
-    String validYaml2 = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-5.yaml"));
+    String validYaml2 = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-5.yaml"));
     try {
       this.yamlResource.updateSubscriptionGroup(user, oldId, validYaml2);
       alertDTO = daoRegistry.getDetectionAlertConfigManager().findById(oldId);
@@ -344,8 +370,12 @@ public class YamlResourceTest {
       Assert.assertEquals(alertDTO.getName(), "Subscription Group Name");
       Assert.assertEquals(alertDTO.getApplication(), "test_application");
       Assert.assertNotNull(alertDTO.getAlertSchemes().get("emailScheme"));
-      Assert.assertEquals(ConfigUtils.getMap(alertDTO.getAlertSchemes().get("emailScheme")).get("template"), "ENTITY_GROUPBY_REPORT");
-      Assert.assertEquals(ConfigUtils.getMap(alertDTO.getAlertSchemes().get("emailScheme")).get("subject"), "METRICS");
+      Assert.assertEquals(
+          ConfigUtils.getMap(alertDTO.getAlertSchemes().get("emailScheme")).get("template"),
+          "ENTITY_GROUPBY_REPORT");
+      Assert.assertEquals(
+          ConfigUtils.getMap(alertDTO.getAlertSchemes().get("emailScheme")).get("subject"),
+          "METRICS");
 
       // Verify if the vector clock is updated with the updated detection
       Assert.assertEquals(alertDTO.getVectorClocks().keySet().size(), 1);
@@ -357,22 +387,27 @@ public class YamlResourceTest {
 
   @Test
   public void testCreateYamlAlert() throws IOException {
-    String detectionPayload = IOUtils.toString(this.getClass().getResourceAsStream("detection/detection-config-3.yaml"));
-    String subscriptionPayload = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-6.yaml"));
+    String detectionPayload = IOUtils
+        .toString(this.getClass().getResourceAsStream("detection/detection-config-3.yaml"));
+    String subscriptionPayload = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-6.yaml"));
     Map<String, String> config = new HashMap<>();
     config.put("detection", detectionPayload);
     config.put("subscription", subscriptionPayload);
     try {
-      Response response = this.yamlResource.createYamlAlert(user, new ObjectMapper().writeValueAsString(config), 0, 0);
+      Response response = this.yamlResource
+          .createYamlAlert(user, new ObjectMapper().writeValueAsString(config), 0, 0);
       Assert.assertEquals(response.getStatus(), 200);
       Assert.assertEquals(ConfigUtils.getMap(response.getEntity()).get(PROP_DETECTION_ID), "6");
       Assert.assertEquals(ConfigUtils.getMap(response.getEntity()).get(PROP_SUBSCRIPTION_ID), "7");
-      Assert.assertEquals(ConfigUtils.getMap(response.getEntity()).get("message"), "Alert was created successfully.");
+      Assert.assertEquals(ConfigUtils.getMap(response.getEntity()).get("message"),
+          "Alert was created successfully.");
 
       // Ensure the detection and subscription are persisted
       DetectionConfigDTO detection = this.daoRegistry.getDetectionConfigManager().findById(6l);
       Assert.assertNotNull(detection);
-      DetectionAlertConfigDTO subscription = this.daoRegistry.getDetectionAlertConfigManager().findById(7l);
+      SubscriptionGroupDTO subscription = this.daoRegistry.getDetectionAlertConfigManager()
+          .findById(7l);
       Assert.assertNotNull(subscription);
 
       // 1 yaml onboarding task should be created
@@ -385,13 +420,16 @@ public class YamlResourceTest {
 
   @Test
   public void testCreateYamlAlertRollback() throws IOException {
-    String detectionPayload = IOUtils.toString(this.getClass().getResourceAsStream("detection/detection-config-3.yaml"));
-    String subscriptionPayloadAppMissing = IOUtils.toString(this.getClass().getResourceAsStream("subscription/subscription-config-7.yaml"));
+    String detectionPayload = IOUtils
+        .toString(this.getClass().getResourceAsStream("detection/detection-config-3.yaml"));
+    String subscriptionPayloadAppMissing = IOUtils
+        .toString(this.getClass().getResourceAsStream("subscription/subscription-config-7.yaml"));
     Map<String, String> config = new HashMap<>();
     config.put("detection", detectionPayload);
     config.put("subscription", subscriptionPayloadAppMissing);
     try {
-      Response response = this.yamlResource.createYamlAlert(user, new ObjectMapper().writeValueAsString(config), 0, 0);
+      Response response = this.yamlResource
+          .createYamlAlert(user, new ObjectMapper().writeValueAsString(config), 0, 0);
 
       // Bad request with validation error should be thrown saying application is a required field in subscription
       Assert.assertEquals(response.getStatus(), 400);
@@ -403,7 +441,8 @@ public class YamlResourceTest {
       // Ensure the detection and subscription are not persisted
       List<DetectionConfigDTO> detections = this.daoRegistry.getDetectionConfigManager().findAll();
       Assert.assertEquals(detections.size(), 2);
-      List<DetectionAlertConfigDTO> subscriptions = this.daoRegistry.getDetectionAlertConfigManager().findAll();
+      List<SubscriptionGroupDTO> subscriptions = this.daoRegistry.getDetectionAlertConfigManager()
+          .findAll();
       Assert.assertEquals(subscriptions.size(), 0);
 
       // No yaml onboarding task should be created
@@ -413,6 +452,5 @@ public class YamlResourceTest {
       Assert.fail("No exception should be thrown for valid payload");
     }
   }
-
 }
 

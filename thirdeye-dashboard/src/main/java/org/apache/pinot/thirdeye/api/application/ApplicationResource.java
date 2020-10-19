@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.api.application;
 
+import static org.apache.pinot.thirdeye.dashboard.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_DETECTION_CONFIG_IDS;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.swagger.annotations.ApiOperation;
@@ -38,22 +40,18 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.dashboard.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.*;
-
 
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
@@ -132,12 +130,12 @@ public class ApplicationResource {
   }
 
   private void deleteDependents(final String application) {
-    List<DetectionAlertConfigDTO> subsGroupList = detectionAlertConfigManager.findByPredicate(
+    List<SubscriptionGroupDTO> subsGroupList = detectionAlertConfigManager.findByPredicate(
         Predicate.EQ("application", application));
     LOG.debug(String.format("[APPLICATION] Found %d subscription groups under application %s",
         subsGroupList.size(), application));
 
-    for (DetectionAlertConfigDTO subsGroup : subsGroupList) {
+    for (SubscriptionGroupDTO subsGroup : subsGroupList) {
       for (long id : ConfigUtils
           .getLongs(subsGroup.getProperties().get(PROP_DETECTION_CONFIG_IDS))) {
         DetectionConfigDTO function = this.alertManager.findById(id);

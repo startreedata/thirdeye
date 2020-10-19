@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.datalayer.dto;
 
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionAlertConfigBean;
 
-
-public class DetectionAlertConfigDTO extends DetectionAlertConfigBean {
+public class SubscriptionGroupDTO extends DetectionAlertConfigBean {
 
 }

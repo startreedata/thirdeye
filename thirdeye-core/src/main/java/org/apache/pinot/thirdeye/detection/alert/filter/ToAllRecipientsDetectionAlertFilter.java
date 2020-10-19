@@ -21,18 +21,17 @@ package org.apache.pinot.thirdeye.detection.alert.filter;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter;
-import java.util.List;
-import java.util.Set;
 import org.apache.pinot.thirdeye.detection.annotation.AlertFilter;
-
 
 /**
  * The detection alert filter that sends the anomaly email to all recipients
@@ -49,11 +48,14 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
   final SetMultimap<String, String> recipients;
   List<Long> detectionConfigIds;
 
-  public ToAllRecipientsDetectionAlertFilter(DataProvider provider, DetectionAlertConfigDTO config, long endTime) {
+  public ToAllRecipientsDetectionAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
+      long endTime) {
     super(provider, config, endTime);
 
-    this.recipients = HashMultimap.create(ConfigUtils.<String, String>getMultimap(this.config.getProperties().get(PROP_RECIPIENTS)));
-    this.detectionConfigIds = ConfigUtils.getLongs(this.config.getProperties().get(PROP_DETECTION_CONFIG_IDS));
+    this.recipients = HashMultimap.create(
+        ConfigUtils.getMultimap(this.config.getProperties().get(PROP_RECIPIENTS)));
+    this.detectionConfigIds = ConfigUtils
+        .getLongs(this.config.getProperties().get(PROP_DETECTION_CONFIG_IDS));
   }
 
   @Override
@@ -61,10 +63,12 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
     DetectionAlertFilterResult result = new DetectionAlertFilterResult();
 
     // Fetch all the anomalies to be notified to the recipients
-    Set<MergedAnomalyResultDTO> anomalies = this.filter(this.makeVectorClocks(this.detectionConfigIds));
+    Set<MergedAnomalyResultDTO> anomalies = this
+        .filter(this.makeVectorClocks(this.detectionConfigIds));
 
     // Handle legacy recipients yaml syntax
-    if (SubscriptionUtils.isEmptyEmailRecipients(this.config) && CollectionUtils.isNotEmpty(this.recipients.get(PROP_TO))) {
+    if (SubscriptionUtils.isEmptyEmailRecipients(this.config) && CollectionUtils
+        .isNotEmpty(this.recipients.get(PROP_TO))) {
       // recipients are configured using the older syntax
       this.config.setAlertSchemes(generateAlertSchemeProps(
           this.config,

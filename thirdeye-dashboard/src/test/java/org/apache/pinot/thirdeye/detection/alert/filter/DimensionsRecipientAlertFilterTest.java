@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,12 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.makeAnomaly;
+import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_DETECTION_CONFIG_IDS;
+import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_DIMENSION;
+import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_DIMENSION_RECIPIENTS;
+import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_NOTIFY;
+import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_REF_LINKS;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -27,14 +33,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
@@ -45,26 +51,27 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.*;
-import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.*;
-
-
 public class DimensionsRecipientAlertFilterTest {
 
   private static final String PROP_RECIPIENTS = "recipients";
   private static final String PROP_TO = "to";
   private static final String PROP_CC = "cc";
   private static final String PROP_BCC = "bcc";
-  private static final Set<String> PROP_TO_VALUE = new HashSet<>(Arrays.asList("test@example.com", "test@example.org"));
-  private static final Set<String> PROP_CC_VALUE = new HashSet<>(Arrays.asList("cctest@example.com", "cctest@example.org"));
-  private static final Set<String> PROP_BCC_VALUE = new HashSet<>(Arrays.asList("bcctest@example.com", "bcctest@example.org"));
-  private static final Set<String> PROP_TO_FOR_VALUE = new HashSet<>(Arrays.asList("myTest@example.com", "myTest@example.org"));
-  private static final Set<String> PROP_TO_FOR_ANOTHER_VALUE = Collections.singleton("myTest@example.net");
+  private static final Set<String> PROP_TO_VALUE = new HashSet<>(
+      Arrays.asList("test@example.com", "test@example.org"));
+  private static final Set<String> PROP_CC_VALUE = new HashSet<>(
+      Arrays.asList("cctest@example.com", "cctest@example.org"));
+  private static final Set<String> PROP_BCC_VALUE = new HashSet<>(
+      Arrays.asList("bcctest@example.com", "bcctest@example.org"));
+  private static final Set<String> PROP_TO_FOR_VALUE = new HashSet<>(
+      Arrays.asList("myTest@example.com", "myTest@example.org"));
+  private static final Set<String> PROP_TO_FOR_ANOTHER_VALUE = Collections
+      .singleton("myTest@example.net");
   private static final List<Map<String, Object>> PROP_DIMENSION_RECIPIENTS_VALUE = new ArrayList<>();
 
   private DetectionAlertFilter alertFilter;
   private MockDataProvider provider;
-  private DetectionAlertConfigDTO alertConfig;
+  private SubscriptionGroupDTO alertConfig;
   private DAOTestBase testDAOProvider;
 
   private long detectionConfigId1;
@@ -151,27 +158,35 @@ public class DimensionsRecipientAlertFilterTest {
     this.detectedAnomalies = new ArrayList<>();
     this.baseTime = System.currentTimeMillis();
     Thread.sleep(100);
-    this.detectedAnomalies.add(makeAnomaly(detectionConfigId1, this.baseTime, 0, 100, Collections.singletonMap("key", "value"), null));
+    this.detectedAnomalies.add(makeAnomaly(detectionConfigId1, this.baseTime, 0, 100,
+        Collections.singletonMap("key", "value"), null));
     Thread.sleep(10);
-    this.detectedAnomalies.add(makeAnomaly(detectionConfigId1, this.baseTime, 0, 110, anomalousDimensions, null));
+    this.detectedAnomalies
+        .add(makeAnomaly(detectionConfigId1, this.baseTime, 0, 110, anomalousDimensions, null));
     Thread.sleep(10);
-    this.detectedAnomalies.add(makeAnomaly(detectionConfigId1, this.baseTime, 0, 120, Collections.singletonMap("key", "unknownValue"), null));
+    this.detectedAnomalies.add(makeAnomaly(detectionConfigId1, this.baseTime, 0, 120,
+        Collections.singletonMap("key", "unknownValue"), null));
     Thread.sleep(30);
-    this.detectedAnomalies.add(makeAnomaly(detectionConfigId2, this.baseTime, 110, 150, Collections.singletonMap("unknownKey", "value"), null));
+    this.detectedAnomalies.add(makeAnomaly(detectionConfigId2, this.baseTime, 110, 150,
+        Collections.singletonMap("unknownKey", "value"), null));
     Thread.sleep(10);
-    this.detectedAnomalies.add(makeAnomaly(detectionConfigId2, this.baseTime, 120, 160, Collections.singletonMap("key", "value"), null));
+    this.detectedAnomalies.add(makeAnomaly(detectionConfigId2, this.baseTime, 120, 160,
+        Collections.singletonMap("key", "value"), null));
     Thread.sleep(40);
-    this.detectedAnomalies.add(makeAnomaly(detectionConfigId1,this.baseTime, 150, 200, Collections.<String, String>emptyMap(), null));
+    this.detectedAnomalies.add(makeAnomaly(detectionConfigId1, this.baseTime, 150, 200,
+        Collections.emptyMap(), null));
     Thread.sleep(200);
-    this.detectedAnomalies.add(makeAnomaly(detectionConfigId2, this.baseTime, 300, 400, Collections.singletonMap("key", "value"), null));
-    this.detectedAnomalies.add(makeAnomaly(detectionConfigId3, this.baseTime, 100, 400, Collections.singletonMap("key", "value"), null));
+    this.detectedAnomalies.add(makeAnomaly(detectionConfigId2, this.baseTime, 300, 400,
+        Collections.singletonMap("key", "value"), null));
+    this.detectedAnomalies.add(makeAnomaly(detectionConfigId3, this.baseTime, 100, 400,
+        Collections.singletonMap("key", "value"), null));
     Thread.sleep(1);
 
     this.alertConfig = createDetectionAlertConfig();
   }
 
-  private DetectionAlertConfigDTO createDetectionAlertConfig() {
-    DetectionAlertConfigDTO alertConfig = new DetectionAlertConfigDTO();
+  private SubscriptionGroupDTO createDetectionAlertConfig() {
+    SubscriptionGroupDTO alertConfig = new SubscriptionGroupDTO();
 
     Map<String, Set<String>> recipients = new HashMap<>();
     recipients.put(PROP_TO, PROP_TO_VALUE);
@@ -205,7 +220,8 @@ public class DimensionsRecipientAlertFilterTest {
    */
   @Test
   public void testAlertFilterRecipients() throws Exception {
-    this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,this.baseTime + 350L);
+    this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
+        this.baseTime + 350L);
     DetectionAlertFilterResult result = this.alertFilter.run();
 
     // Send anomalies on un-configured dimensions to default recipients
@@ -250,8 +266,10 @@ public class DimensionsRecipientAlertFilterTest {
    */
   @Test
   public void testAlertFilterNoChildren() throws Exception {
-    this.alertConfig.getProperties().put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId2));
-    this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,this.baseTime + 250L);
+    this.alertConfig.getProperties()
+        .put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId2));
+    this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
+        this.baseTime + 250L);
 
     // Check if there are 2 anomalies in this window
     DetectionAlertFilterResult result = this.alertFilter.run();
@@ -284,7 +302,8 @@ public class DimensionsRecipientAlertFilterTest {
    */
   @Test
   public void testAlertFilterFeedback() throws Exception {
-    this.alertConfig.getProperties().put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId3));
+    this.alertConfig.getProperties()
+        .put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId3));
     this.alertConfig.setVectorClocks(Collections.singletonMap(detectionConfigId3, this.baseTime));
 
     // Create feedback objects
@@ -294,12 +313,16 @@ public class DimensionsRecipientAlertFilterTest {
     feedbackNoFeedback.setFeedbackType(AnomalyFeedbackType.NO_FEEDBACK);
 
     // Create anomalies with various feedback type
-    MergedAnomalyResultDTO anomalyWithFeedback = makeAnomaly(detectionConfigId3, this.baseTime, 5, 10, Collections.emptyMap(), feedbackAnomaly);
-    MergedAnomalyResultDTO anomalyWithNoFeedback = makeAnomaly(detectionConfigId3, this.baseTime, 5, 10, Collections.emptyMap(), feedbackNoFeedback);
-    MergedAnomalyResultDTO anomalyWithNullFeedback = makeAnomaly(detectionConfigId3, this.baseTime, 5, 10, Collections.emptyMap(), null);
+    MergedAnomalyResultDTO anomalyWithFeedback = makeAnomaly(detectionConfigId3, this.baseTime, 5,
+        10, Collections.emptyMap(), feedbackAnomaly);
+    MergedAnomalyResultDTO anomalyWithNoFeedback = makeAnomaly(detectionConfigId3, this.baseTime, 5,
+        10, Collections.emptyMap(), feedbackNoFeedback);
+    MergedAnomalyResultDTO anomalyWithNullFeedback = makeAnomaly(detectionConfigId3, this.baseTime,
+        5, 10, Collections.emptyMap(), null);
     Thread.sleep(1);
 
-    this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig, System.currentTimeMillis());
+    this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
+        System.currentTimeMillis());
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 2);
 

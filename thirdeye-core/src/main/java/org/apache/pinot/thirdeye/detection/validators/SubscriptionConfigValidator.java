@@ -19,11 +19,13 @@
 
 package org.apache.pinot.thirdeye.detection.validators;
 
-import java.util.HashMap;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_APPLICATION;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_CRON;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_DETECTION_NAMES;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -32,13 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.*;
-
-
 /**
  * Application specific constraints and validations on subscription group are defined here
  */
-public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<DetectionAlertConfigDTO> {
+public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<SubscriptionGroupDTO> {
+
   private static final Logger LOG = LoggerFactory.getLogger(SubscriptionConfigValidator.class);
   private static final String DEFAULT_SUBSCRIPTION_CONFIG_SCHEMA_PATH =
       "/validators/subscription/subscription-config-schema.json";
@@ -51,7 +51,8 @@ public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<Det
    * Perform validation on the parsed & constructed subscription config
    */
   @Override
-  public void semanticValidation(DetectionAlertConfigDTO alertConfig) throws ConfigValidationException {
+  public void semanticValidation(SubscriptionGroupDTO alertConfig)
+      throws ConfigValidationException {
     // TODO
   }
 
@@ -63,7 +64,8 @@ public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<Det
   @Override
   public void staticValidation(String config) throws ConfigValidationException {
     Map<String, Object> subscriptionConfigMap = ConfigUtils.getMap(new Yaml().load(config));
-    if (subscriptionConfigMap.containsKey(PROP_DISABLE_VALD) && MapUtils.getBoolean(subscriptionConfigMap, PROP_DISABLE_VALD)) {
+    if (subscriptionConfigMap.containsKey(PROP_DISABLE_VALD) && MapUtils
+        .getBoolean(subscriptionConfigMap, PROP_DISABLE_VALD)) {
       LOG.info("Validation disabled for subscription config " + config);
       return;
     }
@@ -71,7 +73,8 @@ public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<Det
     super.schemaValidation(config);
 
     // Make sure the subscribed detections exist
-    List<String> detectionNames = ConfigUtils.getList(subscriptionConfigMap.get(PROP_DETECTION_NAMES));
+    List<String> detectionNames = ConfigUtils
+        .getList(subscriptionConfigMap.get(PROP_DETECTION_NAMES));
     for (String detectionName : detectionNames) {
       ConfigValidationUtils.checkArgument(!DAORegistry.getInstance().getDetectionConfigManager()
               .findByPredicate(Predicate.EQ("name", detectionName)).isEmpty(),
@@ -81,7 +84,8 @@ public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<Det
 
     // application should exist in our registry
     String applicationName = MapUtils.getString(subscriptionConfigMap, PROP_APPLICATION);
-    ConfigValidationUtils.checkArgument(!DAORegistry.getInstance().getApplicationDAO().findByName(applicationName).isEmpty(),
+    ConfigValidationUtils.checkArgument(
+        !DAORegistry.getInstance().getApplicationDAO().findByName(applicationName).isEmpty(),
         "Application name doesn't exist in our registry. Please use an existing application name or"
             + " reach out to the ThirdEye team to setup a new one.");
 

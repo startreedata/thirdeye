@@ -1,12 +1,12 @@
 package org.apache.pinot.thirdeye.detection.alert.suppress;
 
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
+import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.ACCEPTABLE_DEVIATION_KEY;
+import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.EXPECTED_CHANGE_KEY;
+import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.IS_THRESHOLD_KEY;
+import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.TIME_WINDOWS_KEY;
+import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.TIME_WINDOW_SUPPRESSOR_KEY;
+import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.WINDOW_END_TIME_KEY;
+import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.WINDOW_START_TIME_KEY;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,25 +15,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.detection.alert.filter.SubscriptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
+import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.*;
-
-
 public class DetectionTimeWindowSuppressorTest {
 
   private DAOTestBase testDAOProvider;
   private Set<MergedAnomalyResultDTO> anomalies;
-  private DetectionAlertConfigDTO config;
+  private SubscriptionGroupDTO config;
 
-  private Map<String, Object> createSuppressWindow(long startTime, long endTime, boolean isThreshold, double expectedChange,
+  private Map<String, Object> createSuppressWindow(long startTime, long endTime,
+      boolean isThreshold, double expectedChange,
       double acceptableDeviation) {
     Map<String, Object> suppressWindowProps = new HashMap<>();
     suppressWindowProps.put(WINDOW_START_TIME_KEY, startTime);
@@ -44,7 +44,8 @@ public class DetectionTimeWindowSuppressorTest {
     return suppressWindowProps;
   }
 
-  private MergedAnomalyResultDTO createAnomaly(long id, long startTime, long endTime, double weight) {
+  private MergedAnomalyResultDTO createAnomaly(long id, long startTime, long endTime,
+      double weight) {
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setId(id);
     anomaly.setStartTime(startTime);
@@ -54,7 +55,7 @@ public class DetectionTimeWindowSuppressorTest {
   }
 
   private void initDetectionAlertConfig() {
-    config = new DetectionAlertConfigDTO();
+    config = new SubscriptionGroupDTO();
 
     List<Map<String, Object>> suppressWindowList = new ArrayList<>();
     suppressWindowList.add(createSuppressWindow(1000, 3000, true, 0.5, 0.1));
@@ -105,16 +106,16 @@ public class DetectionTimeWindowSuppressorTest {
    * Anomalies 4, 5, 7, and 10 should be suppressed (not notified).
    * Anomaly 6 is not suppressed because it falls outside the suppression region.
    *
-   *      *-----3----*    *------7-------*
-   *      |
-   *      | *-2-*    *----5----*    *--8-*
-   *      |     |                   |
-   *      *-1-* *--4-*         *--6-*    *--9-*        *---10---*
-   *      |     |                   |
+   * *-----3----*    *------7-------*
+   * |
+   * | *-2-*    *----5----*    *--8-*
+   * |     |                   |
+   * *-1-* *--4-*         *--6-*    *--9-*        *---10---*
+   * |     |                   |
    * _____|_____|___________________|______________|________________|
-   *      |     |                   |              |                |
-   *    500     |                   |              |                |
-   *          1000----<window1>----3000          4500--<window2>--6000
+   * |     |                   |              |                |
+   * 500     |                   |              |                |
+   * 1000----<window1>----3000          4500--<window2>--6000
    */
   @Test
   public void testTimeWindowSuppressorWithThreshold() throws Exception {
@@ -124,7 +125,7 @@ public class DetectionTimeWindowSuppressorTest {
     DetectionAlertFilterResult result = new DetectionAlertFilterResult();
     Map<String, Object> alertProps = new HashMap<>();
     alertProps.put("emailScheme", recipients);
-    DetectionAlertConfigDTO subsConfig = new DetectionAlertConfigDTO();
+    SubscriptionGroupDTO subsConfig = new SubscriptionGroupDTO();
     subsConfig.setAlertSchemes(alertProps);
     result.addMapping(new DetectionAlertFilterNotification(subsConfig), anomalies);
 
@@ -160,7 +161,7 @@ public class DetectionTimeWindowSuppressorTest {
     DetectionAlertFilterResult result = new DetectionAlertFilterResult();
     Map<String, Object> alertProps = new HashMap<>();
     alertProps.put("emailScheme", recipients);
-    DetectionAlertConfigDTO subsConfig = new DetectionAlertConfigDTO();
+    SubscriptionGroupDTO subsConfig = new SubscriptionGroupDTO();
     subsConfig.setAlertSchemes(alertProps);
     result.addMapping(new DetectionAlertFilterNotification(subsConfig), anomalies);
 
@@ -169,5 +170,4 @@ public class DetectionTimeWindowSuppressorTest {
 
     Assert.assertEquals(resultsAfterSuppress.getAllAnomalies().size(), 0);
   }
-
 }

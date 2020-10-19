@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,14 @@
 
 package org.apache.pinot.thirdeye.notification.content.templates;
 
+import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_HOST_KEY;
+import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_PORT_KEY;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
-import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
-import org.apache.pinot.thirdeye.notification.ContentFormatterUtils;
+import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
@@ -32,30 +35,28 @@ import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.notification.ContentFormatterUtils;
+import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
+import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
-import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.*;
-
-
 public class TestHierarchicalAnomaliesContent {
+
   private static final String TEST = "test";
-  private int id = 0;
-  private String dashboardHost = "http://localhost:8080/dashboard";
+  private final int id = 0;
+  private final String dashboardHost = "http://localhost:8080/dashboard";
   private DAOTestBase testDAOProvider;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
   private AnomalyFunctionManager anomalyFunctionDAO;
+
   @BeforeClass
-  public void beforeClass(){
+  public void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     mergedAnomalyResultDAO = daoRegistry.getMergedAnomalyResultDAO();
@@ -145,14 +146,17 @@ public class TestHierarchicalAnomaliesContent {
     anomalies.add(anomaly);
     mergedAnomalyResultDAO.save(anomaly);
 
-    DetectionAlertConfigDTO notificationConfigDTO = DaoTestUtils.getTestNotificationConfig("Test Config");
+    SubscriptionGroupDTO notificationConfigDTO = DaoTestUtils
+        .getTestNotificationConfig("Test Config");
 
     EmailContentFormatter
-        contentFormatter = new EmailContentFormatter(new Properties(), new HierarchicalAnomaliesContent(),
+        contentFormatter = new EmailContentFormatter(new Properties(),
+        new HierarchicalAnomaliesContent(),
         thirdeyeAnomalyConfig, notificationConfigDTO);
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);
 
-    String htmlPath = ClassLoader.getSystemResource("test-hierarchical-metric-anomalies-template.html").getPath();
+    String htmlPath = ClassLoader
+        .getSystemResource("test-hierarchical-metric-anomalies-template.html").getPath();
     Assert.assertEquals(
         ContentFormatterUtils.getEmailHtml(emailEntity).replaceAll("\\s", ""),
         ContentFormatterUtils.getHtmlContent(htmlPath).replaceAll("\\s", ""));

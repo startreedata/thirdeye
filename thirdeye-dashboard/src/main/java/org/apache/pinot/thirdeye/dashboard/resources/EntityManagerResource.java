@@ -22,43 +22,10 @@ package org.apache.pinot.thirdeye.dashboard.resources;
 import static org.apache.pinot.thirdeye.dashboard.resources.ResourceUtils.badRequest;
 import static org.apache.pinot.thirdeye.dashboard.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.dashboard.resources.ResourceUtils.ensureExists;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.apache.pinot.thirdeye.api.SwaggerTag;
-import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
-import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.OverrideConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
-import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.DatasetConfigBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.SessionBean;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
@@ -73,14 +40,46 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import org.apache.pinot.thirdeye.api.SwaggerTag;
+import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
+import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
+import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.OverrideConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
+import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datalayer.pojo.DatasetConfigBean;
+import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
+import org.apache.pinot.thirdeye.datalayer.pojo.SessionBean;
+import org.apache.pinot.thirdeye.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = {SwaggerTag.DASHBOARD_TAG})
 @Singleton
 public class EntityManagerResource {
+
   private final AnomalyFunctionManager anomalyFunctionManager;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
@@ -140,7 +139,8 @@ public class EntityManagerResource {
   @GET
   @Path("{entityType}")
   @ApiOperation(value = "GET request to get all entities for a type.")
-  public List<? extends AbstractDTO> getAllEntitiesForType(@PathParam("entityType") String entityTypeStr) {
+  public List<? extends AbstractDTO> getAllEntitiesForType(
+      @PathParam("entityType") String entityTypeStr) {
     ensureExists(entityTypeStr, "entityType is null");
 
     final EntityType entityType = entityType(entityTypeStr);
@@ -181,7 +181,8 @@ public class EntityManagerResource {
         return mergedAnomalyResultManager.findByPredicate(Predicate.GT("detectionConfigId", 0));
 
       case SESSION:
-        return sessionManager.findByPredicate(Predicate.EQ("principalType", SessionBean.PrincipalType.SERVICE));
+        return sessionManager
+            .findByPredicate(Predicate.EQ("principalType", SessionBean.PrincipalType.SERVICE));
 
       case DETECTION_ALERT_CONFIG:
         return detectionAlertConfigManager.findAll();
@@ -200,19 +201,24 @@ public class EntityManagerResource {
     try {
       switch (entityType) {
         case DATASET_CONFIG:
-          return assertNotNull(datasetConfigManager.save(OBJECT_MAPPER.readValue(jsonPayload, DatasetConfigDTO.class)));
+          return assertNotNull(datasetConfigManager
+              .save(OBJECT_MAPPER.readValue(jsonPayload, DatasetConfigDTO.class)));
 
         case METRIC_CONFIG:
-          return assertNotNull(metricConfigManager.save(OBJECT_MAPPER.readValue(jsonPayload, MetricConfigDTO.class)));
+          return assertNotNull(metricConfigManager
+              .save(OBJECT_MAPPER.readValue(jsonPayload, MetricConfigDTO.class)));
 
         case ANOMALY_FUNCTION:
-          return assertNotNull(anomalyFunctionManager.save(OBJECT_MAPPER.readValue(jsonPayload, AnomalyFunctionDTO.class)));
+          return assertNotNull(anomalyFunctionManager
+              .save(OBJECT_MAPPER.readValue(jsonPayload, AnomalyFunctionDTO.class)));
 
         case OVERRIDE_CONFIG:
-          return assertNotNull(overrideConfigManager.save(OBJECT_MAPPER.readValue(jsonPayload, OverrideConfigDTO.class)));
+          return assertNotNull(overrideConfigManager
+              .save(OBJECT_MAPPER.readValue(jsonPayload, OverrideConfigDTO.class)));
 
         case ALERT_CONFIG:
-          AlertConfigDTO alertConfigDTO = OBJECT_MAPPER.readValue(jsonPayload, AlertConfigDTO.class);
+          AlertConfigDTO alertConfigDTO = OBJECT_MAPPER
+              .readValue(jsonPayload, AlertConfigDTO.class);
           if (Strings.isNullOrEmpty(alertConfigDTO.getFromAddress())) {
             alertConfigDTO.setFromAddress(config.getFailureToAddress());
           }
@@ -220,31 +226,36 @@ public class EntityManagerResource {
           return assertNotNull(alertConfigManager.save(alertConfigDTO));
 
         case CLASSIFICATION_CONFIG:
-          return assertNotNull(classificationConfigManager.save(OBJECT_MAPPER.readValue(jsonPayload, ClassificationConfigDTO.class)));
+          return assertNotNull(classificationConfigManager
+              .save(OBJECT_MAPPER.readValue(jsonPayload, ClassificationConfigDTO.class)));
 
         case APPLICATION:
-          return assertNotNull(applicationManager.save(OBJECT_MAPPER.readValue(jsonPayload, ApplicationDTO.class)));
+          return assertNotNull(
+              applicationManager.save(OBJECT_MAPPER.readValue(jsonPayload, ApplicationDTO.class)));
 
         case ENTITY_MAPPING:
-          return assertNotNull(entityToEntityMappingManager.save(OBJECT_MAPPER.readValue(jsonPayload, EntityToEntityMappingDTO.class)));
+          return assertNotNull(entityToEntityMappingManager
+              .save(OBJECT_MAPPER.readValue(jsonPayload, EntityToEntityMappingDTO.class)));
 
         case DETECTION_CONFIG:
           return assertNotNull(
               alertManager.save(OBJECT_MAPPER.readValue(jsonPayload, DetectionConfigDTO.class)));
 
         case MERGED_ANOMALY:
-          return assertNotNull(mergedAnomalyResultManager.save(OBJECT_MAPPER.readValue(jsonPayload, MergedAnomalyResultDTO.class)));
+          return assertNotNull(mergedAnomalyResultManager
+              .save(OBJECT_MAPPER.readValue(jsonPayload, MergedAnomalyResultDTO.class)));
 
         case SESSION:
-          return assertNotNull(sessionManager.save(OBJECT_MAPPER.readValue(jsonPayload, SessionDTO.class)));
+          return assertNotNull(
+              sessionManager.save(OBJECT_MAPPER.readValue(jsonPayload, SessionDTO.class)));
 
         case DETECTION_ALERT_CONFIG:
-          return assertNotNull(detectionAlertConfigManager.save(OBJECT_MAPPER.readValue(jsonPayload, DetectionAlertConfigDTO.class)));
+          return assertNotNull(detectionAlertConfigManager
+              .save(OBJECT_MAPPER.readValue(jsonPayload, SubscriptionGroupDTO.class)));
 
         default:
           throw badRequest("Entity type not supported: " + entityType);
       }
-
     } catch (IOException e) {
       LOG.error("Error saving the entity with payload : " + jsonPayload, e);
       throw new WebApplicationException(e);

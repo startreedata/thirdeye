@@ -19,6 +19,18 @@
 
 package org.apache.pinot.thirdeye.notification.formatter.channels;
 
+import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_DIMENSION;
+import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_DIMENSION_RECIPIENTS;
+import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_NOTIFY;
+import static org.apache.pinot.thirdeye.notification.commons.JiraConfiguration.JIRA_CONFIG_KEY;
+import static org.apache.pinot.thirdeye.notification.commons.JiraConfiguration.JIRA_DEFAULT_PROJECT_KEY;
+import static org.apache.pinot.thirdeye.notification.commons.JiraConfiguration.JIRA_ISSUE_TYPE_KEY;
+import static org.apache.pinot.thirdeye.notification.commons.JiraConfiguration.JIRA_PASSWD_KEY;
+import static org.apache.pinot.thirdeye.notification.commons.JiraConfiguration.JIRA_URL_KEY;
+import static org.apache.pinot.thirdeye.notification.commons.JiraConfiguration.JIRA_USER_KEY;
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_ASSIGNEE;
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_LABELS;
+import static org.apache.pinot.thirdeye.notification.formatter.channels.JiraContentFormatter.PROP_SUBJECT_STYLE;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -35,17 +47,17 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
@@ -58,13 +70,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.*;
-import static org.apache.pinot.thirdeye.notification.commons.JiraConfiguration.*;
-import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.*;
-import static org.apache.pinot.thirdeye.notification.formatter.channels.JiraContentFormatter.*;
-
-
 public class TestJiraContentFormatter {
+
   private static final String PROP_CLASS_NAME = "className";
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   private static final String FROM_ADDRESS_VALUE = "test3@test.test";
@@ -80,8 +87,8 @@ public class TestJiraContentFormatter {
   private AlertManager detectionDAO;
   private MetricConfigManager metricDAO;
   private DatasetConfigManager dataSetDAO;
-  private DetectionAlertConfigDTO alertConfigDTO;
-  private DetectionAlertConfigDTO alertConfigDimAlerter;
+  private SubscriptionGroupDTO alertConfigDTO;
+  private SubscriptionGroupDTO alertConfigDimAlerter;
   private Long detectionConfigId;
   private Long subsId1;
   private Long subsId2;
@@ -137,7 +144,8 @@ public class TestJiraContentFormatter {
     anomalyResultDTO2.setMetricUrn("thirdeye:metric:124");
     Map<String, String> props = new HashMap<>();
     props.put("sla", "2_HOURS");
-    props.put("datasetLastRefreshTime", "" + new DateTime(2020, 1, 1, 10, 5, dateTimeZone).getMillis());
+    props.put("datasetLastRefreshTime",
+        "" + new DateTime(2020, 1, 1, 10, 5, dateTimeZone).getMillis());
     anomalyResultDTO2.setProperties(props);
     this.anomalyDAO.save(anomalyResultDTO2);
     anomalies.add(anomalyResultDTO2);
@@ -162,11 +170,12 @@ public class TestJiraContentFormatter {
     testDAOProvider.cleanup();
   }
 
-  public static DetectionAlertConfigDTO createDetectionAlertConfig(Long detectionConfigId) {
-    DetectionAlertConfigDTO alertConfig = new DetectionAlertConfigDTO();
+  public static SubscriptionGroupDTO createDetectionAlertConfig(Long detectionConfigId) {
+    SubscriptionGroupDTO alertConfig = new SubscriptionGroupDTO();
 
     Map<String, Object> properties = new HashMap<>();
-    properties.put(PROP_CLASS_NAME, "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
+    properties.put(PROP_CLASS_NAME,
+        "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId));
 
     Map<String, Object> jiraScheme = new HashMap<>();
@@ -183,8 +192,9 @@ public class TestJiraContentFormatter {
     return alertConfig;
   }
 
-  public static DetectionAlertConfigDTO createDimRecipientsDetectionAlertConfig(Long detectionConfigId) {
-    DetectionAlertConfigDTO alertConfig = new DetectionAlertConfigDTO();
+  public static SubscriptionGroupDTO createDimRecipientsDetectionAlertConfig(
+      Long detectionConfigId) {
+    SubscriptionGroupDTO alertConfig = new SubscriptionGroupDTO();
 
     Map<String, Object> dimensionRecipient1 = new HashMap<>();
     Map<String, String> dimensionKeys1 = new HashMap<>();
@@ -213,7 +223,8 @@ public class TestJiraContentFormatter {
     PROP_DIMENSION_RECIPIENTS_VALUE.add(dimensionRecipient2);
 
     Map<String, Object> properties = new HashMap<>();
-    properties.put(PROP_CLASS_NAME, "org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter");
+    properties.put(PROP_CLASS_NAME,
+        "org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter");
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId));
     properties.put(PROP_DIMENSION_RECIPIENTS, PROP_DIMENSION_RECIPIENTS_VALUE);
 
@@ -237,7 +248,7 @@ public class TestJiraContentFormatter {
 
   @Test
   public void testJiraContent() throws Exception {
-    Map<String,Object> jiraConfiguration = new HashMap<>();
+    Map<String, Object> jiraConfiguration = new HashMap<>();
     jiraConfiguration.put(JIRA_URL_KEY, "jira-test-url");
     jiraConfiguration.put(JIRA_USER_KEY, "test");
     jiraConfiguration.put(JIRA_PASSWD_KEY, "test");
@@ -256,13 +267,15 @@ public class TestJiraContentFormatter {
     jiraClientConfig.put(PROP_SUBJECT_STYLE, AlertConfigBean.SubjectType.METRICS);
 
     JiraContentFormatter jiraContent = new JiraContentFormatter(
-        JiraConfiguration.createFromProperties(jiraConfiguration), jiraClientConfig, this.metricAnomaliesContent, teConfig,
+        JiraConfiguration.createFromProperties(jiraConfiguration), jiraClientConfig,
+        this.metricAnomaliesContent, teConfig,
         this.alertConfigDTO);
 
     JiraEntity jiraEntity = jiraContent.getJiraEntity(ArrayListMultimap.create(), this.anomalies);
 
     // Assert Jira fields
-    Assert.assertEquals(jiraEntity.getLabels(), Arrays.asList("test-label-1", "test-label-2", "thirdeye", "subsId=" + subsId1));
+    Assert.assertEquals(jiraEntity.getLabels(),
+        Arrays.asList("test-label-1", "test-label-2", "thirdeye", "subsId=" + subsId1));
     Assert.assertEquals(jiraEntity.getJiraIssueTypeId().longValue(), 16L);
     Assert.assertEquals(jiraEntity.getAssignee(), "test");
     Assert.assertEquals(jiraEntity.getJiraProject(), "thirdeye");
@@ -277,7 +290,7 @@ public class TestJiraContentFormatter {
 
   @Test
   public void testJiraContentWithDimRecipientsAlerter() throws Exception {
-    Map<String,Object> jiraConfiguration = new HashMap<>();
+    Map<String, Object> jiraConfiguration = new HashMap<>();
     jiraConfiguration.put(JIRA_URL_KEY, "jira-test-url");
     jiraConfiguration.put(JIRA_USER_KEY, "test");
     jiraConfiguration.put(JIRA_PASSWD_KEY, "test");
@@ -296,7 +309,8 @@ public class TestJiraContentFormatter {
     jiraClientConfig.put(PROP_SUBJECT_STYLE, AlertConfigBean.SubjectType.METRICS);
 
     JiraContentFormatter jiraContent = new JiraContentFormatter(
-        JiraConfiguration.createFromProperties(jiraConfiguration), jiraClientConfig, this.metricAnomaliesContent,
+        JiraConfiguration.createFromProperties(jiraConfiguration), jiraClientConfig,
+        this.metricAnomaliesContent,
         teConfig, this.alertConfigDimAlerter);
 
     Multimap<String, String> dimensionKeys1 = ArrayListMultimap.create();
@@ -304,16 +318,19 @@ public class TestJiraContentFormatter {
     JiraEntity jiraEntity = jiraContent.getJiraEntity(dimensionKeys1, this.anomalies);
 
     // Assert Jira fields
-    Assert.assertEquals(jiraEntity.getLabels(), Arrays.asList("test-label-1", "test-label-2", "thirdeye", "subsId=" + subsId2, "key=value"));
+    Assert.assertEquals(jiraEntity.getLabels(), Arrays
+        .asList("test-label-1", "test-label-2", "thirdeye", "subsId=" + subsId2, "key=value"));
     Assert.assertEquals(jiraEntity.getJiraIssueTypeId().longValue(), 16L);
     Assert.assertEquals(jiraEntity.getAssignee(), "test");
     Assert.assertEquals(jiraEntity.getJiraProject(), "thirdeye");
 
     // Assert summary and description
-    Assert.assertEquals(jiraEntity.getSummary(), "Thirdeye Alert : alert_name2 - test_metric, key=value");
+    Assert.assertEquals(jiraEntity.getSummary(),
+        "Thirdeye Alert : alert_name2 - test_metric, key=value");
     Assert.assertEquals(
         jiraEntity.getDescription().replaceAll(" ", ""),
         IOUtils.toString(Thread.currentThread().getContextClassLoader()
-            .getResourceAsStream("test-jira-anomalies-template.ftl")).replaceAll(" ", "").replaceAll("alert_name1", "alert_name2"));
+            .getResourceAsStream("test-jira-anomalies-template.ftl")).replaceAll(" ", "")
+            .replaceAll("alert_name1", "alert_name2"));
   }
 }

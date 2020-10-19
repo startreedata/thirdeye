@@ -23,15 +23,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionAlertConfigBean;
 
-
 @Singleton
-public class DetectionAlertConfigManagerImpl extends AbstractManagerImpl<DetectionAlertConfigDTO> implements DetectionAlertConfigManager {
+public class DetectionAlertConfigManagerImpl extends
+    AbstractManagerImpl<SubscriptionGroupDTO> implements DetectionAlertConfigManager {
 
   @Inject
   public DetectionAlertConfigManagerImpl(GenericPojoDao genericPojoDao) {
-    super(DetectionAlertConfigDTO.class, DetectionAlertConfigBean.class, genericPojoDao);
+    super(SubscriptionGroupDTO.class, DetectionAlertConfigBean.class, genericPojoDao);
   }
 }

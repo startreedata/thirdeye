@@ -1,14 +1,32 @@
 package org.apache.pinot.thirdeye.detection.yaml.translator;
 
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.CRON_SCHEDULE_DEFAULT;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_ACTIVE;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_ALERT_SCHEMES;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_ALERT_SUPPRESSORS;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_APPLICATION;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_CLASS_NAME;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_CRON;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_DETECTION_CONFIG_IDS;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_DETECTION_NAMES;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_FROM;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_PARAM;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_RECIPIENTS;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_REFERENCE_LINKS;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_SUBS_GROUP_NAME;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_TIME_WINDOWS;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_TYPE;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -19,10 +37,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yaml.snakeyaml.Yaml;
-
-import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.*;
-import static org.mockito.Mockito.*;
-
 
 public class YamlDetectionAlertConfigTranslatorTest {
 
@@ -42,7 +56,6 @@ public class YamlDetectionAlertConfigTranslatorTest {
     alertYamlConfigs.put(PROP_CRON, CRON_SCHEDULE_DEFAULT);
     alertYamlConfigs.put(PROP_ACTIVE, true);
     alertYamlConfigs.put(PROP_DETECTION_NAMES, Collections.singletonList("test_pipeline_1"));
-
 
     Map<String, String> refLinks = new HashMap<>();
     refLinks.put("Test Link", "test_url");
@@ -73,7 +86,8 @@ public class YamlDetectionAlertConfigTranslatorTest {
     doNothing().when(validateMocker).staticValidation(new Yaml().dump(alertYamlConfigs));
 
     String yamlConfig = new Yaml().dump(alertYamlConfigs);
-    DetectionAlertConfigDTO alertConfig = new SubscriptionConfigTranslator(yamlConfig, validateMocker).translate();
+    SubscriptionGroupDTO alertConfig = new SubscriptionConfigTranslator(yamlConfig, validateMocker)
+        .translate();
 
     Assert.assertTrue(alertConfig.isActive());
     Assert.assertEquals(alertConfig.getName(), "test_group_name");
@@ -86,24 +100,28 @@ public class YamlDetectionAlertConfigTranslatorTest {
 
     Assert.assertEquals(alertConfig.getAlertSchemes().size(), 1);
     Assert.assertNotNull(alertConfig.getAlertSchemes().get("emailScheme"));
-    Assert.assertEquals(ConfigUtils.getMap(alertConfig.getAlertSchemes().get("emailScheme")).get(PROP_CLASS_NAME),
+    Assert.assertEquals(
+        ConfigUtils.getMap(alertConfig.getAlertSchemes().get("emailScheme")).get(PROP_CLASS_NAME),
         "EmailClass");
 
     Assert.assertEquals(alertConfig.getAlertSuppressors().size(), 1);
-    Map<String, Object> timeWindowSuppressor = ConfigUtils.getMap(alertConfig.getAlertSuppressors().get("timeWindowSuppressor"));
+    Map<String, Object> timeWindowSuppressor = ConfigUtils
+        .getMap(alertConfig.getAlertSuppressors().get("timeWindowSuppressor"));
     Assert.assertEquals(timeWindowSuppressor.get(PROP_CLASS_NAME), "TimeWindowClass");
-    Map<String, Object> timeWindow = ((ArrayList<Map<String, Object>>) timeWindowSuppressor.get(PROP_TIME_WINDOWS)).get(0);
+    Map<String, Object> timeWindow = ((ArrayList<Map<String, Object>>) timeWindowSuppressor
+        .get(PROP_TIME_WINDOWS)).get(0);
     Assert.assertEquals(timeWindow.get("windowStartTime"), 1542888000000L);
     Assert.assertEquals(timeWindow.get("windowEndTime"), 1543215600000L);
 
     Assert.assertNotNull(alertConfig.getProperties());
-    Assert.assertEquals(ConfigUtils.getLongs(alertConfig.getProperties().get(PROP_DETECTION_CONFIG_IDS)).size(), 1);
+    Assert.assertEquals(
+        ConfigUtils.getLongs(alertConfig.getProperties().get(PROP_DETECTION_CONFIG_IDS)).size(), 1);
 
-    Map<String, Object> recipient = (Map<String, Object>) alertConfig.getProperties().get(PROP_RECIPIENTS);
+    Map<String, Object> recipient = (Map<String, Object>) alertConfig.getProperties()
+        .get(PROP_RECIPIENTS);
     Assert.assertEquals(recipient.size(), 2);
     Assert.assertEquals(((List<String>) recipient.get("to")).get(0), "userTo@thirdeye.com");
     Assert.assertEquals(((List<String>) recipient.get("cc")).get(0), "userCc@thirdeye.com");
-
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -115,12 +133,12 @@ public class YamlDetectionAlertConfigTranslatorTest {
     detectionConfigDTO.setName("test_pipeline_1");
     alertManager.save(detectionConfigDTO);
 
-    DetectionAlertRegistry.getInstance().registerAlertFilter("DEFAULT_ALERTER_PIPELINE", "RECIPIENTClass");
+    DetectionAlertRegistry.getInstance()
+        .registerAlertFilter("DEFAULT_ALERTER_PIPELINE", "RECIPIENTClass");
   }
 
   @AfterMethod(alwaysRun = true)
   void afterMethod() {
     testDAOProvider.cleanup();
   }
-
 }

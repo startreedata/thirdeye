@@ -48,18 +48,17 @@ import org.apache.pinot.thirdeye.api.SwaggerTag;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.ResourceUtils;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.pojo.AnomalySummary;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Endpoints for user-customized dashboards (currently alerts only)
@@ -68,6 +67,7 @@ import org.slf4j.LoggerFactory;
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class UserDashboardResource {
+
   protected static final Logger LOG = LoggerFactory.getLogger(UserDashboardResource.class);
 
   private static final int ANOMALIES_LIMIT_DEFAULT = 500;
@@ -91,13 +91,17 @@ public class UserDashboardResource {
     this.detectionAlertDAO = detectionAlertDAO;
   }
 
-  public List<AnomalySummary> queryAnomalies(Long start, Long end, String application, String group, String metric,
-      String dataset, List<MetricDatasetPair> metricDatasetPairs, boolean fetchTrueAnomaly, Integer limit) {
+  public List<AnomalySummary> queryAnomalies(Long start, Long end, String application, String group,
+      String metric,
+      String dataset, List<MetricDatasetPair> metricDatasetPairs, boolean fetchTrueAnomaly,
+      Integer limit) {
     if (limit == null) {
-      LOG.warn("No upper limit specified while fetching anomalies. Defaulting to " + ANOMALIES_LIMIT_DEFAULT);
+      LOG.warn("No upper limit specified while fetching anomalies. Defaulting to "
+          + ANOMALIES_LIMIT_DEFAULT);
       limit = ANOMALIES_LIMIT_DEFAULT;
     }
-    Preconditions.checkNotNull(start, "Please specify the start time of the anomaly retrieval window");
+    Preconditions
+        .checkNotNull(start, "Please specify the start time of the anomaly retrieval window");
 
     List<Set<MergedAnomalyResultDTO>> anomalySets = new ArrayList<>();
     if (group != null) {
@@ -114,7 +118,8 @@ public class UserDashboardResource {
     }
     if (metricDatasetPairs != null && !metricDatasetPairs.isEmpty()) {
       // Fetch anomalies by metric dataset pairs
-      anomalySets.add(new HashSet<>(fetchAnomaliesByMetricDatasetPairs(start, end, metricDatasetPairs)));
+      anomalySets
+          .add(new HashSet<>(fetchAnomaliesByMetricDatasetPairs(start, end, metricDatasetPairs)));
     }
     if (anomalySets.isEmpty()) {
       return getAnomalyFormattedOutput(new ArrayList<>());
@@ -126,7 +131,8 @@ public class UserDashboardResource {
     List<MergedAnomalyResultDTO> anomalies = new ArrayList<>(anomalySets.get(0));
 
     // sort descending by start time
-    Collections.sort(anomalies, (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
+    Collections
+        .sort(anomalies, (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
     if (fetchTrueAnomaly) {
       // Filter and retain only true anomalies
@@ -139,7 +145,8 @@ public class UserDashboardResource {
       anomalies = trueAnomalies;
     }
     // filter child anomalies
-    anomalies = anomalies.stream().filter(anomaly -> !anomaly.isChild()).collect(Collectors.toList());
+    anomalies = anomalies.stream().filter(anomaly -> !anomaly.isChild())
+        .collect(Collectors.toList());
     // limit result size
     anomalies = anomalies.subList(0, Math.min(anomalies.size(), limit));
 
@@ -147,6 +154,7 @@ public class UserDashboardResource {
   }
 
   protected static class MetricDatasetPair {
+
     String datasetName;
     String metricName;
 
@@ -155,7 +163,7 @@ public class UserDashboardResource {
       this.metricName = metric;
     }
 
-    public static MetricDatasetPair fromString(String metricDatasetPair){
+    public static MetricDatasetPair fromString(String metricDatasetPair) {
       String[] metricDataset = metricDatasetPair.trim().split("::");
       if (metricDataset.length != 2) {
         throw new RuntimeException("Unable to parse dataset::metric pair " + metricDatasetPair);
@@ -191,13 +199,11 @@ public class UserDashboardResource {
    *   ]
    * </pre>
    *
-   * @see AnomalySummary
-   *
    * @param start window start time
    * @param end window end time (optional)
    * @param application anomaly function for application alert groups only (optional)
-   *
    * @return List of AnomalySummary
+   * @see AnomalySummary
    */
   @GET
   @Path("/anomalies")
@@ -224,7 +230,8 @@ public class UserDashboardResource {
     Map<String, String> responseMessage = new HashMap<>();
     List<AnomalySummary> output;
     try {
-      output = queryAnomalies(start, end, application, group, metric, dataset, metricDatasetPairs, fetchTrueAnomaly, limit);
+      output = queryAnomalies(start, end, application, group, metric, dataset, metricDatasetPairs,
+          fetchTrueAnomaly, limit);
     } catch (Exception e) {
       LOG.warn("Error while fetching anomalies.", e.getMessage());
       responseMessage.put("message", "Failed to fetch all the anomalies.");
@@ -276,7 +283,6 @@ public class UserDashboardResource {
       // TODO use alert filter if necessary
       summary.setSeverity(Math.abs(anomaly.getWeight()));
 
-
       summary.setFeedback(AnomalyFeedbackType.NO_FEEDBACK);
       summary.setComment("");
       if (anomaly.getFeedback() != null) {
@@ -293,7 +299,8 @@ public class UserDashboardResource {
     return output;
   }
 
-  private Collection<MergedAnomalyResultDTO> fetchAnomaliesByMetricDatasetPairs(Long start, Long end, List<MetricDatasetPair> metricsRef) {
+  private Collection<MergedAnomalyResultDTO> fetchAnomaliesByMetricDatasetPairs(Long start,
+      Long end, List<MetricDatasetPair> metricsRef) {
     List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
 
     if (metricsRef == null) {
@@ -311,13 +318,15 @@ public class UserDashboardResource {
 
       metricDatasetPred.add(Predicate.EQ("collection", metricDatasetPair.datasetName));
       metricDatasetPred.add(Predicate.EQ("metric", metricDatasetPair.metricName));
-      anomalies.addAll(this.anomalyDAO.findByPredicate(Predicate.AND(metricDatasetPred.toArray(new Predicate[0]))));
+      anomalies.addAll(this.anomalyDAO
+          .findByPredicate(Predicate.AND(metricDatasetPred.toArray(new Predicate[0]))));
     }
 
     return anomalies;
   }
 
-  private Collection<MergedAnomalyResultDTO> fetchAnomaliesByMetricDataset(Long start, Long end, String metric, String dataset) {
+  private Collection<MergedAnomalyResultDTO> fetchAnomaliesByMetricDataset(Long start, Long end,
+      String metric, String dataset) {
     if (StringUtils.isBlank(metric) && StringUtils.isBlank(dataset)) {
       return Collections.emptyList();
     }
@@ -336,42 +345,46 @@ public class UserDashboardResource {
       predicates.add(Predicate.EQ("collection", dataset));
     }
 
-    return this.anomalyDAO.findByPredicate(Predicate.AND(predicates.toArray(new Predicate[predicates.size()])));
+    return this.anomalyDAO
+        .findByPredicate(Predicate.AND(predicates.toArray(new Predicate[predicates.size()])));
   }
 
-  private Collection<MergedAnomalyResultDTO> fetchAnomaliesByApplication(Long start, Long end, String application) {
+  private Collection<MergedAnomalyResultDTO> fetchAnomaliesByApplication(Long start, Long end,
+      String application) {
     if (StringUtils.isBlank(application)) {
       return Collections.emptyList();
     }
 
-    List<DetectionAlertConfigDTO> alerts =
+    List<SubscriptionGroupDTO> alerts =
         this.detectionAlertDAO.findByPredicate(Predicate.EQ("application", application));
 
     Set<Long> detectionConfigIds = new HashSet<>();
-    for (DetectionAlertConfigDTO alertConfigDTO : alerts) {
+    for (SubscriptionGroupDTO alertConfigDTO : alerts) {
       detectionConfigIds.addAll(alertConfigDTO.getVectorClocks().keySet());
     }
 
     return fetchAnomaliesByConfigIds(start, end, detectionConfigIds);
   }
 
-  private Collection<MergedAnomalyResultDTO> fetchAnomaliesBySubsGroup(Long start, Long end, String group) {
+  private Collection<MergedAnomalyResultDTO> fetchAnomaliesBySubsGroup(Long start, Long end,
+      String group) {
     if (StringUtils.isBlank(group)) {
       return Collections.emptyList();
     }
 
-    List<DetectionAlertConfigDTO> alerts =
+    List<SubscriptionGroupDTO> alerts =
         this.detectionAlertDAO.findByPredicate(Predicate.EQ("name", group));
 
     Set<Long> detectionConfigIds = new HashSet<>();
-    for (DetectionAlertConfigDTO alertConfigDTO : alerts) {
+    for (SubscriptionGroupDTO alertConfigDTO : alerts) {
       detectionConfigIds.addAll(alertConfigDTO.getVectorClocks().keySet());
     }
 
     return fetchAnomaliesByConfigIds(start, end, detectionConfigIds);
   }
 
-  private Collection<MergedAnomalyResultDTO> fetchAnomaliesByConfigIds(Long start, Long end, Set<Long> detectionConfigIds) {
+  private Collection<MergedAnomalyResultDTO> fetchAnomaliesByConfigIds(Long start, Long end,
+      Set<Long> detectionConfigIds) {
     if (detectionConfigIds.isEmpty()) {
       return Collections.emptyList();
     }
@@ -390,14 +403,16 @@ public class UserDashboardResource {
 
     predicates.add(Predicate.IN("detectionConfigId", detectionConfigIds.toArray()));
 
-    Collection<MergedAnomalyResultDTO> anomalies = this.anomalyDAO.findByPredicate(Predicate.AND(predicates.toArray(new Predicate[predicates.size()])));
+    Collection<MergedAnomalyResultDTO> anomalies = this.anomalyDAO
+        .findByPredicate(Predicate.AND(predicates.toArray(new Predicate[predicates.size()])));
 
-    anomalies = Collections2.filter(anomalies, new com.google.common.base.Predicate<MergedAnomalyResultDTO>() {
-      @Override
-      public boolean apply(@Nullable MergedAnomalyResultDTO mergedAnomalyResultDTO) {
-        return !mergedAnomalyResultDTO.isChild();
-      }
-    });
+    anomalies = Collections2
+        .filter(anomalies, new com.google.common.base.Predicate<MergedAnomalyResultDTO>() {
+          @Override
+          public boolean apply(@Nullable MergedAnomalyResultDTO mergedAnomalyResultDTO) {
+            return !mergedAnomalyResultDTO.isChild();
+          }
+        });
 
     return anomalies;
   }
@@ -413,7 +428,8 @@ public class UserDashboardResource {
       return anomaly.getFunction().getMetricId();
     }
     try {
-      return this.metricDAO.findByMetricAndDataset(anomaly.getMetric(), anomaly.getCollection()).getId();
+      return this.metricDAO.findByMetricAndDataset(anomaly.getMetric(), anomaly.getCollection())
+          .getId();
     } catch (Exception e) {
       return -1;
     }

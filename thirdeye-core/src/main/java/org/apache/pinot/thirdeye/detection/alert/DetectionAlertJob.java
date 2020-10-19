@@ -29,7 +29,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -40,15 +40,15 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The Detection alert job that run by the cron scheduler.
  * This job put detection alert task into database which can be picked up by works later.
  */
 public class DetectionAlertJob implements Job {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertJob.class);
-  private DetectionAlertConfigManager alertConfigDAO;
-  private TaskManager taskDAO;
+  private final DetectionAlertConfigManager alertConfigDAO;
+  private final TaskManager taskDAO;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final MergedAnomalyResultManager anomalyDAO;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationDAO;
@@ -57,7 +57,8 @@ public class DetectionAlertJob implements Job {
     this.alertConfigDAO = DAORegistry.getInstance().getDetectionAlertConfigManager();
     this.taskDAO = DAORegistry.getInstance().getTaskDAO();
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
-    this.anomalySubscriptionGroupNotificationDAO = DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager();
+    this.anomalySubscriptionGroupNotificationDAO = DAORegistry.getInstance()
+        .getAnomalySubscriptionGroupNotificationManager();
   }
 
   @Override
@@ -65,7 +66,7 @@ public class DetectionAlertJob implements Job {
     LOG.debug("Running " + jobExecutionContext.getJobDetail().getKey().getName());
     String jobKey = jobExecutionContext.getJobDetail().getKey().getName();
     long detectionAlertConfigId = TaskUtils.getIdFromJobKey(jobKey);
-    DetectionAlertConfigDTO configDTO = alertConfigDAO.findById(detectionAlertConfigId);
+    SubscriptionGroupDTO configDTO = alertConfigDAO.findById(detectionAlertConfigId);
     if (configDTO == null) {
       LOG.error("Subscription config {} does not exist", detectionAlertConfigId);
     }
@@ -73,7 +74,8 @@ public class DetectionAlertJob implements Job {
     DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(detectionAlertConfigId);
 
     // check if a task for this detection alerter is already scheduled
-    String jobName = String.format("%s_%d", TaskConstants.TaskType.DETECTION_ALERT, detectionAlertConfigId);
+    String jobName = String
+        .format("%s_%d", TaskConstants.TaskType.DETECTION_ALERT, detectionAlertConfigId);
     List<TaskDTO> scheduledTasks = taskDAO.findByPredicate(Predicate.AND(
         Predicate.EQ("name", jobName),
         Predicate.OR(
@@ -81,7 +83,7 @@ public class DetectionAlertJob implements Job {
             Predicate.EQ("status", TaskConstants.TaskStatus.WAITING.toString())
         ))
     );
-    if (!scheduledTasks.isEmpty()){
+    if (!scheduledTasks.isEmpty()) {
       // if a task is pending and not time out yet, don't schedule more
       LOG.info("Skip scheduling subscription task {}. Already queued.", jobName);
       return;
@@ -99,32 +101,39 @@ public class DetectionAlertJob implements Job {
       LOG.error("Exception when converting AlertTaskInfo {} to jsonString", taskInfo, e);
     }
 
-    TaskDTO taskDTO = TaskUtils.buildTask(detectionAlertConfigId, taskInfoJson, TaskConstants.TaskType.DETECTION_ALERT);
+    TaskDTO taskDTO = TaskUtils
+        .buildTask(detectionAlertConfigId, taskInfoJson, TaskConstants.TaskType.DETECTION_ALERT);
     long taskId = taskDAO.save(taskDTO);
-    LOG.info("Created {} task {} with settings {}", TaskConstants.TaskType.DETECTION_ALERT, taskId, taskDTO);
+    LOG.info("Created {} task {} with settings {}", TaskConstants.TaskType.DETECTION_ALERT, taskId,
+        taskDTO);
   }
 
   /**
    * Check if we need to create a subscription task.
-   * If there is no anomaly generated (by looking at anomaly create_time) between last notification time
+   * If there is no anomaly generated (by looking at anomaly create_time) between last notification
+   * time
    * till now (left inclusive, right exclusive) then no need to create this task.
    *
-   * Even if an anomaly gets merged (end_time updated) it will not renotify this anomaly as the create_time is not
+   * Even if an anomaly gets merged (end_time updated) it will not renotify this anomaly as the
+   * create_time is not
    * modified.
-   * For example, if previous anomaly is from t1 to t2 generated at t3, then the timestamp in vectorLock is t3.
-   * If there is a new anomaly from t2 to t4 generated at t5, then we can still get this anomaly as t5 > t3.
+   * For example, if previous anomaly is from t1 to t2 generated at t3, then the timestamp in
+   * vectorLock is t3.
+   * If there is a new anomaly from t2 to t4 generated at t5, then we can still get this anomaly as
+   * t5 > t3.
    *
    * Also, check if there is any anomaly that needs re-notifying
    *
    * @param configDTO The Subscription Configuration.
    * @return true if it needs notification task. false otherwise.
    */
-  private boolean needNotification(DetectionAlertConfigDTO configDTO) {
+  private boolean needNotification(SubscriptionGroupDTO configDTO) {
     Map<Long, Long> vectorLocks = configDTO.getVectorClocks();
     for (Map.Entry<Long, Long> vectorLock : vectorLocks.entrySet()) {
       long configId = vectorLock.getKey();
       long lastNotifiedTime = vectorLock.getValue();
-      if (anomalyDAO.findByCreatedTimeInRangeAndDetectionConfigId(lastNotifiedTime, System.currentTimeMillis(), configId)
+      if (anomalyDAO.findByCreatedTimeInRangeAndDetectionConfigId(lastNotifiedTime,
+          System.currentTimeMillis(), configId)
           .stream().anyMatch(x -> !x.isChild())) {
         return true;
       }

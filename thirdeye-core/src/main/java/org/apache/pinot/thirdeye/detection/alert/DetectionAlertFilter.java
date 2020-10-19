@@ -19,14 +19,14 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-
 
 /**
  * The Detection alert filter.
  */
 public abstract class DetectionAlertFilter {
+
   /**
    * The Provider.
    */
@@ -34,7 +34,7 @@ public abstract class DetectionAlertFilter {
   /**
    * The Config.
    */
-  protected final DetectionAlertConfigDTO config;
+  protected final SubscriptionGroupDTO config;
   /**
    * The End time.
    */
@@ -47,14 +47,15 @@ public abstract class DetectionAlertFilter {
    * @param config the config
    * @param endTime the end time
    */
-  public DetectionAlertFilter(DataProvider provider, DetectionAlertConfigDTO config, long endTime) {
+  public DetectionAlertFilter(DataProvider provider, SubscriptionGroupDTO config, long endTime) {
     this.provider = provider;
     this.config = config;
     this.endTime = endTime;
   }
 
   /**
-   * Returns a detection alert filter result for the time range between {@code startTime} and {@code endTime}.
+   * Returns a detection alert filter result for the time range between {@code startTime} and {@code
+   * endTime}.
    *
    * @return alert filter result
    * @throws Exception the exception

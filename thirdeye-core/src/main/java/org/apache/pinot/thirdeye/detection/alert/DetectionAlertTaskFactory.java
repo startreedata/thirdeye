@@ -20,13 +20,19 @@
 package org.apache.pinot.thirdeye.detection.alert;
 
 import com.google.common.base.Preconditions;
+import java.lang.reflect.Constructor;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
@@ -39,19 +45,13 @@ import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
-import java.lang.reflect.Constructor;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class DetectionAlertTaskFactory {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertTaskFactory.class);
 
   private static final String PROP_CLASS_NAME = "className";
@@ -68,28 +68,31 @@ public class DetectionAlertTaskFactory {
     MergedAnomalyResultManager anomalyMergedResultDAO = DAO_REGISTRY.getMergedAnomalyResultDAO();
     EvaluationManager evaluationDAO = DAO_REGISTRY.getEvaluationManager();
     TimeSeriesLoader timeseriesLoader = new DefaultTimeSeriesLoader(metricDAO, datasetDAO,
-        ThirdEyeCacheRegistry.getInstance().getQueryCache(), ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
+        ThirdEyeCacheRegistry.getInstance().getQueryCache(),
+        ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
     AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO, datasetDAO,
         ThirdEyeCacheRegistry.getInstance().getQueryCache(),
         ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
-    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyMergedResultDAO, evaluationDAO,
-        timeseriesLoader, aggregationLoader, new DetectionPipelineLoader(), TimeSeriesCacheBuilder.getInstance(),
+    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyMergedResultDAO,
+        evaluationDAO,
+        timeseriesLoader, aggregationLoader, new DetectionPipelineLoader(),
+        TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
   }
 
-  public DetectionAlertFilter loadAlertFilter(DetectionAlertConfigDTO alertConfig, long endTime)
+  public DetectionAlertFilter loadAlertFilter(SubscriptionGroupDTO alertConfig, long endTime)
       throws Exception {
     Preconditions.checkNotNull(alertConfig);
     String className = alertConfig.getProperties().get(PROP_CLASS_NAME).toString();
     LOG.debug("Loading Alert Filter : {}", className);
     Constructor<?> constructor = Class.forName(className)
-        .getConstructor(DataProvider.class, DetectionAlertConfigDTO.class, long.class);
+        .getConstructor(DataProvider.class, SubscriptionGroupDTO.class, long.class);
     return (DetectionAlertFilter) constructor.newInstance(provider, alertConfig, endTime);
-
   }
 
-  public Set<DetectionAlertScheme> loadAlertSchemes(DetectionAlertConfigDTO alertConfig,
-      ThirdEyeAnomalyConfiguration thirdeyeConfig, DetectionAlertFilterResult result) throws Exception {
+  public Set<DetectionAlertScheme> loadAlertSchemes(SubscriptionGroupDTO alertConfig,
+      ThirdEyeAnomalyConfiguration thirdeyeConfig, DetectionAlertFilterResult result)
+      throws Exception {
     Preconditions.checkNotNull(alertConfig);
     Map<String, Object> alertSchemes = alertConfig.getAlertSchemes();
     if (alertSchemes == null || alertSchemes.isEmpty()) {
@@ -101,16 +104,21 @@ public class DetectionAlertTaskFactory {
     for (String alertSchemeType : alertSchemes.keySet()) {
       LOG.debug("Loading Alert Scheme : {}", alertSchemeType);
       Preconditions.checkNotNull(alertSchemes.get(alertSchemeType));
-      Preconditions.checkNotNull(ConfigUtils.getMap(alertSchemes.get(alertSchemeType)).get(PROP_CLASS_NAME));
-      Constructor<?> constructor = Class.forName(ConfigUtils.getMap(alertSchemes.get(alertSchemeType))
-          .get(PROP_CLASS_NAME).toString().trim())
-          .getConstructor(DetectionAlertConfigDTO.class, ThirdEyeAnomalyConfiguration.class, DetectionAlertFilterResult.class);
-      detectionAlertSchemeSet.add((DetectionAlertScheme) constructor.newInstance(alertConfig, thirdeyeConfig, result));
+      Preconditions
+          .checkNotNull(ConfigUtils.getMap(alertSchemes.get(alertSchemeType)).get(PROP_CLASS_NAME));
+      Constructor<?> constructor = Class
+          .forName(ConfigUtils.getMap(alertSchemes.get(alertSchemeType))
+              .get(PROP_CLASS_NAME).toString().trim())
+          .getConstructor(SubscriptionGroupDTO.class, ThirdEyeAnomalyConfiguration.class,
+              DetectionAlertFilterResult.class);
+      detectionAlertSchemeSet
+          .add((DetectionAlertScheme) constructor.newInstance(alertConfig, thirdeyeConfig, result));
     }
     return detectionAlertSchemeSet;
   }
 
-  public Set<DetectionAlertSuppressor> loadAlertSuppressors(DetectionAlertConfigDTO alertConfig) throws Exception {
+  public Set<DetectionAlertSuppressor> loadAlertSuppressors(SubscriptionGroupDTO alertConfig)
+      throws Exception {
     Preconditions.checkNotNull(alertConfig);
     Set<DetectionAlertSuppressor> detectionAlertSuppressors = new HashSet<>();
     Map<String, Object> alertSuppressors = alertConfig.getAlertSuppressors();
@@ -121,11 +129,14 @@ public class DetectionAlertTaskFactory {
     for (String alertSuppressor : alertSuppressors.keySet()) {
       LOG.debug("Loading Alert Suppressor : {}", alertSuppressor);
       Preconditions.checkNotNull(alertSuppressors.get(alertSuppressor));
-      Preconditions.checkNotNull(ConfigUtils.getMap(alertSuppressors.get(alertSuppressor)).get(PROP_CLASS_NAME));
-      Constructor<?> constructor = Class.forName(ConfigUtils.getMap(alertSuppressors.get(alertSuppressor))
-          .get(PROP_CLASS_NAME).toString().trim())
-          .getConstructor(DetectionAlertConfigDTO.class);
-      detectionAlertSuppressors.add((DetectionAlertSuppressor) constructor.newInstance(alertConfig));
+      Preconditions.checkNotNull(
+          ConfigUtils.getMap(alertSuppressors.get(alertSuppressor)).get(PROP_CLASS_NAME));
+      Constructor<?> constructor = Class
+          .forName(ConfigUtils.getMap(alertSuppressors.get(alertSuppressor))
+              .get(PROP_CLASS_NAME).toString().trim())
+          .getConstructor(SubscriptionGroupDTO.class);
+      detectionAlertSuppressors
+          .add((DetectionAlertSuppressor) constructor.newInstance(alertConfig));
     }
 
     return detectionAlertSuppressors;

@@ -21,7 +21,7 @@ import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class SubscriptionGroupResource {
   ) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
-    final List<DetectionAlertConfigDTO> all = detectionAlertConfigManager.findAll();
+    final List<SubscriptionGroupDTO> all = detectionAlertConfigManager.findAll();
     return Response
         .ok(all.stream().map(ApiBeanMapper::toApi))
         .build();
@@ -83,7 +83,7 @@ public class SubscriptionGroupResource {
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    final DetectionAlertConfigDTO dto = detectionAlertConfigManager.findById(id);
+    final SubscriptionGroupDTO dto = detectionAlertConfigManager.findById(id);
     ensureExists(dto, "Invalid id");
 
     return Response

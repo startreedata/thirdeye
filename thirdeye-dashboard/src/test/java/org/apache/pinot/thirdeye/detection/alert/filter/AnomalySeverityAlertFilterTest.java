@@ -20,6 +20,7 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.makeAnomaly;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,9 +34,9 @@ import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
@@ -45,10 +46,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.*;
-
-
 public class AnomalySeverityAlertFilterTest {
+
   private static final String PROP_RECIPIENTS = "recipients";
   private static final String PROP_EMAIL_SCHEME = "emailScheme";
   private static final String PROP_TO = "to";
@@ -65,7 +64,7 @@ public class AnomalySeverityAlertFilterTest {
   private DetectionAlertFilter alertFilter;
 
   private DAOTestBase testDAOProvider;
-  private DetectionAlertConfigDTO alertConfig;
+  private SubscriptionGroupDTO alertConfig;
   private List<MergedAnomalyResultDTO> detectionAnomalies;
   private long baseTime;
   private List<Long> detectionConfigIds;
@@ -82,59 +81,71 @@ public class AnomalySeverityAlertFilterTest {
     DetectionConfigDTO detectionConfig1 = new DetectionConfigDTO();
     detectionConfig1.setName("test detection 1");
     detectionConfig1.setActive(true);
-    long detectionConfigId1 = DAORegistry.getInstance().getDetectionConfigManager().save(detectionConfig1);
+    long detectionConfigId1 = DAORegistry.getInstance().getDetectionConfigManager()
+        .save(detectionConfig1);
 
     DetectionConfigDTO detectionConfig2 = new DetectionConfigDTO();
     detectionConfig2.setName("test detection 2");
     detectionConfig2.setActive(true);
-    long detectionConfigId2 = DAORegistry.getInstance().getDetectionConfigManager().save(detectionConfig2);
+    long detectionConfigId2 = DAORegistry.getInstance().getDetectionConfigManager()
+        .save(detectionConfig2);
 
     detectionConfigIds = Arrays.asList(detectionConfigId1, detectionConfigId2);
 
     // Anomaly notification is tracked through create time. Start and end time doesn't matter here.
     this.detectionAnomalies = new ArrayList<>();
     renotifyAnomaly =
-        makeAnomaly(detectionConfigId1, System.currentTimeMillis(), 0, 50, Collections.singletonMap("key", "value"),
+        makeAnomaly(detectionConfigId1, System.currentTimeMillis(), 0, 50,
+            Collections.singletonMap("key", "value"),
             null, AnomalySeverity.LOW);
     Thread.sleep(100);
     this.baseTime = System.currentTimeMillis();
     Thread.sleep(100);
     this.detectionAnomalies.add(
-        makeAnomaly(detectionConfigId1, this.baseTime, 0, 100, Collections.singletonMap("key", "value"), null,
+        makeAnomaly(detectionConfigId1, this.baseTime, 0, 100,
+            Collections.singletonMap("key", "value"), null,
             AnomalySeverity.LOW));
     Thread.sleep(10);
     this.detectionAnomalies.add(
-        makeAnomaly(detectionConfigId1, this.baseTime, 0, 110, Collections.singletonMap("key", "anotherValue"), null,
+        makeAnomaly(detectionConfigId1, this.baseTime, 0, 110,
+            Collections.singletonMap("key", "anotherValue"), null,
             AnomalySeverity.MEDIUM));
     Thread.sleep(20);
     this.detectionAnomalies.add(
-        makeAnomaly(detectionConfigId1, this.baseTime, 0, 120, Collections.singletonMap("key", "unknownValue"), null,
+        makeAnomaly(detectionConfigId1, this.baseTime, 0, 120,
+            Collections.singletonMap("key", "unknownValue"), null,
             AnomalySeverity.HIGH));
     Thread.sleep(30);
     this.detectionAnomalies.add(
-        makeAnomaly(detectionConfigId2, this.baseTime, 110, 150, Collections.singletonMap("unknownKey", "value"),
+        makeAnomaly(detectionConfigId2, this.baseTime, 110, 150,
+            Collections.singletonMap("unknownKey", "value"),
             null));
     Thread.sleep(10);
     this.detectionAnomalies.add(
-        makeAnomaly(detectionConfigId2, this.baseTime, 120, 160, Collections.singletonMap("key", "value"), null));
+        makeAnomaly(detectionConfigId2, this.baseTime, 120, 160,
+            Collections.singletonMap("key", "value"), null));
     Thread.sleep(40);
     this.detectionAnomalies.add(
-        makeAnomaly(detectionConfigId1, this.baseTime, 150, 200, Collections.<String, String>emptyMap(), null));
+        makeAnomaly(detectionConfigId1, this.baseTime, 150, 200,
+            Collections.emptyMap(), null));
     Thread.sleep(200);
     this.detectionAnomalies.add(
-        makeAnomaly(detectionConfigId2, this.baseTime, 300, 400, Collections.singletonMap("key", "value"), null));
+        makeAnomaly(detectionConfigId2, this.baseTime, 300, 400,
+            Collections.singletonMap("key", "value"), null));
     Thread.sleep(100);
 
     this.alertConfig = createDetectionAlertConfig();
   }
 
-  private DetectionAlertConfigDTO createDetectionAlertConfig() {
-    DetectionAlertConfigDTO alertConfig = new DetectionAlertConfigDTO();
+  private SubscriptionGroupDTO createDetectionAlertConfig() {
+    SubscriptionGroupDTO alertConfig = new SubscriptionGroupDTO();
 
     notify1.put("severity", Arrays.asList("LOW", "MEDIUM"));
-    notify1.put("notify", ImmutableMap.of("emailScheme", ImmutableMap.of("recipients", PROP_TO_FOR_VALUE)));
+    notify1.put("notify",
+        ImmutableMap.of("emailScheme", ImmutableMap.of("recipients", PROP_TO_FOR_VALUE)));
     notify2.put("severity", Collections.singleton("HIGH"));
-    notify2.put("notify", ImmutableMap.of("emailScheme", ImmutableMap.of("recipients", PROP_TO_FOR_ANOTHER_VALUE)));
+    notify2.put("notify",
+        ImmutableMap.of("emailScheme", ImmutableMap.of("recipients", PROP_TO_FOR_ANOTHER_VALUE)));
     severityProperty.add(notify1);
     severityProperty.add(notify2);
 
@@ -168,16 +179,20 @@ public class AnomalySeverityAlertFilterTest {
     Assert.assertEquals(result.getResult().size(), 3);
 
     int verifiedResult = 0;
-    for (Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> entry : result.getResult()
+    for (Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> entry : result
+        .getResult()
         .entrySet()) {
       if (entry.getValue().equals(makeSet(0, 1))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), notify1.get("notify"));
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
+            notify1.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(2))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), notify2.get("notify"));
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
+            notify2.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(3, 4, 5))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), defaultScheme);
+        Assert
+            .assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), defaultScheme);
         verifiedResult++;
       }
     }
@@ -191,7 +206,8 @@ public class AnomalySeverityAlertFilterTest {
     AnomalySubscriptionGroupNotificationDTO anomalySubscriptionGroupNotification =
         new AnomalySubscriptionGroupNotificationDTO();
     anomalySubscriptionGroupNotification.setAnomalyId(renotifyAnomaly.getId());
-    anomalySubscriptionGroupNotification.setDetectionConfigId(renotifyAnomaly.getDetectionConfigId());
+    anomalySubscriptionGroupNotification
+        .setDetectionConfigId(renotifyAnomaly.getDetectionConfigId());
     renotificationManager.save(anomalySubscriptionGroupNotification);
 
     this.alertFilter = new AnomalySeverityAlertFilter(provider, alertConfig, this.baseTime + 350L);
@@ -200,23 +216,28 @@ public class AnomalySeverityAlertFilterTest {
     Assert.assertEquals(result.getResult().size(), 3);
 
     int verifiedResult = 0;
-    for (Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> entry : result.getResult()
+    for (Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> entry : result
+        .getResult()
         .entrySet()) {
       if (entry.getValue().equals(makeSet(renotifyAnomaly, 0, 1))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), notify1.get("notify"));
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
+            notify1.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(2))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), notify2.get("notify"));
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
+            notify2.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(3, 4, 5))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), defaultScheme);
+        Assert
+            .assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), defaultScheme);
         verifiedResult++;
       }
     }
     Assert.assertEquals(verifiedResult, 3);
   }
 
-  private Set<MergedAnomalyResultDTO> makeSet(MergedAnomalyResultDTO anomaly, int... anomalyIndices) {
+  private Set<MergedAnomalyResultDTO> makeSet(MergedAnomalyResultDTO anomaly,
+      int... anomalyIndices) {
     Set<MergedAnomalyResultDTO> set = makeSet(anomalyIndices);
     set.add(anomaly);
     return set;

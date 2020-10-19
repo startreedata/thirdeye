@@ -19,6 +19,13 @@
 
 package org.apache.pinot.thirdeye.notification.formatter.channels;
 
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_ASSIGNEE;
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_COMPONENTS;
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_CUSTOM;
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_ISSUE_TYPE;
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_LABELS;
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_MERGE_GAP;
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_PROJECT;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import freemarker.template.Configuration;
@@ -38,7 +45,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
@@ -47,16 +54,14 @@ import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesC
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.*;
-
-
 /**
  * This class formats the content for jira alerts
  */
 public class JiraContentFormatter extends AlertContentFormatter {
+
   private static final Logger LOG = LoggerFactory.getLogger(JiraContentFormatter.class);
 
-  private JiraConfiguration jiraAdminConfig;
+  private final JiraConfiguration jiraAdminConfig;
 
   private static final String CHARSET = "UTF-8";
   static final String PROP_DEFAULT_LABEL = "thirdeye";
@@ -72,7 +77,8 @@ public class JiraContentFormatter extends AlertContentFormatter {
   }
 
   public JiraContentFormatter(JiraConfiguration jiraAdminConfig, Properties jiraClientConfig,
-      BaseNotificationContent content, ThirdEyeAnomalyConfiguration teConfig, DetectionAlertConfigDTO subsConfig) {
+      BaseNotificationContent content, ThirdEyeAnomalyConfiguration teConfig,
+      SubscriptionGroupDTO subsConfig) {
     super(jiraClientConfig, content, teConfig, subsConfig);
 
     this.jiraAdminConfig = jiraAdminConfig;
@@ -92,23 +98,29 @@ public class JiraContentFormatter extends AlertContentFormatter {
    * Format and construct a {@link JiraEntity} by rendering the anomalies and properties
    *
    * @param dimensionFilters dimensions configured in the multi-dimensions alerter
-   * @param anomalies anomalies to be reported to recipients configured in (@link #jiraClientConfig}
+   * @param anomalies anomalies to be reported to recipients configured in (@link
+   *     #jiraClientConfig}
    */
-  public JiraEntity getJiraEntity(Multimap<String, String> dimensionFilters, Collection<AnomalyResult> anomalies) {
+  public JiraEntity getJiraEntity(Multimap<String, String> dimensionFilters,
+      Collection<AnomalyResult> anomalies) {
     Map<String, Object> templateData = notificationContent.format(anomalies, this.subsConfig);
     templateData.put("dashboardHost", teConfig.getDashboardHost());
-    return buildJiraEntity(alertContentToTemplateMap.get(notificationContent.getTemplate()), templateData,
+    return buildJiraEntity(alertContentToTemplateMap.get(notificationContent.getTemplate()),
+        templateData,
         dimensionFilters);
   }
 
-  private String buildSummary(Map<String, Object> templateValues, Multimap<String, String> dimensionFilters) {
+  private String buildSummary(Map<String, Object> templateValues,
+      Multimap<String, String> dimensionFilters) {
     String issueSummary =
-        BaseNotificationContent.makeSubject(super.getSubjectType(alertClientConfig), this.subsConfig, templateValues);
+        BaseNotificationContent
+            .makeSubject(super.getSubjectType(alertClientConfig), this.subsConfig, templateValues);
 
     // Append dimensional info to summary
     StringBuilder dimensions = new StringBuilder();
     for (Map.Entry<String, Collection<String>> dimFilter : dimensionFilters.asMap().entrySet()) {
-      dimensions.append(", ").append(dimFilter.getKey()).append("=").append(String.join(",", dimFilter.getValue()));
+      dimensions.append(", ").append(dimFilter.getKey()).append("=")
+          .append(String.join(",", dimFilter.getValue()));
     }
     issueSummary = issueSummary + dimensions.toString();
 
@@ -131,7 +143,8 @@ public class JiraContentFormatter extends AlertContentFormatter {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try (Writer out = new OutputStreamWriter(baos, CHARSET)) {
       Configuration freemarkerConfig = new Configuration(Configuration.VERSION_2_3_21);
-      freemarkerConfig.setClassForTemplateLoading(getClass(), "/org/apache/pinot/thirdeye/detector");
+      freemarkerConfig
+          .setClassForTemplateLoading(getClass(), "/org/apache/pinot/thirdeye/detector");
       freemarkerConfig.setDefaultEncoding(CHARSET);
       freemarkerConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
       Template template = freemarkerConfig.getTemplate(jiraTemplate);
@@ -139,8 +152,9 @@ public class JiraContentFormatter extends AlertContentFormatter {
 
       description = new String(baos.toByteArray(), CHARSET);
     } catch (Exception e) {
-      description = "Found an exception while constructing the description content. Pls report & reach out"
-          + " to the Thirdeye team. Exception = " + e.getMessage();
+      description =
+          "Found an exception while constructing the description content. Pls report & reach out"
+              + " to the Thirdeye team. Exception = " + e.getMessage();
     }
 
     return description;
@@ -151,7 +165,8 @@ public class JiraContentFormatter extends AlertContentFormatter {
     try {
       snapshotFile = new File(this.notificationContent.getSnaphotPath());
     } catch (Exception e) {
-      LOG.error("Exception while loading snapshot {}", this.notificationContent.getSnaphotPath(), e);
+      LOG.error("Exception while loading snapshot {}", this.notificationContent.getSnaphotPath(),
+          e);
     }
     return snapshotFile;
   }
@@ -161,12 +176,17 @@ public class JiraContentFormatter extends AlertContentFormatter {
    */
   private JiraEntity buildJiraEntity(String jiraTemplate, Map<String, Object> templateValues,
       Multimap<String, String> dimensionFilters) {
-    String jiraProject = MapUtils.getString(alertClientConfig, PROP_PROJECT, this.jiraAdminConfig.getJiraDefaultProjectKey());
-    Long jiraIssueTypeId = MapUtils.getLong(alertClientConfig, PROP_ISSUE_TYPE, this.jiraAdminConfig.getJiraIssueTypeId());
+    String jiraProject = MapUtils.getString(alertClientConfig, PROP_PROJECT,
+        this.jiraAdminConfig.getJiraDefaultProjectKey());
+    Long jiraIssueTypeId = MapUtils
+        .getLong(alertClientConfig, PROP_ISSUE_TYPE, this.jiraAdminConfig.getJiraIssueTypeId());
 
-    JiraEntity jiraEntity = new JiraEntity(jiraProject, jiraIssueTypeId, buildSummary(templateValues, dimensionFilters));
-    jiraEntity.setAssignee(MapUtils.getString(alertClientConfig, PROP_ASSIGNEE, "")); // Default - Unassigned
-    jiraEntity.setMergeGap(MapUtils.getLong(alertClientConfig, PROP_MERGE_GAP, -1L)); // Default - Always merge
+    JiraEntity jiraEntity = new JiraEntity(jiraProject, jiraIssueTypeId,
+        buildSummary(templateValues, dimensionFilters));
+    jiraEntity.setAssignee(
+        MapUtils.getString(alertClientConfig, PROP_ASSIGNEE, "")); // Default - Unassigned
+    jiraEntity.setMergeGap(
+        MapUtils.getLong(alertClientConfig, PROP_MERGE_GAP, -1L)); // Default - Always merge
     jiraEntity.setLabels(buildLabels(dimensionFilters));
     jiraEntity.setDescription(buildDescription(jiraTemplate, templateValues));
     jiraEntity.setComponents(ConfigUtils.getList(alertClientConfig.get(PROP_COMPONENTS)));

@@ -19,35 +19,35 @@
 
 package org.apache.pinot.thirdeye.api.user.dashboard;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.pinot.thirdeye.dashboard.resources.v2.pojo.AnomalySummary;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.dashboard.resources.v2.pojo.AnomalySummary;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class UserDashboardResourceTest {
+
   DAOTestBase testBase;
   UserDashboardResource resource;
 
@@ -88,11 +88,21 @@ public class UserDashboardResourceTest {
     // anomalies
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
     this.anomalyIds = new ArrayList<>();
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(100, 500, this.detectionIds.get(0), "test_metric", "test_dataset"))); // myDetectionA
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(800, 1200, this.detectionIds.get(0), "test_metric", "test_dataset"))); // myDetectionA
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(300, 1500, this.detectionIds.get(1), "test_metric", "test_dataset"))); // myDetectionB
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(300, 1600, this.detectionIds.get(2), "test_metric", "test_dataset"))); // myDetectionC
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(300, 1600, this.detectionIds.get(2), "test_metric_2", "test_dataset"))); // myDetectionC
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(100, 500, this.detectionIds.get(0), "test_metric",
+            "test_dataset"))); // myDetectionA
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(800, 1200, this.detectionIds.get(0), "test_metric",
+            "test_dataset"))); // myDetectionA
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(300, 1500, this.detectionIds.get(1), "test_metric",
+            "test_dataset"))); // myDetectionB
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(300, 1600, this.detectionIds.get(2), "test_metric",
+            "test_dataset"))); // myDetectionC
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(300, 1600, this.detectionIds.get(2), "test_metric_2",
+            "test_dataset"))); // myDetectionC
 
     for (Long id : this.anomalyIds) {
       Assert.assertNotNull(id);
@@ -101,8 +111,11 @@ public class UserDashboardResourceTest {
     // alerts
     this.detectionAlertDAO = DAORegistry.getInstance().getDetectionAlertConfigManager();
     this.alertIds = new ArrayList<>();
-    this.alertIds.add(this.detectionAlertDAO.save(makeAlert("myAlertA", "myApplicationA", Arrays.asList(this.detectionIds.get(0), this.detectionIds.get(1))))); // myDetectionA, myDetectionB
-    this.alertIds.add(this.detectionAlertDAO.save(makeAlert("myAlertB", "myApplicationB", Collections.singletonList(this.detectionIds.get(2))))); // none
+    this.alertIds.add(this.detectionAlertDAO.save(makeAlert("myAlertA", "myApplicationA", Arrays
+        .asList(this.detectionIds.get(0),
+            this.detectionIds.get(1))))); // myDetectionA, myDetectionB
+    this.alertIds.add(this.detectionAlertDAO.save(makeAlert("myAlertB", "myApplicationB",
+        Collections.singletonList(this.detectionIds.get(2))))); // none
 
     for (Long id : this.alertIds) {
       Assert.assertNotNull(id);
@@ -112,7 +125,8 @@ public class UserDashboardResourceTest {
     this.detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
 
     // resource
-    this.resource = new UserDashboardResource(this.anomalyDAO, this.metricDAO, this.datasetDAO, this.detectionDAO, this.detectionAlertDAO);
+    this.resource = new UserDashboardResource(this.anomalyDAO, this.metricDAO, this.datasetDAO,
+        this.detectionDAO, this.detectionAlertDAO);
   }
 
   @AfterMethod(alwaysRun = true)
@@ -124,57 +138,73 @@ public class UserDashboardResourceTest {
 
   @Test
   public void testAnomaliesByApplication() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, "myApplicationA", null, null, null, null, false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, "myApplicationA", null, null, null, null, false, null);
     Assert.assertEquals(anomalies.size(), 2);
-    Assert.assertEquals(extractIds(anomalies), makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2)));
+    Assert.assertEquals(extractIds(anomalies),
+        makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2)));
   }
 
   @Test
   public void testAnomaliesByApplicationInvalid() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, "Invalid", null, null, null, null, false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, "Invalid", null, null, null, null, false, null);
     Assert.assertEquals(anomalies.size(), 0);
   }
 
   @Test
   public void testAnomaliesByGroup() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, null, "myAlertB", null, null, null, false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, null, "myAlertB", null, null, null, false, null);
     Assert.assertEquals(anomalies.size(), 2);
-    Assert.assertEquals(extractIds(anomalies), makeSet(this.anomalyIds.get(3), this.anomalyIds.get(4)));
+    Assert.assertEquals(extractIds(anomalies),
+        makeSet(this.anomalyIds.get(3), this.anomalyIds.get(4)));
   }
 
   @Test
   public void testAnomaliesByGroupInvalid() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, null, "Invalid", null, null, null, false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, null, "Invalid", null, null, null, false, null);
     Assert.assertEquals(anomalies.size(), 0);
   }
 
   @Test
   public void testAnomaliesLimit() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, "myApplicationA", null, null, null, null, false, 1);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, "myApplicationA", null, null, null, null, false, 1);
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(extractIds(anomalies), makeSet(this.anomalyIds.get(1)));
   }
 
   @Test
   public void testAnomaliesByMetric() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, null, null, "test_metric", "test_dataset", null, false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, null, null, "test_metric", "test_dataset", null, false, null);
     Assert.assertEquals(anomalies.size(), 3);
-    Assert.assertEquals(extractIds(anomalies), makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2), this.anomalyIds.get(3)));
+    Assert.assertEquals(extractIds(anomalies),
+        makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2), this.anomalyIds.get(3)));
   }
 
   @Test
   public void testAnomaliesByDataset() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, null, null, null, "test_dataset", null, false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, null, null, null, "test_dataset", null, false, null);
     Assert.assertEquals(anomalies.size(), 4);
-    Assert.assertEquals(extractIds(anomalies), makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2), this.anomalyIds.get(3), this.anomalyIds.get(4)));
+    Assert.assertEquals(extractIds(anomalies),
+        makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2), this.anomalyIds.get(3),
+            this.anomalyIds.get(4)));
   }
 
   @Test
   public void testAnomaliesByMetricDatasetPairs() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, null, null, null, null,
-        Collections.singletonList(new UserDashboardResource.MetricDatasetPair("test_dataset", "test_metric")), false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, null, null, null, null,
+            Collections.singletonList(
+                new UserDashboardResource.MetricDatasetPair("test_dataset", "test_metric")), false,
+            null);
     Assert.assertEquals(anomalies.size(), 3);
-    Assert.assertEquals(extractIds(anomalies), makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2), this.anomalyIds.get(3)));
+    Assert.assertEquals(extractIds(anomalies),
+        makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2), this.anomalyIds.get(3)));
   }
 
   @Test
@@ -182,25 +212,33 @@ public class UserDashboardResourceTest {
     List<UserDashboardResource.MetricDatasetPair> metricPairs = new ArrayList<>();
     metricPairs.add(new UserDashboardResource.MetricDatasetPair("test_dataset", "test_metric"));
     metricPairs.add(new UserDashboardResource.MetricDatasetPair("test_dataset", "test_metric_2"));
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, null, null, null, null, metricPairs, false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, null, null, null, null, metricPairs, false, null);
     Assert.assertEquals(anomalies.size(), 4);
-    Assert.assertEquals(extractIds(anomalies), makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2), this.anomalyIds.get(3), this.anomalyIds.get(4)));
+    Assert.assertEquals(extractIds(anomalies),
+        makeSet(this.anomalyIds.get(1), this.anomalyIds.get(2), this.anomalyIds.get(3),
+            this.anomalyIds.get(4)));
   }
 
   @Test
   public void testAnomaliesByApplicationAndMetric() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, "myApplicationB", null, "test_metric_2", "test_dataset", null, false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, "myApplicationB", null, "test_metric_2", "test_dataset", null,
+            false, null);
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(extractIds(anomalies), makeSet(this.anomalyIds.get(4)));
   }
 
   @Test
   public void testAnomaliesByApplicationAndMetricEmpty() throws Exception {
-    List<AnomalySummary> anomalies = this.resource.queryAnomalies(1000L, null, "myApplicationA", null, "test_metric_2", "test_dataset", null, false, null);
+    List<AnomalySummary> anomalies = this.resource
+        .queryAnomalies(1000L, null, "myApplicationA", null, "test_metric_2", "test_dataset", null,
+            false, null);
     Assert.assertEquals(anomalies.size(), 0);
   }
 
-  private MergedAnomalyResultDTO makeAnomaly(long start, long end, Long detectionId, String metric, String dataset) {
+  private MergedAnomalyResultDTO makeAnomaly(long start, long end, Long detectionId, String metric,
+      String dataset) {
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setStartTime(start);
     anomaly.setEndTime(end);
@@ -231,8 +269,8 @@ public class UserDashboardResourceTest {
     return dataset;
   }
 
-  private DetectionAlertConfigDTO makeAlert(String name, String application, List<Long> detectionIds) {
-    DetectionAlertConfigDTO notification = new DetectionAlertConfigDTO();
+  private SubscriptionGroupDTO makeAlert(String name, String application, List<Long> detectionIds) {
+    SubscriptionGroupDTO notification = new SubscriptionGroupDTO();
     notification.setName(name);
     notification.setApplication(application);
 

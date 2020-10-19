@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
+import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
+import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionJiraAlerter.PROP_JIRA_SCHEME;
+import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_ASSIGNEE;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Arrays;
@@ -28,17 +31,12 @@ import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-
-import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.*;
-import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionJiraAlerter.*;
-import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.*;
-
 
 public class AlertFilterUtils {
 
@@ -47,31 +45,37 @@ public class AlertFilterUtils {
   public static final String PROP_CC = "cc";
   public static final String PROP_BCC = "bcc";
 
-  public static final Set<String> PROP_TO_VALUE = new HashSet<>(Arrays.asList("test@example.com", "test@example.org"));
-  public static final Set<String> PROP_CC_VALUE = new HashSet<>(Arrays.asList("cctest@example.com", "cctest@example.org"));
-  public static final Set<String> PROP_BCC_VALUE = new HashSet<>(Arrays.asList("bcctest@example.com", "bcctest@example.org"));
+  public static final Set<String> PROP_TO_VALUE = new HashSet<>(
+      Arrays.asList("test@example.com", "test@example.org"));
+  public static final Set<String> PROP_CC_VALUE = new HashSet<>(
+      Arrays.asList("cctest@example.com", "cctest@example.org"));
+  public static final Set<String> PROP_BCC_VALUE = new HashSet<>(
+      Arrays.asList("bcctest@example.com", "bcctest@example.org"));
 
-  static DetectionAlertFilterNotification makeEmailNotifications(DetectionAlertConfigDTO config) {
+  static DetectionAlertFilterNotification makeEmailNotifications(SubscriptionGroupDTO config) {
     return makeEmailNotifications(config, new HashSet<String>());
   }
 
-  static DetectionAlertFilterNotification makeEmailNotifications(DetectionAlertConfigDTO config, Set<String> toRecipients) {
+  static DetectionAlertFilterNotification makeEmailNotifications(SubscriptionGroupDTO config,
+      Set<String> toRecipients) {
     Set<String> recipients = new HashSet<>(toRecipients);
     recipients.addAll(PROP_TO_VALUE);
     return makeEmailNotifications(config, recipients, PROP_CC_VALUE, PROP_BCC_VALUE);
   }
 
-  static DetectionAlertFilterNotification makeJiraNotifications(DetectionAlertConfigDTO config, String assignee) {
+  static DetectionAlertFilterNotification makeJiraNotifications(SubscriptionGroupDTO config,
+      String assignee) {
     Map<String, Object> alertProps = new HashMap<>();
     Map<String, Object> jiraParams = new HashMap<>();
     jiraParams.put(PROP_ASSIGNEE, assignee);
     alertProps.put(PROP_JIRA_SCHEME, jiraParams);
 
-    DetectionAlertConfigDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(config, alertProps, config.getReferenceLinks());
+    SubscriptionGroupDTO subsConfig = SubscriptionUtils
+        .makeChildSubscriptionConfig(config, alertProps, config.getReferenceLinks());
     return new DetectionAlertFilterNotification(subsConfig);
   }
 
-  static DetectionAlertFilterNotification makeEmailNotifications(DetectionAlertConfigDTO config,
+  static DetectionAlertFilterNotification makeEmailNotifications(SubscriptionGroupDTO config,
       Set<String> toRecipients, Set<String> ccRecipients, Set<String> bccRecipients) {
     Map<String, Object> alertProps = new HashMap<>();
 
@@ -85,19 +89,22 @@ public class AlertFilterUtils {
 
     alertProps.put(PROP_EMAIL_SCHEME, emailRecipients);
 
-    DetectionAlertConfigDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(config, alertProps, config.getReferenceLinks());
+    SubscriptionGroupDTO subsConfig = SubscriptionUtils
+        .makeChildSubscriptionConfig(config, alertProps, config.getReferenceLinks());
 
     return new DetectionAlertFilterNotification(subsConfig);
   }
+
   static MergedAnomalyResultDTO makeAnomaly(Long configId, long baseTime, long start, long end,
       Map<String, String> dimensions, AnomalyFeedbackDTO feedback) {
-    return makeAnomaly(configId, baseTime, start, end, dimensions, feedback, AnomalySeverity.DEFAULT);
+    return makeAnomaly(configId, baseTime, start, end, dimensions, feedback,
+        AnomalySeverity.DEFAULT);
   }
-
 
   static MergedAnomalyResultDTO makeAnomaly(Long configId, long baseTime, long start, long end,
       Map<String, String> dimensions, AnomalyFeedbackDTO feedback, AnomalySeverity severity) {
-    MergedAnomalyResultDTO anomaly = DetectionTestUtils.makeAnomaly(configId, baseTime + start, baseTime + end);
+    MergedAnomalyResultDTO anomaly = DetectionTestUtils
+        .makeAnomaly(configId, baseTime + start, baseTime + end);
     anomaly.setType(AnomalyType.DEVIATION);
     anomaly.setChildIds(Collections.emptySet());
 

@@ -55,10 +55,10 @@ import org.apache.pinot.thirdeye.dashboard.resources.v2.ResourceUtils;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.rootcause.AnomalyEventFormatter;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
@@ -66,10 +66,10 @@ import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -99,6 +99,7 @@ import org.slf4j.LoggerFactory;
 @Api(tags = {SwaggerTag.DETECTION_TAG})
 @Singleton
 public class DetectionResource {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionResource.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String DAILY_CRON = "0 0 14 * * ? *";
@@ -134,18 +135,23 @@ public class DetectionResource {
     this.detectionAlertConfigDAO = DAORegistry.getInstance().getDetectionAlertConfigManager();
     this.evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
     this.taskDAO = DAORegistry.getInstance().getTaskDAO();
-    this.anomalySubscriptionGroupNotificationManager = DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager();
+    this.anomalySubscriptionGroupNotificationManager = DAORegistry.getInstance()
+        .getAnomalySubscriptionGroupNotificationManager();
 
     TimeSeriesLoader timeseriesLoader =
-        new DefaultTimeSeriesLoader(metricDAO, datasetDAO, ThirdEyeCacheRegistry.getInstance().getQueryCache(), ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
+        new DefaultTimeSeriesLoader(metricDAO, datasetDAO,
+            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
+            ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
 
     this.aggregationLoader =
-        new DefaultAggregationLoader(metricDAO, datasetDAO, ThirdEyeCacheRegistry.getInstance().getQueryCache(),
+        new DefaultAggregationLoader(metricDAO, datasetDAO,
+            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
             ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
 
     this.loader = new DetectionPipelineLoader();
 
-    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyDAO, evaluationDAO,
+    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyDAO,
+        evaluationDAO,
         timeseriesLoader, aggregationLoader, loader, TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
     this.detectionConfigFormatter = new DetectionConfigFormatter(metricDAO, datasetDAO);
@@ -160,7 +166,8 @@ public class DetectionResource {
   @Path("/{id}")
   @GET
   @ApiOperation("get a detection config with yaml")
-  public Response getDetectionConfig(@ApiParam("the detection config id") @PathParam("id") long id){
+  public Response getDetectionConfig(
+      @ApiParam("the detection config id") @PathParam("id") long id) {
     DetectionConfigDTO config = this.configDAO.findById(id);
     return Response.ok(this.detectionConfigFormatter.format(config)).build();
   }
@@ -168,15 +175,17 @@ public class DetectionResource {
   @Path("/notification/{id}")
   @GET
   @ApiOperation("get a detection alert config with yaml")
-  public Response getDetectionAlertConfig(@ApiParam("the detection alert config id") @PathParam("id") long id){
-    DetectionAlertConfigDTO config = this.detectionAlertConfigDAO.findById(id);
+  public Response getDetectionAlertConfig(
+      @ApiParam("the detection alert config id") @PathParam("id") long id) {
+    SubscriptionGroupDTO config = this.detectionAlertConfigDAO.findById(id);
     return Response.ok(this.subscriptionConfigFormatter.format(config)).build();
   }
 
   @Path("/dataset")
   @GET
   @ApiOperation("get a dataset config by name")
-  public Response getDetectionAlertConfig(@ApiParam("the dataset name") @QueryParam("name") String name){
+  public Response getDetectionAlertConfig(
+      @ApiParam("the dataset name") @QueryParam("name") String name) {
     DatasetConfigDTO dataset = this.datasetDAO.findByDataset(name);
     return Response.ok(dataset).build();
   }
@@ -184,38 +193,44 @@ public class DetectionResource {
   @Path("/subscription-groups/{id}")
   @GET
   @ApiOperation("get a list of detection alert configs for a given detection config id")
-  public Response getSubscriptionGroups(@ApiParam("the detection config id") @PathParam("id") long id){
-    List<DetectionAlertConfigDTO> detectionAlertConfigDTOs = this.detectionAlertConfigDAO.findAll();
-    Set<DetectionAlertConfigDTO> subscriptionGroupAlertDTOs = new HashSet<>();
-    for (DetectionAlertConfigDTO alertConfigDTO : detectionAlertConfigDTOs){
-      if (alertConfigDTO.getVectorClocks().containsKey(id) || ConfigUtils.getLongs(alertConfigDTO.getProperties().get("detectionConfigIds")).contains(id)){
+  public Response getSubscriptionGroups(
+      @ApiParam("the detection config id") @PathParam("id") long id) {
+    List<SubscriptionGroupDTO> subscriptionGroupDTOS = this.detectionAlertConfigDAO.findAll();
+    Set<SubscriptionGroupDTO> subscriptionGroupAlertDTOs = new HashSet<>();
+    for (SubscriptionGroupDTO alertConfigDTO : subscriptionGroupDTOS) {
+      if (alertConfigDTO.getVectorClocks().containsKey(id) || ConfigUtils
+          .getLongs(alertConfigDTO.getProperties().get("detectionConfigIds")).contains(id)) {
         subscriptionGroupAlertDTOs.add(alertConfigDTO);
       }
     }
-    return Response.ok(subscriptionGroupAlertDTOs.stream().map(this.subscriptionConfigFormatter::format).collect(Collectors.toList())).build();
+    return Response
+        .ok(subscriptionGroupAlertDTOs.stream().map(this.subscriptionConfigFormatter::format)
+            .collect(Collectors.toList())).build();
   }
-
 
   @Path("/subscription-groups")
   @GET
   @ApiOperation("get all detection alert configs")
-  public Response getAllSubscriptionGroups(){
-    List<DetectionAlertConfigDTO> detectionAlertConfigDTOs = this.detectionAlertConfigDAO.findAll();
-    return Response.ok(detectionAlertConfigDTOs.stream().map(this.subscriptionConfigFormatter::format).collect(Collectors.toList())).build();
+  public Response getAllSubscriptionGroups() {
+    List<SubscriptionGroupDTO> subscriptionGroupDTOS = this.detectionAlertConfigDAO.findAll();
+    return Response.ok(subscriptionGroupDTOS.stream().map(this.subscriptionConfigFormatter::format)
+        .collect(Collectors.toList())).build();
   }
 
   @Path("{id}/anomalies")
   @GET
   @ApiOperation("Get all anomalies within the time range for a detection config id")
-  public Response getAnomalies(@PathParam("id") Long detectionConfigId, @QueryParam("start") long startTime,
+  public Response getAnomalies(@PathParam("id") Long detectionConfigId,
+      @QueryParam("start") long startTime,
       @QueryParam("end") long endTime) {
     List<MergedAnomalyResultDTO> anomalies = this.anomalyDAO.findByPredicate(Predicate.AND(
-            Predicate.EQ("detectionConfigId", detectionConfigId),
-            Predicate.LT("startTime", endTime),
-            Predicate.GT("endTime", startTime)));
+        Predicate.EQ("detectionConfigId", detectionConfigId),
+        Predicate.LT("startTime", endTime),
+        Predicate.GT("endTime", startTime)));
     List result = anomalies.stream().filter(anomaly -> !anomaly.isChild()).map(anomaly -> {
       Map<String, Object> anomalyResult = OBJECT_MAPPER.convertValue(anomaly, Map.class);
-      anomalyResult.put(AnomalyEventFormatter.ATTR_STATUS_CLASSIFICATION, ResourceUtils.getStatusClassification(anomaly).toString());
+      anomalyResult.put(AnomalyEventFormatter.ATTR_STATUS_CLASSIFICATION,
+          ResourceUtils.getStatusClassification(anomaly).toString());
       return anomalyResult;
     }).collect(Collectors.toList());
     return Response.ok(result).build();
@@ -246,7 +261,7 @@ public class DetectionResource {
     DetectionPipelineResult result = pipeline.run();
 
     if (diagnostics == null || !diagnostics) {
-      result.setDiagnostics(Collections.<String, Object>emptyMap());
+      result.setDiagnostics(Collections.emptyMap());
     }
 
     return Response.ok(result).build();
@@ -265,11 +280,13 @@ public class DetectionResource {
 
     Map<String, Object> json = OBJECT_MAPPER.readValue(jsonPayload, Map.class);
 
-    LinkedHashMap<String, List<Number>> parameters = (LinkedHashMap<String, List<Number>>) json.get("parameters");
+    LinkedHashMap<String, List<Number>> parameters = (LinkedHashMap<String, List<Number>>) json
+        .get("parameters");
 
     AnomalySlice slice = new AnomalySlice().withDetectionId(configId).withStart(start).withEnd(end);
 
-    TuningAlgorithm gridSearch = new GridSearchTuningAlgorithm(OBJECT_MAPPER.writeValueAsString(json.get("properties")), parameters);
+    TuningAlgorithm gridSearch = new GridSearchTuningAlgorithm(
+        OBJECT_MAPPER.writeValueAsString(json.get("properties")), parameters);
     gridSearch.fit(slice, configId);
 
     return Response.ok(gridSearch.bestDetectionConfig().getProperties()).build();
@@ -300,7 +317,7 @@ public class DetectionResource {
   }
 
   // return default bucket size based on cron schedule.
-  private long getBucketSize(DetectionConfigDTO config){
+  private long getBucketSize(DetectionConfigDTO config) {
     switch (config.getCron()) {
       case DAILY_CRON:
         // daily
@@ -334,30 +351,33 @@ public class DetectionResource {
   /*
   Generates monitoring window based on cron schedule.
    */
-  private List<Interval> getReplayMonitoringWindows(DetectionConfigDTO config, long start, long end, Long windowSize, Long bucketSize) throws ParseException {
+  private List<Interval> getReplayMonitoringWindows(DetectionConfigDTO config, long start, long end,
+      Long windowSize, Long bucketSize) throws ParseException {
     List<Interval> monitoringWindows = new ArrayList<>();
     CronExpression cronExpression = new CronExpression(config.getCron());
     DateTime currentStart = new DateTime(start);
 
     long legacyWindowSize;
-    if(windowSize == null){
+    if (windowSize == null) {
       legacyWindowSize = getWindowSize(config);
-      LOG.warn("[Legacy replay] window size not set when replay {}. Use default window size {}", config.getId(), legacyWindowSize);
+      LOG.warn("[Legacy replay] window size not set when replay {}. Use default window size {}",
+          config.getId(), legacyWindowSize);
     } else {
       legacyWindowSize = windowSize;
     }
 
     long legacyBucketSize;
-    if (bucketSize == null){
+    if (bucketSize == null) {
       legacyBucketSize = getBucketSize(config);
-      LOG.warn("[Legacy replay] bucket size not set when replay {}. Use default bucket size {}", config.getId(), legacyBucketSize);
+      LOG.warn("[Legacy replay] bucket size not set when replay {}. Use default bucket size {}",
+          config.getId(), legacyBucketSize);
     } else {
       legacyBucketSize = bucketSize;
     }
 
     // add offsets to that it would replay all the moving windows within start time and end time
     currentStart = currentStart.plus(legacyWindowSize).minus(legacyBucketSize);
-    if (config.getCron().equals(DAILY_CRON)){
+    if (config.getCron().equals(DAILY_CRON)) {
       // daily detection offset by 1 to pick up the first moving window
       currentStart.minus(1L);
     }
@@ -367,7 +387,7 @@ public class DetectionResource {
     while (currentEnd.isBefore(endBoundary)) {
       monitoringWindows.add(new Interval(currentStart.getMillis(), currentEnd.getMillis()));
       currentStart = currentEnd;
-      currentEnd =  new DateTime(cronExpression.getNextValidTimeAfter(currentStart.toDate()));
+      currentEnd = new DateTime(cronExpression.getNextValidTimeAfter(currentStart.toDate()));
     }
     return monitoringWindows;
   }
@@ -387,7 +407,8 @@ public class DetectionResource {
       @PathParam("id") long detectionId,
       @QueryParam("start") long start,
       @QueryParam("end") long end,
-      @QueryParam("deleteExistingAnomaly") @DefaultValue("false") boolean deleteExistingAnomaly) throws Exception {
+      @QueryParam("deleteExistingAnomaly") @DefaultValue("false") boolean deleteExistingAnomaly)
+      throws Exception {
     Map<String, String> responseMessage = new HashMap<>();
     long ts = System.currentTimeMillis();
     DetectionPipelineResult result;
@@ -398,7 +419,8 @@ public class DetectionResource {
       }
 
       if (deleteExistingAnomaly) {
-        AnomalySlice slice = new AnomalySlice().withDetectionId(detectionId).withStart(start).withEnd(end);
+        AnomalySlice slice = new AnomalySlice().withDetectionId(detectionId).withStart(start)
+            .withEnd(end);
         Collection<MergedAnomalyResultDTO> existing =
             this.provider.fetchAnomalies(Collections.singleton(slice)).get(slice);
 
@@ -436,7 +458,6 @@ public class DetectionResource {
     return Response.ok(result).build();
   }
 
-
   /**
    * Create a user-reported anomaly for a new detection pipeline
    *
@@ -463,7 +484,8 @@ public class DetectionResource {
 
     DetectionConfigDTO detectionConfigDTO = this.configDAO.findById(detectionConfigId);
     if (detectionConfigDTO == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve detection config id %d", detectionConfigId));
+      throw new IllegalArgumentException(
+          String.format("Could not resolve detection config id %d", detectionConfigId));
     }
 
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
@@ -471,7 +493,7 @@ public class DetectionResource {
     anomaly.setEndTime(endTime);
     anomaly.setDetectionConfigId(detectionConfigId);
     anomaly.setAnomalyResultSource(AnomalyResultSource.USER_LABELED_ANOMALY);
-    anomaly.setProperties(Collections.<String, String>emptyMap());
+    anomaly.setProperties(Collections.emptyMap());
 
     MetricEntity me = MetricEntity.fromURN(metricUrn);
     MetricConfigDTO metric = this.metricDAO.findById(me.getId());
@@ -482,7 +504,8 @@ public class DetectionResource {
 
     try {
       MetricSlice currentSlice = MetricSlice.from(me.getId(), startTime, endTime, me.getFilters());
-      DataFrame df = this.aggregationLoader.loadAggregate(currentSlice, Collections.<String>emptyList(), -1);
+      DataFrame df = this.aggregationLoader
+          .loadAggregate(currentSlice, Collections.emptyList(), -1);
       anomaly.setAvgCurrentVal(df.getDouble(DataFrame.COL_VALUE, 0));
     } catch (Exception e) {
       LOG.warn("Can't get the current value for {}, from {}-{}", me.getId(), startTime, endTime, e);
@@ -491,7 +514,8 @@ public class DetectionResource {
     anomaly.setAvgBaselineVal(baselineValue);
 
     if (this.anomalyDAO.save(anomaly) == null) {
-      throw new IllegalArgumentException(String.format("Could not store user reported anomaly: '%s'", anomaly));
+      throw new IllegalArgumentException(
+          String.format("Could not store user reported anomaly: '%s'", anomaly));
     }
 
     AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO();
@@ -504,11 +528,13 @@ public class DetectionResource {
   }
 
   @DELETE
-  @Path(value="/report-anomaly/{id}")
+  @Path(value = "/report-anomaly/{id}")
   public Response deleteUserReportedAnomaly(@PathParam("id") long anomalyId) {
     MergedAnomalyResultDTO anomaly = this.anomalyDAO.findById(anomalyId);
-    if (anomaly == null || !anomaly.getAnomalyResultSource().equals(AnomalyResultSource.USER_LABELED_ANOMALY)) {
-      return Response.status(Response.Status.BAD_REQUEST).entity(String.format("Couldn't delete anomaly %d", anomalyId)).build();
+    if (anomaly == null || !anomaly.getAnomalyResultSource()
+        .equals(AnomalyResultSource.USER_LABELED_ANOMALY)) {
+      return Response.status(Response.Status.BAD_REQUEST)
+          .entity(String.format("Couldn't delete anomaly %d", anomalyId)).build();
     }
     this.anomalyDAO.deleteById(anomalyId);
     return Response.ok().build();
@@ -518,20 +544,23 @@ public class DetectionResource {
   @ApiOperation("get the current time series and predicted baselines for an anomaly within a time range")
   @Path(value = "/predicted-baseline/{anomalyId}")
   public Response getPredictedBaseline(
-    @PathParam("anomalyId") @ApiParam("anomalyId") long anomalyId,
+      @PathParam("anomalyId") @ApiParam("anomalyId") long anomalyId,
       @ApiParam("Start time for the predicted baselines") @QueryParam("start") long start,
       @ApiParam("End time for the predicted baselines") @QueryParam("end") long end,
       @ApiParam("Add padding to the window based on metric granularity") @QueryParam("padding") @DefaultValue("false") boolean padding
   ) throws Exception {
     MergedAnomalyResultDTO anomaly = anomalyDAO.findById(anomalyId);
     if (anomaly == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve anomaly id %d", anomalyId));
+      throw new IllegalArgumentException(
+          String.format("Could not resolve anomaly id %d", anomalyId));
     }
     if (padding) {
       // add paddings for the time range
       DatasetConfigDTO dataset = this.datasetDAO.findByDataset(anomaly.getCollection());
       if (dataset == null) {
-        throw new IllegalArgumentException(String.format("Could not resolve dataset '%s' for anomaly id %d", anomaly.getCollection(), anomalyId));
+        throw new IllegalArgumentException(String
+            .format("Could not resolve dataset '%s' for anomaly id %d", anomaly.getCollection(),
+                anomalyId));
       }
       AnomalyOffset offsets = BaseAnomalyFunction.getDefaultOffsets(dataset);
       DateTimeZone dataTimeZone = DateTimeZone.forID(dataset.getTimezone());
@@ -539,18 +568,20 @@ public class DetectionResource {
       end = new DateTime(end, dataTimeZone).plus(offsets.getPostOffsetPeriod()).getMillis();
     }
     MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
-    DataFrame baselineTimeseries = DetectionUtils.getBaselineTimeseries(anomaly, me.getFilters(), me.getId(),
-        configDAO.findById(anomaly.getDetectionConfigId()), start, end, loader, provider).getDataFrame();
+    DataFrame baselineTimeseries = DetectionUtils
+        .getBaselineTimeseries(anomaly, me.getFilters(), me.getId(),
+            configDAO.findById(anomaly.getDetectionConfigId()), start, end, loader, provider)
+        .getDataFrame();
     if (!baselineTimeseries.contains(DataFrame.COL_CURRENT)) {
       // add current time series if not exists
       MetricSlice currentSlice = MetricSlice.from(me.getId(), start, end, me.getFilters());
-      DataFrame dfCurrent = this.provider.fetchTimeseries(Collections.singleton(currentSlice)).get(currentSlice).renameSeries(
-          DataFrame.COL_VALUE, DataFrame.COL_CURRENT);
+      DataFrame dfCurrent = this.provider.fetchTimeseries(Collections.singleton(currentSlice))
+          .get(currentSlice).renameSeries(
+              DataFrame.COL_VALUE, DataFrame.COL_CURRENT);
       baselineTimeseries = dfCurrent.joinOuter(baselineTimeseries);
     }
     return Response.ok(baselineTimeseries).build();
   }
-
 
   @GET
   @Path(value = "/health/{id}")

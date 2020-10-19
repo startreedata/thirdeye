@@ -24,8 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -33,7 +33,6 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.annotation.AlertFilter;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-
 
 /**
  * The detection alert filter that can send notifications through multiple channels
@@ -67,6 +66,7 @@ import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
  */
 @AlertFilter(type = "DIMENSIONS_ALERTER_PIPELINE")
 public class DimensionsRecipientAlertFilter extends StatefulDetectionAlertFilter {
+
   public static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   public static final String PROP_DIMENSION = "dimensions";
   public static final String PROP_NOTIFY = "notify";
@@ -76,32 +76,39 @@ public class DimensionsRecipientAlertFilter extends StatefulDetectionAlertFilter
   final List<Map<String, Object>> dimensionRecipients;
   final List<Long> detectionConfigIds;
 
-  public DimensionsRecipientAlertFilter(DataProvider provider, DetectionAlertConfigDTO config, long endTime) {
+  public DimensionsRecipientAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
+      long endTime) {
     super(provider, config, endTime);
-    this.dimensionRecipients = ConfigUtils.getList(this.config.getProperties().get(PROP_DIMENSION_RECIPIENTS));
-    this.detectionConfigIds = ConfigUtils.getLongs(this.config.getProperties().get(PROP_DETECTION_CONFIG_IDS));
+    this.dimensionRecipients = ConfigUtils
+        .getList(this.config.getProperties().get(PROP_DIMENSION_RECIPIENTS));
+    this.detectionConfigIds = ConfigUtils
+        .getLongs(this.config.getProperties().get(PROP_DETECTION_CONFIG_IDS));
   }
 
   @Override
   public DetectionAlertFilterResult run() {
     DetectionAlertFilterResult result = new DetectionAlertFilterResult();
 
-    Set<MergedAnomalyResultDTO> anomalies = this.filter(this.makeVectorClocks(this.detectionConfigIds));
+    Set<MergedAnomalyResultDTO> anomalies = this
+        .filter(this.makeVectorClocks(this.detectionConfigIds));
 
     // Prepare mapping from dimension-recipients to anomalies
     for (Map<String, Object> dimensionRecipient : this.dimensionRecipients) {
-      Multimap<String, String> dimensionFilters = ConfigUtils.getMultimap(dimensionRecipient.get(PROP_DIMENSION));
+      Multimap<String, String> dimensionFilters = ConfigUtils
+          .getMultimap(dimensionRecipient.get(PROP_DIMENSION));
       Set<MergedAnomalyResultDTO> notifyAnomalies = new HashSet<>();
       for (MergedAnomalyResultDTO anomaly : anomalies) {
-        Multimap<String, String> anomalousDims = MetricEntity.fromURN(anomaly.getMetricUrn()).getFilters();
+        Multimap<String, String> anomalousDims = MetricEntity.fromURN(anomaly.getMetricUrn())
+            .getFilters();
         if (anomalousDims.entries().containsAll(dimensionFilters.entries())) {
           notifyAnomalies.add(anomaly);
         }
       }
 
       if (!notifyAnomalies.isEmpty()) {
-        DetectionAlertConfigDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(config,
-            ConfigUtils.getMap(dimensionRecipient.get(PROP_NOTIFY)), ConfigUtils.getMap(dimensionRecipient.get(PROP_REF_LINKS)));
+        SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(config,
+            ConfigUtils.getMap(dimensionRecipient.get(PROP_NOTIFY)),
+            ConfigUtils.getMap(dimensionRecipient.get(PROP_REF_LINKS)));
         result.addMapping(
             new DetectionAlertFilterNotification(subsConfig, dimensionFilters),
             notifyAnomalies);

@@ -22,13 +22,13 @@ package org.apache.pinot.thirdeye.formatter;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 
 /**
  * The detection alert config formatter
  */
-public class DetectionAlertConfigFormatter implements DTOFormatter<DetectionAlertConfigDTO> {
+public class DetectionAlertConfigFormatter implements DTOFormatter<SubscriptionGroupDTO> {
+
   private static final String ATTR_NAME = "name";
   private static final String ATTR_YAML = "yaml";
   private static final String ATTR_ACTIVE = "active";
@@ -37,7 +37,7 @@ public class DetectionAlertConfigFormatter implements DTOFormatter<DetectionAler
   private static final String ATTR_APPLICATION = "application";
 
   @Override
-  public Map<String, Object> format(DetectionAlertConfigDTO config) {
+  public Map<String, Object> format(SubscriptionGroupDTO config) {
     Map<String, Object> output = new HashMap<>();
     output.put(ATTR_NAME, config.getName());
     output.put(ATTR_YAML, config.getYaml());

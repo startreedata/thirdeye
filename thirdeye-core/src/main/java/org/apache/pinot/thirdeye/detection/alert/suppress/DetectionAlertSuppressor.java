@@ -19,9 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.alert.suppress;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
-
 
 /**
  * The base alert suppressor whose purpose is to suppress the  actual  alert
@@ -31,11 +30,12 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
  */
 public abstract class DetectionAlertSuppressor {
 
-  protected final DetectionAlertConfigDTO config;
+  protected final SubscriptionGroupDTO config;
 
-  public DetectionAlertSuppressor(DetectionAlertConfigDTO config) {
+  public DetectionAlertSuppressor(SubscriptionGroupDTO config) {
     this.config = config;
   }
 
-  public abstract DetectionAlertFilterResult run(DetectionAlertFilterResult result) throws Exception;
+  public abstract DetectionAlertFilterResult run(DetectionAlertFilterResult result)
+      throws Exception;
 }

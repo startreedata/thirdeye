@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,28 @@
 
 package org.apache.pinot.thirdeye.datalayer;
 
+import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter.PROP_BCC;
+import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter.PROP_CC;
+import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter.PROP_RECIPIENTS;
+import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter.PROP_TO;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
+import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyFeedConfig;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyFetcherConfig;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyNotifiedStatus;
 import org.apache.pinot.thirdeye.alert.commons.AnomalySource;
-import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.anomaly.override.OverrideConfigHelper;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
@@ -40,7 +50,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DataCompletenessConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
@@ -50,6 +59,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.OnboardDatasetMetricDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -61,22 +71,15 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTra
 import org.apache.pinot.thirdeye.detector.email.filter.AlphaBetaAlertFilter;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
-
-import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter.*;
-
 
 public class DaoTestUtils {
 
-  public static DetectionConfigDTO getTestDetectionConfig(DataProvider provider, String detectionConfigFile)
+  public static DetectionConfigDTO getTestDetectionConfig(DataProvider provider,
+      String detectionConfigFile)
       throws IOException, ConfigValidationException {
-    String yamlConfig = IOUtils.toString(DaoTestUtils.class.getResourceAsStream(detectionConfigFile));
+    String yamlConfig = IOUtils
+        .toString(DaoTestUtils.class.getResourceAsStream(detectionConfigFile));
 
     // Translate
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, provider);
@@ -94,12 +97,12 @@ public class DaoTestUtils {
     return detectionConfig;
   }
 
-  public static DetectionAlertConfigDTO getTestDetectionAlertConfig(String alertConfigFile)
+  public static SubscriptionGroupDTO getTestDetectionAlertConfig(String alertConfigFile)
       throws IOException, ConfigValidationException {
 
     String yamlConfig = IOUtils.toString(DaoTestUtils.class.getResourceAsStream(alertConfigFile));
 
-    DetectionAlertConfigDTO alertConfig = new SubscriptionConfigTranslator(yamlConfig).translate();
+    SubscriptionGroupDTO alertConfig = new SubscriptionConfigTranslator(yamlConfig).translate();
     alertConfig.setCronExpression("0/10 * * * * ?");
     return alertConfig;
   }
@@ -126,7 +129,8 @@ public class DaoTestUtils {
     return functionSpec;
   }
 
-  public static AnomalyFunctionDTO getTestFunctionAlphaBetaAlertFilterSpec(String metricName, String collection){
+  public static AnomalyFunctionDTO getTestFunctionAlphaBetaAlertFilterSpec(String metricName,
+      String collection) {
     AnomalyFunctionDTO functionSpec = getTestFunctionSpec(metricName, collection);
     Map<String, String> alphaBetaAlertFilter = new HashMap<>();
     alphaBetaAlertFilter.put("type", "alpha_beta");
@@ -137,8 +141,8 @@ public class DaoTestUtils {
     return functionSpec;
   }
 
-  public static DetectionAlertConfigDTO getTestNotificationConfig(String name) {
-    DetectionAlertConfigDTO notificationConfigDTO = new DetectionAlertConfigDTO();
+  public static SubscriptionGroupDTO getTestNotificationConfig(String name) {
+    SubscriptionGroupDTO notificationConfigDTO = new SubscriptionGroupDTO();
     notificationConfigDTO.setName(name);
     notificationConfigDTO.setActive(true);
     notificationConfigDTO.setApplication("test");
@@ -182,7 +186,8 @@ public class DaoTestUtils {
     return alertConfigDTO;
   }
 
-  public static ClassificationConfigDTO getTestGroupingConfiguration(List<Long> mainFunctionIdList) {
+  public static ClassificationConfigDTO getTestGroupingConfiguration(
+      List<Long> mainFunctionIdList) {
     ClassificationConfigDTO configDTO = new ClassificationConfigDTO();
     configDTO.setName("classificationJob");
     configDTO.setMainFunctionIdList(mainFunctionIdList);
@@ -272,7 +277,8 @@ public class DaoTestUtils {
     return detectionStatusDTO;
   }
 
-  public static ClassificationConfigDTO getTestClassificationConfig(String name, List<Long> mainFunctionIdList,
+  public static ClassificationConfigDTO getTestClassificationConfig(String name,
+      List<Long> mainFunctionIdList,
       List<Long> functionIds) {
     ClassificationConfigDTO classificationConfigDTO = new ClassificationConfigDTO();
     classificationConfigDTO.setName(name);
@@ -282,7 +288,8 @@ public class DaoTestUtils {
     return classificationConfigDTO;
   }
 
-  public static EntityToEntityMappingDTO getTestEntityToEntityMapping(String fromURN, String toURN, String mappingType) {
+  public static EntityToEntityMappingDTO getTestEntityToEntityMapping(String fromURN, String toURN,
+      String mappingType) {
     EntityToEntityMappingDTO dto = new EntityToEntityMappingDTO();
     dto.setFromURN(fromURN);
     dto.setToURN(toURN);
@@ -291,7 +298,8 @@ public class DaoTestUtils {
     return dto;
   }
 
-  public static OnboardDatasetMetricDTO getTestOnboardConfig(String datasetName, String metricName, String dataSource) {
+  public static OnboardDatasetMetricDTO getTestOnboardConfig(String datasetName, String metricName,
+      String dataSource) {
     OnboardDatasetMetricDTO dto = new OnboardDatasetMetricDTO();
     dto.setDatasetName(datasetName);
     dto.setMetricName(metricName);
@@ -307,13 +315,13 @@ public class DaoTestUtils {
     return dto;
   }
 
-  public static AlertSnapshotDTO getTestAlertSnapshot(){
+  public static AlertSnapshotDTO getTestAlertSnapshot() {
     AlertSnapshotDTO alertSnapshot = new AlertSnapshotDTO();
     alertSnapshot.setLastNotifyTime(0);
     Multimap<String, AnomalyNotifiedStatus> snapshot = HashMultimap.create();
-    snapshot.put("test::{dimension=[test]}", new AnomalyNotifiedStatus(0,-0.1));
-    snapshot.put("test::{dimension=[test]}", new AnomalyNotifiedStatus(2,-0.2));
-    snapshot.put("test::{dimension=[test2]}", new AnomalyNotifiedStatus(4,-0.4));
+    snapshot.put("test::{dimension=[test]}", new AnomalyNotifiedStatus(0, -0.1));
+    snapshot.put("test::{dimension=[test]}", new AnomalyNotifiedStatus(2, -0.2));
+    snapshot.put("test::{dimension=[test2]}", new AnomalyNotifiedStatus(4, -0.4));
     alertSnapshot.setSnapshot(snapshot);
     return alertSnapshot;
   }
@@ -340,7 +348,7 @@ public class DaoTestUtils {
     return anomalyFeedConfig;
   }
 
-  public static AnomalyFetcherConfig getTestAnomalyFetcherConfig(){
+  public static AnomalyFetcherConfig getTestAnomalyFetcherConfig() {
     AnomalyFetcherConfig anomalyFetcherConfig = new AnomalyFetcherConfig();
     anomalyFetcherConfig.setType("UnnotifiedAnomalyFetcher");
     anomalyFetcherConfig.setProperties("");
@@ -349,7 +357,8 @@ public class DaoTestUtils {
     return anomalyFetcherConfig;
   }
 
-  public static MergedAnomalyResultDTO getTestMergedAnomalyResult(long startTime, long endTime, String collection,
+  public static MergedAnomalyResultDTO getTestMergedAnomalyResult(long startTime, long endTime,
+      String collection,
       String metric, double weight, long functionId, long createdTime) {
     // Add mock anomalies
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
@@ -365,7 +374,8 @@ public class DaoTestUtils {
     return anomaly;
   }
 
-  public static MergedAnomalyResultDTO getTestGroupedAnomalyResult(long startTime, long endTime, long createdTime, long id) {
+  public static MergedAnomalyResultDTO getTestGroupedAnomalyResult(long startTime, long endTime,
+      long createdTime, long id) {
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setStartTime(startTime);
     anomaly.setEndTime(endTime);
@@ -377,8 +387,10 @@ public class DaoTestUtils {
     return anomaly;
   }
 
-  public static RootcauseSessionDTO getTestRootcauseSessionResult(long start, long end, long created, long updated,
-      String name, String owner, String text, String granularity, String compareMode, Long previousId, Long anomalyId) {
+  public static RootcauseSessionDTO getTestRootcauseSessionResult(long start, long end,
+      long created, long updated,
+      String name, String owner, String text, String granularity, String compareMode,
+      Long previousId, Long anomalyId) {
     RootcauseSessionDTO session = new RootcauseSessionDTO();
     session.setAnomalyRangeStart(start);
     session.setAnomalyRangeEnd(end);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,13 @@
 
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,13 +34,13 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -48,10 +55,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.*;
-
-
 public class DetectionJiraAlerterTest {
+
   private static final String PROP_CLASS_NAME = "className";
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   private static final String DASHBOARD_HOST_VALUE = "dashboard";
@@ -63,7 +68,7 @@ public class DetectionJiraAlerterTest {
   private DetectionAlertConfigManager alertConfigDAO;
   private MergedAnomalyResultManager anomalyDAO;
   private AlertManager detectionDAO;
-  private DetectionAlertConfigDTO alertConfigDTO;
+  private SubscriptionGroupDTO alertConfigDTO;
   private Long detectionConfigId;
   private ThirdEyeAnomalyConfiguration thirdEyeConfig;
 
@@ -79,12 +84,14 @@ public class DetectionJiraAlerterTest {
     detectionConfig.setName(DETECTION_NAME_VALUE);
     this.detectionConfigId = this.detectionDAO.save(detectionConfig);
 
-    this.alertConfigDTO = new DetectionAlertConfigDTO();
+    this.alertConfigDTO = new SubscriptionGroupDTO();
     Map<String, Object> properties = new HashMap<>();
-    properties.put(PROP_CLASS_NAME, "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
+    properties.put(PROP_CLASS_NAME,
+        "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(this.detectionConfigId));
 
-    this.alertConfigDTO = TestJiraContentFormatter.createDimRecipientsDetectionAlertConfig(this.detectionConfigId);
+    this.alertConfigDTO = TestJiraContentFormatter
+        .createDimRecipientsDetectionAlertConfig(this.detectionConfigId);
     long id = this.alertConfigDAO.save(this.alertConfigDTO);
     alertConfigDTO.setId(id);
 
@@ -124,23 +131,26 @@ public class DetectionJiraAlerterTest {
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
-    DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO, this.thirdEyeConfig, null);
+    DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO,
+        this.thirdEyeConfig, null);
     alertTaskInfo.run();
   }
 
   @Test
   public void testUpdateJiraSuccessful() throws Exception {
-    DetectionAlertConfigDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
+    SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
         this.alertConfigDTO,
         ConfigUtils.getMap(this.alertConfigDTO.getAlertSchemes()),
         new HashMap<>());
     Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result = new HashMap<>();
-    result.put(new DetectionAlertFilterNotification(subsConfig), new HashSet<>(this.anomalyDAO.findAll()));
+    result.put(new DetectionAlertFilterNotification(subsConfig),
+        new HashSet<>(this.anomalyDAO.findAll()));
     DetectionAlertFilterResult notificationResults = new DetectionAlertFilterResult(result);
 
     final ThirdEyeJiraClient jiraClient = mock(ThirdEyeJiraClient.class);
     Issue foo = mock(Issue.class);
-    when(jiraClient.getIssues(anyString(), anyList(), anyString(), anyLong())).thenReturn(Arrays.asList(foo));
+    when(jiraClient.getIssues(anyString(), anyList(), anyString(), anyLong()))
+        .thenReturn(Arrays.asList(foo));
     doNothing().when(jiraClient).reopenIssue(any(Issue.class));
     doNothing().when(jiraClient).updateIssue(any(Issue.class), any(JiraEntity.class));
     doNothing().when(jiraClient).addComment(any(Issue.class), anyString());
@@ -150,7 +160,8 @@ public class DetectionJiraAlerterTest {
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
     MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient);
 
-    DetectionJiraAlerter jiraAlerter = new DetectionJiraAlerter(this.alertConfigDTO, this.thirdEyeConfig,
+    DetectionJiraAlerter jiraAlerter = new DetectionJiraAlerter(this.alertConfigDTO,
+        this.thirdEyeConfig,
         notificationResults, jiraClient) {
       @Override
       protected BaseNotificationContent getNotificationContent(Properties emailClientConfigs) {

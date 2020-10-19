@@ -59,20 +59,20 @@ import org.apache.pinot.thirdeye.dashboard.views.heatmap.HeatMapViewHandler;
 import org.apache.pinot.thirdeye.dashboard.views.heatmap.HeatMapViewRequest;
 import org.apache.pinot.thirdeye.dashboard.views.heatmap.HeatMapViewResponse;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionAlertConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
@@ -87,27 +87,31 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Do's and Dont's
  * ================
  * 1. Prefer PathParams over QueryParams
- * 2. Protocols : use Post for new entity creation, Put for update, Delete for delete and Get for retrieval
- * 3. Dont use OBJECT_MAPPER unnecessarily as REST library already takes care of marshalling your object to JSON
+ * 2. Protocols : use Post for new entity creation, Put for update, Delete for delete and Get for
+ * retrieval
+ * 3. Dont use OBJECT_MAPPER unnecessarily as REST library already takes care of marshalling your
+ * object to JSON
  *
  * 4. Errors: there are few ways to handle server side errors
- *    a. catch exception and throw as WebApplicationException : its a REST library exception, you can pass your error response etc into this exception
- *    b. Add a ExceptionMapper and register it in the dw environment
- *    c. Add a web filter / intercepter to catch and convert RTEs to web exception
+ * a. catch exception and throw as WebApplicationException : its a REST library exception, you can
+ * pass your error response etc into this exception
+ * b. Add a ExceptionMapper and register it in the dw environment
+ * c. Add a web filter / intercepter to catch and convert RTEs to web exception
  */
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = {SwaggerTag.DASHBOARD_TAG})
 @Singleton
 public class DataResource {
+
   private static final Logger LOG = LoggerFactory.getLogger(DataResource.class);
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = ThirdEyeCacheRegistry.getInstance();
+  private static final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = ThirdEyeCacheRegistry
+      .getInstance();
 
   private final MetricConfigManager metricConfigDAO;
   private final DatasetConfigManager datasetConfigDAO;
@@ -172,18 +176,19 @@ public class DataResource {
   //------------- endpoint for autocomplete ----------
   @GET
   @Path("autocomplete/anomalies")
-  public List<? extends Object> getWhereNameLike(@QueryParam("mode") String mode, @QueryParam("name") String name){
-    if("metric".equalsIgnoreCase(mode)){
+  public List<? extends Object> getWhereNameLike(@QueryParam("mode") String mode,
+      @QueryParam("name") String name) {
+    if ("metric".equalsIgnoreCase(mode)) {
       return getMetricsWhereNameLike(name);
     }
     return Collections.emptyList();
   }
 
-
   @GET
   @Path("autocomplete/metric")
   @ApiOperation("GET autocomplete request for metric data by name")
-  public List<MetricConfigDTO> getMetricsWhereNameLike(@ApiParam("metric name") @QueryParam("name") String name) {
+  public List<MetricConfigDTO> getMetricsWhereNameLike(
+      @ApiParam("metric name") @QueryParam("name") String name) {
     List<MetricConfigDTO> metricConfigs = Collections.emptyList();
     if (StringUtils.isNotBlank(name)) {
       Set<String> aliasParts = new HashSet<>(Arrays.asList(name.split("\\s+")));
@@ -217,8 +222,10 @@ public class DataResource {
    */
   @GET
   @Path("autocomplete/detection")
-  public List<DetectionConfigDTO> getDetectionsWhereNameLike(@ApiParam("detection name") @QueryParam("name") String name) {
-    List<DetectionConfigDTO> result = this.detectionConfigDAO.findByPredicate(Predicate.LIKE("name", "%" + name.trim() + "%"));
+  public List<DetectionConfigDTO> getDetectionsWhereNameLike(
+      @ApiParam("detection name") @QueryParam("name") String name) {
+    List<DetectionConfigDTO> result = this.detectionConfigDAO
+        .findByPredicate(Predicate.LIKE("name", "%" + name.trim() + "%"));
     result.sort(Comparator.comparing(DetectionConfigBean::getName));
     return result;
   }
@@ -231,8 +238,9 @@ public class DataResource {
    */
   @GET
   @Path("autocomplete/subscription")
-  public List<DetectionAlertConfigDTO> getSubscriptionWhereNameLike(@QueryParam("name") String name) {
-    List<DetectionAlertConfigDTO> result = this.detectionAlertConfigDAO.findByPredicate(Predicate.LIKE("name", "%" + name.trim() + "%"));
+  public List<SubscriptionGroupDTO> getSubscriptionWhereNameLike(@QueryParam("name") String name) {
+    List<SubscriptionGroupDTO> result = this.detectionAlertConfigDAO
+        .findByPredicate(Predicate.LIKE("name", "%" + name.trim() + "%"));
     result.sort(Comparator.comparing(DetectionAlertConfigBean::getName));
     return result;
   }
@@ -246,7 +254,8 @@ public class DataResource {
   @GET
   @Path("autocomplete/application")
   public List<ApplicationDTO> getApplicationsWhereNameLike(@QueryParam("name") String name) {
-    List<ApplicationDTO> result = this.applicationManager.findByPredicate(Predicate.LIKE("application", "%" + name.trim() + "%"));
+    List<ApplicationDTO> result = this.applicationManager
+        .findByPredicate(Predicate.LIKE("application", "%" + name.trim() + "%"));
     result.sort(Comparator.comparing(ApplicationBean::getApplication));
     return result;
   }
@@ -260,11 +269,11 @@ public class DataResource {
   @GET
   @Path("autocomplete/dataset")
   public List<DatasetConfigDTO> getDatasetsWhereNameLike(@QueryParam("name") String name) {
-    List<DatasetConfigDTO> result = this.datasetConfigDAO.findByPredicate(Predicate.LIKE("dataset", "%" + name.trim() + "%"));
+    List<DatasetConfigDTO> result = this.datasetConfigDAO
+        .findByPredicate(Predicate.LIKE("dataset", "%" + name.trim() + "%"));
     result.sort(Comparator.comparing(DatasetConfigDTO::getDataset));
     return result;
   }
-
 
   /**
    * Gets detection config creators where name like.
@@ -275,7 +284,8 @@ public class DataResource {
   @GET
   @Path("autocomplete/detection-createdby")
   public Set<String> getCreatedBysWhereNameLike(@QueryParam("name") String name) {
-    List<DetectionConfigDTO> result = this.detectionConfigDAO.findByPredicate(Predicate.LIKE("createdBy", "%" + name.trim() + "%"));
+    List<DetectionConfigDTO> result = this.detectionConfigDAO
+        .findByPredicate(Predicate.LIKE("createdBy", "%" + name.trim() + "%"));
     return result.stream()
         .map(DetectionConfigBean::getCreatedBy)
         .sorted()
@@ -284,13 +294,12 @@ public class DataResource {
 
   /**
    * Returns list of Anomaly functions matching given name
-   * @param name
-   * @return
    */
   @GET
   @Path("autocomplete/functionByName")
   @ApiOperation("GET autocomplete request for alert by name")
-  public List<AnomalyFunctionDTO> getFunctionsWhereNameLike(@ApiParam("alert name") @QueryParam("name") String name) {
+  public List<AnomalyFunctionDTO> getFunctionsWhereNameLike(
+      @ApiParam("alert name") @QueryParam("name") String name) {
     List<AnomalyFunctionDTO> functions = Collections.emptyList();
     if (StringUtils.isNotBlank(name)) {
       functions = anomalyFunctionDAO.findWhereNameLike("%" + name + "%");
@@ -298,15 +307,13 @@ public class DataResource {
     return functions;
   }
 
-
   /**
    * Returns list of AnomalyFunction object matching given AlertConfigName
-   * @param alertName
-   * @return
    */
   @GET
   @Path("autocomplete/functionByAlertName")
-  public List<AnomalyFunctionDTO> getAlertsWhereAlertNameLike(@QueryParam("alertName") String alertName) {
+  public List<AnomalyFunctionDTO> getAlertsWhereAlertNameLike(
+      @QueryParam("alertName") String alertName) {
     List<AlertConfigDTO> alerts = Collections.emptyList();
     if (StringUtils.isNotBlank(alertName)) {
       alerts = alertConfigDAO.findWhereNameLike("%" + alertName + "%");
@@ -316,8 +323,6 @@ public class DataResource {
 
   /**
    * Returns list of AnomalyFunction object matching given appName
-   * @param appname
-   * @return
    */
   @GET
   @Path("autocomplete/functionByAppname")
@@ -326,7 +331,7 @@ public class DataResource {
     if (StringUtils.isNotBlank(appname)) {
       alerts = alertConfigDAO.findWhereApplicationLike("%" + appname + "%");
     }
-   return getFunctionsFromAlertConfigs(alerts);
+    return getFunctionsFromAlertConfigs(alerts);
   }
 
   private List<AnomalyFunctionDTO> getFunctionsFromAlertConfigs(List<AlertConfigDTO> alerts) {
@@ -334,7 +339,7 @@ public class DataResource {
     List<AnomalyFunctionDTO> functions = new ArrayList<>();
 
     for (AlertConfigDTO alertConfigDTO : alerts) {
-      if(alertConfigDTO.getEmailConfig() != null) {
+      if (alertConfigDTO.getEmailConfig() != null) {
         List<Long> functionIds = alertConfigDTO.getEmailConfig().getFunctionIds();
         for (Long functionId : functionIds) {
           AnomalyFunctionDTO anomalyFunctionDTO = anomalyFunctionDAO.findById(functionId);
@@ -348,11 +353,8 @@ public class DataResource {
     return functions;
   }
 
-
   /**
    * Returns list of AlertConfig object matching given name
-   * @param name
-   * @return
    */
   @GET
   @Path("autocomplete/alert")
@@ -372,7 +374,8 @@ public class DataResource {
     list.add("All");
     try {
       MetricConfigDTO metricConfigDTO = metricConfigDAO.findById(metricId);
-      DatasetConfigDTO datasetConfigDTO = datasetConfigDAO.findByDataset(metricConfigDTO.getDataset());
+      DatasetConfigDTO datasetConfigDTO = datasetConfigDAO
+          .findByDataset(metricConfigDTO.getDataset());
       list.addAll(datasetConfigDTO.getDimensions());
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
@@ -386,10 +389,11 @@ public class DataResource {
   public Map<String, List<String>> getFiltersForMetric(@PathParam("metricId") Long metricId) {
     Map<String, List<String>> filterMap = new HashMap<>();
     try {
-    // TODO : cache this
-    MetricConfigDTO metricConfigDTO = metricConfigDAO.findById(metricId);
-    DatasetConfigDTO datasetConfigDTO = datasetConfigDAO.findByDataset(metricConfigDTO.getDataset());
-    String dimensionFiltersJson = dimensionsFilterCache.get(datasetConfigDTO.getDataset());
+      // TODO : cache this
+      MetricConfigDTO metricConfigDTO = metricConfigDAO.findById(metricId);
+      DatasetConfigDTO datasetConfigDTO = datasetConfigDAO
+          .findByDataset(metricConfigDTO.getDataset());
+      String dimensionFiltersJson = dimensionsFilterCache.get(datasetConfigDTO.getDataset());
       if (!Strings.isNullOrEmpty(dimensionFiltersJson)) {
         filterMap = OBJECT_MAPPER.readValue(dimensionFiltersJson, LinkedHashMap.class);
       }
@@ -405,7 +409,7 @@ public class DataResource {
    * For minute level datasets, we will also support HOURS and DAYS
    * For hour level datasets, we will also support DAYS
    * For day level datasets, we will only support DAYS
-   * @param metricId
+   *
    * @return list of allowed data aggregations
    */
   @GET
@@ -414,13 +418,14 @@ public class DataResource {
   public List<String> getDataAggregationGranularities(@PathParam("metricId") Long metricId) {
 
     MetricConfigDTO metricConfig = metricConfigDAO.findById(metricId);
-    DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(metricConfig.getDataset());
+    DatasetConfigDTO datasetConfig = ThirdEyeUtils
+        .getDatasetConfigFromName(metricConfig.getDataset());
     int dataTimeSize = datasetConfig.bucketTimeGranularity().getSize();
     TimeUnit dataTimeUnit = datasetConfig.bucketTimeGranularity().getUnit();
 
-
     List<String> dataGranularities = new ArrayList<>();
-    if (datasetConfig.isAdditive()) { // Add additional aggregation granularities only for additive datasets
+    if (datasetConfig
+        .isAdditive()) { // Add additional aggregation granularities only for additive datasets
       switch (dataTimeUnit) {
         case MILLISECONDS:
         case SECONDS:
@@ -488,7 +493,6 @@ public class DataResource {
     return response;
   }
 
-
   @GET
   @Path("anomalies/ranges")
   public Map<Long, List<TimeRange>> getAnomalyTimeRangesByMetricIds(
@@ -497,14 +501,17 @@ public class DataResource {
       @QueryParam("end") Long end,
       @QueryParam("filters") String filters) {
 
-    if (metricIds == null)
+    if (metricIds == null) {
       throw new IllegalArgumentException("Must provide metricIds");
+    }
 
-    if (start == null)
+    if (start == null) {
       throw new IllegalArgumentException("Must provide start timestamp");
+    }
 
-    if (end == null)
+    if (end == null) {
       throw new IllegalArgumentException("Must provide end timestamp");
+    }
 
     List<Long> ids = new ArrayList<>();
     for (String metricId : metricIds.split(",")) {
@@ -512,7 +519,8 @@ public class DataResource {
     }
 
     // fetch anomalies in time range
-    Map<Long, List<MergedAnomalyResultDTO>> anomalies = DAO_REGISTRY.getMergedAnomalyResultDAO().findAnomaliesByMetricIdsAndTimeRange(ids, start, end);
+    Map<Long, List<MergedAnomalyResultDTO>> anomalies = DAO_REGISTRY.getMergedAnomalyResultDAO()
+        .findAnomaliesByMetricIdsAndTimeRange(ids, start, end);
     int countAll = countNested(anomalies);
 
     // apply search filters
@@ -524,8 +532,8 @@ public class DataResource {
       }
 
       int countPassed = countNested(anomalies);
-      LOG.info("Fetched {} anomalies ({} after filter) for time range {}-{}", countAll, countPassed, start, end);
-
+      LOG.info("Fetched {} anomalies ({} after filter) for time range {}-{}", countAll, countPassed,
+          start, end);
     } else {
       // no filter
       LOG.info("Fetched {} anomalies for time range {}-{}", countAll, start, end);
@@ -533,8 +541,9 @@ public class DataResource {
 
     // extract and truncate time ranges
     Map<Long, List<TimeRange>> output = new HashMap<>();
-    for(Map.Entry<Long, List<MergedAnomalyResultDTO>> entry : anomalies.entrySet()) {
-      output.put(entry.getKey(), truncateRanges(extractAnomalyTimeRanges(entry.getValue()), start, end));
+    for (Map.Entry<Long, List<MergedAnomalyResultDTO>> entry : anomalies.entrySet()) {
+      output.put(entry.getKey(),
+          truncateRanges(extractAnomalyTimeRanges(entry.getValue()), start, end));
     }
 
     return output;
@@ -549,7 +558,7 @@ public class DataResource {
    * @return list of time ranges
    */
   static List<TimeRange> extractAnomalyTimeRanges(List<MergedAnomalyResultDTO> anomalies) {
-    if(anomalies.isEmpty()) {
+    if (anomalies.isEmpty()) {
       return Collections.emptyList();
     }
 
@@ -567,7 +576,7 @@ public class DataResource {
     long currStart = first.getStartTime();
     long currEnd = first.getEndTime();
 
-    while(itAnomaly.hasNext()) {
+    while (itAnomaly.hasNext()) {
       MergedAnomalyResultDTO anomaly = itAnomaly.next();
       if (currEnd >= anomaly.getStartTime()) {
         currEnd = Math.max(currEnd, anomaly.getEndTime());
@@ -612,7 +621,8 @@ public class DataResource {
    * @param filters dimension filter multimap
    * @return list of filtered anomalies
    */
-  static List<MergedAnomalyResultDTO> applyAnomalyFilters(List<MergedAnomalyResultDTO> anomalies, Multimap<String, String> filters) {
+  static List<MergedAnomalyResultDTO> applyAnomalyFilters(List<MergedAnomalyResultDTO> anomalies,
+      Multimap<String, String> filters) {
     List<MergedAnomalyResultDTO> output = new ArrayList<>();
     for (MergedAnomalyResultDTO anomaly : anomalies) {
       if (applyAnomalyFilters(anomaly, filters)) {
@@ -631,15 +641,19 @@ public class DataResource {
    * @param filters dimension filter multimap
    * @return {@code true} if anomaly passed the filters, {@code false} otherwise
    */
-  static boolean applyAnomalyFilters(MergedAnomalyResultDTO anomaly, Multimap<String, String> filters) {
-    Multimap<String, String> anomalyFilter = AnomalyUtils.generateFilterSetForTimeSeriesQuery(anomaly);
+  static boolean applyAnomalyFilters(MergedAnomalyResultDTO anomaly,
+      Multimap<String, String> filters) {
+    Multimap<String, String> anomalyFilter = AnomalyUtils
+        .generateFilterSetForTimeSeriesQuery(anomaly);
     for (String filterKey : filters.keySet()) {
-      if (!anomalyFilter.containsKey(filterKey))
+      if (!anomalyFilter.containsKey(filterKey)) {
         return false;
+      }
 
       Collection<String> filterValues = filters.get(filterKey);
-      if (!filterValues.containsAll(anomalyFilter.get(filterKey)))
+      if (!filterValues.containsAll(anomalyFilter.get(filterKey))) {
         return false;
+      }
     }
     return true;
   }
@@ -658,11 +672,9 @@ public class DataResource {
     return count;
   }
 
-
   /**
    * Generates data granularity string for dropdown in the root cause page
-   * @param dataTimeSize
-   * @param dataTimeUnit
+   *
    * @return data granularity string
    */
   private String getDataGranularityString(int dataTimeSize, TimeUnit dataTimeUnit) {

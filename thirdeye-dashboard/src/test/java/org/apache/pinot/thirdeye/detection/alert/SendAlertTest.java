@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,30 +16,30 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
-import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class SendAlertTest {
+
   private static final String PROP_CLASS_NAME = "className";
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   private static final String FROM_ADDRESS_VALUE = "test3@test.test";
@@ -56,7 +56,7 @@ public class SendAlertTest {
   private AlertManager detectionDAO;
   private MetricConfigManager metricDAO;
   private DatasetConfigManager dataSetDAO;
-  private DetectionAlertConfigDTO alertConfigDTO;
+  private SubscriptionGroupDTO alertConfigDTO;
   private Long alertConfigId;
   private Long detectionConfigId;
 
@@ -81,9 +81,10 @@ public class SendAlertTest {
     detectionConfig.setActive(true);
     this.detectionConfigId = this.detectionDAO.save(detectionConfig);
 
-    this.alertConfigDTO = new DetectionAlertConfigDTO();
+    this.alertConfigDTO = new SubscriptionGroupDTO();
     Map<String, Object> properties = new HashMap<>();
-    properties.put(PROP_CLASS_NAME, "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
+    properties.put(PROP_CLASS_NAME,
+        "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(this.detectionConfigId));
 
     Map<String, Object> emailScheme = new HashMap<>();
@@ -137,7 +138,7 @@ public class SendAlertTest {
 
     taskRunner.execute(alertTaskInfo, taskContext);
 
-    DetectionAlertConfigDTO alert = alertConfigDAO.findById(this.alertConfigId);
-    Assert.assertTrue((long) alert.getVectorClocks().get(this.detectionConfigId) > 0);
+    SubscriptionGroupDTO alert = alertConfigDAO.findById(this.alertConfigId);
+    Assert.assertTrue(alert.getVectorClocks().get(this.detectionConfigId) > 0);
   }
 }

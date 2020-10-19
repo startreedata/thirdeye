@@ -21,10 +21,6 @@ package org.apache.pinot.thirdeye.dashboard.resources.v2;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.apache.pinot.thirdeye.api.SwaggerTag;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +31,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
+import org.apache.pinot.thirdeye.api.SwaggerTag;
+import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
 /**
  * Endpoints for detection alert (aka "groups") management
@@ -44,6 +43,7 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class DetectionAlertResource {
+
   private final DetectionAlertConfigManager detectionAlertDAO;
 
   @Inject
@@ -53,13 +53,13 @@ public class DetectionAlertResource {
 
   @GET
   @Path("{id}")
-  public DetectionAlertConfigDTO get(@PathParam("id") Long id) {
+  public SubscriptionGroupDTO get(@PathParam("id") Long id) {
     return this.detectionAlertDAO.findById(id);
   }
 
   @GET
   @Path("batch")
-  public List<DetectionAlertConfigDTO> getBatch(@QueryParam("ids") List<String> ids) {
+  public List<SubscriptionGroupDTO> getBatch(@QueryParam("ids") List<String> ids) {
     return this.detectionAlertDAO.findByIds(ResourceUtils.parseListParamsLong(ids));
   }
 
@@ -87,7 +87,8 @@ public class DetectionAlertResource {
     }
 
     if (!application.isEmpty()) {
-      predicates.add(Predicate.OR(makeLike("application", ResourceUtils.parseListParams(application))));
+      predicates
+          .add(Predicate.OR(makeLike("application", ResourceUtils.parseListParams(application))));
     }
 
     // fetch
@@ -95,7 +96,8 @@ public class DetectionAlertResource {
       return Collections.emptyList();
     }
 
-    return this.detectionAlertDAO.findIdsByPredicate(Predicate.AND(predicates.toArray(new Predicate[0])));
+    return this.detectionAlertDAO
+        .findIdsByPredicate(Predicate.AND(predicates.toArray(new Predicate[0])));
   }
 
   private static Predicate[] makeLike(String column, List<String> values) {

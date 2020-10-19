@@ -30,8 +30,8 @@ import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -40,7 +40,6 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotificatio
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.annotation.AlertFilter;
-
 
 /**
  * The detection alert filter that can send notifications through multiple channels
@@ -76,6 +75,7 @@ import org.apache.pinot.thirdeye.detection.annotation.AlertFilter;
  */
 @AlertFilter(type = "SEVERITY_ALERTER_PIPELINE")
 public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
+
   public static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   public static final String PROP_SEVERITY = "severity";
   public static final String PROP_NOTIFY = "notify";
@@ -87,11 +87,13 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
 
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationDAO;
 
-
-  public AnomalySeverityAlertFilter(DataProvider provider, DetectionAlertConfigDTO config, long endTime) {
+  public AnomalySeverityAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
+      long endTime) {
     super(provider, config, endTime);
-    this.severityRecipients = ConfigUtils.getList(this.config.getProperties().get(PROP_SEVERITY_RECIPIENTS));
-    this.detectionConfigIds = ConfigUtils.getLongs(this.config.getProperties().get(PROP_DETECTION_CONFIG_IDS));
+    this.severityRecipients = ConfigUtils
+        .getList(this.config.getProperties().get(PROP_SEVERITY_RECIPIENTS));
+    this.detectionConfigIds = ConfigUtils
+        .getLongs(this.config.getProperties().get(PROP_DETECTION_CONFIG_IDS));
     this.anomalySubscriptionGroupNotificationDAO =
         DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager();
   }
@@ -101,7 +103,8 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
     DetectionAlertFilterResult result = new DetectionAlertFilterResult();
 
     // retrieve the anomalies based on vector clocks
-    Set<MergedAnomalyResultDTO> anomalies = this.filter(this.makeVectorClocks(this.detectionConfigIds));
+    Set<MergedAnomalyResultDTO> anomalies = this
+        .filter(this.makeVectorClocks(this.detectionConfigIds));
     // find the anomalies that needs re-notifying.
     anomalies.addAll(this.retrieveRenotifyAnomalies(this.detectionConfigIds));
     // Prepare mapping from severity-recipients to anomalies
@@ -118,7 +121,7 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
       }
 
       if (!notifyAnomalies.isEmpty()) {
-        DetectionAlertConfigDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(config,
+        SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(config,
             ConfigUtils.getMap(severityRecipient.get(PROP_NOTIFY)),
             ConfigUtils.getMap(severityRecipient.get(PROP_REF_LINKS)));
         result.addMapping(new DetectionAlertFilterNotification(subsConfig), notifyAnomalies);
@@ -140,8 +143,8 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
     return result;
   }
 
-
-  protected Collection<MergedAnomalyResultDTO> retrieveRenotifyAnomalies(Collection<Long> detectionConfigIds) {
+  protected Collection<MergedAnomalyResultDTO> retrieveRenotifyAnomalies(
+      Collection<Long> detectionConfigIds) {
     // find if any notification is needed
     List<AnomalySubscriptionGroupNotificationDTO> anomalySubscriptionGroupNotificationDTOs =
         this.anomalySubscriptionGroupNotificationDAO.findByPredicate(
@@ -150,10 +153,12 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
     List<Long> anomalyIds = new ArrayList<>();
     for (AnomalySubscriptionGroupNotificationDTO anomalySubscriptionGroupNotification : anomalySubscriptionGroupNotificationDTOs) {
       // notify the anomalies if this subscription group have not sent out this anomaly yet
-      if (!anomalySubscriptionGroupNotification.getNotifiedSubscriptionGroupIds().contains(this.config.getId())) {
+      if (!anomalySubscriptionGroupNotification.getNotifiedSubscriptionGroupIds()
+          .contains(this.config.getId())) {
         anomalyIds.add(anomalySubscriptionGroupNotification.getAnomalyId());
         // add this subscription group to the notification record and update
-        anomalySubscriptionGroupNotification.getNotifiedSubscriptionGroupIds().add(this.config.getId());
+        anomalySubscriptionGroupNotification.getNotifiedSubscriptionGroupIds()
+            .add(this.config.getId());
         this.anomalySubscriptionGroupNotificationDAO.save(anomalySubscriptionGroupNotification);
       }
     }

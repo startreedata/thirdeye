@@ -19,12 +19,10 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
+import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
-
-import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.*;
-
 
 public class SubscriptionUtils {
 
@@ -36,12 +34,12 @@ public class SubscriptionUtils {
    *
    * This is used   preparing the notification for each dimensional recipients.
    */
-  public static DetectionAlertConfigDTO makeChildSubscriptionConfig(
-      DetectionAlertConfigDTO parentConfig,
+  public static SubscriptionGroupDTO makeChildSubscriptionConfig(
+      SubscriptionGroupDTO parentConfig,
       Map<String, Object> alertSchemes,
       Map<String, String> refLinks) {
     // TODO: clone object using serialization rather than manual copy
-    DetectionAlertConfigDTO subsConfig = new DetectionAlertConfigDTO();
+    SubscriptionGroupDTO subsConfig = new SubscriptionGroupDTO();
     subsConfig.setId(parentConfig.getId());
     subsConfig.setFrom(parentConfig.getFrom());
     subsConfig.setActive(parentConfig.isActive());
@@ -62,8 +60,9 @@ public class SubscriptionUtils {
   /**
    * Validates if the subscription config has email recipients configured or not.
    */
-  public static boolean isEmptyEmailRecipients(DetectionAlertConfigDTO detectionAlertConfigDTO) {
-    Map<String, Object> emailProps = ConfigUtils.getMap(detectionAlertConfigDTO.getAlertSchemes().get(PROP_EMAIL_SCHEME));
+  public static boolean isEmptyEmailRecipients(SubscriptionGroupDTO subscriptionGroupDTO) {
+    Map<String, Object> emailProps = ConfigUtils
+        .getMap(subscriptionGroupDTO.getAlertSchemes().get(PROP_EMAIL_SCHEME));
     Map<String, Object> recipients = ConfigUtils.getMap(emailProps.get(PROP_RECIPIENTS));
     return recipients.isEmpty() || ConfigUtils.getList(recipients.get(PROP_TO)).isEmpty();
   }

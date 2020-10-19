@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.detection.alert.scheme;
 import java.util.Comparator;
 import java.util.Properties;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
@@ -30,11 +30,11 @@ import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesC
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public abstract class DetectionAlertScheme {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertScheme.class);
 
-  protected final DetectionAlertConfigDTO subsConfig;
+  protected final SubscriptionGroupDTO subsConfig;
   protected final DetectionAlertFilterResult result;
 
   public static final String PROP_TEMPLATE = "template";
@@ -47,7 +47,7 @@ public abstract class DetectionAlertScheme {
     ENTITY_GROUPBY_REPORT
   }
 
-  public DetectionAlertScheme(DetectionAlertConfigDTO subsConfig, DetectionAlertFilterResult result) {
+  public DetectionAlertScheme(SubscriptionGroupDTO subsConfig, DetectionAlertFilterResult result) {
     this.subsConfig = subsConfig;
     this.result = result;
   }
@@ -61,7 +61,8 @@ public abstract class DetectionAlertScheme {
   /**
    * Plug the appropriate template based on configuration.
    */
-  public static BaseNotificationContent buildNotificationContent(Properties alertSchemeClientConfigs) {
+  public static BaseNotificationContent buildNotificationContent(
+      Properties alertSchemeClientConfigs) {
     AlertTemplate template = AlertTemplate.DEFAULT_EMAIL;
     if (alertSchemeClientConfigs != null && alertSchemeClientConfigs.containsKey(PROP_TEMPLATE)) {
       template = AlertTemplate.valueOf(alertSchemeClientConfigs.get(PROP_TEMPLATE).toString());
@@ -74,7 +75,7 @@ public abstract class DetectionAlertScheme {
         break;
 
       case ENTITY_GROUPBY_REPORT:
-        content =  new EntityGroupKeyContent();
+        content = new EntityGroupKeyContent();
         break;
 
       default:
@@ -86,7 +87,8 @@ public abstract class DetectionAlertScheme {
   }
 
   /**
-   * Fail the alert task if unable to notify owner. However, in case of dimensions recipient alerter,
+   * Fail the alert task if unable to notify owner. However, in case of dimensions recipient
+   * alerter,
    * do not fail the alert if a subset of recipients are invalid.
    */
   void handleAlertFailure(int numOfAnomalies, Exception e) throws Exception {
@@ -94,7 +96,8 @@ public abstract class DetectionAlertScheme {
     if (this.result.getResult().size() == 1) {
       throw e;
     } else {
-      LOG.warn("Skipping! Found illegal arguments while sending {} anomalies for alert {}." + " Exception message: ",
+      LOG.warn("Skipping! Found illegal arguments while sending {} anomalies for alert {}."
+              + " Exception message: ",
           numOfAnomalies, this.subsConfig.getId(), e);
     }
   }

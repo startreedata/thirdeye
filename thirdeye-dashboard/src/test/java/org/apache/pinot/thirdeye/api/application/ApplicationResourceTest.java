@@ -7,26 +7,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class ApplicationResourceTest {
+
   DAOTestBase testBase;
   ApplicationResource resource;
 
@@ -68,11 +68,17 @@ public class ApplicationResourceTest {
     // anomalies
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
     this.anomalyIds = new ArrayList<>();
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(100, 500, this.functionIds.get(0), "test_metric", "test_dataset"))); // func A
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(800, 1200, this.functionIds.get(0), "test_metric", "test_dataset"))); // func A
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(300, 1500, this.functionIds.get(1), "test_metric", "test_dataset"))); // func B
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(300, 1600, this.functionIds.get(2), "test_metric", "test_dataset"))); // func C
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(300, 1600, this.functionIds.get(2), "test_metric_2", "test_dataset"))); // func C
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(100, 500, this.functionIds.get(0), "test_metric", "test_dataset"))); // func A
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(800, 1200, this.functionIds.get(0), "test_metric", "test_dataset"))); // func A
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(300, 1500, this.functionIds.get(1), "test_metric", "test_dataset"))); // func B
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(300, 1600, this.functionIds.get(2), "test_metric", "test_dataset"))); // func C
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(300, 1600, this.functionIds.get(2), "test_metric_2",
+            "test_dataset"))); // func C
 
     for (Long id : this.anomalyIds) {
       Assert.assertNotNull(id);
@@ -81,8 +87,10 @@ public class ApplicationResourceTest {
     // alerts
     this.detectionAlertDAO = DAORegistry.getInstance().getDetectionAlertConfigManager();
     this.alertIds = new ArrayList<>();
-    this.alertIds.add(this.detectionAlertDAO.save(makeAlert("myGroupA", "myApplicationA", Arrays.asList(this.functionIds.get(0), this.functionIds.get(1))))); // funcA, funcB
-    this.alertIds.add(this.detectionAlertDAO.save(makeAlert("myGroupB", "myApplicationB", Collections.singletonList(this.functionIds.get(2))))); // none
+    this.alertIds.add(this.detectionAlertDAO.save(makeAlert("myGroupA", "myApplicationA",
+        Arrays.asList(this.functionIds.get(0), this.functionIds.get(1))))); // funcA, funcB
+    this.alertIds.add(this.detectionAlertDAO.save(makeAlert("myGroupB", "myApplicationB",
+        Collections.singletonList(this.functionIds.get(2))))); // none
 
     for (Long id : this.alertIds) {
       Assert.assertNotNull(id);
@@ -95,7 +103,8 @@ public class ApplicationResourceTest {
     this.detectionAlertDAO = DAORegistry.getInstance().getDetectionAlertConfigManager();
 
     // resource
-    this.resource = new ApplicationResource(this.appDAO, this.anomalyDAO, this.detectionDAO, this.detectionAlertDAO);
+    this.resource = new ApplicationResource(this.appDAO, this.anomalyDAO, this.detectionDAO,
+        this.detectionAlertDAO);
   }
 
   @AfterMethod(alwaysRun = true)
@@ -134,7 +143,8 @@ public class ApplicationResourceTest {
     return function;
   }
 
-  private MergedAnomalyResultDTO makeAnomaly(long start, long end, Long functionId, String metric, String dataset) {
+  private MergedAnomalyResultDTO makeAnomaly(long start, long end, Long functionId, String metric,
+      String dataset) {
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setStartTime(start);
     anomaly.setEndTime(end);
@@ -144,8 +154,8 @@ public class ApplicationResourceTest {
     return anomaly;
   }
 
-  private DetectionAlertConfigDTO makeAlert(String name, String application, List<Long> functionIds) {
-    DetectionAlertConfigDTO subsGroup = new DetectionAlertConfigDTO();
+  private SubscriptionGroupDTO makeAlert(String name, String application, List<Long> functionIds) {
+    SubscriptionGroupDTO subsGroup = new SubscriptionGroupDTO();
     subsGroup.setName(name);
     subsGroup.setApplication(application);
     Map<String, Object> properties = new HashMap<>();

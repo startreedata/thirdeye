@@ -24,8 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
-
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 
 /**
  * Defines the notification content interface.
@@ -40,7 +39,7 @@ public interface NotificationContent {
   /**
    * Generate the template dictionary from the list of anomaly results to render in the template
    */
-  Map<String, Object> format(Collection<AnomalyResult> anomalies, DetectionAlertConfigDTO subsConfig);
+  Map<String, Object> format(Collection<AnomalyResult> anomalies, SubscriptionGroupDTO subsConfig);
 
   /**
    * Retrieves the template file (.ftl)

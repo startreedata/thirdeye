@@ -14,9 +14,9 @@ import org.apache.pinot.thirdeye.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
 
 public abstract class ApiBeanMapper {
@@ -73,7 +73,7 @@ public abstract class ApiBeanMapper {
         ;
   }
 
-  public static SubscriptionGroupApi toApi(final DetectionAlertConfigDTO dto) {
+  public static SubscriptionGroupApi toApi(final SubscriptionGroupDTO dto) {
     final List<AlertApi> alertApis = optional(dto.getProperties())
         .map(o1 -> o1.get("detectionConfigIds"))
         .map(l -> ((List<Integer>) l).stream()

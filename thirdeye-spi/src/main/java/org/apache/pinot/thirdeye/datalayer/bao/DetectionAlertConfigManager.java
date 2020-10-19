@@ -20,8 +20,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionAlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 
+public interface DetectionAlertConfigManager extends AbstractManager<SubscriptionGroupDTO> {
 
-public interface DetectionAlertConfigManager extends AbstractManager<DetectionAlertConfigDTO> {
 }

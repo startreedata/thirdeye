@@ -60,7 +60,7 @@ import org.joda.time.format.ISODateTimeFormat;
  * The user can specify the TimeRange and Baseline entities, as well as arbitrary URNs to
  * populate the search context with. The console interface allows one-off or interactive REPL execution modes.
  *
- * <br/><b>Example:</b> {@code java -cp target/thirdeye-pinot-1.0-SNAPSHOT.jar org.apache.pinot.thirdeye.rootcause.impl.RCAFrameworkRunner
+ * <br/><b>Example:</b> {@code java -cp target/thirdeye-dashboard-1.0-SNAPSHOT.jar org.apache.pinot.thirdeye.rootcause.impl.RCAFrameworkRunner
  * --config-dir local-configs/ --window-size 28 --baseline-offset 28 --entities thirdeye:metric:pageViews,thirdeye:metric:logins}
  *
  */

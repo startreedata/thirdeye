@@ -38,7 +38,7 @@
   </files>
   <fileSets>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-pinot/config</directory>
+      <directory>${thirdeye.root}/thirdeye-dashboard/config</directory>
       <outputDirectory>config/</outputDirectory>
     </fileSet>
     <fileSet>

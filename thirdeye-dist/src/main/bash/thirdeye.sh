@@ -76,7 +76,7 @@ function start_db {
   sleep 1
 
   echo "Creating ThirdEye database schema"
-  java -cp "${CLASSPATH}" org.h2.tools.RunScript -user "sa" -password "sa" -url "jdbc:h2:tcp:localhost/h2db" -script "zip:./bin/thirdeye-pinot.jar!/schema/create-schema.sql"
+  java -cp "${CLASSPATH}" org.h2.tools.RunScript -user "sa" -password "sa" -url "jdbc:h2:tcp:localhost/h2db" -script "zip:./bin/thirdeye-dashboard.jar!/schema/create-schema.sql"
 
   if [ -f "${CONFIG_DIR}/bootstrap.sql" ]; then
     echo "Running database bootstrap script ${CONFIG_DIR}/bootstrap.sql"

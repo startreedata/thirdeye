@@ -34,7 +34,7 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
@@ -64,7 +64,7 @@ public class DataQualityTaskRunnerTest {
   private TaskContext context;
   private DAOTestBase testDAOProvider;
   private AlertManager detectionDAO;
-  private DetectionAlertConfigManager subscriptionDAO;
+  private SubscriptionGroupManager subscriptionDAO;
   private DatasetConfigManager datasetDAO;
   private MergedAnomalyResultManager anomalyDAO;
   private EvaluationManager evaluationDAO;

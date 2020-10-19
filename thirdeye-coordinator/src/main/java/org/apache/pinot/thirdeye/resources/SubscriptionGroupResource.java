@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
@@ -32,14 +32,14 @@ public class SubscriptionGroupResource {
 
   private static final Logger log = LoggerFactory.getLogger(SubscriptionGroupResource.class);
 
-  private final DetectionAlertConfigManager detectionAlertConfigManager;
+  private final SubscriptionGroupManager subscriptionGroupManager;
   private final AuthService authService;
 
   @Inject
   public SubscriptionGroupResource(
-      final DetectionAlertConfigManager detectionAlertConfigManager,
+      final SubscriptionGroupManager subscriptionGroupManager,
       final AuthService authService) {
-    this.detectionAlertConfigManager = detectionAlertConfigManager;
+    this.subscriptionGroupManager = subscriptionGroupManager;
     this.authService = authService;
   }
 
@@ -49,7 +49,7 @@ public class SubscriptionGroupResource {
   ) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
-    final List<SubscriptionGroupDTO> all = detectionAlertConfigManager.findAll();
+    final List<SubscriptionGroupDTO> all = subscriptionGroupManager.findAll();
     return Response
         .ok(all.stream().map(ApiBeanMapper::toApi))
         .build();
@@ -83,7 +83,7 @@ public class SubscriptionGroupResource {
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    final SubscriptionGroupDTO dto = detectionAlertConfigManager.findById(id);
+    final SubscriptionGroupDTO dto = subscriptionGroupManager.findById(id);
     ensureExists(dto, "Invalid id");
 
     return Response

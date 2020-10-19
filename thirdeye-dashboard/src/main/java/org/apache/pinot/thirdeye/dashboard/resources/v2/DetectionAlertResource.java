@@ -32,7 +32,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.pinot.thirdeye.api.SwaggerTag;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
@@ -44,10 +44,10 @@ import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 @Singleton
 public class DetectionAlertResource {
 
-  private final DetectionAlertConfigManager detectionAlertDAO;
+  private final SubscriptionGroupManager detectionAlertDAO;
 
   @Inject
-  public DetectionAlertResource(DetectionAlertConfigManager detectionAlertDAO) {
+  public DetectionAlertResource(SubscriptionGroupManager detectionAlertDAO) {
     this.detectionAlertDAO = detectionAlertDAO;
   }
 

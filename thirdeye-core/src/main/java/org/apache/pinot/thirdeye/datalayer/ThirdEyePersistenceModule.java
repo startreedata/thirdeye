@@ -18,7 +18,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DataCompletenessConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
@@ -45,7 +45,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ClassificationConfigManagerI
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataCompletenessConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionAlertConfigManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EntityToEntityMappingManagerImpl;
@@ -175,7 +175,7 @@ public class ThirdEyePersistenceModule extends AbstractModule {
         .in(Scopes.SINGLETON);
     bind(SessionManager.class).to(SessionManagerImpl.class).in(Scopes.SINGLETON);
     bind(AlertManager.class).to(AlertManagerImpl.class).in(Scopes.SINGLETON);
-    bind(DetectionAlertConfigManager.class).to(DetectionAlertConfigManagerImpl.class).in(
+    bind(SubscriptionGroupManager.class).to(SubscriptionGroupManagerImpl.class).in(
         Scopes.SINGLETON);
     bind(EvaluationManager.class).to(EvaluationManagerImpl.class).in(Scopes.SINGLETON);
     bind(OnlineDetectionDataManager.class).to(OnlineDetectionDataManagerImpl.class).in(

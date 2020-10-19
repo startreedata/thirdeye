@@ -42,7 +42,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
@@ -62,18 +62,18 @@ public class ApplicationResource {
   private final ApplicationManager applicationManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
-  private final DetectionAlertConfigManager detectionAlertConfigManager;
+  private final SubscriptionGroupManager subscriptionGroupManager;
 
   @Inject
   public ApplicationResource(
       ApplicationManager applicationManager,
       MergedAnomalyResultManager mergedAnomalyResultManager,
       AlertManager alertManager,
-      DetectionAlertConfigManager detectionAlertConfigManager) {
+      SubscriptionGroupManager subscriptionGroupManager) {
     this.applicationManager = applicationManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
-    this.detectionAlertConfigManager = detectionAlertConfigManager;
+    this.subscriptionGroupManager = subscriptionGroupManager;
   }
 
   /**
@@ -130,7 +130,7 @@ public class ApplicationResource {
   }
 
   private void deleteDependents(final String application) {
-    List<SubscriptionGroupDTO> subsGroupList = detectionAlertConfigManager.findByPredicate(
+    List<SubscriptionGroupDTO> subsGroupList = subscriptionGroupManager.findByPredicate(
         Predicate.EQ("application", application));
     LOG.debug(String.format("[APPLICATION] Found %d subscription groups under application %s",
         subsGroupList.size(), application));
@@ -150,7 +150,7 @@ public class ApplicationResource {
               + " and all anomalies have been deleted.");
         }
       }
-      detectionAlertConfigManager.delete(subsGroup);
+      subscriptionGroupManager.delete(subsGroup);
       LOG.debug("[APPLICATION] subscription group " + subsGroup.getName() + " deleted.");
     }
   }

@@ -24,7 +24,7 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -51,7 +51,7 @@ public class SendAlertTest {
 
   private DAOTestBase testDAOProvider;
   private DetectionAlertTaskRunner taskRunner;
-  private DetectionAlertConfigManager alertConfigDAO;
+  private SubscriptionGroupManager alertConfigDAO;
   private MergedAnomalyResultManager anomalyDAO;
   private AlertManager detectionDAO;
   private MetricConfigManager metricDAO;

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class DetectionAlertJob implements Job {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertJob.class);
-  private final DetectionAlertConfigManager alertConfigDAO;
+  private final SubscriptionGroupManager alertConfigDAO;
   private final TaskManager taskDAO;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final MergedAnomalyResultManager anomalyDAO;

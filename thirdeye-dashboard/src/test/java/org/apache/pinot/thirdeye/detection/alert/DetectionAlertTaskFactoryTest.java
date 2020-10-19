@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
@@ -26,7 +26,7 @@ public class DetectionAlertTaskFactoryTest {
 
   private DAOTestBase testDAOProvider;
   private SubscriptionGroupDTO alertConfigDTO;
-  private DetectionAlertConfigManager alertConfigDAO;
+  private SubscriptionGroupManager alertConfigDAO;
   private Map<String, Object> alerters;
 
   @BeforeMethod

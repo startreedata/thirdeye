@@ -37,7 +37,7 @@ import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -66,7 +66,7 @@ public class DetectionEmailAlerterTest {
   private static final String METRIC_VALUE = "test_metric";
 
   private DAOTestBase testDAOProvider;
-  private DetectionAlertConfigManager alertConfigDAO;
+  private SubscriptionGroupManager alertConfigDAO;
   private MergedAnomalyResultManager anomalyDAO;
   private AlertManager detectionDAO;
   private SubscriptionGroupDTO alertConfigDTO;

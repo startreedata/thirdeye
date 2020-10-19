@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AbstractBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionAlertConfigBean;
@@ -65,7 +65,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
 
   final Scheduler scheduler;
   private final ScheduledExecutorService scheduledExecutorService;
-  private final DetectionAlertConfigManager alertConfigDAO;
+  private final SubscriptionGroupManager alertConfigDAO;
 
   public SubscriptionCronScheduler() throws SchedulerException {
     this.scheduler = StdSchedulerFactory.getDefaultScheduler();

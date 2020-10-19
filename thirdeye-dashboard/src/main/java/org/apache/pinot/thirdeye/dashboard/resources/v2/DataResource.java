@@ -63,7 +63,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
@@ -118,7 +118,7 @@ public class DataResource {
   private final AnomalyFunctionManager anomalyFunctionDAO;
   private final AlertConfigManager alertConfigDAO;
   private final AlertManager detectionConfigDAO;
-  private final DetectionAlertConfigManager detectionAlertConfigDAO;
+  private final SubscriptionGroupManager detectionAlertConfigDAO;
   private final ApplicationManager applicationManager;
 
   private final LoadingCache<String, Long> collectionMaxDataTimeCache;

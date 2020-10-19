@@ -12,7 +12,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
@@ -33,7 +33,7 @@ public class ApplicationResourceTest {
   ApplicationManager appDAO;
   MergedAnomalyResultManager anomalyDAO;
   AlertManager detectionDAO;
-  DetectionAlertConfigManager detectionAlertDAO;
+  SubscriptionGroupManager detectionAlertDAO;
   MetricConfigManager metricDAO;
   DatasetConfigManager datasetDAO;
   AnomalyFunctionManager functionDAO;

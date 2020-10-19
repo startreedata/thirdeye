@@ -15,23 +15,13 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
-package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
+package org.apache.pinot.thirdeye.datalayer.bao;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.DetectionAlertConfigBean;
 
-@Singleton
-public class DetectionAlertConfigManagerImpl extends
-    AbstractManagerImpl<SubscriptionGroupDTO> implements DetectionAlertConfigManager {
+public interface SubscriptionGroupManager extends AbstractManager<SubscriptionGroupDTO> {
 
-  @Inject
-  public DetectionAlertConfigManagerImpl(GenericPojoDao genericPojoDao) {
-    super(SubscriptionGroupDTO.class, DetectionAlertConfigBean.class, genericPojoDao);
-  }
 }

@@ -48,7 +48,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionAlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
@@ -91,7 +91,7 @@ public class EntityManagerResource {
   private final SessionManager sessionManager;
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final DetectionAlertConfigManager detectionAlertConfigManager;
+  private final SubscriptionGroupManager subscriptionGroupManager;
   private final ThirdEyeConfiguration config;
 
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
@@ -112,7 +112,7 @@ public class EntityManagerResource {
     this.sessionManager = DAO_REGISTRY.getSessionDAO();
     this.alertManager = DAO_REGISTRY.getDetectionConfigManager();
     this.mergedAnomalyResultManager = DAO_REGISTRY.getMergedAnomalyResultDAO();
-    this.detectionAlertConfigManager = DAO_REGISTRY.getDetectionAlertConfigManager();
+    this.subscriptionGroupManager = DAO_REGISTRY.getDetectionAlertConfigManager();
     this.config = configuration;
   }
 
@@ -185,7 +185,7 @@ public class EntityManagerResource {
             .findByPredicate(Predicate.EQ("principalType", SessionBean.PrincipalType.SERVICE));
 
       case DETECTION_ALERT_CONFIG:
-        return detectionAlertConfigManager.findAll();
+        return subscriptionGroupManager.findAll();
 
       default:
         throw new WebApplicationException("Unknown entity type : " + entityType);
@@ -250,7 +250,7 @@ public class EntityManagerResource {
               sessionManager.save(OBJECT_MAPPER.readValue(jsonPayload, SessionDTO.class)));
 
         case DETECTION_ALERT_CONFIG:
-          return assertNotNull(detectionAlertConfigManager
+          return assertNotNull(subscriptionGroupManager
               .save(OBJECT_MAPPER.readValue(jsonPayload, SubscriptionGroupDTO.class)));
 
         default:

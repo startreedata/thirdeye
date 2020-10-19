@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toDatasetApi;
+import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApi;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -51,7 +51,7 @@ public class DatasetResource {
 
     final List<DatasetConfigDTO> all = datasetConfigManager.findAll();
     return Response
-        .ok(all.stream().map(ApiBeanMapper::toDatasetApi))
+        .ok(all.stream().map(ApiBeanMapper::toApi))
         .build();
   }
 
@@ -87,7 +87,7 @@ public class DatasetResource {
     ensureExists(datasetConfigDTO, "Invalid id");
 
     return Response
-        .ok(toDatasetApi(datasetConfigDTO))
+        .ok(toApi(datasetConfigDTO))
         .build();
   }
 

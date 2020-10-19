@@ -1,10 +1,10 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApplicationApi;
+import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApi;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApplicationDto;
-import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import io.swagger.annotations.ApiKeyAuthDefinition;
 import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.SecurityDefinition;
@@ -64,20 +64,20 @@ public class ApplicationResource {
 
     final List<ApplicationDTO> all = applicationManager.findAll();
     return Response
-        .ok(all.stream().map(ApiBeanMapper::toApplicationApi))
+        .ok(all.stream().map(ApiBeanMapper::toApi))
         .build();
   }
 
   @POST
   public Response createMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      List<ApplicationApi> applicationApiList) {
+      List<ApplicationApi> list) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
-    ensureExists(applicationApiList, "Invalid request");
-    ensure(applicationApiList.size() == 1, "Only 1 insert supported at this time.");
+    ensureExists(list, "Invalid request");
+    ensure(list.size() == 1, "Only 1 insert supported at this time.");
 
-    final ApplicationApi applicationApi = applicationApiList.get(0);
+    final ApplicationApi applicationApi = list.get(0);
     final Long saved = applicationManager.save(toApplicationDto(applicationApi));
     return Response
         .ok(saved)
@@ -104,7 +104,7 @@ public class ApplicationResource {
 
     applicationManager.update(applicationDTO);
     return Response
-        .ok(toApplicationApi(applicationDTO))
+        .ok(toApi(applicationDTO))
         .build();
   }
 
@@ -118,7 +118,7 @@ public class ApplicationResource {
     ensureExists(applicationDTO, "Invalid id");
 
     return Response
-        .ok(toApplicationApi(applicationDTO))
+        .ok(toApi(applicationDTO))
         .build();
   }
 
@@ -131,7 +131,7 @@ public class ApplicationResource {
     final ApplicationDTO applicationDTO = applicationManager.findById(id);
     if (applicationDTO != null) {
       applicationManager.delete(applicationDTO);
-      return Response.ok(toApplicationApi(applicationDTO)).build();
+      return Response.ok(toApi(applicationDTO)).build();
     }
     return Response.ok("Not found").build();
   }

@@ -21,7 +21,7 @@ import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
 
 public abstract class ApiBeanMapper {
 
-  public static ApplicationApi toApplicationApi(final ApplicationBean o) {
+  public static ApplicationApi toApi(final ApplicationBean o) {
     return new ApplicationApi()
         .setId(o.getId())
         .setName(o.getApplication())
@@ -35,7 +35,7 @@ public abstract class ApiBeanMapper {
     return applicationDTO;
   }
 
-  public static DatasetApi toDatasetApi(final DatasetConfigDTO dto) {
+  public static DatasetApi toApi(final DatasetConfigDTO dto) {
     return new DatasetApi()
         .setId(dto.getId())
         .setActive(dto.isActive())
@@ -52,7 +52,7 @@ public abstract class ApiBeanMapper {
         ;
   }
 
-  public static MetricApi toMetricApi(final MetricConfigDTO dto) {
+  public static MetricApi toApi(final MetricConfigDTO dto) {
     return new MetricApi()
         .setId(dto.getId())
         .setActive(dto.isActive())
@@ -64,7 +64,7 @@ public abstract class ApiBeanMapper {
         ;
   }
 
-  public static AlertApi toAlertApi(final DetectionConfigDTO dto) {
+  public static AlertApi toApi(final DetectionConfigDTO dto) {
     return new AlertApi()
         .setName(dto.getName())
         .setDescription(dto.getDescription())
@@ -73,7 +73,7 @@ public abstract class ApiBeanMapper {
         ;
   }
 
-  public static SubscriptionGroupApi toSubscriptionGroupApi(final DetectionAlertConfigDTO dto) {
+  public static SubscriptionGroupApi toApi(final DetectionAlertConfigDTO dto) {
     final List<AlertApi> alertApis = optional(dto.getProperties())
         .map(o1 -> o1.get("detectionConfigIds"))
         .map(l -> ((List<Integer>) l).stream()

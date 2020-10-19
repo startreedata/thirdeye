@@ -2,8 +2,6 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toDatasetApi;
-import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toMetricApi;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,9 +19,7 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
@@ -54,7 +50,7 @@ public class MetricResource {
 
     final List<MetricConfigDTO> all = metricConfigManager.findAll();
     return Response
-        .ok(all.stream().map(ApiBeanMapper::toMetricApi))
+        .ok(all.stream().map(ApiBeanMapper::toApi))
         .build();
   }
 
@@ -90,7 +86,7 @@ public class MetricResource {
     ensureExists(dto, "Invalid id");
 
     return Response
-        .ok(toMetricApi(dto))
+        .ok(ApiBeanMapper.toApi(dto))
         .build();
   }
 

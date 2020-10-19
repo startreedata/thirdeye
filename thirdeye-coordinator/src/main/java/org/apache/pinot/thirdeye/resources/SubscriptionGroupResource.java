@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toSubscriptionGroupApi;
+import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApi;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -51,7 +51,7 @@ public class SubscriptionGroupResource {
 
     final List<DetectionAlertConfigDTO> all = detectionAlertConfigManager.findAll();
     return Response
-        .ok(all.stream().map(ApiBeanMapper::toSubscriptionGroupApi))
+        .ok(all.stream().map(ApiBeanMapper::toApi))
         .build();
   }
 
@@ -87,7 +87,7 @@ public class SubscriptionGroupResource {
     ensureExists(dto, "Invalid id");
 
     return Response
-        .ok(toSubscriptionGroupApi(dto))
+        .ok(toApi(dto))
         .build();
   }
 

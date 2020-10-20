@@ -66,6 +66,7 @@ public abstract class ApiBeanMapper {
 
   public static AlertApi toApi(final DetectionConfigDTO dto) {
     return new AlertApi()
+        .setId(dto.getId())
         .setName(dto.getName())
         .setDescription(dto.getDescription())
         .setActive(dto.isActive())
@@ -81,6 +82,7 @@ public abstract class ApiBeanMapper {
             .collect(Collectors.toList()))
         .orElse(null);
 
+    // TODO spyne This entire bean to be refactored, current optimistic conversion is a hack.
     final EmailSettingsApi emailSettings = optional(dto.getAlertSchemes())
         .map(o -> o.get("emailScheme"))
         .map(o -> ((Map) o).get("recipients"))

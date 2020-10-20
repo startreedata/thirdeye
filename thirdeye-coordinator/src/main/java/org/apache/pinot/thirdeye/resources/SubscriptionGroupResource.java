@@ -2,7 +2,9 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApi;
+import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toSubscriptionGroupDTO;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,6 +20,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
+import org.apache.pinot.thirdeye.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
@@ -58,12 +61,25 @@ public class SubscriptionGroupResource {
   @POST
   public Response createMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      List<ApplicationApi> applicationApiList) {
+      List<SubscriptionGroupApi> list) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    ensure(false, "Unsupported Operation.");
+
+    ensureExists(list, "Invalid request");
+    ensure(list.size() == 1, "Only 1 insert supported at this time.");
+
     return Response
-        .ok()
+        .ok(toApi(createSubscriptionGroup(list.get(0))))
         .build();
+  }
+
+  private SubscriptionGroupDTO createSubscriptionGroup(
+      final SubscriptionGroupApi api) {
+    ensureNull(api.getId(), "id should be null during creation.");
+    SubscriptionGroupDTO dto = toSubscriptionGroupDTO(api);
+    final Long id = subscriptionGroupManager.save(dto);
+    dto.setId(id);
+
+    return dto;
   }
 
   @PUT

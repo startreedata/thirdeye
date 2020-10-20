@@ -109,4 +109,18 @@ public abstract class ApiBeanMapper {
         .setEmailSettings(emailSettings)
         ;
   }
+
+  public static SubscriptionGroupDTO toSubscriptionGroupDTO(final SubscriptionGroupApi api) {
+    final SubscriptionGroupDTO dto = new SubscriptionGroupDTO();
+    dto.setId(api.getId());
+    dto.setName(api.getName());
+
+    optional(api.getApplication())
+        .map(ApplicationApi::getName)
+        .ifPresent(dto::setApplication);
+
+    // TODO spyne implement translation of alert schemes, suppressors etc.
+
+    return dto;
+  }
 }

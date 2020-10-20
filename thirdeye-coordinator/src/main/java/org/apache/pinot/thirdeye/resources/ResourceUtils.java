@@ -25,4 +25,8 @@ public class ResourceUtils {
     ensure(o != null, message);
     return o;
   }
+
+  public static void ensureNull(Object o, String message) {
+    ensure(o == null, message);
+  }
 }

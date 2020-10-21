@@ -11,6 +11,7 @@ public class ApiResource {
   private final MetricResource metricResource;
   private final AlertResource alertResource;
   private final SubscriptionGroupResource subscriptionGroupResource;
+  private final AnomalyResource anomalyResource;
 
   @Inject
   public ApiResource(final AuthResource authResource,
@@ -18,13 +19,15 @@ public class ApiResource {
       final DatasetResource datasetResource,
       final MetricResource metricResource,
       final AlertResource alertResource,
-      final SubscriptionGroupResource subscriptionGroupResource) {
+      final SubscriptionGroupResource subscriptionGroupResource,
+      final AnomalyResource anomalyResource) {
     this.authResource = authResource;
     this.applicationResource = applicationResource;
     this.datasetResource = datasetResource;
     this.metricResource = metricResource;
     this.alertResource = alertResource;
     this.subscriptionGroupResource = subscriptionGroupResource;
+    this.anomalyResource = anomalyResource;
   }
 
   @Path("auth")
@@ -55,5 +58,10 @@ public class ApiResource {
   @Path("subscription-groups")
   public SubscriptionGroupResource getSubscriptionGroupResource() {
     return subscriptionGroupResource;
+  }
+
+  @Path("anomalies")
+  public AnomalyResource getAnomalyResource() {
+    return anomalyResource;
   }
 }

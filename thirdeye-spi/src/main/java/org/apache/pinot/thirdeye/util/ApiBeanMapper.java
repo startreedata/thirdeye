@@ -2,10 +2,12 @@ package org.apache.pinot.thirdeye.util;
 
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.api.AlertApi;
+import org.apache.pinot.thirdeye.api.AnomalyApi;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.api.DatasetApi;
 import org.apache.pinot.thirdeye.api.EmailSettingsApi;
@@ -15,6 +17,7 @@ import org.apache.pinot.thirdeye.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
@@ -124,5 +127,22 @@ public abstract class ApiBeanMapper {
     // TODO spyne implement translation of alert schemes, suppressors etc.
 
     return dto;
+  }
+
+  public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
+    return new AnomalyApi()
+        .setId(dto.getId())
+        .setStartTime(new Date(dto.getStartTime()))
+        .setEndTime(new Date(dto.getEndTime()))
+        .setCreated(new Date(dto.getCreatedTime()))
+        .setAvgCurrentVal(dto.getAvgCurrentVal())
+        .setAvgBaselineVal(dto.getAvgBaselineVal())
+        .setScore(dto.getScore())
+        .setWeight(dto.getWeight())
+        .setImpactToGlobal(dto.getImpactToGlobal())
+        .setSourceType(dto.getAnomalyResultSource())
+        .setNotified(dto.isNotified())
+        .setMessage(dto.getMessage())
+        ;
   }
 }

@@ -24,19 +24,9 @@ package org.apache.pinot.thirdeye.anomaly;
  */
 public enum AnomalySeverity {
   // the order of definition follows the severity from highest to lowest
-  CRITICAL ("critical"),
-  HIGH ("high"),
-  MEDIUM ("medium"),
-  LOW ("low"),
-  DEFAULT ("default");
-
-  private String severity;
-
-  AnomalySeverity(String severity) {
-    this.severity = severity;
-  }
-
-  public String getLabel() {
-    return severity;
-  }
+  CRITICAL,
+  HIGH,
+  MEDIUM,
+  LOW,
+  DEFAULT;
 }

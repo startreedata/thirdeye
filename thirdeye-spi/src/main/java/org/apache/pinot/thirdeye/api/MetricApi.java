@@ -9,6 +9,7 @@ public class MetricApi {
 
   private Long id;
   private String name;
+  private String urn;
   private DatasetApi dataset;
   private Boolean active;
   private Date created;
@@ -29,6 +30,15 @@ public class MetricApi {
 
   public MetricApi setName(final String name) {
     this.name = name;
+    return this;
+  }
+
+  public String getUrn() {
+    return urn;
+  }
+
+  public MetricApi setUrn(final String urn) {
+    this.urn = urn;
     return this;
   }
 

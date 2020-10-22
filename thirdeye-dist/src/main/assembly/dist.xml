@@ -29,18 +29,7 @@
     <format>dir</format>
     <format>tar.gz</format>
   </formats>
-  <files>
-    <file>
-      <source>${thirdeye.root}/thirdeye-dashboard/target/thirdeye-dashboard-${pom.version}.jar</source>
-      <outputDirectory>lib/fat/</outputDirectory>
-      <fileMode>0444</fileMode>
-    </file>
-  </files>
   <fileSets>
-    <fileSet>
-      <directory>${thirdeye.root}/thirdeye-dashboard/config</directory>
-      <outputDirectory>config/</outputDirectory>
-    </fileSet>
     <fileSet>
       <directory>${thirdeye.root}/thirdeye-dist/src/main/bash</directory>
       <outputDirectory>bin/</outputDirectory>

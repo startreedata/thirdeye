@@ -40,10 +40,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-dashboard</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-worker</artifactId>
     </dependency>
   </dependencies>
@@ -79,16 +75,17 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
-                <id>binary-release-assembly-pinot</id>
+                <id>binary-release-assembly-thirdeye</id>
                 <goals>
                   <goal>single</goal>
                 </goals>
                 <phase>package</phase>
                 <configuration>
-                  <finalName>apache-pinot-incubating-${project.version}-bin</finalName>
+                  <finalName>thirdeye-${project.version}</finalName>
                   <appendAssemblyId>false</appendAssemblyId>
                   <descriptors>
-                    <descriptor>pinot-assembly.xml</descriptor>
+                    <descriptor>src/main/assembly/dist.xml</descriptor>
+                    <descriptor>src/main/assembly/dist.xml</descriptor>
                   </descriptors>
                 </configuration>
               </execution>

@@ -20,6 +20,7 @@
 
 package org.apache.pinot.thirdeye.detection.spec;
 
+import java.io.Serializable;
 import java.util.Map;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -28,7 +29,7 @@ import org.modelmapper.convention.MatchingStrategies;
 /**
  * Base class for component specs
  */
-public abstract class AbstractSpec {
+public abstract class AbstractSpec implements Serializable {
   static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
 
   public static <T extends AbstractSpec> T fromProperties(Map<String, Object> properties, Class<T> specClass) {

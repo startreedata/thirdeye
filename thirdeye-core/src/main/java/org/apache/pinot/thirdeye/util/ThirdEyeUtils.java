@@ -56,6 +56,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
+import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
@@ -93,23 +94,6 @@ public abstract class ThirdEyeUtils {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private static final ThirdEyeCacheRegistry CACHE_REGISTRY = ThirdEyeCacheRegistry.getInstance();
-  private static final String TWO_DECIMALS_FORMAT = "#,###.##";
-  private static final String MAX_DECIMALS_FORMAT = "#,###.#####";
-  private static final String DECIMALS_FORMAT_TOKEN = "#";
-  private static final String PROP_DETECTOR_COMPONENT_NAME_DELIMETER = ",";
-
-  private static final int DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE = 50;
-  private static final int DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 100;
-  private static final int DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 8192;
-
-  // How much data to prefetch to warm up the cache
-  private static final long DEFAULT_CACHING_PERIOD_LOOKBACK = -1;
-  private static final long CACHING_PERIOD_LOOKBACK_DAILY = TimeUnit.DAYS.toMillis(90);
-  private static final long CACHING_PERIOD_LOOKBACK_HOURLY = TimeUnit.DAYS.toMillis(60);
-  // disable minute level cache warm up
-  private static final long CACHING_PERIOD_LOOKBACK_MINUTELY = -1;
-
-  public static final long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
 
   /**
    * Returns or modifies a filter that can be for querying the results corresponding to the given dimension map.
@@ -429,10 +413,11 @@ public abstract class ThirdEyeUtils {
         return Double.toString(Double.NEGATIVE_INFINITY);
       }
     }
-    StringBuffer decimalFormatBuffer = new StringBuffer(TWO_DECIMALS_FORMAT);
+    StringBuffer decimalFormatBuffer = new StringBuffer(CoreConstants.TWO_DECIMALS_FORMAT);
     double compareValue = 0.1;
-    while (value > 0 && value < compareValue && !decimalFormatBuffer.toString().equals(MAX_DECIMALS_FORMAT)) {
-      decimalFormatBuffer.append(DECIMALS_FORMAT_TOKEN);
+    while (value > 0 && value < compareValue && !decimalFormatBuffer.toString().equals(
+        CoreConstants.MAX_DECIMALS_FORMAT)) {
+      decimalFormatBuffer.append(CoreConstants.DECIMALS_FORMAT_TOKEN);
       compareValue = compareValue * 0.1;
     }
     DecimalFormat decimalFormat = new DecimalFormat(decimalFormatBuffer.toString());
@@ -603,7 +588,8 @@ public abstract class ThirdEyeUtils {
     // ResultSetGroup Cache. The size of this cache is limited by the total number of buckets in all ResultSetGroup.
     // We estimate that 1 bucket (including overhead) consumes 1KB and this cache is allowed to use up to 50% of max
     // heap space.
-    long maxBucketNumber = getApproximateMaxBucketNumber(DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE);
+    long maxBucketNumber = getApproximateMaxBucketNumber(
+        CoreConstants.DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE);
     LOG.debug("Max bucket number for {}'s cache is set to {}", cacheLoader.toString(), maxBucketNumber);
 
     return CacheBuilder.newBuilder()
@@ -627,9 +613,9 @@ public abstract class ThirdEyeUtils {
   private static long getApproximateMaxBucketNumber(int percentage) {
     long jvmMaxMemoryInBytes = Runtime.getRuntime().maxMemory();
     if (jvmMaxMemoryInBytes == Long.MAX_VALUE) { // Check upper bound
-      jvmMaxMemoryInBytes = DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB * FileUtils.ONE_MB; // MB to Bytes
+      jvmMaxMemoryInBytes = CoreConstants.DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB * FileUtils.ONE_MB; // MB to Bytes
     } else { // Check lower bound
-      long lowerBoundInBytes = DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB * FileUtils.ONE_MB; // MB to Bytes
+      long lowerBoundInBytes = CoreConstants.DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB * FileUtils.ONE_MB; // MB to Bytes
       if (jvmMaxMemoryInBytes < lowerBoundInBytes) {
         jvmMaxMemoryInBytes = lowerBoundInBytes;
       }
@@ -679,18 +665,18 @@ public abstract class ThirdEyeUtils {
     switch (granularity.getUnit()) {
       case DAYS:
         // 90 days data for daily detection
-        period = CACHING_PERIOD_LOOKBACK_DAILY;
+        period = CoreConstants.CACHING_PERIOD_LOOKBACK_DAILY;
         break;
       case HOURS:
         // 60 days data for hourly detection
-        period = CACHING_PERIOD_LOOKBACK_HOURLY;
+        period = CoreConstants.CACHING_PERIOD_LOOKBACK_HOURLY;
         break;
       case MINUTES:
         // disable minute level cache warmup by default.
-        period = CACHING_PERIOD_LOOKBACK_MINUTELY;
+        period = CoreConstants.CACHING_PERIOD_LOOKBACK_MINUTELY;
         break;
       default:
-        period = DEFAULT_CACHING_PERIOD_LOOKBACK;
+        period = CoreConstants.DEFAULT_CACHING_PERIOD_LOOKBACK;
     }
     return period;
   }
@@ -703,7 +689,7 @@ public abstract class ThirdEyeUtils {
   public static boolean isDetectedByMultipleComponents(MergedAnomalyResultDTO anomaly) {
     String componentName = anomaly.getProperties().getOrDefault(
         GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME, "");
-    return componentName.contains(PROP_DETECTOR_COMPONENT_NAME_DELIMETER);
+    return componentName.contains(CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER);
   }
 
   /**
@@ -716,9 +702,12 @@ public abstract class ThirdEyeUtils {
    */
   private static String combineComponents(String component1, String component2) {
     List<String> components = new ArrayList<>();
-    components.addAll(Arrays.asList(component1.split(PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
-    components.addAll(Arrays.asList(component2.split(PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
-    return components.stream().distinct().collect(Collectors.joining(PROP_DETECTOR_COMPONENT_NAME_DELIMETER));
+    components.addAll(Arrays.asList(component1.split(
+        CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
+    components.addAll(Arrays.asList(component2.split(
+        CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
+    return components.stream().distinct().collect(Collectors.joining(
+        CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER));
   }
 
   /**

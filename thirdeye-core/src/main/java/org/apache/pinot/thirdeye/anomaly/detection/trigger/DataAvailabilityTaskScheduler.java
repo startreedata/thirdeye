@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskInfoFactory;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
@@ -193,7 +194,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     statusList.add(TaskConstants.TaskStatus.WAITING);
     statusList.add(TaskConstants.TaskStatus.RUNNING);
     List<TaskDTO> tasks = taskDAO.findByStatusesAndTypeWithinDays(statusList, TaskConstants.TaskType.DETECTION,
-        (int) TimeUnit.MILLISECONDS.toDays(ThirdEyeUtils.DETECTION_TASK_MAX_LOOKBACK_WINDOW));
+        (int) TimeUnit.MILLISECONDS.toDays(CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW));
     Map<Long, TaskDTO> res = new HashMap<>(tasks.size());
     for (TaskDTO task : tasks) {
       res.put(ThirdEyeUtils.getDetectionIdFromJobName(task.getJobName()), task);

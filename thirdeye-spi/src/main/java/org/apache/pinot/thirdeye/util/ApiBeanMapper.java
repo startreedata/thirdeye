@@ -1,12 +1,15 @@
 package org.apache.pinot.thirdeye.util;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.api.AlertApi;
+import org.apache.pinot.thirdeye.api.AlertComponentApi;
 import org.apache.pinot.thirdeye.api.AnomalyApi;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.api.DatasetApi;
@@ -74,7 +77,45 @@ public abstract class ApiBeanMapper {
         .setDescription(dto.getDescription())
         .setActive(dto.isActive())
         .setCron(dto.getCron())
+        .setComponentMap(toComponentMap(dto.getComponentSpecs()))
         ;
+  }
+
+  private static Map<String, AlertComponentApi> toComponentMap(
+      final Map<String, Object> componentSpecs) {
+    if (componentSpecs == null) {
+      return null;
+    }
+    Map<String, AlertComponentApi> map = new HashMap<>(componentSpecs.size());
+    for (Map.Entry<String, Object> e : componentSpecs.entrySet()) {
+      final String key = e.getKey();
+      final String[] splitted = key.split(":");
+      checkState(splitted.length == 2);
+
+      final String name = splitted[0];
+      final String type = splitted[1];
+
+      final Map<String, Object> valueMap = (Map<String, Object>) e.getValue();
+      final String metricUrn = (String) valueMap.get("metricUrn");
+      valueMap.remove("metricUrn");
+      valueMap.remove("className");
+
+      map.put(name, new AlertComponentApi()
+          .setType(type)
+          .setParams(valueMap)
+          .setMetric(toMetricApi(metricUrn))
+      );
+    }
+
+    return map;
+  }
+
+  public static MetricApi toMetricApi(final String metricUrn) {
+    final String[] parts = metricUrn.split(":");
+    checkState(parts.length == 3);
+    return new MetricApi()
+        .setId(Long.parseLong(parts[2]))
+        .setUrn(metricUrn);
   }
 
   public static SubscriptionGroupApi toApi(final SubscriptionGroupDTO dto) {

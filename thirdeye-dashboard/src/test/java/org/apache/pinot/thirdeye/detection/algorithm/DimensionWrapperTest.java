@@ -23,7 +23,7 @@ import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.StringSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -70,7 +70,7 @@ public class DimensionWrapperTest {
   private List<MockPipeline> runs;
   private List<MockPipelineOutput> outputs;
 
-  private DetectionConfigDTO config;
+  private AlertDTO config;
   private Map<String, Object> properties;
   private Map<String, Object> nestedProperties;
   private Map<MetricSlice, DataFrame> aggregates;
@@ -123,7 +123,7 @@ public class DimensionWrapperTest {
     this.properties.put(PROP_NESTED, Collections.singletonList(this.nestedProperties));
     this.properties.put(PROP_LOOKBACK, 0);
 
-    this.config = new DetectionConfigDTO();
+    this.config = new AlertDTO();
     this.config.setId(PROP_ID_VALUE);
     this.config.setName(PROP_NAME_VALUE);
     this.config.setProperties(this.properties);
@@ -258,11 +258,11 @@ public class DimensionWrapperTest {
     assertEquals(this.runs.get(2), makePipeline("thirdeye:metric:11:b%3D2"));
   }
 
-  private DetectionConfigDTO makeConfig(String metricUrn) {
+  private AlertDTO makeConfig(String metricUrn) {
     Map<String, Object> properties = new HashMap<>(this.nestedProperties);
     properties.put(PROP_NESTED_METRIC_URN_KEY_VALUE, metricUrn);
 
-    DetectionConfigDTO config = new DetectionConfigDTO();
+    AlertDTO config = new AlertDTO();
     config.setId(this.config.getId());
     config.setName(this.config.getName());
     config.setProperties(properties);

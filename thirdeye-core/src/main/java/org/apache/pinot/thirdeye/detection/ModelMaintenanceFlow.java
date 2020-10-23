@@ -22,7 +22,7 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.joda.time.Instant;
 
 
@@ -37,5 +37,5 @@ public interface ModelMaintenanceFlow {
    * @param timestamp the time stamp of this maintenance
    * @return the maintained detection config
    */
-  DetectionConfigDTO maintain(DetectionConfigDTO detectionConfig, Instant timestamp);
+  AlertDTO maintain(AlertDTO detectionConfig, Instant timestamp);
 }

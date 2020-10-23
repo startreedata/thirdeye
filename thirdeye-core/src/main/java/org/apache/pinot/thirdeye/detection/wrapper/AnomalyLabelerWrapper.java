@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -52,7 +52,7 @@ public class AnomalyLabelerWrapper extends DetectionPipeline {
   private Labeler labeler;
   private String metricUrn;
 
-  public AnomalyLabelerWrapper(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime) {
+  public AnomalyLabelerWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) {
     super(provider, config, startTime, endTime);
     Map<String, Object> properties = config.getProperties();
     this.nestedProperties = ConfigUtils.getList(properties.get(PROP_NESTED));

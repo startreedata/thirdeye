@@ -33,7 +33,7 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -143,10 +143,10 @@ public class MonitorTaskRunner implements TaskRunner {
    */
   private void disableLongFailedAlerts() {
     AlertManager detectionDAO = DAO_REGISTRY.getDetectionConfigManager();
-    List<DetectionConfigDTO> detectionConfigs = detectionDAO.findAllActive();
+    List<AlertDTO> detectionConfigs = detectionDAO.findAllActive();
     long currentTimeMillis = System.currentTimeMillis();
     long maxTaskFailMillis = TimeUnit.DAYS.toMillis(MAX_FAILED_DISABLE_DAYS);
-    for (DetectionConfigDTO config : detectionConfigs) {
+    for (AlertDTO config : detectionConfigs) {
       try {
         Timestamp updateTime = config.getUpdateTime();
         if (updateTime != null && config.getHealth() != null && config.getHealth().getDetectionTaskStatus() != null) {
@@ -167,7 +167,7 @@ public class MonitorTaskRunner implements TaskRunner {
     }
   }
 
-  private void sendDisableAlertNotificationEmail(DetectionConfigDTO config) throws EmailException {
+  private void sendDisableAlertNotificationEmail(AlertDTO config) throws EmailException {
     HtmlEmail email = new HtmlEmail();
     String subject = String.format("ThirdEye alert disabled: %s", config.getName());
     String textBody = String.format(

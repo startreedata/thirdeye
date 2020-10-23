@@ -28,7 +28,7 @@ import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -53,7 +53,7 @@ public class ThresholdSeverityLabelerTest {
   private List<MockPipeline> runs;
   private DataProvider testDataProvider;
   private Map<String, Object> properties;
-  private DetectionConfigDTO config;
+  private AlertDTO config;
   private Map<String, Object> specs;
   private AnomalyLabelerWrapper thresholdSeverityLabeler;
 
@@ -77,7 +77,7 @@ public class ThresholdSeverityLabelerTest {
     datasetConfigDTO.setTimeUnit(TimeUnit.MILLISECONDS);
     datasetConfigDTO.setTimezone("UTC");
 
-    this.config = new DetectionConfigDTO();
+    this.config = new AlertDTO();
     this.config.setId(CONFIG_ID);
     this.properties = new HashMap<>();
     this.properties.put("nested", Collections.singletonList(Collections.singletonMap("className", "dummy")));

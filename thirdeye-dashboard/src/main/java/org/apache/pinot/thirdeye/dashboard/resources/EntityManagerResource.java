@@ -60,7 +60,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -239,7 +239,7 @@ public class EntityManagerResource {
 
         case DETECTION_CONFIG:
           return assertNotNull(
-              alertManager.save(OBJECT_MAPPER.readValue(jsonPayload, DetectionConfigDTO.class)));
+              alertManager.save(OBJECT_MAPPER.readValue(jsonPayload, AlertDTO.class)));
 
         case MERGED_ANOMALY:
           return assertNotNull(mergedAnomalyResultManager

@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -59,7 +59,7 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
     Set<MergedAnomalyResultDTO> allAnomalies = new HashSet<>();
     for (Long detectionId : vectorClocks.keySet()) {
       // Ignore disabled detections
-      DetectionConfigDTO detection = DAORegistry.getInstance().getDetectionConfigManager()
+      AlertDTO detection = DAORegistry.getInstance().getDetectionConfigManager()
           .findById(detectionId);
       if (detection == null || !detection.isActive()) {
         continue;

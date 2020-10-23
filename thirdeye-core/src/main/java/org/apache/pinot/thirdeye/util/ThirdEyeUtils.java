@@ -65,7 +65,7 @@ import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.COMPARE_MODE;
@@ -341,7 +341,7 @@ public abstract class ThirdEyeUtils {
    * @param config The detection config.
    * @return The expected delay for this alert in milliseconds.
    */
-  public static long getDetectionExpectedDelay(DetectionConfigDTO config) {
+  public static long getDetectionExpectedDelay(AlertDTO config) {
     long maxExpectedDelay = 0;
     Set<String> metricUrns = DetectionConfigFormatter
         .extractMetricUrnsFromProperties(config.getProperties());

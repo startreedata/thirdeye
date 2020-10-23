@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -127,7 +127,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
     try {
       DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
-      DetectionConfigDTO config;
+      AlertDTO config;
       if (info.isOnline()) {
         config = taskDAO.extractDetectionConfig(info);
         // Online detection is not saved into DB so it does not have an ID

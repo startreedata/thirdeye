@@ -43,7 +43,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -213,7 +213,7 @@ public class DefaultDataProvider implements DataProvider {
   }
 
   @Override
-  public DetectionPipeline loadPipeline(DetectionConfigDTO config, long start, long end) {
+  public DetectionPipeline loadPipeline(AlertDTO config, long start, long end) {
     return this.loader.from(this, config, start, end);
   }
 

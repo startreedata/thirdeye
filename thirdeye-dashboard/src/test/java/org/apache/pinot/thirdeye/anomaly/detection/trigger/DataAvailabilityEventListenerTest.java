@@ -30,7 +30,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.slf4j.Logger;
@@ -70,7 +70,7 @@ public class DataAvailabilityEventListenerTest {
     metric2.setAlias("");
     long metricId2 = metricConfigManager.save(metric2);
 
-    DetectionConfigDTO detect1 = new DetectionConfigDTO();
+    AlertDTO detect1 = new AlertDTO();
     detect1.setName("detection_trigger_listener1");
     detect1.setActive(true);
     Map<String, Object> props = new HashMap<>();

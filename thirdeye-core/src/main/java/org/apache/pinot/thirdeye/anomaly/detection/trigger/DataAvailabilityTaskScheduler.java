@@ -38,7 +38,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -95,13 +95,13 @@ public class DataAvailabilityTaskScheduler implements Runnable {
    */
   @Override
   public void run() {
-    Map<DetectionConfigDTO, Set<String>> detection2DatasetMap = new HashMap<>();
+    Map<AlertDTO, Set<String>> detection2DatasetMap = new HashMap<>();
     Map<String, DatasetConfigDTO> datasetConfigMap = new HashMap<>();
     populateDetectionMapAndDatasetConfigMap(detection2DatasetMap, datasetConfigMap);
     Map<Long, TaskDTO> runningDetection = retrieveRunningDetectionTasks();
     int taskCount = 0;
     long detectionEndTime = System.currentTimeMillis();
-    for (DetectionConfigDTO detectionConfig : detection2DatasetMap.keySet()) {
+    for (AlertDTO detectionConfig : detection2DatasetMap.keySet()) {
       try {
         long detectionConfigId = detectionConfig.getId();
         DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfoFromDetectionConfig(detectionConfig, detectionEndTime);
@@ -154,12 +154,12 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   }
 
   private void populateDetectionMapAndDatasetConfigMap(
-      Map<DetectionConfigDTO, Set<String>> dataset2DetectionMap,
+      Map<AlertDTO, Set<String>> dataset2DetectionMap,
       Map<String, DatasetConfigDTO> datasetConfigMap) {
     Map<Long, Set<String>> metricCache = new HashMap<>();
-    List<DetectionConfigDTO> detectionConfigs = detectionConfigDAO.findAllActive()
+    List<AlertDTO> detectionConfigs = detectionConfigDAO.findAllActive()
         .stream().filter(DetectionConfigBean::isDataAvailabilitySchedule).collect(Collectors.toList());
-    for (DetectionConfigDTO detectionConfig : detectionConfigs) {
+    for (AlertDTO detectionConfig : detectionConfigs) {
       Set<String> metricUrns = DetectionConfigFormatter
           .extractMetricUrnsFromProperties(detectionConfig.getProperties());
       Set<String> datasets = new HashSet<>();
@@ -202,7 +202,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     return res;
   }
 
-  private void loadLatestTaskCreateTime(DetectionConfigDTO detectionConfig) throws Exception {
+  private void loadLatestTaskCreateTime(AlertDTO detectionConfig) throws Exception {
     long detectionConfigId = detectionConfig.getId();
     List<TaskDTO> tasks = taskDAO.findByNameOrderByCreateTime(TaskConstants.TaskType.DETECTION.toString() +
         "_" + detectionConfigId, 1,false);
@@ -216,7 +216,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     }
   }
 
-  private boolean isAllDatasetUpdated(DetectionConfigDTO detectionConfig, Set<String> datasets,
+  private boolean isAllDatasetUpdated(AlertDTO detectionConfig, Set<String> datasets,
       Map<String, DatasetConfigDTO> datasetConfigMap) {
     long lastTimestamp = detectionConfig.getLastTimestamp();
     long curr = System.currentTimeMillis();
@@ -225,7 +225,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   }
 
   /* check if the fallback cron need to be triggered if the detection has not been run for long time */
-  private boolean needFallback(DetectionConfigDTO detectionConfig) throws Exception {
+  private boolean needFallback(AlertDTO detectionConfig) throws Exception {
     long detectionConfigId = detectionConfig.getId();
     long notRunThreshold = ((detectionConfig.getTaskTriggerFallBackTimeInSec() == 0) ?
         fallBackTimeInSec : detectionConfig.getTaskTriggerFallBackTimeInSec()) * 1000;

@@ -28,7 +28,7 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -77,25 +77,25 @@ public class ToAllRecipientsDetectionAlertFilterTest {
   public void beforeMethod() throws InterruptedException {
     testDAOProvider = DAOTestBase.getInstance();
 
-    DetectionConfigDTO detectionConfig1 = new DetectionConfigDTO();
+    AlertDTO detectionConfig1 = new AlertDTO();
     detectionConfig1.setName("test detection 1");
     detectionConfig1.setActive(true);
     this.detectionConfigId1 = DAORegistry.getInstance().getDetectionConfigManager()
         .save(detectionConfig1);
 
-    DetectionConfigDTO detectionConfig2 = new DetectionConfigDTO();
+    AlertDTO detectionConfig2 = new AlertDTO();
     detectionConfig2.setName("test detection 2");
     detectionConfig2.setActive(true);
     this.detectionConfigId2 = DAORegistry.getInstance().getDetectionConfigManager()
         .save(detectionConfig2);
 
-    DetectionConfigDTO detectionConfig3 = new DetectionConfigDTO();
+    AlertDTO detectionConfig3 = new AlertDTO();
     detectionConfig3.setName("test detection 3");
     detectionConfig3.setActive(true);
     this.detectionConfigId3 = DAORegistry.getInstance().getDetectionConfigManager()
         .save(detectionConfig3);
 
-    DetectionConfigDTO detectionConfig = new DetectionConfigDTO();
+    AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName("test detection 0");
     detectionConfig.setActive(true);
     this.detectionConfigId = DAORegistry.getInstance().getDetectionConfigManager()

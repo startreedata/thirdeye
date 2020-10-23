@@ -38,7 +38,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -80,7 +80,7 @@ public class DetectionJiraAlerterTest {
     this.anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     this.detectionDAO = daoRegistry.getDetectionConfigManager();
 
-    DetectionConfigDTO detectionConfig = new DetectionConfigDTO();
+    AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName(DETECTION_NAME_VALUE);
     this.detectionConfigId = this.detectionDAO.save(detectionConfig);
 

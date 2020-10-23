@@ -36,7 +36,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
@@ -159,14 +159,14 @@ public class TestMetricAnomaliesContent {
     metricDAO.save(getTestMetricConfig("test-collection", "cost", null));
 
     List<AnomalyResult> anomalies = new ArrayList<>();
-    DetectionConfigDTO detectionConfigDTO = DaoTestUtils.getTestDetectionConfig(provider, detectionConfigFile);
-    detectionConfigDAO.save(detectionConfigDTO);
+    AlertDTO alertDTO = DaoTestUtils.getTestDetectionConfig(provider, detectionConfigFile);
+    detectionConfigDAO.save(alertDTO);
 
     MergedAnomalyResultDTO anomaly = DaoTestUtils.getTestMergedAnomalyResult(
         new DateTime(2020, 1, 6, 10, 0, dateTimeZone).getMillis(),
         new DateTime(2020, 1, 6, 13, 0, dateTimeZone).getMillis(),
         TEST, TEST, 0.1, 1l, new DateTime(2020, 1, 6, 10, 0, dateTimeZone).getMillis());
-    anomaly.setDetectionConfigId(detectionConfigDTO.getId());
+    anomaly.setDetectionConfigId(alertDTO.getId());
     anomaly.setAvgCurrentVal(1.1);
     anomaly.setAvgBaselineVal(1.0);
     anomaly.setMetricUrn("thirdeye:metric:1");
@@ -177,7 +177,7 @@ public class TestMetricAnomaliesContent {
         new DateTime(2020, 1, 7, 10, 0, dateTimeZone).getMillis(),
         new DateTime(2020, 1, 7, 17, 0, dateTimeZone).getMillis(),
         TEST, TEST, 0.1, 1l, new DateTime(2020, 1, 6, 10, 0, dateTimeZone).getMillis());
-    anomaly.setDetectionConfigId(detectionConfigDTO.getId());
+    anomaly.setDetectionConfigId(alertDTO.getId());
     anomaly.setAvgCurrentVal(0.9);
     anomaly.setAvgBaselineVal(Double.NaN);
     anomaly.setMetricUrn("thirdeye:metric:2");
@@ -188,7 +188,7 @@ public class TestMetricAnomaliesContent {
         new DateTime(2020, 1, 1, 10, 0, dateTimeZone).getMillis(),
         new DateTime(2020, 1, 7, 17, 0, dateTimeZone).getMillis(),
         TEST, TEST, 0.1, 1l, new DateTime(2020, 1, 7, 17, 1, dateTimeZone).getMillis());
-    anomaly.setDetectionConfigId(detectionConfigDTO.getId());
+    anomaly.setDetectionConfigId(alertDTO.getId());
     anomaly.setType(AnomalyType.DATA_SLA);
     anomaly.setAnomalyResultSource(AnomalyResultSource.DATA_QUALITY_DETECTION);
     anomaly.setMetricUrn("thirdeye:metric:3");
@@ -202,7 +202,7 @@ public class TestMetricAnomaliesContent {
         new DateTime(2020, 1, 1, 0, 0, dateTimeZone).getMillis(),
         new DateTime(2020, 1, 7, 5, 5, dateTimeZone).getMillis(),
         TEST, TEST, 0.1, 1l, new DateTime(2020, 1, 7, 5, 6, dateTimeZone).getMillis());
-    anomaly.setDetectionConfigId(detectionConfigDTO.getId());
+    anomaly.setDetectionConfigId(alertDTO.getId());
     anomaly.setType(AnomalyType.DATA_SLA);
     anomaly.setAnomalyResultSource(AnomalyResultSource.DATA_QUALITY_DETECTION);
     anomaly.setMetricUrn("thirdeye:metric:3");
@@ -217,7 +217,7 @@ public class TestMetricAnomaliesContent {
         new DateTime(2020, 1, 1, 10, 5, dateTimeZone).getMillis(),
         new DateTime(2020, 1, 1, 15, 0, dateTimeZone).getMillis(),
         TEST, TEST, 0.1, 1l, new DateTime(2020, 1, 1, 16, 0, dateTimeZone).getMillis());
-    anomaly.setDetectionConfigId(detectionConfigDTO.getId());
+    anomaly.setDetectionConfigId(alertDTO.getId());
     anomaly.setType(AnomalyType.DATA_SLA);
     anomaly.setAnomalyResultSource(AnomalyResultSource.DATA_QUALITY_DETECTION);
     anomaly.setMetricUrn("thirdeye:metric:3");

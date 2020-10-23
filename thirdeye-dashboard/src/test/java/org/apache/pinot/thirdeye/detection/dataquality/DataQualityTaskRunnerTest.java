@@ -40,7 +40,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -70,7 +70,7 @@ public class DataQualityTaskRunnerTest {
   private EvaluationManager evaluationDAO;
   private MetricConfigDTO metricConfigDTO;
   private DatasetConfigDTO datasetConfigDTO;
-  private DetectionConfigDTO detectionConfigDTO;
+  private AlertDTO alertDTO;
 
   private long detectorId;
   private DetectionPipelineLoader loader;
@@ -115,8 +115,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
 
-    detectionConfigDTO = translateSlaConfig(-1, "sla-config-1.yaml");
-    this.detectorId = detectionConfigDTO.getId();
+    alertDTO = translateSlaConfig(-1, "sla-config-1.yaml");
+    this.detectorId = alertDTO.getId();
 
     this.info = new DetectionPipelineTaskInfo();
     this.info.setConfigId(this.detectorId);
@@ -131,17 +131,17 @@ public class DataQualityTaskRunnerTest {
   /**
    * Load and update the detection config from filePath into detectionId
    */
-  private DetectionConfigDTO translateSlaConfig(long detectionId, String filePath) throws Exception {
+  private AlertDTO translateSlaConfig(long detectionId, String filePath) throws Exception {
     String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream(filePath), StandardCharsets.UTF_8);
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
-    DetectionConfigDTO detectionConfigDTO = translator.translate();
+    AlertDTO alertDTO = translator.translate();
     if (detectionId < 0) {
-      detectionConfigDTO.setId(this.detectionDAO.save(detectionConfigDTO));
+      alertDTO.setId(this.detectionDAO.save(alertDTO));
     } else {
-      detectionConfigDTO.setId(detectionId);
-      this.detectionDAO.update(detectionConfigDTO);
+      alertDTO.setId(detectionId);
+      this.detectionDAO.update(alertDTO);
     }
-    return detectionConfigDTO;
+    return alertDTO;
   }
 
   /**
@@ -238,7 +238,7 @@ public class DataQualityTaskRunnerTest {
 
     // CHECK 0: Report data missing immediately if delayed even by a minute (sla = 0_DAYS)
     // This comes into effect if the detection runs more frequently than the dataset granularity.
-    detectionConfigDTO = translateSlaConfig(detectorId, "sla-config-0.yaml");
+    alertDTO = translateSlaConfig(detectorId, "sla-config-0.yaml");
 
     // 1st scan - sla breach
     //  time:  3____4    5     // We have data till 3rd, data for 4th is missing/delayed
@@ -257,7 +257,7 @@ public class DataQualityTaskRunnerTest {
     cleanUpAnomalies();
 
     // CHECK 1: Report data delayed by at least a day (sla = 1_DAYS)
-    detectionConfigDTO = translateSlaConfig(detectorId, "sla-config-1.yaml");
+    alertDTO = translateSlaConfig(detectorId, "sla-config-1.yaml");
 
     // 1st scan - sla breach
     //  time:  3____4    5     // We have data till 3rd, data for 4th is missing/delayed
@@ -270,7 +270,7 @@ public class DataQualityTaskRunnerTest {
     Assert.assertEquals(anomalies.size(), 0);
 
     // CHECK 2: Report data missing when delayed (sla = 2_DAYS)
-    detectionConfigDTO = translateSlaConfig(detectorId, "sla-config-2.yaml");
+    alertDTO = translateSlaConfig(detectorId, "sla-config-2.yaml");
 
     // 1st scan after issue - no sla breach
     //  time:  3____4    5           // We have data till 3rd, data for 4th is missing/delayed
@@ -309,7 +309,7 @@ public class DataQualityTaskRunnerTest {
 
 
     // CHECK 3: Report data missing when delayed by (sla = 3_DAYS)
-    detectionConfigDTO = translateSlaConfig(detectorId, "sla-config-3.yaml");
+    alertDTO = translateSlaConfig(detectorId, "sla-config-3.yaml");
 
     // 1st scan after issue - no sla breach
     //  time:  3____4    5           // We have data till 3rd, data for 4th is missing/delayed
@@ -358,7 +358,7 @@ public class DataQualityTaskRunnerTest {
 
 
     // CHECK 4: Report data missing when there is a gap btw LastRefreshTime & SLA window start
-    detectionConfigDTO = translateSlaConfig(detectorId, "sla-config-1.yaml");
+    alertDTO = translateSlaConfig(detectorId, "sla-config-1.yaml");
 
     // 2 cases are possible:
     // a. with availability events

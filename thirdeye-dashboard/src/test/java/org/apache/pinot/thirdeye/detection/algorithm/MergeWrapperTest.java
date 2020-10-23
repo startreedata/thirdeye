@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.AnomalyType;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
@@ -41,7 +41,7 @@ import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.*;
 
 
 public class MergeWrapperTest {
-  private DetectionConfigDTO config;
+  private AlertDTO config;
   private MergeWrapper wrapper;
   private Map<String, Object> properties;
   private List<Map<String, Object>> nestedProperties;
@@ -94,7 +94,7 @@ public class MergeWrapperTest {
 
     this.properties.put(PROP_NESTED, this.nestedProperties);
 
-    this.config = new DetectionConfigDTO();
+    this.config = new AlertDTO();
     this.config.setId(PROP_ID_VALUE);
     this.config.setName(PROP_NAME_VALUE);
     this.config.setProperties(this.properties);

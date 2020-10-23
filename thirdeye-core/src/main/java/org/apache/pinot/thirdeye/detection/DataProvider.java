@@ -27,7 +27,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -141,7 +141,7 @@ public interface DataProvider {
    * @return detection pipeline instance
    * @throws Exception
    */
-  DetectionPipeline loadPipeline(DetectionConfigDTO config, long start, long end) throws Exception;
+  DetectionPipeline loadPipeline(AlertDTO config, long start, long end) throws Exception;
 
   /**
    * Returns a multimap of evaluations (keyed by the evaluations slice) for a given set of evaluations slices.

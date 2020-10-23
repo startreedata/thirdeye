@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +36,7 @@ public class MockPipelineLoader extends DetectionPipelineLoader {
   }
 
   @Override
-  public DetectionPipeline from(DataProvider provider, DetectionConfigDTO config, long start, long end) {
+  public DetectionPipeline from(DataProvider provider, AlertDTO config, long start, long end) {
     MockPipelineOutput output = this.outputs.isEmpty() ?
         new MockPipelineOutput(Collections.<MergedAnomalyResultDTO>emptyList(), -1) :
         this.outputs.get(this.offset++);

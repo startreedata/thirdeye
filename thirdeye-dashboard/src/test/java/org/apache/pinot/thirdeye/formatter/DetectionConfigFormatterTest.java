@@ -27,9 +27,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.testng.Assert;
@@ -52,7 +51,7 @@ public class DetectionConfigFormatterTest {
 
   @Test
   public void testDetectionConfigFormatter() throws IOException {
-    DetectionConfigDTO configDTO = new DetectionConfigDTO();
+    AlertDTO configDTO = new AlertDTO();
     configDTO.setName("test");
     configDTO.setActive(true);
     configDTO.setYaml(IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream("sample-detection-config.yml")));

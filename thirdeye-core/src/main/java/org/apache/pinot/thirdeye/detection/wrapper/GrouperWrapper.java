@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.Constants;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -58,7 +58,7 @@ public class GrouperWrapper extends DetectionPipeline {
   private final String grouperName;
   private final String entityName;
 
-  public GrouperWrapper(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime)
+  public GrouperWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime)
       throws Exception {
     super(provider, config, startTime, endTime);
     Map<String, Object> properties = config.getProperties();

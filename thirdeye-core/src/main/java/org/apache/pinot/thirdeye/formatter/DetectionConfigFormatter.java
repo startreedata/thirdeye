@@ -40,7 +40,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -57,7 +57,7 @@ import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.Detect
 /**
  * The detection config formatter
  */
-public class DetectionConfigFormatter implements DTOFormatter<DetectionConfigDTO> {
+public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
   static final String ATTR_ID = "id";
   static final String ATTR_CREATED_BY = "createdBy";
   static final String ATTR_UPDATED_BY = "updatedBy";
@@ -106,7 +106,7 @@ public class DetectionConfigFormatter implements DTOFormatter<DetectionConfigDTO
   }
 
   @Override
-  public Map<String, Object> format(DetectionConfigDTO config) {
+  public Map<String, Object> format(AlertDTO config) {
     Map<String, Object> output = new HashMap<>();
     output.put(ATTR_ID, config.getId());
     output.put(ATTR_IS_ACTIVE, config.isActive());
@@ -169,7 +169,7 @@ public class DetectionConfigFormatter implements DTOFormatter<DetectionConfigDTO
     return metricUrns;
   }
 
-  private DetectionHealth getDetectionHealth(DetectionConfigDTO config) {
+  private DetectionHealth getDetectionHealth(AlertDTO config) {
     // Return the stored detection health when it is available in the DetectionConfig.
     if (!Objects.isNull(config.getHealth())) {
       return config.getHealth();
@@ -210,7 +210,7 @@ public class DetectionConfigFormatter implements DTOFormatter<DetectionConfigDTO
     return this.metricDAO.findById(me.getId());
   }
 
-  private List<TimeGranularity> getGranularitiesForConfig(DetectionConfigDTO config, Map<String, DatasetConfigDTO> metricUrnToDatasets) {
+  private List<TimeGranularity> getGranularitiesForConfig(AlertDTO config, Map<String, DatasetConfigDTO> metricUrnToDatasets) {
     try {
       // first try to get the granularities in config properties
       List<TimeGranularity> granularities = getDetectionConfigMonitoringGranularities(config);
@@ -237,7 +237,7 @@ public class DetectionConfigFormatter implements DTOFormatter<DetectionConfigDTO
     return Collections.min(windowSizes);
   }
 
-  private List<TimeGranularity> getDetectionConfigMonitoringGranularities(DetectionConfigDTO config) {
+  private List<TimeGranularity> getDetectionConfigMonitoringGranularities(AlertDTO config) {
     List<TimeGranularity> monitoringGranularities = new ArrayList<>();
     for (Map.Entry<String, Object> entry : config.getComponentSpecs().entrySet()) {
       Map<String, Object> specs = (Map<String, Object>) entry.getValue();

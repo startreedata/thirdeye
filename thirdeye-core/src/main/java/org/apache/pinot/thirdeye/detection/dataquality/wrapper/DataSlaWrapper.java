@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -61,7 +61,7 @@ public class DataSlaWrapper extends DetectionPipeline {
   private final String entityName;
   private final String metricUrn;
 
-  public DataSlaWrapper(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime) {
+  public DataSlaWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) {
     super(provider, config, startTime, endTime);
 
     Preconditions.checkArgument(this.config.getProperties().containsKey(PROP_SUB_ENTITY_NAME));

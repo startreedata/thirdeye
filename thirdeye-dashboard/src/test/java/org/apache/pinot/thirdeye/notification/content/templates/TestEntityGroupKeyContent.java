@@ -39,7 +39,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -111,7 +111,7 @@ public class TestEntityGroupKeyContent {
     alerters.put("smtpConfiguration", smtpProps);
     thirdeyeAnomalyConfig.setAlerterConfiguration(alerters);
 
-    DetectionConfigDTO detection = new DetectionConfigDTO();
+    AlertDTO detection = new AlertDTO();
     detection.setName("test_report");
     detection.setDescription("test_description");
     long id = detectionDAO.save(detection);
@@ -202,7 +202,7 @@ public class TestEntityGroupKeyContent {
     alerters.put("smtpConfiguration", smtpProps);
     thirdeyeAnomalyConfig.setAlerterConfiguration(alerters);
 
-    DetectionConfigDTO detection = new DetectionConfigDTO();
+    AlertDTO detection = new AlertDTO();
     detection.setName("test_report");
     detection.setDescription("test_description");
     long id = detectionDAO.save(detection);

@@ -77,7 +77,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
@@ -214,8 +214,8 @@ public class YamlResource {
   /*
    * Helper method to build the detection config from a yaml.
    */
-  private DetectionConfigDTO buildDetectionConfigFromYaml(long tuningStartTime, long tuningEndTime,
-      @NotNull String yamlConfig, DetectionConfigDTO existingConfig)
+  private AlertDTO buildDetectionConfigFromYaml(long tuningStartTime, long tuningEndTime,
+      @NotNull String yamlConfig, AlertDTO existingConfig)
       throws ConfigValidationException {
     // Configure the tuning window
     if (tuningStartTime == 0L && tuningEndTime == 0L) {
@@ -225,7 +225,7 @@ public class YamlResource {
     }
 
     // Translate the raw yaml config to detection config object
-    DetectionConfigDTO config = new DetectionConfigTranslator(yamlConfig, this.provider)
+    AlertDTO config = new DetectionConfigTranslator(yamlConfig, this.provider)
         .translate();
 
     if (existingConfig != null) {
@@ -246,7 +246,7 @@ public class YamlResource {
    */
   private void createYamlOnboardingTask(long detectionConfigId, long tuningWindowStart,
       long tuningWindowEnd) {
-    DetectionConfigDTO detectionConfig = this.detectionConfigDAO.findById(detectionConfigId);
+    AlertDTO detectionConfig = this.detectionConfigDAO.findById(detectionConfigId);
     Preconditions.checkNotNull(detectionConfig,
         String.format("Cannot find detection %d to run onboarding job", detectionConfigId));
 
@@ -430,9 +430,9 @@ public class YamlResource {
    * Check and validate if there exists a duplicate detection name entry
    */
   private void validateDuplicateDetection(String detectionName) throws ConfigValidationException {
-    List<DetectionConfigDTO> detectionConfigDTOS = this.detectionConfigDAO
+    List<AlertDTO> alertDTOS = this.detectionConfigDAO
         .findByPredicate(Predicate.EQ("name", detectionName));
-    ConfigValidationUtils.checkArgument(detectionConfigDTOS.isEmpty(),
+    ConfigValidationUtils.checkArgument(alertDTOS.isEmpty(),
         String.format(DUPLICATE_KEY_MSG, PROP_DETECTION_NAME));
   }
 
@@ -464,7 +464,7 @@ public class YamlResource {
               + " QPS quota: %f", this.onboardingRateLimiter.getRate()));
     }
 
-    DetectionConfigDTO detectionConfig = buildDetectionConfigFromYaml(tuningStartTime,
+    AlertDTO detectionConfig = buildDetectionConfigFromYaml(tuningStartTime,
         tuningEndTime, payload, null);
     validateDuplicateDetection(detectionConfig.getName());
 
@@ -517,13 +517,13 @@ public class YamlResource {
   private void updateDetectionConfig(ThirdEyePrincipal user, long detectionID,
       @NotNull String payload, long startTime,
       long endTime) throws ConfigValidationException {
-    DetectionConfigDTO existingDetectionConfig = this.detectionConfigDAO.findById(detectionID);
+    AlertDTO existingDetectionConfig = this.detectionConfigDAO.findById(detectionID);
     Preconditions
         .checkNotNull(existingDetectionConfig, "Cannot find detection pipeline " + detectionID);
 
     authorizeUser(user, detectionID, PROP_DETECTION);
     try {
-      DetectionConfigDTO updatedDetectionConfig = buildDetectionConfigFromYaml(startTime, endTime,
+      AlertDTO updatedDetectionConfig = buildDetectionConfigFromYaml(startTime, endTime,
           payload, existingDetectionConfig);
       if (!updatedDetectionConfig.getName().equals(existingDetectionConfig.getName())) {
         // detection name has been renamed; ensure there are no duplicates.
@@ -571,7 +571,7 @@ public class YamlResource {
   private void authorizeUser(ThirdEyePrincipal user, long id, String authEntity) {
     if (isServiceAccount(user)) {
       if (authEntity.equals(PROP_DETECTION)) {
-        DetectionConfigDTO detectionConfig = this.detectionConfigDAO.findById(id);
+        AlertDTO detectionConfig = this.detectionConfigDAO.findById(id);
         validateConfigOwner(user, detectionConfig.getOwners());
       } else if (authEntity.equals(PROP_SUBSCRIPTION)) {
         SubscriptionGroupDTO subscriptionConfig = this.subscriptionConfigDAO.findById(id);
@@ -624,9 +624,9 @@ public class YamlResource {
     return Response.ok().entity(responseMessage).build();
   }
 
-  private DetectionConfigDTO fetchExistingDetection(@NotNull String payload)
+  private AlertDTO fetchExistingDetection(@NotNull String payload)
       throws ConfigValidationException {
-    DetectionConfigDTO existingDetectionConfig = null;
+    AlertDTO existingDetectionConfig = null;
 
     // Extract the detectionName from payload
     Map<String, Object> detectionConfigMap = new HashMap<>();
@@ -636,7 +636,7 @@ public class YamlResource {
         PROP_DETECTION_NAME + " cannot be left empty");
 
     // Check if detection already existing
-    Collection<DetectionConfigDTO> detectionConfigs = this.detectionConfigDAO
+    Collection<AlertDTO> detectionConfigs = this.detectionConfigDAO
         .findByPredicate(Predicate.EQ("name", detectionName));
     if (detectionConfigs != null && !detectionConfigs.isEmpty()) {
       existingDetectionConfig = detectionConfigs.iterator().next();
@@ -648,7 +648,7 @@ public class YamlResource {
   long createOrUpdateDetectionConfig(ThirdEyePrincipal user, @NotNull String payload)
       throws ConfigValidationException {
     long detectionId;
-    DetectionConfigDTO existingDetection = fetchExistingDetection(payload);
+    AlertDTO existingDetection = fetchExistingDetection(payload);
     if (existingDetection != null) {
       detectionId = existingDetection.getId();
       updateDetectionConfig(user, detectionId, payload);
@@ -917,20 +917,20 @@ public class YamlResource {
       @QueryParam("tuningEnd") long tuningEnd,
       @ApiParam("jsonPayload") String payload) throws ConfigValidationException {
     validatePayload(payload);
-    DetectionConfigDTO existingConfig = this.detectionConfigDAO.findById(id);
+    AlertDTO existingConfig = this.detectionConfigDAO.findById(id);
     Preconditions.checkNotNull(existingConfig, "can not find existing detection config " + id);
     return runPreview(start, end, tuningStart, tuningEnd, payload, existingConfig);
   }
 
   private Response runPreview(long start, long end,
       long tuningStart, long tuningEnd, @NotNull String payload,
-      DetectionConfigDTO existingConfig) {
+      AlertDTO existingConfig) {
     long ts = System.currentTimeMillis();
     Map<String, String> responseMessage = new HashMap<>();
     DetectionPipelineResult result;
     Future<DetectionPipelineResult> future = null;
     try {
-      DetectionConfigDTO detectionConfig;
+      AlertDTO detectionConfig;
       if (existingConfig == null) {
         detectionConfig = buildDetectionConfigFromYaml(tuningStart, tuningEnd, payload, null);
         detectionConfig.setId(Long.MAX_VALUE);
@@ -993,7 +993,7 @@ public class YamlResource {
       @QueryParam("ruleName") String ruleName) {
     try {
       validatePayload(payload);
-      DetectionConfigDTO detectionConfig = buildDetectionConfigFromYaml(tuningStart, tuningEnd,
+      AlertDTO detectionConfig = buildDetectionConfigFromYaml(tuningStart, tuningEnd,
           payload, null);
       Preconditions.checkNotNull(detectionConfig);
       detectionConfig.setId(Long.MAX_VALUE);
@@ -1044,7 +1044,7 @@ public class YamlResource {
    * @param rule The rule name. If not provided then find the first rule.
    * @return The baseline for the urn.
    */
-  private TimeSeries getBaseline(DetectionConfigDTO detectionConfig, long start, long end,
+  private TimeSeries getBaseline(AlertDTO detectionConfig, long start, long end,
       String urn, String rule) {
     MetricEntity metric = MetricEntity.fromURN(urn);
     MetricSlice slice = MetricSlice
@@ -1079,7 +1079,7 @@ public class YamlResource {
       @ApiParam("Active status you want to set for the alert") @NotNull @QueryParam("active") boolean active) {
     Map<String, String> responseMessage = new HashMap<>();
     try {
-      DetectionConfigDTO config = this.detectionConfigDAO.findById(detectionId);
+      AlertDTO config = this.detectionConfigDAO.findById(detectionId);
       if (config == null) {
         throw new IllegalArgumentException(String.format("Cannot find config %d", detectionId));
       }
@@ -1137,7 +1137,7 @@ public class YamlResource {
    * @param config The detection configuration to be enhanced by DetectionConfigFormatter::format.
    * @return enhanced configuration or null if the parse failed, logs failure for debugging.
    */
-  private Map<String, Object> formatConfigOrNull(DetectionConfigDTO config) {
+  private Map<String, Object> formatConfigOrNull(AlertDTO config) {
     try {
       return this.detectionConfigFormatter.format(config);
     } catch (Exception e) {

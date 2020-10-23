@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.TaskBean;
@@ -276,14 +276,14 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   }
 
   @Override
-  public void populateDetectionConfig(DetectionConfigDTO detectionConfigDTO, DetectionPipelineTaskInfo taskInfo) {
-    DetectionConfigBean bean = convertDTO2Bean(detectionConfigDTO, DetectionConfigBean.class);
+  public void populateDetectionConfig(AlertDTO alertDTO, DetectionPipelineTaskInfo taskInfo) {
+    DetectionConfigBean bean = convertDTO2Bean(alertDTO, DetectionConfigBean.class);
     taskInfo.setDetectionConfigBean(bean);
   }
 
   @Override
-  public DetectionConfigDTO extractDetectionConfig(DetectionPipelineTaskInfo taskInfo) {
+  public AlertDTO extractDetectionConfig(DetectionPipelineTaskInfo taskInfo) {
     DetectionConfigBean detectionConfigBean = taskInfo.getDetectionConfigBean();
-    return MODEL_MAPPER.map(detectionConfigBean, DetectionConfigDTO.class);
+    return MODEL_MAPPER.map(detectionConfigBean, AlertDTO.class);
   }
 }

@@ -25,7 +25,7 @@ package org.apache.pinot.thirdeye.detection;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.MockModelEvaluator;
@@ -65,19 +65,19 @@ public class DefaultModelMaintenanceFlowTest {
 
   @Test
   public void testMaintainNotTunable() {
-    DetectionConfigDTO configDTO = new DetectionConfigDTO();
+    AlertDTO configDTO = new AlertDTO();
     configDTO.setId(this.configId);
     ModelEvaluator evaluator = new MockModelEvaluator();
     MockModelEvaluatorSpec spec = new MockModelEvaluatorSpec();
     spec.setMockModelStatus(ModelStatus.GOOD);
     configDTO.setComponents(ImmutableMap.of("evaluator_1", evaluator));
-    DetectionConfigDTO maintainedConfig = this.maintenanceFlow.maintain(configDTO, Instant.now());
+    AlertDTO maintainedConfig = this.maintenanceFlow.maintain(configDTO, Instant.now());
     Assert.assertEquals(configDTO, maintainedConfig);
   }
 
   @Test
   public void testMaintainTunableGood() {
-    DetectionConfigDTO configDTO = new DetectionConfigDTO();
+    AlertDTO configDTO = new AlertDTO();
     configDTO.setId(this.configId);
     ModelEvaluator evaluator = new MockModelEvaluator();
     MockModelEvaluatorSpec spec = new MockModelEvaluatorSpec();
@@ -85,14 +85,14 @@ public class DefaultModelMaintenanceFlowTest {
     evaluator.init(spec, this.dataFetcher);
     MockTunableDetector detector = new MockTunableDetector();
     configDTO.setComponents(ImmutableMap.of("evaluator_1", evaluator, "detector", detector));
-    DetectionConfigDTO maintainedConfig = this.maintenanceFlow.maintain(configDTO, Instant.now());
+    AlertDTO maintainedConfig = this.maintenanceFlow.maintain(configDTO, Instant.now());
     Assert.assertEquals(configDTO, maintainedConfig);
   }
 
   @Test
   public void testMaintainTunableBad() {
     DetectionRegistry.registerTunableComponent(MockTunableDetector.class.getName(), "MOCK_TUNABLE", "MOCK_TUNABLE");
-    DetectionConfigDTO configDTO = new DetectionConfigDTO();
+    AlertDTO configDTO = new AlertDTO();
     configDTO.setId(this.configId);
     configDTO.setYaml(String.format("metric: %s\ndataset: %s\n", METRIC_NAME, DATASET_NAME));
     ModelEvaluator evaluator = new MockModelEvaluator();
@@ -104,7 +104,7 @@ public class DefaultModelMaintenanceFlowTest {
     configDTO.setLastTuningTimestamp(1559175301000L);
     configDTO.setComponentSpecs(ImmutableMap.of("detector:MOCK_TUNABLE", ImmutableMap.of("className", MockTunableDetector.class.getName())));
     Instant maintainTimestamp = Instant.now();
-    DetectionConfigDTO maintainedConfig = this.maintenanceFlow.maintain(configDTO, maintainTimestamp);
+    AlertDTO maintainedConfig = this.maintenanceFlow.maintain(configDTO, maintainTimestamp);
     Assert.assertEquals(maintainedConfig.getLastTuningTimestamp(), maintainTimestamp.getMillis());
   }
 

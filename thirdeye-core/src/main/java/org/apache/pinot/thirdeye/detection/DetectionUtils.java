@@ -39,7 +39,7 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -248,7 +248,7 @@ public class DetectionUtils {
    * @return baseline time series
    * @throws Exception
    */
-  public static TimeSeries getBaselineTimeseries(MergedAnomalyResultDTO anomaly, Multimap<String, String> filters, Long metricId, DetectionConfigDTO config,
+  public static TimeSeries getBaselineTimeseries(MergedAnomalyResultDTO anomaly, Multimap<String, String> filters, Long metricId, AlertDTO config,
       long start, long end, DetectionPipelineLoader loader, DataProvider provider) throws Exception {
     String baselineProviderComponentName = anomaly.getProperties().get(PROP_BASELINE_PROVIDER_COMPONENT_NAME);
     BaselineProvider baselineProvider = new RuleBaselineProvider();
@@ -365,7 +365,7 @@ public class DetectionUtils {
   /**
    * Verify if this detection has data quality checks enabled
    */
-  public static boolean isDataQualityCheckEnabled(DetectionConfigDTO detectionConfig) {
+  public static boolean isDataQualityCheckEnabled(AlertDTO detectionConfig) {
     return detectionConfig.getDataQualityProperties() != null
         && !detectionConfig.getDataQualityProperties().isEmpty();
   }

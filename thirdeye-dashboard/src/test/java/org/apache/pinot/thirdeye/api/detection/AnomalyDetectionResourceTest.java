@@ -29,7 +29,7 @@ import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.common.metric.MetricType;
 import org.apache.pinot.thirdeye.datalayer.bao.*;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.OnlineDetectionDataDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
@@ -200,20 +200,20 @@ public class AnomalyDetectionResourceTest {
     MetricConfigDTO metricConfigDTO =
         this.anomalyDetectionResource.generateMetricConfig(payloadNode, this.suffix);
 
-    DetectionConfigDTO detectionConfigDTO = this.anomalyDetectionResource
+    AlertDTO alertDTO = this.anomalyDetectionResource
         .generateDetectionConfig(payloadNode, this.suffix, datasetConfigDTO, metricConfigDTO, 0, 0);
 
     // Do not support customized config names. Test this
-    Assert.assertEquals(detectionConfigDTO.getName(), DEFAULT_DETECTION_NAME + this.suffix);
+    Assert.assertEquals(alertDTO.getName(), DEFAULT_DETECTION_NAME + this.suffix);
   }
 
   @Test
   public void testGenerateTaskConfig() throws JsonProcessingException {
     long dummyId = 123456L;
-    DetectionConfigDTO detectionConfigDTO = new DetectionConfigDTO();
-    detectionConfigDTO.setId(dummyId);
+    AlertDTO alertDTO = new AlertDTO();
+    alertDTO.setId(dummyId);
     TaskDTO taskDTO = this.anomalyDetectionResource
-        .generateTaskConfig(detectionConfigDTO, 0, 0, this.suffix);
+        .generateTaskConfig(alertDTO, 0, 0, this.suffix);
 
     Assert.assertEquals(taskDTO.getTaskType(), TaskConstants.TaskType.DETECTION_ONLINE);
     Assert.assertEquals(taskDTO.getStatus(), TaskConstants.TaskStatus.WAITING);

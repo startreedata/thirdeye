@@ -26,7 +26,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -92,7 +92,7 @@ public class CurrentAndBaselineLoaderTest {
     ThirdEyeCacheRegistry.getInstance().registerQueryCache(cache);
     ThirdEyeCacheRegistry.initMetaDataCaches();
 
-    DetectionConfigDTO detectionConfig = new DetectionConfigDTO();
+    AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName(DETECTION_NAME_VALUE);
     this.detectionConfigId = this.detectionDAO.save(detectionConfig);
 

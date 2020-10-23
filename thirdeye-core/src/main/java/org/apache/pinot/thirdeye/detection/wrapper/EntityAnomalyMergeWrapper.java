@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
@@ -49,7 +49,7 @@ import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
  */
 public class EntityAnomalyMergeWrapper extends BaselineFillingMergeWrapper {
 
-  public EntityAnomalyMergeWrapper(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime) {
+  public EntityAnomalyMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) {
     super(provider, config, startTime, endTime);
   }
 

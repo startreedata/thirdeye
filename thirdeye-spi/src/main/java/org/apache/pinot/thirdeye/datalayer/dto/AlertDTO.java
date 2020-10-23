@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class DetectionConfigDTO extends DetectionConfigBean {
+public class AlertDTO extends DetectionConfigBean {
   private Map<String, BaseComponent> components = new HashMap<>();
 
   public Map<String, BaseComponent> getComponents() {

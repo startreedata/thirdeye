@@ -20,13 +20,11 @@
 package org.apache.pinot.thirdeye.detection.yaml;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -61,10 +59,10 @@ public class DetectionConfigTuner {
   private static final DetectionRegistry DETECTION_REGISTRY = DetectionRegistry.getInstance();
   public static final String PROP_YAML_PARAMS = "yamlParams";
 
-  private final DetectionConfigDTO detectionConfig;
+  private final AlertDTO detectionConfig;
   private final DataProvider dataProvider;
 
-  public DetectionConfigTuner(DetectionConfigDTO config, DataProvider dataProvider) {
+  public DetectionConfigTuner(AlertDTO config, DataProvider dataProvider) {
     Preconditions.checkNotNull(config);
     this.detectionConfig = config;
     this.dataProvider = dataProvider;
@@ -123,7 +121,7 @@ public class DetectionConfigTuner {
   /**
    * Scans through all the tunable components and injects tuned model params into the detection config
    */
-  public DetectionConfigDTO tune(long tuningWindowStart, long tuningWindowEnd) {
+  public AlertDTO tune(long tuningWindowStart, long tuningWindowEnd) {
     Map<String, Object> tunedComponentSpecs = new HashMap<>();
 
     // Tune each tunable component in the detection componentSpecs

@@ -28,7 +28,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -76,7 +76,7 @@ public class SendAlertTest {
     metricConfigDTO.setAlias(COLLECTION_VALUE + ":" + METRIC_VALUE);
     this.metricDAO.save(metricConfigDTO);
 
-    DetectionConfigDTO detectionConfig = new DetectionConfigDTO();
+    AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName(DETECTION_NAME_VALUE);
     detectionConfig.setActive(true);
     this.detectionConfigId = this.detectionDAO.save(detectionConfig);

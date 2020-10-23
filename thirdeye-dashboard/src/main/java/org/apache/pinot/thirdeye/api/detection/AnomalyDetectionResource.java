@@ -40,7 +40,7 @@ import org.apache.pinot.thirdeye.dashboard.resources.v2.anomalies.AnomalySearchF
 import org.apache.pinot.thirdeye.dashboard.resources.v2.anomalies.AnomalySearcher;
 import org.apache.pinot.thirdeye.datalayer.bao.*;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.OnlineDetectionDataDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
@@ -175,7 +175,7 @@ public class AnomalyDetectionResource {
           @Auth ThirdEyePrincipal principal) {
     DatasetConfigDTO datasetConfigDTO = null;
     MetricConfigDTO metricConfigDTO = null;
-    DetectionConfigDTO detectionConfigDTO;
+    AlertDTO alertDTO;
     TaskDTO taskDTO;
     Map<String, Object> anomalies;
     Response.Status responseStatus;
@@ -230,12 +230,12 @@ public class AnomalyDetectionResource {
       }
 
       // Create & save detection
-      detectionConfigDTO =
+      alertDTO =
           generateDetectionConfig(payloadNode, nameSuffix, datasetConfigDTO, metricConfigDTO, start,
               end);
 
       // Create & save task
-      taskDTO = generateTaskConfig(detectionConfigDTO, start, end, nameSuffix);
+      taskDTO = generateTaskConfig(alertDTO, start, end, nameSuffix);
 
       // Polling task status
       TaskDTO polledTaskDTO = pollingTask(taskDTO.getId());
@@ -274,7 +274,7 @@ public class AnomalyDetectionResource {
       JsonNode anomalyNode = objectMapper.convertValue(anomalies, JsonNode.class);
       ObjectNode responseNode = objectMapper.createObjectNode();
       responseNode.set(ANOMALIES_FIELD, anomalyNode);
-      responseNode.set(DETECTION_FIELD, objectMapper.convertValue(detectionConfigDTO.getYaml(), JsonNode.class));
+      responseNode.set(DETECTION_FIELD, objectMapper.convertValue(alertDTO.getYaml(), JsonNode.class));
       responseNode.set(DATASET_FIELD, objectMapper.convertValue(translateDatasetToYaml(datasetConfigDTO), JsonNode.class));
       responseNode.set(METRIC_FIELD, objectMapper.convertValue(translateMetricToYaml(metricConfigDTO), JsonNode.class));
 
@@ -369,10 +369,10 @@ public class AnomalyDetectionResource {
     return metricConfigDTO;
   }
 
-  DetectionConfigDTO generateDetectionConfig(JsonNode payloadNode, String suffix,
+  AlertDTO generateDetectionConfig(JsonNode payloadNode, String suffix,
       DatasetConfigDTO datasetConfigDTO, MetricConfigDTO metricConfigDTO, long start, long end)
       throws ConfigValidationException {
-    DetectionConfigDTO detectionConfigDTO;
+    AlertDTO alertDTO;
     Map<String, Object> detectionYaml;
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
@@ -390,25 +390,25 @@ public class AnomalyDetectionResource {
     detectionYaml.put("dataset", datasetConfigDTO.getName());
     detectionYaml.put("metric", metricConfigDTO.getName());
 
-    detectionConfigDTO =
+    alertDTO =
         new DetectionConfigTranslator(this.yaml.dump(detectionYaml), this.provider).translate();
-    detectionConfigDTO.setCron("0 0 0 1 1 ? 2200"); // Never scheduled
+    alertDTO.setCron("0 0 0 1 1 ? 2200"); // Never scheduled
 
     // Tune the detection config - Passes the raw yaml params & injects tuned params
-    DetectionConfigTuner detectionTuner = new DetectionConfigTuner(detectionConfigDTO, provider);
-    detectionConfigDTO = detectionTuner.tune(start, end);
+    DetectionConfigTuner detectionTuner = new DetectionConfigTuner(alertDTO, provider);
+    alertDTO = detectionTuner.tune(start, end);
 
     // Validate the detection config
-    detectionValidator.semanticValidation(detectionConfigDTO);
+    detectionValidator.semanticValidation(alertDTO);
 
     // Online detection will not save detect config into DB
 
-    LOG.info("Created detection with config {}", detectionConfigDTO);
+    LOG.info("Created detection with config {}", alertDTO);
 
-    return detectionConfigDTO;
+    return alertDTO;
   }
 
-  TaskDTO generateTaskConfig(DetectionConfigDTO detectionConfigDTO,
+  TaskDTO generateTaskConfig(AlertDTO alertDTO,
         long start, long end, String nameSuffix)
       throws JsonProcessingException {
     TaskDTO taskDTO = new TaskDTO();
@@ -421,7 +421,7 @@ public class AnomalyDetectionResource {
     taskInfo.setOnline(true);
 
     // Store the detection config into online task info
-    taskDAO.populateDetectionConfig(detectionConfigDTO, taskInfo);
+    taskDAO.populateDetectionConfig(alertDTO, taskInfo);
 
     String taskInfoJson = objectMapper.writeValueAsString(taskInfo);
     taskDTO.setTaskInfo(taskInfoJson);
@@ -870,28 +870,28 @@ public class AnomalyDetectionResource {
     Map<String, String> responseMessage = new HashMap<>();
     try {
       // Find detection by name
-      List<DetectionConfigDTO> detectionConfigDTOS =
+      List<AlertDTO> alertDTOS =
           detectionConfigDAO.findByPredicate(Predicate.EQ("name", detectionName));
 
       // Precondition check
-      if (detectionConfigDTOS.isEmpty()) {
+      if (alertDTOS.isEmpty()) {
         LOG.warn("Detection config not found: {}", detectionName);
         responseMessage.put("message", "Detection config not found: " + detectionName);
         return Response.status(Response.Status.NOT_FOUND).entity(responseMessage).build();
-      } else if (detectionConfigDTOS.size() > 1) {
-        LOG.error("Duplicate detection configs: {}", detectionConfigDTOS);
+      } else if (alertDTOS.size() > 1) {
+        LOG.error("Duplicate detection configs: {}", alertDTOS);
         responseMessage.put("message", "Duplicate detection configs");
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseMessage)
             .build();
       }
 
-      DetectionConfigDTO detectionConfigDTO = detectionConfigDTOS.get(0);
+      AlertDTO alertDTO = alertDTOS.get(0);
 
-      LOG.info("Find detection config: {}", detectionConfigDTO);
+      LOG.info("Find detection config: {}", alertDTO);
 
       // Create task
       DetectionPipelineTaskInfo taskInfo =
-          new DetectionPipelineTaskInfo(detectionConfigDTO.getId(), start, end);
+          new DetectionPipelineTaskInfo(alertDTO.getId(), start, end);
       String taskInfoJson;
       TaskDTO taskDTO;
       long taskId;

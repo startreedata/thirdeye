@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.finetune;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 
 
@@ -40,5 +40,5 @@ public interface TuningAlgorithm {
    *
    * @return the detection config dto
    */
-  DetectionConfigDTO bestDetectionConfig();
+  AlertDTO bestDetectionConfig();
 }

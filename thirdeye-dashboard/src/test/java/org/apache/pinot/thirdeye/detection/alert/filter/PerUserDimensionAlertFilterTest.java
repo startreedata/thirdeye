@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -76,13 +76,13 @@ public class PerUserDimensionAlertFilterTest {
   public void beforeMethod() throws InterruptedException {
     testDAOProvider = DAOTestBase.getInstance();
 
-    DetectionConfigDTO detectionConfig1 = new DetectionConfigDTO();
+    AlertDTO detectionConfig1 = new AlertDTO();
     detectionConfig1.setName("test detection 1");
     detectionConfig1.setActive(true);
     this.detectionConfigId1 = DAORegistry.getInstance().getDetectionConfigManager()
         .save(detectionConfig1);
 
-    DetectionConfigDTO detectionConfig2 = new DetectionConfigDTO();
+    AlertDTO detectionConfig2 = new AlertDTO();
     detectionConfig2.setName("test detection 2");
     detectionConfig2.setActive(true);
     this.detectionConfigId2 = DAORegistry.getInstance().getDetectionConfigManager()

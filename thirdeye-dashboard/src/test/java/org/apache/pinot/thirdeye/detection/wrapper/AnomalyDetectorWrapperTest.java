@@ -25,7 +25,7 @@ import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
@@ -53,7 +53,7 @@ public class AnomalyDetectorWrapperTest {
 
   private MockDataProvider provider;
   private Map<String, Object> properties;
-  private DetectionConfigDTO config;
+  private AlertDTO config;
 
   @BeforeMethod
   public void setUp() {
@@ -61,7 +61,7 @@ public class AnomalyDetectorWrapperTest {
     this.properties.put(PROP_METRIC_URN, "thirdeye:metric:1");
     this.properties.put(PROP_DETECTOR, "$testDetector");
     this.properties.put(PROP_SUB_ENTITY_NAME, "test_detector");
-    this.config = new DetectionConfigDTO();
+    this.config = new AlertDTO();
     this.config.setComponents(ImmutableMap.of("testDetector", new ThresholdRuleDetector()));
     this.config.setProperties(properties);
     this.config.setId(-1L);

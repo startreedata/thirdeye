@@ -23,7 +23,7 @@ import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.List;
@@ -57,7 +57,7 @@ public class DatasetAutoOnboardResource {
 
   @GET
   @Path("/{detectionId}")
-  public DetectionConfigDTO getDetectionConfig(@PathParam("detectionId") long detectionId) {
+  public AlertDTO getDetectionConfig(@PathParam("detectionId") long detectionId) {
     return this.detectionDAO.findById(detectionId);
   }
 }

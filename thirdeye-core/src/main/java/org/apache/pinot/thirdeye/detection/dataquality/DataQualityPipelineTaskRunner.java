@@ -33,7 +33,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -109,7 +109,7 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
 
     try {
       DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
-      DetectionConfigDTO config = this.detectionDAO.findById(info.getConfigId());
+      AlertDTO config = this.detectionDAO.findById(info.getConfigId());
       if (config == null) {
         throw new IllegalArgumentException(String.format("Could not resolve config id %d", info.getConfigId()));
       }

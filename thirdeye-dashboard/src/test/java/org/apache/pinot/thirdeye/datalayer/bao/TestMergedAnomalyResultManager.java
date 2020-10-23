@@ -17,7 +17,7 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -301,8 +301,8 @@ public class TestMergedAnomalyResultManager{
     Assert.assertEquals(parent, this.mergedAnomalyResultDAO.findParent(leafNode));
   }
 
-  public static DetectionConfigDTO mockDetectionConfig() {
-    DetectionConfigDTO detectionConfig = new DetectionConfigDTO();
+  public static AlertDTO mockDetectionConfig() {
+    AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName("Only For Test");
     return detectionConfig;
   }

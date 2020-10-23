@@ -38,7 +38,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -95,17 +95,17 @@ public class DimensionsRecipientAlertFilterTest {
     appDAO.save(app);
 
     AlertManager detDAO = DAORegistry.getInstance().getDetectionConfigManager();
-    DetectionConfigDTO detectionConfig1 = new DetectionConfigDTO();
+    AlertDTO detectionConfig1 = new AlertDTO();
     detectionConfig1.setName("test detection 1");
     detectionConfig1.setActive(true);
     this.detectionConfigId1 = detDAO.save(detectionConfig1);
 
-    DetectionConfigDTO detectionConfig2 = new DetectionConfigDTO();
+    AlertDTO detectionConfig2 = new AlertDTO();
     detectionConfig2.setName("test detection 2");
     detectionConfig2.setActive(true);
     this.detectionConfigId2 = detDAO.save(detectionConfig2);
 
-    DetectionConfigDTO detectionConfig3 = new DetectionConfigDTO();
+    AlertDTO detectionConfig3 = new AlertDTO();
     detectionConfig3.setName("test detection 3");
     detectionConfig3.setActive(true);
     this.detectionConfigId3 = detDAO.save(detectionConfig3);

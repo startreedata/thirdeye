@@ -50,7 +50,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DataCompletenessConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
@@ -75,7 +75,7 @@ import org.joda.time.DateTime;
 
 public class DaoTestUtils {
 
-  public static DetectionConfigDTO getTestDetectionConfig(DataProvider provider,
+  public static AlertDTO getTestDetectionConfig(DataProvider provider,
       String detectionConfigFile)
       throws IOException, ConfigValidationException {
     String yamlConfig = IOUtils
@@ -83,7 +83,7 @@ public class DaoTestUtils {
 
     // Translate
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, provider);
-    DetectionConfigDTO detectionConfig = translator.translate();
+    AlertDTO detectionConfig = translator.translate();
 
     Map<String, Object> properties = detectionConfig.getProperties();
     properties.put("timezone", "UTC");

@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -89,12 +89,12 @@ public class TaskUtils {
   public static DetectionPipelineTaskInfo buildTaskInfo(JobExecutionContext jobExecutionContext) {
     JobKey jobKey = jobExecutionContext.getJobDetail().getKey();
     Long id = getIdFromJobKey(jobKey.getName());
-    DetectionConfigDTO configDTO = DAORegistry.getInstance().getDetectionConfigManager().findById(id);
+    AlertDTO configDTO = DAORegistry.getInstance().getDetectionConfigManager().findById(id);
 
     return buildTaskInfoFromDetectionConfig(configDTO, System.currentTimeMillis());
   }
 
-  public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(DetectionConfigDTO configDTO, long end) {
+  public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO configDTO, long end) {
     long delay = getDetectionExpectedDelay(configDTO);
     long start = Math.max(configDTO.getLastTimestamp(), end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
     return new DetectionPipelineTaskInfo(configDTO.getId(), start, end);

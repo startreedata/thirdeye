@@ -28,7 +28,7 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
@@ -58,11 +58,11 @@ public abstract class DetectionPipeline {
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipeline.class);
 
   protected final DataProvider provider;
-  protected final DetectionConfigDTO config;
+  protected final AlertDTO config;
   protected final long startTime;
   protected final long endTime;
 
-  protected DetectionPipeline(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime) {
+  protected DetectionPipeline(DataProvider provider, AlertDTO config, long startTime, long endTime) {
     this.provider = provider;
     this.config = config;
     this.startTime = startTime;
@@ -256,7 +256,7 @@ public abstract class DetectionPipeline {
       Map<String, Object> nestedProps, final long startTime, final long endTime) throws Exception {
     Preconditions.checkArgument(nestedProps.containsKey(PROP_CLASS_NAME), "Nested missing " + PROP_CLASS_NAME);
     Map<String, Object> properties = new HashMap<>(nestedProps);
-    DetectionConfigDTO nestedConfig = new DetectionConfigDTO();
+    AlertDTO nestedConfig = new AlertDTO();
     nestedConfig.setId(this.config.getId());
     nestedConfig.setName(this.config.getName());
     nestedConfig.setDescription(this.config.getDescription());
@@ -279,7 +279,7 @@ public abstract class DetectionPipeline {
     return provider;
   }
 
-  public DetectionConfigDTO getConfig() {
+  public AlertDTO getConfig() {
     return config;
   }
 

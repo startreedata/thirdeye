@@ -36,7 +36,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -64,8 +64,8 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
   private final DetectionPipelineLoader loader;
   private final DataProvider provider;
   private final MergedAnomalyResultManager anomalyDAO;
-  private Map<DetectionConfigDTO, Double> scores;
-  private Map<DetectionConfigDTO, DetectionPipelineResult> results;
+  private Map<AlertDTO, Double> scores;
+  private Map<AlertDTO, DetectionPipelineResult> results;
   private ScoreFunction scoreFunction;
 
   /**
@@ -120,7 +120,7 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
   private void fit(AnomalySlice slice, Map<String, Number> currentParameters,
       Collection<MergedAnomalyResultDTO> testAnomalies) throws Exception {
     if (currentParameters.size() == this.parameters.size()) {
-      DetectionConfigDTO config = makeConfigFromParameters(currentParameters);
+      AlertDTO config = makeConfigFromParameters(currentParameters);
       DetectionPipeline pipeline = this.loader.from(this.provider, config, slice.getStart(), slice.getEnd());
       DetectionPipelineResult result = pipeline.run();
       this.results.put(config, result);
@@ -138,7 +138,7 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
     }
   }
 
-  private DetectionConfigDTO makeConfigFromParameters(Map<String, Number> currentParameters) throws IOException {
+  private AlertDTO makeConfigFromParameters(Map<String, Number> currentParameters) throws IOException {
     DocumentContext jsonContext = JsonPath.parse(this.jsonProperties);
     // Replace parameters using json path
     for (Map.Entry<String, Number> entry : currentParameters.entrySet()) {
@@ -147,7 +147,7 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
       jsonContext.set(path, value);
     }
     Map<String, Object> properties = OBJECT_MAPPER.readValue(jsonContext.jsonString(), Map.class);
-    DetectionConfigDTO config = new DetectionConfigDTO();
+    AlertDTO config = new AlertDTO();
     config.setId(Long.MAX_VALUE);
     config.setName("preview");
     config.setDescription("previewing the detection");
@@ -162,11 +162,11 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
    * @return the detection config dto
    */
   @Override
-  public DetectionConfigDTO bestDetectionConfig() {
+  public AlertDTO bestDetectionConfig() {
     // returns the detection config with the highest score
     double maxVal = -1;
-    DetectionConfigDTO bestConfig = null;
-    for (Map.Entry<DetectionConfigDTO, Double> entry : this.scores.entrySet()) {
+    AlertDTO bestConfig = null;
+    for (Map.Entry<AlertDTO, Double> entry : this.scores.entrySet()) {
       if (entry.getValue() > maxVal) {
         bestConfig = entry.getKey();
         maxVal = entry.getValue();
@@ -184,8 +184,8 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
     // if no scores is available, compare the number of anomalies detected by each config.
     if (!this.results.isEmpty()) {
       int maxNumberOfAnomalies = 0;
-      bestConfig = (DetectionConfigDTO) results.keySet().toArray()[0];
-      for (Map.Entry<DetectionConfigDTO, DetectionPipelineResult> entry : results.entrySet()) {
+      bestConfig = (AlertDTO) results.keySet().toArray()[0];
+      for (Map.Entry<AlertDTO, DetectionPipelineResult> entry : results.entrySet()) {
         if (entry.getValue().getAnomalies().size() > maxNumberOfAnomalies) {
           bestConfig = entry.getKey();
           maxNumberOfAnomalies = entry.getValue().getAnomalies().size();

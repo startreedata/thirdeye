@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
@@ -71,10 +71,10 @@ public class YamlResourceTest {
     this.yamlResource = new YamlResource(null, new DetectionPreviewConfiguration());
     this.daoRegistry = DAORegistry.getInstance();
     AlertManager detectionDAO = this.daoRegistry.getDetectionConfigManager();
-    DetectionConfigDTO config1 = new DetectionConfigDTO();
+    AlertDTO config1 = new AlertDTO();
     config1.setName("test_detection_1");
     alertId1 = detectionDAO.save(config1);
-    DetectionConfigDTO config2 = new DetectionConfigDTO();
+    AlertDTO config2 = new AlertDTO();
     config2.setName("test_detection_2");
     alertId2 = detectionDAO.save(config2);
 
@@ -164,7 +164,7 @@ public class YamlResourceTest {
         .toString(this.getClass().getResourceAsStream("detection/detection-config-1.yaml"));
     try {
       long id = this.yamlResource.createOrUpdateDetectionConfig(user, validYaml);
-      DetectionConfigDTO detection = daoRegistry.getDetectionConfigManager().findById(id);
+      AlertDTO detection = daoRegistry.getDetectionConfigManager().findById(id);
       Assert.assertNotNull(detection);
       Assert.assertEquals(detection.getName(), "test_detection_1");
     } catch (Exception e) {
@@ -177,7 +177,7 @@ public class YamlResourceTest {
         .toString(this.getClass().getResourceAsStream("detection/detection-config-2.yaml"));
     try {
       long id = this.yamlResource.createOrUpdateDetectionConfig(user, updatedYaml);
-      DetectionConfigDTO detection = daoRegistry.getDetectionConfigManager().findById(id);
+      AlertDTO detection = daoRegistry.getDetectionConfigManager().findById(id);
       Assert.assertNotNull(detection);
       Assert.assertEquals(detection.getName(), "test_detection_2");
       Assert.assertEquals(detection.getDescription(), "My modified pipeline");
@@ -291,7 +291,7 @@ public class YamlResourceTest {
         .toString(this.getClass().getResourceAsStream("subscription/subscription-config-4.yaml"));
     try {
       long id = this.yamlResource.createSubscriptionConfig(validYaml);
-      DetectionConfigDTO detection = daoRegistry.getDetectionConfigManager().findById(id);
+      AlertDTO detection = daoRegistry.getDetectionConfigManager().findById(id);
       Assert.assertNotNull(detection);
       Assert.assertEquals(detection.getName(), "Subscription Group Name");
     } catch (Exception e) {
@@ -404,7 +404,7 @@ public class YamlResourceTest {
           "Alert was created successfully.");
 
       // Ensure the detection and subscription are persisted
-      DetectionConfigDTO detection = this.daoRegistry.getDetectionConfigManager().findById(6l);
+      AlertDTO detection = this.daoRegistry.getDetectionConfigManager().findById(6l);
       Assert.assertNotNull(detection);
       SubscriptionGroupDTO subscription = this.daoRegistry.getDetectionAlertConfigManager()
           .findById(7l);
@@ -439,7 +439,7 @@ public class YamlResourceTest {
               + " Please use an existing application name or reach out to the ThirdEye team to setup a new one.");
 
       // Ensure the detection and subscription are not persisted
-      List<DetectionConfigDTO> detections = this.daoRegistry.getDetectionConfigManager().findAll();
+      List<AlertDTO> detections = this.daoRegistry.getDetectionConfigManager().findAll();
       Assert.assertEquals(detections.size(), 2);
       List<SubscriptionGroupDTO> subscriptions = this.daoRegistry.getDetectionAlertConfigManager()
           .findAll();

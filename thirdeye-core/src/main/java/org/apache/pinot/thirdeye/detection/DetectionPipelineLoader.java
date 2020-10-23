@@ -19,17 +19,17 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import java.lang.reflect.Constructor;
 
 
 public class DetectionPipelineLoader {
   private static final String PROP_CLASS_NAME = "className";
 
-  public DetectionPipeline from(DataProvider provider, DetectionConfigDTO config, long start, long end) {
+  public DetectionPipeline from(DataProvider provider, AlertDTO config, long start, long end) {
     String className = config.getProperties().get(PROP_CLASS_NAME).toString();
     try {
-      Constructor<?> constructor = Class.forName(className).getConstructor(DataProvider.class, DetectionConfigDTO.class, long.class, long.class);
+      Constructor<?> constructor = Class.forName(className).getConstructor(DataProvider.class, AlertDTO.class, long.class, long.class);
       return (DetectionPipeline) constructor.newInstance(provider, config, start, end);
     } catch (Exception e) {
       throw new IllegalArgumentException("Failed to initialize the detection pipeline.", e);

@@ -44,7 +44,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -112,7 +112,7 @@ public class DataProviderTest {
 
     // detections
     this.detectionIds = new ArrayList<>();
-    DetectionConfigDTO detectionConfig = new DetectionConfigDTO();
+    AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName("test_detection_1");
     detectionConfig.setDescription("test_description_1");
     this.detectionIds.add(this.detectionDAO.save(detectionConfig));

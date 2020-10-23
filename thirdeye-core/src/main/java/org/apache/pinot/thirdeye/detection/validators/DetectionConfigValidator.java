@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -42,7 +42,7 @@ import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionCo
 /**
  * Application specific constraints and validations on detection config are defined here
  */
-public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<DetectionConfigDTO> {
+public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertDTO> {
   private static final Logger LOG = LoggerFactory.getLogger(DetectionConfigValidator.class);
 
   private final DetectionPipelineLoader loader;
@@ -75,7 +75,7 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<Detect
    * Validate the pipeline by loading and initializing components
    */
   @Override
-  public void semanticValidation(DetectionConfigDTO detectionConfig) throws ConfigValidationException {
+  public void semanticValidation(AlertDTO detectionConfig) throws ConfigValidationException {
     // backup and swap out id
     Long id = detectionConfig.getId();
     detectionConfig.setId(-1L);

@@ -21,9 +21,9 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 
 
-public interface AlertManager extends AbstractManager<DetectionConfigDTO> {
-  List<DetectionConfigDTO> findAllActive();
+public interface AlertManager extends AbstractManager<AlertDTO> {
+  List<AlertDTO> findAllActive();
 }

@@ -76,7 +76,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.MergedAnomalyResultBean;
@@ -557,7 +557,7 @@ public class AnomaliesResource {
 
     if (mergedAnomaly.getDetectionConfigId() != null) {
 
-      DetectionConfigDTO detectionConfig = this.detectionDAO.findById(mergedAnomaly.getDetectionConfigId());
+      AlertDTO detectionConfig = this.detectionDAO.findById(mergedAnomaly.getDetectionConfigId());
       if (detectionConfig == null) {
         return null;
       }
@@ -708,7 +708,7 @@ public class AnomaliesResource {
    * @return
    * @throws Exception
    */
-  private AnomalyDetails constructAnomalyDetails(MergedAnomalyResultDTO anomaly, DetectionConfigDTO config) throws Exception {
+  private AnomalyDetails constructAnomalyDetails(MergedAnomalyResultDTO anomaly, AlertDTO config) throws Exception {
     MetricConfigDTO metric = this.metricConfigDAO.findByMetricAndDataset(anomaly.getMetric(), anomaly.getCollection());
     if (metric == null) {
       throw new IllegalArgumentException(String.format("Could not resolve metric '%s' in dataset '%s' for anomaly id %d", anomaly.getMetric(), anomaly.getCollection(), anomaly.getId()));

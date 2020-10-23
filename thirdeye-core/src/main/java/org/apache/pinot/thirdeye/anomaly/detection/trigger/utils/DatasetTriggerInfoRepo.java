@@ -30,7 +30,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
@@ -100,9 +100,9 @@ public class DatasetTriggerInfoRepo {
 
   private void updateFreshTimeMap() {
     Set<Long> visitedMetrics = new HashSet<>(); // reduce the number of DB read
-    List<DetectionConfigDTO> detectionConfigs = detectionConfigDAO.findAllActive();
+    List<AlertDTO> detectionConfigs = detectionConfigDAO.findAllActive();
     LOG.info(String.format("Found %d active detection configs", detectionConfigs.size()));
-    for (DetectionConfigDTO detectionConfig : detectionConfigs) {
+    for (AlertDTO detectionConfig : detectionConfigs) {
       Set<String> metricUrns = DetectionConfigFormatter
           .extractMetricUrnsFromProperties(detectionConfig.getProperties());
       for (String urn : metricUrns) {

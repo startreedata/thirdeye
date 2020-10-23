@@ -38,7 +38,7 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -139,7 +139,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       Long id = -1L;
 
       if (anomaly.getDetectionConfigId() != null) {
-        DetectionConfigDTO config = this.configDAO.findById(anomaly.getDetectionConfigId());
+        AlertDTO config = this.configDAO.findById(anomaly.getDetectionConfigId());
         Preconditions.checkNotNull(config,
             String.format("Cannot find detection config %d", anomaly.getDetectionConfigId()));
         functionName = config.getName();

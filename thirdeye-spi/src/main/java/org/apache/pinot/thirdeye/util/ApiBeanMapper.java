@@ -19,7 +19,7 @@ import org.apache.pinot.thirdeye.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -70,7 +70,7 @@ public abstract class ApiBeanMapper {
         ;
   }
 
-  public static AlertApi toApi(final DetectionConfigDTO dto) {
+  public static AlertApi toApi(final AlertDTO dto) {
     return new AlertApi()
         .setId(dto.getId())
         .setName(dto.getName())

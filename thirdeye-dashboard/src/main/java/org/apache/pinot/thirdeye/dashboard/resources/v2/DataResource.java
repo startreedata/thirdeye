@@ -69,7 +69,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -222,9 +222,9 @@ public class DataResource {
    */
   @GET
   @Path("autocomplete/detection")
-  public List<DetectionConfigDTO> getDetectionsWhereNameLike(
+  public List<AlertDTO> getDetectionsWhereNameLike(
       @ApiParam("detection name") @QueryParam("name") String name) {
-    List<DetectionConfigDTO> result = this.detectionConfigDAO
+    List<AlertDTO> result = this.detectionConfigDAO
         .findByPredicate(Predicate.LIKE("name", "%" + name.trim() + "%"));
     result.sort(Comparator.comparing(DetectionConfigBean::getName));
     return result;
@@ -284,7 +284,7 @@ public class DataResource {
   @GET
   @Path("autocomplete/detection-createdby")
   public Set<String> getCreatedBysWhereNameLike(@QueryParam("name") String name) {
-    List<DetectionConfigDTO> result = this.detectionConfigDAO
+    List<AlertDTO> result = this.detectionConfigDAO
         .findByPredicate(Predicate.LIKE("createdBy", "%" + name.trim() + "%"));
     return result.stream()
         .map(DetectionConfigBean::getCreatedBy)

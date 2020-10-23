@@ -17,9 +17,8 @@
 package org.apache.pinot.thirdeye.detection.wrapper;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
@@ -43,7 +42,7 @@ import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.*;
 
 
 public class ChildKeepingMergeWrapperTest {
-  private DetectionConfigDTO config;
+  private AlertDTO config;
   private ChildKeepingMergeWrapper wrapper;
   private Map<String, Object> properties;
   private List<Map<String, Object>> nestedProperties;
@@ -82,7 +81,7 @@ public class ChildKeepingMergeWrapperTest {
 
     this.properties.put(PROP_NESTED, this.nestedProperties);
 
-    this.config = new DetectionConfigDTO();
+    this.config = new AlertDTO();
     this.config.setId(PROP_ID_VALUE);
     this.config.setName(PROP_NAME_VALUE);
     this.config.setProperties(this.properties);
@@ -286,7 +285,7 @@ public class ChildKeepingMergeWrapperTest {
     Map<String, Object> properties = new HashMap<>();
     properties.put(PROP_NESTED, nestedProperties);
 
-    DetectionConfigDTO config = new DetectionConfigDTO();
+    AlertDTO config = new AlertDTO();
     config.setId(PROP_ID_VALUE);
     config.setName(PROP_NAME_VALUE);
     config.setProperties(properties);

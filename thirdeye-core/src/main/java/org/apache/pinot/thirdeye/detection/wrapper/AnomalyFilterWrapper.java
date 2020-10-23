@@ -24,7 +24,7 @@ import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -53,7 +53,7 @@ public class AnomalyFilterWrapper extends DetectionPipeline {
   private final AnomalyFilter anomalyFilter;
   private String metricUrn;
 
-  public AnomalyFilterWrapper(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime) {
+  public AnomalyFilterWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) {
     super(provider, config, startTime, endTime);
     Map<String, Object> properties = config.getProperties();
     this.nestedProperties = ConfigUtils.getList(properties.get(PROP_NESTED));

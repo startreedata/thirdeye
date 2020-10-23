@@ -37,7 +37,7 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
@@ -106,7 +106,7 @@ public class LegacyMergeWrapper extends DetectionPipeline {
    * @param endTime the end time
    * @throws Exception the exception
    */
-  public LegacyMergeWrapper(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime) throws Exception {
+  public LegacyMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) throws Exception {
     super(provider, config, startTime, endTime);
 
     this.anomalyFunctionClassName = MapUtils.getString(config.getProperties(), PROP_ANOMALY_FUNCTION_CLASS);

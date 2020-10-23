@@ -66,7 +66,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -168,7 +168,7 @@ public class DetectionResource {
   @ApiOperation("get a detection config with yaml")
   public Response getDetectionConfig(
       @ApiParam("the detection config id") @PathParam("id") long id) {
-    DetectionConfigDTO config = this.configDAO.findById(id);
+    AlertDTO config = this.configDAO.findById(id);
     return Response.ok(this.detectionConfigFormatter.format(config)).build();
   }
 
@@ -250,7 +250,7 @@ public class DetectionResource {
 
     Map<String, Object> properties = OBJECT_MAPPER.readValue(jsonPayload, Map.class);
 
-    DetectionConfigDTO config = new DetectionConfigDTO();
+    AlertDTO config = new AlertDTO();
     config.setId(Long.MAX_VALUE);
     config.setName("preview");
     config.setDescription("previewing the detection");
@@ -301,7 +301,7 @@ public class DetectionResource {
       @QueryParam("diagnostics") Boolean diagnostics,
       @QueryParam("end") long end) throws Exception {
 
-    DetectionConfigDTO config = this.configDAO.findById(id);
+    AlertDTO config = this.configDAO.findById(id);
     if (config == null) {
       throw new IllegalArgumentException("Detection Config not exist");
     }
@@ -317,7 +317,7 @@ public class DetectionResource {
   }
 
   // return default bucket size based on cron schedule.
-  private long getBucketSize(DetectionConfigDTO config) {
+  private long getBucketSize(AlertDTO config) {
     switch (config.getCron()) {
       case DAILY_CRON:
         // daily
@@ -333,7 +333,7 @@ public class DetectionResource {
   }
 
   // return default window size based on cron schedule.
-  private long getWindowSize(DetectionConfigDTO config) {
+  private long getWindowSize(AlertDTO config) {
     switch (config.getCron()) {
       case DAILY_CRON:
         // daily
@@ -351,7 +351,7 @@ public class DetectionResource {
   /*
   Generates monitoring window based on cron schedule.
    */
-  private List<Interval> getReplayMonitoringWindows(DetectionConfigDTO config, long start, long end,
+  private List<Interval> getReplayMonitoringWindows(AlertDTO config, long start, long end,
       Long windowSize, Long bucketSize) throws ParseException {
     List<Interval> monitoringWindows = new ArrayList<>();
     CronExpression cronExpression = new CronExpression(config.getCron());
@@ -413,7 +413,7 @@ public class DetectionResource {
     long ts = System.currentTimeMillis();
     DetectionPipelineResult result;
     try {
-      DetectionConfigDTO config = this.configDAO.findById(detectionId);
+      AlertDTO config = this.configDAO.findById(detectionId);
       if (config == null) {
         throw new IllegalArgumentException(String.format("Cannot find config %d", detectionId));
       }
@@ -482,8 +482,8 @@ public class DetectionResource {
       @QueryParam("comment") @ApiParam("comments") String comment,
       @QueryParam("baselineValue") @ApiParam("the baseline value for the anomaly") @DefaultValue("NaN") double baselineValue) {
 
-    DetectionConfigDTO detectionConfigDTO = this.configDAO.findById(detectionConfigId);
-    if (detectionConfigDTO == null) {
+    AlertDTO alertDTO = this.configDAO.findById(detectionConfigId);
+    if (alertDTO == null) {
       throw new IllegalArgumentException(
           String.format("Could not resolve detection config id %d", detectionConfigId));
     }

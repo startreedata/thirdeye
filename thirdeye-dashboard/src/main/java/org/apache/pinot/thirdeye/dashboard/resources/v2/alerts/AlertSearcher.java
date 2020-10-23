@@ -38,7 +38,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -112,7 +112,7 @@ public class AlertSearcher {
   public Map<String, Object> search(AlertSearchFilter searchFilter, long limit, long offset) {
     AlertSearchQuery searchQuery = new AlertSearchQuery(searchFilter, limit, offset);
     List<SubscriptionGroupDTO> subscriptionGroups = findRelatedSubscriptionGroups(searchQuery);
-    List<DetectionConfigDTO> detectionConfigs = findDetectionConfig(searchQuery,
+    List<AlertDTO> detectionConfigs = findDetectionConfig(searchQuery,
         subscriptionGroups);
     return getResult(searchQuery, subscriptionGroups, detectionConfigs);
   }
@@ -154,7 +154,7 @@ public class AlertSearcher {
     return new ArrayList<>(subscriptionGroups);
   }
 
-  private List<DetectionConfigDTO> findDetectionConfig(AlertSearchQuery searchQuery,
+  private List<AlertDTO> findDetectionConfig(AlertSearchQuery searchQuery,
       List<SubscriptionGroupDTO> subscriptionGroups) {
     AlertSearchFilter searchFilter = searchQuery.searchFilter;
     if (searchFilter.isEmpty()) {
@@ -163,7 +163,7 @@ public class AlertSearcher {
     }
 
     // look up and run the search filters on the detection config index
-    List<DetectionConfigDTO> indexedResult = new ArrayList<>();
+    List<AlertDTO> indexedResult = new ArrayList<>();
     List<Predicate> indexPredicates = new ArrayList<>();
     if (!searchFilter.getApplications().isEmpty() || !searchFilter.getSubscriptionGroups().isEmpty()
         || !searchFilter.getSubscribedBy().isEmpty()) {
@@ -188,7 +188,7 @@ public class AlertSearcher {
     }
 
     // for metrics, datasets, rule types filters, run the search filters in the generic table
-    List<DetectionConfigDTO> jsonValResult = new ArrayList<>();
+    List<AlertDTO> jsonValResult = new ArrayList<>();
     List<Predicate> jsonValPredicates = new ArrayList<>();
     if (!searchFilter.getRuleTypes().isEmpty()) {
       List<Predicate> ruleTypePredicates = new ArrayList<>();
@@ -237,7 +237,7 @@ public class AlertSearcher {
               .findByPredicateJsonVal(Predicate.AND(jsonValPredicates.toArray(new Predicate[0])));
     }
 
-    List<DetectionConfigDTO> result;
+    List<AlertDTO> result;
     if (!jsonValPredicates.isEmpty() && !indexPredicates.isEmpty()) {
       // merge the result from both tables
       result = jsonValResult.stream().filter(indexedResult::contains).collect(Collectors.toList());
@@ -254,7 +254,7 @@ public class AlertSearcher {
    */
   private Map<String, Object> getResult(AlertSearchQuery searchQuery,
       List<SubscriptionGroupDTO> subscriptionGroups,
-      List<DetectionConfigDTO> detectionConfigs) {
+      List<AlertDTO> detectionConfigs) {
     long count;
     if (searchQuery.searchFilter.isEmpty()) {
       // if not filter is applied, execute count query

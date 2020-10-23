@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
@@ -73,7 +73,7 @@ public class DetectionConfigSlaTranslatorTest {
   public void testSlaTranslation() throws Exception {
     String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream("sla-config-1.yaml"), "UTF-8");
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
-    DetectionConfigDTO result = translator.translate();
+    AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER.readValue(this.getClass().getResourceAsStream("sla-config-translated-1.json"), YamlTranslationResult.class);
     Assert.assertEquals(result.getDataQualityProperties(), expected.getDataQualityProperties());
     Assert.assertEquals(result.getComponentSpecs(), expected.getComponents());
@@ -83,7 +83,7 @@ public class DetectionConfigSlaTranslatorTest {
   public void testDetectionAndSlaTranslation() throws Exception {
     String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream("sla-config-2.yaml"), "UTF-8");
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
-    DetectionConfigDTO result = translator.translate();
+    AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER.readValue(this.getClass().getResourceAsStream("sla-config-translated-2.json"), YamlTranslationResult.class);
     Assert.assertEquals(result.getDataQualityProperties(), expected.getDataQualityProperties());
     Assert.assertEquals(result.getComponentSpecs(), expected.getComponents());
@@ -93,7 +93,7 @@ public class DetectionConfigSlaTranslatorTest {
   public void testMultipleDetectionFilterAndSlaTranslation() throws Exception {
     String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream("sla-config-3.yaml"), "UTF-8");
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
-    DetectionConfigDTO result = translator.translate();
+    AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER.readValue(this.getClass().getResourceAsStream("sla-config-translated-3.json"), YamlTranslationResult.class);
     Assert.assertEquals(result.getDataQualityProperties(), expected.getDataQualityProperties());
     Assert.assertEquals(result.getComponentSpecs(), expected.getComponents());
@@ -103,7 +103,7 @@ public class DetectionConfigSlaTranslatorTest {
   public void testSlaTranslationWithSingleMetricEntityAlert() throws Exception {
     String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream("sla-config-4.yaml"), "UTF-8");
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
-    DetectionConfigDTO result = translator.translate();
+    AlertDTO result = translator.translate();
     YamlTranslationResult expected   = OBJECT_MAPPER.readValue(this.getClass().getResourceAsStream("sla-config-translated-4.json"), YamlTranslationResult.class);
     Assert.assertEquals(result.getDataQualityProperties(), expected.getDataQualityProperties());
     Assert.assertEquals(result.getComponentSpecs(), expected.getComponents());
@@ -113,7 +113,7 @@ public class DetectionConfigSlaTranslatorTest {
   public void testSlaTranslationWithMultiMetricEntityAlert() throws Exception {
     String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream("sla-config-5.yaml"), "UTF-8");
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
-    DetectionConfigDTO result = translator.translate();
+    AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER.readValue(this.getClass().getResourceAsStream("sla-config-translated-5.json"), YamlTranslationResult.class);
     Assert.assertEquals(result.getDataQualityProperties(), expected.getDataQualityProperties());
     Assert.assertEquals(result.getComponentSpecs(), expected.getComponents());

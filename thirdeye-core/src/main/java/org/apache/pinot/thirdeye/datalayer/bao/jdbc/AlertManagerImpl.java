@@ -26,57 +26,57 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
 
 
 @Singleton
-public class AlertManagerImpl extends AbstractManagerImpl<DetectionConfigDTO> implements
+public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     AlertManager {
 
   @Inject
   public AlertManagerImpl(GenericPojoDao genericPojoDao) {
-    super(DetectionConfigDTO.class, DetectionConfigBean.class, genericPojoDao);
+    super(AlertDTO.class, DetectionConfigBean.class, genericPojoDao);
   }
 
   @Override
-  public int update(DetectionConfigDTO detectionConfigDTO) {
-    if (detectionConfigDTO.getId() == null) {
-      Long id = save(detectionConfigDTO);
+  public int update(AlertDTO alertDTO) {
+    if (alertDTO.getId() == null) {
+      Long id = save(alertDTO);
       if (id > 0) {
         return 1;
       } else {
         return 0;
       }
     } else {
-      DetectionConfigBean detectionConfigBean = convertDetectionConfigDTO2Bean(detectionConfigDTO);
+      DetectionConfigBean detectionConfigBean = convertDetectionConfigDTO2Bean(alertDTO);
       return genericPojoDao.update(detectionConfigBean);
     }
   }
 
   @Override
-  public Long save(DetectionConfigDTO detectionConfigDTO) {
-    if (detectionConfigDTO.getId() != null) {
+  public Long save(AlertDTO alertDTO) {
+    if (alertDTO.getId() != null) {
       //TODO: throw exception and force the caller to call update instead
-      update(detectionConfigDTO);
-      return detectionConfigDTO.getId();
+      update(alertDTO);
+      return alertDTO.getId();
     }
 
-    DetectionConfigBean detectionConfigBean = convertDetectionConfigDTO2Bean(detectionConfigDTO);
+    DetectionConfigBean detectionConfigBean = convertDetectionConfigDTO2Bean(alertDTO);
     Long id = genericPojoDao.put(detectionConfigBean);
-    detectionConfigDTO.setId(id);
+    alertDTO.setId(id);
     return id;
   }
 
-  DetectionConfigBean convertDetectionConfigDTO2Bean(DetectionConfigDTO detectionConfigDTO){
-    detectionConfigDTO.setComponents(Collections.emptyMap());
-    DetectionConfigBean bean = convertDTO2Bean(detectionConfigDTO, DetectionConfigBean.class);
+  DetectionConfigBean convertDetectionConfigDTO2Bean(AlertDTO alertDTO){
+    alertDTO.setComponents(Collections.emptyMap());
+    DetectionConfigBean bean = convertDTO2Bean(alertDTO, DetectionConfigBean.class);
     return bean;
   }
 
   @Override
-  public List<DetectionConfigDTO> findAllActive() {
-    List<DetectionConfigDTO> detectionConfigs = findAll();
+  public List<AlertDTO> findAllActive() {
+    List<AlertDTO> detectionConfigs = findAll();
     return detectionConfigs.stream().filter(DetectionConfigBean::isActive).collect(Collectors.toList());
   }
 }

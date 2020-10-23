@@ -25,7 +25,7 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -66,17 +66,17 @@ public class ThresholdRuleDetectorTest {
     datasetConfigDTO.setTimeUnit(TimeUnit.MILLISECONDS);
     datasetConfigDTO.setTimezone("UTC");
 
-    DetectionConfigDTO detectionConfigDTO = new DetectionConfigDTO();
-    detectionConfigDTO.setId(125L);
+    AlertDTO alertDTO = new AlertDTO();
+    alertDTO.setId(125L);
     Map<String, Object> detectorSpecs = new HashMap<>();
     detectorSpecs.put("className", ThresholdRuleDetector.class.getName());
     Map<String, Object> properties = new HashMap<>();
     properties.put("metricUrn", "thirdeye:metric:123");
     properties.put("detector", "$threshold");
-    detectionConfigDTO.setProperties(properties);
+    alertDTO.setProperties(properties);
     Map<String, Object> componentSpecs = new HashMap<>();
     componentSpecs.put("threshold", detectorSpecs);
-    detectionConfigDTO.setComponentSpecs(componentSpecs);
+    alertDTO.setComponentSpecs(componentSpecs);
 
     this.testDataProvider = new MockDataProvider()
         .setMetrics(Collections.singletonList(metricConfigDTO))

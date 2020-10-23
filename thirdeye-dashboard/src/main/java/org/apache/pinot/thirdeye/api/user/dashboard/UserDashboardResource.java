@@ -53,7 +53,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
@@ -259,7 +259,7 @@ public class UserDashboardResource {
       summary.setDetectionConfigId(-1);
       if (anomaly.getDetectionConfigId() != null) {
         long detectionConfigId = anomaly.getDetectionConfigId();
-        DetectionConfigDTO detectionDTO = this.detectionDAO.findById(detectionConfigId);
+        AlertDTO detectionDTO = this.detectionDAO.findById(detectionConfigId);
         if (detectionDTO != null) {
           summary.setFunctionName(detectionDTO.getName());
           summary.setDetectionConfigId(detectionConfigId);

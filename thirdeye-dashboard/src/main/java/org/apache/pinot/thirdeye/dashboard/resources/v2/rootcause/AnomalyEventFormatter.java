@@ -33,7 +33,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -106,11 +106,11 @@ public class AnomalyEventFormatter extends RootCauseEventEntityFormatter {
     Long detectionConfigId = null;
 
     if (anomaly.getDetectionConfigId() != null){
-      DetectionConfigDTO detectionConfigDTO = detectionDAO.findById(anomaly.getDetectionConfigId());
-      if (detectionConfigDTO == null){
+      AlertDTO alertDTO = detectionDAO.findById(anomaly.getDetectionConfigId());
+      if (alertDTO == null){
         throw new IllegalArgumentException(String.format("could not resolve detection config id %d", anomaly.getDetectionConfigId()));
       }
-      functionName = detectionConfigDTO.getName();
+      functionName = alertDTO.getName();
       detectionConfigId = anomaly.getDetectionConfigId();
     }
 

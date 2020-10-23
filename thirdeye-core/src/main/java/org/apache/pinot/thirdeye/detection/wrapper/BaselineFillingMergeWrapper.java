@@ -22,13 +22,12 @@ package org.apache.pinot.thirdeye.detection.wrapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import java.util.HashMap;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.Series;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -39,7 +38,6 @@ import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
 import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
 import org.apache.pinot.thirdeye.detection.spec.RuleBaselineProviderSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
-import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
 import java.util.ArrayList;
@@ -73,7 +71,7 @@ public class BaselineFillingMergeWrapper extends MergeWrapper {
   private String metricUrn;
   protected final Map<Long, MergedAnomalyResultDTO> existingAnomalies; // from id to anomalies
 
-  public BaselineFillingMergeWrapper(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime)
+  public BaselineFillingMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime)
   {
     super(provider, config, startTime, endTime);
 

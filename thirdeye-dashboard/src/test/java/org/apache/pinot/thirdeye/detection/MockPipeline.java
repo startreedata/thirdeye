@@ -16,14 +16,14 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import java.util.Objects;
 
 
 public class MockPipeline extends DetectionPipeline {
   private final MockPipelineOutput output;
 
-  public MockPipeline(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime, MockPipelineOutput output) {
+  public MockPipeline(DataProvider provider, AlertDTO config, long startTime, long endTime, MockPipelineOutput output) {
     super(provider, config, startTime, endTime);
     this.output = output;
   }

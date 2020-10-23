@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import java.util.Set;
@@ -62,7 +62,7 @@ public interface TaskManager extends AbstractManager<TaskDTO>{
 
   int countWaiting();
 
-  void populateDetectionConfig(DetectionConfigDTO detectionConfigDTO, DetectionPipelineTaskInfo taskInfo);
+  void populateDetectionConfig(AlertDTO alertDTO, DetectionPipelineTaskInfo taskInfo);
 
-  DetectionConfigDTO extractDetectionConfig(DetectionPipelineTaskInfo taskInfo);
+  AlertDTO extractDetectionConfig(DetectionPipelineTaskInfo taskInfo);
 }

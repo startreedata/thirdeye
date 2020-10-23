@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -52,7 +52,7 @@ public class ThresholdRuleAnomalyFilterTest {
   private DataProvider testDataProvider;
   private AnomalyFilterWrapper thresholdRuleFilter;
   private Map<String, Object> properties;
-  private DetectionConfigDTO config;
+  private AlertDTO config;
   private Map<String, Object> specs;
 
   @BeforeMethod
@@ -79,7 +79,7 @@ public class ThresholdRuleAnomalyFilterTest {
     datasetConfigDTO.setTimeUnit(TimeUnit.MILLISECONDS);
     datasetConfigDTO.setTimezone("UTC");
 
-    this.config = new DetectionConfigDTO();
+    this.config = new AlertDTO();
     this.config.setId(CONFIG_ID);
     this.properties = new HashMap<>();
     this.properties.put("nested", Collections.singletonList(Collections.singletonMap("className", "dummy")));

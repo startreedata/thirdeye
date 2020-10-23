@@ -26,7 +26,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public class DetectionPipelineTaskRunnerTest {
     this.properties.put("metricUrn", "thirdeye:metric:1");
     this.properties.put("className", "myClassName");
 
-    DetectionConfigDTO detector = new DetectionConfigDTO();
+    AlertDTO detector = new AlertDTO();
     detector.setProperties(this.properties);
     detector.setName("myName");
     detector.setDescription("myDescription");

@@ -22,18 +22,14 @@ package org.apache.pinot.thirdeye.detection.wrapper;
 import com.google.common.collect.Collections2;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
-import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
-
 
 /**
  * The Data Quality Merge Wrapper. This merge wrapper is specifically designed keeping the sla anomalies in mind.
@@ -45,7 +41,7 @@ import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 public class DataQualityMergeWrapper extends MergeWrapper {
   private static final String PROP_GROUP_KEY = "groupKey";
 
-  public DataQualityMergeWrapper(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime) {
+  public DataQualityMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) {
     super(provider, config, startTime, endTime);
   }
 

@@ -45,7 +45,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
@@ -138,7 +138,7 @@ public class ApplicationResource {
     for (SubscriptionGroupDTO subsGroup : subsGroupList) {
       for (long id : ConfigUtils
           .getLongs(subsGroup.getProperties().get(PROP_DETECTION_CONFIG_IDS))) {
-        DetectionConfigDTO function = this.alertManager.findById(id);
+        AlertDTO function = this.alertManager.findById(id);
         if (function != null) {
           List<MergedAnomalyResultDTO> anomalies =
               new ArrayList<>(

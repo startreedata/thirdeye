@@ -21,14 +21,13 @@ package org.apache.pinot.thirdeye.detection.yaml.translator;
 
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -121,7 +120,7 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionProp
  * +-------------------------------------------------+
  *
  */
-public class DetectionConfigTranslator extends ConfigTranslator<DetectionConfigDTO, DetectionConfigValidator> {
+public class DetectionConfigTranslator extends ConfigTranslator<AlertDTO, DetectionConfigValidator> {
   public static final String PROP_SUB_ENTITY_NAME = "subEntityName";
 
   static final String PROP_CRON = "cron";
@@ -155,7 +154,7 @@ public class DetectionConfigTranslator extends ConfigTranslator<DetectionConfigD
   }
 
   @Override
-  DetectionConfigDTO translateConfig() {
+  AlertDTO translateConfig() {
     Map<String, Object> yamlConfigMap = ConfigUtils.getMap(this.yaml.load(yamlConfig));
 
     // Hack to support 'detectionName' attribute at root level and 'name' attribute elsewhere
@@ -190,9 +189,9 @@ public class DetectionConfigTranslator extends ConfigTranslator<DetectionConfigD
   /**
    * Fill in common fields of detection config. Properties of the pipeline is filled by the subclass.
    */
-  private DetectionConfigDTO generateDetectionConfig(Map<String, Object> yamlConfigMap,
+  private AlertDTO generateDetectionConfig(Map<String, Object> yamlConfigMap,
       Map<String, Object> detectionProperties, Map<String, Object> qualityProperties, String cron) {
-    DetectionConfigDTO config = new DetectionConfigDTO();
+    AlertDTO config = new AlertDTO();
     config.setName(MapUtils.getString(yamlConfigMap, PROP_DETECTION_NAME));
     config.setDescription(MapUtils.getString(yamlConfigMap, PROP_DESC_NAME));
     config.setDescription(MapUtils.getString(yamlConfigMap, PROP_DESC_NAME));

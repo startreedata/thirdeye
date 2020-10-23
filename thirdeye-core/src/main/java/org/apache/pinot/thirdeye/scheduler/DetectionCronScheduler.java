@@ -25,7 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -76,10 +76,10 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void run() {
     try {
-      Collection<DetectionConfigDTO> configs = this.detectionDAO.findAll();
+      Collection<AlertDTO> configs = this.detectionDAO.findAll();
 
       // add or update
-      for (DetectionConfigDTO config : configs) {
+      for (AlertDTO config : configs) {
         if (!config.isActive()) {
           LOG.debug("Detection config " + config.getId() + " is inactive. Skipping.");
           continue;
@@ -126,7 +126,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
       for (JobKey jobKey : scheduledJobs) {
         try {
           Long id = TaskUtils.getIdFromJobKey(jobKey.getName());
-          DetectionConfigDTO detectionDTO = detectionDAO.findById(id);
+          AlertDTO detectionDTO = detectionDAO.findById(id);
           if (detectionDTO == null) {
             LOG.info("Found a scheduled detection config task, but not found in the database {}", id);
             stopJob(jobKey);
@@ -149,7 +149,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
     }
   }
 
-  private void restartJob(DetectionConfigDTO config, JobDetail job) throws SchedulerException {
+  private void restartJob(AlertDTO config, JobDetail job) throws SchedulerException {
     stopJob(job.getKey());
     startJob(config, job);
   }
@@ -188,7 +188,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
     return String.format("%s_%d", taskType, id);
   }
 
-  private boolean isJobUpdated(DetectionConfigDTO config, JobKey key) throws SchedulerException {
+  private boolean isJobUpdated(AlertDTO config, JobKey key) throws SchedulerException {
     List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(key);
     CronTrigger cronTrigger = (CronTrigger) triggers.get(0);
     String cronInSchedule = cronTrigger.getCronExpression();

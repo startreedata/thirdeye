@@ -36,7 +36,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -141,7 +141,7 @@ public class DataAvailabilityTaskSchedulerTest {
     createDataset(2, TEST_TIME - TimeUnit.HOURS.toMillis(1), TEST_TIME); // not updated dataset
     createDetectionTask(detection1, TEST_TIME - 60_000, TaskConstants.TaskStatus.COMPLETED);
     createDetectionTask(detection2, TEST_TIME - 60_000, TaskConstants.TaskStatus.COMPLETED);
-    List<DetectionConfigDTO> detectionConfigs = detectionConfigDAO.findAll();
+    List<AlertDTO> detectionConfigs = detectionConfigDAO.findAll();
     Assert.assertEquals(detectionConfigs.size(), 2);
     dataAvailabilityTaskScheduler.run();
     TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
@@ -237,7 +237,7 @@ public class DataAvailabilityTaskSchedulerTest {
   public void testDetectionsWithDataAvailabilityRules() {
     List<Long> metrics1 = Collections.singletonList(metricId1);
     long oneDayAgo = TEST_TIME - TimeUnit.DAYS.toMillis(1);
-    DetectionConfigDTO detection = generateDetectionConfig(1, metrics1, oneDayAgo, 0);
+    AlertDTO detection = generateDetectionConfig(1, metrics1, oneDayAgo, 0);
     Map<String, Object> metricSla = new HashMap<>();
     Map<String, Object> props = new HashMap<>();
     props.put("testMetricUrn", metricSla);
@@ -287,11 +287,11 @@ public class DataAvailabilityTaskSchedulerTest {
     return detectionConfigDAO.save(generateDetectionConfig(intSuffix, metrics, lastTimestamp, notRunThreshold));
   }
 
-  private DetectionConfigDTO generateDetectionConfig(int intSuffix, List<Long> metrics, long lastTimestamp,
+  private AlertDTO generateDetectionConfig(int intSuffix, List<Long> metrics, long lastTimestamp,
       int notRunThreshold) {
     final String TEST_DETECTION_PREFIX = "detection_trigger_listener_";
 
-    DetectionConfigDTO detect = new DetectionConfigDTO();
+    AlertDTO detect = new AlertDTO();
     detect.setName(TEST_DETECTION_PREFIX + intSuffix);
     detect.setActive(true);
     Map<String, Object> props = new HashMap<>();

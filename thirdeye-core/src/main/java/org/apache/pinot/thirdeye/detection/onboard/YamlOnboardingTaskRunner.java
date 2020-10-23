@@ -33,7 +33,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -97,7 +97,7 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
     LOG.info("Running yaml detection onboarding task for id {}", info.getConfigId());
 
     // replay the detection pipeline
-    DetectionConfigDTO config = this.detectionDAO.findById(info.getConfigId());
+    AlertDTO config = this.detectionDAO.findById(info.getConfigId());
     if (config == null) {
       throw new IllegalArgumentException(String.format("Could not resolve config id %d", info.getConfigId()));
     }
@@ -122,7 +122,7 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
 
     // re-tune the detection pipeline because tuning is depend on replay result. e.g. algorithm-based alert filter
     DetectionConfigTuner detectionConfigTuner = new DetectionConfigTuner(config, provider);
-    DetectionConfigDTO tunedConfig = detectionConfigTuner.tune(info.getTuningWindowStart(), info.getTuningWindowEnd());
+    AlertDTO tunedConfig = detectionConfigTuner.tune(info.getTuningWindowStart(), info.getTuningWindowEnd());
     this.detectionDAO.save(tunedConfig);
 
     LOG.info("Yaml detection onboarding task for id {} completed", info.getConfigId());

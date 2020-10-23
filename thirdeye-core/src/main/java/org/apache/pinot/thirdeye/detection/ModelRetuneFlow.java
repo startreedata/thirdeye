@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.MapeAveragePercentageChangeModelEvaluator;
 import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
@@ -58,7 +58,7 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
     this.detectionRegistry = detectionRegistry;
   }
 
-  public DetectionConfigDTO maintain(DetectionConfigDTO config, Instant timestamp) {
+  public AlertDTO maintain(AlertDTO config, Instant timestamp) {
     Preconditions.checkArgument(!Objects.isNull(config.getComponents()) && !config.getComponents().isEmpty(), "Components not initialized");
     if (isTunable(config)) {
       // if the pipeline is tunable, get the model evaluators
@@ -80,7 +80,8 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
     return config;
   }
 
-  private Collection<? extends ModelEvaluator<? extends AbstractSpec>> getModelEvaluators(DetectionConfigDTO config) {
+  private Collection<? extends ModelEvaluator<? extends AbstractSpec>> getModelEvaluators(
+      AlertDTO config) {
     // get the model evaluator in the detection config
     Collection<? extends ModelEvaluator<? extends AbstractSpec>> modelEvaluators = config.getComponents()
         .values()
@@ -98,7 +99,7 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
   }
 
   private Collection<ModelEvaluator<MapeAveragePercentageChangeModelEvaluatorSpec>> instantiateDefaultEvaluators(
-      DetectionConfigDTO config) {
+      AlertDTO config) {
     ModelEvaluator<MapeAveragePercentageChangeModelEvaluatorSpec> evaluator =
         new MapeAveragePercentageChangeModelEvaluator();
     evaluator.init(new MapeAveragePercentageChangeModelEvaluatorSpec(),
@@ -111,7 +112,7 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
    * @param configDTO the detection config
    * @return True if the detection config is contains tunable component
    */
-  private boolean isTunable(DetectionConfigDTO configDTO) {
+  private boolean isTunable(AlertDTO configDTO) {
     return configDTO.getComponents()
         .values()
         .stream()

@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.detection.algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Multimap;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -62,7 +62,7 @@ public class LegacyDimensionWrapper extends DimensionWrapper {
    * @param endTime the end time
    * @throws Exception the exception
    */
-  public LegacyDimensionWrapper(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime) throws Exception {
+  public LegacyDimensionWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) throws Exception {
     super(provider, augmentConfig(config), startTime, endTime);
 
     this.anomalyFunctionClassName = MapUtils.getString(config.getProperties(), PROP_ANOMALY_FUNCTION_CLASS);
@@ -92,7 +92,7 @@ public class LegacyDimensionWrapper extends DimensionWrapper {
     return super.runNested(nestedProps, startTime, endTime);
   }
 
-  private static DetectionConfigDTO augmentConfig(DetectionConfigDTO config) {
+  private static AlertDTO augmentConfig(AlertDTO config) {
     config.setProperties(augmentProperties(config.getProperties()));
     return config;
   }

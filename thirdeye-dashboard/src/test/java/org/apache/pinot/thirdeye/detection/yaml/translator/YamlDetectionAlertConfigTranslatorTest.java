@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -129,9 +129,9 @@ public class YamlDetectionAlertConfigTranslatorTest {
     testDAOProvider = DAOTestBase.getInstance();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     alertManager = daoRegistry.getDetectionConfigManager();
-    DetectionConfigDTO detectionConfigDTO = new DetectionConfigDTO();
-    detectionConfigDTO.setName("test_pipeline_1");
-    alertManager.save(detectionConfigDTO);
+    AlertDTO alertDTO = new AlertDTO();
+    alertDTO.setName("test_pipeline_1");
+    alertManager.save(alertDTO);
 
     DetectionAlertRegistry.getInstance()
         .registerAlertFilter("DEFAULT_ALERTER_PIPELINE", "RECIPIENTClass");

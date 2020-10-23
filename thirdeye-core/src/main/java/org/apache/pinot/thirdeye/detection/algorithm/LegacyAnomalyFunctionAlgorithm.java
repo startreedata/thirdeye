@@ -36,7 +36,7 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -82,7 +82,7 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
    * @param endTime the end time
    * @throws Exception the exception
    */
-  public LegacyAnomalyFunctionAlgorithm(DataProvider provider, DetectionConfigDTO config, long startTime, long endTime) throws Exception {
+  public LegacyAnomalyFunctionAlgorithm(DataProvider provider, AlertDTO config, long startTime, long endTime) throws Exception {
     super(provider, config, startTime, endTime);
     // TODO: Round start and end time stamps
     Preconditions.checkArgument(config.getProperties().containsKey(PROP_ANOMALY_FUNCTION_CLASS));

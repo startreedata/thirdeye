@@ -36,7 +36,7 @@ import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomaly.alert.util.AlertScreenshotHelper;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
@@ -100,7 +100,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
       SubscriptionGroupDTO subsConfig) {
     Map<String, Object> templateData = super.getTemplateData(subsConfig, anomalies);
 
-    DetectionConfigDTO config = null;
+    AlertDTO config = null;
     Preconditions
         .checkArgument(anomalies != null && !anomalies.isEmpty(), "Report has empty anomalies");
 
@@ -157,7 +157,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
    * Recursively find the anomalies having a groupKey and display them in the email
    */
   private void updateEntityToAnomalyDetailsMap(MergedAnomalyResultDTO anomaly,
-      DetectionConfigDTO detectionConfig) {
+      AlertDTO detectionConfig) {
     Properties props = new Properties();
     props.putAll(anomaly.getProperties());
     double lift = BaseNotificationContent

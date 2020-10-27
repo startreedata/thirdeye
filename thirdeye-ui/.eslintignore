@@ -1,0 +1,28 @@
+# Node
+node/
+
+# Dependencies
+node_modules/
+
+# Production
+build/
+dist/
+
+# Maven
+target/
+
+# TypeScript
+tsbuildinfo/
+
+# Assets
+*.svg
+*.png
+*.ico
+
+# webpack (ESLint rules don't agree with how these configs are written)
+webpack.config.base.js
+webpack.config.dev.js
+webpack.config.prod.js
+
+# macOS
+.DS_Store

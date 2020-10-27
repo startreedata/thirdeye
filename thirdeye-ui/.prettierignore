@@ -1,0 +1,38 @@
+# Node
+node/
+
+# Dependencies
+node_modules/
+
+# Production
+build/
+dist/
+
+# Maven
+target/
+
+# TypeScript
+tsbuildinfo/
+
+# Assets
+*.svg
+*.png
+*.ico
+*.ttf
+*.txt
+
+# Ignore files (Prettier has trouble parsing files without extension)
+.eslintignore
+.gitignore
+.prettierignore
+.stylelintignore
+
+# RC files (Prettier has trouble parsing files without extension)
+.npmrc
+.nvmrc
+
+# XML (File type not supported)
+*.xml
+
+# macOS
+.DS_Store

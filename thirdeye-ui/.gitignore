@@ -1,0 +1,21 @@
+# Node
+node/
+
+# Dependencies
+node_modules/
+
+# Production
+build/
+dist/
+
+# Maven
+target/
+
+# TypeScript
+tsbuildinfo/
+
+# macOS
+.DS_Store
+
+# webpack stats
+webpack-stats.json

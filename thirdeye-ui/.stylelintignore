@@ -1,0 +1,25 @@
+# Node
+node/
+
+# Dependencies
+node_modules/
+
+# Production
+build/
+dist/
+
+# Maven
+target/
+
+# TypeScript
+tsbuildinfo/
+*.tsx
+*.ts
+
+# Assets
+*.svg
+*.png
+*.ico
+
+# macOS
+.DS_Store

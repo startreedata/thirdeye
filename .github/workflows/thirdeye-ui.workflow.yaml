@@ -1,0 +1,50 @@
+# Workflow to triage pull requests and build ThirdEye UI
+name: ThirdEye UI Workflow
+
+on:
+    push:
+        branches: [master]
+        paths: thirdeye-ui/**
+    pull_request:
+        branches: [master]
+        paths: thirdeye-ui/**
+
+jobs:
+    thirdeye-ui-build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+
+            - name: Read .nvmrc
+              run: echo ::set-output name=NVMRC::$(cat thirdeye-ui/.nvmrc)
+              id: nvm
+
+            - name: Setup Node
+              uses: actions/setup-node@v1
+              with:
+                  node-version: "${{ steps.nvm.outputs.NVMRC }}"
+
+            - name: thirdeye-ui > npm install
+              run: npm ci
+
+            - name: thirdeye-ui > npm install
+              working-directory: thirdeye-ui
+              run: npm ci
+
+            - name: thirdeye-ui > eslint
+              working-directory: thirdeye-ui
+              run: npm run eslint
+
+            - name: thirdeye-ui > stylelint
+              working-directory: thirdeye-ui
+              run: npm run stylelint
+
+            - name: thirdeye-ui > pretty
+              working-directory: thirdeye-ui
+              run: npm run pretty
+
+            - name: thirdeye-ui > build
+              working-directory: thirdeye-ui
+              run: npm run build

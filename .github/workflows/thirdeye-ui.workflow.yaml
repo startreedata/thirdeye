@@ -27,9 +27,6 @@ jobs:
                   node-version: "${{ steps.nvm.outputs.NVMRC }}"
 
             - name: thirdeye-ui > npm install
-              run: npm ci
-
-            - name: thirdeye-ui > npm install
               working-directory: thirdeye-ui
               run: npm ci
 

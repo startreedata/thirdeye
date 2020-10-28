@@ -22,7 +22,7 @@
             "jsx": true
         }
     },
-    "plugins": ["react", "@typescript-eslint", "typescript-sort-keys"],
+    "plugins": ["react", "@typescript-eslint"],
     "rules": {
         // ESLint rules
 
@@ -35,9 +35,6 @@
             "error",
             { "code": 200, "comments": 100, "ignoreTrailingComments": true }
         ],
-
-        // Require braces around arrow function body
-        "arrow-body-style": ["error", "always"],
 
         // Require braces around blocks
         "curly": ["error", "all"],
@@ -78,16 +75,7 @@
         // @typescript-eslint rules
 
         // Require explicit return type on functions and class methods
-        "@typescript-eslint/explicit-function-return-type": ["error"],
-
-        // eslint-plugin-typescript-sort-keys rules
-
-        // Require interface properties to be sorted
-        "typescript-sort-keys/interface": [
-            "error",
-            "asc",
-            { "requiredFirst": true }
-        ]
+        "@typescript-eslint/explicit-function-return-type": ["error"]
     },
     "settings": {
         "react": {

@@ -94,15 +94,19 @@ public abstract class DetectionConfigPropertiesBuilder {
 
   public abstract Map<String, Object> buildCompositeAlertProperties(Map<String, Object> yamlConfigMap);
 
-  Map<String, Object> buildDimensionWrapperProperties(Map<String, Object> yamlConfigMap,
-      Map<String, Collection<String>> dimensionFilters, String metricUrn, String datasetName) {
+  Map<String, Object> buildDimensionWrapperProperties(
+      Map<String, Collection<String>> dimensionFilters,
+      String metricUrn,
+      String datasetName,
+      final Map<String, Object> dimensionExploreYaml,
+      final boolean containsDimensionExploration) {
     Map<String, Object> dimensionWrapperProperties = new HashMap<>();
     dimensionWrapperProperties.put(PROP_NESTED_METRIC_URNS, Collections.singletonList(metricUrn));
-    if (yamlConfigMap.containsKey(PROP_DIMENSION_EXPLORATION)) {
-      Map<String, Object> dimensionExploreYaml = ConfigUtils.getMap(yamlConfigMap.get(PROP_DIMENSION_EXPLORATION));
+    if (containsDimensionExploration) {
       dimensionWrapperProperties.putAll(dimensionExploreYaml);
       if (dimensionExploreYaml.containsKey(PROP_DIMENSION_FILTER_METRIC)){
-        MetricConfigDTO dimensionExploreMetric = this.dataProvider.fetchMetric(MapUtils.getString(dimensionExploreYaml, PROP_DIMENSION_FILTER_METRIC), datasetName);
+        MetricConfigDTO dimensionExploreMetric = this.dataProvider.fetchMetric(MapUtils.getString(
+            dimensionExploreYaml, PROP_DIMENSION_FILTER_METRIC), datasetName);
         dimensionWrapperProperties.put(PROP_METRIC_URN, MetricEntity.fromMetric(dimensionFilters, dimensionExploreMetric.getId()).getUrn());
       } else {
         dimensionWrapperProperties.put(PROP_METRIC_URN, metricUrn);

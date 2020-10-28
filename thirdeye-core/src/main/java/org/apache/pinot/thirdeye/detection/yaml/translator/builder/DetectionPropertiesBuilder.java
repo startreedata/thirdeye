@@ -65,16 +65,36 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
    */
   @Override
   public Map<String, Object> buildMetricAlertProperties(Map<String, Object> metricAlertConfigMap) {
-    MetricConfigDTO metricConfigDTO = metricAttributesMap.fetchMetric(metricAlertConfigMap);
-    DatasetConfigDTO datasetConfigDTO = metricAttributesMap.fetchDataset(metricAlertConfigMap);
+    final MetricConfigDTO metricConfigDTO = metricAttributesMap.fetchMetric(metricAlertConfigMap);
+    final DatasetConfigDTO datasetConfigDTO = metricAttributesMap
+        .fetchDataset(metricAlertConfigMap);
 
-    String subEntityName = MapUtils.getString(metricAlertConfigMap, PROP_NAME);
-    Map<String, Object> mergerProperties = ConfigUtils.getMap(metricAlertConfigMap.get(PROP_MERGER));
-    Map<String, Collection<String>> dimensionFiltersMap = ConfigUtils.getMap(metricAlertConfigMap.get(PROP_FILTERS));
+    return buildExecutionPlan(
+        metricConfigDTO,
+        datasetConfigDTO,
+        MapUtils.getString(metricAlertConfigMap, PROP_NAME),
+        getMap(metricAlertConfigMap.get(PROP_MERGER)),
+        getMap(metricAlertConfigMap.get(PROP_FILTERS)),
+        getMap(metricAlertConfigMap.get(PROP_DIMENSION_EXPLORATION)),
+        metricAlertConfigMap.containsKey(PROP_DIMENSION_EXPLORATION),
+        getList(metricAlertConfigMap.get(PROP_RULES)),
+        getList(metricAlertConfigMap.get(PROP_GROUPER)));
+  }
+
+  private Map<String, Object> buildExecutionPlan(
+      final MetricConfigDTO metricConfigDTO,
+      final DatasetConfigDTO datasetConfigDTO,
+      final String subEntityName,
+      final Map<String, Object> mergerProperties,
+      final Map<String, Collection<String>> dimensionFiltersMap,
+      final Map<String, Object> dimensionExploreYaml,
+      final boolean containsDimensionExploration,
+      final List<Map<String, Object>> ruleYamls,
+      final List<Map<String, Object>> grouperYamls) {
+
     String metricUrn = MetricEntity.fromMetric(dimensionFiltersMap, metricConfigDTO.getId()).getUrn();
 
     // Translate all the rules
-    List<Map<String, Object>> ruleYamls = getList(metricAlertConfigMap.get(PROP_RULES));
     List<Map<String, Object>> nestedPipelines = new ArrayList<>();
     for (Map<String, Object> ruleYaml : ruleYamls) {
       List<Map<String, Object>> detectionYamls = ConfigUtils.getList(ruleYaml.get(PROP_DETECTION));
@@ -107,18 +127,22 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
 
     // Wrap with dimension exploration properties
     Map<String, Object> dimensionWrapperProperties = buildDimensionWrapperProperties(
-        metricAlertConfigMap, dimensionFiltersMap, metricUrn, datasetConfigDTO.getDataset());
+        dimensionFiltersMap,
+        metricUrn,
+        datasetConfigDTO.getDataset(),
+        dimensionExploreYaml,
+        containsDimensionExploration);
     Map<String, Object> properties = buildWrapperProperties(
         ChildKeepingMergeWrapper.class.getName(),
         Collections.singletonList(buildWrapperProperties(DimensionWrapper.class.getName(), nestedPipelines, dimensionWrapperProperties)),
         mergerProperties);
 
     // Wrap with metric level grouper, restricting to only 1 grouper
-    List<Map<String, Object>> grouperYamls = getList(metricAlertConfigMap.get(PROP_GROUPER));
     if (!grouperYamls.isEmpty()) {
       properties = buildWrapperProperties(
           EntityAnomalyMergeWrapper.class.getName(),
-          Collections.singletonList(buildGroupWrapperProperties(subEntityName, metricUrn, grouperYamls.get(0), Collections.singletonList(properties))),
+          Collections.singletonList(buildGroupWrapperProperties(subEntityName, metricUrn, grouperYamls
+              .get(0), Collections.singletonList(properties))),
           mergerProperties);
 
       properties = buildWrapperProperties(

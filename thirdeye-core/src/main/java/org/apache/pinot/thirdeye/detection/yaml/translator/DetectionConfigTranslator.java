@@ -123,23 +123,22 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionProp
 public class DetectionConfigTranslator extends ConfigTranslator<AlertDTO, DetectionConfigValidator> {
   public static final String PROP_SUB_ENTITY_NAME = "subEntityName";
 
-  static final String PROP_CRON = "cron";
-  static final String PROP_TYPE = "type";
-  static final String PROP_NAME = "name";
-  static final String PROP_LAST_TIMESTAMP = "lastTimestamp";
+  private static final String PROP_CRON = "cron";
+  private static final String PROP_TYPE = "type";
+  private static final String PROP_NAME = "name";
+  private static final String PROP_LAST_TIMESTAMP = "lastTimestamp";
 
   private static final String PROP_DETECTION_NAME = "detectionName";
   private static final String PROP_DESC_NAME = "description";
   private static final String PROP_ACTIVE = "active";
   private static final String PROP_OWNERS = "owners";
 
-  static final String COMPOSITE_ALERT = "COMPOSITE_ALERT";
-  static final String METRIC_ALERT = "METRIC_ALERT";
+  private static final String COMPOSITE_ALERT = "COMPOSITE_ALERT";
+  private static final String METRIC_ALERT = "METRIC_ALERT";
 
-  private DataProvider dataProvider;
-  private DetectionConfigPropertiesBuilder detectionTranslatorBuilder;
-  private DetectionConfigPropertiesBuilder dataQualityTranslatorBuilder;
-  private DetectionMetricAttributeHolder metricAttributesMap;
+  private final DetectionConfigPropertiesBuilder detectionTranslatorBuilder;
+  private final DetectionConfigPropertiesBuilder dataQualityTranslatorBuilder;
+  private final DetectionMetricAttributeHolder metricAttributesMap;
 
   public DetectionConfigTranslator(String yamlConfig, DataProvider provider) {
     this(yamlConfig, provider, new DetectionConfigValidator(provider));
@@ -147,7 +146,6 @@ public class DetectionConfigTranslator extends ConfigTranslator<AlertDTO, Detect
 
   public DetectionConfigTranslator(String yamlConfig, DataProvider provider, DetectionConfigValidator validator) {
     super(yamlConfig, validator);
-    this.dataProvider = provider;
     this.metricAttributesMap = new DetectionMetricAttributeHolder(provider);
     this.detectionTranslatorBuilder = new DetectionPropertiesBuilder(metricAttributesMap, provider);
     this.dataQualityTranslatorBuilder = new DataQualityPropertiesBuilder(metricAttributesMap, provider);

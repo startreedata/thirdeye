@@ -187,8 +187,8 @@ public class DataProviderTest {
     this.aggregationLoader = new DefaultAggregationLoader(this.metricDAO, this.datasetDAO, this.queryCache, mockDatasetMaxDataTimeCache);
 
     // provider
-    this.provider = new DefaultDataProvider(this.metricDAO, this.datasetDAO, this.eventDAO, this.anomalyDAO,
-        this.evaluationDAO, this.timeseriesLoader, aggregationLoader, null,
+    this.provider = new DefaultDataProvider(this.metricDAO, this.datasetDAO, this.eventDAO,
+        this.evaluationDAO, aggregationLoader, null,
         TimeSeriesCacheBuilder.getInstance(), AnomaliesCacheBuilder.getInstance());
   }
 

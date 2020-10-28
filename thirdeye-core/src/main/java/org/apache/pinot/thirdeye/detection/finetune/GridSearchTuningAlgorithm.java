@@ -86,15 +86,12 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
     EvaluationManager evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
 
-    TimeSeriesLoader timeseriesLoader =
-        new DefaultTimeSeriesLoader(metricDAO, datasetDAO, ThirdEyeCacheRegistry.getInstance().getQueryCache(), ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
-
     AggregationLoader aggregationLoader =
         new DefaultAggregationLoader(metricDAO, datasetDAO, ThirdEyeCacheRegistry.getInstance().getQueryCache(),
             ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
 
-    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyDAO, evaluationDAO,
-        timeseriesLoader, aggregationLoader, loader, TimeSeriesCacheBuilder.getInstance(),
+    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, evaluationDAO,
+        aggregationLoader, loader, TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
     this.scores = new HashMap<>();
     this.results = new LinkedHashMap<>();

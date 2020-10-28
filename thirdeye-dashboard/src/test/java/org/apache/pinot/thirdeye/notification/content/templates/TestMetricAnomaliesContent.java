@@ -119,8 +119,8 @@ public class TestMetricAnomaliesContent {
         new DefaultAggregationLoader(metricDAO, datasetDAO, ThirdEyeCacheRegistry.getInstance().getQueryCache(),
             ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
 
-    provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyDAO, evaluationDAO,
-        timeseriesLoader, aggregationLoader, detectionPipelineLoader, TimeSeriesCacheBuilder.getInstance(),
+    provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, evaluationDAO,
+        aggregationLoader, detectionPipelineLoader, TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
   }
 

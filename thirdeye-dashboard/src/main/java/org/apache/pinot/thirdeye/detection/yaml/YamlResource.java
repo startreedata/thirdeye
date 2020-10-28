@@ -184,11 +184,6 @@ public class YamlResource {
     this.alerterConfig = alerterConfig;
     this.onboardingRateLimiter = RateLimiter.create(alertOnboardingPermitPerSecond);
 
-    TimeSeriesLoader timeseriesLoader =
-        new DefaultTimeSeriesLoader(metricDAO, datasetDAO,
-            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
-
     AggregationLoader aggregationLoader =
         new DefaultAggregationLoader(metricDAO, datasetDAO,
             ThirdEyeCacheRegistry.getInstance().getQueryCache(),
@@ -196,9 +191,9 @@ public class YamlResource {
 
     this.loader = new DetectionPipelineLoader();
 
-    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyDAO,
+    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO,
         evaluationDAO,
-        timeseriesLoader, aggregationLoader, loader, TimeSeriesCacheBuilder.getInstance(),
+        aggregationLoader, loader, TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
 
     this.detectionValidator = new DetectionConfigValidator(this.provider);
@@ -214,9 +209,12 @@ public class YamlResource {
   /*
    * Helper method to build the detection config from a yaml.
    */
-  private AlertDTO buildDetectionConfigFromYaml(long tuningStartTime, long tuningEndTime,
-      @NotNull String yamlConfig, AlertDTO existingConfig)
-      throws ConfigValidationException {
+  private AlertDTO buildDetectionConfigFromYaml(
+      long tuningStartTime,
+      long tuningEndTime,
+      @NotNull String yamlConfig,
+      AlertDTO existingConfig
+  ) throws ConfigValidationException {
     // Configure the tuning window
     if (tuningStartTime == 0L && tuningEndTime == 0L) {
       // default tuning window 28 days

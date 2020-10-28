@@ -23,6 +23,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetConfigCacheLoader;
@@ -39,9 +41,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfigLoader;
 import org.apache.pinot.thirdeye.detection.cache.CacheDAO;
-import org.apache.pinot.thirdeye.detection.cache.CacheDataSource;
 import org.apache.pinot.thirdeye.detection.cache.CentralizedCacheConfig;
-import org.apache.pinot.thirdeye.detection.cache.CouchbaseCacheDAO;
 import org.apache.pinot.thirdeye.detection.cache.DefaultTimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
 import org.slf4j.Logger;
@@ -87,17 +87,21 @@ public class ThirdEyeCacheRegistry {
     try {
       // Initialize adaptors to time series databases.
       URL dataSourcesUrl = thirdeyeConfig.getDataSourcesAsUrl();
-      DataSources dataSources = DataSourcesLoader.fromDataSourcesUrl(dataSourcesUrl);
-      if (dataSources == null) {
-        throw new IllegalStateException("Could not create data sources from path " + dataSourcesUrl);
-      }
-      // Query Cache
-      Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = DataSourcesLoader.getDataSourceMap(dataSources);
-      QueryCache queryCache = new QueryCache(thirdEyeDataSourcesMap, Executors.newCachedThreadPool());
+      QueryCache queryCache = buildQueryCache(dataSourcesUrl);
       ThirdEyeCacheRegistry.getInstance().registerQueryCache(queryCache);
     } catch (Exception e) {
      LOGGER.info("Caught exception while initializing caches", e);
     }
+  }
+
+  public static QueryCache buildQueryCache(final URL dataSourcesUrl) {
+    DataSources dataSources = DataSourcesLoader.fromDataSourcesUrl(dataSourcesUrl);
+    if (dataSources == null) {
+      throw new IllegalStateException("Could not create data sources from path " + dataSourcesUrl);
+    }
+    // Query Cache
+    Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = DataSourcesLoader.getDataSourceMap(dataSources);
+    return new QueryCache(thirdEyeDataSourcesMap, Executors.newCachedThreadPool());
   }
 
   public static void initCentralizedCache(ThirdEyeConfiguration thirdeyeConfig) {
@@ -115,10 +119,11 @@ public class ThirdEyeCacheRegistry {
       }
 
       if (INSTANCE.getTimeSeriesCache() == null) {
-        TimeSeriesCache timeSeriesCache = new DefaultTimeSeriesCache(DAO_REGISTRY.getMetricConfigDAO(), DAO_REGISTRY.getDatasetConfigDAO(),
+        TimeSeriesCache timeSeriesCache = buildTimeSeriesCache(cacheDAO,
             ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            cacheDAO,
-            Executors.newFixedThreadPool(CacheConfig.getInstance().getCentralizedCacheSettings().getMaxParallelInserts()));
+            DAO_REGISTRY.getMetricConfigDAO(),
+            DAO_REGISTRY.getDatasetConfigDAO(),
+            CacheConfig.getInstance().getCentralizedCacheSettings().getMaxParallelInserts());
 
         ThirdEyeCacheRegistry.getInstance().registerTimeSeriesCache(timeSeriesCache);
       }
@@ -126,6 +131,18 @@ public class ThirdEyeCacheRegistry {
       LOGGER.error("Caught exception while initializing centralized cache - reverting to default settings", e);
       setupDefaultTimeSeriesCacheSettings();
     }
+  }
+
+  public static TimeSeriesCache buildTimeSeriesCache(
+      final CacheDAO cacheDAO,
+      final QueryCache queryCache,
+      final MetricConfigManager metricConfigDAO,
+      final DatasetConfigManager datasetConfigDAO,
+      final int maxParallelInserts) {
+    return new DefaultTimeSeriesCache(metricConfigDAO, datasetConfigDAO,
+        queryCache,
+        cacheDAO,
+        Executors.newFixedThreadPool(maxParallelInserts));
   }
 
   /**

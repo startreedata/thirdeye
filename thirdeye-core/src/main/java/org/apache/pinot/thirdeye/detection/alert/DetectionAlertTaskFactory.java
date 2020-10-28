@@ -65,17 +65,13 @@ public class DetectionAlertTaskFactory {
     EventManager eventDAO = DAO_REGISTRY.getEventDAO();
     MetricConfigManager metricDAO = DAO_REGISTRY.getMetricConfigDAO();
     DatasetConfigManager datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
-    MergedAnomalyResultManager anomalyMergedResultDAO = DAO_REGISTRY.getMergedAnomalyResultDAO();
     EvaluationManager evaluationDAO = DAO_REGISTRY.getEvaluationManager();
-    TimeSeriesLoader timeseriesLoader = new DefaultTimeSeriesLoader(metricDAO, datasetDAO,
-        ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-        ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
     AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO, datasetDAO,
         ThirdEyeCacheRegistry.getInstance().getQueryCache(),
         ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
-    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyMergedResultDAO,
+    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO,
         evaluationDAO,
-        timeseriesLoader, aggregationLoader, new DetectionPipelineLoader(),
+        aggregationLoader, new DetectionPipelineLoader(),
         TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
   }

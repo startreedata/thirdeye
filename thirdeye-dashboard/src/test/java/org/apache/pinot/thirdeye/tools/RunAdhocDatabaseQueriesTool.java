@@ -780,8 +780,8 @@ public class RunAdhocDatabaseQueriesTool {
             ThirdEyeCacheRegistry.getInstance().getQueryCache(),
             ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
     DefaultDataProvider provider =
-        new DefaultDataProvider(metricConfigDAO, datasetConfigDAO, eventDAO, mergedResultDAO,
-            DAORegistry.getInstance().getEvaluationManager(), timeseriesLoader, aggregationLoader,
+        new DefaultDataProvider(metricConfigDAO, datasetConfigDAO, eventDAO,
+            DAORegistry.getInstance().getEvaluationManager(), aggregationLoader,
             new DetectionPipelineLoader(), TimeSeriesCacheBuilder.getInstance(),
             AnomaliesCacheBuilder.getInstance());
 

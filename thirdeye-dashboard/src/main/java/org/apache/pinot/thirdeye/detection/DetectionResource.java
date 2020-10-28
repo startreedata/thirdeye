@@ -138,11 +138,6 @@ public class DetectionResource {
     this.anomalySubscriptionGroupNotificationManager = DAORegistry.getInstance()
         .getAnomalySubscriptionGroupNotificationManager();
 
-    TimeSeriesLoader timeseriesLoader =
-        new DefaultTimeSeriesLoader(metricDAO, datasetDAO,
-            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
-
     this.aggregationLoader =
         new DefaultAggregationLoader(metricDAO, datasetDAO,
             ThirdEyeCacheRegistry.getInstance().getQueryCache(),
@@ -150,9 +145,9 @@ public class DetectionResource {
 
     this.loader = new DetectionPipelineLoader();
 
-    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyDAO,
+    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO,
         evaluationDAO,
-        timeseriesLoader, aggregationLoader, loader, TimeSeriesCacheBuilder.getInstance(),
+        aggregationLoader, loader, TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
     this.detectionConfigFormatter = new DetectionConfigFormatter(metricDAO, datasetDAO);
     this.subscriptionConfigFormatter = new DetectionAlertConfigFormatter();

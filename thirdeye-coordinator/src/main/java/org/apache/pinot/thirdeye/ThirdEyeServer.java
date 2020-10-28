@@ -45,8 +45,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
     final Injector injector = Guice.createInjector(new ThirdEyeServerModule(
         configuration,
-        dataSource,
-        env.metrics()));
+        dataSource));
 
     env.jersey().register(injector.getInstance(RootResource.class));
   }

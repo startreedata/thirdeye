@@ -64,13 +64,25 @@ public class TimeSeriesCacheBuilder {
   }
 
   synchronized public static TimeSeriesCacheBuilder getInstance() {
+    return getInstance(null);
+  }
+
+  synchronized public static TimeSeriesCacheBuilder getInstance(
+      DefaultTimeSeriesLoader defaultTimeSeriesLoader
+  ) {
     if (INSTANCE == null) {
       INSTANCE = new TimeSeriesCacheBuilder();
+      DefaultTimeSeriesLoader timeSeriesLoader = defaultTimeSeriesLoader;
+      if (timeSeriesLoader == null) {
+        timeSeriesLoader = new DefaultTimeSeriesLoader(
+            DAORegistry.getInstance().getMetricConfigDAO(),
+            DAORegistry.getInstance().getDatasetConfigDAO(),
+            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
+            ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
+      }
+      INSTANCE.setTimeseriesLoader(timeSeriesLoader);
     }
 
-    INSTANCE.setTimeseriesLoader(new DefaultTimeSeriesLoader(DAORegistry.getInstance().getMetricConfigDAO(),
-        DAORegistry.getInstance().getDatasetConfigDAO(), ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-        ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache()));
     return INSTANCE;
   }
 

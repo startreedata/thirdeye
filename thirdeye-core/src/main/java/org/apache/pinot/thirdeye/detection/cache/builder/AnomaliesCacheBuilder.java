@@ -68,11 +68,21 @@ public class AnomaliesCacheBuilder {
   }
 
   synchronized public static AnomaliesCacheBuilder getInstance() {
+    return getInstance(null);
+  }
+
+  public static synchronized AnomaliesCacheBuilder getInstance(
+      MergedAnomalyResultManager provided) {
     if (INSTANCE == null) {
       INSTANCE = new AnomaliesCacheBuilder();
+      MergedAnomalyResultManager mergedAnomalyResultManager = provided;
+      if (mergedAnomalyResultManager == null) {
+        mergedAnomalyResultManager = DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO();
+      }
+      INSTANCE.setAnomalyDAO(mergedAnomalyResultManager);
     }
 
-    INSTANCE.setAnomalyDAO(DAORegistry.getInstance().getMergedAnomalyResultDAO());
     return INSTANCE;
   }
 

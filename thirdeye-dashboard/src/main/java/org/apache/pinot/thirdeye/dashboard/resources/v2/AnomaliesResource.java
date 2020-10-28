@@ -167,8 +167,8 @@ public class AnomaliesResource {
     this.aggregationLoader = new DefaultAggregationLoader(this.metricConfigDAO, this.datasetConfigDAO, queryCache, maxTimeCache);
     this.loader = new DetectionPipelineLoader();
 
-    this.provider = new DefaultDataProvider(this.metricConfigDAO, this.datasetConfigDAO, this.eventDAO, this.anomalyDAO,
-        this.evaluationDAO, this.timeSeriesLoader, this.aggregationLoader, this.loader,
+    this.provider = new DefaultDataProvider(this.metricConfigDAO, this.datasetConfigDAO, this.eventDAO,
+        this.evaluationDAO, this.aggregationLoader, this.loader,
         TimeSeriesCacheBuilder.getInstance(), AnomaliesCacheBuilder.getInstance());
   }
 

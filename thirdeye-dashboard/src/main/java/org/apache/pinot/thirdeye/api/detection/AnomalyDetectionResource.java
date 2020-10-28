@@ -129,11 +129,6 @@ public class AnomalyDetectionResource {
     this.onlineDetectionDataDAO = DAORegistry.getInstance().getOnlineDetectionDataManager();
     this.objectMapper = new ObjectMapper();
 
-    TimeSeriesLoader timeseriesLoader =
-        new DefaultTimeSeriesLoader(metricConfigDAO, datasetConfigDAO,
-            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
-
     AggregationLoader aggregationLoader =
         new DefaultAggregationLoader(metricConfigDAO, datasetConfigDAO,
             ThirdEyeCacheRegistry.getInstance().getQueryCache(),
@@ -141,8 +136,8 @@ public class AnomalyDetectionResource {
 
     this.loader = new DetectionPipelineLoader();
 
-    this.provider = new DefaultDataProvider(metricConfigDAO, datasetConfigDAO, eventDAO, anomalyDAO,
-        evaluationDAO, timeseriesLoader, aggregationLoader, loader,
+    this.provider = new DefaultDataProvider(metricConfigDAO, datasetConfigDAO, eventDAO,
+        evaluationDAO, aggregationLoader, loader,
         TimeSeriesCacheBuilder.getInstance(), AnomaliesCacheBuilder.getInstance());
     this.detectionValidator = new DetectionConfigValidator(this.provider);
     this.anomalySearcher = new AnomalySearcher();

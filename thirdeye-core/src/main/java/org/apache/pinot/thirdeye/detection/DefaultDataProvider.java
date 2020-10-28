@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.detection;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,17 +42,15 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
@@ -60,6 +60,7 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class DefaultDataProvider implements DataProvider {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultDataProvider.class);
   private static final long TIMEOUT = 60000;
@@ -69,25 +70,25 @@ public class DefaultDataProvider implements DataProvider {
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
   private final EventManager eventDAO;
-  private final MergedAnomalyResultManager anomalyDAO;
   private final EvaluationManager evaluationDAO;
-  private final TimeSeriesLoader timeseriesLoader;
   private final AggregationLoader aggregationLoader;
   private final DetectionPipelineLoader loader;
 
   private final TimeSeriesCacheBuilder timeseriesCache;
   private final AnomaliesCacheBuilder anomaliesCache;
 
-  public DefaultDataProvider(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO, EventManager eventDAO,
-      MergedAnomalyResultManager anomalyDAO, EvaluationManager evaluationDAO, TimeSeriesLoader timeseriesLoader,
-      AggregationLoader aggregationLoader, DetectionPipelineLoader loader, TimeSeriesCacheBuilder timeseriesCache,
+  @Inject
+  public DefaultDataProvider(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
+      EventManager eventDAO,
+      EvaluationManager evaluationDAO,
+      AggregationLoader aggregationLoader,
+      DetectionPipelineLoader loader,
+      TimeSeriesCacheBuilder timeseriesCache,
       AnomaliesCacheBuilder anomaliesCache) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.eventDAO = eventDAO;
-    this.anomalyDAO = anomalyDAO;
     this.evaluationDAO = evaluationDAO;
-    this.timeseriesLoader = timeseriesLoader;
     this.aggregationLoader = aggregationLoader;
     this.loader = loader;
     this.timeseriesCache = timeseriesCache;

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datasource.loader;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
@@ -33,7 +34,7 @@ import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+@Singleton
 public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultTimeSeriesLoader.class);
 

@@ -135,14 +135,12 @@ public class NotificationTaskSchedulerTest {
     app.setRecipients("test@test");
     this.appDAO.save(app);
 
-    TimeSeriesLoader timeseriesLoader =
-        new DefaultTimeSeriesLoader(daoRegistry.getMetricConfigDAO(), datasetDAO, null, null);
     AggregationLoader aggregationLoader =
         new DefaultAggregationLoader(metricDAO, datasetDAO, ThirdEyeCacheRegistry.getInstance().getQueryCache(),
             ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
 
-    DataProvider provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, anomalyDAO, evaluationDAO,
-        timeseriesLoader, aggregationLoader, detectionPipelineLoader, TimeSeriesCacheBuilder.getInstance(),
+    DataProvider provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, evaluationDAO,
+        aggregationLoader, detectionPipelineLoader, TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
 
     detectionId = daoRegistry.getDetectionConfigManager().save(DaoTestUtils.getTestDetectionConfig(provider, detectionConfigFile));

@@ -77,7 +77,7 @@ public abstract class ApiBeanMapper {
         .setDescription(dto.getDescription())
         .setActive(dto.isActive())
         .setCron(dto.getCron())
-        .setComponentMap(toComponentMap(dto.getComponentSpecs()))
+        .setDetections(toComponentMap(dto.getComponentSpecs()))
         ;
   }
 

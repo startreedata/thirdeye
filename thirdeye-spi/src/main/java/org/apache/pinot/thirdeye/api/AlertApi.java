@@ -18,7 +18,9 @@ public class AlertApi {
   private Date created;
   private Date updated;
   private UserApi owner;
-  private Map<String, AlertComponentApi> componentMap = new HashMap<>();
+  private Map<String, AlertComponentApi> detections = new HashMap<>();
+  private Map<String, AlertComponentApi> filters = new HashMap<>();
+  private Map<String, AlertComponentApi> qualityChecks = new HashMap<>();
 
   public Long getId() {
     return id;
@@ -101,13 +103,33 @@ public class AlertApi {
     return this;
   }
 
-  public Map<String, AlertComponentApi> getComponentMap() {
-    return componentMap;
+  public Map<String, AlertComponentApi> getDetections() {
+    return detections;
   }
 
-  public AlertApi setComponentMap(
-      final Map<String, AlertComponentApi> componentMap) {
-    this.componentMap = componentMap;
+  public AlertApi setDetections(
+      final Map<String, AlertComponentApi> detections) {
+    this.detections = detections;
+    return this;
+  }
+
+  public Map<String, AlertComponentApi> getFilters() {
+    return filters;
+  }
+
+  public AlertApi setFilters(
+      final Map<String, AlertComponentApi> filters) {
+    this.filters = filters;
+    return this;
+  }
+
+  public Map<String, AlertComponentApi> getQualityChecks() {
+    return qualityChecks;
+  }
+
+  public AlertApi setQualityChecks(
+      final Map<String, AlertComponentApi> qualityChecks) {
+    this.qualityChecks = qualityChecks;
     return this;
   }
 }

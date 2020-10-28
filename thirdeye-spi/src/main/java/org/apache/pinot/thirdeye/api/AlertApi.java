@@ -13,7 +13,7 @@ public class AlertApi {
   private String name;
   private String description;
   private String cron;
-  private Long lastTimestamp;
+  private Date lastTimestamp;
   private Boolean active;
   private Date created;
   private Date updated;
@@ -58,11 +58,11 @@ public class AlertApi {
     return this;
   }
 
-  public Long getLastTimestamp() {
+  public Date getLastTimestamp() {
     return lastTimestamp;
   }
 
-  public AlertApi setLastTimestamp(final Long lastTimestamp) {
+  public AlertApi setLastTimestamp(final Date lastTimestamp) {
     this.lastTimestamp = lastTimestamp;
     return this;
   }

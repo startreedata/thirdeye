@@ -78,6 +78,7 @@ public abstract class ApiBeanMapper {
         .setActive(dto.isActive())
         .setCron(dto.getCron())
         .setDetections(toComponentMap(dto.getComponentSpecs()))
+        .setLastTimestamp(new Date(dto.getLastTimestamp()))
         ;
   }
 

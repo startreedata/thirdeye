@@ -17,6 +17,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.thirdeye.alert.AlertCreater;
+import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
@@ -33,13 +35,16 @@ public class AlertResource {
   private static final Logger log = LoggerFactory.getLogger(AlertResource.class);
 
   private final AlertManager alertManager;
+  private final AlertCreater alertCreater;
   private final AuthService authService;
 
   @Inject
   public AlertResource(
       final AlertManager alertManager,
+      final AlertCreater alertCreater,
       final AuthService authService) {
     this.alertManager = alertManager;
+    this.alertCreater = alertCreater;
     this.authService = authService;
   }
 
@@ -58,11 +63,17 @@ public class AlertResource {
   @POST
   public Response createMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      List<ApplicationApi> applicationApiList) {
+      List<AlertApi> list) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    ensure(false, "Unsupported Operation.");
+
+    ensureExists(list, "Invalid request");
+    ensure(list.size() == 1, "Only 1 insert supported at this time.");
+
+    final AlertApi alertApi = list.get(0);
+    final Long id = alertCreater.create(alertApi);
+
     return Response
-        .ok()
+        .ok(id)
         .build();
   }
 

@@ -20,6 +20,7 @@
 
 package org.apache.pinot.thirdeye.formatter;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -43,7 +44,9 @@ public class DetectionAlertConfigFormatter implements DTOFormatter<SubscriptionG
     output.put(ATTR_YAML, config.getYaml());
     output.put(ATTR_ID, config.getId());
     output.put(ATTR_ACTIVE, config.isActive());
-    output.put(ATTR_DETECTION_CONFIG_IDS, config.getVectorClocks().keySet());
+    final Map<Long, Long> vectorClocks =
+        config.getVectorClocks() == null ? Collections.emptyMap() : config.getVectorClocks();
+    output.put(ATTR_DETECTION_CONFIG_IDS, vectorClocks.keySet());
     output.put(ATTR_APPLICATION, config.getApplication());
     return output;
   }

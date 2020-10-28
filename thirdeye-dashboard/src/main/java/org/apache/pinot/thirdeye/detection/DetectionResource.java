@@ -58,15 +58,15 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -198,8 +198,11 @@ public class DetectionResource {
     List<SubscriptionGroupDTO> subscriptionGroupDTOS = this.detectionAlertConfigDAO.findAll();
     Set<SubscriptionGroupDTO> subscriptionGroupAlertDTOs = new HashSet<>();
     for (SubscriptionGroupDTO alertConfigDTO : subscriptionGroupDTOS) {
-      if (alertConfigDTO.getVectorClocks().containsKey(id) || ConfigUtils
-          .getLongs(alertConfigDTO.getProperties().get("detectionConfigIds")).contains(id)) {
+      final Map<Long, Long> vectorClocks = alertConfigDTO.getVectorClocks();
+      final Map<String, Object> properties = alertConfigDTO.getProperties();
+      if ((vectorClocks != null && vectorClocks.containsKey(id)) || (properties != null
+          && ConfigUtils
+          .getLongs(properties.get("detectionConfigIds")).contains(id))) {
         subscriptionGroupAlertDTOs.add(alertConfigDTO);
       }
     }

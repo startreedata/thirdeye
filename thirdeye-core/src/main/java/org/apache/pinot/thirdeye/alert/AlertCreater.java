@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.alert;
 
 import static org.apache.pinot.thirdeye.CoreConstants.ONBOARDING_REPLAY_LOOKBACK;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,7 +55,7 @@ public class AlertCreater {
   public AlertDTO create(AlertApi api) {
     ensure(alertManager
         .findByPredicate(Predicate.EQ("name", api.getName()))
-        .isEmpty(), "Alert name must be unique!");
+        .isEmpty(), ERR_DUPLICATE_NAME);
 
     final AlertDTO dto = toAlertDTO(api);
 

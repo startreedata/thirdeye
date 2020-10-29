@@ -1,0 +1,50 @@
+[
+  {
+    "name": "template detection",
+    "description": "This is the detection used by online service",
+    "detections": {
+      "detection_rule_1": {
+        "type": "PERCENTAGE_RULE",
+        "metric": {
+          "name": "views",
+          "dataset": {
+            "name": "pageviews"
+          }
+        },
+        "params": {
+          "offset": "wo1w",
+          "percentageChange": 0.2
+        }
+      }
+    },
+    "filters": {
+      "filter_rule_1": {
+        "type": "PERCENTAGE_CHANGE_FILTER",
+        "metric": {
+          "name": "views",
+          "dataset": {
+            "name": "pageviews"
+          }
+        },
+        "params": {
+          "pattern": "UP_OR_DOWN",
+          "threshold": 0.05
+        }
+      }
+    },
+    "qualityChecks": {
+      "data_sla_rule_1": {
+        "type": "DATA_SLA",
+        "metric": {
+          "name": "views",
+          "dataset": {
+            "name": "pageviews"
+          }
+        },
+        "params": {
+          "sla": "3_DAYS"
+        }
+      }
+    }
+  }
+]

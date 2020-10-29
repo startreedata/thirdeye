@@ -69,7 +69,7 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
     final DatasetConfigDTO datasetConfigDTO = metricAttributesMap
         .fetchDataset(metricAlertConfigMap);
 
-    return buildExecutionPlan(
+    return buildMetricAlertExecutionPlan(
         metricConfigDTO,
         datasetConfigDTO,
         MapUtils.getString(metricAlertConfigMap, PROP_NAME),
@@ -81,7 +81,7 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
         getList(metricAlertConfigMap.get(PROP_GROUPER)));
   }
 
-  private Map<String, Object> buildExecutionPlan(
+  public Map<String, Object> buildMetricAlertExecutionPlan(
       final MetricConfigDTO metricConfigDTO,
       final DatasetConfigDTO datasetConfigDTO,
       final String subEntityName,

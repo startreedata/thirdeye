@@ -47,7 +47,7 @@ public class DetectionMetricAttributeHolder {
   private final List<DatasetConfigDTO> datasetConfigs = new ArrayList<>();
   private final Map<String, Object> components = new HashMap<>();
 
-  DetectionMetricAttributeHolder(DataProvider provider) {
+  public DetectionMetricAttributeHolder(DataProvider provider) {
     this.dataProvider = provider;
   }
 
@@ -55,6 +55,11 @@ public class DetectionMetricAttributeHolder {
     String metricName = MapUtils.getString(metricAlertConfigMap, PROP_METRIC);
     String datasetName = MapUtils.getString(metricAlertConfigMap, PROP_DATASET);
     String cron = MapUtils.getString(metricAlertConfigMap, PROP_CRON);
+
+    return loadMetricCache(metricName, datasetName, cron);
+  }
+
+  public String loadMetricCache(final String metricName, final String datasetName, String cron) {
     String metricAliasKey = ThirdEyeUtils.constructMetricAlias(datasetName, metricName);
     if (metricAttributesMap.containsKey(metricAliasKey)) {
       return metricAliasKey;
@@ -70,6 +75,10 @@ public class DetectionMetricAttributeHolder {
     metricAttributesMap.put(metricAliasKey, new DetectionMetricProperties(cron, metricConfig, datasetConfig));
 
     return metricAliasKey;
+  }
+
+  public DetectionMetricProperties getDetectionMetricProperties(final String key) {
+    return metricAttributesMap.get(key);
   }
 
   public List<DatasetConfigDTO> getAllDatasets() {

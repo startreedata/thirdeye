@@ -1,6 +1,10 @@
 package org.apache.pinot.thirdeye.alert;
 
+import static org.apache.pinot.thirdeye.CoreConstants.ONBOARDING_REPLAY_LOOKBACK;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
@@ -8,29 +12,42 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertComponentApi;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
+import org.apache.pinot.thirdeye.detection.TaskUtils;
+import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskInfo;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricProperties;
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionPropertiesBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class AlertCreater {
 
+  protected static final Logger LOG = LoggerFactory.getLogger(AlertCreater.class);
+
   private final DataProvider dataProvider;
   private final AlertManager alertManager;
+  private final TaskManager taskManager;
 
   @Inject
   public AlertCreater(
       final DataProvider dataProvider,
-      final AlertManager alertManager) {
+      final AlertManager alertManager,
+      final TaskManager taskManager) {
     this.dataProvider = dataProvider;
     this.alertManager = alertManager;
+    this.taskManager = taskManager;
   }
 
   public Long create(AlertApi api) {
@@ -40,6 +57,7 @@ public class AlertCreater {
     final Long id = alertManager.save(dto);
     dto.setId(id);
 
+    createOnboardingTask(dto, 0, 0);
     return id;
   }
 
@@ -104,5 +122,43 @@ public class AlertCreater {
     dto.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 
     return dto;
+  }
+
+  private void createOnboardingTask(
+      final AlertDTO alertDTO,
+      long tuningWindowStart,
+      long tuningWindowEnd
+  ) {
+    YamlOnboardingTaskInfo info = new YamlOnboardingTaskInfo();
+    info.setConfigId(alertDTO.getId());
+    if (tuningWindowStart == 0L && tuningWindowEnd == 0L) {
+      // default tuning window 28 days
+      tuningWindowEnd = System.currentTimeMillis();
+      tuningWindowStart = tuningWindowEnd - TimeUnit.DAYS.toMillis(28);
+    }
+    info.setTuningWindowStart(tuningWindowStart);
+    info.setTuningWindowEnd(tuningWindowEnd);
+    info.setEnd(System.currentTimeMillis());
+
+    long lastTimestamp = alertDTO.getLastTimestamp();
+    // If no value is present, set the default lookback
+    if (lastTimestamp < 0) {
+      lastTimestamp = info.getEnd() - ONBOARDING_REPLAY_LOOKBACK;
+    }
+    info.setStart(lastTimestamp);
+
+    String taskInfoJson;
+    try {
+      taskInfoJson = new ObjectMapper().writeValueAsString(info);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(String.format("Error while serializing %s: %s",
+          YamlOnboardingTaskInfo.class.getSimpleName(), info), e);
+    }
+
+    TaskDTO taskDTO = TaskUtils.buildTask(alertDTO.getId(), taskInfoJson,
+        TaskConstants.TaskType.YAML_DETECTION_ONBOARD);
+    long taskId = taskManager.save(taskDTO);
+    LOG.info("Created {} task {} with taskId {}", TaskConstants.TaskType.YAML_DETECTION_ONBOARD,
+        taskDTO, taskId);
   }
 }

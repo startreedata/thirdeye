@@ -3,6 +3,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+const outputPath = path.join(__dirname, "dist");
 
 module.exports = {
     // Input configuration
@@ -10,7 +11,7 @@ module.exports = {
 
     // Output configuration
     output: {
-        path: path.join(__dirname, "dist"),
+        path: outputPath,
         filename: "thirdeye-ui.js",
         publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
     },
@@ -86,18 +87,18 @@ module.exports = {
             patterns: [
                 {
                     from: path.join(__dirname, "src/public/favicon.ico"),
-                    to: path.join(__dirname, "dist"),
+                    to: outputPath,
                 },
                 {
                     from: path.join(
                         __dirname,
                         "src/public/cortex-data-512x512.png"
                     ),
-                    to: path.join(__dirname, "dist"),
+                    to: outputPath,
                 },
                 {
                     from: path.join(__dirname, "src/public/manifest.json"),
-                    to: path.join(__dirname, "dist"),
+                    to: outputPath,
                 },
             ],
         }),

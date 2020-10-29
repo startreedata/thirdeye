@@ -16,6 +16,3 @@ tsbuildinfo/
 
 # macOS
 .DS_Store
-
-# webpack stats
-webpack-stats.json

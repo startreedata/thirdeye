@@ -3,6 +3,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+const outputPath = path.join(__dirname, "dist");
 
 module.exports = {
     // Input configuration
@@ -10,11 +11,10 @@ module.exports = {
 
     // Output configuration
     output: {
-        path: path.join(__dirname, "dist"),
+        path: outputPath,
         filename: "thirdeye-ui.js",
         publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
-        // Development mode optimizations
-        pathinfo: false,
+        pathinfo: false, // Development mode optimization
     },
 
     // Loaders
@@ -86,7 +86,7 @@ module.exports = {
         // main transpilation
         new ForkTsCheckerWebpackPlugin({
             eslint: {
-                files: "./src/**/*.{ts,tsx}", // NOTE: this was "files: "./src/**/*.{ts,tsx,js,jsx}","
+                files: "./src/**/*.{ts,tsx}",
             },
         }),
         // Generate index.html from template
@@ -99,18 +99,18 @@ module.exports = {
             patterns: [
                 {
                     from: path.join(__dirname, "src/public/favicon.ico"),
-                    to: path.join(__dirname, "dist"),
+                    to: outputPath,
                 },
                 {
                     from: path.join(
                         __dirname,
                         "src/public/cortex-data-512x512.png"
                     ),
-                    to: path.join(__dirname, "dist"),
+                    to: outputPath,
                 },
                 {
                     from: path.join(__dirname, "src/public/manifest.json"),
-                    to: path.join(__dirname, "dist"),
+                    to: outputPath,
                 },
             ],
         }),
@@ -118,12 +118,14 @@ module.exports = {
 
     // Setup webpack-dev-server
     devServer: {
-        contentBase: path.join(__dirname, "dist"),
+        contentBase: outputPath,
         compress: true,
         port: 7004,
         // Required to route all requests to index.html so that React router gets to handle all
         // copy pasted deep links
-        historyApiFallback: { disableDotRule: true },
+        historyApiFallback: {
+            disableDotRule: true,
+        },
 
         // Setup webpack-dev-server proxy context and target
         proxy: [
@@ -142,7 +144,6 @@ module.exports = {
     devtool: "eval-cheap-module-source-map",
 
     // Development mode optimizations
-
     optimization: {
         runtimeChunk: true,
         removeAvailableModules: false,

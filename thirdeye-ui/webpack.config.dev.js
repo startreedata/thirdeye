@@ -3,6 +3,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+
 const outputPath = path.join(__dirname, "dist");
 
 module.exports = {
@@ -60,7 +61,7 @@ module.exports = {
         ],
     },
 
-    // Configure how modules are resolved
+    // Module resolution
     resolve: {
         // File types to be handled
         extensions: [
@@ -116,14 +117,14 @@ module.exports = {
         }),
     ],
 
-    // Setup webpack-dev-server
+    // webpack-dev-server
     devServer: {
         contentBase: outputPath,
         compress: true,
         port: 7004,
-        // Required to route all requests to index.html so that React router gets to handle all
-        // copy pasted deep links
         historyApiFallback: {
+            // Required to route all requests to index.html so that React router gets to handle all
+            // copy pasted deep links
             disableDotRule: true,
         },
 

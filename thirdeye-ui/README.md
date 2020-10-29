@@ -1,4 +1,4 @@
-<img align="right" width="65" height="65" src="./src/public/cortex-data-512x512.png">
+<img align="right" width="65" height="65" src="./src/public/thirdeye-512x512.png">
 
 # ThirdEye UI
 
@@ -44,7 +44,7 @@ This will build and deploy the project using webpack-dev-server at `http://local
 
 ### `start`
 
-Build and deploy the project using webpack-dev-server at `http://localhost:7002`
+Build and deploy the project using webpack-dev-server at `http://localhost:7004`
 
 ```
 $ npm run start
@@ -60,7 +60,7 @@ $ npm run build
 
 ### `eslint`
 
-Run ESLint across the project except for files and directories listed in repository root `.eslintignore`
+Run ESLint across the project except for files and directories listed in project root `.eslintignore`
 
 ```
 $ npm run eslint
@@ -68,7 +68,7 @@ $ npm run eslint
 
 ### `stylelint`
 
-Run stylelint across the project except for files and directories listed in repository root `.stylelintignore`
+Run stylelint across the project except for files and directories listed in project root `.stylelintignore`
 
 ```
 $ npm run stylelint
@@ -76,7 +76,7 @@ $ npm run stylelint
 
 ### `pretty`
 
-Run Prettier across the project except for files and directories listed in repository root `.prettierignore`
+Run Prettier across the project except for files and directories listed in project root `.prettierignore`
 
 ```
 $ npm run pretty

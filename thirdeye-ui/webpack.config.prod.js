@@ -3,6 +3,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+
 const outputPath = path.join(__dirname, "dist");
 
 module.exports = {
@@ -55,7 +56,7 @@ module.exports = {
         ],
     },
 
-    // Configure how modules are resolved
+    // Module resolution
     resolve: {
         // File types to be handled
         extensions: [
@@ -107,6 +108,6 @@ module.exports = {
     // Production mode
     mode: "production",
 
-    // Include cheap source maps for potential debugging
+    // Include cheap-source map for potential debugging
     devtool: "cheap-source-map",
 };

@@ -1,0 +1,37 @@
+// Fonts referenced here will be extracted and placed into dist/fonts/font-name per webpack config
+@font-face {
+    font-family: Quattrocento Sans;
+    src: url("/src/assets/fonts/Quattrocento_Sans/QuattrocentoSans-Regular.ttf")
+        format("truetype");
+    font-style: normal;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: Quattrocento Sans;
+    src: url("/src/assets/fonts/Quattrocento_Sans/QuattrocentoSans-Bold.ttf")
+        format("truetype");
+    font-style: normal;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: Nunito;
+    src: url("/src/assets/fonts/Nunito/Nunito-Light.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: Nunito;
+    src: url("/src/assets/fonts/Nunito/Nunito-Regular.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: Nunito;
+    src: url("/src/assets/fonts/Nunito/Nunito-Bold.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 700;
+}

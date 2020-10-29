@@ -11,8 +11,6 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertComponentApi;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -25,25 +23,27 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionProp
 public class AlertCreater {
 
   private final DataProvider dataProvider;
-  private final MetricConfigManager metricConfigManager;
-  private final DatasetConfigManager datasetConfigManager;
   private final AlertManager alertManager;
 
   @Inject
   public AlertCreater(
       final DataProvider dataProvider,
-      final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager,
       final AlertManager alertManager) {
     this.dataProvider = dataProvider;
-    this.metricConfigManager = metricConfigManager;
-    this.datasetConfigManager = datasetConfigManager;
     this.alertManager = alertManager;
   }
 
   public Long create(AlertApi api) {
     final AlertDTO dto = toAlertDTO(api);
+    dto.setProperties(buildDetectionProperties(api));
 
+    final Long id = alertManager.save(dto);
+    dto.setId(id);
+
+    return id;
+  }
+
+  private Map<String, Object> buildDetectionProperties(final AlertApi api) {
     final DetectionMetricAttributeHolder metricAttributesMap =
         new DetectionMetricAttributeHolder(dataProvider);
 
@@ -63,7 +63,7 @@ public class AlertCreater {
     final MetricConfigDTO metricConfigDTO = detectionMetricProperties.getMetricConfigDTO();
     final DatasetConfigDTO datasetConfigDTO = detectionMetricProperties.getDatasetConfigDTO();
 
-    final Map<String, Object> detectionProperties = detectionTranslatorBuilder
+    return detectionTranslatorBuilder
         .buildMetricAlertExecutionPlan(
             metricConfigDTO,
             datasetConfigDTO,
@@ -75,12 +75,6 @@ public class AlertCreater {
             toRuleYamls(name, component),
             Collections.emptyList()
         );
-
-    dto.setProperties(detectionProperties);
-
-
-    final Long id = alertManager.save(dto);
-    return id;
   }
 
   private List<Map<String, Object>> toRuleYamls(final String name,

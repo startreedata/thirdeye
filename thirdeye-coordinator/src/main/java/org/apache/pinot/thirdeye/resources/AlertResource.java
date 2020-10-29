@@ -70,6 +70,9 @@ public class AlertResource {
     ensure(list.size() == 1, "Only 1 insert supported at this time.");
 
     final AlertApi alertApi = list.get(0);
+    ensureExists(alertApi.getDetections(), "Exactly 1 detection must be present");
+    ensure(alertApi.getDetections().size() == 1, "Exactly 1 detection must be present");
+
     final Long id = alertCreater.create(alertApi);
 
     return Response

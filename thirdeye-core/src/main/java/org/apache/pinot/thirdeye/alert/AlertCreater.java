@@ -52,7 +52,12 @@ public class AlertCreater {
 
   public Long create(AlertApi api) {
     final AlertDTO dto = toAlertDTO(api);
-    dto.setProperties(buildDetectionProperties(api));
+
+    final DetectionMetricAttributeHolder metricAttributesMap =
+        new DetectionMetricAttributeHolder(dataProvider);
+
+    dto.setProperties(buildDetectionProperties(api, metricAttributesMap));
+    dto.setComponentSpecs(metricAttributesMap.getAllComponents());
 
     final Long id = alertManager.save(dto);
     dto.setId(id);
@@ -61,9 +66,8 @@ public class AlertCreater {
     return id;
   }
 
-  private Map<String, Object> buildDetectionProperties(final AlertApi api) {
-    final DetectionMetricAttributeHolder metricAttributesMap =
-        new DetectionMetricAttributeHolder(dataProvider);
+  private Map<String, Object> buildDetectionProperties(final AlertApi api,
+      final DetectionMetricAttributeHolder metricAttributesMap) {
 
     final DetectionPropertiesBuilder detectionTranslatorBuilder =
         new DetectionPropertiesBuilder(metricAttributesMap, dataProvider);

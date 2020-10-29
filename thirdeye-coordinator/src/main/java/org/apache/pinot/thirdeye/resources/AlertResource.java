@@ -74,10 +74,8 @@ public class AlertResource {
     ensureExists(alertApi.getDetections(), "Exactly 1 detection must be present");
     ensure(alertApi.getDetections().size() == 1, "Exactly 1 detection must be present");
 
-    final Long id = alertCreater.create(alertApi);
-
     return Response
-        .ok(id)
+        .ok(toApi(alertCreater.create(alertApi)))
         .build();
   }
 

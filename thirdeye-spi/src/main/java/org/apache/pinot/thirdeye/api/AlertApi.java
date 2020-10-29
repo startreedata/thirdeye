@@ -3,7 +3,6 @@ package org.apache.pinot.thirdeye.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
@@ -18,9 +17,9 @@ public class AlertApi {
   private Date created;
   private Date updated;
   private UserApi owner;
-  private Map<String, AlertComponentApi> detections = new HashMap<>();
-  private Map<String, AlertComponentApi> filters = new HashMap<>();
-  private Map<String, AlertComponentApi> qualityChecks = new HashMap<>();
+  private Map<String, AlertComponentApi> detections;
+  private Map<String, AlertComponentApi> filters;
+  private Map<String, AlertComponentApi> qualityChecks;
 
   public Long getId() {
     return id;

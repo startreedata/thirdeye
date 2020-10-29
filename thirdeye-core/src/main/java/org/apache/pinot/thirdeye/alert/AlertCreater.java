@@ -51,7 +51,7 @@ public class AlertCreater {
     this.taskManager = taskManager;
   }
 
-  public Long create(AlertApi api) {
+  public AlertDTO create(AlertApi api) {
     ensure(alertManager
         .findByPredicate(Predicate.EQ("name", api.getName()))
         .isEmpty(), "Alert name must be unique!");
@@ -68,7 +68,7 @@ public class AlertCreater {
     dto.setId(id);
 
     createOnboardingTask(dto, 0, 0);
-    return id;
+    return dto;
   }
 
   private Map<String, Object> buildDetectionProperties(final AlertApi api,

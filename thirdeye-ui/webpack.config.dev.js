@@ -104,7 +104,7 @@ module.exports = {
                 {
                     from: path.join(
                         __dirname,
-                        "src/public/cortex-data-512x512.png"
+                        "src/public/thirdeye-512x512.png"
                     ),
                     to: outputPath,
                 },

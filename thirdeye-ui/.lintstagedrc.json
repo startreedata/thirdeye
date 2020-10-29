@@ -1,0 +1,8 @@
+{
+    "*.{ts,tsx,js}": [
+        "eslint --config './.eslintrc.json' --ignore-path './.eslintignore' --fix"
+    ],
+    "*.{css,scss}": "stylelint --config './.stylelintrc.json' --ignore-path './.stylelintignore' --fix",
+    "*.{ts,tsx}": ["organize-imports-cli"],
+    "*": "prettier --config './.prettierrc.json' --ignore-path './.prettierignore' --write"
+}

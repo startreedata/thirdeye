@@ -23,6 +23,7 @@ logging:
   level: INFO
   loggers:
     org.apache.pinot.thirdeye: DEBUG
+    org.apache.zookeeper: WARN
 
 auth:
   jwt:

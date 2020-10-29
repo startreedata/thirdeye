@@ -2,9 +2,9 @@ package org.apache.pinot.thirdeye.alert;
 
 import static org.apache.pinot.thirdeye.CoreConstants.ONBOARDING_REPLAY_LOOKBACK;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
@@ -22,6 +22,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
+import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskInfo;
@@ -51,6 +52,10 @@ public class AlertCreater {
   }
 
   public Long create(AlertApi api) {
+    ensure(alertManager
+        .findByPredicate(Predicate.EQ("name", api.getName()))
+        .isEmpty(), "Alert name must be unique!");
+
     final AlertDTO dto = toAlertDTO(api);
 
     final DetectionMetricAttributeHolder metricAttributesMap =

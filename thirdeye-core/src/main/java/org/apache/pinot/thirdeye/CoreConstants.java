@@ -21,4 +21,7 @@ public interface CoreConstants {
   // disable minute level cache warm up
   long CACHING_PERIOD_LOOKBACK_MINUTELY = -1;
   long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
+
+  // default onboarding replay period
+  long ONBOARDING_REPLAY_LOOKBACK = TimeUnit.DAYS.toMillis(30);
 }

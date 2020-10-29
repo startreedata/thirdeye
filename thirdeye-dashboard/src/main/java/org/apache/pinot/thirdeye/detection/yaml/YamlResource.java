@@ -59,6 +59,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
@@ -86,8 +87,6 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
-import org.apache.pinot.thirdeye.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
@@ -143,9 +142,6 @@ public class YamlResource {
   private static final String DUPLICATE_KEY_MSG = "%s is already taken. Please use a different one.";
   private static final String MISSING_YAML_MSG = "%s yaml is missing.";
 
-  // default onboarding replay period
-  private static final long ONBOARDING_REPLAY_LOOKBACK = TimeUnit.DAYS.toMillis(30);
-
   private final AlertManager detectionConfigDAO;
   private final SubscriptionGroupManager subscriptionConfigDAO;
   private final DetectionConfigValidator detectionValidator;
@@ -154,7 +150,6 @@ public class YamlResource {
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
   private final EventManager eventDAO;
-  private final MergedAnomalyResultManager anomalyDAO;
   private final EvaluationManager evaluationDAO;
   private final TaskManager taskDAO;
   private final SessionManager sessionDAO;
@@ -174,7 +169,6 @@ public class YamlResource {
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
     this.eventDAO = DAORegistry.getInstance().getEventDAO();
-    this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
     this.taskDAO = DAORegistry.getInstance().getTaskDAO();
     this.evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
     this.sessionDAO = DAORegistry.getInstance().getSessionDAO();
@@ -262,7 +256,7 @@ public class YamlResource {
     long lastTimestamp = detectionConfig.getLastTimestamp();
     // If no value is present, set the default lookback
     if (lastTimestamp < 0) {
-      lastTimestamp = info.getEnd() - ONBOARDING_REPLAY_LOOKBACK;
+      lastTimestamp = info.getEnd() - CoreConstants.ONBOARDING_REPLAY_LOOKBACK;
     }
     info.setStart(lastTimestamp);
 

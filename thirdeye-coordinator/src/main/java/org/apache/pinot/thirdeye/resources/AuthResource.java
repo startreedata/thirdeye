@@ -22,7 +22,7 @@ import org.apache.pinot.thirdeye.auth.GrantType;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 
 @Singleton
-@Api(tags = "Auth")
+@Api(tags = " Auth")
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 

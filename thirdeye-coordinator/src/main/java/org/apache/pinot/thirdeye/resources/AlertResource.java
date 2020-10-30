@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApi;
+import io.swagger.annotations.Api;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,6 +29,7 @@ import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Api(tags = "Alert")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AlertResource {

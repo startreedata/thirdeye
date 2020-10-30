@@ -10,7 +10,7 @@ import javax.ws.rs.core.Response;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = "Root")
+@Api(tags = "zzz All Endpoints zzz")
 public class RootResource {
 
   private final ApiResource apiResource;

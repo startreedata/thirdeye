@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApi;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,9 +21,7 @@ import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +97,11 @@ public class AnomalyResource {
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    ensure(false, "Unsupported Operation.");
-    return Response.ok().build();
+    final MergedAnomalyResultDTO dto = mergedAnomalyResultManager.findById(id);
+    if (dto != null) {
+      mergedAnomalyResultManager.delete(dto);
+      return Response.ok(toApi(dto)).build();
+    }
+    return Response.ok("Not found").build();
   }
 }

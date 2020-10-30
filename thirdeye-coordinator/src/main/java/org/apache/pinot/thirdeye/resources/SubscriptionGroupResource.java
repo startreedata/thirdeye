@@ -113,7 +113,11 @@ public class SubscriptionGroupResource {
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    ensure(false, "Unsupported Operation.");
-    return Response.ok().build();
+    final SubscriptionGroupDTO dto = subscriptionGroupManager.findById(id);
+    if (dto != null) {
+      subscriptionGroupManager.delete(dto);
+      return Response.ok(toApi(dto)).build();
+    }
+    return Response.ok("Not found").build();
   }
 }

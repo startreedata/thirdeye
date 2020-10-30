@@ -285,9 +285,12 @@ public class AlertSearcher {
     Multimap<Long, String> detectionIdToSubscriptionGroups = ArrayListMultimap.create();
     Multimap<Long, String> detectionIdToApplications = ArrayListMultimap.create();
     for (SubscriptionGroupDTO subscriptionGroup : subscriptionGroups) {
-      for (long detectionConfigId : subscriptionGroup.getVectorClocks().keySet()) {
-        detectionIdToSubscriptionGroups.put(detectionConfigId, subscriptionGroup.getName());
-        detectionIdToApplications.put(detectionConfigId, subscriptionGroup.getApplication());
+      final Map<Long, Long> vectorClocks = subscriptionGroup.getVectorClocks();
+      if (vectorClocks != null) {
+        for (long detectionConfigId : vectorClocks.keySet()) {
+          detectionIdToSubscriptionGroups.put(detectionConfigId, subscriptionGroup.getName());
+          detectionIdToApplications.put(detectionConfigId, subscriptionGroup.getApplication());
+        }
       }
     }
     for (Map<String, Object> alert : alerts) {

@@ -6,12 +6,13 @@ import { login } from "../../utils/rest/authentication-rest/authentication-rest.
 export const SignInPage: FunctionComponent = () => {
     useEffect(() => {
         performLogin();
-        location.reload;
     }, []);
 
     const performLogin = async (): Promise<void> => {
         const authentication: Authentication = await login();
         setAuthentication(authentication.accessToken);
+
+        location.reload;
     };
 
     return <></>;

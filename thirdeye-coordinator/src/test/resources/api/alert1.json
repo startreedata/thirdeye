@@ -1,6 +1,6 @@
 [
   {
-    "name": "template detection",
+    "name": "Alert",
     "description": "This is the detection used by online service",
     "detections": {
       "detection_rule_1": {

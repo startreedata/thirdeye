@@ -30,7 +30,7 @@
     <module>thirdeye-spi</module>
     <module>thirdeye-core</module>
     <module>thirdeye-coordinator</module>
-    <module>thirdeye-dist</module>
+    <module>thirdeye-distribution</module>
     <module>thirdeye-integration-tests</module>
     <module>thirdeye-worker</module>
   </modules>

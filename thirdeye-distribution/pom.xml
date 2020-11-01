@@ -29,7 +29,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>thirdeye-dist</artifactId>
+  <artifactId>thirdeye-distribution</artifactId>
   <properties>
     <thirdeye.root>${basedir}/..</thirdeye.root>
   </properties>

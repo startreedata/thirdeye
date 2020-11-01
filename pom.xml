@@ -31,7 +31,7 @@
     <module>thirdeye-core</module>
     <module>thirdeye-coordinator</module>
     <module>thirdeye-dist</module>
-    <module>thirdeye-dashboard</module>
+    <module>thirdeye-integration-tests</module>
     <module>thirdeye-worker</module>
   </modules>
 

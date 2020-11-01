@@ -10,20 +10,20 @@ import org.apache.pinot.thirdeye.resources.RootResource;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.testng.annotations.Test;
 
-public class ThirdEyeServerModuleTest {
+public class ThirdEyeCoordinatorModuleTest {
 
   @Test
   public void testRootResourceInjection() throws Exception {
     TestDatabase db = new TestDatabase();
     final DataSource dataSource = db.createDataSource(db.testPersistenceConfig());
 
-    final ThirdEyeServerConfiguration configuration = new ThirdEyeServerConfiguration()
+    final ThirdEyeCoordinatorConfiguration configuration = new ThirdEyeCoordinatorConfiguration()
         .setAuthConfiguration(new AuthConfiguration()
             .setJwtConfiguration(new JwtConfiguration()
                 .setSigningKey("abcd")
                 .setIssuer("issuer")));
 
-    final Injector injector = Guice.createInjector(new ThirdEyeServerModule(
+    final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,
         dataSource
     ));

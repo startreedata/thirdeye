@@ -50,7 +50,7 @@ Detailed documentation can be found at [ThirdEye documentation](https://thirdeye
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.
 
 ### Running ThirdEye Coordinator in debug mode
-After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeServer` class. Press the `play ▶️` icon
+After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeCoordinator` class. Press the `play ▶️` icon
 and choose debug. This should run the application. However, it would need the right args to start the server.
 
 In the debug configuration settings, set the following values:

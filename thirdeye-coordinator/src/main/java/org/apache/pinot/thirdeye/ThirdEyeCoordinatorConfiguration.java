@@ -6,7 +6,7 @@ import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.DatabaseConfiguration;
 
-public class ThirdEyeServerConfiguration extends Configuration {
+public class ThirdEyeCoordinatorConfiguration extends Configuration {
 
   @JsonProperty("auth")
   private AuthConfiguration authConfiguration;
@@ -21,7 +21,7 @@ public class ThirdEyeServerConfiguration extends Configuration {
     return authConfiguration;
   }
 
-  public ThirdEyeServerConfiguration setAuthConfiguration(
+  public ThirdEyeCoordinatorConfiguration setAuthConfiguration(
       final AuthConfiguration authConfiguration) {
     this.authConfiguration = authConfiguration;
     return this;
@@ -40,7 +40,7 @@ public class ThirdEyeServerConfiguration extends Configuration {
     return databaseConfiguration;
   }
 
-  public ThirdEyeServerConfiguration setDatabaseConfiguration(
+  public ThirdEyeCoordinatorConfiguration setDatabaseConfiguration(
       final DatabaseConfiguration databaseConfiguration) {
     this.databaseConfiguration = databaseConfiguration;
     return this;

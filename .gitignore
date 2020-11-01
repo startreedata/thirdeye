@@ -13,3 +13,5 @@ test-output/
 *.log
 *.swp
 docs/_build
+
+.DS_Store

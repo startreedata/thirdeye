@@ -6,12 +6,12 @@ import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
-public class ThirdEyeServerModule extends AbstractModule {
+public class ThirdEyeCoordinatorModule extends AbstractModule {
 
-  private final ThirdEyeServerConfiguration configuration;
+  private final ThirdEyeCoordinatorConfiguration configuration;
   private final DataSource dataSource;
 
-  public ThirdEyeServerModule(final ThirdEyeServerConfiguration configuration,
+  public ThirdEyeCoordinatorModule(final ThirdEyeCoordinatorConfiguration configuration,
       final DataSource dataSource) {
     this.configuration = configuration;
     this.dataSource = dataSource;

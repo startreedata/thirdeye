@@ -15,35 +15,35 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
+public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfiguration> {
 
-  private static final Logger log = LoggerFactory.getLogger(ThirdEyeServer.class);
+  private static final Logger log = LoggerFactory.getLogger(ThirdEyeCoordinator.class);
 
   public static void main(String[] args) throws Exception {
     RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
     log.info(String.format("JVM arguments: %s", runtimeMxBean.getInputArguments()));
 
-    new ThirdEyeServer().run(args);
+    new ThirdEyeCoordinator().run(args);
   }
 
   @Override
-  public void initialize(final Bootstrap<ThirdEyeServerConfiguration> bootstrap) {
-    bootstrap.addBundle(new SwaggerBundle<ThirdEyeServerConfiguration>() {
+  public void initialize(final Bootstrap<ThirdEyeCoordinatorConfiguration> bootstrap) {
+    bootstrap.addBundle(new SwaggerBundle<ThirdEyeCoordinatorConfiguration>() {
       @Override
       protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(
-          ThirdEyeServerConfiguration configuration) {
+          ThirdEyeCoordinatorConfiguration configuration) {
         return configuration.getSwaggerBundleConfiguration();
       }
     });
   }
 
   @Override
-  public void run(final ThirdEyeServerConfiguration configuration, final Environment env) {
+  public void run(final ThirdEyeCoordinatorConfiguration configuration, final Environment env) {
 
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
 
-    final Injector injector = Guice.createInjector(new ThirdEyeServerModule(
+    final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,
         dataSource));
 

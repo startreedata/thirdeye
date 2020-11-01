@@ -17,10 +17,12 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.dashboard.views;
+package org.apache.pinot.thirdeye.dashboard.resources.v2.alerts;
 
-public interface ViewHandler<Request extends ViewRequest, Response extends ViewResponse> {
-
-  Response process(Request request) throws Exception;
-
+public enum AnomalyClassificationType {
+  NONE,
+  TRUE_POSITIVE,
+  FALSE_POSITIVE,
+  TRUE_NEGATIVE,
+  FALSE_NEGATIVE
 }

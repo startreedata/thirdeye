@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.dashboard.resources.v2.anomalies;
+package org.apache.pinot.thirdeye.dashboard.resources.v2.alerts;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.dashboard.resources.v2.ResourceUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;

@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.dashboard.resource;
 
-import org.apache.pinot.thirdeye.dashboard.resources.AnomalyResource;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
@@ -10,17 +11,13 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.Arrays;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 
 public class AnomalyResourceTest {
+
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyResourceTest.class);
 
   private DAOTestBase testDAOProvider;
@@ -101,5 +98,4 @@ public class AnomalyResourceTest {
   void afterClass() {
     testDAOProvider.cleanup();
   }
-
 }

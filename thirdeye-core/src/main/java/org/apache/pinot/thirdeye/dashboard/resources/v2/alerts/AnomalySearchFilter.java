@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.dashboard.resources.v2.anomalies;
+package org.apache.pinot.thirdeye.dashboard.resources.v2.alerts;
 
 import java.util.Collections;
 import java.util.List;

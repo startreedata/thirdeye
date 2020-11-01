@@ -17,13 +17,12 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.dashboard.resources.v2;
+package org.apache.pinot.thirdeye.dashboard.resources.v2.alerts;
 
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.TreeMultimap;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
-import org.apache.pinot.thirdeye.dashboard.resources.v2.pojo.AnomalyClassificationType;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;

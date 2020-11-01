@@ -19,6 +19,7 @@
 package org.apache.pinot.thirdeye.anomaly.detection.trigger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,8 +48,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.apache.pinot.thirdeye.dashboard.resources.EntityManagerResource.*;
 
 public class DataAvailabilityTaskSchedulerTest {
   private static final Logger LOG = LoggerFactory.getLogger(DataAvailabilityTaskSchedulerTest.class);
@@ -311,7 +310,7 @@ public class DataAvailabilityTaskSchedulerTest {
     DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo(detectionId, createTime - 1, createTime);
     String taskInfoJson = null;
     try {
-      taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
+      taskInfoJson = new ObjectMapper().writeValueAsString(taskInfo);
     } catch (JsonProcessingException e) {
       LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString", taskInfo, e);
     }

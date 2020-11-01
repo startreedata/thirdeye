@@ -27,7 +27,6 @@
   <name>thirdeye</name>
 
   <modules>
-    <module>thirdeye-frontend</module>
     <module>thirdeye-spi</module>
     <module>thirdeye-core</module>
     <module>thirdeye-coordinator</module>

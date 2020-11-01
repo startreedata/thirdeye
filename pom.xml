@@ -102,8 +102,8 @@
   </licenses>
 
   <organization>
-    <name>LinkedIn Corp.</name>
-    <url>http://www.linkedin.com/</url>
+    <name>CortexData</name>
+    <url>https://www.cortexdata.io</url>
   </organization>
 
   <developers>
@@ -131,11 +131,11 @@
       <id>apucher</id>
       <name>Alexander Pucher</name>
     </developer>
+    <developer>
+      <id>suvodeep-pyne</id>
+      <name>Suvodeep Pyne</name>
+    </developer>
   </developers>
-
-  <scm>
-    <developerConnection>scm:git:git://git@github.com/apache/incubator-pinot.git</developerConnection>
-  </scm>
 
   <inceptionYear>2014-2018</inceptionYear>
 

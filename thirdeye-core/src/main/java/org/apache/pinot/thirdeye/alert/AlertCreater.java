@@ -60,12 +60,6 @@ public class AlertCreater {
 
     final AlertDTO dto = toAlertDTO(api);
 
-    final DetectionMetricAttributeHolder metricAttributesMap =
-        new DetectionMetricAttributeHolder(dataProvider);
-
-    dto.setProperties(buildDetectionProperties(api, metricAttributesMap));
-    dto.setComponentSpecs(metricAttributesMap.getAllComponents());
-
     final Long id = alertManager.save(dto);
     dto.setId(id);
 
@@ -120,7 +114,7 @@ public class AlertCreater {
     return ruleYamls;
   }
 
-  private AlertDTO toAlertDTO(final AlertApi api) {
+  public AlertDTO toAlertDTO(final AlertApi api) {
     final AlertDTO dto = new AlertDTO();
 
     dto.setName(api.getName());
@@ -132,6 +126,12 @@ public class AlertCreater {
         .orElse(0L));
     dto.setUpdateTime(new Timestamp(System.currentTimeMillis()));
     dto.setCreatedBy(api.getOwner().getPrincipal());
+
+    final DetectionMetricAttributeHolder metricAttributesMap =
+        new DetectionMetricAttributeHolder(dataProvider);
+
+    dto.setProperties(buildDetectionProperties(api, metricAttributesMap));
+    dto.setComponentSpecs(metricAttributesMap.getAllComponents());
 
     return dto;
   }

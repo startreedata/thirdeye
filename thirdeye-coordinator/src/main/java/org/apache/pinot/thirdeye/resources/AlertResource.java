@@ -6,6 +6,8 @@ import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApi;
 
 import io.swagger.annotations.Api;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
@@ -20,13 +22,16 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
+import org.apache.pinot.thirdeye.alert.AlertPreviewGenerator;
 import org.apache.pinot.thirdeye.api.AlertApi;
+import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.api.UserApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,15 +46,18 @@ public class AlertResource {
   private final AlertManager alertManager;
   private final AlertCreater alertCreater;
   private final AuthService authService;
+  private final AlertPreviewGenerator alertPreviewGenerator;
 
   @Inject
   public AlertResource(
       final AlertManager alertManager,
       final AlertCreater alertCreater,
-      final AuthService authService) {
+      final AuthService authService,
+      final AlertPreviewGenerator alertPreviewGenerator) {
     this.alertManager = alertManager;
     this.alertCreater = alertCreater;
     this.authService = authService;
+    this.alertPreviewGenerator = alertPreviewGenerator;
   }
 
   @GET
@@ -82,6 +90,27 @@ public class AlertResource {
         .ok(toApi(alertCreater.create(alertApi
             .setOwner(new UserApi().setPrincipal(principal.getName()))
         )))
+        .build();
+  }
+
+  @Path("preview")
+  @POST
+  public Response preview(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      AlertEvaluationApi request)
+      throws InterruptedException, ExecutionException, TimeoutException {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+
+    ensureExists(request.getStart());
+    ensureExists(request.getEnd());
+
+    ensureExists(request.getAlert())
+        .setOwner(new UserApi()
+            .setPrincipal(principal.getName()));
+
+    final DetectionPipelineResult pipelineResult = alertPreviewGenerator.runPreview(request);
+    return Response
+        .ok(pipelineResult)
         .build();
   }
 

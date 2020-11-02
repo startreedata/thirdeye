@@ -33,6 +33,15 @@ public class ResourceUtils {
     }
   }
 
+  public static <T> T ensureExists(T o) {
+    return ensureExists(o, ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST);
+  }
+
+  public static <T> T ensureExists(T o, ThirdEyeStatus status) {
+    ensure(o != null, status);
+    return o;
+  }
+
   public static <T> T ensureExists(T o, String message) {
     ensure(o != null, message);
     return o;

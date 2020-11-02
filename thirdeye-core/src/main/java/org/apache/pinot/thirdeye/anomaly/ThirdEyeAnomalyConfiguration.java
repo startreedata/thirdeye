@@ -19,12 +19,12 @@
 
 package org.apache.pinot.thirdeye.anomaly;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardConfiguration;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
-import java.util.List;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 
 

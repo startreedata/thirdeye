@@ -23,11 +23,11 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
-import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
-import org.apache.pinot.thirdeye.cube.data.dbclient.CubeTag;
 import org.apache.pinot.thirdeye.cube.data.dbclient.BaseCubePinotClient;
 import org.apache.pinot.thirdeye.cube.data.dbclient.CubeSpec;
+import org.apache.pinot.thirdeye.cube.data.dbclient.CubeTag;
+import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
+import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 
 

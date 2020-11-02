@@ -21,8 +21,8 @@ package org.apache.pinot.thirdeye.rootcause.util;
 
 import java.util.Objects;
 
-
 public final class FilterPredicate {
+
   final String key;
   final String operator;
   final String value;
@@ -42,8 +42,9 @@ public final class FilterPredicate {
       return false;
     }
     FilterPredicate that = (FilterPredicate) o;
-    return Objects.equals(key, that.key) && Objects.equals(operator, that.operator) && Objects.equals(value,
-        that.value);
+    return Objects.equals(key, that.key) && Objects.equals(operator, that.operator) && Objects
+        .equals(value,
+            that.value);
   }
 
   @Override

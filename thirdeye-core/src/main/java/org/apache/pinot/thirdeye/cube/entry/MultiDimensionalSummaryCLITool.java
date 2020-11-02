@@ -19,19 +19,23 @@
 
 package org.apache.pinot.thirdeye.cube.entry;
 
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_DEPTH;
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_DIM_HIERARCHIES;
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_EXCLUDED_DIMENSIONS;
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_MANUAL_ORDER;
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_ONE_SIDE_ERROR;
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_SUMMARY_SIZE;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.BASELINE_END;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.BASELINE_START;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.CURRENT_END;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.CURRENT_START;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.TIME_ZONE;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
-import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
-import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
-import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
-import org.apache.pinot.thirdeye.cube.cost.CostFunction;
-import org.apache.pinot.thirdeye.dashboard.Utils;
-import org.apache.pinot.thirdeye.cube.summary.SummaryResponse;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -49,12 +53,17 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
+import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
+import org.apache.pinot.thirdeye.cube.cost.CostFunction;
+import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
+import org.apache.pinot.thirdeye.cube.summary.SummaryResponse;
+import org.apache.pinot.thirdeye.dashboard.Utils;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.*;
-import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.*;
 
 
 public class MultiDimensionalSummaryCLITool {

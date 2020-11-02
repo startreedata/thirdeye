@@ -20,10 +20,10 @@
 
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import java.util.Objects;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.joda.time.DateTime;
 
 @Deprecated
@@ -58,19 +58,19 @@ public class RawAnomalyResultBean extends AbstractBean implements Comparable<Raw
     this.jobId = jobId;
   }
 
-  public double getAvgCurrentVal(){
+  public double getAvgCurrentVal() {
     return this.avgCurrentVal;
   }
 
-  public double getAvgBaselineVal(){
+  public double getAvgBaselineVal() {
     return this.avgBaselineVal;
   }
 
-  public void setAvgCurrentVal(double val){
+  public void setAvgCurrentVal(double val) {
     this.avgCurrentVal = val;
   }
 
-  public void setAvgBaselineVal(double val){
+  public void setAvgBaselineVal(double val) {
     this.avgBaselineVal = val;
   }
 
@@ -142,7 +142,6 @@ public class RawAnomalyResultBean extends AbstractBean implements Comparable<Raw
     this.creationTimeUtc = creationTimeUtc;
   }
 
-
   public boolean isDataMissing() {
     return dataMissing;
   }
@@ -193,7 +192,8 @@ public class RawAnomalyResultBean extends AbstractBean implements Comparable<Raw
         && Objects.equals(dimensions, r.getDimensions()) && Objects.equals(endTime, r.getEndTime())
         && Objects.equals(score, r.getScore()) && Objects.equals(weight, r.getWeight())
         && Objects.equals(properties, r.getProperties()) && Objects.equals(message, r.getMessage())
-        && Objects.equals(avgBaselineVal, r.getAvgBaselineVal()) && Objects.equals(avgCurrentVal, r.getAvgCurrentVal())
+        && Objects.equals(avgBaselineVal, r.getAvgBaselineVal()) && Objects
+        .equals(avgCurrentVal, r.getAvgCurrentVal())
         && Objects.equals(anomalyResultSource, r.anomalyResultSource);
     // Intentionally omit creationTimeUtc, since start/end are the truly significant dates for
     // anomalies

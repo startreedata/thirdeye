@@ -21,18 +21,18 @@ package org.apache.pinot.thirdeye.detection.algorithm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Multimap;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
+import java.util.Collections;
+import java.util.Map;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-import java.util.Collections;
-import java.util.Map;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 
 
 /**

@@ -20,16 +20,17 @@
 
 package org.apache.pinot.thirdeye.datalayer.dto;
 
-import org.apache.pinot.thirdeye.datalayer.pojo.AnomalyFunctionBean;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.pinot.thirdeye.datalayer.pojo.AnomalyFunctionBean;
+import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AnomalyFunctionDTO extends AnomalyFunctionBean {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(AnomalyFunctionDTO.class);
 
   public String getTopicMetric() {
@@ -41,6 +42,7 @@ public class AnomalyFunctionDTO extends AnomalyFunctionBean {
   }
 
   // TODO: Remove this method and update the value in DB instead
+
   /**
    * Returns the list of metrics to be retrieved for anomaly detection. If the information is not
    * provided in the DB, then it returns a list that contains only topic metric.
@@ -58,8 +60,8 @@ public class AnomalyFunctionDTO extends AnomalyFunctionBean {
 
   /**
    * Return if this function should get total metric for anomaly calculation
-   * @return
-   * true if this function should get total metric
+   *
+   * @return true if this function should get total metric
    */
   public boolean isToCalculateGlobalMetric() {
     return org.apache.commons.lang3.StringUtils.isNotEmpty(this.getGlobalMetric());
@@ -88,8 +90,8 @@ public class AnomalyFunctionDTO extends AnomalyFunctionBean {
 
   /**
    * Update values of entries in Properties
-   * @param config
-   * the configuration need to be updated in the function properties
+   *
+   * @param config the configuration need to be updated in the function properties
    */
   public void updateProperties(Map<String, String> config) {
     Properties properties = toProperties();

@@ -19,13 +19,13 @@
 
 package org.apache.pinot.thirdeye.util;
 
-import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
-import org.apache.pinot.thirdeye.anomalydetection.context.TimeSeries;
-import org.apache.pinot.thirdeye.dashboard.views.TimeBucket;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
+import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
+import org.apache.pinot.thirdeye.anomalydetection.context.TimeSeries;
+import org.apache.pinot.thirdeye.dashboard.views.TimeBucket;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

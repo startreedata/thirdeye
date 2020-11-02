@@ -19,9 +19,9 @@
 
 package org.apache.pinot.thirdeye.detection.finetune;
 
+import java.util.Collection;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
-import java.util.Collection;
 
 
 public interface ScoreFunction {

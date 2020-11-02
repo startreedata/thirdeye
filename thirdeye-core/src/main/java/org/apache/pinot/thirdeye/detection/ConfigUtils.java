@@ -20,9 +20,7 @@
 package org.apache.pinot.thirdeye.detection;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.SetMultimap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

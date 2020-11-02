@@ -19,15 +19,6 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
-import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.Pipeline;
-import org.apache.pinot.thirdeye.rootcause.RCAFramework;
-import org.apache.pinot.thirdeye.rootcause.RCAFrameworkExecutionResult;
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +42,15 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
+import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.rootcause.Pipeline;
+import org.apache.pinot.thirdeye.rootcause.RCAFramework;
+import org.apache.pinot.thirdeye.rootcause.RCAFrameworkExecutionResult;
+import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 

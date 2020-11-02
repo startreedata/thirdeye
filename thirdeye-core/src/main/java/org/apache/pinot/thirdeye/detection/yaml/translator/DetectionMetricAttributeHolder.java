@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.yaml.translator;
 
+import static org.apache.pinot.thirdeye.detection.ConfigUtils.fetchDatasetConfigDTO;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +31,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
-
-import static org.apache.pinot.thirdeye.detection.ConfigUtils.*;
 
 
 /**

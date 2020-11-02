@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.detector.email;
 
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.File;
@@ -34,7 +33,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
-
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datasource.comparison.Row;
+import org.apache.pinot.thirdeye.datasource.comparison.Row.Metric;
+import org.apache.pinot.thirdeye.datasource.comparison.TimeOnTimeComparisonResponse;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -53,11 +56,6 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.datasource.comparison.Row;
-import org.apache.pinot.thirdeye.datasource.comparison.TimeOnTimeComparisonResponse;
-import org.apache.pinot.thirdeye.datasource.comparison.Row.Metric;
 
 /** Creates JFreeChart images from Thirdeye Data. */
 public class AnomalyGraphGenerator {

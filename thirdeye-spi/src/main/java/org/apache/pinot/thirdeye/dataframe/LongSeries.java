@@ -27,11 +27,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-
 /**
  * Series container for primitive long.
  */
 public final class LongSeries extends TypedSeries<LongSeries> {
+
   public static final long NULL = Long.MIN_VALUE;
   public static final long DEFAULT = 0L;
   public static final long MIN_VALUE = Long.MIN_VALUE + 1;
@@ -45,72 +45,89 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   public static final LongFunction MAX = new LongMax();
 
   public static final class LongSum implements LongFunction {
+
     @Override
     public long apply(long[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       long result = 0;
-      for(long v : values)
+      for (long v : values) {
         result += v;
+      }
       return result;
     }
   }
 
   public static final class LongProduct implements LongFunction {
+
     @Override
     public long apply(long[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       long result = 1;
-      for(long v : values)
+      for (long v : values) {
         result *= v;
+      }
       return result;
     }
   }
 
   public static final class LongFirst implements LongFunction {
+
     @Override
     public long apply(long[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       return values[0];
     }
   }
 
   public static final class LongLast implements LongFunction {
+
     @Override
     public long apply(long[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       return values[values.length - 1];
     }
   }
 
   public static final class LongMin implements LongFunction {
+
     @Override
     public long apply(long[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       long min = values[0];
-      for(long v : values)
+      for (long v : values) {
         min = Math.min(min, v);
+      }
       return min;
     }
   }
 
   public static final class LongMax implements LongFunction {
+
     @Override
     public long apply(long[] values) {
-      if (values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       long max = values[0];
-      for (long v : values)
+      for (long v : values) {
         max = Math.max(max, v);
+      }
       return max;
     }
   }
 
   public static final class Builder extends Series.Builder {
+
     final List<long[]> arrays = new ArrayList<>();
 
     private Builder() {
@@ -123,14 +140,15 @@ public final class LongSeries extends TypedSeries<LongSeries> {
     }
 
     public Builder addValues(long value) {
-      return this.addValues(new long[] { value });
+      return this.addValues(new long[]{value});
     }
 
     public Builder addValues(Collection<Long> values) {
       long[] newValues = new long[values.size()];
       int i = 0;
-      for(Long v : values)
+      for (Long v : values) {
         newValues[i++] = valueOf(v);
+      }
       return this.addValues(newValues);
     }
 
@@ -139,13 +157,14 @@ public final class LongSeries extends TypedSeries<LongSeries> {
     }
 
     public Builder addValues(Long value) {
-      return this.addValues(new long[] { valueOf(value) });
+      return this.addValues(new long[]{valueOf(value)});
     }
 
     @Override
     public Builder addSeries(Collection<Series> series) {
-      for(Series s : series)
+      for (Series s : series) {
         this.addValues(s.getLongs().values);
+      }
       return this;
     }
 
@@ -162,12 +181,13 @@ public final class LongSeries extends TypedSeries<LongSeries> {
     @Override
     public LongSeries build() {
       int totalSize = 0;
-      for(long[] array : this.arrays)
+      for (long[] array : this.arrays) {
         totalSize += array.length;
+      }
 
       int offset = 0;
       long[] values = new long[totalSize];
-      for(long[] array : this.arrays) {
+      for (long[] array : this.arrays) {
         System.arraycopy(array, 0, values, offset, array.length);
         offset += array.length;
       }
@@ -210,7 +230,7 @@ public final class LongSeries extends TypedSeries<LongSeries> {
 
   public static LongSeries sequence(long from, int count, long interval) {
     long[] values = new long[count];
-    for(int i=0; i<count; i++) {
+    for (int i = 0; i < count; i++) {
       values[i] = from + i * interval;
     }
     return buildFrom(values);
@@ -239,8 +259,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public static double getDouble(long value) {
-    if(LongSeries.isNull(value))
+    if (LongSeries.isNull(value)) {
       return DoubleSeries.NULL;
+    }
     return (double) value;
   }
 
@@ -259,8 +280,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public static byte getBoolean(long value) {
-    if(isNull(value))
+    if (isNull(value)) {
       return BooleanSeries.NULL;
+    }
     return BooleanSeries.valueOf(value != 0L);
   }
 
@@ -270,8 +292,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public static String getString(long value) {
-    if(isNull(value))
+    if (isNull(value)) {
       return StringSeries.NULL;
+    }
     return String.valueOf(value);
   }
 
@@ -281,8 +304,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public static Object getObject(long value) {
-    if(isNull(value))
+    if (isNull(value)) {
       return ObjectSeries.NULL;
+    }
     return value;
   }
 
@@ -310,8 +334,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public long value() {
-    if(this.size() != 1)
+    if (this.size() != 1) {
       throw new IllegalStateException("Series must contain exactly one element");
+    }
     return this.values[0];
   }
 
@@ -322,9 +347,10 @@ public final class LongSeries extends TypedSeries<LongSeries> {
    */
   public List<Long> toList() {
     Long[] values = new Long[this.values.length];
-    for(int i=0; i<this.values.length; i++) {
-      if(!this.isNull(i))
+    for (int i = 0; i < this.values.length; i++) {
+      if (!this.isNull(i)) {
         values[i] = this.values[i];
+      }
     }
     return Arrays.asList(values);
   }
@@ -340,8 +366,8 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append("LongSeries{");
-    for(long l : this.values) {
-      if(isNull(l)) {
+    for (long l : this.values) {
+      if (isNull(l)) {
         builder.append("null");
       } else {
         builder.append(l);
@@ -354,8 +380,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
 
   @Override
   public String toString(int index) {
-    if(this.isNull(index))
+    if (this.isNull(index)) {
       return TOSTRING_NULL;
+    }
     return String.valueOf(this.values[index]);
   }
 
@@ -402,8 +429,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public LongSeries add(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.add(other.getLong(0));
+    }
     return map(new LongFunction() {
       @Override
       public long apply(long... values) {
@@ -413,8 +441,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public LongSeries add(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return nulls(this.size());
+    }
     return this.map(new LongFunction() {
       @Override
       public long apply(long... values) {
@@ -424,8 +453,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public LongSeries subtract(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.subtract(other.getLong(0));
+    }
     return map(new LongFunction() {
       @Override
       public long apply(long... values) {
@@ -435,8 +465,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public LongSeries subtract(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return nulls(this.size());
+    }
     return this.map(new LongFunction() {
       @Override
       public long apply(long... values) {
@@ -446,8 +477,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public LongSeries multiply(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.multiply(other.getLong(0));
+    }
     return map(new LongFunction() {
       @Override
       public long apply(long... values) {
@@ -457,8 +489,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public LongSeries multiply(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return nulls(this.size());
+    }
     return this.map(new LongFunction() {
       @Override
       public long apply(long... values) {
@@ -468,8 +501,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public LongSeries divide(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.divide(other.getLong(0));
+    }
     return map(new LongFunction() {
       @Override
       public long apply(long... values) {
@@ -479,8 +513,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public LongSeries divide(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return nulls(this.size());
+    }
     return this.map(new LongFunction() {
       @Override
       public long apply(long... values) {
@@ -490,8 +525,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries eq(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.eq(other.getLong(0));
+    }
     return map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -501,8 +537,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries eq(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return BooleanSeries.nulls(this.size());
+    }
     return this.map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -512,14 +549,16 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries neq(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return BooleanSeries.nulls(this.size());
+    }
     return this.map((LongConditional) values -> values[0] != constant);
   }
 
   public BooleanSeries gt(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return BooleanSeries.nulls(this.size());
+    }
     return this.map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -529,8 +568,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries gt(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.gt(other.getLong(0));
+    }
     return map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -540,8 +580,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries gte(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return BooleanSeries.nulls(this.size());
+    }
     return this.map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -551,8 +592,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries gte(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.gte(other.getLong(0));
+    }
     return map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -562,8 +604,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries lt(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return BooleanSeries.nulls(this.size());
+    }
     return this.map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -573,8 +616,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries lt(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.lt(other.getLong(0));
+    }
     return map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -584,8 +628,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries lte(final long constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return BooleanSeries.nulls(this.size());
+    }
     return this.map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -595,8 +640,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries lte(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.lte(other.getLong(0));
+    }
     return map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -606,8 +652,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public BooleanSeries between(final long startIncl, final long endExcl) {
-    if(isNull(startIncl) || isNull(endExcl))
+    if (isNull(startIncl) || isNull(endExcl)) {
       return BooleanSeries.nulls(this.size());
+    }
     return this.map(new LongConditional() {
       @Override
       public boolean apply(long... values) {
@@ -618,14 +665,16 @@ public final class LongSeries extends TypedSeries<LongSeries> {
 
   @Override
   public LongSeries set(BooleanSeries mask, Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.set(mask, other.getLong(0));
-    assertSameLength(this, mask ,other);
+    }
+    assertSameLength(this, mask, other);
 
     long[] values = Arrays.copyOf(this.values, this.values.length);
-    for(int i=0; i<this.values.length; i++) {
-      if(BooleanSeries.isTrue(mask.getBoolean(i)))
+    for (int i = 0; i < this.values.length; i++) {
+      if (BooleanSeries.isTrue(mask.getBoolean(i))) {
         values[i] = other.getLong(i);
+      }
     }
     return buildFrom(values);
   }
@@ -633,8 +682,8 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   public LongSeries set(BooleanSeries mask, long value) {
     assertSameLength(this, mask);
     long[] values = new long[this.values.length];
-    for(int i=0; i<mask.size(); i++) {
-      if(BooleanSeries.isTrue(mask.getBoolean(i))) {
+    for (int i = 0; i < mask.size(); i++) {
+      if (BooleanSeries.isTrue(mask.getBoolean(i))) {
         values[i] = value;
       } else {
         values[i] = this.values[i];
@@ -645,9 +694,11 @@ public final class LongSeries extends TypedSeries<LongSeries> {
 
   public int count(long value) {
     int count = 0;
-    for(long v : this.values)
-      if(v == value)
+    for (long v : this.values) {
+      if (v == value) {
         count++;
+      }
+    }
     return count;
   }
 
@@ -656,8 +707,9 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public LongSeries replace(long find, long by) {
-    if(isNull(find))
+    if (isNull(find)) {
       return this.fillNull(by);
+    }
     return this.set(this.eq(find), by);
   }
 
@@ -666,9 +718,11 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   public int find(long value, int startOffset) {
-    for(int i=startOffset; i<this.values.length; i++)
-      if(this.values[i]==value)
+    for (int i = startOffset; i < this.values.length; i++) {
+      if (this.values[i] == value) {
         return i;
+      }
+    }
     return -1;
   }
 
@@ -696,8 +750,8 @@ public final class LongSeries extends TypedSeries<LongSeries> {
    */
   public LongSeries fillNull(long value) {
     long[] values = Arrays.copyOf(this.values, this.values.length);
-    for(int i=0; i<values.length; i++) {
-      if(isNull(values[i])) {
+    for (int i = 0; i < values.length; i++) {
+      if (isNull(values[i])) {
         values[i] = value;
       }
     }
@@ -707,8 +761,8 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   @Override
   LongSeries project(int[] fromIndex) {
     long[] values = new long[fromIndex.length];
-    for(int i=0; i<fromIndex.length; i++) {
-      if(fromIndex[i] == -1) {
+    for (int i = 0; i < fromIndex.length; i++) {
+      if (fromIndex[i] == -1) {
         values[i] = NULL;
       } else {
         values[i] = this.values[fromIndex[i]];
@@ -745,22 +799,26 @@ public final class LongSeries extends TypedSeries<LongSeries> {
    * @see DataFrame#map(Function, Series...)
    */
   public static LongSeries map(LongFunction function, Series... series) {
-    if(series.length <= 0)
+    if (series.length <= 0) {
       return empty();
+    }
 
     assertSameLength(series);
 
     // Note: code-specialization to help hot-spot vm
-    if(series.length == 1)
+    if (series.length == 1) {
       return mapUnrolled(function, series[0]);
-    if(series.length == 2)
+    }
+    if (series.length == 2) {
       return mapUnrolled(function, series[0], series[1]);
-    if(series.length == 3)
+    }
+    if (series.length == 3) {
       return mapUnrolled(function, series[0], series[1], series[2]);
+    }
 
     long[] input = new long[series.length];
     long[] output = new long[series[0].size()];
-    for(int i=0; i<series[0].size(); i++) {
+    for (int i = 0; i < series[0].size(); i++) {
       output[i] = mapRow(function, series, input, i);
     }
 
@@ -768,10 +826,11 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   private static long mapRow(LongFunction function, Series[] series, long[] input, int row) {
-    for(int j=0; j<series.length; j++) {
+    for (int j = 0; j < series.length; j++) {
       long value = series[j].getLong(row);
-      if(isNull(value))
+      if (isNull(value)) {
         return NULL;
+      }
       input[j] = value;
     }
     return function.apply(input);
@@ -779,8 +838,8 @@ public final class LongSeries extends TypedSeries<LongSeries> {
 
   private static LongSeries mapUnrolled(LongFunction function, Series a) {
     long[] output = new long[a.size()];
-    for(int i=0; i<a.size(); i++) {
-      if(a.isNull(i)) {
+    for (int i = 0; i < a.size(); i++) {
+      if (a.isNull(i)) {
         output[i] = NULL;
       } else {
         output[i] = function.apply(a.getLong(i));
@@ -791,8 +850,8 @@ public final class LongSeries extends TypedSeries<LongSeries> {
 
   private static LongSeries mapUnrolled(LongFunction function, Series a, Series b) {
     long[] output = new long[a.size()];
-    for(int i=0; i<a.size(); i++) {
-      if(a.isNull(i) || b.isNull(i)) {
+    for (int i = 0; i < a.size(); i++) {
+      if (a.isNull(i) || b.isNull(i)) {
         output[i] = NULL;
       } else {
         output[i] = function.apply(a.getLong(i), b.getLong(i));
@@ -803,8 +862,8 @@ public final class LongSeries extends TypedSeries<LongSeries> {
 
   private static LongSeries mapUnrolled(LongFunction function, Series a, Series b, Series c) {
     long[] output = new long[a.size()];
-    for(int i=0; i<a.size(); i++) {
-      if(a.isNull(i) || b.isNull(i) || c.isNull(i)) {
+    for (int i = 0; i < a.size(); i++) {
+      if (a.isNull(i) || b.isNull(i) || c.isNull(i)) {
         output[i] = NULL;
       } else {
         output[i] = function.apply(a.getLong(i), b.getLong(i), c.getLong(i));
@@ -817,14 +876,15 @@ public final class LongSeries extends TypedSeries<LongSeries> {
    * @see DataFrame#map(Function, Series...)
    */
   public static BooleanSeries map(LongConditional function, Series... series) {
-    if(series.length <= 0)
+    if (series.length <= 0) {
       return BooleanSeries.empty();
+    }
 
     assertSameLength(series);
 
     long[] input = new long[series.length];
     byte[] output = new byte[series[0].size()];
-    for(int i=0; i<series[0].size(); i++) {
+    for (int i = 0; i < series[0].size(); i++) {
       output[i] = mapRow(function, series, input, i);
     }
 
@@ -832,10 +892,11 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   private static byte mapRow(LongConditional function, Series[] series, long[] input, int row) {
-    for(int j=0; j<series.length; j++) {
+    for (int j = 0; j < series.length; j++) {
       long value = series[j].getLong(row);
-      if(isNull(value))
+      if (isNull(value)) {
         return BooleanSeries.NULL;
+      }
       input[j] = value;
     }
     return BooleanSeries.valueOf(function.apply(input));
@@ -852,12 +913,14 @@ public final class LongSeries extends TypedSeries<LongSeries> {
    * @see Series#aggregate(Function)
    */
   public static BooleanSeries aggregate(LongConditional function, Series series) {
-    return BooleanSeries.builder().addBooleanValues(function.apply(series.dropNull().getLongs().values)).build();
+    return BooleanSeries.builder()
+        .addBooleanValues(function.apply(series.dropNull().getLongs().values)).build();
   }
 
   public static long valueOf(Long value) {
-    if(value == null)
+    if (value == null) {
       return NULL;
+    }
     return value;
   }
 
@@ -866,19 +929,22 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   private static long[] assertNotEmpty(long[] values) {
-    if(values.length <= 0)
+    if (values.length <= 0) {
       throw new IllegalStateException("Must contain at least one value");
+    }
     return values;
   }
 
   @Override
   public LongSeries shift(int offset) {
     long[] values = new long[this.values.length];
-    if(offset >= 0) {
+    if (offset >= 0) {
       Arrays.fill(values, 0, Math.min(offset, values.length), NULL);
-      System.arraycopy(this.values, 0, values, Math.min(offset, values.length), Math.max(values.length - offset, 0));
+      System.arraycopy(this.values, 0, values, Math.min(offset, values.length),
+          Math.max(values.length - offset, 0));
     } else {
-      System.arraycopy(this.values, Math.min(-offset, values.length), values, 0, Math.max(values.length + offset, 0));
+      System.arraycopy(this.values, Math.min(-offset, values.length), values, 0,
+          Math.max(values.length + offset, 0));
       Arrays.fill(values, Math.max(values.length + offset, 0), values.length, NULL);
     }
     return buildFrom(values);
@@ -913,6 +979,7 @@ public final class LongSeries extends TypedSeries<LongSeries> {
   }
 
   static final class LongSortTuple {
+
     final long value;
     final int index;
 

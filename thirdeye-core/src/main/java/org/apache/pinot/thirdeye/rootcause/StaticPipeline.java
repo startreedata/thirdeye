@@ -19,11 +19,11 @@
 
 package org.apache.pinot.thirdeye.rootcause;
 
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 
 
 /**

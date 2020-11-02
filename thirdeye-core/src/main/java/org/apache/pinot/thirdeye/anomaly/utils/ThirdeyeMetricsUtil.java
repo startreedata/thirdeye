@@ -19,12 +19,12 @@
 
 package org.apache.pinot.thirdeye.anomaly.utils;
 
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.tracking.RequestLog;
 import com.yammer.metrics.core.Counter;
 import com.yammer.metrics.core.Gauge;
 import com.yammer.metrics.core.MetricsRegistry;
 import com.yammer.metrics.reporting.JmxReporter;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.tracking.RequestLog;
 
 
 public class ThirdeyeMetricsUtil {

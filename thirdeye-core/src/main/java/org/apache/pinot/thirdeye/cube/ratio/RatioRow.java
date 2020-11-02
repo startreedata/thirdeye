@@ -21,10 +21,10 @@ package org.apache.pinot.thirdeye.cube.ratio;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import org.apache.pinot.thirdeye.cube.data.dbrow.BaseRow;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
-import org.apache.pinot.thirdeye.cube.data.dbrow.BaseRow;
 
 
 /**

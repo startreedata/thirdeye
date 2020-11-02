@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.dashboard.views;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.pinot.thirdeye.datasource.comparison.Row;
 
 public class TimeBucket implements Comparable<TimeBucket> {

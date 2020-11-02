@@ -19,14 +19,13 @@
 
 package org.apache.pinot.thirdeye.anomaly.alert.util;
 
-import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
-import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
+import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
+import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

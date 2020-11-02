@@ -23,6 +23,7 @@ package org.apache.pinot.thirdeye.detection.spi.exception;
  * Base detector exception class.
  */
 public class DetectorException extends Exception {
+
   public DetectorException(Throwable cause) {
     super(cause);
   }
@@ -38,5 +39,4 @@ public class DetectorException extends Exception {
   public DetectorException(String message, Throwable cause) {
     super(message, cause);
   }
-
 }

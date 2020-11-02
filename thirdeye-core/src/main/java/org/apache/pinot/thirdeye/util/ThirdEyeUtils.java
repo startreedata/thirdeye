@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.util;
 
+import static org.apache.pinot.thirdeye.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
+import static org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,8 +67,8 @@ import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.COMPARE_MODE;
@@ -85,9 +88,6 @@ import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
-import static org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
 
 public abstract class ThirdEyeUtils {
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);

@@ -27,6 +27,7 @@ import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertSnapshotBean extends AbstractBean {
+
   protected long lastNotifyTime;
   protected long alertConfigId;
 
@@ -55,7 +56,8 @@ public class AlertSnapshotBean extends AbstractBean {
       return false;
     }
     AlertSnapshotBean as = (AlertSnapshotBean) o;
-    return Objects.equals(snapshotString, as.getSnapshotString()) && Objects.equals(lastNotifyTime, as.getLastNotifyTime());
+    return Objects.equals(snapshotString, as.getSnapshotString()) && Objects
+        .equals(lastNotifyTime, as.getLastNotifyTime());
   }
 
   @Override

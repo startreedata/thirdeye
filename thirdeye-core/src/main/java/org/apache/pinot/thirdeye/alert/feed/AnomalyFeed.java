@@ -19,10 +19,10 @@
 
 package org.apache.pinot.thirdeye.alert.feed;
 
+import java.util.Collection;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyFeedConfig;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detector.email.filter.AlertFilterFactory;
-import java.util.Collection;
 
 /**
  * AnomalyFeed aggregates the output from AnomalyFetchers, and filter the anomalies based on user-input criteria.

@@ -19,12 +19,11 @@
 
 package org.apache.pinot.thirdeye.datasource.cache;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.cache.CacheLoader;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetricConfigCacheLoader extends CacheLoader<MetricDataset, MetricConfigDTO> {
 

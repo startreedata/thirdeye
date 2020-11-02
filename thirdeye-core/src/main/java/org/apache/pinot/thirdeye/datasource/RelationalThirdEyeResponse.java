@@ -20,17 +20,11 @@
 package org.apache.pinot.thirdeye.datasource;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.pinot.client.TextTable;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.datasource.BaseThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
 import org.apache.pinot.thirdeye.detection.cache.CacheConstants;
 
 

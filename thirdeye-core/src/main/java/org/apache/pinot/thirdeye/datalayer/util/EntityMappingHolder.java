@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.util;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -29,9 +31,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

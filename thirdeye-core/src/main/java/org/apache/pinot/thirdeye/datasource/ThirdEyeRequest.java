@@ -19,23 +19,18 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ArrayListMultimap;
-import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
-
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

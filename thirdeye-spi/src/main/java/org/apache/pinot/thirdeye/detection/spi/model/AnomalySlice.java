@@ -21,6 +21,7 @@
 package org.apache.pinot.thirdeye.detection.spi.model;
 
 import static org.apache.pinot.thirdeye.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -35,10 +36,11 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
  * dimension filters.
  */
 public class AnomalySlice {
+
   private final long detectionId;
   private final long start;
   private final long end;
-  private  Multimap<String, String> filters;
+  private Multimap<String, String> filters;
   private final List<String> detectionComponentNames;
   private final boolean isTaggedAsChild;
 
@@ -46,7 +48,8 @@ public class AnomalySlice {
     this(-1, -1, -1, ArrayListMultimap.create(), new ArrayList<>(), false);
   }
 
-  private AnomalySlice(long detectionId, long start, long end, Multimap<String, String> filters, List<String> detectionComponentName, boolean isTaggedAsChild) {
+  private AnomalySlice(long detectionId, long start, long end, Multimap<String, String> filters,
+      List<String> detectionComponentName, boolean isTaggedAsChild) {
     this.detectionId = detectionId;
     this.start = start;
     this.end = end;
@@ -61,7 +64,6 @@ public class AnomalySlice {
       detectionComponentName = new ArrayList<>();
     }
     this.detectionComponentNames = detectionComponentName;
-
   }
 
   public AnomalySlice(long start, long end, Multimap<String, String> filters) {
@@ -95,37 +97,43 @@ public class AnomalySlice {
   }
 
   public AnomalySlice withDetectionId(long id) {
-    return new AnomalySlice(id, start, this.end, this.filters, this.detectionComponentNames, this.isTaggedAsChild);
+    return new AnomalySlice(id, start, this.end, this.filters, this.detectionComponentNames,
+        this.isTaggedAsChild);
   }
 
   public AnomalySlice withStart(long start) {
-    return new AnomalySlice(this.detectionId, start, this.end, this.filters, this.detectionComponentNames, this.isTaggedAsChild);
+    return new AnomalySlice(this.detectionId, start, this.end, this.filters,
+        this.detectionComponentNames, this.isTaggedAsChild);
   }
 
   public AnomalySlice withEnd(long end) {
-    return new AnomalySlice(this.detectionId, this.start, end, this.filters, this.detectionComponentNames, this.isTaggedAsChild);
+    return new AnomalySlice(this.detectionId, this.start, end, this.filters,
+        this.detectionComponentNames, this.isTaggedAsChild);
   }
 
   public AnomalySlice withFilters(Multimap<String, String> filters) {
-    return new AnomalySlice(this.detectionId, this.start, this.end, filters, this.detectionComponentNames, this.isTaggedAsChild);
+    return new AnomalySlice(this.detectionId, this.start, this.end, filters,
+        this.detectionComponentNames, this.isTaggedAsChild);
   }
 
   public AnomalySlice withDetectionCompNames(List<String> detectionComponentNames) {
-    return new AnomalySlice(this.detectionId, this.start, this.end, this.filters, detectionComponentNames, this.isTaggedAsChild);
+    return new AnomalySlice(this.detectionId, this.start, this.end, this.filters,
+        detectionComponentNames, this.isTaggedAsChild);
   }
 
   public AnomalySlice withIsTaggedAsChild(boolean isTaggedAsChild) {
-    return new AnomalySlice(this.detectionId, this.start, this.end, this.filters, this.detectionComponentNames, isTaggedAsChild);
+    return new AnomalySlice(this.detectionId, this.start, this.end, this.filters,
+        this.detectionComponentNames, isTaggedAsChild);
   }
 
   /**
    * Check if current anomaly slice contains another anomaly slice
    *
    * We will say one slice (current) contains another slice(request) when
-   *   a. Slices are fetching anomalies for the same detection
-   *   b. The time range of the request slice falls within the current slice
-   *   c. current filters are empty or exactly match request filters.
-   *   d. current detectionComponentNames are empty or contains request detectionComponentNames
+   * a. Slices are fetching anomalies for the same detection
+   * b. The time range of the request slice falls within the current slice
+   * c. current filters are empty or exactly match request filters.
+   * d. current detectionComponentNames are empty or contains request detectionComponentNames
    *
    * Note: Empty filters will fetch all the anomalies regardless of the anomalous dimension.
    * Similarly, empty detectionComponentNames will fetch all the anomalies.
@@ -154,14 +162,17 @@ public class AnomalySlice {
     }
 
     if (this.detectionId >= 0 &&
-        (anomaly.getDetectionConfigId() == null || anomaly.getDetectionConfigId() != this.detectionId)) {
+        (anomaly.getDetectionConfigId() == null
+            || anomaly.getDetectionConfigId() != this.detectionId)) {
       return false;
     }
 
-    if (this.start >= 0 && anomaly.getEndTime() <= this.start)
+    if (this.start >= 0 && anomaly.getEndTime() <= this.start) {
       return false;
-    if (this.end >= 0 && anomaly.getStartTime() >= this.end)
+    }
+    if (this.end >= 0 && anomaly.getStartTime() >= this.end) {
       return false;
+    }
 
     // Matches anomalies on the specified dimension filters
     //
@@ -173,8 +184,9 @@ public class AnomalySlice {
     for (String dimName : this.filters.keySet()) {
       if (anomaly.getDimensionMap().containsKey(dimName)) {
         Collection<String> dimValue = anomaly.getDimensionMap().get(dimName);
-        if (!this.filters.get(dimName).equals(dimValue))
+        if (!this.filters.get(dimName).equals(dimValue)) {
           return false;
+        }
       } else {
         return false;
       }
@@ -201,8 +213,10 @@ public class AnomalySlice {
       return false;
     }
     AnomalySlice as = (AnomalySlice) o;
-    return Objects.equals(getDetectionId(), as.getDetectionId()) && Objects.equals(getStart(), as.getStart())
-        && Objects.equals(getEnd(), as.getEnd()) && Objects.equals(getIsTaggedAsChild(), as.getIsTaggedAsChild())
+    return Objects.equals(getDetectionId(), as.getDetectionId()) && Objects
+        .equals(getStart(), as.getStart())
+        && Objects.equals(getEnd(), as.getEnd()) && Objects
+        .equals(getIsTaggedAsChild(), as.getIsTaggedAsChild())
         && Objects.equals(getFilters(), as.getFilters()) && Objects.equals(getDetectionCompNames(),
         as.getDetectionCompNames());
   }

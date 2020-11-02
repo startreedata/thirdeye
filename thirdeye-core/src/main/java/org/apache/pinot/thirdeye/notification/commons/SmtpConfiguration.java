@@ -19,10 +19,9 @@
 
 package org.apache.pinot.thirdeye.notification.commons;
 
+import com.google.common.base.MoreObjects;
 import java.util.Map;
 import java.util.Objects;
-
-import com.google.common.base.MoreObjects;
 import org.apache.commons.collections4.MapUtils;
 
 

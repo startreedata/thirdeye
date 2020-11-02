@@ -19,6 +19,17 @@
 
 package org.apache.pinot.thirdeye.common.restclient;
 
+import static org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter.AUTH_TOKEN_NAME;
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_DEPTH;
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_ONE_SIDE_ERROR;
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_ORDER_TYPE;
+import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_SUMMARY_SIZE;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.BASELINE_END;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.BASELINE_START;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.CURRENT_END;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.CURRENT_START;
+import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.METRIC_URN;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -29,10 +40,6 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
-
-import static org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter.AUTH_TOKEN_NAME;
-import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.*;
-import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.*;
 
 
 /**

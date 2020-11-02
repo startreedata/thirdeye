@@ -19,12 +19,22 @@
 
 package org.apache.pinot.thirdeye.anomaly.monitor;
 
+import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_CONFIG_KEY;
+
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+import org.apache.pinot.thirdeye.Constants.JobStatus;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomaly.alert.util.EmailHelper;
-import org.apache.pinot.thirdeye.Constants.JobStatus;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConstants.MonitorType;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
@@ -37,20 +47,10 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.*;
 
 
 public class MonitorTaskRunner implements TaskRunner {

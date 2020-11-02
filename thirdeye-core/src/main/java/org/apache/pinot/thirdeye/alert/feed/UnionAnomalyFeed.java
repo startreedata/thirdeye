@@ -20,6 +20,13 @@
 package org.apache.pinot.thirdeye.alert.feed;
 
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyFeedConfig;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyFetcherConfig;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyFetcherFactory;
@@ -36,13 +43,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detector.email.filter.AlertFilter;
 import org.apache.pinot.thirdeye.detector.email.filter.AlertFilterFactory;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

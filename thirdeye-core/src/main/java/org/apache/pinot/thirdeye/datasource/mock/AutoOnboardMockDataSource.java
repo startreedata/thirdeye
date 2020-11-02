@@ -19,6 +19,12 @@
 
 package org.apache.pinot.thirdeye.datasource.mock;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboard;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
@@ -27,16 +33,10 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 
 
 /**

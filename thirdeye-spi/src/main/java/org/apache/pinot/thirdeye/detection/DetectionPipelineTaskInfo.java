@@ -24,6 +24,7 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskInfo;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
 
 public class DetectionPipelineTaskInfo implements TaskInfo {
+
   long configId;
   long start;
   long end;
@@ -36,7 +37,7 @@ public class DetectionPipelineTaskInfo implements TaskInfo {
     this.end = end;
   }
 
-  public DetectionPipelineTaskInfo(){
+  public DetectionPipelineTaskInfo() {
     // dummy constructor for deserialization
   }
 

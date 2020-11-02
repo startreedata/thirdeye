@@ -20,15 +20,15 @@
 package org.apache.pinot.thirdeye.datasource.pinot.resultset;
 
 import com.google.common.base.Preconditions;
-import org.apache.pinot.client.ResultSet;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.apache.pinot.client.ResultSet;
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.dataframe.DataFrame;
 
 /**
  * An unified container that store Select, Aggregation, and Group-By {@link ResultSet} in a data frame.

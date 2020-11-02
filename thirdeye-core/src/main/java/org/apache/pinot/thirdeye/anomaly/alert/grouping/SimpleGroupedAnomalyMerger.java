@@ -19,14 +19,14 @@
 
 package org.apache.pinot.thirdeye.anomaly.alert.grouping;
 
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 /**
  * This class simply merges the new GroupedAnomaly with recent GroupedAnomaly regardless the gap of time between them.

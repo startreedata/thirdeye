@@ -23,17 +23,16 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * An immutable configurations for setting up {@link PinotThirdEyeDataSource}'s connection to Pinot.

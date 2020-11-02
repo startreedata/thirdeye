@@ -19,6 +19,10 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.DoubleFunction;
+import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.LongConditional;
+import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.map;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +53,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.*;
 
 @Components(title = "History mean and standard deviation based forecasting and detection.",
     type = "MEAN_VARIANCE_RULE",

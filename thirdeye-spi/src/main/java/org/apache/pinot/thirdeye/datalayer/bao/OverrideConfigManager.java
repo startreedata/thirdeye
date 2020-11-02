@@ -20,8 +20,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 
 public interface OverrideConfigManager extends AbstractManager<OverrideConfigDTO> {
 

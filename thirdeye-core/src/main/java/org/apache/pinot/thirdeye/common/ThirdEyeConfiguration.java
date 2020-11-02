@@ -20,12 +20,11 @@
 package org.apache.pinot.thirdeye.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-
-import io.dropwizard.Configuration;
 import java.util.Map;
 import org.apache.pinot.thirdeye.model.download.ModelDownloaderConfiguration;
 

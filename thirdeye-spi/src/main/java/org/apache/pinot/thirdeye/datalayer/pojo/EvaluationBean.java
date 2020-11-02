@@ -28,6 +28,7 @@ import java.util.Objects;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EvaluationBean extends AbstractBean {
+
   private long detectionConfigId; // the detection config id
   private long startTime; // the start time for the detection window being monitored
   private long endTime; // the end time for the detection window being monitored
@@ -92,8 +93,10 @@ public class EvaluationBean extends AbstractBean {
       return false;
     }
     EvaluationBean that = (EvaluationBean) o;
-    return detectionConfigId == that.detectionConfigId && startTime == that.startTime && endTime == that.endTime
-        && Double.compare(that.mape, mape) == 0 && Objects.equals(detectorName, that.detectorName) && Objects.equals(
+    return detectionConfigId == that.detectionConfigId && startTime == that.startTime
+        && endTime == that.endTime
+        && Double.compare(that.mape, mape) == 0 && Objects.equals(detectorName, that.detectorName)
+        && Objects.equals(
         metricUrn, that.metricUrn);
   }
 
@@ -104,8 +107,10 @@ public class EvaluationBean extends AbstractBean {
 
   @Override
   public String toString() {
-    return "EvaluationBean{" + "detectionConfigId=" + detectionConfigId + ", startTime=" + startTime + ", endTime="
-        + endTime + ", detectorName='" + detectorName + '\'' + ", mape=" + mape + ", metricUrn='" + metricUrn + '\''
+    return "EvaluationBean{" + "detectionConfigId=" + detectionConfigId + ", startTime=" + startTime
+        + ", endTime="
+        + endTime + ", detectorName='" + detectorName + '\'' + ", mape=" + mape + ", metricUrn='"
+        + metricUrn + '\''
         + '}';
   }
 }

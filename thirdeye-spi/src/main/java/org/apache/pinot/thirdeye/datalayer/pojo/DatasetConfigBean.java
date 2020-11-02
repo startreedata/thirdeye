@@ -21,8 +21,6 @@
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -30,14 +28,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.common.time.TimeSpec;
 
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DatasetConfigBean extends AbstractBean {
+
   public static String DEFAULT_PREAGGREGATED_DIMENSION_VALUE = "all";
   // This is the expected delay for the hourly/daily data source.
   // 1 hour delay means we always expect to have 1 hour's before's data.
-  public static TimeGranularity DEFAULT_HOURLY_EXPECTED_DELAY = new TimeGranularity(1, TimeUnit.HOURS);
-  public static TimeGranularity DEFAULT_DAILY_EXPECTED_DELAY = new TimeGranularity(24, TimeUnit.HOURS);
+  public static TimeGranularity DEFAULT_HOURLY_EXPECTED_DELAY = new TimeGranularity(1,
+      TimeUnit.HOURS);
+  public static TimeGranularity DEFAULT_DAILY_EXPECTED_DELAY = new TimeGranularity(24,
+      TimeUnit.HOURS);
 
   private String dataset;
 
@@ -61,7 +64,9 @@ public class DatasetConfigBean extends AbstractBean {
 
   private boolean active = true;
 
-  /** Configuration for non-additive dataset **/
+  /**
+   * Configuration for non-additive dataset
+   **/
   // By default, every dataset is additive and this section of configurations should be ignored.
   private boolean additive = true;
 
@@ -83,7 +88,9 @@ public class DatasetConfigBean extends AbstractBean {
 
   // the actual time unit for non-additive dataset
   private TimeUnit nonAdditiveBucketUnit;
-  /** End of Configuration for non-additive dataset **/
+  /**
+   * End of Configuration for non-additive dataset
+   **/
 
   private boolean realtime = false;
 
@@ -94,9 +101,7 @@ public class DatasetConfigBean extends AbstractBean {
   // timestamp of receiving the last update event
   private long lastRefreshEventTime = 0;
 
-
   private Map<String, String> properties = new HashMap<>();
-
 
   public String getDataset() {
     return dataset;
@@ -123,9 +128,11 @@ public class DatasetConfigBean extends AbstractBean {
   }
 
   /**
-   * Use DatasetConfigDTO.bucketTimeGranularity instead of this method for considering the additives of the dataset.
+   * Use DatasetConfigDTO.bucketTimeGranularity instead of this method for considering the additives
+   * of the dataset.
    *
-   * This method is preserved for reading object from database via object mapping (i.e., Java reflection)
+   * This method is preserved for reading object from database via object mapping (i.e., Java
+   * reflection)
    *
    * @return the time unit of the granularity of the timestamp of each data point.
    */
@@ -139,9 +146,11 @@ public class DatasetConfigBean extends AbstractBean {
   }
 
   /**
-   * Use DatasetConfigDTO.bucketTimeGranularity instead of this method for considering the additives of the dataset.
+   * Use DatasetConfigDTO.bucketTimeGranularity instead of this method for considering the additives
+   * of the dataset.
    *
-   * This method is preserved for reading object from database via object mapping (i.e., Java reflection)
+   * This method is preserved for reading object from database via object mapping (i.e., Java
+   * reflection)
    *
    * @return the duration of the granularity of the timestamp of each data point.
    */
@@ -293,20 +302,28 @@ public class DatasetConfigBean extends AbstractBean {
     DatasetConfigBean that = (DatasetConfigBean) o;
     return active == that.active && additive == that.additive && realtime == that.realtime &&
         Objects.equals(dataset, that.dataset) && Objects.equals(displayName, that.displayName)
-        && Objects.equals(dimensions, that.dimensions) && Objects.equals(timeColumn, that.timeColumn)
+        && Objects.equals(dimensions, that.dimensions) && Objects
+        .equals(timeColumn, that.timeColumn)
         && timeUnit == that.timeUnit && Objects.equals(timeDuration, that.timeDuration)
         && Objects.equals(timeFormat, that.timeFormat) && Objects.equals(timezone, that.timezone)
-        && Objects.equals(dataSource, that.dataSource) && Objects.equals(owners, that.owners) && Objects.equals(
-        dimensionsHaveNoPreAggregation, that.dimensionsHaveNoPreAggregation) && Objects.equals(preAggregatedKeyword,
-        that.preAggregatedKeyword) && Objects.equals(nonAdditiveBucketSize, that.nonAdditiveBucketSize)
-        && nonAdditiveBucketUnit == that.nonAdditiveBucketUnit && Objects.equals(expectedDelay, that.expectedDelay)
+        && Objects.equals(dataSource, that.dataSource) && Objects.equals(owners, that.owners)
+        && Objects.equals(
+        dimensionsHaveNoPreAggregation, that.dimensionsHaveNoPreAggregation) && Objects
+        .equals(preAggregatedKeyword,
+            that.preAggregatedKeyword) && Objects
+        .equals(nonAdditiveBucketSize, that.nonAdditiveBucketSize)
+        && nonAdditiveBucketUnit == that.nonAdditiveBucketUnit && Objects
+        .equals(expectedDelay, that.expectedDelay)
         && Objects.equals(properties, that.properties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dataset, displayName, dimensions, timeColumn, timeUnit, timeDuration, timeFormat, timezone,
-        dataSource, owners, active, additive, dimensionsHaveNoPreAggregation, preAggregatedKeyword,
-        nonAdditiveBucketSize, nonAdditiveBucketUnit, realtime, expectedDelay, properties);
+    return Objects
+        .hash(dataset, displayName, dimensions, timeColumn, timeUnit, timeDuration, timeFormat,
+            timezone,
+            dataSource, owners, active, additive, dimensionsHaveNoPreAggregation,
+            preAggregatedKeyword,
+            nonAdditiveBucketSize, nonAdditiveBucketUnit, realtime, expectedDelay, properties);
   }
 }

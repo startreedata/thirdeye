@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.yaml.translator.builder;
 
+import static org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner.PROP_YAML_PARAMS;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,8 +38,6 @@ import org.apache.pinot.thirdeye.detection.wrapper.EntityAnomalyMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.GrouperWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-
-import static org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner.*;
 
 
 /**

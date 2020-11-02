@@ -25,9 +25,9 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import java.io.IOException;
 import java.util.ArrayList;
+import org.apache.pinot.thirdeye.dataframe.DataFrame;
 
 public class ThirdEyeResultSetDeserializer extends StdDeserializer<ThirdEyeResultSet> {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

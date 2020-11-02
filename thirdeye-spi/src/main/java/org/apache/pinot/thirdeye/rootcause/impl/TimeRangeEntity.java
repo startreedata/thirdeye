@@ -19,22 +19,21 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.PipelineContext;
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
-import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
 
 /**
  * TimeRangeEntity represents a time-range as investigated by the user for purposes of
  * root cause search. The URN namespace is defined as 'thirdeye:timerange:{type}:{start}:{end}'.
  */
 public class TimeRangeEntity extends Entity {
+
   public static final EntityType TYPE = new EntityType("thirdeye:timerange:");
 
   public static final String TYPE_ANOMALY = "anomaly";
@@ -45,7 +44,8 @@ public class TimeRangeEntity extends Entity {
   private final long start;
   private final long end;
 
-  protected TimeRangeEntity(String urn, double score, List<? extends Entity> related, String type, long start, long end) {
+  protected TimeRangeEntity(String urn, double score, List<? extends Entity> related, String type,
+      long start, long end) {
     super(urn, score, related);
     this.type = type;
     this.start = start;
@@ -66,12 +66,14 @@ public class TimeRangeEntity extends Entity {
 
   @Override
   public TimeRangeEntity withScore(double score) {
-    return new TimeRangeEntity(this.getUrn(), score, this.getRelated(), this.type, this.start, this.end);
+    return new TimeRangeEntity(this.getUrn(), score, this.getRelated(), this.type, this.start,
+        this.end);
   }
 
   @Override
   public TimeRangeEntity withRelated(List<? extends Entity> related) {
-    return new TimeRangeEntity(this.getUrn(), this.getScore(), related, this.type, this.start, this.end);
+    return new TimeRangeEntity(this.getUrn(), this.getScore(), related, this.type, this.start,
+        this.end);
   }
 
   public static TimeRangeEntity fromURN(String urn, double score) {
@@ -102,12 +104,15 @@ public class TimeRangeEntity extends Entity {
   public static TimeRangeEntity getContextTimeRange(PipelineContext context, String type) {
     Set<TimeRangeEntity> timeRanges = context.filter(TimeRangeEntity.class);
     Set<TimeRangeEntity> matching = new HashSet<>();
-    for(TimeRangeEntity e : timeRanges) {
-      if(e.getType().equals(type))
+    for (TimeRangeEntity e : timeRanges) {
+      if (e.getType().equals(type)) {
         matching.add(e);
+      }
     }
-    if(matching.size() != 1)
-      throw new IllegalArgumentException(String.format("Must contain exactly one of type '%s'", type));
+    if (matching.size() != 1) {
+      throw new IllegalArgumentException(
+          String.format("Must contain exactly one of type '%s'", type));
+    }
     return matching.iterator().next();
   }
 

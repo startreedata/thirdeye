@@ -20,12 +20,6 @@
 package org.apache.pinot.thirdeye.alert.fetcher;
 
 import com.google.common.collect.Multimap;
-import org.apache.pinot.thirdeye.alert.commons.AnomalyNotifiedStatus;
-import org.apache.pinot.thirdeye.alert.commons.AnomalySource;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +27,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.alert.commons.AnomalyNotifiedStatus;
+import org.apache.pinot.thirdeye.alert.commons.AnomalySource;
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.slf4j.Logger;

@@ -21,19 +21,20 @@
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
 import java.io.Serializable;
-import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
-import org.apache.pinot.thirdeye.anomaly.AnomalyType;
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
+import org.apache.pinot.thirdeye.anomaly.AnomalyType;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 
+public class MergedAnomalyResultBean extends AbstractBean implements
+    Comparable<MergedAnomalyResultBean>, Serializable {
 
-public class MergedAnomalyResultBean extends AbstractBean implements Comparable<MergedAnomalyResultBean>, Serializable {
   private Long functionId;
   private Long anomalyFeedbackId;
   private String collection;
@@ -63,7 +64,6 @@ public class MergedAnomalyResultBean extends AbstractBean implements Comparable<
   private boolean isChild;
   private AnomalyType type;
   private AnomalySeverity severityLabel = AnomalySeverity.DEFAULT;
-
 
   public Set<Long> getChildIds() {
     return childIds;
@@ -156,19 +156,19 @@ public class MergedAnomalyResultBean extends AbstractBean implements Comparable<
     this.dimensions = dimensions;
   }
 
-  public double getAvgCurrentVal(){
+  public double getAvgCurrentVal() {
     return this.avgCurrentVal;
   }
 
-  public double getAvgBaselineVal(){
+  public double getAvgBaselineVal() {
     return this.avgBaselineVal;
   }
 
-  public void setAvgCurrentVal(double val){
+  public void setAvgCurrentVal(double val) {
     this.avgCurrentVal = val;
   }
 
-  public void setAvgBaselineVal(double val){
+  public void setAvgBaselineVal(double val) {
     this.avgBaselineVal = val;
   }
 
@@ -282,7 +282,10 @@ public class MergedAnomalyResultBean extends AbstractBean implements Comparable<
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), startTime, endTime, collection, metric, dimensions, score, impactToGlobal, avgBaselineVal, avgCurrentVal, anomalyResultSource, metricUrn, detectionConfigId, childIds, isChild);
+    return Objects
+        .hash(getId(), startTime, endTime, collection, metric, dimensions, score, impactToGlobal,
+            avgBaselineVal, avgCurrentVal, anomalyResultSource, metricUrn, detectionConfigId,
+            childIds, isChild);
   }
 
   @Override
@@ -291,13 +294,18 @@ public class MergedAnomalyResultBean extends AbstractBean implements Comparable<
       return false;
     }
     MergedAnomalyResultBean m = (MergedAnomalyResultBean) o;
-    return Objects.equals(getId(), m.getId()) && Objects.equals(startTime, m.getStartTime()) && Objects
+    return Objects.equals(getId(), m.getId()) && Objects.equals(startTime, m.getStartTime())
+        && Objects
         .equals(endTime, m.getEndTime()) && Objects.equals(collection, m.getCollection()) && Objects
         .equals(metric, m.getMetric()) && Objects.equals(dimensions, m.getDimensions()) && Objects
-        .equals(score, m.getScore()) && Objects.equals(avgBaselineVal, m.getAvgBaselineVal()) && Objects
-        .equals(avgCurrentVal, m.getAvgCurrentVal()) && Objects.equals(impactToGlobal, m.getImpactToGlobal()) &&
-        Objects.equals(anomalyResultSource, m.getAnomalyResultSource()) && Objects.equals(metricUrn, m.getMetricUrn()) &&
-        Objects.equals(detectionConfigId, m.getDetectionConfigId()) && Objects.equals(childIds, m.getChildIds()) &&
+        .equals(score, m.getScore()) && Objects.equals(avgBaselineVal, m.getAvgBaselineVal())
+        && Objects
+        .equals(avgCurrentVal, m.getAvgCurrentVal()) && Objects
+        .equals(impactToGlobal, m.getImpactToGlobal()) &&
+        Objects.equals(anomalyResultSource, m.getAnomalyResultSource()) && Objects
+        .equals(metricUrn, m.getMetricUrn()) &&
+        Objects.equals(detectionConfigId, m.getDetectionConfigId()) && Objects
+        .equals(childIds, m.getChildIds()) &&
         Objects.equals(isChild, m.isChild());
   }
 

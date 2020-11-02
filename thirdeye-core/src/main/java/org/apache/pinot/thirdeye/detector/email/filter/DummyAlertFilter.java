@@ -19,11 +19,10 @@
 
 package org.apache.pinot.thirdeye.detector.email.filter;
 
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 
 public class DummyAlertFilter extends BaseAlertFilter {

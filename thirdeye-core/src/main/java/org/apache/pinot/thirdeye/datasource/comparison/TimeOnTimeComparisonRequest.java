@@ -19,15 +19,13 @@
 
 package org.apache.pinot.thirdeye.datasource.comparison;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.joda.time.DateTime;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
+import org.joda.time.DateTime;
 
 public class TimeOnTimeComparisonRequest {
 

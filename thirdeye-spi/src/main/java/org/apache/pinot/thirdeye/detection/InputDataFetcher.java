@@ -29,6 +29,7 @@ import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
  */
 
 public interface InputDataFetcher {
+
   /**
    * fetch data for input data spec
    */

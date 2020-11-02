@@ -20,7 +20,11 @@
 package org.apache.pinot.thirdeye.detection;
 
 import com.google.common.collect.Multimap;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -33,10 +37,6 @@ import org.apache.pinot.thirdeye.detection.spi.model.EvaluationSlice;
 import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
 import org.apache.pinot.thirdeye.detection.spi.model.InputData;
 import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**

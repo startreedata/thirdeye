@@ -19,11 +19,11 @@
 
 package org.apache.pinot.thirdeye.detection.validators;
 
+import static org.apache.pinot.thirdeye.detection.validators.ThirdEyeUserConfigValidator.USER_CONFIG_VALIDATION_FAILED_KEY;
+
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import java.util.Iterator;
-
-import static org.apache.pinot.thirdeye.detection.validators.ThirdEyeUserConfigValidator.*;
 
 
 /**

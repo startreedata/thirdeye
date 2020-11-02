@@ -19,15 +19,14 @@
 
 package org.apache.pinot.thirdeye.anomaly.alert.util;
 
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.detector.email.filter.AlertFilter;
-import org.apache.pinot.thirdeye.detector.email.filter.AlertFilterFactory;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.detector.email.filter.AlertFilter;
+import org.apache.pinot.thirdeye.detector.email.filter.AlertFilterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

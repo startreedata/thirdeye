@@ -24,12 +24,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResponseParserUtils {
   public static ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = ThirdEyeCacheRegistry.getInstance();

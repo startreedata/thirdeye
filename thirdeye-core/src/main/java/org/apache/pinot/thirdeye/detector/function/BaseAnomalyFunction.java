@@ -19,6 +19,13 @@
 
 package org.apache.pinot.thirdeye.detector.function;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import org.apache.pinot.pql.parsers.utils.Pair;
 import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
@@ -26,21 +33,10 @@ import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.dashboard.views.TimeBucket;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.util.AnomalyOffset;
-
-import java.util.concurrent.TimeUnit;
-
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.slf4j.Logger;

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection.spi.exception;
 
 public class DetectorDataWrongFormatException extends DetectorException {
+
   public DetectorDataWrongFormatException(Throwable cause) {
     super(cause);
   }
@@ -35,7 +36,6 @@ public class DetectorDataWrongFormatException extends DetectorException {
   public DetectorDataWrongFormatException(String message, Throwable cause) {
     super(message, cause);
   }
-
 
   @Override
   public String toString() {

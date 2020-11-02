@@ -20,9 +20,7 @@
 
 package org.apache.pinot.thirdeye.datalayer.dto;
 
-
 import org.apache.pinot.thirdeye.datalayer.pojo.TaskBean;
-
 
 /**
  * This class corresponds to anomaly tasks. An execution of an anomaly function creates an anomaly

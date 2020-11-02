@@ -19,9 +19,9 @@
 
 package org.apache.pinot.thirdeye.anomalydetection.performanceEvaluation;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.util.IntervalUtils;
-import java.util.List;
 import org.joda.time.Interval;
 
 

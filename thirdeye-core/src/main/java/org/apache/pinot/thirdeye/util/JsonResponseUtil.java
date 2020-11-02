@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.util;
 
 import java.util.List;
-
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;

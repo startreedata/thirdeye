@@ -20,13 +20,13 @@
 package org.apache.pinot.thirdeye.anomaly.alert.grouping.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

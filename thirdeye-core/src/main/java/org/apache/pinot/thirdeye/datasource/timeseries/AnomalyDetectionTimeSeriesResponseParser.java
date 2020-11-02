@@ -20,15 +20,15 @@
 package org.apache.pinot.thirdeye.datasource.timeseries;
 
 import com.google.common.collect.Range;
-import org.apache.pinot.thirdeye.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

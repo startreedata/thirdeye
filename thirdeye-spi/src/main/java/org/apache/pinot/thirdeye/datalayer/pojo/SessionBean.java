@@ -23,7 +23,6 @@ package org.apache.pinot.thirdeye.datalayer.pojo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
 
-
 /**
  * ConfigBean holds namespaced key-value configuration values.  Values are serialized into the
  * database using the default object mapper.  ConfigBean serves as a light-weight
@@ -85,7 +84,8 @@ public class SessionBean extends AbstractBean {
       return false;
     }
     SessionBean that = (SessionBean) o;
-    return expirationTime == that.expirationTime && Objects.equals(sessionKey, that.sessionKey) && Objects.equals(
+    return expirationTime == that.expirationTime && Objects.equals(sessionKey, that.sessionKey)
+        && Objects.equals(
         principal, that.principal) && Objects.equals(principalType, that.principalType);
   }
 

@@ -20,11 +20,12 @@
 
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
-import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import java.io.Serializable;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 
 public class AnomalyFeedbackBean extends AbstractBean implements Serializable {
+
   private static final long serialVersionUID = 1L;
 
   private AnomalyFeedbackType feedbackType;
@@ -57,7 +58,8 @@ public class AnomalyFeedbackBean extends AbstractBean implements Serializable {
     }
 
     AnomalyFeedbackBean that = (AnomalyFeedbackBean) o;
-    return Objects.equals(getId(), that.getId()) && Objects.equals(feedbackType, that.getFeedbackType())
+    return Objects.equals(getId(), that.getId()) && Objects
+        .equals(feedbackType, that.getFeedbackType())
         && Objects.equals(comment, that.getComment());
   }
 

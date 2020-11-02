@@ -22,11 +22,11 @@ package org.apache.pinot.thirdeye.detection.health;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 /**
  * The anomaly coverage status for a detection config
  */
 public class AnomalyCoverageStatus {
+
   // the anomaly coverage ratio. the percentage of anomalous duration in the duration of the whole window
   @JsonProperty
   private final double anomalyCoverageRatio;
@@ -51,7 +51,8 @@ public class AnomalyCoverageStatus {
   }
 
   public static AnomalyCoverageStatus fromCoverageRatio(double anomalyCoverageRatio) {
-    return new AnomalyCoverageStatus(anomalyCoverageRatio, classifyCoverageStatus(anomalyCoverageRatio));
+    return new AnomalyCoverageStatus(anomalyCoverageRatio,
+        classifyCoverageStatus(anomalyCoverageRatio));
   }
 
   private static HealthStatus classifyCoverageStatus(double anomalyCoverageRatio) {

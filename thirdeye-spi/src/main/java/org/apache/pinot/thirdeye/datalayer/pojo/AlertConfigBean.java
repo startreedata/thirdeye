@@ -21,19 +21,19 @@
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.alert.commons.AnomalyFeedConfig;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
+import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.alert.commons.AnomalyFeedConfig;
+import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertConfigBean extends AbstractBean {
+
   public enum SubjectType {
     ALERT,
     METRICS,
@@ -169,6 +169,7 @@ public class AlertConfigBean extends AbstractBean {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class EmailConfig {
+
     long anomalyWatermark = 0l;
     List<Long> functionIds = new ArrayList<>();
     List<Long> detectionConfigIds = new ArrayList<>();
@@ -208,6 +209,7 @@ public class AlertConfigBean extends AbstractBean {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class EmailFormatterConfig {
+
     String type;
     String properties;
 
@@ -236,6 +238,7 @@ public class AlertConfigBean extends AbstractBean {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class ReportMetricConfig {
+
     COMPARE_MODE compareMode = COMPARE_MODE.Wo2W;
     Long metricId;
     List<String> dimensions = new ArrayList<>();
@@ -276,6 +279,7 @@ public class AlertConfigBean extends AbstractBean {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class ReportConfigCollection {
+
     boolean enabled;
     boolean intraDay;
     long delayOffsetMillis = 2 * 36_00_000; // 2 hours
@@ -322,7 +326,8 @@ public class AlertConfigBean extends AbstractBean {
       this.contactEmail = contactEmail;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
       return "ReportConfigCollection{" +
           "contactEmail='" + contactEmail + '\'' +
           ", enabled=" + enabled +
@@ -333,6 +338,7 @@ public class AlertConfigBean extends AbstractBean {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class AlertGroupConfig {
+
     Map<String, String> groupByConfig = new HashMap<>();
     Map<String, String> groupFilterConfig = new HashMap<>();
     Map<String, String> groupTimeBasedMergeConfig = new HashMap<>();
@@ -393,13 +399,17 @@ public class AlertConfigBean extends AbstractBean {
         .equals(getReportConfigCollection(), that.getReportConfigCollection()) && Objects
         .equals(getAlertGroupConfig(), that.getAlertGroupConfig()) && Objects
         .equals(getEmailFormatterConfig(), that.getEmailFormatterConfig()) && Objects
-        .equals(getReceiverAddresses(), that.getReceiverAddresses()) && Objects.equals(getFromAddress(), that.getFromAddress());
+        .equals(getReceiverAddresses(), that.getReceiverAddresses()) && Objects
+        .equals(getFromAddress(), that.getFromAddress());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getApplication(), getCronExpression(), getHolidayCronExpression(), isActive(),
-        getAnomalyFeedConfig(), getEmailConfig(), getReportConfigCollection(), getAlertGroupConfig(),
-        getEmailFormatterConfig(), getReceiverAddresses(), getFromAddress());
+    return Objects
+        .hash(getName(), getApplication(), getCronExpression(), getHolidayCronExpression(),
+            isActive(),
+            getAnomalyFeedConfig(), getEmailConfig(), getReportConfigCollection(),
+            getAlertGroupConfig(),
+            getEmailFormatterConfig(), getReceiverAddresses(), getFromAddress());
   }
 }

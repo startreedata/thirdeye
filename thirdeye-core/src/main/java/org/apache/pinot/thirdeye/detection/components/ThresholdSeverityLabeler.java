@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import static org.apache.pinot.thirdeye.detection.spec.SeverityThresholdLabelerSpec.CHANGE_KEY;
+import static org.apache.pinot.thirdeye.detection.spec.SeverityThresholdLabelerSpec.DURATION_KEY;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +33,8 @@ import org.apache.pinot.thirdeye.detection.annotation.Components;
 import org.apache.pinot.thirdeye.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.detection.spec.SeverityThresholdLabelerSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.Labeler;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.detection.spec.SeverityThresholdLabelerSpec.*;
 
 /**
  * Threshold-based severity labeler, which labels anomalies with severity based on deviation from baseline and duration

@@ -30,15 +30,16 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper class to represent an array of dimension values.
+ *
  * @author kgopalak
  */
 public class DimensionKey implements Comparable<DimensionKey> {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(DimensionKey.class);
 
   static MessageDigest md5;
@@ -55,7 +56,7 @@ public class DimensionKey implements Comparable<DimensionKey> {
   private String[] dimensionValues;
 
   /**
-   * @param dimensionValues
+   *
    */
   public DimensionKey(String[] dimensionValues) {
     this.dimensionValues = dimensionValues;
@@ -63,15 +64,14 @@ public class DimensionKey implements Comparable<DimensionKey> {
   }
 
   /**
-   * @return
+   *
    */
   public String[] getDimensionValues() {
     return dimensionValues;
   }
 
   /**
-   * @return
-   * @throws IOException
+   *
    */
   public byte[] toBytes() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -98,9 +98,7 @@ public class DimensionKey implements Comparable<DimensionKey> {
   }
 
   /**
-   * @param bytes
-   * @return
-   * @throws IOException
+   *
    */
   public static DimensionKey fromBytes(byte[] bytes) throws IOException {
     DataInput in = new DataInputStream(new ByteArrayInputStream(bytes));
@@ -131,8 +129,7 @@ public class DimensionKey implements Comparable<DimensionKey> {
   }
 
   /**
-   * @param that
-   * @return
+   *
    */
   public int compareTo(DimensionKey that) {
     // assumes both have the same length

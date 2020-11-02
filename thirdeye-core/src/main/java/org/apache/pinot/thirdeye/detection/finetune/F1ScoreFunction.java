@@ -19,12 +19,11 @@
 
 package org.apache.pinot.thirdeye.detection.finetune;
 
-import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 
 
 /**

@@ -20,10 +20,10 @@
 
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
-import org.apache.pinot.thirdeye.Constants.JobStatus;
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import java.sql.Timestamp;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.Constants.JobStatus;
+import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 
 /**
  * This class corresponds to an anomaly job. An anomaly job is created for every execution of an
@@ -122,8 +122,10 @@ public class JobBean extends AbstractBean {
       return false;
     }
     JobBean af = (JobBean) o;
-    return Objects.equals(getId(), af.getId()) && Objects.equals(jobName, af.getJobName()) && Objects
-        .equals(status, af.getStatus()) && Objects.equals(scheduleStartTime, af.getScheduleStartTime())
+    return Objects.equals(getId(), af.getId()) && Objects.equals(jobName, af.getJobName())
+        && Objects
+        .equals(status, af.getStatus()) && Objects
+        .equals(scheduleStartTime, af.getScheduleStartTime())
         && Objects.equals(taskType, af.getTaskType()) && Objects.equals(configId, af.getConfigId());
   }
 

@@ -22,32 +22,34 @@ package org.apache.pinot.thirdeye.datalayer.dto;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.pinot.thirdeye.alert.commons.AnomalyNotifiedStatus;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertSnapshotBean;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.alert.commons.AnomalyNotifiedStatus;
+import org.apache.pinot.thirdeye.datalayer.pojo.AlertSnapshotBean;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class AlertSnapshotDTO extends AlertSnapshotBean {
+
   private static final Logger LOG = LoggerFactory.getLogger(AlertSnapshotDTO.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public Multimap<String, AnomalyNotifiedStatus> getSnapshot() {
     Multimap<String, AnomalyNotifiedStatus> snapshot = HashMultimap.create();
     if (snapshotString == null || snapshotString.size() == 0) {
-      LOG.info("SnapshotString in AlertSnapshotBean {} is empty, return an empty map instead", getId());
+      LOG.info("SnapshotString in AlertSnapshotBean {} is empty, return an empty map instead",
+          getId());
     } else {
       for (Map.Entry<String, List<String>> entry : snapshotString.entrySet()) {
         for (String statusString : entry.getValue()) {
           try {
-            AnomalyNotifiedStatus status = OBJECT_MAPPER.readValue(statusString, AnomalyNotifiedStatus.class);
+            AnomalyNotifiedStatus status = OBJECT_MAPPER
+                .readValue(statusString, AnomalyNotifiedStatus.class);
             snapshot.put(entry.getKey(), status);
           } catch (IOException e) {
             LOG.error("Unable to parse String {} to Status", statusString);
@@ -68,14 +70,15 @@ public class AlertSnapshotDTO extends AlertSnapshotBean {
         LOG.error("Unable to parse Status {} to String", entry.getValue());
         continue;
       }
-      if(!snapshotString.containsKey(entry.getKey())) {
+      if (!snapshotString.containsKey(entry.getKey())) {
         snapshotString.put(entry.getKey(), new ArrayList<String>());
       }
       snapshotString.get(entry.getKey()).add(valueString);
     }
   }
 
-  public AnomalyNotifiedStatus getLatestStatus(Multimap<String, AnomalyNotifiedStatus> snapshot, String statusKey) {
+  public AnomalyNotifiedStatus getLatestStatus(Multimap<String, AnomalyNotifiedStatus> snapshot,
+      String statusKey) {
     if (!snapshot.containsKey(statusKey)) {
       return new AnomalyNotifiedStatus(0, 0);
     }

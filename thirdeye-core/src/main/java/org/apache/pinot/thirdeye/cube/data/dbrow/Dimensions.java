@@ -19,16 +19,14 @@
 
 package org.apache.pinot.thirdeye.cube.data.dbrow;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import java.util.HashSet;
 import java.util.List;
-
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class Dimensions {

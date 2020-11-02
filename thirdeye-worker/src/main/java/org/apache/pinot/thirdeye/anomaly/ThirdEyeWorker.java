@@ -20,6 +20,14 @@
 package org.apache.pinot.thirdeye.anomaly;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.dropwizard.assets.AssetsBundle;
+import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityEventListenerDriver;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityTaskScheduler;
 import org.apache.pinot.thirdeye.anomaly.events.HolidayEventResource;
@@ -27,11 +35,11 @@ import org.apache.pinot.thirdeye.anomaly.events.HolidayEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorJobScheduler;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriver;
-import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardService;
 import org.apache.pinot.thirdeye.common.BaseThirdEyeApplication;
 import org.apache.pinot.thirdeye.common.ThirdEyeSwaggerBundle;
+import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -41,14 +49,6 @@ import org.apache.pinot.thirdeye.model.download.ModelDownloaderManager;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
-import io.dropwizard.assets.AssetsBundle;
-import io.dropwizard.lifecycle.Managed;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 public class ThirdEyeWorker

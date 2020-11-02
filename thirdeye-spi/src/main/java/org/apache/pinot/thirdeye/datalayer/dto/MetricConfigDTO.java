@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.datalayer.dto;
 
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 
-
 public class MetricConfigDTO extends MetricConfigBean {
 
   private DatasetConfigDTO datasetConfig;
@@ -34,5 +33,4 @@ public class MetricConfigDTO extends MetricConfigBean {
   public void setDatasetConfig(DatasetConfigDTO datasetConfig) {
     this.datasetConfig = datasetConfig;
   }
-
 }

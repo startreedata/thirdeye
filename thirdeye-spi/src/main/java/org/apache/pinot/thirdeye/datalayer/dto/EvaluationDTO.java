@@ -20,19 +20,21 @@
 
 package org.apache.pinot.thirdeye.datalayer.dto;
 
+import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_CURRENT;
+import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_VALUE;
+
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.datalayer.pojo.EvaluationBean;
 import org.apache.pinot.thirdeye.detection.Evaluation;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
 
-import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_CURRENT;
-import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_VALUE;
-
 /**
  * The evaluation DTO
  */
 public class EvaluationDTO extends EvaluationBean {
-  public static EvaluationDTO fromPredictionResult(PredictionResult predictionResult, long startTime, long endTime,
+
+  public static EvaluationDTO fromPredictionResult(PredictionResult predictionResult,
+      long startTime, long endTime,
       long detectionConfigId) {
     EvaluationDTO evaluation = new EvaluationDTO();
     evaluation.setDetectionConfigId(detectionConfigId);

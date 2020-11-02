@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.anomaly.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;

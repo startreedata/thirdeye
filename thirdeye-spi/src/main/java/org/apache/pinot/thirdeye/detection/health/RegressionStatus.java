@@ -25,11 +25,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 /**
  * The regression status for a detection config
  */
 public class RegressionStatus {
+
   // the average mape for each detector
   @JsonProperty
   private final Map<String, Double> detectorMapes;
@@ -49,7 +49,8 @@ public class RegressionStatus {
     this.healthStatus = HealthStatus.UNKNOWN;
   }
 
-  public RegressionStatus(Map<String, Double> detectorMapes, Map<String, HealthStatus> detectorHealthStatus,
+  public RegressionStatus(Map<String, Double> detectorMapes,
+      Map<String, HealthStatus> detectorHealthStatus,
       HealthStatus healthStatus) {
     this.detectorMapes = detectorMapes;
     this.detectorHealthStatus = detectorHealthStatus;
@@ -90,11 +91,14 @@ public class RegressionStatus {
   }
 
   /**
-   * Classify the regression status of the detection config based on the health status for each detector
+   * Classify the regression status of the detection config based on the health status for each
+   * detector
+   *
    * @param detectorHealthStatus the health status for each detector
    * @return the overall regression status
    */
-  private static HealthStatus classifyOverallRegressionStatus(Map<String, HealthStatus> detectorHealthStatus) {
+  private static HealthStatus classifyOverallRegressionStatus(
+      Map<String, HealthStatus> detectorHealthStatus) {
     if (detectorHealthStatus.isEmpty()) {
       return HealthStatus.UNKNOWN;
     }

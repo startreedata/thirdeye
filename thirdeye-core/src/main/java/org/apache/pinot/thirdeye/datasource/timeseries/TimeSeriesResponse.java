@@ -20,13 +20,11 @@
 package org.apache.pinot.thirdeye.datasource.timeseries;
 
 import com.google.common.collect.ImmutableList;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
 
 public class TimeSeriesResponse {

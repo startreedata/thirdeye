@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datasource.timeseries;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,11 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.apache.commons.collections4.map.MultiKeyMap;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 import org.apache.pinot.thirdeye.common.dimension.DimensionKey;
 import org.apache.pinot.thirdeye.common.metric.MetricSchema;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;

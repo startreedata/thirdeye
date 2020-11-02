@@ -22,12 +22,12 @@ package org.apache.pinot.thirdeye.dataframe;
 
 import java.util.Arrays;
 
-
 /**
  * Custom hash-based multimap implementation for joins. Primitive, fixed size, append only.
  * Minimizes memory footprint and overheads. Open-addressing, linear scan, block skip.
  */
 class PrimitiveMultimap {
+
   private static final int M = 0x5bd1e995;
   private static final int SEED = 0xb7f93ea;
   private static final long TO_LONG = 0xFFFFFFFFL;
@@ -63,7 +63,7 @@ class PrimitiveMultimap {
   public PrimitiveMultimap(Series... series) {
     this(series[0].size());
     Series.assertSameLength(series);
-    for(int i=0; i<series[0].size(); i++) {
+    for (int i = 0; i < series[0].size(); i++) {
       putFast(hashRow(series, i), i);
     }
   }
@@ -73,9 +73,9 @@ class PrimitiveMultimap {
     int val = this.get(key);
 
     int cntr = 0;
-    while(val != -1) {
-      if(Series.equalsMultiple(series, compare, row, val)) {
-        if(cntr >= this.outBuffer.length) {
+    while (val != -1) {
+      if (Series.equalsMultiple(series, compare, row, val)) {
+        if (cntr >= this.outBuffer.length) {
           int[] newBuffer = new int[this.outBuffer.length * 2];
           System.arraycopy(this.outBuffer, 0, newBuffer, 0, this.outBuffer.length);
           this.outBuffer = newBuffer;
@@ -89,7 +89,7 @@ class PrimitiveMultimap {
 
   static int hashRow(Series[] series, int row) {
     int k = SEED;
-    for(Series s : series) {
+    for (Series s : series) {
       k ^= s.hashCode(row);
     }
     return k;
@@ -101,7 +101,7 @@ class PrimitiveMultimap {
   public PrimitiveMultimap(final int maxSize) {
     this.maxSize = maxSize;
 
-    final int minCapacity = (int)(maxSize * SCALING_FACTOR);
+    final int minCapacity = (int) (maxSize * SCALING_FACTOR);
     this.shift = log2(minCapacity) + 1;
 
     final int capacity = pow2(this.shift);
@@ -112,10 +112,13 @@ class PrimitiveMultimap {
 
   public void put(final int key, final int value) {
     // NOTE: conservative - (hash, value) must be != 0
-    if(value == RESERVED_VALUE)
-      throw new IllegalArgumentException(String.format("Value must be different from %d", RESERVED_VALUE));
-    if(this.size >= this.maxSize)
+    if (value == RESERVED_VALUE) {
+      throw new IllegalArgumentException(
+          String.format("Value must be different from %d", RESERVED_VALUE));
+    }
+    if (this.size >= this.maxSize) {
       throw new IllegalArgumentException(String.format("Map is at max size %d", this.maxSize));
+    }
     putFast(key, value);
   }
 
@@ -125,7 +128,7 @@ class PrimitiveMultimap {
 
     int index = keyIndex;
     long tuple = this.data[index];
-    while(tuple != 0) {
+    while (tuple != 0) {
       index = this.writeInfo[index];
       tuple = this.data[index];
       this.collisions++;
@@ -150,11 +153,11 @@ class PrimitiveMultimap {
     int index = safeIndex(hash);
     long tuple = this.data[index];
 
-    while(tuple != 0) {
+    while (tuple != 0) {
       int tkey = tuple2key(tuple);
 
-      if(tkey == key) {
-        if(offset == toff++) {
+      if (tkey == key) {
+        if (offset == toff++) {
           this.iteratorKey = key;
           this.iterator = index + 1;
           return tuple2val(tuple) - 1; // fix value offset
@@ -172,8 +175,9 @@ class PrimitiveMultimap {
   }
 
   public int getNext() {
-    if(this.iterator == -1)
+    if (this.iterator == -1) {
       return -1;
+    }
     return getInternal(this.iteratorKey, this.iterator, 0);
   }
 
@@ -200,13 +204,15 @@ class PrimitiveMultimap {
   public String visualize() {
     final int rowSize = (int) (Math.ceil(Math.sqrt(this.data.length)) * 1.5);
     final StringBuilder sb = new StringBuilder();
-    for(int i=0; i<this.size(); i++) {
-      if(i % rowSize == 0)
+    for (int i = 0; i < this.size(); i++) {
+      if (i % rowSize == 0) {
         sb.append('\n');
-      if(this.data[i] == 0)
+      }
+      if (this.data[i] == 0) {
         sb.append('.');
-      else
+      } else {
         sb.append('X');
+      }
     }
     return sb.toString();
   }
@@ -228,8 +234,9 @@ class PrimitiveMultimap {
   }
 
   static int log2(int value) {
-    if(value == 0)
+    if (value == 0) {
       return 0;
+    }
     return 31 - Integer.numberOfLeadingZeros(value);
   }
 

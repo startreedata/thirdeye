@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.wrapper;
 
+import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
+
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +40,6 @@ import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
 import org.apache.pinot.thirdeye.detection.spi.components.Grouper;
-
-import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.*;
 
 
 /**

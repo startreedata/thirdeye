@@ -19,9 +19,9 @@
 
 package org.apache.pinot.thirdeye.anomalydetection.datafilter;
 
+import java.util.Map;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import java.util.Map;
 
 public interface DataFilter {
 

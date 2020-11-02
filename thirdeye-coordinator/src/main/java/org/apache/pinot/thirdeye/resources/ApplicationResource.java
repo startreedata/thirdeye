@@ -5,6 +5,7 @@ import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApi;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApplicationDto;
+
 import io.swagger.annotations.ApiKeyAuthDefinition;
 import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.SecurityDefinition;

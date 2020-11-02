@@ -31,11 +31,11 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.TaskBean;
 
-
 /**
  * The detection task status for a detection config
  */
 public class DetectionTaskStatus {
+
   // the task success rate for the detection config
   @JsonProperty
   private final double taskSuccessRate;
@@ -55,11 +55,11 @@ public class DetectionTaskStatus {
   // the counting for detection task status
   @JsonProperty
   private final Map<TaskConstants.TaskStatus, Long> taskCounts = new HashMap<TaskConstants.TaskStatus, Long>() {{
-      put(TaskConstants.TaskStatus.COMPLETED, 0L);
-      put(TaskConstants.TaskStatus.FAILED, 0L);
-      put(TaskConstants.TaskStatus.WAITING, 0L);
-      put(TaskConstants.TaskStatus.TIMEOUT, 0L);
-    }};
+    put(TaskConstants.TaskStatus.COMPLETED, 0L);
+    put(TaskConstants.TaskStatus.FAILED, 0L);
+    put(TaskConstants.TaskStatus.WAITING, 0L);
+    put(TaskConstants.TaskStatus.TIMEOUT, 0L);
+  }};
 
   // the list of tasks for the detection config
   @JsonProperty
@@ -68,7 +68,8 @@ public class DetectionTaskStatus {
   private static final double TASK_SUCCESS_RATE_BAD_THRESHOLD = 0.2;
   private static final double TASK_SUCCESS_RATE_MODERATE_THRESHOLD = 0.8;
 
-  public DetectionTaskStatus(double taskSuccessRate, HealthStatus healthStatus, Map<TaskConstants.TaskStatus, Long> counts, List<TaskDTO> tasks, long lastTaskExecutionTime) {
+  public DetectionTaskStatus(double taskSuccessRate, HealthStatus healthStatus,
+      Map<TaskConstants.TaskStatus, Long> counts, List<TaskDTO> tasks, long lastTaskExecutionTime) {
     this.taskSuccessRate = taskSuccessRate;
     this.healthStatus = healthStatus;
     this.tasks = tasks;
@@ -107,27 +108,33 @@ public class DetectionTaskStatus {
         tasks.stream().collect(Collectors.groupingBy(TaskBean::getStatus, Collectors.counting()));
     double taskSuccessRate = getTaskSuccessRate(counts);
     long newTaskExecutionTime = getLastSuccessTaskExecutionTime(tasks);
-    newTaskExecutionTime = newTaskExecutionTime == -1L ? lastTaskExecutionTime : newTaskExecutionTime;
-    return new DetectionTaskStatus(taskSuccessRate, classifyTaskStatus(taskSuccessRate), counts, tasks, newTaskExecutionTime);
+    newTaskExecutionTime =
+        newTaskExecutionTime == -1L ? lastTaskExecutionTime : newTaskExecutionTime;
+    return new DetectionTaskStatus(taskSuccessRate, classifyTaskStatus(taskSuccessRate), counts,
+        tasks, newTaskExecutionTime);
   }
 
   /**
    * Create a Detection task status from a list of tasks
+   *
    * @param tasks the list of tasks
    * @param lastTaskExecutionTime the last task exeuction time
    * @param taskLimit the number of tasks should be returned in the task status
    * @return the DetectionTaskStatus
    */
-  public static DetectionTaskStatus fromTasks(List<TaskDTO> tasks, long lastTaskExecutionTime, long taskLimit) {
+  public static DetectionTaskStatus fromTasks(List<TaskDTO> tasks, long lastTaskExecutionTime,
+      long taskLimit) {
     // count the number of tasks by task status
     tasks.sort(Comparator.comparingLong(TaskBean::getStartTime).reversed());
     Map<TaskConstants.TaskStatus, Long> counts =
         tasks.stream().collect(Collectors.groupingBy(TaskBean::getStatus, Collectors.counting()));
     double taskSuccessRate = getTaskSuccessRate(counts);
     long newTaskExecutionTime = getLastSuccessTaskExecutionTime(tasks);
-    newTaskExecutionTime = newTaskExecutionTime == -1L ? lastTaskExecutionTime : newTaskExecutionTime;
+    newTaskExecutionTime =
+        newTaskExecutionTime == -1L ? lastTaskExecutionTime : newTaskExecutionTime;
     tasks = tasks.stream().limit(taskLimit).collect(Collectors.toList());
-    return new DetectionTaskStatus(taskSuccessRate, classifyTaskStatus(taskSuccessRate), counts, tasks,
+    return new DetectionTaskStatus(taskSuccessRate, classifyTaskStatus(taskSuccessRate), counts,
+        tasks,
         newTaskExecutionTime);
   }
 
@@ -150,7 +157,6 @@ public class DetectionTaskStatus {
     return Double.NaN;
   }
 
-
   private static HealthStatus classifyTaskStatus(double taskSuccessRate) {
     if (Double.isNaN(taskSuccessRate)) {
       return HealthStatus.UNKNOWN;
@@ -163,5 +169,4 @@ public class DetectionTaskStatus {
     }
     return HealthStatus.GOOD;
   }
-
 }

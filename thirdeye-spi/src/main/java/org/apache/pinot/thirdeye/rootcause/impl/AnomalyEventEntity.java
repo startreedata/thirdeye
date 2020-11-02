@@ -19,19 +19,20 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 
 public class AnomalyEventEntity extends EventEntity {
+
   public static final String EVENT_TYPE_ANOMALY = "anomaly";
 
-  public static final EntityType TYPE = new EntityType(EventEntity.TYPE.getPrefix() + EVENT_TYPE_ANOMALY + ":");
+  public static final EntityType TYPE = new EntityType(
+      EventEntity.TYPE.getPrefix() + EVENT_TYPE_ANOMALY + ":");
 
   protected AnomalyEventEntity(String urn, double score, List<? extends Entity> related, long id) {
     super(urn, score, related, EVENT_TYPE_ANOMALY, id);

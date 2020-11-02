@@ -19,12 +19,6 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
-import org.apache.pinot.client.Connection;
-import org.apache.pinot.client.ConnectionFactory;
-import org.apache.pinot.client.PinotClientException;
-import org.apache.pinot.client.ResultSet;
-import org.apache.pinot.client.ResultSetGroup;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,6 +33,12 @@ import org.apache.helix.manager.zk.ZKHelixAdmin;
 import org.apache.helix.manager.zk.ZNRecordSerializer;
 import org.apache.helix.manager.zk.ZkClient;
 import org.apache.helix.model.InstanceConfig;
+import org.apache.pinot.client.Connection;
+import org.apache.pinot.client.ConnectionFactory;
+import org.apache.pinot.client.PinotClientException;
+import org.apache.pinot.client.ResultSet;
+import org.apache.pinot.client.ResultSetGroup;
+import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

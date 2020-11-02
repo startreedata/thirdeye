@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import java.lang.reflect.Constructor;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 
 
 public class DetectionPipelineLoader {

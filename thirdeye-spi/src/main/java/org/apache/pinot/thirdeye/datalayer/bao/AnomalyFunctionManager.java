@@ -21,9 +21,7 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
 import java.util.List;
-
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-
 
 public interface AnomalyFunctionManager extends AbstractManager<AnomalyFunctionDTO> {
 
@@ -31,6 +29,7 @@ public interface AnomalyFunctionManager extends AbstractManager<AnomalyFunctionD
 
   /**
    * Get the list of anomaly functions under the given application
+   *
    * @param application name of the application
    * @return return the list of anomaly functions under the application
    */
@@ -43,5 +42,4 @@ public interface AnomalyFunctionManager extends AbstractManager<AnomalyFunctionD
   List<AnomalyFunctionDTO> findWhereNameLike(String name);
 
   AnomalyFunctionDTO findWhereNameEquals(String name);
-
 }

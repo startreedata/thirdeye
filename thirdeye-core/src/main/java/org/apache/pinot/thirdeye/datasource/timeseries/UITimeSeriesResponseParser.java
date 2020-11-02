@@ -19,14 +19,9 @@
 
 package org.apache.pinot.thirdeye.datasource.timeseries;
 
+import static org.apache.pinot.thirdeye.datasource.ResponseParserUtils.OTHER;
+
 import com.google.common.collect.Range;
-import org.apache.pinot.thirdeye.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
-import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.Builder;
-import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,11 +29,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
+import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.Builder;
+import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
+import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.datasource.ResponseParserUtils.OTHER;
 
 //Heavily based off TimeOnTime equivalent
 public class UITimeSeriesResponseParser extends BaseTimeSeriesResponseParser {

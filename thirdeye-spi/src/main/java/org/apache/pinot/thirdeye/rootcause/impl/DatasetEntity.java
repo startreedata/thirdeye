@@ -19,21 +19,22 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
-import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
 
 /**
- * DatasetEntity represents a group of metrics tightly associated with each other. It typically serves
+ * DatasetEntity represents a group of metrics tightly associated with each other. It typically
+ * serves
  * as a convenience to describe entity mappings common to whole groups of entities.
  * 'thirdeye:dataset:{name}'.
  */
 public class DatasetEntity extends Entity {
+
   public static final EntityType TYPE = new EntityType("thirdeye:dataset:");
 
   private final String name;
@@ -62,7 +63,8 @@ public class DatasetEntity extends Entity {
     return new DatasetEntity(urn, score, new ArrayList<Entity>(), name);
   }
 
-  public static DatasetEntity fromName(double score, Collection<? extends Entity> related, String name) {
+  public static DatasetEntity fromName(double score, Collection<? extends Entity> related,
+      String name) {
     String urn = TYPE.formatURN(name);
     return new DatasetEntity(urn, score, new ArrayList<>(related), name);
   }

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static org.apache.pinot.thirdeye.notification.commons.JiraConfiguration.JIRA_CONFIG_KEY;
+
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;

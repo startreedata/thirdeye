@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_CONFIG_KEY;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;

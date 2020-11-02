@@ -20,10 +20,6 @@
 package org.apache.pinot.thirdeye.auto.onboard;
 
 import com.google.common.base.CaseFormat;
-import org.apache.pinot.thirdeye.datasource.DataSourceConfig;
-import org.apache.pinot.thirdeye.datasource.DataSources;
-import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
-import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,6 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.datasource.DataSourceConfig;
+import org.apache.pinot.thirdeye.datasource.DataSources;
+import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
+import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

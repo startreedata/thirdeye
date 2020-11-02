@@ -25,7 +25,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-
 /**
  * An entity represents a node in the knowledge graph traversed to identify potential root causes.
  * The URN represents a unique identifier (with a hierarchical namespace) and the score identifies
@@ -42,6 +41,7 @@ import java.util.Objects;
  * centralized repository of valid URNs.
  */
 public class Entity {
+
   private final String urn;
   private final double score;
   private final List<Entity> related;
@@ -81,7 +81,8 @@ public class Entity {
 
   @Override
   public String toString() {
-    return String.format("%s(urn=%s, score=%.3f)", getClass().getSimpleName(), this.urn, this.score);
+    return String
+        .format("%s(urn=%s, score=%.3f)", getClass().getSimpleName(), this.urn, this.score);
   }
 
   @Override

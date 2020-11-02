@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.auto.onboard;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DatasetConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 
 public class ConfigGenerator {

@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static org.apache.pinot.thirdeye.util.ThirdEyeUtils.getDetectionExpectedDelay;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -35,8 +37,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.util.ThirdEyeUtils.getDetectionExpectedDelay;
 
 /**
  * Holds utility functions related to ThirdEye Tasks

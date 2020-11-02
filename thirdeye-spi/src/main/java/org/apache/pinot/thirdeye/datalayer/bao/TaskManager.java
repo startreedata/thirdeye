@@ -21,15 +21,14 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
 import java.util.List;
-
+import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
-import java.util.Set;
 
-public interface TaskManager extends AbstractManager<TaskDTO>{
+public interface TaskManager extends AbstractManager<TaskDTO> {
 
   List<TaskDTO> findByJobIdStatusNotIn(Long jobId, TaskStatus status);
 
@@ -39,19 +38,23 @@ public interface TaskManager extends AbstractManager<TaskDTO>{
 
   List<TaskDTO> findByStatusWithinDays(TaskStatus status, int days);
 
-  List<TaskDTO> findByStatusesAndTypeWithinDays(List<TaskStatus> statuses, TaskConstants.TaskType type, int days);
+  List<TaskDTO> findByStatusesAndTypeWithinDays(List<TaskStatus> statuses,
+      TaskConstants.TaskType type, int days);
 
   List<TaskDTO> findTimeoutTasksWithinDays(int days, long maxTaskTime);
 
   List<TaskDTO> findByStatusOrderByCreateTime(TaskStatus status, int fetchSize, boolean asc);
 
-  List<TaskDTO> findByStatusAndTypeOrderByCreateTime(TaskStatus status, TaskConstants.TaskType type, int fetchSize, boolean asc);
+  List<TaskDTO> findByStatusAndTypeOrderByCreateTime(TaskStatus status, TaskConstants.TaskType type,
+      int fetchSize, boolean asc);
 
-  List<TaskDTO> findByStatusAndTypeNotInOrderByCreateTime(TaskStatus status, TaskConstants.TaskType type, int fetchSize, boolean asc);
+  List<TaskDTO> findByStatusAndTypeNotInOrderByCreateTime(TaskStatus status,
+      TaskConstants.TaskType type, int fetchSize, boolean asc);
 
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 
-  boolean updateStatusAndWorkerId(Long workerId, Long id, Set<TaskStatus> allowedOldStatus, int expectedVersion);
+  boolean updateStatusAndWorkerId(Long workerId, Long id, Set<TaskStatus> allowedOldStatus,
+      int expectedVersion);
 
   void updateStatusAndTaskEndTime(Long id, TaskStatus oldStatus, TaskStatus newStatus,
       Long taskEndTime, String message);

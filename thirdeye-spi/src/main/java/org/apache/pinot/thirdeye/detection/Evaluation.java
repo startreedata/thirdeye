@@ -24,11 +24,11 @@ package org.apache.pinot.thirdeye.detection;
 
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 
-
 /**
  * The util class for model evaluation
  */
 public class Evaluation {
+
   // Suppresses default constructor, ensuring non-instantiability.
   private Evaluation() {
   }
@@ -36,6 +36,7 @@ public class Evaluation {
   /**
    * Calculate the mean absolute percentage error (MAPE).
    * See https://en.wikipedia.org/wiki/Mean_absolute_percentage_error
+   *
    * @param current current time series
    * @param predicted baseline time series
    * @return the mape value

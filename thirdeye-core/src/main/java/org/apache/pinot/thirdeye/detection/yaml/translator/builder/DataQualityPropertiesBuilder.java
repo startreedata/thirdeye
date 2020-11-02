@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.yaml.translator.builder;
 
+import static org.apache.pinot.thirdeye.detection.ConfigUtils.getList;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,8 +34,6 @@ import org.apache.pinot.thirdeye.detection.dataquality.wrapper.DataSlaWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.DataQualityMergeWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-
-import static org.apache.pinot.thirdeye.detection.ConfigUtils.*;
 
 
 /**

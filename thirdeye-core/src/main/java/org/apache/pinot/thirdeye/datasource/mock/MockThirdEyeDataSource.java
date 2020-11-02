@@ -19,9 +19,33 @@
 
 package org.apache.pinot.thirdeye.datasource.mock;
 
+import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_TIME;
+import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_VALUE;
+import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.ABANDONED_TIMEOUT;
+import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.DATASETS;
+import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.DB;
+import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.H2;
+import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.INIT_CONNECTIONS;
+import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.MAX_CONNECTIONS;
+import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.PASSWORD;
+import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.USER;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,15 +70,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_TIME;
-import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_VALUE;
-import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.*;
 
 
 /**

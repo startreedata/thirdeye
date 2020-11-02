@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.anomaly.job;
 
 import java.util.List;
-
 import org.quartz.SchedulerException;
 
 public interface JobScheduler {

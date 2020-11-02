@@ -19,12 +19,12 @@
 
 package org.apache.pinot.thirdeye.tracking;
 
-import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 
 
 /**

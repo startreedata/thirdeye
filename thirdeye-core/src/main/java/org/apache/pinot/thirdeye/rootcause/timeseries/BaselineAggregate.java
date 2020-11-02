@@ -19,13 +19,6 @@
 
 package org.apache.pinot.thirdeye.rootcause.timeseries;
 
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.dataframe.Grouping;
-import org.apache.pinot.thirdeye.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.dataframe.Series;
-import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
-import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +26,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.dataframe.Grouping;
+import org.apache.pinot.thirdeye.dataframe.LongSeries;
+import org.apache.pinot.thirdeye.dataframe.Series;
+import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
+import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;

@@ -26,6 +26,7 @@ import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_LABELS;
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_MERGE_GAP;
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_PROJECT;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import freemarker.template.Configuration;

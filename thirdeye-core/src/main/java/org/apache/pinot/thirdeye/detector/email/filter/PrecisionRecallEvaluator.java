@@ -19,10 +19,8 @@
 
 package org.apache.pinot.thirdeye.detector.email.filter;
 
-import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
-import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import static org.apache.pinot.thirdeye.detector.email.filter.UserReportUtils.isUserReportAnomalyIsQualified;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,8 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import static org.apache.pinot.thirdeye.detector.email.filter.UserReportUtils.*;
+import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
+import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
+import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 
 /**

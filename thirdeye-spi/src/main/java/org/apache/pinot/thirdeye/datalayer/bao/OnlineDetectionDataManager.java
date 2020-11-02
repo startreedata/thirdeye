@@ -20,10 +20,10 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.OnlineDetectionDataDTO;
 
-import java.util.List;
+public interface OnlineDetectionDataManager extends AbstractManager<OnlineDetectionDataDTO> {
 
-public interface OnlineDetectionDataManager extends AbstractManager<OnlineDetectionDataDTO>{
   List<OnlineDetectionDataDTO> findByDatasetAndMetric(String dataset, String metric);
 }

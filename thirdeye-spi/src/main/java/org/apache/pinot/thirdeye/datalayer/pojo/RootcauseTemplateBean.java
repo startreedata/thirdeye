@@ -26,6 +26,7 @@ import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RootcauseTemplateBean extends AbstractBean {
+
   String name;
   String owner;
   String application;

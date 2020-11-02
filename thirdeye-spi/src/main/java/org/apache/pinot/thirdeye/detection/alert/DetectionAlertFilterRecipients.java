@@ -27,16 +27,17 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-
 /**
  * Container class for email alert recipients
  */
 public class DetectionAlertFilterRecipients {
+
   Set<String> to;
   Set<String> cc;
   Set<String> bcc;
 
-  public DetectionAlertFilterRecipients(Collection<String> to, Collection<String> cc, Collection<String> bcc) {
+  public DetectionAlertFilterRecipients(Collection<String> to, Collection<String> cc,
+      Collection<String> bcc) {
     this.to = new HashSet<>(to);
     this.cc = new HashSet<>(cc);
     this.bcc = new HashSet<>(bcc);
@@ -85,7 +86,8 @@ public class DetectionAlertFilterRecipients {
       return false;
     }
     DetectionAlertFilterRecipients that = (DetectionAlertFilterRecipients) o;
-    return Objects.equals(to, that.to) && Objects.equals(cc, that.cc) && Objects.equals(bcc, that.bcc);
+    return Objects.equals(to, that.to) && Objects.equals(cc, that.cc) && Objects
+        .equals(bcc, that.bcc);
   }
 
   @Override

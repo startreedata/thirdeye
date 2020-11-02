@@ -19,18 +19,15 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
-import java.io.File;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
  * This class contains helper classes to load/transform datasources from file

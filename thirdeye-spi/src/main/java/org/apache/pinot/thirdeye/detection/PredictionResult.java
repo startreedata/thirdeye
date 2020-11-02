@@ -22,17 +22,18 @@ package org.apache.pinot.thirdeye.detection;
 
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 
-
 /**
  * The time series prediction result
  */
 public class PredictionResult {
+
   private final String detectorName;
   private final String metricUrn;
   private final DataFrame predictedTimeSeries;
 
   /**
    * Construct a prediction result
+   *
    * @param detectorName the name for the detector, for example "detection_rule_1:PERCENTAGE_RULE"
    * @param metricUrn the metric urn
    * @param predictedTimeSeries the predicted time series
@@ -57,7 +58,8 @@ public class PredictionResult {
 
   @Override
   public String toString() {
-    return "PredictionResult{" + "detectorName='" + detectorName + '\'' + ", metricUrn='" + metricUrn + '\''
+    return "PredictionResult{" + "detectorName='" + detectorName + '\'' + ", metricUrn='"
+        + metricUrn + '\''
         + ", predictedTimeSeries=" + predictedTimeSeries + '}';
   }
 }

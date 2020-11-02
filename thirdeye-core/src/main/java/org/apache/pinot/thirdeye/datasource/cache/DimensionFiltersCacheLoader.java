@@ -19,17 +19,15 @@
 
 package org.apache.pinot.thirdeye.datasource.cache;
 
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheLoader;
+import java.util.List;
+import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DimensionFiltersCacheLoader extends CacheLoader<String, String> {
 

@@ -23,7 +23,7 @@ package org.apache.pinot.thirdeye.datalayer.bao;
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 
-
 public interface AlertManager extends AbstractManager<AlertDTO> {
+
   List<AlertDTO> findAllActive();
 }

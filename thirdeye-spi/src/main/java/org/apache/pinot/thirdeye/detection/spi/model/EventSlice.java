@@ -23,11 +23,11 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 
-
 /**
  * Selector for events based on (optionally) start time, end time, and dimension filters.
  */
 public class EventSlice {
+
   final long start;
   final long end;
   final Multimap<String, String> filters;
@@ -69,10 +69,12 @@ public class EventSlice {
   }
 
   public boolean match(EventDTO event) {
-    if (this.start >= 0 && event.getEndTime() <= this.start)
+    if (this.start >= 0 && event.getEndTime() <= this.start) {
       return false;
-    if (this.end >= 0 && event.getStartTime() >= this.end)
+    }
+    if (this.end >= 0 && event.getStartTime() >= this.end) {
       return false;
+    }
 
     for (String dimName : this.filters.keySet()) {
       if (event.getTargetDimensionMap().containsKey(dimName)) {
@@ -80,8 +82,9 @@ public class EventSlice {
         for (String dimValue : event.getTargetDimensionMap().get(dimName)) {
           anyMatch |= this.filters.get(dimName).contains(dimValue);
         }
-        if (!anyMatch)
+        if (!anyMatch) {
           return false;
+        }
       }
     }
 

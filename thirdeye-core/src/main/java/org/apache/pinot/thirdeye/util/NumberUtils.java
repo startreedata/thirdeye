@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.util;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
 import org.apache.pinot.thirdeye.common.metric.MetricType;
 
 /**

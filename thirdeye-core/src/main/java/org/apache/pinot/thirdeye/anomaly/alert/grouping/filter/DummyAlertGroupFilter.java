@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.anomaly.alert.grouping.filter;
 
-import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
 
 public class DummyAlertGroupFilter extends BaseAlertGroupFilter {
   @Override

@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.cube.data.dbclient;
 
 import com.google.common.collect.Multimap;
 import java.util.List;
-
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
 

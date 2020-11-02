@@ -20,15 +20,15 @@
 package org.apache.pinot.thirdeye.alert.fetcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collection;
+import java.util.Properties;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyFetcherConfig;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.Collection;
-import java.util.Properties;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

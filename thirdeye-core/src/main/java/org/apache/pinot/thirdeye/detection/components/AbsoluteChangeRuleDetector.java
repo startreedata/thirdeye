@@ -19,6 +19,10 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.DoubleFunction;
+import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.POSITIVE_INFINITY;
+import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.map;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,8 +51,6 @@ import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
 import org.joda.time.Interval;
-
-import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.*;
 
 @Components(title = "Absolute change rule detection",
     type = "ABSOLUTE_CHANGE_RULE",

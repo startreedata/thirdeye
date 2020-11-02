@@ -21,17 +21,6 @@ package org.apache.pinot.thirdeye.rootcause.util;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
-import org.apache.pinot.thirdeye.rootcause.impl.AnomalyEventEntity;
-import org.apache.pinot.thirdeye.rootcause.impl.DatasetEntity;
-import org.apache.pinot.thirdeye.rootcause.impl.DimensionEntity;
-import org.apache.pinot.thirdeye.rootcause.impl.DimensionsEntity;
-import org.apache.pinot.thirdeye.rootcause.impl.EntityType;
-import org.apache.pinot.thirdeye.rootcause.impl.HyperlinkEntity;
-import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-import org.apache.pinot.thirdeye.rootcause.impl.ServiceEntity;
-import org.apache.pinot.thirdeye.rootcause.impl.TimeRangeEntity;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -44,20 +33,31 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-
+import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
+import org.apache.pinot.thirdeye.rootcause.impl.AnomalyEventEntity;
+import org.apache.pinot.thirdeye.rootcause.impl.DatasetEntity;
+import org.apache.pinot.thirdeye.rootcause.impl.DimensionEntity;
+import org.apache.pinot.thirdeye.rootcause.impl.DimensionsEntity;
+import org.apache.pinot.thirdeye.rootcause.impl.EntityType;
+import org.apache.pinot.thirdeye.rootcause.impl.HyperlinkEntity;
+import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.rootcause.impl.ServiceEntity;
+import org.apache.pinot.thirdeye.rootcause.impl.TimeRangeEntity;
 
 /**
  * Utility class to simplify type-checking and extraction of entities
  */
 public class EntityUtils {
+
   private static Pattern PATTERN_FILTER_OPERATOR = Pattern.compile("!=|>=|<=|==|>|<|=");
 
   private static Map<String, String> FILTER_TO_OPERATOR = new LinkedHashMap<>();
+
   static {
     FILTER_TO_OPERATOR.put("!", "!=");
     FILTER_TO_OPERATOR.put("<=", "<=");
@@ -100,7 +100,7 @@ public class EntityUtils {
    */
   public static <T extends Entity> Map<String, T> mapEntityURNs(Collection<T> entities) {
     Map<String, T> map = new HashMap<>();
-    for(T e : entities) {
+    for (T e : entities) {
       map.put(e.getUrn(), e);
     }
     return map;
@@ -111,22 +111,26 @@ public class EntityUtils {
    *
    * @param urn entity URN
    * @param type entity type
-   * @throws IllegalArgumentException if the URN does not encode the specified entity type
    * @return the entity urn
+   * @throws IllegalArgumentException if the URN does not encode the specified entity type
    */
   public static String assertType(String urn, EntityType type) {
-    if(!isType(urn, type))
-      throw new IllegalArgumentException(String.format("Entity '%s' is not a '%s'", urn, type.getPrefix()));
+    if (!isType(urn, type)) {
+      throw new IllegalArgumentException(
+          String.format("Entity '%s' is not a '%s'", urn, type.getPrefix()));
+    }
     return urn;
   }
 
   /**
-   * Throws an IllegalArgumentException if the entity's URN does not encode the specified entity type.
+   * Throws an IllegalArgumentException if the entity's URN does not encode the specified entity
+   * type.
    *
    * @param entity entity
    * @param type entity type
-   * @throws IllegalArgumentException if the entity's URN does not encode the specified entity type
    * @return the entity
+   * @throws IllegalArgumentException if the entity's URN does not encode the specified entity
+   *     type
    */
   public static Entity assertType(Entity entity, EntityType type) {
     assertType(entity.getUrn(), type);
@@ -143,7 +147,7 @@ public class EntityUtils {
     double min = Double.MAX_VALUE;
     double max = Double.MIN_VALUE;
 
-    for(Entity e : entities) {
+    for (Entity e : entities) {
       min = Math.min(e.getScore(), min);
       max = Math.max(e.getScore(), max);
     }
@@ -151,14 +155,14 @@ public class EntityUtils {
     double range = max - min;
     Set<Entity> out = new HashSet<>();
 
-    if(range <= 0) {
-      for(Entity e : entities) {
+    if (range <= 0) {
+      for (Entity e : entities) {
         out.add(e.withScore(1.0));
       }
       return out;
     }
 
-    for(Entity e : entities) {
+    for (Entity e : entities) {
       out.add(e.withScore((e.getScore() - min) / range));
     }
 
@@ -173,8 +177,9 @@ public class EntityUtils {
    * @return top k entities
    */
   public static <T extends Entity> Set<T> topk(Collection<T> entities, int k) {
-    if (k < 0)
+    if (k < 0) {
       return new HashSet<>(entities);
+    }
     List<T> sorted = new ArrayList<>(entities);
     Collections.sort(sorted, Entity.HIGHEST_SCORE_FIRST);
     return new HashSet<>(sorted.subList(0, Math.min(k, sorted.size())));
@@ -201,11 +206,13 @@ public class EntityUtils {
    * @param <T> (super) class of output collection
    * @return set of Entities with given super class
    */
-  public static <T extends Entity> Set<T> filter(Collection<? extends Entity> entities, Class<? extends T> clazz) {
+  public static <T extends Entity> Set<T> filter(Collection<? extends Entity> entities,
+      Class<? extends T> clazz) {
     Set<T> filtered = new MaxScoreSet<>();
     for (Entity e : entities) {
-      if (clazz.isInstance(e))
+      if (clazz.isInstance(e)) {
         filtered.add((T) e);
+      }
     }
     return filtered;
   }
@@ -217,34 +224,26 @@ public class EntityUtils {
    *
    * @param urn entity urn
    * @param score entity score
-   * @throws IllegalArgumentException, if the urn cannot be parsed
    * @return entity subtype instance
+   * @throws IllegalArgumentException, if the urn cannot be parsed
    */
   public static Entity parseURN(String urn, double score) {
-    if(DimensionEntity.TYPE.isType(urn)) {
+    if (DimensionEntity.TYPE.isType(urn)) {
       return DimensionEntity.fromURN(urn, score);
-
-    } else if(MetricEntity.TYPE.isType(urn)) {
+    } else if (MetricEntity.TYPE.isType(urn)) {
       return MetricEntity.fromURN(urn, score);
-
-    } else if(TimeRangeEntity.TYPE.isType(urn)) {
+    } else if (TimeRangeEntity.TYPE.isType(urn)) {
       return TimeRangeEntity.fromURN(urn, score);
-
-    } else if(ServiceEntity.TYPE.isType(urn)) {
+    } else if (ServiceEntity.TYPE.isType(urn)) {
       return ServiceEntity.fromURN(urn, score);
-
-    } else if(DatasetEntity.TYPE.isType(urn)) {
+    } else if (DatasetEntity.TYPE.isType(urn)) {
       return DatasetEntity.fromURN(urn, score);
-
-    } else if(HyperlinkEntity.TYPE.isType(urn)) {
+    } else if (HyperlinkEntity.TYPE.isType(urn)) {
       return HyperlinkEntity.fromURL(urn, score);
-
-    } else if(AnomalyEventEntity.TYPE.isType(urn)) {
+    } else if (AnomalyEventEntity.TYPE.isType(urn)) {
       return AnomalyEventEntity.fromURN(urn, score);
-
-    } else if(DimensionsEntity.TYPE.isType(urn)) {
+    } else if (DimensionsEntity.TYPE.isType(urn)) {
       return DimensionsEntity.fromURN(urn, score);
-
     }
     throw new IllegalArgumentException(String.format("Could not parse URN '%s'", urn));
   }
@@ -276,10 +275,11 @@ public class EntityUtils {
    * @param related related entities
    * @return List of base entities with related entities
    */
-  public static <T extends Entity> List<T> withRelated(Iterable<T> entities, List<? extends Entity> related) {
+  public static <T extends Entity> List<T> withRelated(Iterable<T> entities,
+      List<? extends Entity> related) {
     List<T> tagged = new ArrayList<>();
-    for(T e : entities) {
-      tagged.add((T)e.withRelated(related));
+    for (T e : entities) {
+      tagged.add((T) e.withRelated(related));
     }
     return tagged;
   }
@@ -289,11 +289,10 @@ public class EntityUtils {
    * <br/><b>NOTE:</b> co-variant. Requires {@code Entity.withRelated(Entity)}
    * to return an instance of the respective {@code Entity} subclass.
    *
-   * @see EntityUtils#addRelated(Iterable, List)
-   *
    * @param entities base entities to set related entity on
    * @param related related entity
    * @return List of base entities with added related entity
+   * @see EntityUtils#addRelated(Iterable, List)
    */
   public static <T extends Entity> List<T> withRelated(Iterable<T> entities, Entity related) {
     return withRelated(entities, Collections.singletonList(related));
@@ -308,12 +307,13 @@ public class EntityUtils {
    * @param related related entities
    * @return List of base entities with related entities
    */
-  public static <T extends Entity> List<T> addRelated(Iterable<T> entities, List<? extends Entity> related) {
+  public static <T extends Entity> List<T> addRelated(Iterable<T> entities,
+      List<? extends Entity> related) {
     List<T> tagged = new ArrayList<>();
-    for(T e : entities) {
+    for (T e : entities) {
       List<Entity> newRelated = new ArrayList<>(e.getRelated());
       newRelated.addAll(related);
-      tagged.add((T)e.withRelated(newRelated));
+      tagged.add((T) e.withRelated(newRelated));
     }
     return tagged;
   }
@@ -323,11 +323,10 @@ public class EntityUtils {
    * <br/><b>NOTE:</b> co-variant. Requires {@code Entity.withRelated(Entity)}
    * to return an instance of the respective {@code Entity} subclass.
    *
-   * @see EntityUtils#addRelated(Iterable, List)
-   *
    * @param entities base entities to add related entities to
    * @param related related entities
    * @return List of base entities with related entities
+   * @see EntityUtils#addRelated(Iterable, List)
    */
   public static <T extends Entity> List<T> addRelated(Iterable<T> entities, Entity related) {
     return addRelated(entities, Collections.singletonList(related));
@@ -380,14 +379,15 @@ public class EntityUtils {
   public static Multimap<String, String> decodeDimensions(List<String> filterStrings) {
     Multimap<String, String> filters = TreeMultimap.create();
 
-    for(String filterString : filterStrings) {
+    for (String filterString : filterStrings) {
       if (StringUtils.isBlank(filterString)) {
         continue;
       }
 
       String[] parts = EntityUtils.decodeURNComponent(filterString).split("!=|<=|>=|<|>|=", 2);
       if (parts.length != 2) {
-        throw new IllegalArgumentException(String.format("Could not parse filter string '%s'", filterString));
+        throw new IllegalArgumentException(
+            String.format("Could not parse filter string '%s'", filterString));
       }
 
       filters.put(parts[0], parts[1]);
@@ -406,7 +406,7 @@ public class EntityUtils {
     List<String> output = new ArrayList<>();
 
     Multimap<String, String> sorted = TreeMultimap.create(filters);
-    for(Map.Entry<String, String> entry : sorted.entries()) {
+    for (Map.Entry<String, String> entry : sorted.entries()) {
       String operator = "=";
       String value = entry.getValue();
 
@@ -419,7 +419,8 @@ public class EntityUtils {
         }
       }
 
-      output.add(EntityUtils.encodeURNComponent(String.format("%s%s%s", entry.getKey(), operator, value)));
+      output.add(
+          EntityUtils.encodeURNComponent(String.format("%s%s%s", entry.getKey(), operator, value)));
     }
 
     return output;
@@ -471,11 +472,11 @@ public class EntityUtils {
         try {
           // attempt parsing current filter fragment
           predicates.add(extractFilterPredicate(currentFragment));
-          currentFragment = decodeURNComponent(filterFragments[i-1]);
-
+          currentFragment = decodeURNComponent(filterFragments[i - 1]);
         } catch (IllegalArgumentException ignore) {
           // merge filter fragment with next if it doesn't parse
-          currentFragment = String.format("%s:%s", decodeURNComponent(filterFragments[i - 1]), currentFragment);
+          currentFragment = String
+              .format("%s:%s", decodeURNComponent(filterFragments[i - 1]), currentFragment);
         }
       }
 
@@ -496,7 +497,8 @@ public class EntityUtils {
    */
   public static ParsedUrn parseUrnString(String urn, EntityType type) {
     if (!type.isType(urn)) {
-      throw new IllegalArgumentException(String.format("Expected type '%s' but got '%s'", type.getPrefix(), urn));
+      throw new IllegalArgumentException(
+          String.format("Expected type '%s' but got '%s'", type.getPrefix(), urn));
     }
     return parseUrnString(urn);
   }
@@ -512,7 +514,8 @@ public class EntityUtils {
    */
   public static ParsedUrn parseUrnString(String urn, EntityType type, int filterOffset) {
     if (urn == null || !type.isType(urn)) {
-      throw new IllegalArgumentException(String.format("Expected type '%s' but got '%s'", type.getPrefix(), urn));
+      throw new IllegalArgumentException(
+          String.format("Expected type '%s' but got '%s'", type.getPrefix(), urn));
     }
     return parseUrnString(urn, filterOffset);
   }
@@ -533,7 +536,8 @@ public class EntityUtils {
     Matcher m = PATTERN_FILTER_OPERATOR.matcher(filterString);
     if (!m.find()) {
       throw new IllegalArgumentException(
-          String.format("Could not find filter predicate operator. Expected regex '%s'", PATTERN_FILTER_OPERATOR.pattern()));
+          String.format("Could not find filter predicate operator. Expected regex '%s'",
+              PATTERN_FILTER_OPERATOR.pattern()));
     }
 
     int keyStart = 0;
@@ -550,5 +554,4 @@ public class EntityUtils {
 
     return new FilterPredicate(key, operator, value);
   }
-
 }

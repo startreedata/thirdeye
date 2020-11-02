@@ -26,7 +26,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
-
 public interface AbstractManager<E extends AbstractDTO> {
 
   Long save(E entity);
@@ -61,6 +60,7 @@ public interface AbstractManager<E extends AbstractDTO> {
 
   /**
    * Find the entities based on the JSON value predicate
+   *
    * @param predicate the predicate
    * @return the list of entities that match with the predicate
    */
@@ -70,6 +70,7 @@ public interface AbstractManager<E extends AbstractDTO> {
 
   /**
    * List the entities with pagination
+   *
    * @param limit the limit for the number of elements returned
    * @param offset the offset position
    * @return the list of entities ordered by id in descending order
@@ -80,9 +81,10 @@ public interface AbstractManager<E extends AbstractDTO> {
 
   /**
    * Count how many entities are there in the table
+   *
    * @return the number of total entities
    */
-  default long count()  {
+  default long count() {
     throw new NotImplementedException("Not Implemented");
   }
 }

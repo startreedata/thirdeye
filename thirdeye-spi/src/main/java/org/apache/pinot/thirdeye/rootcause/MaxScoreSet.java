@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-
 public class MaxScoreSet<T extends Entity> implements Set<T> {
+
   private final Map<String, T> delegate = new HashMap<>();
 
   public MaxScoreSet() {
@@ -50,13 +50,15 @@ public class MaxScoreSet<T extends Entity> implements Set<T> {
 
   @Override
   public boolean contains(Object o) {
-    if (!(o instanceof Entity))
+    if (!(o instanceof Entity)) {
       return false;
+    }
     final Entity e = (Entity) o;
     final String urn = e.getUrn();
 
-    if (!this.delegate.containsKey(urn))
+    if (!this.delegate.containsKey(urn)) {
       return false;
+    }
     return this.delegate.get(urn).equals(e);
   }
 
@@ -77,15 +79,18 @@ public class MaxScoreSet<T extends Entity> implements Set<T> {
 
   @Override
   public boolean remove(Object o) {
-    if (!(o instanceof Entity))
+    if (!(o instanceof Entity)) {
       return false;
+    }
     final Entity e = (Entity) o;
     final String urn = e.getUrn();
 
-    if (!this.delegate.containsKey(urn))
+    if (!this.delegate.containsKey(urn)) {
       return false;
-    if (!this.delegate.get(urn).equals(e))
+    }
+    if (!this.delegate.get(urn).equals(e)) {
       return false;
+    }
 
     this.delegate.remove(urn);
     return true;
@@ -124,8 +129,9 @@ public class MaxScoreSet<T extends Entity> implements Set<T> {
   public boolean retainAll(Collection<?> c) {
     Map<String, Entity> valid = new HashMap<>();
     for (Object o : c) {
-      if (!(o instanceof Entity))
+      if (!(o instanceof Entity)) {
         continue;
+      }
       final Entity e = (Entity) o;
       valid.put(e.getUrn(), e);
     }

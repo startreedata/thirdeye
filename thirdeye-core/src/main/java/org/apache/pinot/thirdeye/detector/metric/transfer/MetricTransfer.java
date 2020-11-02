@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.detector.metric.transfer;
 
-import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +26,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

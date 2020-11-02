@@ -21,19 +21,22 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
 import java.util.List;
-
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import java.util.Set;
-
+import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 
 public interface MetricConfigManager extends AbstractManager<MetricConfigDTO> {
 
   List<MetricConfigDTO> findByDataset(String dataset);
-  MetricConfigDTO findByMetricAndDataset(String metricName, String dataset);
-  MetricConfigDTO findByAliasAndDataset(String alias, String dataset);
-  List<MetricConfigDTO> findActiveByDataset(String dataset);
-  List<MetricConfigDTO> findWhereNameOrAliasLikeAndActive(String name);
-  List<MetricConfigDTO> findWhereAliasLikeAndActive(Set<String> aliasParts);
-  List<MetricConfigDTO> findByMetricName(String metricName);
 
+  MetricConfigDTO findByMetricAndDataset(String metricName, String dataset);
+
+  MetricConfigDTO findByAliasAndDataset(String alias, String dataset);
+
+  List<MetricConfigDTO> findActiveByDataset(String dataset);
+
+  List<MetricConfigDTO> findWhereNameOrAliasLikeAndActive(String name);
+
+  List<MetricConfigDTO> findWhereAliasLikeAndActive(Set<String> aliasParts);
+
+  List<MetricConfigDTO> findByMetricName(String metricName);
 }

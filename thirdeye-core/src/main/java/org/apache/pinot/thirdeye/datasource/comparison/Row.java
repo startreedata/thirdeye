@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.datasource.comparison;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.joda.time.DateTime;
 
 // TODO rename to TimeOnTimeComparisonRow?

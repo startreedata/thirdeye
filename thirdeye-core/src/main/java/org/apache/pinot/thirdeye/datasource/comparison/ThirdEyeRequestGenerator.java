@@ -26,14 +26,12 @@ import static org.apache.pinot.thirdeye.datasource.comparison.TimeOnTimeConstant
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.joda.time.DateTime;
-
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
+import org.joda.time.DateTime;
 
 public class ThirdEyeRequestGenerator {
 

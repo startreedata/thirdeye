@@ -20,11 +20,11 @@
 package org.apache.pinot.thirdeye.anomaly.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorTaskInfo;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskInfo;
-import java.io.IOException;
 import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

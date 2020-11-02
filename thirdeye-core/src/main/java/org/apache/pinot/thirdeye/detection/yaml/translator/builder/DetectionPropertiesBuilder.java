@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.detection.yaml.translator.builder;
 
+import static org.apache.pinot.thirdeye.detection.ConfigUtils.getList;
+import static org.apache.pinot.thirdeye.detection.ConfigUtils.getMap;
+
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,8 +46,6 @@ import org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.EntityAnomalyMergeWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-
-import static org.apache.pinot.thirdeye.detection.ConfigUtils.*;
 
 
 /**

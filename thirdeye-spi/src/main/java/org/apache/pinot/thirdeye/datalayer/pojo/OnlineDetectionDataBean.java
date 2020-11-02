@@ -23,6 +23,7 @@ package org.apache.pinot.thirdeye.datalayer.pojo;
 import java.util.Objects;
 
 public class OnlineDetectionDataBean extends AbstractBean {
+
   private String dataset;
 
   private String metric;

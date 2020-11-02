@@ -20,13 +20,16 @@
 package org.apache.pinot.thirdeye.alert.commons;
 
 public class AnomalyNotifiedStatus {
+
   public AnomalyNotifiedStatus() {
 
   }
-  public AnomalyNotifiedStatus(long time, double severity){
+
+  public AnomalyNotifiedStatus(long time, double severity) {
     this.lastNotifyTime = time;
     this.lastNotifySeverity = severity;
   }
+
   private long lastNotifyTime;
   private double lastNotifySeverity;
 

@@ -22,6 +22,6 @@ package org.apache.pinot.thirdeye.datalayer.bao;
 
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 
-
 public interface AlertSnapshotManager extends AbstractManager<AlertSnapshotDTO> {
+
 }

@@ -20,6 +20,11 @@
 package org.apache.pinot.thirdeye.datasource.timeseries;
 
 import com.google.common.collect.Range;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
@@ -27,11 +32,6 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
 import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
 
 public abstract class BaseTimeSeriesResponseParser implements TimeSeriesResponseParser {

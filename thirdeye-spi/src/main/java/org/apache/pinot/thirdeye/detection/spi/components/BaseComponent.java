@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.detection.spi.components;
 import org.apache.pinot.thirdeye.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
 
-
 public interface BaseComponent<T extends AbstractSpec> {
+
   void init(T spec, InputDataFetcher dataFetcher);
 }

@@ -21,12 +21,12 @@ package org.apache.pinot.thirdeye.rootcause.callgraph;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import java.util.Collections;
+import java.util.List;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.impl.EntityType;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
-import java.util.Collections;
-import java.util.List;
 
 
 public class CallGraphEntity extends Entity {

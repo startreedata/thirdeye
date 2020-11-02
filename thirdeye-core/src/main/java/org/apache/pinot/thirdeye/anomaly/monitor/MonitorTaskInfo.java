@@ -19,9 +19,8 @@
 
 package org.apache.pinot.thirdeye.anomaly.monitor;
 
-import java.util.Objects;
-
 import com.google.common.base.MoreObjects;
+import java.util.Objects;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConstants.MonitorType;
 import org.apache.pinot.thirdeye.anomaly.task.TaskInfo;
 

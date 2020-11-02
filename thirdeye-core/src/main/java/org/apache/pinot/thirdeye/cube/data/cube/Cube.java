@@ -19,11 +19,12 @@
 
 package org.apache.pinot.thirdeye.cube.data.cube;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
-import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
-import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
-import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,19 +36,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
+import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import org.apache.pinot.thirdeye.cube.data.dbclient.CubeClient;
-import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
+import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
+import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)

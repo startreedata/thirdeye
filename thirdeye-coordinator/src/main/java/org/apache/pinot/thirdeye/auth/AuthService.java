@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.auth;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.unauthenticatedException;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.AuthenticationException;

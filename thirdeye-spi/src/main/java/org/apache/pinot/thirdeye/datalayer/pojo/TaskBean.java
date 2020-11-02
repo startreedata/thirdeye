@@ -20,11 +20,10 @@
 
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import java.sql.Timestamp;
 import java.util.Objects;
-
+import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
+import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 
 /**
  * This class corresponds to anomaly tasks. An execution of an anomaly function creates an anomaly
@@ -125,7 +124,6 @@ public class TaskBean extends AbstractBean {
   public void setJobId(Long jobId) {
     this.jobId = jobId;
   }
-
 
   @Override
   public boolean equals(Object o) {

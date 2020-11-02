@@ -25,13 +25,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-
 /**
- * RootcauseSessionBean holds information for stored rootcause investigation reports. Supports backpointers to previous
+ * RootcauseSessionBean holds information for stored rootcause investigation reports. Supports
+ * backpointers to previous
  * versions.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RootcauseSessionBean extends AbstractBean {
+
   public enum PermissionType {
     READ,
     READ_WRITE
@@ -193,13 +194,21 @@ public class RootcauseSessionBean extends AbstractBean {
     this.permissions = permissions;
   }
 
-  public Map<String, Object> getCustomTableSettings() { return customTableSettings; }
+  public Map<String, Object> getCustomTableSettings() {
+    return customTableSettings;
+  }
 
-  public void setCustomTableSettings(Map<String, Object> customTableSettings) { this.customTableSettings = customTableSettings; }
+  public void setCustomTableSettings(Map<String, Object> customTableSettings) {
+    this.customTableSettings = customTableSettings;
+  }
 
-  public Boolean getIsUserCustomizingRequest() { return isUserCustomizingRequest; }
+  public Boolean getIsUserCustomizingRequest() {
+    return isUserCustomizingRequest;
+  }
 
-  public void setIsUserCustomizingRequest( Boolean isUserCustomizingRequest ) { this.isUserCustomizingRequest = isUserCustomizingRequest; }
+  public void setIsUserCustomizingRequest(Boolean isUserCustomizingRequest) {
+    this.isUserCustomizingRequest = isUserCustomizingRequest;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -210,22 +219,32 @@ public class RootcauseSessionBean extends AbstractBean {
       return false;
     }
     RootcauseSessionBean that = (RootcauseSessionBean) o;
-    return Objects.equals(name, that.name) && Objects.equals(text, that.text) && Objects.equals(owner, that.owner)
-        && Objects.equals(compareMode, that.compareMode) && Objects.equals(granularity, that.granularity)
-        && Objects.equals(previousId, that.previousId) && Objects.equals(anomalyRangeStart, that.anomalyRangeStart)
-        && Objects.equals(anomalyRangeEnd, that.anomalyRangeEnd) && Objects.equals(analysisRangeStart,
-        that.analysisRangeStart) && Objects.equals(analysisRangeEnd, that.analysisRangeEnd) && Objects.equals(created,
-        that.created) && Objects.equals(updated, that.updated) && Objects.equals(contextUrns, that.contextUrns)
-        && Objects.equals(anomalyUrns, that.anomalyUrns) && Objects.equals(selectedUrns, that.selectedUrns)
-        && Objects.equals(anomalyId, that.anomalyId) && Objects.equals(permissions, that.permissions)
+    return Objects.equals(name, that.name) && Objects.equals(text, that.text) && Objects
+        .equals(owner, that.owner)
+        && Objects.equals(compareMode, that.compareMode) && Objects
+        .equals(granularity, that.granularity)
+        && Objects.equals(previousId, that.previousId) && Objects
+        .equals(anomalyRangeStart, that.anomalyRangeStart)
+        && Objects.equals(anomalyRangeEnd, that.anomalyRangeEnd) && Objects
+        .equals(analysisRangeStart,
+            that.analysisRangeStart) && Objects.equals(analysisRangeEnd, that.analysisRangeEnd)
+        && Objects.equals(created,
+        that.created) && Objects.equals(updated, that.updated) && Objects
+        .equals(contextUrns, that.contextUrns)
+        && Objects.equals(anomalyUrns, that.anomalyUrns) && Objects
+        .equals(selectedUrns, that.selectedUrns)
+        && Objects.equals(anomalyId, that.anomalyId) && Objects
+        .equals(permissions, that.permissions)
         && Objects.equals(customTableSettings, that.customTableSettings)
         && Objects.equals(isUserCustomizingRequest, that.isUserCustomizingRequest);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, text, owner, compareMode, granularity, previousId, anomalyRangeStart, anomalyRangeEnd,
-        analysisRangeStart, analysisRangeEnd, created, updated, contextUrns, anomalyUrns, selectedUrns, anomalyId,
+    return Objects.hash(name, text, owner, compareMode, granularity, previousId, anomalyRangeStart,
+        anomalyRangeEnd,
+        analysisRangeStart, analysisRangeEnd, created, updated, contextUrns, anomalyUrns,
+        selectedUrns, anomalyId,
         permissions, customTableSettings, isUserCustomizingRequest);
   }
 }

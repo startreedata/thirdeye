@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.anomalydetection.performanceEvaluation;
 
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 
 /**

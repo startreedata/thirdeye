@@ -20,12 +20,14 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.dto.ConfigDTO;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.datalayer.dto.ConfigDTO;
 
 public interface ConfigManager extends AbstractManager<ConfigDTO> {
+
   List<ConfigDTO> findByNamespace(String namespace);
+
   ConfigDTO findByNamespaceName(String namespace, String name);
+
   void deleteByNamespaceName(String namespace, String name);
 }

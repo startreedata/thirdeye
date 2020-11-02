@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.datalayer.dto;
 
 import org.apache.pinot.thirdeye.datalayer.pojo.ConfigBean;
 
-
 public class ConfigDTO extends ConfigBean {
 
 }

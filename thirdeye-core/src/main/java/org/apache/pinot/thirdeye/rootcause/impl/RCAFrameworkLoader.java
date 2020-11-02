@@ -21,8 +21,6 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.apache.pinot.thirdeye.rootcause.Pipeline;
-import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -33,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.rootcause.Pipeline;
+import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

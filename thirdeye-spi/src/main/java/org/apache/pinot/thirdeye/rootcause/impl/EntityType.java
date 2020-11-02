@@ -19,20 +19,20 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
-
+import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
 
 /**
  * Wrapper class for URN prefix based typing of Entity.
  */
 public final class EntityType {
+
   private final String prefix;
 
   public String getPrefix() {
@@ -40,8 +40,9 @@ public final class EntityType {
   }
 
   public EntityType(String prefix) {
-    if(!prefix.endsWith(":"))
+    if (!prefix.endsWith(":")) {
       throw new IllegalArgumentException("Prefix must end with ':'");
+    }
     this.prefix = prefix;
   }
 
@@ -62,7 +63,7 @@ public final class EntityType {
           tailValues.add(v.toString());
         }
 
-      // single item
+        // single item
       } else {
         tailValues.add(value.toString());
       }
@@ -88,5 +89,4 @@ public final class EntityType {
   public int getPrefixSize() {
     return this.prefix.split(":").length;
   }
-
 }

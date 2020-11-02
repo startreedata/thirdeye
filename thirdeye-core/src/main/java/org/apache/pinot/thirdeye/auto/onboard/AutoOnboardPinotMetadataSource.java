@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import static org.apache.pinot.thirdeye.auto.onboard.ConfigGenerator.checkNonAdditive;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -56,8 +58,6 @@ import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.auto.onboard.ConfigGenerator.checkNonAdditive;
 
 /**
  * This is a service to onboard datasets automatically to thirdeye from pinot

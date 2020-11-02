@@ -20,14 +20,14 @@
 package org.apache.pinot.thirdeye.anomaly.alert.grouping.auxiliary_info_provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

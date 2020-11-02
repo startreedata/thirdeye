@@ -19,15 +19,14 @@
 
 package org.apache.pinot.thirdeye.util;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.joda.time.DateTime;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.joda.time.DateTime;
 
 public class CustomListDateDeserializer extends JsonDeserializer<List<DateTime>> {
 

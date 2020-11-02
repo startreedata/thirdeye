@@ -19,17 +19,18 @@
 
 package org.apache.pinot.thirdeye.rootcause;
 
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import java.util.Map;
 import java.util.Set;
-
+import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 
 /**
- * Container object for the execution context (the state) of {@code Pipeline.run()}. Holds the search context
+ * Container object for the execution context (the state) of {@code Pipeline.run()}. Holds the
+ * search context
  * with user-specified entities as well as the (incremental) results from executing individual
  * pipelines.
  */
 public class PipelineContext {
+
   private final Map<String, Set<Entity>> inputs;
 
   public PipelineContext(Map<String, Set<Entity>> inputs) {
@@ -57,10 +58,9 @@ public class PipelineContext {
    */
   public <T extends Entity> Set<T> filter(Class<? extends T> clazz) {
     Set<T> filtered = new MaxScoreSet<>();
-    for(Set<Entity> entities : this.inputs.values()) {
+    for (Set<Entity> entities : this.inputs.values()) {
       filtered.addAll(EntityUtils.filter(entities, clazz));
     }
     return filtered;
   }
-
 }

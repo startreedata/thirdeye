@@ -19,15 +19,13 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
+import java.util.Map;
+import java.util.Set;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
-import java.util.Map;
-import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**

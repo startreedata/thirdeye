@@ -19,9 +19,9 @@
 
 package org.apache.pinot.thirdeye.detection.spi.components;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
-import java.util.List;
 
 
 public interface Grouper<T extends AbstractSpec> extends BaseComponent<T> {

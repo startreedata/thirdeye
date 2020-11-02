@@ -23,7 +23,6 @@ package org.apache.pinot.thirdeye.datalayer.pojo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
 
-
 /**
  * ConfigBean holds namespaced key-value configuration values.  Values are serialized into the
  * database using the default object mapper.  ConfigBean serves as a light-weight
@@ -33,6 +32,7 @@ import java.util.Objects;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigBean extends AbstractBean {
+
   private String name;
   private String namespace;
   private Object value;
@@ -71,9 +71,9 @@ public class ConfigBean extends AbstractBean {
     }
     ConfigBean that = (ConfigBean) o;
     return Objects.equals(getId(), that.getId()) &&
-           Objects.equals(name, that.name) &&
-           Objects.equals(namespace, that.namespace) &&
-           Objects.equals(value, that.value);
+        Objects.equals(name, that.name) &&
+        Objects.equals(namespace, that.namespace) &&
+        Objects.equals(value, that.value);
   }
 
   @Override

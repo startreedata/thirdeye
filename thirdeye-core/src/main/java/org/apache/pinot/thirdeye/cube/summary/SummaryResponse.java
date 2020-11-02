@@ -19,19 +19,18 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import org.apache.pinot.thirdeye.cube.data.cube.Cube;
-import org.apache.pinot.thirdeye.cube.cost.CostFunction;
-import org.apache.pinot.thirdeye.cube.data.cube.DimNameValueCostEntry;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.pinot.thirdeye.cube.cost.CostFunction;
+import org.apache.pinot.thirdeye.cube.data.cube.Cube;
+import org.apache.pinot.thirdeye.cube.data.cube.DimNameValueCostEntry;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;

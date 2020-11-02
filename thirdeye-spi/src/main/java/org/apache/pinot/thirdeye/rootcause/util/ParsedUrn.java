@@ -28,9 +28,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-
 public final class ParsedUrn {
+
   private static Map<String, String> OPERATOR_TO_FILTER = new HashMap<>();
+
   static {
     OPERATOR_TO_FILTER.put("!=", "!");
     OPERATOR_TO_FILTER.put("==", "");
@@ -71,7 +72,8 @@ public final class ParsedUrn {
       return false;
     }
     ParsedUrn parsedUrn = (ParsedUrn) o;
-    return Objects.equals(prefixes, parsedUrn.prefixes) && Objects.equals(predicates, parsedUrn.predicates);
+    return Objects.equals(prefixes, parsedUrn.prefixes) && Objects
+        .equals(predicates, parsedUrn.predicates);
   }
 
   @Override
@@ -86,7 +88,8 @@ public final class ParsedUrn {
    */
   public void assertPrefixOnly() throws IllegalArgumentException {
     if (!this.getPredicates().isEmpty()) {
-      throw new IllegalArgumentException(String.format("Expected prefix only but got predicates %s", this.getPredicates()));
+      throw new IllegalArgumentException(
+          String.format("Expected prefix only but got predicates %s", this.getPredicates()));
     }
   }
 
@@ -100,7 +103,8 @@ public final class ParsedUrn {
     Multimap<String, String> filters = TreeMultimap.create();
     for (FilterPredicate predicate : this.predicates) {
       if (!OPERATOR_TO_FILTER.containsKey(predicate.operator)) {
-        throw new IllegalArgumentException(String.format("Operator '%s' could not be translated to filter prefix", predicate.operator));
+        throw new IllegalArgumentException(String
+            .format("Operator '%s' could not be translated to filter prefix", predicate.operator));
       }
       String prefix = OPERATOR_TO_FILTER.get(predicate.operator);
       filters.put(predicate.key, prefix + predicate.value);

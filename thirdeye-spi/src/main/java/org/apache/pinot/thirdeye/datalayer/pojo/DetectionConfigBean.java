@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.pinot.thirdeye.detection.health.DetectionHealth;
 
-
 /**
  * ConfigBean holds namespaced key-value configuration values.  Values are serialized into the
  * database using the default object mapper.  ConfigBean serves as a light-weight
@@ -36,6 +35,7 @@ import org.apache.pinot.thirdeye.detection.health.DetectionHealth;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DetectionConfigBean extends AbstractBean {
+
   String cron;
   String name;
   String description;
@@ -175,9 +175,11 @@ public class DetectionConfigBean extends AbstractBean {
       return false;
     }
     DetectionConfigBean that = (DetectionConfigBean) o;
-    return lastTimestamp == that.lastTimestamp && active == that.active && Objects.equals(cron, that.cron)
-        && Objects.equals(name, that.name) && Objects.equals(properties, that.properties) && Objects.equals(yaml,
-        that.yaml) && Objects.equals(dataQualityProperties, that.dataQualityProperties)
+    return lastTimestamp == that.lastTimestamp && active == that.active && Objects
+        .equals(cron, that.cron)
+        && Objects.equals(name, that.name) && Objects.equals(properties, that.properties) && Objects
+        .equals(yaml,
+            that.yaml) && Objects.equals(dataQualityProperties, that.dataQualityProperties)
         && Objects.equals(isDataAvailabilitySchedule, that.isDataAvailabilitySchedule) && Objects
         .equals(taskTriggerFallBackTimeInSec, that.taskTriggerFallBackTimeInSec);
   }

@@ -19,9 +19,9 @@
 
 package org.apache.pinot.thirdeye.datasource.loader;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import java.util.List;
 
 
 public interface AggregationLoader {

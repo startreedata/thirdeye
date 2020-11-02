@@ -19,17 +19,17 @@
 
 package org.apache.pinot.thirdeye.anomaly.views;
 
+import static org.apache.pinot.thirdeye.util.ThirdEyeUtils.getRoundedDouble;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.pinot.thirdeye.dashboard.views.TimeBucket;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.dashboard.views.TimeBucket;
 import org.joda.time.Minutes;
-
-import static org.apache.pinot.thirdeye.util.ThirdEyeUtils.*;
 
 
 /**

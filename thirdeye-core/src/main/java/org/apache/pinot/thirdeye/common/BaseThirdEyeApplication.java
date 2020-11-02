@@ -21,6 +21,9 @@ package org.apache.pinot.thirdeye.common;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import java.io.File;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameSerializer;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
@@ -31,12 +34,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MergedAnomalyResultManagerIm
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MetricConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-
-import java.io.File;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

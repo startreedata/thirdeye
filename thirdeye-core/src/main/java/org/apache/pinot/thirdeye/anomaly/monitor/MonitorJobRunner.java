@@ -19,15 +19,10 @@
 
 package org.apache.pinot.thirdeye.anomaly.monitor;
 
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.pinot.thirdeye.Constants.JobStatus;
 import org.apache.pinot.thirdeye.anomaly.job.JobRunner;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
@@ -37,6 +32,8 @@ import org.apache.pinot.thirdeye.datalayer.bao.JobManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MonitorJobRunner implements JobRunner {
 

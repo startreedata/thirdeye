@@ -20,14 +20,12 @@
 package org.apache.pinot.thirdeye.rootcause.impl;
 
 import com.google.common.collect.Multimap;
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 
 /**
  * DimensionsEntity represents a dimension cut of the data without being bound
@@ -39,6 +37,7 @@ import java.util.List;
  * @see DimensionEntity
  */
 public class DimensionsEntity extends Entity {
+
   public static final EntityType TYPE = new EntityType("thirdeye:dimensions:");
 
   private final Multimap<String, String> dimensions;
@@ -71,8 +70,10 @@ public class DimensionsEntity extends Entity {
     return fromDimensions(score, Collections.<Entity>emptyList(), dimensions);
   }
 
-  public static DimensionsEntity fromDimensions(double score, Collection<? extends Entity> related, Multimap<String, String> dimensions) {
-    return new DimensionsEntity(TYPE.formatURN(EntityUtils.encodeDimensions(dimensions)), score, new ArrayList<>(related), dimensions);
+  public static DimensionsEntity fromDimensions(double score, Collection<? extends Entity> related,
+      Multimap<String, String> dimensions) {
+    return new DimensionsEntity(TYPE.formatURN(EntityUtils.encodeDimensions(dimensions)), score,
+        new ArrayList<>(related), dimensions);
   }
 
   public static DimensionsEntity fromURN(String urn, double score) {

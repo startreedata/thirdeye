@@ -20,11 +20,12 @@
 
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 
 public class GroupedAnomalyResultsBean extends AbstractBean {
+
   private long alertConfigId;
   private DimensionMap dimensions = new DimensionMap();
   private List<Long> anomalyResultsId = new ArrayList<>();

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datasource;
 
 import org.apache.pinot.thirdeye.datalayer.bao.AlertConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertSnapshotManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
@@ -28,8 +29,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DataCompletenessConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
@@ -45,8 +44,10 @@ import org.apache.pinot.thirdeye.datalayer.bao.RawAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.RootcauseTemplateManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertConfigManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertSnapshotManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalySubscriptionGroupNotificationManagerImpl;
@@ -55,8 +56,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ClassificationConfigManagerI
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataCompletenessConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EntityToEntityMappingManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EvaluationManagerImpl;
@@ -72,6 +71,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RawAnomalyResultManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseSessionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseTemplateManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SessionManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.TaskManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 

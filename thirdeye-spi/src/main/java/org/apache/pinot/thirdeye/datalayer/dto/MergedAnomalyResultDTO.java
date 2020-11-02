@@ -20,22 +20,22 @@
 
 package org.apache.pinot.thirdeye.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.io.Serializable;
-import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
-import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.pinot.thirdeye.datalayer.pojo.MergedAnomalyResultBean;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
+import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.datalayer.pojo.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MergedAnomalyResultDTO extends MergedAnomalyResultBean implements AnomalyResult, Serializable {
+public class MergedAnomalyResultDTO extends MergedAnomalyResultBean implements AnomalyResult,
+    Serializable {
+
   public static final String ISSUE_TYPE_KEY = "issue_type";
   public static final String TIME_SERIES_SNAPSHOT_KEY = "anomalyTimelinesView";
 
@@ -131,7 +131,8 @@ public class MergedAnomalyResultDTO extends MergedAnomalyResultBean implements A
       return false;
     }
     MergedAnomalyResultDTO that = (MergedAnomalyResultDTO) o;
-    return Objects.equals(feedback, that.feedback) && Objects.equals(function, that.function) && Objects.equals(
+    return Objects.equals(feedback, that.feedback) && Objects.equals(function, that.function)
+        && Objects.equals(
         children, that.children);
   }
 

@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 import java.util.Objects;
 
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 /**
  * This table will be the entry point for users, to add new datasets to Thirdeye or new metrics to datasets in Thirdeye
  * Each data source will keep polling this table, for new entries to onboard
@@ -42,7 +42,6 @@ public class OnboardDatasetMetricBean extends AbstractBean {
   private Map<String, String> properties;
 
   private boolean onboarded = false;
-
 
   public String getDatasetName() {
     return datasetName;
@@ -76,7 +75,6 @@ public class OnboardDatasetMetricBean extends AbstractBean {
     this.properties = properties;
   }
 
-
   public boolean isOnboarded() {
     return onboarded;
   }
@@ -103,5 +101,4 @@ public class OnboardDatasetMetricBean extends AbstractBean {
   public int hashCode() {
     return Objects.hash(getId(), datasetName, metricName, dataSource, properties, onboarded);
   }
-
 }

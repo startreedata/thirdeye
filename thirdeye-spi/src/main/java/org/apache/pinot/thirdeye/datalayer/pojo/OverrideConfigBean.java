@@ -38,7 +38,6 @@ public class OverrideConfigBean extends AbstractBean {
 
   private boolean active;
 
-
   public long getStartTime() {
     return startTime;
   }

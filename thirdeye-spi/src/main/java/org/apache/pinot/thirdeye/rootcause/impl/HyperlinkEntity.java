@@ -19,15 +19,14 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
+import java.util.Collections;
+import java.util.List;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 
 public class HyperlinkEntity extends Entity {
+
   public static final EntityType TYPE = new EntityType("http:");
 
   private HyperlinkEntity(String urn, double score, List<? extends Entity> related) {

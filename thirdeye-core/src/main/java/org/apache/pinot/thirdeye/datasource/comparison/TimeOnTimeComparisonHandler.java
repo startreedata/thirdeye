@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.datasource.comparison;
 
+import com.google.common.collect.Range;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,21 +29,18 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import org.joda.time.DateTime;
-
-import com.google.common.collect.Range;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
 import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.apache.pinot.thirdeye.datasource.comparison.Row.Metric;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
+import org.joda.time.DateTime;
 
 public class TimeOnTimeComparisonHandler {
   private static final String CURRENT = "current";

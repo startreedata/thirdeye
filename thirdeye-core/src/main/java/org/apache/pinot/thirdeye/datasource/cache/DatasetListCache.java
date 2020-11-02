@@ -19,11 +19,10 @@
 
 package org.apache.pinot.thirdeye.datasource.cache;
 
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

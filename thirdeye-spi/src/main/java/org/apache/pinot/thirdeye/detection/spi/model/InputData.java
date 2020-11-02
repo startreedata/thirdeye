@@ -21,6 +21,9 @@ package org.apache.pinot.thirdeye.detection.spi.model;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -28,15 +31,12 @@ import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-
 
 /**
  * Input data for each detection stage
  */
 public class InputData {
+
   final InputDataSpec dataSpec;
   final Map<MetricSlice, DataFrame> timeseries;
   final Map<MetricSlice, DataFrame> aggregates;
@@ -48,18 +48,22 @@ public class InputData {
 
   /**
    * The data set config dtos for metric ids
+   *
    * @see InputDataSpec#withMetricIdsForDataset(Collection)
    */
   final Map<Long, DatasetConfigDTO> datasetForMetricId;
 
   /**
    * The metric config dtos for metric and data set names
+   *
    * @see InputDataSpec#withMetricNamesAndDatasetNames(Collection)
    */
   final Map<InputDataSpec.MetricAndDatasetName, MetricConfigDTO> metricForMetricAndDatasetNames;
 
-  public InputData(InputDataSpec spec, Map<MetricSlice, DataFrame> timeseries, Map<MetricSlice, DataFrame> aggregates,
-      Multimap<AnomalySlice, MergedAnomalyResultDTO> anomalies, Multimap<EventSlice, EventDTO> events) {
+  public InputData(InputDataSpec spec, Map<MetricSlice, DataFrame> timeseries,
+      Map<MetricSlice, DataFrame> aggregates,
+      Multimap<AnomalySlice, MergedAnomalyResultDTO> anomalies,
+      Multimap<EventSlice, EventDTO> events) {
     this.dataSpec = spec;
     this.timeseries = timeseries;
     this.aggregates = aggregates;
@@ -72,10 +76,13 @@ public class InputData {
     this.evaluations = ArrayListMultimap.create();
   }
 
-  public InputData(InputDataSpec spec, Map<MetricSlice, DataFrame> timeseries, Map<MetricSlice, DataFrame> aggregates,
-      Multimap<AnomalySlice, MergedAnomalyResultDTO> anomalies, Multimap<EventSlice, EventDTO> events,
+  public InputData(InputDataSpec spec, Map<MetricSlice, DataFrame> timeseries,
+      Map<MetricSlice, DataFrame> aggregates,
+      Multimap<AnomalySlice, MergedAnomalyResultDTO> anomalies,
+      Multimap<EventSlice, EventDTO> events,
       Map<Long, MetricConfigDTO> metrics, Map<String, DatasetConfigDTO> datasets,
-      Multimap<EvaluationSlice, EvaluationDTO> evaluations, Map<Long, DatasetConfigDTO> datasetForMetricId,
+      Multimap<EvaluationSlice, EvaluationDTO> evaluations,
+      Map<Long, DatasetConfigDTO> datasetForMetricId,
       Map<InputDataSpec.MetricAndDatasetName, MetricConfigDTO> metricForMetricAndDatasetNames) {
     this.dataSpec = spec;
     this.timeseries = timeseries;
@@ -117,7 +124,7 @@ public class InputData {
     return datasets;
   }
 
-  public Map<Long, DatasetConfigDTO> getDatasetForMetricId(){
+  public Map<Long, DatasetConfigDTO> getDatasetForMetricId() {
     return datasetForMetricId;
   }
 

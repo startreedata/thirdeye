@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.detection.validators;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_APPLICATION;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_CRON;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_DETECTION_NAMES;
+
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;

@@ -25,14 +25,15 @@ import java.util.Map;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 
-
 /**
  * Base class for component specs
  */
 public abstract class AbstractSpec implements Serializable {
+
   static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
 
-  public static <T extends AbstractSpec> T fromProperties(Map<String, Object> properties, Class<T> specClass) {
+  public static <T extends AbstractSpec> T fromProperties(Map<String, Object> properties,
+      Class<T> specClass) {
     // don't reuse model mapper instance. It caches typeMaps and will result in unexpected mappings
     ModelMapper modelMapper = new ModelMapper();
     // use strict mapping to ensure no mismatches or ambiguity occurs

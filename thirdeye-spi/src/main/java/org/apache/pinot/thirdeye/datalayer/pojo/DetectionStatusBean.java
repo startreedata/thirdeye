@@ -22,13 +22,10 @@ package org.apache.pinot.thirdeye.datalayer.pojo;
 
 import java.util.Objects;
 
-import com.google.common.base.MoreObjects;
-
-
 /**
  * Bean to store the detection status
  */
-public class DetectionStatusBean extends AbstractBean implements Comparable<DetectionStatusBean>{
+public class DetectionStatusBean extends AbstractBean implements Comparable<DetectionStatusBean> {
 
   private long functionId;
   private String dataset;
@@ -85,12 +82,14 @@ public class DetectionStatusBean extends AbstractBean implements Comparable<Dete
     return Objects.equals(getId(), ds.getId()) && Objects.equals(dataset, ds.getDataset())
         && Objects.equals(dateToCheckInMS, ds.getDateToCheckInMS())
         && Objects.equals(dateToCheckInSDF, ds.getDateToCheckInSDF())
-        && Objects.equals(functionId, ds.getFunctionId()) && Objects.equals(detectionRun, ds.isDetectionRun());
+        && Objects.equals(functionId, ds.getFunctionId()) && Objects
+        .equals(detectionRun, ds.isDetectionRun());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), dataset, dateToCheckInMS, dateToCheckInSDF, functionId, detectionRun);
+    return Objects
+        .hash(getId(), dataset, dateToCheckInMS, dateToCheckInSDF, functionId, detectionRun);
   }
 
   @Override

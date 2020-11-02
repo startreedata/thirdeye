@@ -19,13 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.dataquality;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.quartz.Job;

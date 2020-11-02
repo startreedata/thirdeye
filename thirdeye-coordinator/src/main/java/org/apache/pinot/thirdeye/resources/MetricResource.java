@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;

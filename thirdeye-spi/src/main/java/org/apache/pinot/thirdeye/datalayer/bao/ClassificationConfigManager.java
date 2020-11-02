@@ -20,10 +20,11 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
 
 public interface ClassificationConfigManager extends AbstractManager<ClassificationConfigDTO> {
+
   List<ClassificationConfigDTO> findActives();
 
   ClassificationConfigDTO findByName(String name);

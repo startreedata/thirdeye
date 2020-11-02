@@ -33,8 +33,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
-
 public class ObjectSeries extends TypedSeries<ObjectSeries> {
+
   public static final String METHOD_DOUBLE = "doubleValue";
   public static final String METHOD_DOUBLE_FROM_FLOAT = "floatValue";
   public static final String METHOD_LONG = "longValue";
@@ -52,28 +52,34 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   public static final Object NULL = null;
 
   public static final class ObjectFirst implements ObjectFunction {
+
     @Override
     public Object apply(Object[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       return values[0];
     }
   }
 
   public static final class ObjectLast implements ObjectFunction {
+
     @Override
     public Object apply(Object[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       return values[values.length - 1];
     }
   }
 
   public static final class ObjectMin implements ObjectFunction {
+
     @Override
     public Object apply(Object[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       return Collections.min(Arrays.asList(values), new Comparator<Object>() {
         @Override
         public int compare(Object o1, Object o2) {
@@ -84,10 +90,12 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public static final class ObjectMax implements ObjectFunction {
+
     @Override
     public Object apply(Object[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return NULL;
+      }
       return Collections.max(Arrays.asList(values), new Comparator<Object>() {
         @Override
         public int compare(Object o1, Object o2) {
@@ -98,15 +106,18 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public static final class ObjectToString implements ObjectFunction {
+
     @Override
     public Object apply(Object[] values) {
-      if(values.length <= 0)
+      if (values.length <= 0) {
         return "[]";
+      }
       return "[" + StringUtils.join(values, ", ") + "]";
     }
   }
 
   public static final class Builder extends Series.Builder {
+
     final List<Object[]> arrays = new ArrayList<>();
 
     private Builder() {
@@ -124,8 +135,9 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
 
     @Override
     public Builder addSeries(Collection<Series> series) {
-      for(Series s : series)
+      for (Series s : series) {
         this.addValues(s.getObjects().values);
+      }
       return this;
     }
 
@@ -138,12 +150,13 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
     @Override
     public ObjectSeries build() {
       int totalSize = 0;
-      for(Object[] array : this.arrays)
+      for (Object[] array : this.arrays) {
         totalSize += array.length;
+      }
 
       int offset = 0;
       Object[] values = new Object[totalSize];
-      for(Object[] array : this.arrays) {
+      for (Object[] array : this.arrays) {
         System.arraycopy(array, 0, values, offset, array.length);
         offset += array.length;
       }
@@ -184,8 +197,9 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public Object value() {
-    if(this.size() != 1)
+    if (this.size() != 1) {
       throw new IllegalStateException("Series must contain exactly one element");
+    }
     return this.values[0];
   }
 
@@ -212,14 +226,18 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public static double getDouble(Object value) {
-    if(isNull(value))
+    if (isNull(value)) {
       return DoubleSeries.NULL;
-    if(value instanceof Boolean)
-      return BooleanSeries.getDouble(BooleanSeries.valueOf((Boolean)value));
-    if(value instanceof Number)
-      return DoubleSeries.getDouble(((Number)value).doubleValue());
-    if(value instanceof String)
+    }
+    if (value instanceof Boolean) {
+      return BooleanSeries.getDouble(BooleanSeries.valueOf((Boolean) value));
+    }
+    if (value instanceof Number) {
+      return DoubleSeries.getDouble(((Number) value).doubleValue());
+    }
+    if (value instanceof String) {
       return StringSeries.getDouble(value.toString());
+    }
 
     try {
       return (double) invokeMethod(value, METHOD_DOUBLE);
@@ -233,7 +251,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
       // ignore
     }
 
-    throw new IllegalArgumentException(String.format("Cannot convert object '%s' to double", value.toString()));
+    throw new IllegalArgumentException(
+        String.format("Cannot convert object '%s' to double", value.toString()));
   }
 
   @Override
@@ -242,14 +261,18 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public static long getLong(Object value) {
-    if(isNull(value))
+    if (isNull(value)) {
       return LongSeries.NULL;
-    if(value instanceof Boolean)
-      return BooleanSeries.getLong(BooleanSeries.valueOf((Boolean)value));
-    if(value instanceof Number)
-      return DoubleSeries.getLong(((Number)value).doubleValue());
-    if(value instanceof String)
+    }
+    if (value instanceof Boolean) {
+      return BooleanSeries.getLong(BooleanSeries.valueOf((Boolean) value));
+    }
+    if (value instanceof Number) {
+      return DoubleSeries.getLong(((Number) value).doubleValue());
+    }
+    if (value instanceof String) {
       return StringSeries.getLong(value.toString());
+    }
 
     try {
       return (long) invokeMethod(value, METHOD_LONG);
@@ -263,7 +286,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
       // ignore
     }
 
-    throw new IllegalArgumentException(String.format("Cannot convert object '%s' to long", value.toString()));
+    throw new IllegalArgumentException(
+        String.format("Cannot convert object '%s' to long", value.toString()));
   }
 
   @Override
@@ -272,14 +296,18 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public static byte getBoolean(Object value) {
-    if(isNull(value))
+    if (isNull(value)) {
       return BooleanSeries.NULL;
-    if(value instanceof Boolean)
-      return BooleanSeries.valueOf((Boolean)value);
-    if(value instanceof Number)
-      return DoubleSeries.getBoolean(((Number)value).doubleValue());
-    if(value instanceof String)
+    }
+    if (value instanceof Boolean) {
+      return BooleanSeries.valueOf((Boolean) value);
+    }
+    if (value instanceof Number) {
+      return DoubleSeries.getBoolean(((Number) value).doubleValue());
+    }
+    if (value instanceof String) {
       return StringSeries.getBoolean(value.toString());
+    }
     try {
       return BooleanSeries.valueOf((boolean) invokeMethod(value, METHOD_BOOLEAN));
     } catch (Exception e) {
@@ -293,8 +321,9 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public static String getString(Object value) {
-    if(isNull(value))
+    if (isNull(value)) {
       return StringSeries.NULL;
+    }
     return value.toString();
   }
 
@@ -327,7 +356,7 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
 
   @SuppressWarnings("unchecked")
   public <T> List<T> toListTyped() {
-    return (List<T>)Arrays.asList(this.values);
+    return (List<T>) Arrays.asList(this.values);
   }
 
   @Override
@@ -341,8 +370,9 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
 
   @Override
   public String toString(int index) {
-    if(this.isNull(index))
+    if (this.isNull(index)) {
       return TOSTRING_NULL;
+    }
     return String.valueOf(this.values[index]);
   }
 
@@ -350,8 +380,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append("ObjectSeries{");
-    for(Object o : this.values) {
-      if(isNull(o)) {
+    for (Object o : this.values) {
+      if (isNull(o)) {
         builder.append("null");
       } else {
         builder.append(o.toString());
@@ -408,8 +438,9 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public BooleanSeries eq(Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.eq(other.getObject(0));
+    }
     return map(new ObjectConditional() {
       @Override
       public boolean apply(Object... values) {
@@ -419,8 +450,9 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public BooleanSeries eq(final Object constant) {
-    if(isNull(constant))
+    if (isNull(constant)) {
       return BooleanSeries.nulls(this.size());
+    }
     return this.map(new ObjectConditional() {
       @Override
       public boolean apply(Object... values) {
@@ -431,14 +463,16 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
 
   @Override
   public ObjectSeries set(BooleanSeries mask, Series other) {
-    if(other.size() == 1)
+    if (other.size() == 1) {
       return this.set(mask, other.getObject(0));
-    assertSameLength(this, mask ,other);
+    }
+    assertSameLength(this, mask, other);
 
     Object[] values = Arrays.copyOf(this.values, this.values.length);
-    for(int i=0; i<this.values.length; i++) {
-      if(BooleanSeries.isTrue(mask.getBoolean(i)))
+    for (int i = 0; i < this.values.length; i++) {
+      if (BooleanSeries.isTrue(mask.getBoolean(i))) {
         values[i] = other.getObject(i);
+      }
     }
     return buildFrom(values);
   }
@@ -446,8 +480,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   public ObjectSeries set(BooleanSeries mask, Object value) {
     assertSameLength(this, mask);
     Object[] values = new Object[this.values.length];
-    for(int i=0; i<mask.size(); i++) {
-      if(BooleanSeries.isTrue(mask.getBoolean(i))) {
+    for (int i = 0; i < mask.size(); i++) {
+      if (BooleanSeries.isTrue(mask.getBoolean(i))) {
         values[i] = value;
       } else {
         values[i] = this.values[i];
@@ -458,9 +492,11 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
 
   public int count(Object value) {
     int count = 0;
-    for(Object v : this.values)
-      if(v == value)
+    for (Object v : this.values) {
+      if (v == value) {
         count++;
+      }
+    }
     return count;
   }
 
@@ -469,8 +505,9 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public ObjectSeries replace(Object find, Object by) {
-    if(isNull(find))
+    if (isNull(find)) {
       return this.fillNull(by);
+    }
     return this.set(this.eq(find), by);
   }
 
@@ -482,8 +519,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   @Override
   ObjectSeries project(int[] fromIndex) {
     Object[] values = new Object[fromIndex.length];
-    for(int i=0; i<fromIndex.length; i++) {
-      if(fromIndex[i] == -1) {
+    for (int i = 0; i < fromIndex.length; i++) {
+      if (fromIndex[i] == -1) {
         values[i] = NULL;
       } else {
         values[i] = this.values[fromIndex[i]];
@@ -501,8 +538,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
    */
   public ObjectSeries fillNull(Object value) {
     Object[] values = Arrays.copyOf(this.values, this.values.length);
-    for(int i=0; i<values.length; i++) {
-      if(isNull(values[i])) {
+    for (int i = 0; i < values.length; i++) {
+      if (isNull(values[i])) {
         values[i] = value;
       }
     }
@@ -510,45 +547,53 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public SeriesType inferType() {
-    if(this.isEmpty())
+    if (this.isEmpty()) {
       return SeriesType.OBJECT;
+    }
 
     boolean isBoolean = true;
     boolean isLong = true;
     boolean isDouble = true;
 
-    for(int i=0; i<this.size(); i++) {
+    for (int i = 0; i < this.size(); i++) {
       Object o = this.getObject(i);
-      if(o == null)
+      if (o == null) {
         continue;
+      }
 
-      if(!(o instanceof Number) && !(o instanceof String) && !(o instanceof Boolean))
+      if (!(o instanceof Number) && !(o instanceof String) && !(o instanceof Boolean)) {
         return Series.SeriesType.OBJECT;
+      }
 
-      if(o instanceof Boolean) {
+      if (o instanceof Boolean) {
         isDouble = false;
         isLong = false;
       }
 
-      if(o instanceof Number) {
+      if (o instanceof Number) {
         isBoolean = false;
-        isLong &= ((Number)o).longValue() == ((Number)o).doubleValue();
+        isLong &= ((Number) o).longValue() == ((Number) o).doubleValue();
       }
 
-      if(o instanceof String) {
+      if (o instanceof String) {
         String s = o.toString();
-        isBoolean &= (s.length() <= 0) || (s.compareToIgnoreCase("true") == 0 || s.compareToIgnoreCase("false") == 0);
-        isLong &= (s.length() <= 0) || (NumberUtils.isNumber(s) && !s.contains(".") && !s.contains("e"));
+        isBoolean &= (s.length() <= 0) || (s.compareToIgnoreCase("true") == 0
+            || s.compareToIgnoreCase("false") == 0);
+        isLong &=
+            (s.length() <= 0) || (NumberUtils.isNumber(s) && !s.contains(".") && !s.contains("e"));
         isDouble &= (s.length() <= 0) || NumberUtils.isNumber(s);
       }
     }
 
-    if(isBoolean)
+    if (isBoolean) {
       return Series.SeriesType.BOOLEAN;
-    if(isLong)
+    }
+    if (isLong) {
       return Series.SeriesType.LONG;
-    if(isDouble)
+    }
+    if (isDouble) {
       return Series.SeriesType.DOUBLE;
+    }
     return Series.SeriesType.STRING;
   }
 
@@ -592,12 +637,15 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   private static int nullSafeObjectComparator(Object a, Object b) {
-    if(isNull(a) && isNull(b))
+    if (isNull(a) && isNull(b)) {
       return 0;
-    if(isNull(a))
+    }
+    if (isNull(a)) {
       return -1;
-    if(isNull(b))
+    }
+    if (isNull(b)) {
       return 1;
+    }
     try {
       return (int) invokeMethod(a, METHOD_COMPARE, b);
     } catch (Exception e) {
@@ -606,12 +654,15 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   private static boolean nullSafeObjectEquals(Object a, Object b) {
-    if(isNull(a) && isNull(b))
+    if (isNull(a) && isNull(b)) {
       return true;
-    if(isNull(a))
+    }
+    if (isNull(a)) {
       return false;
-    if(isNull(b))
+    }
+    if (isNull(b)) {
       return false;
+    }
     return a.equals(b);
   }
 
@@ -629,11 +680,13 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   @Override
   public ObjectSeries shift(int offset) {
     Object[] values = new Object[this.values.length];
-    if(offset >= 0) {
+    if (offset >= 0) {
       Arrays.fill(values, 0, Math.min(offset, values.length), NULL);
-      System.arraycopy(this.values, 0, values, Math.min(offset, values.length), Math.max(values.length - offset, 0));
+      System.arraycopy(this.values, 0, values, Math.min(offset, values.length),
+          Math.max(values.length - offset, 0));
     } else {
-      System.arraycopy(this.values, Math.min(-offset, values.length), values, 0, Math.max(values.length + offset, 0));
+      System.arraycopy(this.values, Math.min(-offset, values.length), values, 0,
+          Math.max(values.length + offset, 0));
       Arrays.fill(values, Math.max(values.length + offset, 0), values.length, NULL);
     }
     return buildFrom(values);
@@ -666,6 +719,7 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   static final class ObjectSortTuple {
+
     final Object value;
     final int index;
 
@@ -679,22 +733,26 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
    * @see DataFrame#map(Function, Series...)
    */
   public static ObjectSeries map(ObjectFunction function, Series... series) {
-    if(series.length <= 0)
+    if (series.length <= 0) {
       return empty();
+    }
 
     assertSameLength(series);
 
     // Note: code-specialization to help hot-spot vm
-    if(series.length == 1)
+    if (series.length == 1) {
       return mapUnrolled(function, series[0]);
-    if(series.length == 2)
+    }
+    if (series.length == 2) {
       return mapUnrolled(function, series[0], series[1]);
-    if(series.length == 3)
+    }
+    if (series.length == 3) {
       return mapUnrolled(function, series[0], series[1], series[2]);
+    }
 
     Object[] input = new Object[series.length];
     Object[] output = new Object[series[0].size()];
-    for(int i=0; i<series[0].size(); i++) {
+    for (int i = 0; i < series[0].size(); i++) {
       output[i] = mapRow(function, series, input, i);
     }
 
@@ -702,10 +760,11 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   private static Object mapRow(ObjectFunction function, Series[] series, Object[] input, int row) {
-    for(int j=0; j<series.length; j++) {
+    for (int j = 0; j < series.length; j++) {
       Object value = series[j].getObject(row);
-      if(isNull(value))
+      if (isNull(value)) {
         return NULL;
+      }
       input[j] = value;
     }
     return function.apply(input);
@@ -713,8 +772,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
 
   private static ObjectSeries mapUnrolled(ObjectFunction function, Series a) {
     Object[] output = new Object[a.size()];
-    for(int i=0; i<a.size(); i++) {
-      if(a.isNull(i)) {
+    for (int i = 0; i < a.size(); i++) {
+      if (a.isNull(i)) {
         output[i] = NULL;
       } else {
         output[i] = function.apply(a.getObject(i));
@@ -725,8 +784,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
 
   private static ObjectSeries mapUnrolled(ObjectFunction function, Series a, Series b) {
     Object[] output = new Object[a.size()];
-    for(int i=0; i<a.size(); i++) {
-      if(a.isNull(i) || b.isNull(i)) {
+    for (int i = 0; i < a.size(); i++) {
+      if (a.isNull(i) || b.isNull(i)) {
         output[i] = NULL;
       } else {
         output[i] = function.apply(a.getObject(i), b.getObject(i));
@@ -737,8 +796,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
 
   private static ObjectSeries mapUnrolled(ObjectFunction function, Series a, Series b, Series c) {
     Object[] output = new Object[a.size()];
-    for(int i=0; i<a.size(); i++) {
-      if(a.isNull(i) || b.isNull(i) || c.isNull(i)) {
+    for (int i = 0; i < a.size(); i++) {
+      if (a.isNull(i) || b.isNull(i) || c.isNull(i)) {
         output[i] = NULL;
       } else {
         output[i] = function.apply(a.getObject(i), b.getObject(i), c.getObject(i));
@@ -751,14 +810,15 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
    * @see DataFrame#map(Function, Series...)
    */
   public static BooleanSeries map(ObjectConditional function, Series... series) {
-    if(series.length <= 0)
+    if (series.length <= 0) {
       return BooleanSeries.empty();
+    }
 
     assertSameLength(series);
 
     Object[] input = new Object[series.length];
     byte[] output = new byte[series[0].size()];
-    for(int i=0; i<series[0].size(); i++) {
+    for (int i = 0; i < series[0].size(); i++) {
       output[i] = mapRow(function, series, input, i);
     }
 
@@ -766,10 +826,11 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   private static byte mapRow(ObjectConditional function, Series[] series, Object[] input, int row) {
-    for(int j=0; j<series.length; j++) {
+    for (int j = 0; j < series.length; j++) {
       Object value = series[j].getObject(row);
-      if(isNull(value))
+      if (isNull(value)) {
         return BooleanSeries.NULL;
+      }
       input[j] = value;
     }
     return BooleanSeries.valueOf(function.apply(input));
@@ -786,7 +847,8 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
    * @see Series#aggregate(Function)
    */
   public static BooleanSeries aggregate(ObjectConditional function, Series series) {
-    return BooleanSeries.builder().addBooleanValues(function.apply(series.dropNull().getObjects().values)).build();
+    return BooleanSeries.builder()
+        .addBooleanValues(function.apply(series.dropNull().getObjects().values)).build();
   }
 
   /**
@@ -805,22 +867,25 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   public static ObjectSeries map(String objectExpression, Series... series) {
-    if(series.length <= 0)
+    if (series.length <= 0) {
       return empty();
-    if(series.length > 1)
+    }
+    if (series.length > 1) {
       throw new IllegalArgumentException("Must provide at most 1 series");
+    }
 
     DataFrame.assertSameLength(series);
 
     // TODO support escaping of "."
     List<String> expressions = Arrays.asList(objectExpression.split("\\."));
-    if(expressions.isEmpty())
+    if (expressions.isEmpty()) {
       return ObjectSeries.nulls(series[0].size());
+    }
 
     try {
       Object[] out = new Object[series[0].size()];
-      for(int i=0; i<series[0].size(); i++) {
-        if(series[0].isNull(i)) {
+      for (int i = 0; i < series[0].size(); i++) {
+        if (series[0].isNull(i)) {
           out[i] = NULL;
         } else {
           out[i] = mapExpression(expressions, series[0].getObject(i));
@@ -834,20 +899,21 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
   }
 
   private static Object mapExpression(List<String> expressions, Object value) throws Exception {
-    if(expressions.isEmpty())
+    if (expressions.isEmpty()) {
       return value;
+    }
 
     String head = expressions.get(0);
     List<String> tail = expressions.subList(1, expressions.size());
 
-    if(head.equals("this"))
+    if (head.equals("this")) {
       return mapExpression(tail, value);
+    }
 
-    if(head.endsWith("()")) {
+    if (head.endsWith("()")) {
       head = head.substring(0, head.length() - 2);
       // method call
       return mapExpression(tail, invokeMethod(value, head));
-
     } else {
       // field access
       return mapExpression(tail, FieldUtils.readField(value, head, true));

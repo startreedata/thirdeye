@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.anomaly.detection.trigger;
 
+import static org.apache.pinot.thirdeye.detection.TaskUtils.createDataQualityTask;
+import static org.apache.pinot.thirdeye.detection.TaskUtils.createDetectionTask;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -34,11 +37,11 @@ import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskInfoFactory;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -50,8 +53,6 @@ import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.detection.TaskUtils.*;
 
 
 /**

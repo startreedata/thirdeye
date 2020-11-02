@@ -20,7 +20,6 @@
 
 package org.apache.pinot.thirdeye.datalayer.dto;
 
-
 import org.apache.pinot.thirdeye.datalayer.pojo.JobBean;
 
 /**
@@ -28,6 +27,5 @@ import org.apache.pinot.thirdeye.datalayer.pojo.JobBean;
  * anomaly function spec An anomaly job consists of 1 or more anomaly tasks
  */
 public class JobDTO extends JobBean {
-
 
 }

@@ -19,11 +19,10 @@
 
 package org.apache.pinot.thirdeye.alert.fetcher;
 
+import java.util.Collection;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyFetcherConfig;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import java.util.Collection;
-import java.util.Properties;
 import org.joda.time.DateTime;
 
 

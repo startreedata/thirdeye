@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datasource.sql;
 
+import static org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeDataFrameResultSet.fromSQLResultSet;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheLoader;
 import java.io.File;
@@ -47,7 +49,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeDataFrameResultSet.*;
 
 /**
  * This class is a CacheLoader which issue queries to Presto or MySQL

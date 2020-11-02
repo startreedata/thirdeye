@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.rootcause;
 
-import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

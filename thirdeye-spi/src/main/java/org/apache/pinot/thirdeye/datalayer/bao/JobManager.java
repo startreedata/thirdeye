@@ -20,12 +20,10 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import java.util.List;
-
 import org.apache.pinot.thirdeye.Constants.JobStatus;
+import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
-
 
 public interface JobManager extends AbstractManager<JobDTO> {
 
@@ -41,5 +39,6 @@ public interface JobManager extends AbstractManager<JobDTO> {
 
   String getJobNameByJobId(long id);
 
-  List<JobDTO> findRecentScheduledJobByTypeAndConfigId(TaskConstants.TaskType taskType, long configId, long minScheduledTime);
+  List<JobDTO> findRecentScheduledJobByTypeAndConfigId(TaskConstants.TaskType taskType,
+      long configId, long minScheduledTime);
 }

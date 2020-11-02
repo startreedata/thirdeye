@@ -20,6 +20,12 @@
 
 package org.apache.pinot.thirdeye.formatter;
 
+import static org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator.PROP_DATASET;
+import static org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator.PROP_METRIC;
+import static org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator.PROP_RULES;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_DIMENSION_EXPLORATION;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_FILTERS;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,8 +45,8 @@ import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -49,9 +55,6 @@ import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.yaml.snakeyaml.Yaml;
-
-import static org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator.*;
-import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.*;
 
 
 /**

@@ -19,14 +19,12 @@
 
 package org.apache.pinot.thirdeye.anomaly.utils;
 
-import org.apache.pinot.thirdeye.anomalydetection.performanceEvaluation.PerformanceEvaluationMethod;
 import java.io.IOException;
-
 import org.apache.http.HttpHost;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.pinot.thirdeye.anomalydetection.performanceEvaluation.PerformanceEvaluationMethod;
 
 
 /**

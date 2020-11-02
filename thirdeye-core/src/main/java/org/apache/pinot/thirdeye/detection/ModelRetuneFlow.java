@@ -22,6 +22,8 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil.detectionRetuneCounter;
+
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,8 +40,6 @@ import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil.*;
 
 
 /**

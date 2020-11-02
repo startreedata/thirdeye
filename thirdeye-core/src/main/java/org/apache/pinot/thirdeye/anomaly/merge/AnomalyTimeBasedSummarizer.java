@@ -19,19 +19,18 @@
 
 package org.apache.pinot.thirdeye.anomaly.merge;
 
-import java.util.HashSet;
-import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 
 

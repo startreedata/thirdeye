@@ -20,8 +20,8 @@
 package org.apache.pinot.thirdeye.datasource.pinot;
 
 import com.google.common.cache.CacheLoader;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 
 public abstract class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
   /**

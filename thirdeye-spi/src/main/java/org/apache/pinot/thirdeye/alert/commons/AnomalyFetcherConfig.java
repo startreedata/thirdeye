@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.alert.commons;
 
 public class AnomalyFetcherConfig {
+
   private String type;
   private AnomalySource anomalySourceType;
   private String anomalySource;

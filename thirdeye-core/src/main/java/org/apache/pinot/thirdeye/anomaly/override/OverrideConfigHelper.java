@@ -19,10 +19,6 @@
 
 package org.apache.pinot.thirdeye.anomaly.override;
 
-import org.apache.pinot.pql.parsers.utils.Pair;
-import org.apache.pinot.thirdeye.datalayer.bao.OverrideConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
-import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +27,10 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.pql.parsers.utils.Pair;
+import org.apache.pinot.thirdeye.datalayer.bao.OverrideConfigManager;
+import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
+import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

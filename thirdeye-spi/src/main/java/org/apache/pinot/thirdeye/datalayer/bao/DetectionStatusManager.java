@@ -20,16 +20,14 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-
 import java.util.List;
-
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
 
-public interface DetectionStatusManager extends AbstractManager<DetectionStatusDTO>{
+public interface DetectionStatusManager extends AbstractManager<DetectionStatusDTO> {
 
   DetectionStatusDTO findLatestEntryForFunctionId(long functionId);
 
-  List<DetectionStatusDTO> findAllInTimeRangeForFunctionAndDetectionRun(long startTime, long endTime, long functionId,
+  List<DetectionStatusDTO> findAllInTimeRangeForFunctionAndDetectionRun(long startTime,
+      long endTime, long functionId,
       boolean detectionRun);
-
 }

@@ -3,7 +3,6 @@ package org.apache.pinot.thirdeye.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
 
 @JsonInclude(Include.NON_NULL)
 public class AlertComponentApi {

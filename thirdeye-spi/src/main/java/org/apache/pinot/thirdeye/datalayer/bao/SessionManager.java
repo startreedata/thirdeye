@@ -22,9 +22,7 @@ package org.apache.pinot.thirdeye.datalayer.bao;
 
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 
-
 public interface SessionManager extends AbstractManager<SessionDTO> {
 
   SessionDTO findBySessionKey(String sessionKey);
-
 }

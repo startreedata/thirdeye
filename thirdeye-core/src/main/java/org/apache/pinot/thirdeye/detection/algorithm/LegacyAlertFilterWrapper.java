@@ -21,6 +21,13 @@ package org.apache.pinot.thirdeye.detection.algorithm;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -29,13 +36,6 @@ import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detector.email.filter.BaseAlertFilter;
 import org.apache.pinot.thirdeye.detector.email.filter.DummyAlertFilter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nullable;
-import org.apache.commons.collections4.MapUtils;
 
 
 /**

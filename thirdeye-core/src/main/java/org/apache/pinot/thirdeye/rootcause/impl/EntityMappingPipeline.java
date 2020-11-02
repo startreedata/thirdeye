@@ -19,15 +19,6 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
-import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
-import org.apache.pinot.thirdeye.rootcause.Pipeline;
-import org.apache.pinot.thirdeye.rootcause.PipelineContext;
-import org.apache.pinot.thirdeye.rootcause.PipelineResult;
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
+import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
+import org.apache.pinot.thirdeye.rootcause.Pipeline;
+import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineResult;
+import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

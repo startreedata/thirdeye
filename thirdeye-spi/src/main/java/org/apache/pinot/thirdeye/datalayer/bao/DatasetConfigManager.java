@@ -20,9 +20,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 
 public interface DatasetConfigManager extends AbstractManager<DatasetConfigDTO> {
 
@@ -31,5 +30,4 @@ public interface DatasetConfigManager extends AbstractManager<DatasetConfigDTO> 
   List<DatasetConfigDTO> findActive();
 
   void updateLastRefreshTime(String dataset, long lastRefreshTime, long lastEventTime);
-
 }

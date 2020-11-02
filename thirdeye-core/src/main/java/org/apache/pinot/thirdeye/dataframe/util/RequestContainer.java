@@ -19,9 +19,9 @@
 
 package org.apache.pinot.thirdeye.dataframe.util;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
-import java.util.List;
 
 
 /**

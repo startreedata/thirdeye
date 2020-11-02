@@ -19,12 +19,12 @@
 
 package org.apache.pinot.thirdeye.anomalydetection.performanceEvaluation;
 
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.util.IntervalUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.util.IntervalUtils;
 import org.joda.time.Interval;
 
 

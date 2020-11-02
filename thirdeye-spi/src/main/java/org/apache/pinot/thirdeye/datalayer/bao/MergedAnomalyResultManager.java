@@ -20,36 +20,40 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import java.util.Set;
-import org.apache.pinot.thirdeye.datalayer.pojo.MergedAnomalyResultBean;
 import java.util.List;
-
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.Map;
-
+import java.util.Set;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.pojo.MergedAnomalyResultBean;
 
 public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomalyResultDTO> {
 
   MergedAnomalyResultDTO findById(Long id);
 
-  List<MergedAnomalyResultDTO> findOverlappingByFunctionId(long functionId, long conflictWindowStart,
+  List<MergedAnomalyResultDTO> findOverlappingByFunctionId(long functionId,
+      long conflictWindowStart,
       long conflictWindowEnd);
 
-  List<MergedAnomalyResultDTO> findOverlappingByFunctionIdDimensions(long functionId, long conflictWindowStart, long conflictWindowEnd, String dimensions);
+  List<MergedAnomalyResultDTO> findOverlappingByFunctionIdDimensions(long functionId,
+      long conflictWindowStart, long conflictWindowEnd, String dimensions);
 
-  List<MergedAnomalyResultDTO> findByCollectionMetricDimensionsTime(String collection, String metric, String dimensions,
+  List<MergedAnomalyResultDTO> findByCollectionMetricDimensionsTime(String collection,
+      String metric, String dimensions,
       long startTime, long endTime);
 
-  List<MergedAnomalyResultDTO> findByCollectionMetricTime(String collection, String metric, long startTime,
+  List<MergedAnomalyResultDTO> findByCollectionMetricTime(String collection, String metric,
+      long startTime,
       long endTime);
 
   List<MergedAnomalyResultDTO> findByMetricTime(String metric, long startTime, long endTime);
 
-  List<MergedAnomalyResultDTO> findByDetectionConfigAndIdGreaterThan(Long detectionConfigId, Long anomalyId);
+  List<MergedAnomalyResultDTO> findByDetectionConfigAndIdGreaterThan(Long detectionConfigId,
+      Long anomalyId);
 
   // TODO : add findByMetricId - currently we are not updating metricId in table.
 
-  List<MergedAnomalyResultDTO> findByCollectionTime(String collection, long startTime, long endTime);
+  List<MergedAnomalyResultDTO> findByCollectionTime(String collection, long startTime,
+      long endTime);
 
   MergedAnomalyResultDTO findLatestOverlapByFunctionIdDimensions(Long functionId, String dimensions,
       long conflictWindowStart, long conflictWindowEnd);
@@ -58,24 +62,31 @@ public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomal
 
   List<MergedAnomalyResultDTO> findByFunctionIdAndIdGreaterThan(Long functionId, Long anomalyId);
 
-  List<MergedAnomalyResultDTO> findByStartTimeInRangeAndFunctionId(long startTime, long endTime, long functionId);
+  List<MergedAnomalyResultDTO> findByStartTimeInRangeAndFunctionId(long startTime, long endTime,
+      long functionId);
 
-  List<MergedAnomalyResultDTO> findByStartEndTimeInRangeAndDetectionConfigId(long startTime, long endTime, long detectionConfigId);
+  List<MergedAnomalyResultDTO> findByStartEndTimeInRangeAndDetectionConfigId(long startTime,
+      long endTime, long detectionConfigId);
 
-  List<MergedAnomalyResultDTO> findByCreatedTimeInRangeAndDetectionConfigId(long startTime, long endTime, long detectionConfigId);
+  List<MergedAnomalyResultDTO> findByCreatedTimeInRangeAndDetectionConfigId(long startTime,
+      long endTime, long detectionConfigId);
 
-  List<MergedAnomalyResultDTO> findAnomaliesWithinBoundary(long startTime, long endTime, long detectionConfigId);
+  List<MergedAnomalyResultDTO> findAnomaliesWithinBoundary(long startTime, long endTime,
+      long detectionConfigId);
 
   List<MergedAnomalyResultDTO> findByTime(long startTime, long endTime);
 
-  List<MergedAnomalyResultDTO> findUnNotifiedByFunctionIdAndIdLesserThanAndEndTimeGreaterThanLastOneDay(long functionId,
+  List<MergedAnomalyResultDTO> findUnNotifiedByFunctionIdAndIdLesserThanAndEndTimeGreaterThanLastOneDay(
+      long functionId,
       long anomalyId);
 
   List<MergedAnomalyResultDTO> findNotifiedByTime(long startTime, long endTime);
 
-  Map<Long, List<MergedAnomalyResultDTO>> findAnomaliesByMetricIdsAndTimeRange(List<Long> metricIds, long start, long end);
+  Map<Long, List<MergedAnomalyResultDTO>> findAnomaliesByMetricIdsAndTimeRange(List<Long> metricIds,
+      long start, long end);
 
-  List<MergedAnomalyResultDTO> findAnomaliesByMetricIdAndTimeRange(Long metricId, long start, long end);
+  List<MergedAnomalyResultDTO> findAnomaliesByMetricIdAndTimeRange(Long metricId, long start,
+      long end);
 
   MergedAnomalyResultDTO findParent(MergedAnomalyResultDTO entity);
 
@@ -83,7 +94,9 @@ public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomal
 
   MergedAnomalyResultBean convertMergeAnomalyDTO2Bean(MergedAnomalyResultDTO entity);
 
-  MergedAnomalyResultDTO convertMergedAnomalyBean2DTO(MergedAnomalyResultBean mergedAnomalyResultBean, Set<Long> visitedAnomalyIds);
+  MergedAnomalyResultDTO convertMergedAnomalyBean2DTO(
+      MergedAnomalyResultBean mergedAnomalyResultBean, Set<Long> visitedAnomalyIds);
 
-  List<MergedAnomalyResultDTO> convertMergedAnomalyBean2DTO(List<MergedAnomalyResultBean> mergedAnomalyResultBeanList);
+  List<MergedAnomalyResultDTO> convertMergedAnomalyBean2DTO(
+      List<MergedAnomalyResultBean> mergedAnomalyResultBeanList);
 }

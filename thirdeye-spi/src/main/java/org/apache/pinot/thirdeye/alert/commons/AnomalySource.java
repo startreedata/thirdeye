@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.alert.commons;
 
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
-
 public enum AnomalySource {
   DATASET {
     @Override
@@ -42,7 +41,7 @@ public enum AnomalySource {
     }
   };
 
-  AnomalySource(){
+  AnomalySource() {
 
   }
 

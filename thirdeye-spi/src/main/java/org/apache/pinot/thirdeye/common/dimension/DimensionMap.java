@@ -41,20 +41,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Stores key-value pairs of dimension name and value. The paris are sorted by their dimension names in ascending order.
+ * Stores key-value pairs of dimension name and value. The paris are sorted by their dimension names
+ * in ascending order.
  *
- * To reduces the length of string to be stored in database, this class implements SortedMap<String, String> for
- * converting to/from Json string in Map format, i.e., instead of storing {"sortedDimensionMap":{"country":"US",
+ * To reduces the length of string to be stored in database, this class implements SortedMap<String,
+ * String> for
+ * converting to/from Json string in Map format, i.e., instead of storing
+ * {"sortedDimensionMap":{"country":"US",
  * "page_name":"front_page"}}, we only need to store {"country":"US","page_name":"front_page"}.
  */
 @Deprecated
-public class DimensionMap implements SortedMap<String, String>, Comparable<DimensionMap>, Serializable {
+public class DimensionMap implements SortedMap<String, String>, Comparable<DimensionMap>,
+    Serializable {
+
   private static final Logger LOG = LoggerFactory.getLogger(DimensionMap.class);
   private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   // Dimension name to dimension value pairs, which are sorted by dimension names
   private SortedMap<String, String> sortedDimensionMap = new TreeMap<>();
-
 
   /**
    * Constructs an empty dimension map.
@@ -63,7 +67,8 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
   }
 
   /**
-   * Constructs a dimension map from a json string; if the given string is not in Json format, then this method falls
+   * Constructs a dimension map from a json string; if the given string is not in Json format, then
+   * this method falls
    * back to parse Java's map string format, which is {key1=value1,key2=value2}.
    *
    * @param value the json string that represents this dimension map.
@@ -93,14 +98,18 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
   /**
    * Returns a dimension map according to the given dimension key.
    *
-   * Assume that the given dimension key is [US,front_page,*,*,...] and the schema dimension names are
-   * [country,page_name,...], then this method return this dimension map: {country=US; page_name=front_page;}
+   * Assume that the given dimension key is [US,front_page,*,*,...] and the schema dimension names
+   * are
+   * [country,page_name,...], then this method return this dimension map: {country=US;
+   * page_name=front_page;}
    *
    * @param dimensionKey the dimension key to be used to covert to explored dimensions
    * @param schemaDimensionNames the schema dimension names
-   * @return the key-value pair of dimension value and dimension name according to the given dimension key.
+   * @return the key-value pair of dimension value and dimension name according to the given
+   *     dimension key.
    */
-  public static DimensionMap fromDimensionKey(DimensionKey dimensionKey, List<String> schemaDimensionNames) {
+  public static DimensionMap fromDimensionKey(DimensionKey dimensionKey,
+      List<String> schemaDimensionNames) {
     DimensionMap dimensionMap = new DimensionMap();
     if (schemaDimensionNames != null && !schemaDimensionNames.isEmpty()) {
       String[] dimensionValues = dimensionKey.getDimensionValues();
@@ -122,7 +131,8 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
     }
 
     for (Entry<String, String> filter : that.entrySet()) {
-      if (this.get(filter.getKey()) == null || !filter.getValue().equalsIgnoreCase(this.get(filter.getKey()))) {
+      if (this.get(filter.getKey()) == null || !filter.getValue()
+          .equalsIgnoreCase(this.get(filter.getKey()))) {
         return false;
       }
     }
@@ -131,7 +141,8 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
   }
 
   /**
-   * Returns if this dimension map equals or is a child of the given dimension map, i.e., the given dimension map is
+   * Returns if this dimension map equals or is a child of the given dimension map, i.e., the given
+   * dimension map is
    * a subset of this dimension map.
    *
    * @param that the given dimension map.
@@ -158,7 +169,9 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
   }
 
   /**
-   * Returns Java's string representation for Map class, which is in the form of {key1=value1,key2=value2}.
+   * Returns Java's string representation for Map class, which is in the form of
+   * {key1=value1,key2=value2}.
+   *
    * @return Java's string representation for Map class.
    */
   public String toJavaString() {
@@ -166,24 +179,29 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
   }
 
   /**
-   * Returns Json string representation for Map class, which is in the form of {"key1":"value1","key2"="value2"}.
+   * Returns Json string representation for Map class, which is in the form of
+   * {"key1":"value1","key2"="value2"}.
+   *
    * @return Json string representation for Map class.
-   * @throws JsonProcessingException
    */
   public String toJson() throws JsonProcessingException {
     return OBJECT_MAPPER.writeValueAsString(this);
   }
 
   /**
-   * Returns a JSON string representation of this dimension map for {@link org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao}
+   * Returns a JSON string representation of this dimension map for {@link
+   * org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao}
    * to persistent the map to backend database.
    *
-   * It returns the generic string representation of this dimension map if any exception occurs when generating the JSON
-   * string. In that case, the constructor {@link DimensionMap(String)} will be invoked during the construction of that
+   * It returns the generic string representation of this dimension map if any exception occurs when
+   * generating the JSON
+   * string. In that case, the constructor {@link DimensionMap(String)} will be invoked during the
+   * construction of that
    * dimension map.
    *
-   * @return a JSON string representation of this dimension map for {@link org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao}
-   * to persistent the map to backend database.
+   * @return a JSON string representation of this dimension map for {@link
+   *     org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao}
+   *     to persistent the map to backend database.
    */
   @Override
   public String toString() {
@@ -342,5 +360,4 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
   public Set<Entry<String, String>> entrySet() {
     return sortedDimensionMap.entrySet();
   }
-
 }

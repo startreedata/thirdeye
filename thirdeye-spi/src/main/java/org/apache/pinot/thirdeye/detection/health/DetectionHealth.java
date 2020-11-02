@@ -41,16 +41,15 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.EvaluationBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.MergedAnomalyResultBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.TaskBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.joda.time.Interval;
-
 
 /**
  * The detection health metric and status
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DetectionHealth {
+
   // overall health for a detection config
   @JsonProperty
   private HealthStatus overallHealth;
@@ -87,6 +86,7 @@ public class DetectionHealth {
    * Builder for the detection health
    */
   public static class Builder {
+
     private final long startTime;
     private final long endTime;
     private final long detectionConfigId;
@@ -116,6 +116,7 @@ public class DetectionHealth {
 
     /**
      * Add the regression health status in the health report built by the builder
+     *
      * @param evaluationDAO the evaluation dao
      * @return the builder
      */
@@ -126,6 +127,7 @@ public class DetectionHealth {
 
     /**
      * Add the anomaly coverage health status in the health report built by the builder
+     *
      * @param anomalyDAO the anomaly dao
      * @return the builder
      */
@@ -136,8 +138,10 @@ public class DetectionHealth {
 
     /**
      * Add the detection task health status in the health report built by the builder
+     *
      * @param taskDAO the task dao
-     * @param limit the maximum number of tasks returned in the health report (ordered by task start time, latest task first)
+     * @param limit the maximum number of tasks returned in the health report (ordered by task
+     *     start time, latest task first)
      * @return the builder
      */
     public Builder addDetectionTaskStatus(TaskManager taskDAO, long limit) {
@@ -147,7 +151,9 @@ public class DetectionHealth {
     }
 
     /**
-     * Add the detection task health status in the health report built by the builder. Do not return any task details
+     * Add the detection task health status in the health report built by the builder. Do not return
+     * any task details
+     *
      * @param taskDAO the task dao
      * @return the builder
      */
@@ -158,8 +164,11 @@ public class DetectionHealth {
     }
 
     /**
-     * Add the global health status in the report built by the builder, consider both regression health, coverage ratio and task health.
-     * The overall health can be generated only if regression health, coverage ratio and task health are available.
+     * Add the global health status in the report built by the builder, consider both regression
+     * health, coverage ratio and task health.
+     * The overall health can be generated only if regression health, coverage ratio and task health
+     * are available.
+     *
      * @return the builder
      */
     public Builder addOverallHealth() {
@@ -168,7 +177,9 @@ public class DetectionHealth {
     }
 
     /**
-     * Add the original detection health. This is needed since we need to keep the last task success time.
+     * Add the original detection health. This is needed since we need to keep the last task success
+     * time.
+     *
      * @return the builder
      */
     public Builder addOriginalDetectionHealth(DetectionHealth lastDetectionHealth) {
@@ -178,6 +189,7 @@ public class DetectionHealth {
 
     /**
      * Build the health status object
+     *
      * @return the health status object
      */
     public DetectionHealth build() {
@@ -200,7 +212,8 @@ public class DetectionHealth {
     private RegressionStatus buildRegressionStatus() {
       // fetch evaluations
       List<EvaluationDTO> evaluations = this.evaluationDAO.findByPredicate(
-          Predicate.AND(Predicate.LT(COL_NAME_START_TIME, endTime), Predicate.GT(COL_NAME_END_TIME, startTime),
+          Predicate.AND(Predicate.LT(COL_NAME_START_TIME, endTime),
+              Predicate.GT(COL_NAME_END_TIME, startTime),
               Predicate.EQ(COL_NAME_DETECTION_CONFIG_ID, detectionConfigId)));
 
       // calculate average mapes for each detector
@@ -219,7 +232,8 @@ public class DetectionHealth {
           Predicate.AND(Predicate.LT(COL_NAME_START_TIME, this.endTime),
               Predicate.GT(COL_NAME_END_TIME, this.startTime),
               Predicate.EQ(COL_NAME_DETECTION_CONFIG_ID, detectionConfigId)));
-      anomalies = anomalies.stream().filter(anomaly -> !anomaly.isChild()).collect(Collectors.toList());
+      anomalies = anomalies.stream().filter(anomaly -> !anomaly.isChild())
+          .collect(Collectors.toList());
 
       // the anomalies can come from different sub-dimensions, merge the anomaly range if possible
       List<Interval> intervals = new ArrayList<>();
@@ -241,7 +255,8 @@ public class DetectionHealth {
 
       // compute coverage
       long totalAnomalyCoverage =
-          intervals.stream().map(interval -> interval.getEndMillis() - interval.getStartMillis()).reduce(0L, Long::sum);
+          intervals.stream().map(interval -> interval.getEndMillis() - interval.getStartMillis())
+              .reduce(0L, Long::sum);
       double coverageRatio = (double) totalAnomalyCoverage / (this.endTime - this.startTime);
       return AnomalyCoverageStatus.fromCoverageRatio(coverageRatio);
     }
@@ -250,14 +265,18 @@ public class DetectionHealth {
       // fetch tasks
       List<TaskDTO> tasks = this.taskDAO.findByPredicate(
           Predicate.AND(Predicate.EQ(COL_NAME_TASK_NAME, "DETECTION_" + this.detectionConfigId),
-              Predicate.LT(COL_NAME_START_TIME, endTime), Predicate.GT(COL_NAME_END_TIME, startTime),
+              Predicate.LT(COL_NAME_START_TIME, endTime),
+              Predicate.GT(COL_NAME_END_TIME, startTime),
               Predicate.EQ(COL_NAME_TASK_TYPE, TaskConstants.TaskType.DETECTION.toString()),
-              Predicate.IN(COL_NAME_TASK_STATUS, new String[]{TaskConstants.TaskStatus.COMPLETED.toString(),
-                  TaskConstants.TaskStatus.FAILED.toString(), TaskConstants.TaskStatus.TIMEOUT.toString(),
-                  TaskConstants.TaskStatus.WAITING.toString()})));
+              Predicate.IN(COL_NAME_TASK_STATUS,
+                  new String[]{TaskConstants.TaskStatus.COMPLETED.toString(),
+                      TaskConstants.TaskStatus.FAILED.toString(),
+                      TaskConstants.TaskStatus.TIMEOUT.toString(),
+                      TaskConstants.TaskStatus.WAITING.toString()})));
       long lastTaskExecutionTime = -1L;
       if (lastDetectionHealth != null && lastDetectionHealth.getDetectionTaskStatus() != null) {
-        lastTaskExecutionTime = lastDetectionHealth.getDetectionTaskStatus().getLastTaskExecutionTime();
+        lastTaskExecutionTime = lastDetectionHealth.getDetectionTaskStatus()
+            .getLastTaskExecutionTime();
       }
       return DetectionTaskStatus.fromTasks(tasks, lastTaskExecutionTime, this.taskLimit);
     }
@@ -272,7 +291,8 @@ public class DetectionHealth {
       Preconditions.checkNotNull(coverageHealth);
 
       // if task fail ratio is high or both regression and coverage are bad, we say the overall status is bad
-      if (taskHealth.equals(HealthStatus.BAD) || (regressionHealth.equals(HealthStatus.BAD) && coverageHealth.equals(
+      if (taskHealth.equals(HealthStatus.BAD) || (regressionHealth.equals(HealthStatus.BAD)
+          && coverageHealth.equals(
           HealthStatus.BAD))) {
         return HealthStatus.BAD;
       }
@@ -287,6 +307,7 @@ public class DetectionHealth {
 
   /**
    * Create a unknown detection health
+   *
    * @return the unknown detection health
    */
   public static DetectionHealth unknown() {

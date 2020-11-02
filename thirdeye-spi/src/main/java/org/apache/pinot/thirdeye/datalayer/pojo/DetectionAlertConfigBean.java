@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-
 /**
  * ConfigBean holds namespaced key-value configuration values.  Values are serialized into the
  * database using the default object mapper.  ConfigBean serves as a light-weight
@@ -35,6 +34,7 @@ import java.util.Objects;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DetectionAlertConfigBean extends AbstractBean {
+
   boolean active;
   String name;
   String from;
@@ -166,17 +166,22 @@ public class DetectionAlertConfigBean extends AbstractBean {
       return false;
     }
     DetectionAlertConfigBean that = (DetectionAlertConfigBean) o;
-    return active == that.active && Objects.equals(name, that.name) && Objects.equals(from, that.from)
-        && Objects.equals(cronExpression, that.cronExpression) && Objects.equals(application, that.application)
+    return active == that.active && Objects.equals(name, that.name) && Objects
+        .equals(from, that.from)
+        && Objects.equals(cronExpression, that.cronExpression) && Objects
+        .equals(application, that.application)
         && subjectType == that.subjectType && Objects.equals(vectorClocks, that.vectorClocks)
-        && Objects.equals(properties, that.properties) && Objects.equals(alertSchemes, that.alertSchemes)
-        && Objects.equals(alertSuppressors, that.alertSuppressors) && Objects.equals(refLinks, that.refLinks)
+        && Objects.equals(properties, that.properties) && Objects
+        .equals(alertSchemes, that.alertSchemes)
+        && Objects.equals(alertSuppressors, that.alertSuppressors) && Objects
+        .equals(refLinks, that.refLinks)
         && Objects.equals(yaml, that.yaml);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(active, name, from, cronExpression, application, subjectType, vectorClocks, properties,
+    return Objects.hash(active, name, from, cronExpression, application, subjectType, vectorClocks,
+        properties,
         alertSchemes, alertSuppressors, refLinks, yaml);
   }
 }

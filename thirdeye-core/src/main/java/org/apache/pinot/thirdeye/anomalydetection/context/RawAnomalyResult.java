@@ -21,10 +21,10 @@ package org.apache.pinot.thirdeye.anomalydetection.context;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import java.util.Collections;
 import java.util.Map;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 
 
 /**

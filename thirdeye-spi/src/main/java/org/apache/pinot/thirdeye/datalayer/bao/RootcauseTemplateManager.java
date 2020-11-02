@@ -23,7 +23,9 @@ package org.apache.pinot.thirdeye.datalayer.bao;
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseTemplateDTO;
 
-public interface RootcauseTemplateManager extends AbstractManager<RootcauseTemplateDTO>{
+public interface RootcauseTemplateManager extends AbstractManager<RootcauseTemplateDTO> {
+
   List<RootcauseTemplateDTO> findByMetricId(long metricId);
+
   Long saveOrUpdate(RootcauseTemplateDTO rootcauseTemplateDTO);
 }

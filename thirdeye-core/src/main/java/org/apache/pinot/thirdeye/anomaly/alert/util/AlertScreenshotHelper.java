@@ -19,13 +19,12 @@
 
 package org.apache.pinot.thirdeye.anomaly.alert.util;
 
-import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
+import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -20,8 +20,6 @@
 package org.apache.pinot.thirdeye.anomalydetection.datafilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +27,8 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -21,16 +21,14 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.PipelineContext;
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
-import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 
 /**
  * DimensionEntity represents a data dimension (a cut) across multiple metrics. It is identified
@@ -39,6 +37,7 @@ import java.util.Set;
  */
 @Deprecated
 public class DimensionEntity extends Entity {
+
   public static final EntityType TYPE = new EntityType("thirdeye:dimension:");
 
   public static final String TYPE_PROVIDED = "provided"; // user-defined filter to be applied everywhere
@@ -48,7 +47,8 @@ public class DimensionEntity extends Entity {
   private final String value;
   private final String type;
 
-  protected DimensionEntity(String urn, double score, List<? extends Entity> related, String name, String value, String type) {
+  protected DimensionEntity(String urn, double score, List<? extends Entity> related, String name,
+      String value, String type) {
     super(urn, score, related);
     this.name = name;
     this.value = value;
@@ -69,33 +69,43 @@ public class DimensionEntity extends Entity {
 
   @Override
   public DimensionEntity withScore(double score) {
-    return new DimensionEntity(this.getUrn(), score, this.getRelated(), this.name, this.value, this.type);
+    return new DimensionEntity(this.getUrn(), score, this.getRelated(), this.name, this.value,
+        this.type);
   }
 
-  public static DimensionEntity fromDimension(double score, Collection<? extends Entity> related, String name, String value, String type) {
-    return new DimensionEntity(TYPE.formatURN(EntityUtils.encodeURNComponent(name), EntityUtils.encodeURNComponent(value), type), score, new ArrayList<>(related), name, value, type);
+  public static DimensionEntity fromDimension(double score, Collection<? extends Entity> related,
+      String name, String value, String type) {
+    return new DimensionEntity(
+        TYPE.formatURN(EntityUtils.encodeURNComponent(name), EntityUtils.encodeURNComponent(value),
+            type), score, new ArrayList<>(related), name, value, type);
   }
 
-  public static DimensionEntity fromDimension(double score, String name, String value, String type) {
+  public static DimensionEntity fromDimension(double score, String name, String value,
+      String type) {
     return fromDimension(score, new ArrayList<Entity>(), name, value, type);
   }
 
   @Override
   public DimensionEntity withRelated(List<? extends Entity> related) {
-    return new DimensionEntity(this.getUrn(), this.getScore(), related, this.name, this.value, this.type);
+    return new DimensionEntity(this.getUrn(), this.getScore(), related, this.name, this.value,
+        this.type);
   }
 
   public static DimensionEntity fromURN(String urn, double score) {
-    if(!TYPE.isType(urn))
-      throw new IllegalArgumentException(String.format("URN '%s' is not type '%s'", urn, TYPE.getPrefix()));
+    if (!TYPE.isType(urn)) {
+      throw new IllegalArgumentException(
+          String.format("URN '%s' is not type '%s'", urn, TYPE.getPrefix()));
+    }
     String[] parts = urn.split(":", 5);
-    if(parts.length != 5)
-      throw new IllegalArgumentException(String.format("Dimension URN must have 5 parts but has '%d'", parts.length));
-    return fromDimension(score, EntityUtils.decodeURNComponent(parts[2]), EntityUtils.decodeURNComponent(parts[3]), parts[4]);
-
+    if (parts.length != 5) {
+      throw new IllegalArgumentException(
+          String.format("Dimension URN must have 5 parts but has '%d'", parts.length));
+    }
+    return fromDimension(score, EntityUtils.decodeURNComponent(parts[2]),
+        EntityUtils.decodeURNComponent(parts[3]), parts[4]);
   }
 
-  public static  Set<DimensionEntity> getContextDimensions(PipelineContext context, String type) {
+  public static Set<DimensionEntity> getContextDimensions(PipelineContext context, String type) {
     Set<DimensionEntity> output = new HashSet<>();
     for (DimensionEntity e : context.filter(DimensionEntity.class)) {
       if (type.equals(e.type)) {

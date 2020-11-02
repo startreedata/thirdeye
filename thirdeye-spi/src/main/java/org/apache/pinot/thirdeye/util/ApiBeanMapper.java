@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.util;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,9 +18,9 @@ import org.apache.pinot.thirdeye.api.EmailSettingsApi;
 import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.api.TimeColumnApi;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;

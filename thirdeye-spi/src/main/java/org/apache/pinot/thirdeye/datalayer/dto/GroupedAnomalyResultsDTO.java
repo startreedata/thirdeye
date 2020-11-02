@@ -20,14 +20,15 @@
 
 package org.apache.pinot.thirdeye.datalayer.dto;
 
-import org.apache.pinot.thirdeye.datalayer.pojo.GroupedAnomalyResultsBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.pojo.GroupedAnomalyResultsBean;
 
 /**
- * The grouped anomaly results for alerter. Each group of anomalies should be sent through the same email.
+ * The grouped anomaly results for alerter. Each group of anomalies should be sent through the same
+ * email.
  */
 public class GroupedAnomalyResultsDTO extends GroupedAnomalyResultsBean {
 

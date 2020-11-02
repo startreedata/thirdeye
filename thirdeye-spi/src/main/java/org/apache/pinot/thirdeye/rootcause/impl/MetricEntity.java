@@ -22,28 +22,29 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 
 /**
  * MetricEntity represents an individual metric. It holds meta-data referencing ThirdEye's internal
  * database. The URN namespace is defined as 'thirdeye:metric:{id}'.
  */
 public class MetricEntity extends Entity {
+
   public static final EntityType TYPE = new EntityType("thirdeye:metric:");
 
   private final long id;
   private final Multimap<String, String> filters;
 
-  protected MetricEntity(String urn, double score, List<? extends Entity> related, long id, Multimap<String, String> filters) {
+  protected MetricEntity(String urn, double score, List<? extends Entity> related, long id,
+      Multimap<String, String> filters) {
     super(urn, score, related);
     this.id = id;
     this.filters = filters;
@@ -68,18 +69,23 @@ public class MetricEntity extends Entity {
   }
 
   public MetricEntity withFilters(Multimap<String, String> filters) {
-    return new MetricEntity(TYPE.formatURN(this.id, EntityUtils.encodeDimensions(filters)), this.getScore(), this.getRelated(), this.id, filters);
+    return new MetricEntity(TYPE.formatURN(this.id, EntityUtils.encodeDimensions(filters)),
+        this.getScore(), this.getRelated(), this.id, filters);
   }
 
   public MetricEntity withoutFilters() {
-    return new MetricEntity(TYPE.formatURN(this.id), this.getScore(), this.getRelated(), this.id, filters);
+    return new MetricEntity(TYPE.formatURN(this.id), this.getScore(), this.getRelated(), this.id,
+        filters);
   }
 
-  public static MetricEntity fromMetric(double score, Collection<? extends Entity> related, long id, Multimap<String, String> filters) {
-    return new MetricEntity(TYPE.formatURN(id, EntityUtils.encodeDimensions(filters)), score, new ArrayList<>(related), id, TreeMultimap.create(filters));
+  public static MetricEntity fromMetric(double score, Collection<? extends Entity> related, long id,
+      Multimap<String, String> filters) {
+    return new MetricEntity(TYPE.formatURN(id, EntityUtils.encodeDimensions(filters)), score,
+        new ArrayList<>(related), id, TreeMultimap.create(filters));
   }
 
-  public static MetricEntity fromMetric(double score, Collection<? extends Entity> related, long id) {
+  public static MetricEntity fromMetric(double score, Collection<? extends Entity> related,
+      long id) {
     return fromMetric(score, related, id, TreeMultimap.<String, String>create());
   }
 

@@ -19,13 +19,13 @@
 
 package org.apache.pinot.thirdeye.rootcause.timeseries;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 
 /**

@@ -19,6 +19,10 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.DoubleFunction;
+import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.POSITIVE_INFINITY;
+import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.map;
+
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,8 +57,6 @@ import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-
-import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.*;
 
 @Components(title = "Percentage change rule detection", type = "PERCENTAGE_RULE", tags = {
     DetectionTag.RULE_DETECTION}, description =

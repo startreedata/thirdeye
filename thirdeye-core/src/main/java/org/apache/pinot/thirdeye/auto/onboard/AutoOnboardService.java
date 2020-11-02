@@ -19,13 +19,13 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

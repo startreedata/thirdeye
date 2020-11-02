@@ -20,7 +20,6 @@
 
 package org.apache.pinot.thirdeye.datalayer.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.pinot.thirdeye.datalayer.pojo.RawAnomalyResultBean;
 
@@ -60,5 +59,4 @@ public class RawAnomalyResultDTO extends RawAnomalyResultBean {
   public void setFeedback(AnomalyFeedbackDTO feedback) {
     this.feedback = feedback;
   }
-
 }

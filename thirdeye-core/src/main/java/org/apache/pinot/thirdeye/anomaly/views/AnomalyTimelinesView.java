@@ -20,13 +20,13 @@
 package org.apache.pinot.thirdeye.anomaly.views;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.pinot.thirdeye.dashboard.views.TimeBucket;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.pinot.thirdeye.dashboard.views.TimeBucket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -22,19 +22,19 @@ package org.apache.pinot.thirdeye.dataframe.util;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-
 
 /**
  * Selector for time series and aggregate values of a specific metric, independent of
  * data source.
  */
 public final class MetricSlice {
-  public static final TimeGranularity NATIVE_GRANULARITY = new TimeGranularity(0, TimeUnit.MILLISECONDS);
+
+  public static final TimeGranularity NATIVE_GRANULARITY = new TimeGranularity(0,
+      TimeUnit.MILLISECONDS);
 
   final long metricId;
   final long start;
@@ -42,7 +42,8 @@ public final class MetricSlice {
   final Multimap<String, String> filters;
   final TimeGranularity granularity;
 
-  MetricSlice(long metricId, long start, long end, Multimap<String, String> filters, TimeGranularity granularity) {
+  MetricSlice(long metricId, long start, long end, Multimap<String, String> filters,
+      TimeGranularity granularity) {
     this.metricId = metricId;
     this.start = start;
     this.end = end;
@@ -87,14 +88,17 @@ public final class MetricSlice {
   }
 
   public static MetricSlice from(long metricId, long start, long end) {
-    return new MetricSlice(metricId, start, end, ArrayListMultimap.<String, String>create(), NATIVE_GRANULARITY);
+    return new MetricSlice(metricId, start, end, ArrayListMultimap.<String, String>create(),
+        NATIVE_GRANULARITY);
   }
 
-  public static MetricSlice from(long metricId, long start, long end, Multimap<String, String> filters) {
+  public static MetricSlice from(long metricId, long start, long end,
+      Multimap<String, String> filters) {
     return new MetricSlice(metricId, start, end, filters, NATIVE_GRANULARITY);
   }
 
-  public static MetricSlice from(long metricId, long start, long end, Multimap<String, String> filters, TimeGranularity granularity) {
+  public static MetricSlice from(long metricId, long start, long end,
+      Multimap<String, String> filters, TimeGranularity granularity) {
     return new MetricSlice(metricId, start, end, filters, granularity);
   }
 
@@ -102,7 +106,8 @@ public final class MetricSlice {
    * check if current metric slice contains another metric slice
    */
   public boolean containSlice(MetricSlice slice) {
-    return slice.metricId == this.metricId && slice.granularity.equals(this.granularity) && slice.getFilters().equals(this.getFilters()) &&
+    return slice.metricId == this.metricId && slice.granularity.equals(this.granularity) && slice
+        .getFilters().equals(this.getFilters()) &&
         slice.start >= this.start && slice.end <= this.end;
   }
 
@@ -115,7 +120,8 @@ public final class MetricSlice {
       return false;
     }
     MetricSlice that = (MetricSlice) o;
-    return metricId == that.metricId && start == that.start && end == that.end && Objects.equals(filters, that.filters)
+    return metricId == that.metricId && start == that.start && end == that.end && Objects
+        .equals(filters, that.filters)
         && Objects.equals(granularity, that.granularity);
   }
 

@@ -19,15 +19,13 @@
 
 package org.apache.pinot.thirdeye.anomaly.monitor;
 
-import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MonitorJobScheduler {
   private static final Logger LOG = LoggerFactory.getLogger(MonitorJobScheduler.class);

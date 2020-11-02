@@ -19,13 +19,12 @@
 
 package org.apache.pinot.thirdeye.anomalydetection.context;
 
-import org.apache.pinot.thirdeye.anomalydetection.function.AnomalyDetectionFunction;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.anomalydetection.function.AnomalyDetectionFunction;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 /**
  * The context for performing an anomaly detection on the sets of time series from the same

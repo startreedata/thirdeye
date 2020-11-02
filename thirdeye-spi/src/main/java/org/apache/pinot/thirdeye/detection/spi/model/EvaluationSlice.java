@@ -24,11 +24,11 @@ package org.apache.pinot.thirdeye.detection.spi.model;
 
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 
-
 /**
  * Selector for evaluations based on (optionally) start time and end time.
  */
 public class EvaluationSlice {
+
   private final long start;
   private final long end;
 
@@ -59,10 +59,12 @@ public class EvaluationSlice {
   }
 
   public boolean match(EvaluationDTO evaluationDTO) {
-    if (this.start >= 0 && evaluationDTO.getEndTime() <= this.start)
+    if (this.start >= 0 && evaluationDTO.getEndTime() <= this.start) {
       return false;
-    if (this.end >= 0 && evaluationDTO.getStartTime() >= this.end)
+    }
+    if (this.end >= 0 && evaluationDTO.getStartTime() >= this.end) {
       return false;
+    }
     return true;
   }
 }

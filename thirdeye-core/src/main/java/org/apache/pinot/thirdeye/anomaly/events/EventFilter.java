@@ -25,10 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.anomaly.utils;
 import java.io.IOException;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.cookie.BasicClientCookie;
 
 
 /**

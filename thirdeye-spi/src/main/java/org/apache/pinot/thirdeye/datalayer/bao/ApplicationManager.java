@@ -20,10 +20,10 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 
 public interface ApplicationManager extends AbstractManager<ApplicationDTO> {
+
   List<ApplicationDTO> findByName(String name);
 }

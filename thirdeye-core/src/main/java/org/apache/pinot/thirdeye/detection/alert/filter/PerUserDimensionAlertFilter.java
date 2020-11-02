@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
 import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
+
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;

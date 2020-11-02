@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
 import org.apache.pinot.thirdeye.datasource.comparison.Row.Metric;
 
 public class TimeOnTimeComparisonResponse {

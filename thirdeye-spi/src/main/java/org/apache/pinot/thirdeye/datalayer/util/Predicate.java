@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.datalayer.util;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class Predicate {
+
   enum OPER {
     AND("AND"), OR("OR"), EQ("="), GT(">"), GE(">="), LT("<"), LE("<="), NEQ("!="), IN(
         "IN"), BETWEEN("BETWEEN"), LIKE("LIKE");
@@ -35,7 +36,6 @@ public class Predicate {
     public String toString() {
       return sign;
     }
-
   }
 
   private String lhs;
@@ -93,6 +93,7 @@ public class Predicate {
   public static Predicate GE(String columnName, Object value) {
     return new Predicate(columnName, OPER.GE, value);
   }
+
   public static Predicate IN(String columnName, Object[] values) {
     return new Predicate(columnName, OPER.IN, values);
   }
@@ -113,5 +114,4 @@ public class Predicate {
   public static Predicate LIKE(String columnName, Object value) {
     return new Predicate(columnName, OPER.LIKE, value);
   }
-
 }

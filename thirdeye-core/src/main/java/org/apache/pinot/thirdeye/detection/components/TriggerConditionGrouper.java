@@ -18,6 +18,12 @@
  */
 package org.apache.pinot.thirdeye.detection.components;
 
+import static org.apache.pinot.thirdeye.detection.DetectionUtils.makeParentEntityAnomaly;
+import static org.apache.pinot.thirdeye.detection.DetectionUtils.mergeAndSortAnomalies;
+import static org.apache.pinot.thirdeye.detection.DetectionUtils.setEntityChildMapping;
+import static org.apache.pinot.thirdeye.detection.ExpressionParser.generateOperators;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
+
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,10 +42,6 @@ import org.apache.pinot.thirdeye.detection.spec.TriggerConditionGrouperSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.Grouper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.*;
-import static org.apache.pinot.thirdeye.detection.ExpressionParser.*;
-import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.*;
 
 
 /**

@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.auth;
 
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;

@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EventBean extends AbstractBean {
+
   String name;
   String metric;
   String service;
@@ -102,7 +102,8 @@ public class EventBean extends AbstractBean {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), name, eventType, targetDimensionMap, service, metric, startTime, endTime);
+    return Objects
+        .hash(getId(), name, eventType, targetDimensionMap, service, metric, startTime, endTime);
   }
 
   @Override
@@ -114,8 +115,9 @@ public class EventBean extends AbstractBean {
     return Objects.equals(getId(), eb.getId()) && Objects.equals(getName(), eb.getName()) &&
         Objects.equals(getEventType(), eb.getEventType()) &&
         Objects.equals(getTargetDimensionMap(), eb.getTargetDimensionMap()) &&
-        Objects.equals(getService(), eb.getService()) && Objects.equals(getMetric(), eb.getMetric()) &&
-        Objects.equals(getStartTime(), eb.getStartTime()) && Objects.equals(getEndTime(), eb.getEndTime());
+        Objects.equals(getService(), eb.getService()) && Objects.equals(getMetric(), eb.getMetric())
+        &&
+        Objects.equals(getStartTime(), eb.getStartTime()) && Objects
+        .equals(getEndTime(), eb.getEndTime());
   }
-
 }

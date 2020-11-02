@@ -1,13 +1,27 @@
-import { User } from "../authentication-rest/authentication-rest.interfaces";
-
 export interface Alert {
     id: number;
     name: string;
     description: string;
-    cron: string;
-    lastTimestamp: Date;
+
+    lastTimestamp: number;
     active: boolean;
-    created: Date;
-    updated: Date;
-    User: User;
+
+    subscriptionGroup: string[];
+    metric: string;
+    filters?: string | null;
+    createdBy: string;
+    updatedBy: string;
+    datasetNames: string[];
+    breakdownBy?: string;
+    application: string[];
+    rules: Array<{ detection: Detection[] }>;
+    monitoringGranularity: string[];
+}
+
+export interface Detection {
+    name: string;
+    type: string;
+    params: {
+        [name: string]: string | number;
+    };
 }

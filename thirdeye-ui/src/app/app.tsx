@@ -1,4 +1,4 @@
-import { CssBaseline, ThemeProvider } from "@material-ui/core";
+import { Box, CssBaseline, ThemeProvider } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { SWRConfig } from "swr";
 import { ApplicationBar } from "./components/application-bar/application-bar.component";
@@ -17,17 +17,19 @@ setupInterceptors();
 // ThirdEye UI app
 export const App: FunctionComponent = () => {
     return (
-        // Apply Meterial UI theme
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
+        <Box display="flex">
+            {/* Apply Meterial UI theme */}
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
 
-            <ApplicationBar />
+                <ApplicationBar />
 
-            {/* Initialize SWR config */}
-            <SWRConfig value={{ fetcher: swrFetcher }}>
-                {/* Router */}
-                <AppRouter />
-            </SWRConfig>
-        </ThemeProvider>
+                {/* Initialize SWR config */}
+                <SWRConfig value={{ fetcher: swrFetcher }}>
+                    {/* Router */}
+                    <AppRouter />
+                </SWRConfig>
+            </ThemeProvider>
+        </Box>
     );
 };

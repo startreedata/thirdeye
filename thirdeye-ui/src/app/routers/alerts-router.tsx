@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { AlertsAllPage } from "../pages/alerts-all-page/alerts-all-page.component";
+import { AlertsDetailPage } from "../pages/alerts-detail-page/alerts-detail-page.component";
 import { AppRoute, getAlertsAllPath } from "../utils/routes.util";
 
 // ThirdEye UI alerts path router
@@ -15,6 +16,16 @@ export const AlertsRouter: FunctionComponent = () => {
 
             {/* Alerts - all path */}
             <Route exact component={AlertsAllPage} path={AppRoute.ALERTS_ALL} />
+            <Route
+                exact
+                component={AlertsDetailPage}
+                path={AppRoute.ALERTS_DETAIL}
+            />
+            <Route
+                exact
+                component={AlertsAllPage}
+                path={AppRoute.ALERTS_EDIT}
+            />
         </Switch>
     );
 };

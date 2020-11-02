@@ -7,9 +7,20 @@ import java.util.Map;
 @JsonInclude(Include.NON_NULL)
 public class AlertComponentApi {
 
+  private String name;
   private String type;
   private MetricApi metric;
   private Map<String, Object> params;
+  private AlertApi alert;
+
+  public String getName() {
+    return name;
+  }
+
+  public AlertComponentApi setName(final String name) {
+    this.name = name;
+    return this;
+  }
 
   public String getType() {
     return type;
@@ -35,6 +46,15 @@ public class AlertComponentApi {
 
   public AlertComponentApi setParams(final Map<String, Object> params) {
     this.params = params;
+    return this;
+  }
+
+  public AlertApi getAlert() {
+    return alert;
+  }
+
+  public AlertComponentApi setAlert(final AlertApi alert) {
+    this.alert = alert;
     return this;
   }
 }

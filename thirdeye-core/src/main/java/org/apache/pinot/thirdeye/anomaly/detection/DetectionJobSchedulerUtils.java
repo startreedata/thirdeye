@@ -43,7 +43,6 @@ public class DetectionJobSchedulerUtils {
   /**
    * Get date time formatter according to granularity of dataset
    * This is to store the date in the db, in the correct SDF
-   * @return
    */
   public static DateTimeFormatter getDateTimeFormatterForDataset(
       DatasetConfigDTO datasetConfig, DateTimeZone dateTimeZone) {
@@ -71,12 +70,12 @@ public class DetectionJobSchedulerUtils {
   /**
    * round this time to earlier boundary, depending on granularity of dataset
    * e.g. 12:15pm on HOURLY dataset should be treated as 12pm
-   * any dataset with granularity finer than HOUR, will be rounded as per function frequency (assumption is that this is in MINUTES)
+   * any dataset with granularity finer than HOUR, will be rounded as per function frequency
+   * (assumption is that this is in MINUTES)
    * so 12.53 on 5 MINUTES dataset, with function frequency 15 MINUTES will be rounded to 12.45
-   * @param anomalyFunction
-   * @return
    */
-  public static long getBoundaryAlignedTimeForDataset(DatasetConfigDTO datasetConfig, DateTime dateTime,
+  public static long getBoundaryAlignedTimeForDataset(DatasetConfigDTO datasetConfig,
+      DateTime dateTime,
       AnomalyFunctionDTO anomalyFunction) {
     TimeSpec timeSpec = ThirdEyeUtils.getTimeSpecFromDatasetConfig(datasetConfig);
     TimeUnit dataUnit = timeSpec.getDataGranularity().getUnit();
@@ -84,10 +83,12 @@ public class DetectionJobSchedulerUtils {
 
     // For nMINUTE level datasets, with frequency defined in nMINUTES in the function, (make sure size doesnt exceed 30 minutes, just use 1 HOUR in that case)
     // Calculate time periods according to the function frequency
-    if (dataUnit.equals(TimeUnit.MINUTES) || dataUnit.equals(TimeUnit.MILLISECONDS) || dataUnit.equals(TimeUnit.SECONDS)) {
-      if (functionFrequency.getUnit().equals(TimeUnit.MINUTES) && (functionFrequency.getSize() <=30)) {
+    if (dataUnit.equals(TimeUnit.MINUTES) || dataUnit.equals(TimeUnit.MILLISECONDS) || dataUnit
+        .equals(TimeUnit.SECONDS)) {
+      if (functionFrequency.getUnit().equals(TimeUnit.MINUTES) && (functionFrequency.getSize()
+          <= 30)) {
         int minuteBucketSize = functionFrequency.getSize();
-        int roundedMinutes = (dateTime.getMinuteOfHour()/minuteBucketSize) * minuteBucketSize;
+        int roundedMinutes = (dateTime.getMinuteOfHour() / minuteBucketSize) * minuteBucketSize;
         dateTime = dateTime.withTime(dateTime.getHourOfDay(), roundedMinutes, 0, 0);
       } else {
         dateTime = getBoundaryAlignedTimeForDataset(dateTime, TimeUnit.HOURS); // default to HOURS
@@ -116,9 +117,9 @@ public class DetectionJobSchedulerUtils {
    * get bucket size in millis, according to data granularity of dataset
    * Bucket size are 1 HOUR for hourly, 1 DAY for daily
    * For MINUTE level data, bucket size is calculated based on anomaly function frequency
-   * @return
    */
-  public static Period getBucketSizePeriodForDataset(DatasetConfigDTO datasetConfig, AnomalyFunctionDTO anomalyFunction) {
+  public static Period getBucketSizePeriodForDataset(DatasetConfigDTO datasetConfig,
+      AnomalyFunctionDTO anomalyFunction) {
     Period bucketSizePeriod = null;
     TimeSpec timeSpec = ThirdEyeUtils.getTimeSpecFromDatasetConfig(datasetConfig);
     TimeUnit dataUnit = timeSpec.getDataGranularity().getUnit();
@@ -126,8 +127,10 @@ public class DetectionJobSchedulerUtils {
 
     // For nMINUTE level datasets, with frequency defined in nMINUTES in the function, (make sure size doesnt exceed 30 minutes, just use 1 HOUR in that case)
     // Calculate time periods according to the function frequency
-    if (dataUnit.equals(TimeUnit.MINUTES) || dataUnit.equals(TimeUnit.MILLISECONDS) || dataUnit.equals(TimeUnit.SECONDS)) {
-      if (functionFrequency.getUnit().equals(TimeUnit.MINUTES) && (functionFrequency.getSize() <=30)) {
+    if (dataUnit.equals(TimeUnit.MINUTES) || dataUnit.equals(TimeUnit.MILLISECONDS) || dataUnit
+        .equals(TimeUnit.SECONDS)) {
+      if (functionFrequency.getUnit().equals(TimeUnit.MINUTES) && (functionFrequency.getSize()
+          <= 30)) {
         bucketSizePeriod = new Period(0, 0, 0, 0, 0, functionFrequency.getSize(), 0, 0);
       } else {
         bucketSizePeriod = getBucketSizePeriodForUnit(TimeUnit.HOURS); // default to 1 HOUR
@@ -152,34 +155,29 @@ public class DetectionJobSchedulerUtils {
     return bucketSizePeriod;
   }
 
-
-
   /**
    * Create new entries from last entry to current time,
    * according to time granularity of dataset in case of HOURLY/DAILY,
    * and according to time granularity of function frequency in case of MINUTE level data
    * If it is an HOURLY dataset, run detection for every HOUR
    * If it is a DAILY dataset, run detection for every DAY
-   * If it is an n MINUTE level dataset, run detection for every bucket, determined by the frequency field in anomaly function
-   *
-   * @param currentDateTime
-   * @param lastEntryForFunction
-   * @param anomalyFunction
-   * @param datasetConfig
-   * @param dateTimeZone
-   * @return
+   * If it is an n MINUTE level dataset, run detection for every bucket, determined by the frequency
+   * field in anomaly function
    */
-  public static Map<String, Long> getNewEntries(DateTime currentDateTime, DetectionStatusDTO lastEntryForFunction,
-      AnomalyFunctionDTO anomalyFunction, DatasetConfigDTO datasetConfig, DateTimeZone dateTimeZone) {
+  public static Map<String, Long> getNewEntries(DateTime currentDateTime,
+      DetectionStatusDTO lastEntryForFunction,
+      AnomalyFunctionDTO anomalyFunction, DatasetConfigDTO datasetConfig,
+      DateTimeZone dateTimeZone) {
 
     Map<String, Long> newEntries = new LinkedHashMap<>();
 
     // get current hour/day, depending on granularity of dataset,
-    DateTimeFormatter dateTimeFormatterForDataset = DetectionJobSchedulerUtils.
-        getDateTimeFormatterForDataset(datasetConfig, dateTimeZone);
+    DateTimeFormatter dateTimeFormatterForDataset = DetectionJobSchedulerUtils
+        .getDateTimeFormatterForDataset(datasetConfig, dateTimeZone);
 
     long alignedCurrentMillis =
-        DetectionJobSchedulerUtils.getBoundaryAlignedTimeForDataset(datasetConfig, currentDateTime, anomalyFunction);
+        DetectionJobSchedulerUtils
+            .getBoundaryAlignedTimeForDataset(datasetConfig, currentDateTime, anomalyFunction);
     DateTime alignedDateTime = new DateTime(alignedCurrentMillis, dateTimeZone);
 
     // if first ever entry, create it with current time
@@ -188,7 +186,8 @@ public class DetectionJobSchedulerUtils {
       newEntries.put(currentDateString, dateTimeFormatterForDataset.parseMillis(currentDateString));
     } else { // else create all entries from last entry onwards to current time
       DateTime lastDateTime = new DateTime(lastEntryForFunction.getDateToCheckInMS(), dateTimeZone);
-      Period bucketSizePeriod = DetectionJobSchedulerUtils.getBucketSizePeriodForDataset(datasetConfig, anomalyFunction);
+      Period bucketSizePeriod = DetectionJobSchedulerUtils
+          .getBucketSizePeriodForDataset(datasetConfig, anomalyFunction);
       while (lastDateTime.isBefore(alignedDateTime)) {
         lastDateTime = lastDateTime.plus(bucketSizePeriod);
         newEntries.put(dateTimeFormatterForDataset.print(lastDateTime), lastDateTime.getMillis());
@@ -196,5 +195,4 @@ public class DetectionJobSchedulerUtils {
     }
     return newEntries;
   }
-
 }

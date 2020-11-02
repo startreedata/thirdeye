@@ -34,12 +34,6 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertConfigBean extends AbstractBean {
 
-  public enum SubjectType {
-    ALERT,
-    METRICS,
-    DATASETS
-  }
-
   String name;
   String application;
   String cronExpression;
@@ -67,6 +61,10 @@ public class AlertConfigBean extends AbstractBean {
     return cronExpression;
   }
 
+  public void setCronExpression(String cronExpression) {
+    this.cronExpression = cronExpression;
+  }
+
   public String getFromAddress() {
     return fromAddress;
   }
@@ -81,10 +79,6 @@ public class AlertConfigBean extends AbstractBean {
 
   public void setReceiverAddresses(DetectionAlertFilterRecipients receiverAddresses) {
     this.receiverAddresses = receiverAddresses;
-  }
-
-  public void setCronExpression(String cronExpression) {
-    this.cronExpression = cronExpression;
   }
 
   public AnomalyFeedConfig getAnomalyFeedConfig() {
@@ -167,10 +161,52 @@ public class AlertConfigBean extends AbstractBean {
     this.refLinks = refLinks;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    AlertConfigBean that = (AlertConfigBean) o;
+    return isActive() == that.isActive() && Objects.equals(getName(), that.getName()) && Objects
+        .equals(getApplication(), that.getApplication()) && Objects
+        .equals(getCronExpression(), that.getCronExpression()) && Objects
+        .equals(getHolidayCronExpression(), that.getHolidayCronExpression()) && Objects
+        .equals(getAnomalyFeedConfig(), that.getAnomalyFeedConfig()) && Objects
+        .equals(getEmailConfig(), that.getEmailConfig()) && Objects
+        .equals(getReportConfigCollection(), that.getReportConfigCollection()) && Objects
+        .equals(getAlertGroupConfig(), that.getAlertGroupConfig()) && Objects
+        .equals(getEmailFormatterConfig(), that.getEmailFormatterConfig()) && Objects
+        .equals(getReceiverAddresses(), that.getReceiverAddresses()) && Objects
+        .equals(getFromAddress(), that.getFromAddress());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects
+        .hash(getName(), getApplication(), getCronExpression(), getHolidayCronExpression(),
+            isActive(),
+            getAnomalyFeedConfig(), getEmailConfig(), getReportConfigCollection(),
+            getAlertGroupConfig(),
+            getEmailFormatterConfig(), getReceiverAddresses(), getFromAddress());
+  }
+
+  public enum SubjectType {
+    ALERT,
+    METRICS,
+    DATASETS
+  }
+
+  public enum COMPARE_MODE {
+    WoW, Wo2W, Wo3W, Wo4W
+  }
+
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class EmailConfig {
 
-    long anomalyWatermark = 0l;
+    long anomalyWatermark = 0L;
     List<Long> functionIds = new ArrayList<>();
     List<Long> detectionConfigIds = new ArrayList<>();
 
@@ -314,16 +350,16 @@ public class AlertConfigBean extends AbstractBean {
       return contactEmail;
     }
 
+    public void setContactEmail(String contactEmail) {
+      this.contactEmail = contactEmail;
+    }
+
     public List<ReportMetricConfig> getReportMetricConfigs() {
       return reportMetricConfigs;
     }
 
     public void setReportMetricConfigs(List<ReportMetricConfig> reportMetricConfigs) {
       this.reportMetricConfigs = reportMetricConfigs;
-    }
-
-    public void setContactEmail(String contactEmail) {
-      this.contactEmail = contactEmail;
     }
 
     @Override
@@ -375,41 +411,5 @@ public class AlertConfigBean extends AbstractBean {
     public void setGroupAuxiliaryEmailProvider(Map<String, String> groupAuxiliaryEmailProvider) {
       this.groupAuxiliaryEmailProvider = groupAuxiliaryEmailProvider;
     }
-  }
-
-  public enum COMPARE_MODE {
-    WoW, Wo2W, Wo3W, Wo4W
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    AlertConfigBean that = (AlertConfigBean) o;
-    return isActive() == that.isActive() && Objects.equals(getName(), that.getName()) && Objects
-        .equals(getApplication(), that.getApplication()) && Objects
-        .equals(getCronExpression(), that.getCronExpression()) && Objects
-        .equals(getHolidayCronExpression(), that.getHolidayCronExpression()) && Objects
-        .equals(getAnomalyFeedConfig(), that.getAnomalyFeedConfig()) && Objects
-        .equals(getEmailConfig(), that.getEmailConfig()) && Objects
-        .equals(getReportConfigCollection(), that.getReportConfigCollection()) && Objects
-        .equals(getAlertGroupConfig(), that.getAlertGroupConfig()) && Objects
-        .equals(getEmailFormatterConfig(), that.getEmailFormatterConfig()) && Objects
-        .equals(getReceiverAddresses(), that.getReceiverAddresses()) && Objects
-        .equals(getFromAddress(), that.getFromAddress());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects
-        .hash(getName(), getApplication(), getCronExpression(), getHolidayCronExpression(),
-            isActive(),
-            getAnomalyFeedConfig(), getEmailConfig(), getReportConfigCollection(),
-            getAlertGroupConfig(),
-            getEmailFormatterConfig(), getReceiverAddresses(), getFromAddress());
   }
 }

@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EntityMappingHolder {
+
   private static final Logger LOG = LoggerFactory.getLogger(EntityMappingHolder.class);
 
   //Map<TableName,EntityName>
@@ -43,6 +44,14 @@ public class EntityMappingHolder {
   Map<String, LinkedHashMap<String, ColumnInfo>> columnInfoPerTable = new HashMap<>();
   //DB NAME to ENTITY NAME mapping
   Map<String, BiMap<String, String>> columnMappingPerTable = new HashMap<>();
+
+  public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
+    fields.addAll(Arrays.asList(type.getDeclaredFields()));
+    if (type.getSuperclass() != null) {
+      fields = getAllFields(fields, type.getSuperclass());
+    }
+    return fields;
+  }
 
   public void register(Connection connection, Class<? extends AbstractEntity> entityClass,
       String tableName) throws Exception {
@@ -53,12 +62,13 @@ public class EntityMappingHolder {
     String columnNamePattern = null;
     LinkedHashMap<String, ColumnInfo> columnInfoMap = new LinkedHashMap<>();
     tableToEntityNameMap.put(tableName, entityClass.getSimpleName());
-    columnMappingPerTable.put(tableName, HashBiMap.<String, String>create());
+    columnMappingPerTable.put(tableName, HashBiMap.create());
     boolean foundTable = false;
-    for (String tableNamePattern : new String[] {tableName.toLowerCase(),
+    for (String tableNamePattern : new String[]{tableName.toLowerCase(),
         tableName.toUpperCase()}) {
       try (ResultSet rs =
-          databaseMetaData.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern)) {
+          databaseMetaData
+              .getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern)) {
         while (rs.next()) {
           foundTable = true;
           String columnName = rs.getString(4);
@@ -94,27 +104,13 @@ public class EntityMappingHolder {
           break;
         }
       }
-      if(!success) {
+      if (!success) {
         LOG.error("Unable to map [" + dbColumn + "] to any field in table [" + entityClass
             .getSimpleName() + "] !!!");
       }
     }
     columnInfoPerTable.put(tableName, columnInfoMap);
   }
-
-  public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
-    fields.addAll(Arrays.asList(type.getDeclaredFields()));
-    if (type.getSuperclass() != null) {
-      fields = getAllFields(fields, type.getSuperclass());
-    }
-    return fields;
-  }
 }
 
 
-class ColumnInfo {
-  String columnNameInDB;
-  int sqlType;
-  String columnNameInEntity;
-  Field field;
-}

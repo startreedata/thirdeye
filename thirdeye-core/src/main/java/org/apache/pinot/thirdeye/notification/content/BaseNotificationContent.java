@@ -71,8 +71,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseNotificationContent implements NotificationContent {
 
+  protected static final String EVENT_FILTER_COUNTRY = "countryCode";
   private static final Logger LOG = LoggerFactory.getLogger(BaseNotificationContent.class);
-
   /*  The Event Crawl Offset takes the standard period format, ex: P1D for 1 day, P1W for 1 week
   Y: years     M: months              W: weeks
   D: days      H: hours (after T)     M: minutes (after T)
@@ -80,7 +80,6 @@ public abstract class BaseNotificationContent implements NotificationContent {
   private static final String EVENT_CRAWL_OFFSET = "eventCrawlOffset";
   private static final String PRE_EVENT_CRAWL_OFFSET = "preEventCrawlOffset";
   private static final String POST_EVENT_CRAWL_OFFSET = "postEventCrawlOffset";
-
   private static final String INCLUDE_SENT_ANOMALY_ONLY = "includeSentAnomaliesOnly";
   private static final String INCLUDE_SUMMARY = "includeSummary";
   private static final String TIME_ZONE = "timezone";
@@ -89,9 +88,6 @@ public abstract class BaseNotificationContent implements NotificationContent {
   private static final String DEFAULT_DATE_PATTERN = "MMM dd, HH:mm";
   private static final String DEFAULT_TIME_ZONE = "America/Los_Angeles";
   private static final String DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
-
-  protected static final String EVENT_FILTER_COUNTRY = "countryCode";
-
   private static final String RAW_VALUE_FORMAT = "%.0f";
   private static final String PERCENTAGE_FORMAT = "%.2f %%";
 
@@ -104,44 +100,6 @@ public abstract class BaseNotificationContent implements NotificationContent {
   protected MetricConfigManager metricDAO;
   protected ThirdEyeAnomalyConfiguration thirdEyeAnomalyConfig;
   protected Properties properties;
-
-  public void init(Properties properties, ThirdEyeAnomalyConfiguration config) {
-    this.properties = properties;
-    this.thirdEyeAnomalyConfig = config;
-
-    this.includeSentAnomaliesOnly = Boolean.valueOf(
-        properties.getProperty(INCLUDE_SENT_ANOMALY_ONLY, DEFAULT_INCLUDE_SENT_ANOMALY_ONLY));
-    this.includeSummary = Boolean.valueOf(
-        properties.getProperty(INCLUDE_SUMMARY, DEFAULT_INCLUDE_SUMMARY));
-    this.dateTimeZone = DateTimeZone.forID(properties.getProperty(TIME_ZONE, DEFAULT_TIME_ZONE));
-
-    Period defaultPeriod = Period
-        .parse(properties.getProperty(EVENT_CRAWL_OFFSET, DEFAULT_EVENT_CRAWL_OFFSET));
-    this.preEventCrawlOffset = defaultPeriod;
-    this.postEventCrawlOffset = defaultPeriod;
-    if (properties.getProperty(PRE_EVENT_CRAWL_OFFSET) != null) {
-      this.preEventCrawlOffset = Period.parse(properties.getProperty(PRE_EVENT_CRAWL_OFFSET));
-    }
-    if (properties.getProperty(POST_EVENT_CRAWL_OFFSET) != null) {
-      this.postEventCrawlOffset = Period.parse(properties.getProperty(POST_EVENT_CRAWL_OFFSET));
-    }
-
-    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-  }
-
-  public String getSnaphotPath() {
-    return imgPath;
-  }
-
-  public void cleanup() {
-    if (StringUtils.isNotBlank(imgPath)) {
-      try {
-        Files.deleteIfExists(new File(imgPath).toPath());
-      } catch (IOException e) {
-        LOG.error("Exception in deleting screenshot {}", imgPath, e);
-      }
-    }
-  }
 
   /**
    * Generate subject based on configuration.
@@ -166,83 +124,6 @@ public abstract class BaseNotificationContent implements NotificationContent {
     }
   }
 
-  protected void enrichMetricInfo(Map<String, Object> templateData,
-      Collection<AnomalyResult> anomalies) {
-    Set<String> metrics = new TreeSet<>();
-    Set<String> datasets = new TreeSet<>();
-
-    Map<String, MetricConfigDTO> metricsMap = new TreeMap<>();
-    for (AnomalyResult anomalyResult : anomalies) {
-      if (anomalyResult instanceof MergedAnomalyResultDTO) {
-        MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
-        datasets.add(mergedAnomaly.getCollection());
-        metrics.add(mergedAnomaly.getMetric());
-
-        MetricConfigDTO metric = this.metricDAO
-            .findByMetricAndDataset(mergedAnomaly.getMetric(), mergedAnomaly.getCollection());
-        if (metric != null) {
-          metricsMap.put(metric.getId().toString(), metric);
-        }
-      }
-    }
-
-    templateData.put("datasetsCount", datasets.size());
-    templateData.put("datasets", StringUtils.join(datasets, ", "));
-    templateData.put("metricsCount", metrics.size());
-    templateData.put("metrics", StringUtils.join(metrics, ", "));
-    templateData.put("metricsMap", metricsMap);
-  }
-
-  protected Map<String, Object> getTemplateData(SubscriptionGroupDTO notificationConfig,
-      Collection<AnomalyResult> anomalies) {
-    Map<String, Object> templateData = new HashMap<>();
-
-    DateTimeZone timeZone = DateTimeZone.forTimeZone(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
-    List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
-
-    // Calculate start and end time of the anomalies
-    DateTime startTime = DateTime.now();
-    DateTime endTime = new DateTime(0l);
-    for (AnomalyResult anomalyResult : anomalies) {
-      if (anomalyResult instanceof MergedAnomalyResultDTO) {
-        MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
-        mergedAnomalyResults.add(mergedAnomaly);
-      }
-      if (anomalyResult.getStartTime() < startTime.getMillis()) {
-        startTime = new DateTime(anomalyResult.getStartTime(), dateTimeZone);
-      }
-      if (anomalyResult.getEndTime() > endTime.getMillis()) {
-        endTime = new DateTime(anomalyResult.getEndTime(), dateTimeZone);
-      }
-    }
-
-    PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(
-        new DummyAlertFilter(), mergedAnomalyResults);
-
-    templateData.put("anomalyCount", anomalies.size());
-    templateData.put("startTime", getDateString(startTime));
-    templateData.put("endTime", getDateString(endTime));
-    templateData.put("timeZone", getTimezoneString(dateTimeZone));
-    templateData.put("notifiedCount", precisionRecallEvaluator.getTotalAlerts());
-    templateData.put("feedbackCount", precisionRecallEvaluator.getTotalResponses());
-    templateData.put("trueAlertCount", precisionRecallEvaluator.getTrueAnomalies());
-    templateData.put("falseAlertCount", precisionRecallEvaluator.getFalseAlarm());
-    templateData.put("newTrendCount", precisionRecallEvaluator.getTrueAnomalyNewTrend());
-    templateData.put("alertConfigName", notificationConfig.getName());
-    templateData.put("includeSummary", includeSummary);
-    templateData.put("reportGenerationTimeMillis", System.currentTimeMillis());
-    if (precisionRecallEvaluator.getTotalResponses() > 0) {
-      templateData.put("precision", precisionRecallEvaluator.getPrecisionInResponse());
-      templateData.put("recall", precisionRecallEvaluator.getRecall());
-      templateData.put("falseNegative", precisionRecallEvaluator.getFalseNegativeRate());
-    }
-    if (notificationConfig.getReferenceLinks() != null) {
-      templateData.put("referenceLinks", notificationConfig.getReferenceLinks());
-    }
-
-    return templateData;
-  }
-
   protected static String getDateString(DateTime dateTime) {
     return dateTime.toString(DEFAULT_DATE_PATTERN);
   }
@@ -264,14 +145,6 @@ public abstract class BaseNotificationContent implements NotificationContent {
    */
   protected static boolean getLiftDirection(double lift) {
     return !(lift < 0);
-  }
-
-  /**
-   * Get the timezone in String
-   */
-  protected String getTimezoneString(DateTimeZone dateTimeZone) {
-    TimeZone tz = TimeZone.getTimeZone(dateTimeZone.getID());
-    return tz.getDisplayName(true, 0);
   }
 
   /**
@@ -428,28 +301,6 @@ public abstract class BaseNotificationContent implements NotificationContent {
   }
 
   /**
-   * Taking advantage of event data provider, extract the events around the given start and end time
-   *
-   * @param eventTypes the list of event types
-   * @param start the start time of the event, preEventCrawlOffset is added before the given
-   *     date time
-   * @param end the end time of the event, postEventCrawlOffset is added after the given date
-   *     time
-   * @param metricName the affected metric name
-   * @param serviceName the affected service name
-   * @param targetDimensions the affected dimensions
-   * @return a list of related events
-   */
-  protected List<EventDTO> getRelatedEvents(List<EventType> eventTypes, DateTime start, DateTime end
-      , String metricName, String serviceName, Map<String, List<String>> targetDimensions) {
-    List<EventDTO> relatedEvents = new ArrayList<>();
-    for (EventType eventType : eventTypes) {
-      relatedEvents.addAll(getHolidayEvents(start, end, targetDimensions));
-    }
-    return relatedEvents;
-  }
-
-  /**
    * Convert comparison mode to Period
    */
   protected static Period getBaselinePeriod(COMPARE_MODE compareMode) {
@@ -464,6 +315,152 @@ public abstract class BaseNotificationContent implements NotificationContent {
       default:
         return Weeks.ONE.toPeriod();
     }
+  }
+
+  public void init(Properties properties, ThirdEyeAnomalyConfiguration config) {
+    this.properties = properties;
+    this.thirdEyeAnomalyConfig = config;
+
+    this.includeSentAnomaliesOnly = Boolean.valueOf(
+        properties.getProperty(INCLUDE_SENT_ANOMALY_ONLY, DEFAULT_INCLUDE_SENT_ANOMALY_ONLY));
+    this.includeSummary = Boolean.valueOf(
+        properties.getProperty(INCLUDE_SUMMARY, DEFAULT_INCLUDE_SUMMARY));
+    this.dateTimeZone = DateTimeZone.forID(properties.getProperty(TIME_ZONE, DEFAULT_TIME_ZONE));
+
+    Period defaultPeriod = Period
+        .parse(properties.getProperty(EVENT_CRAWL_OFFSET, DEFAULT_EVENT_CRAWL_OFFSET));
+    this.preEventCrawlOffset = defaultPeriod;
+    this.postEventCrawlOffset = defaultPeriod;
+    if (properties.getProperty(PRE_EVENT_CRAWL_OFFSET) != null) {
+      this.preEventCrawlOffset = Period.parse(properties.getProperty(PRE_EVENT_CRAWL_OFFSET));
+    }
+    if (properties.getProperty(POST_EVENT_CRAWL_OFFSET) != null) {
+      this.postEventCrawlOffset = Period.parse(properties.getProperty(POST_EVENT_CRAWL_OFFSET));
+    }
+
+    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
+  }
+
+  public String getSnaphotPath() {
+    return imgPath;
+  }
+
+  public void cleanup() {
+    if (StringUtils.isNotBlank(imgPath)) {
+      try {
+        Files.deleteIfExists(new File(imgPath).toPath());
+      } catch (IOException e) {
+        LOG.error("Exception in deleting screenshot {}", imgPath, e);
+      }
+    }
+  }
+
+  protected void enrichMetricInfo(Map<String, Object> templateData,
+      Collection<AnomalyResult> anomalies) {
+    Set<String> metrics = new TreeSet<>();
+    Set<String> datasets = new TreeSet<>();
+
+    Map<String, MetricConfigDTO> metricsMap = new TreeMap<>();
+    for (AnomalyResult anomalyResult : anomalies) {
+      if (anomalyResult instanceof MergedAnomalyResultDTO) {
+        MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
+        datasets.add(mergedAnomaly.getCollection());
+        metrics.add(mergedAnomaly.getMetric());
+
+        MetricConfigDTO metric = this.metricDAO
+            .findByMetricAndDataset(mergedAnomaly.getMetric(), mergedAnomaly.getCollection());
+        if (metric != null) {
+          metricsMap.put(metric.getId().toString(), metric);
+        }
+      }
+    }
+
+    templateData.put("datasetsCount", datasets.size());
+    templateData.put("datasets", StringUtils.join(datasets, ", "));
+    templateData.put("metricsCount", metrics.size());
+    templateData.put("metrics", StringUtils.join(metrics, ", "));
+    templateData.put("metricsMap", metricsMap);
+  }
+
+  protected Map<String, Object> getTemplateData(SubscriptionGroupDTO notificationConfig,
+      Collection<AnomalyResult> anomalies) {
+    Map<String, Object> templateData = new HashMap<>();
+
+    DateTimeZone timeZone = DateTimeZone.forTimeZone(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
+    List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
+
+    // Calculate start and end time of the anomalies
+    DateTime startTime = DateTime.now();
+    DateTime endTime = new DateTime(0L);
+    for (AnomalyResult anomalyResult : anomalies) {
+      if (anomalyResult instanceof MergedAnomalyResultDTO) {
+        MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
+        mergedAnomalyResults.add(mergedAnomaly);
+      }
+      if (anomalyResult.getStartTime() < startTime.getMillis()) {
+        startTime = new DateTime(anomalyResult.getStartTime(), dateTimeZone);
+      }
+      if (anomalyResult.getEndTime() > endTime.getMillis()) {
+        endTime = new DateTime(anomalyResult.getEndTime(), dateTimeZone);
+      }
+    }
+
+    PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(
+        new DummyAlertFilter(), mergedAnomalyResults);
+
+    templateData.put("anomalyCount", anomalies.size());
+    templateData.put("startTime", getDateString(startTime));
+    templateData.put("endTime", getDateString(endTime));
+    templateData.put("timeZone", getTimezoneString(dateTimeZone));
+    templateData.put("notifiedCount", precisionRecallEvaluator.getTotalAlerts());
+    templateData.put("feedbackCount", precisionRecallEvaluator.getTotalResponses());
+    templateData.put("trueAlertCount", precisionRecallEvaluator.getTrueAnomalies());
+    templateData.put("falseAlertCount", precisionRecallEvaluator.getFalseAlarm());
+    templateData.put("newTrendCount", precisionRecallEvaluator.getTrueAnomalyNewTrend());
+    templateData.put("alertConfigName", notificationConfig.getName());
+    templateData.put("includeSummary", includeSummary);
+    templateData.put("reportGenerationTimeMillis", System.currentTimeMillis());
+    if (precisionRecallEvaluator.getTotalResponses() > 0) {
+      templateData.put("precision", precisionRecallEvaluator.getPrecisionInResponse());
+      templateData.put("recall", precisionRecallEvaluator.getRecall());
+      templateData.put("falseNegative", precisionRecallEvaluator.getFalseNegativeRate());
+    }
+    if (notificationConfig.getReferenceLinks() != null) {
+      templateData.put("referenceLinks", notificationConfig.getReferenceLinks());
+    }
+
+    return templateData;
+  }
+
+  /**
+   * Get the timezone in String
+   */
+  protected String getTimezoneString(DateTimeZone dateTimeZone) {
+    TimeZone tz = TimeZone.getTimeZone(dateTimeZone.getID());
+    return tz.getDisplayName(true, 0);
+  }
+
+  /**
+   * Taking advantage of event data provider, extract the events around the given start and end time
+   *
+   * @param eventTypes the list of event types
+   * @param start the start time of the event, preEventCrawlOffset is added before the given
+   *     date time
+   * @param end the end time of the event, postEventCrawlOffset is added after the given date
+   *     time
+   * @param metricName the affected metric name
+   * @param serviceName the affected service name
+   * @param targetDimensions the affected dimensions
+   * @return a list of related events
+   */
+  protected List<EventDTO> getRelatedEvents(List<EventType> eventTypes, DateTime start,
+      DateTime end, String metricName, String serviceName,
+      Map<String, List<String>> targetDimensions) {
+    List<EventDTO> relatedEvents = new ArrayList<>();
+    for (EventType eventType : eventTypes) {
+      relatedEvents.addAll(getHolidayEvents(start, end, targetDimensions));
+    }
+    return relatedEvents;
   }
 
   /**
@@ -770,12 +767,12 @@ public abstract class BaseNotificationContent implements NotificationContent {
       this.properties = properties;
     }
 
-    public void setWeight(Double weight) {
-      this.weight = weight;
-    }
-
     public double getWeight() {
       return weight;
+    }
+
+    public void setWeight(Double weight) {
+      this.weight = weight;
     }
 
     public String getScore() {

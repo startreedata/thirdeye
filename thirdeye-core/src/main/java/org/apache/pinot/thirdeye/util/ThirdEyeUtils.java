@@ -90,22 +90,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class ThirdEyeUtils {
+
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private static final ThirdEyeCacheRegistry CACHE_REGISTRY = ThirdEyeCacheRegistry.getInstance();
 
   /**
-   * Returns or modifies a filter that can be for querying the results corresponding to the given dimension map.
+   * Returns or modifies a filter that can be for querying the results corresponding to the given
+   * dimension map.
    *
-   * For example, if a dimension map = {country=IN,page_name=front_page}, then the two entries will be added or
+   * For example, if a dimension map = {country=IN,page_name=front_page}, then the two entries will
+   * be added or
    * over-written to the given filter.
    *
-   * Note that if the given filter contains an entry: country=["IN", "US", "TW",...], then this entry is replaced by
+   * Note that if the given filter contains an entry: country=["IN", "US", "TW",...], then this
+   * entry is replaced by
    * country=IN.
    *
    * @param dimensionMap the dimension map to add to the filter
-   * @param filterToDecorate if it is null, a new filter will be created; otherwise, it is modified.
+   * @param filterToDecorate if it is null, a new filter will be created; otherwise, it is
+   *     modified.
    * @return a filter that is modified according to the given dimension map.
    */
   public static Multimap<String, String> getFilterSetFromDimensionMap(DimensionMap dimensionMap,
@@ -119,7 +124,7 @@ public abstract class ThirdEyeUtils {
       String dimensionValue = entry.getValue();
       // If dimension value is "OTHER", then we need to get all data and calculate "OTHER" part.
       // In order to reproduce the data for "OTHER", the filter should remain as is.
-      if ( !dimensionValue.equalsIgnoreCase("OTHER") ) {
+      if (!dimensionValue.equalsIgnoreCase("OTHER")) {
         // Only add the specific dimension value to the filter because other dimension values will not be used
         filterToDecorate.removeAll(dimensionName);
         filterToDecorate.put(dimensionName, dimensionValue);
@@ -181,15 +186,19 @@ public abstract class ThirdEyeUtils {
   }
 
   /**
-   * Returns the time spec of the buckets (data points) in the specified dataset config. For additive dataset, this
-   * method returns the same time spec as getTimestampTimeSpecFromDatasetConfig; however, for non-additive dataset,
-   * this method return the time spec for buckets (data points) instead of the one for the timestamp in the backend
-   * database. For example, the data points of a non-additive dataset could be 5-MINUTES granularity, but timestamp's
-   * granularity could be 1-Milliseconds. For additive dataset, the discrepancy is not an issue, but it could be
+   * Returns the time spec of the buckets (data points) in the specified dataset config. For
+   * additive dataset, this
+   * method returns the same time spec as getTimestampTimeSpecFromDatasetConfig; however, for
+   * non-additive dataset,
+   * this method return the time spec for buckets (data points) instead of the one for the timestamp
+   * in the backend
+   * database. For example, the data points of a non-additive dataset could be 5-MINUTES
+   * granularity, but timestamp's
+   * granularity could be 1-Milliseconds. For additive dataset, the discrepancy is not an issue, but
+   * it could be
    * a problem for non-additive dataset.
    *
    * @param datasetConfig the given dataset config
-   *
    * @return the time spec of the buckets (data points) in the specified dataset config.
    */
   public static TimeSpec getTimeSpecFromDatasetConfig(DatasetConfigDTO datasetConfig) {
@@ -200,19 +209,22 @@ public abstract class ThirdEyeUtils {
   }
 
   /**
-   * Returns the time spec of the timestamp in the specified dataset config. The timestamp time spec is mainly used
-   * for constructing the queries to backend database. For most use case, this method returns the same time spec as
-   * getTimeSpecFromDatasetConfig(); however, if the dataset is non-additive, then getTimeSpecFromDatasetConfig
+   * Returns the time spec of the timestamp in the specified dataset config. The timestamp time spec
+   * is mainly used
+   * for constructing the queries to backend database. For most use case, this method returns the
+   * same time spec as
+   * getTimeSpecFromDatasetConfig(); however, if the dataset is non-additive, then
+   * getTimeSpecFromDatasetConfig
    * should be used unless the application is related to database queries.
    *
    * @param datasetConfig the given dataset config
-   *
    * @return the time spec of the timestamp in the specified dataset config.
    */
   public static TimeSpec getTimestampTimeSpecFromDatasetConfig(DatasetConfigDTO datasetConfig) {
     String timeFormat = getTimeFormatString(datasetConfig);
     TimeSpec timespec = new TimeSpec(datasetConfig.getTimeColumn(),
-        new TimeGranularity(datasetConfig.getTimeDuration(), datasetConfig.getTimeUnit()), timeFormat);
+        new TimeGranularity(datasetConfig.getTimeDuration(), datasetConfig.getTimeUnit()),
+        timeFormat);
     return timespec;
   }
 
@@ -252,7 +264,8 @@ public abstract class ThirdEyeUtils {
     return metricExpression;
   }
 
-  public static String getDerivedMetricExpression(String metricExpressionName, String dataset) throws ExecutionException {
+  public static String getDerivedMetricExpression(String metricExpressionName, String dataset)
+      throws ExecutionException {
     String derivedMetricExpression = null;
     MetricDataset metricDataset = new MetricDataset(metricExpressionName, dataset);
 
@@ -271,16 +284,20 @@ public abstract class ThirdEyeUtils {
     Map<String, Double> metricThresholds = new HashMap<>();
     for (MetricFunction metricFunction : metricFunctions) {
       String derivedMetricExpression = metricFunction.getMetricName();
-      String metricId = derivedMetricExpression.replaceAll(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, "");
-      MetricConfigDTO metricConfig = DAO_REGISTRY.getMetricConfigDAO().findById(Long.valueOf(metricId));
+      String metricId = derivedMetricExpression
+          .replaceAll(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, "");
+      MetricConfigDTO metricConfig = DAO_REGISTRY.getMetricConfigDAO()
+          .findById(Long.valueOf(metricId));
       metricThresholds.put(derivedMetricExpression, metricConfig.getRollupThreshold());
     }
     return metricThresholds;
   }
 
   public static String getMetricNameFromFunction(MetricFunction metricFunction) {
-    String metricId = metricFunction.getMetricName().replace(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, "");
-    MetricConfigDTO metricConfig = DAO_REGISTRY.getMetricConfigDAO().findById(Long.valueOf(metricId));
+    String metricId = metricFunction.getMetricName()
+        .replace(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, "");
+    MetricConfigDTO metricConfig = DAO_REGISTRY.getMetricConfigDAO()
+        .findById(Long.valueOf(metricId));
     return metricConfig.getName();
   }
 
@@ -292,19 +309,19 @@ public abstract class ThirdEyeUtils {
   public static Period getbaselineOffsetPeriodByMode(COMPARE_MODE compareMode) {
     int numWeeksAgo = 1;
     switch (compareMode) {
-    case Wo2W:
-      numWeeksAgo = 2;
-      break;
-    case Wo3W:
-      numWeeksAgo = 3;
-      break;
-    case Wo4W:
-      numWeeksAgo = 4;
-      break;
-    case WoW:
-    default:
-      numWeeksAgo = 1;
-      break;
+      case Wo2W:
+        numWeeksAgo = 2;
+        break;
+      case Wo3W:
+        numWeeksAgo = 3;
+        break;
+      case Wo4W:
+        numWeeksAgo = 4;
+        break;
+      case WoW:
+      default:
+        numWeeksAgo = 1;
+        break;
     }
     return new Period(0, 0, 0, 7 * numWeeksAgo, 0, 0, 0, 0);
   }
@@ -322,12 +339,17 @@ public abstract class ThirdEyeUtils {
   public static List<DatasetConfigDTO> getDatasetConfigsFromMetricUrn(String metricUrn) {
     DatasetConfigManager datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
     MetricEntity me = MetricEntity.fromURN(metricUrn);
-    MetricConfigDTO metricConfig = DAORegistry.getInstance().getMetricConfigDAO().findById(me.getId());
-    if (metricConfig == null) return new ArrayList<>();
+    MetricConfigDTO metricConfig = DAORegistry.getInstance().getMetricConfigDAO()
+        .findById(me.getId());
+    if (metricConfig == null) {
+      return new ArrayList<>();
+    }
     if (!metricConfig.isDerived()) {
-      return Collections.singletonList(datasetConfigManager.findByDataset(metricConfig.getDataset()));
+      return Collections
+          .singletonList(datasetConfigManager.findByDataset(metricConfig.getDataset()));
     } else {
-      MetricExpression metricExpression = ThirdEyeUtils.getMetricExpressionFromMetricConfig(metricConfig);
+      MetricExpression metricExpression = ThirdEyeUtils
+          .getMetricExpressionFromMetricConfig(metricConfig);
       List<MetricFunction> functions = metricExpression.computeMetricFunctions();
       return functions.stream().map(
           f -> datasetConfigManager.findByDataset(f.getDataset())).collect(Collectors.toList());
@@ -362,13 +384,15 @@ public abstract class ThirdEyeUtils {
     return metricConfig;
   }
 
-
-  public static MetricConfigDTO getMetricConfigFromNameAndDataset(String metricName, String dataset) {
+  public static MetricConfigDTO getMetricConfigFromNameAndDataset(String metricName,
+      String dataset) {
     MetricConfigDTO metricConfig = null;
     try {
-      metricConfig = CACHE_REGISTRY.getMetricConfigCache().get(new MetricDataset(metricName, dataset));
+      metricConfig = CACHE_REGISTRY.getMetricConfigCache()
+          .get(new MetricDataset(metricName, dataset));
     } catch (ExecutionException e) {
-      LOG.error("Exception while fetching metric by name {} and dataset {}", metricName, dataset, e);
+      LOG.error("Exception while fetching metric by name {} and dataset {}", metricName, dataset,
+          e);
     }
     return metricConfig;
   }
@@ -378,6 +402,7 @@ public abstract class ThirdEyeUtils {
    * Max rounding will be up to 4 decimals
    * For values >= 0.1, use 2 decimals (eg. 123, 2.5, 1.26, 0.5, 0.162)
    * For values < 0.1, use 3 decimals (eg. 0.08, 0.071, 0.0123)
+   *
    * @param value any double value
    * @return the rounded double value
    */
@@ -398,9 +423,8 @@ public abstract class ThirdEyeUtils {
    * For values gte 0.1, use ##.## (eg. 123, 2.5, 1.26, 0.5, 0.162)
    * For values lt 0.1 and gte 0.01, use ##.### (eg. 0.08, 0.071, 0.0123)
    * For values lt 0.01 and gte 0.001, use ##.#### (eg. 0.001, 0.00367)
-   * This function ensures we don't prematurely round off double values to a fixed format, and make it 0.00 or lose out information
-   * @param value
-   * @return
+   * This function ensures we don't prematurely round off double values to a fixed format, and make
+   * it 0.00 or lose out information
    */
   public static String getRoundedValue(double value) {
     if (Double.isNaN(value) || Double.isInfinite(value)) {
@@ -425,7 +449,6 @@ public abstract class ThirdEyeUtils {
     return decimalFormat.format(value);
   }
 
-
   //TODO: currently assuming all metrics in one request are for the same data source
   // It would be better to not assume that, and split the thirdeye request into more requests depending upon the data sources
   public static String getDataSourceFromMetricFunctions(List<MetricFunction> metricFunctions) {
@@ -435,8 +458,9 @@ public abstract class ThirdEyeUtils {
       if (dataSource == null) {
         dataSource = functionDatasetDatasource;
       } else if (!dataSource.equals(functionDatasetDatasource)) {
-        throw new IllegalStateException("All metric funcitons of one request must belong to the same data source. "
-            + dataSource + " is not equal to" + functionDatasetDatasource);
+        throw new IllegalStateException(
+            "All metric funcitons of one request must belong to the same data source. "
+                + dataSource + " is not equal to" + functionDatasetDatasource);
       }
     }
     return dataSource;
@@ -463,7 +487,6 @@ public abstract class ThirdEyeUtils {
    *
    * @param exceptions the list of exceptions to be printed.
    * @param maxWordCount the length limitation of the string; set to 0 to remove the limitation.
-   *
    * @return the string that contains the messages and stack traces of the given exceptions.
    */
   public static String exceptionsToString(List<Exception> exceptions, int maxWordCount) {
@@ -505,7 +528,8 @@ public abstract class ThirdEyeUtils {
       File configFile = new File(dashboardConfigFilePath);
       YamlConfigurationFactory<ThirdEyeConfiguration> factory =
           new YamlConfigurationFactory<>(ThirdEyeConfiguration.class,
-              Validation.buildDefaultValidatorFactory().getValidator(), Jackson.newObjectMapper(), "");
+              Validation.buildDefaultValidatorFactory().getValidator(), Jackson.newObjectMapper(),
+              "");
       config = factory.build(configFile);
       config.setRootDir(thirdEyeConfigDir);
     } catch (Exception e) {
@@ -526,7 +550,6 @@ public abstract class ThirdEyeUtils {
    * Guess time duration from period.
    *
    * @param granularity dataset granularity
-   * @return
    */
   public static int getTimeDuration(Period granularity) {
     if (granularity.getDays() > 0) {
@@ -548,7 +571,6 @@ public abstract class ThirdEyeUtils {
    * Guess time unit from period.
    *
    * @param granularity dataset granularity
-   * @return
    */
   public static TimeUnit getTimeUnit(Period granularity) {
     if (granularity.getDays() > 0) {
@@ -575,13 +597,17 @@ public abstract class ThirdEyeUtils {
     if (LOG.isDebugEnabled()) {
       listener = new RemovalListener<RelationalQuery, ThirdEyeResultSet>() {
         @Override
-        public void onRemoval(RemovalNotification<RelationalQuery, ThirdEyeResultSet> notification) {
+        public void onRemoval(
+            RemovalNotification<RelationalQuery, ThirdEyeResultSet> notification) {
           LOG.debug("Expired {}", notification.getKey().getQuery());
         }
       };
     } else {
       listener = new RemovalListener<RelationalQuery, ThirdEyeResultSet>() {
-        @Override public void onRemoval(RemovalNotification<RelationalQuery, ThirdEyeResultSet> notification) { }
+        @Override
+        public void onRemoval(
+            RemovalNotification<RelationalQuery, ThirdEyeResultSet> notification) {
+        }
       };
     }
 
@@ -590,19 +616,22 @@ public abstract class ThirdEyeUtils {
     // heap space.
     long maxBucketNumber = getApproximateMaxBucketNumber(
         CoreConstants.DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE);
-    LOG.debug("Max bucket number for {}'s cache is set to {}", cacheLoader.toString(), maxBucketNumber);
+    LOG.debug("Max bucket number for {}'s cache is set to {}", cacheLoader.toString(),
+        maxBucketNumber);
 
     return CacheBuilder.newBuilder()
         .removalListener(listener)
         .expireAfterWrite(15, TimeUnit.MINUTES)
         .maximumWeight(maxBucketNumber)
         .weigher(new Weigher<RelationalQuery, ThirdEyeResultSetGroup>() {
-          @Override public int weigh(RelationalQuery relationalQuery, ThirdEyeResultSetGroup resultSetGroup) {
+          @Override
+          public int weigh(RelationalQuery relationalQuery, ThirdEyeResultSetGroup resultSetGroup) {
             int resultSetCount = resultSetGroup.size();
             int weight = 0;
             for (int idx = 0; idx < resultSetCount; ++idx) {
               ThirdEyeResultSet resultSet = resultSetGroup.get(idx);
-              weight += ((resultSet.getColumnCount() + resultSet.getGroupKeyLength()) * resultSet.getRowCount());
+              weight += ((resultSet.getColumnCount() + resultSet.getGroupKeyLength()) * resultSet
+                  .getRowCount());
             }
             return weight;
           }
@@ -613,9 +642,11 @@ public abstract class ThirdEyeUtils {
   private static long getApproximateMaxBucketNumber(int percentage) {
     long jvmMaxMemoryInBytes = Runtime.getRuntime().maxMemory();
     if (jvmMaxMemoryInBytes == Long.MAX_VALUE) { // Check upper bound
-      jvmMaxMemoryInBytes = CoreConstants.DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB * FileUtils.ONE_MB; // MB to Bytes
+      jvmMaxMemoryInBytes = CoreConstants.DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
+          * FileUtils.ONE_MB; // MB to Bytes
     } else { // Check lower bound
-      long lowerBoundInBytes = CoreConstants.DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB * FileUtils.ONE_MB; // MB to Bytes
+      long lowerBoundInBytes = CoreConstants.DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
+          * FileUtils.ONE_MB; // MB to Bytes
       if (jvmMaxMemoryInBytes < lowerBoundInBytes) {
         jvmMaxMemoryInBytes = lowerBoundInBytes;
       }
@@ -623,11 +654,11 @@ public abstract class ThirdEyeUtils {
     return (jvmMaxMemoryInBytes / 102400) * percentage;
   }
 
-
   /**
    * Merge child's properties into parent's properties.
    * If the property exists in both then use parent's property.
    * For property = "detectorComponentName", combine the parent and child.
+   *
    * @param parent The parent anomaly's properties.
    * @param child The child anomaly's properties.
    */
@@ -683,6 +714,7 @@ public abstract class ThirdEyeUtils {
 
   /**
    * Check if the anomaly is detected by multiple components
+   *
    * @param anomaly the anomaly
    * @return if the anomaly is detected by multiple components
    */
@@ -712,8 +744,6 @@ public abstract class ThirdEyeUtils {
 
   /**
    * Parse job name to get the detection id
-   * @param jobName
-   * @return
    */
   public static long getDetectionIdFromJobName(String jobName) {
     String[] parts = jobName.split("_");
@@ -724,16 +754,20 @@ public abstract class ThirdEyeUtils {
   }
 
   /**
-   * A helper function to merge time series snapshot of two anomalies. This function assumes that the time series of
+   * A helper function to merge time series snapshot of two anomalies. This function assumes that
+   * the time series of
    * both parent and child anomalies are aligned with the metric granularity boundary.
+   *
    * @param parent time series snapshot of parent anomaly
    * @param child time series snapshot of parent anaomaly
    * @return merged time series snapshot based on timestamps
    */
-  private static AnomalyTimelinesView mergeTimeSeriesSnapshot(AnomalyTimelinesView parent, AnomalyTimelinesView child) {
+  private static AnomalyTimelinesView mergeTimeSeriesSnapshot(AnomalyTimelinesView parent,
+      AnomalyTimelinesView child) {
     AnomalyTimelinesView mergedTimeSeriesSnapshot = new AnomalyTimelinesView();
-    int i = 0 , j = 0;
-    while(i < parent.getTimeBuckets().size() && j < child.getTimeBuckets().size()) {
+    int i = 0;
+    int j = 0;
+    while (i < parent.getTimeBuckets().size() && j < child.getTimeBuckets().size()) {
       long parentTime = parent.getTimeBuckets().get(i).getCurrentStart();
       long childTime = child.getTimeBuckets().get(j).getCurrentStart();
       if (parentTime == childTime) {

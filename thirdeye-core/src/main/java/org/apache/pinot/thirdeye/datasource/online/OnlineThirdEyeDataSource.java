@@ -56,9 +56,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OnlineThirdEyeDataSource implements ThirdEyeDataSource {
-  static final Logger LOG = LoggerFactory.getLogger(OnlineThirdEyeDataSource.class);
 
   public static final String DATA_SOURCE_NAME = OnlineThirdEyeDataSource.class.getSimpleName();
+  static final Logger LOG = LoggerFactory.getLogger(OnlineThirdEyeDataSource.class);
   private static final String ONLINE = "Online";
   private final OnlineDetectionDataManager onlineDetectionDataDAO;
   Map<String, DataFrame> dataSets;
@@ -66,7 +66,8 @@ public class OnlineThirdEyeDataSource implements ThirdEyeDataSource {
   /**
    * Construct an online data source, which connects to internal database to retrieve data.
    *
-   * @param properties the configuration providing the information to initialize online datasource.
+   * @param properties the configuration providing the information to initialize online
+   *     datasource.
    */
   public OnlineThirdEyeDataSource(Map<String, Object> properties) {
     LOG.info("Initializing online datasource with prop: " + properties);
@@ -80,11 +81,13 @@ public class OnlineThirdEyeDataSource implements ThirdEyeDataSource {
     return formatter.parseDateTime(str);
   }
 
-  @Override public String getName() {
+  @Override
+  public String getName() {
     return DATA_SOURCE_NAME;
   }
 
-  @Override public ThirdEyeResponse execute(ThirdEyeRequest request) throws Exception {
+  @Override
+  public ThirdEyeResponse execute(ThirdEyeRequest request) throws Exception {
     // Currently only support single metric function (non-derived)
     if (request.getMetricFunctions().size() != 1) {
       throw new RuntimeException(
@@ -104,7 +107,7 @@ public class OnlineThirdEyeDataSource implements ThirdEyeDataSource {
 
     List<OnlineDetectionDataDTO> onlineDetectionDataDTOs
         = onlineDetectionDataDAO.findByDatasetAndMetric(dataset, metricConfig.getName());
-    Preconditions.checkState(onlineDetectionDataDTOs.size()==1,
+    Preconditions.checkState(onlineDetectionDataDTOs.size() == 1,
         String.format("Find %d online data", onlineDetectionDataDTOs.size()));
     String onlineDetectionData = onlineDetectionDataDTOs.get(0).getOnlineDetectionData();
 
@@ -126,18 +129,21 @@ public class OnlineThirdEyeDataSource implements ThirdEyeDataSource {
     ArrayNode columnsNode = (ArrayNode) rootNode.path("columns");
     ArrayNode rowsNode = (ArrayNode) rootNode.path("rows");
 
-    int timeColIdx = -1, metricColIdx = -1;
+    int timeColIdx = -1;
+    int metricColIdx = -1;
     Map<String, Integer> colNameToFilterColIndices = new HashMap<>();
     if (columnsNode.isArray()) {
       int idx = 0;
       for (JsonNode columnNode : columnsNode) {
         String columnName = columnNode.textValue();
-        if (columnName.equals(timeColumnName))
+        if (columnName.equals(timeColumnName)) {
           timeColIdx = idx;
-        else if (columnName.equals(metricColumnName))
+        } else if (columnName.equals(metricColumnName)) {
           metricColIdx = idx;
-        if (decoratedFilterSet.keySet().contains(columnName))
+        }
+        if (decoratedFilterSet.keySet().contains(columnName)) {
           colNameToFilterColIndices.put(columnName, idx);
+        }
         idx++;
       }
     }
@@ -153,8 +159,9 @@ public class OnlineThirdEyeDataSource implements ThirdEyeDataSource {
           String timeValString = rowNode.get(timeColIdx).textValue();
           DateTime timeValDate = convertStringToDate(timeValString, datasetConfig.getTimezone(),
               dataTimeSpec.getFormat());
-          if (timeValDate.isBefore(startTime) || timeValDate.isAfter(endTime))
+          if (timeValDate.isBefore(startTime) || timeValDate.isAfter(endTime)) {
             continue;
+          }
 
           // Filter by filtering set
           boolean needFiltered = false;
@@ -167,8 +174,9 @@ public class OnlineThirdEyeDataSource implements ThirdEyeDataSource {
               break;
             }
           }
-          if (needFiltered)
+          if (needFiltered) {
             continue;
+          }
 
           int idxInDF = 0;
           columnsOfTheRow = new String[totalColumnCount];
@@ -199,23 +207,28 @@ public class OnlineThirdEyeDataSource implements ThirdEyeDataSource {
     return new RelationalThirdEyeResponse(request, resultRows, dataTimeSpec);
   }
 
-  @Override public List<String> getDatasets() throws Exception {
+  @Override
+  public List<String> getDatasets() throws Exception {
     return new ArrayList<>(this.dataSets.keySet());
   }
 
-  @Override public void clear() throws Exception {
+  @Override
+  public void clear() throws Exception {
     throw new RuntimeException("Online service: not supported");
   }
 
-  @Override public void close() throws Exception {
+  @Override
+  public void close() throws Exception {
     throw new RuntimeException("Online service: not supported");
   }
 
-  @Override public long getMaxDataTime(String dataset) throws Exception {
+  @Override
+  public long getMaxDataTime(String dataset) throws Exception {
     throw new RuntimeException("Online service: not supported");
   }
 
-  @Override public Map<String, List<String>> getDimensionFilters(String dataset) throws Exception {
+  @Override
+  public Map<String, List<String>> getDimensionFilters(String dataset) throws Exception {
     throw new RuntimeException("Online service: not supported");
   }
 }

@@ -29,11 +29,14 @@ import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
 
-
 public class AnomalyDetectionInputContext {
-  private Map<DimensionMap, MetricTimeSeries> dimensionMapMetricTimeSeriesMap = Collections.emptyMap();
+
+  private Map<DimensionMap, MetricTimeSeries> dimensionMapMetricTimeSeriesMap = Collections
+      .emptyMap();
   private MetricTimeSeries globalMetric;
-  private ListMultimap<DimensionMap, MergedAnomalyResultDTO> knownMergedAnomalies = ArrayListMultimap.create();;
+  private ListMultimap<DimensionMap, MergedAnomalyResultDTO> knownMergedAnomalies = ArrayListMultimap
+      .create();
+  ;
   private List<ScalingFactor> scalingFactors = Collections.emptyList();
 
   public Map<DimensionMap, MetricTimeSeries> getDimensionMapMetricTimeSeriesMap() {
@@ -49,7 +52,8 @@ public class AnomalyDetectionInputContext {
     return knownMergedAnomalies;
   }
 
-  public void setKnownMergedAnomalies(ListMultimap<DimensionMap, MergedAnomalyResultDTO> knownMergedAnomalies) {
+  public void setKnownMergedAnomalies(
+      ListMultimap<DimensionMap, MergedAnomalyResultDTO> knownMergedAnomalies) {
     this.knownMergedAnomalies = knownMergedAnomalies;
   }
 

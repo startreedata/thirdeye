@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.tracking;
 
+import static org.apache.pinot.thirdeye.Constants.NO_AUTH_USER;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,12 +28,12 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 
-
 /**
  * Concurrent request log. Tracks request success and failure events with deep information.
  * Support append and truncation plus an approximate capacity gauge.
  */
 public class RequestLog {
+
   final int approximateCapacity;
 
   final ConcurrentLinkedDeque<RequestLogEntry> requestLog = new ConcurrentLinkedDeque<>();
@@ -40,6 +42,42 @@ public class RequestLog {
 
   public RequestLog(int approximateCapacity) {
     this.approximateCapacity = approximateCapacity;
+  }
+
+  /**
+   * Helper to increment (possibly non-existing) map value by given value
+   *
+   * @param map map
+   * @param key key
+   * @param byValue value to increment by
+   */
+  private static void increment(Map<String, Long> map, String key, long byValue) {
+    if (!map.containsKey(key)) {
+      map.put(key, 0L);
+    }
+    map.put(key, map.get(key) + byValue);
+  }
+
+  /**
+   * Helper to increment (possibly non-existing) map value by one
+   *
+   * @param map map
+   * @param key key
+   */
+  private static void increment(Map<String, Long> map, String key) {
+    increment(map, key, 1);
+  }
+
+  /**
+   * Helper to return current authenticated principal, if any.
+   *
+   * @return principal name
+   */
+  private static String getPrincipal() {
+    if (ThirdEyeAuthFilter.getCurrentPrincipal() == null) {
+      return NO_AUTH_USER;
+    }
+    return ThirdEyeAuthFilter.getCurrentPrincipal().getName();
   }
 
   /**
@@ -56,7 +94,8 @@ public class RequestLog {
     if (this.requestLogGauge.getAndIncrement() >= this.approximateCapacity) {
       this.requestLog.removeFirst();
     }
-    this.requestLog.add(new RequestLogEntry(datasource, dataset, metric, getPrincipal(), true, start, end, null));
+    this.requestLog.add(
+        new RequestLogEntry(datasource, dataset, metric, getPrincipal(), true, start, end, null));
   }
 
   /**
@@ -70,11 +109,14 @@ public class RequestLog {
    * @param end request end time (in nanos)
    * @param exception exception
    */
-  public void failure(String datasource, String dataset, String metric, long start, long end, Exception exception) {
+  public void failure(String datasource, String dataset, String metric, long start, long end,
+      Exception exception) {
     if (this.requestLogGauge.getAndIncrement() >= this.approximateCapacity) {
       this.requestLog.removeFirst();
     }
-    this.requestLog.add(new RequestLogEntry(datasource, dataset, metric, getPrincipal(), false, start, end, exception));
+    this.requestLog.add(
+        new RequestLogEntry(datasource, dataset, metric, getPrincipal(), false, start, end,
+            exception));
   }
 
   /**
@@ -99,7 +141,8 @@ public class RequestLog {
   }
 
   /**
-   * Return aggregate data source performance statistics up to the given timestamp. Weakly consistent.
+   * Return aggregate data source performance statistics up to the given timestamp. Weakly
+   * consistent.
    *
    * @param end upper time bound for performance log entries
    * @return aggregated performance statistics
@@ -151,7 +194,6 @@ public class RequestLog {
         increment(successPerMetric, metric);
         increment(successPerPrincipal, principal);
         successTotal++;
-
       } else {
         increment(failurePerDatasource, datasource);
         increment(failurePerDataset, dataset);
@@ -193,41 +235,5 @@ public class RequestLog {
     stats.setDurationTotal(durationTotal);
 
     return stats;
-  }
-
-  /**
-   * Helper to increment (possibly non-existing) map value by given value
-   *
-   * @param map map
-   * @param key key
-   * @param byValue value to increment by
-   */
-  private static void increment(Map<String, Long> map, String key, long byValue) {
-    if (!map.containsKey(key)) {
-      map.put(key, 0L);
-    }
-    map.put(key, map.get(key) + byValue);
-  }
-
-  /**
-   * Helper to increment (possibly non-existing) map value by one
-   *
-   * @param map map
-   * @param key key
-   */
-  private static void increment(Map<String, Long> map, String key) {
-    increment(map, key, 1);
-  }
-
-  /**
-   * Helper to return current authenticated principal, if any.
-   *
-   * @return principal name
-   */
-  private static String getPrincipal() {
-    if (ThirdEyeAuthFilter.getCurrentPrincipal() == null) {
-      return "no-auth-user";
-    }
-    return ThirdEyeAuthFilter.getCurrentPrincipal().getName();
   }
 }

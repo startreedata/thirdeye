@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye;
 public interface Constants {
 
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
+  String NO_AUTH_USER = "no-auth-user";
 
   enum JobStatus {
     SCHEDULED,

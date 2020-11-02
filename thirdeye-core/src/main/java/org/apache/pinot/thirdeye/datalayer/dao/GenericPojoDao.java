@@ -38,6 +38,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
@@ -111,6 +112,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class GenericPojoDao {
+
   private static final Logger LOG = LoggerFactory.getLogger(GenericPojoDao.class);
   private static boolean IS_DEBUG = LOG.isDebugEnabled();
   private static int MAX_BATCH_SIZE = 1000;
@@ -220,7 +222,7 @@ public class GenericPojoDao {
     if (principal != null) {
       return principal.getName();
     }
-    return "no-auth-user";
+    return Constants.NO_AUTH_USER;
   }
 
   public <E extends AbstractBean> Long put(final E pojo) {

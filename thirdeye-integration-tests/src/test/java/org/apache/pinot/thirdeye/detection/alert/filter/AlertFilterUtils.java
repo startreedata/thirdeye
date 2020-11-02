@@ -16,9 +16,11 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
+import static org.apache.pinot.thirdeye.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
 import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionJiraAlerter.PROP_JIRA_SCHEME;
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_ASSIGNEE;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Arrays;
@@ -118,8 +120,8 @@ public class AlertFilterUtils {
     dimMap.putAll(dimensions);
     anomaly.setDimensions(dimMap);
 
-    anomaly.setCreatedBy("no-auth-user");
-    anomaly.setUpdatedBy("no-auth-user");
+    anomaly.setCreatedBy(NO_AUTH_USER);
+    anomaly.setUpdatedBy(NO_AUTH_USER);
     anomaly.setSeverityLabel(severity);
     anomaly.setId(DAORegistry.getInstance().getMergedAnomalyResultDAO().save(anomaly));
 

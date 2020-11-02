@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.auth;
 
+import static org.apache.pinot.thirdeye.Constants.NO_AUTH_USER;
+
 import io.dropwizard.auth.Authenticator;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -34,6 +36,6 @@ public class ThirdEyeAuthenticatorDisabled implements
     LOG.warn("Authentication is disabled. Accepting any credentials for {}.",
         credentials.getPrincipal());
 
-    return Optional.of(new ThirdEyePrincipal(credentials.getPrincipal()));
+    return Optional.of(new ThirdEyePrincipal(NO_AUTH_USER));
   }
 }

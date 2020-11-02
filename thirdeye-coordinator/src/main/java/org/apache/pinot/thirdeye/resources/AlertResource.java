@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
+import org.apache.pinot.thirdeye.api.UserApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
@@ -78,7 +79,9 @@ public class AlertResource {
     ensure(alertApi.getDetections().size() == 1, "Exactly 1 detection must be present");
 
     return Response
-        .ok(toApi(alertCreater.create(alertApi)))
+        .ok(toApi(alertCreater.create(alertApi
+            .setOwner(new UserApi().setPrincipal(principal.getName()))
+        )))
         .build();
   }
 

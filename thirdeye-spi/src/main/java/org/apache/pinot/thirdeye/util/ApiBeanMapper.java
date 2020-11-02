@@ -18,6 +18,7 @@ import org.apache.pinot.thirdeye.api.EmailSettingsApi;
 import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.api.TimeColumnApi;
+import org.apache.pinot.thirdeye.api.UserApi;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -80,6 +81,8 @@ public abstract class ApiBeanMapper {
         .setCron(dto.getCron())
         .setDetections(toComponentMap(dto.getComponentSpecs()))
         .setLastTimestamp(new Date(dto.getLastTimestamp()))
+        .setOwner(new UserApi()
+            .setPrincipal(dto.getCreatedBy()))
         ;
   }
 

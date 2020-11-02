@@ -131,6 +131,7 @@ public class AlertCreater {
         .map(d -> d.toInstant().toEpochMilli())
         .orElse(0L));
     dto.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+    dto.setCreatedBy(api.getOwner().getPrincipal());
 
     return dto;
   }

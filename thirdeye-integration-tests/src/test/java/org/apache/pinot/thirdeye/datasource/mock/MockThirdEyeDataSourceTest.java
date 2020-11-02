@@ -83,8 +83,7 @@ public class MockThirdEyeDataSourceTest {
   @Test
   public void testDataGenerator() {
     Assert.assertEquals(this.dataSource.datasetData.size(), 2);
-    // TODO suvodeep investigate/refactor test
-    Assert.assertEquals(this.dataSource.datasetData.get("business").size(), 27 * 9);
+    Assert.assertEquals(this.dataSource.datasetData.get("business").size(), 28 * 9);
     Assert.assertTrue(this.dataSource.datasetData.get("tracking").size() > 27 * 21); // allow for DST
   }
 
@@ -107,9 +106,8 @@ public class MockThirdEyeDataSourceTest {
   @Test
   public void testDataGeneratorDaily() {
     DataFrame data = this.dataSource.datasetData.get("business");
-    // TODO suvodeep investigate/refactor test
-    Assert.assertEquals(data.getDoubles(COL_PURCHASES).count(), 27 * 9);
-    Assert.assertEquals(data.getDoubles(COL_REVENUE).count(), 27 * 9);
+    Assert.assertEquals(data.getDoubles(COL_PURCHASES).count(), 28 * 9);
+    Assert.assertEquals(data.getDoubles(COL_REVENUE).count(), 28 * 9);
 
     Assert.assertTrue(data.getDoubles(COL_PURCHASES).sum().doubleValue() > 0);
     Assert.assertTrue(data.getDoubles(COL_REVENUE).sum().doubleValue() > 0);

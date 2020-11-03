@@ -105,7 +105,7 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
     }
     public String toString(){
       DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-      return String.format("%s,%s,%s,%s,%s,%s,%s,%s", fmt.print(startTime), fmt.print(endTime),
+      return String.format("%s,%s,%s,%s,%s,%s,%s,%s %s", fmt.print(startTime), fmt.print(endTime),
           dimensionString(), (filters == null)? "":filters,
           Long.toString(functionId), functionName, Double.toString(severity),
           Double.toString(windowSize),

@@ -164,7 +164,7 @@
             <target>${jdk.version}</target>
             <compilerArgs>
               <arg>-XDcompilePolicy=simple</arg>
-              <arg>-Xplugin:ErrorProne -XepAllErrorsAsWarnings</arg>
+              <arg>-Xplugin:ErrorProne</arg>
             </compilerArgs>
             <annotationProcessorPaths>
               <path>

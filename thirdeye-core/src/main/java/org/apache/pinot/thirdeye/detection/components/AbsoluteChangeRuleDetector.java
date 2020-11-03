@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
-import static org.apache.pinot.thirdeye.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.POSITIVE_INFINITY;
+import static org.apache.pinot.thirdeye.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.dataframe.Series.map;
 
 import java.util.ArrayList;

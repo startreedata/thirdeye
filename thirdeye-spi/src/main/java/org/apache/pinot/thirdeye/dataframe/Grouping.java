@@ -20,7 +20,7 @@
 
 package org.apache.pinot.thirdeye.dataframe;
 
-import static org.apache.pinot.thirdeye.dataframe.DoubleSeries.LongConditional;
+import static org.apache.pinot.thirdeye.dataframe.Series.LongConditional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1239,21 +1239,21 @@ public abstract class Grouping {
 
     private static DateTime makeOrigin(DateTime first, Period period) {
       if (period.getYears() > 0) {
-        return first.year().roundFloorCopy().toDateTime();
+        return first.year().roundFloorCopy();
       } else if (period.getMonths() > 0) {
-        return first.monthOfYear().roundFloorCopy().toDateTime();
+        return first.monthOfYear().roundFloorCopy();
       } else if (period.getWeeks() > 0) {
-        return first.weekOfWeekyear().roundFloorCopy().toDateTime();
+        return first.weekOfWeekyear().roundFloorCopy();
       } else if (period.getDays() > 0) {
-        return first.dayOfYear().roundFloorCopy().toDateTime();
+        return first.dayOfYear().roundFloorCopy();
       } else if (period.getHours() > 0) {
-        return first.hourOfDay().roundFloorCopy().toDateTime();
+        return first.hourOfDay().roundFloorCopy();
       } else if (period.getMinutes() > 0) {
-        return first.minuteOfHour().roundFloorCopy().toDateTime();
+        return first.minuteOfHour().roundFloorCopy();
       } else if (period.getSeconds() > 0) {
-        return first.secondOfMinute().roundFloorCopy().toDateTime();
+        return first.secondOfMinute().roundFloorCopy();
       } else if (period.getMillis() > 0) {
-        return first.millisOfSecond().roundFloorCopy().toDateTime();
+        return first.millisOfSecond().roundFloorCopy();
       }
 
       throw new IllegalArgumentException(String.format("Unsupported Period '%s'", period));

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.common.metric;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 
 public class MetricSpec {
   private String name;
@@ -50,13 +51,20 @@ public class MetricSpec {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof MetricSpec)) {
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
       return false;
     }
+    final MetricSpec that = (MetricSpec) o;
+    return name.equals(that.name) &&
+        type == that.type;
+  }
 
-    MetricSpec m = (MetricSpec) o;
-
-    return name.equals(m.getName()) && type.equals(m.getType());
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, type);
   }
 }

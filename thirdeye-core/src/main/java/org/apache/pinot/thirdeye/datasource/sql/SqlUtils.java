@@ -221,7 +221,7 @@ public class SqlUtils {
       if (id != null) {
         LOG.info("Created metric '{}' with id {}", metricConfig.getAlias(), id);
       } else {
-        String warning = String.format("Could not create metric '{}'", metricConfig.getAlias());
+        String warning = String.format("Could not create metric %s", metricConfig.getAlias());
         LOG.warn(warning);
         throw new RuntimeException(warning);
       }
@@ -231,7 +231,7 @@ public class SqlUtils {
     if (id != null) {
       LOG.info("Created dataset '{}' with id {}", datasetConfig.getDataset(), id);
     } else {
-      String warning = String.format("Could not create dataset '{}'", datasetConfig.getDataset());
+      String warning = String.format("Could not create dataset %s", datasetConfig.getDataset());
       LOG.warn(warning);
       throw new RuntimeException(warning);
     }

@@ -25,6 +25,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -155,7 +156,8 @@ public class PqlUtils {
     MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
     Map<String, String> metricProperties = metricConfig.getMetricProperties();
     if (metricProperties == null || metricProperties.isEmpty()) {
-      throw new RuntimeException("Metric properties must have properties " + DimensionAsMetricProperties.values());
+      throw new RuntimeException("Metric properties must have properties " + Arrays
+          .toString(DimensionAsMetricProperties.values()));
     }
     String metricNames =
         metricProperties.get(DimensionAsMetricProperties.METRIC_NAMES.toString());
@@ -164,7 +166,8 @@ public class PqlUtils {
     String metricValuesColumn =
         metricProperties.get(DimensionAsMetricProperties.METRIC_VALUES_COLUMN.toString());
     if (StringUtils.isBlank(metricNames) || StringUtils.isBlank(metricNamesColumns) || StringUtils.isBlank(metricValuesColumn)) {
-      throw new RuntimeException("Metric properties must have properties " + DimensionAsMetricProperties.values());
+      throw new RuntimeException("Metric properties must have properties " + Arrays
+          .toString(DimensionAsMetricProperties.values()));
     }
     List<String> metricNamesList =
         Lists.newArrayList(metricNames.split(MetricConfigBean.METRIC_PROPERTIES_SEPARATOR));

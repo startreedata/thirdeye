@@ -267,7 +267,7 @@ public class DimensionWrapper extends DetectionPipeline {
     }
     if (nestedMetrics.size() > MAX_DIMENSION_COMBINATIONS) {
       throw new DetectionPipelineException(String.format(
-          "Dimension combination for {} is {} which exceeds limit of {}",
+          "Dimension combination for %d is %d which exceeds limit of %d",
           this.config.getId(), nestedMetrics.size(), MAX_DIMENSION_COMBINATIONS));
     }
 

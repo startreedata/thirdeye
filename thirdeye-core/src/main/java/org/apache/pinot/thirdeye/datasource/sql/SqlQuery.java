@@ -24,7 +24,6 @@ import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 
-
 public class SqlQuery extends RelationalQuery {
 
   private String sourceName;
@@ -34,8 +33,8 @@ public class SqlQuery extends RelationalQuery {
   private TimeGranularity granularity;
   private TimeSpec timeSpec;
 
-
-  public SqlQuery(String sql, String sourceName, String dbName, String metric, List<String> groupByKeys, TimeGranularity granularity, TimeSpec timeSpec) {
+  public SqlQuery(String sql, String sourceName, String dbName, String metric,
+      List<String> groupByKeys, TimeGranularity granularity, TimeSpec timeSpec) {
     super(sql);
     this.sourceName = sourceName;
     this.dbName = dbName;
@@ -47,10 +46,6 @@ public class SqlQuery extends RelationalQuery {
 
   public String getQuery() {
     return query;
-  }
-
-  public void setSql(String sql) {
-    this.query = query;
   }
 
   public String getSourceName() {

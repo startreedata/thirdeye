@@ -19,9 +19,13 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -47,12 +51,15 @@ import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class ThirdEyeCacheRegistry {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ThirdEyeCacheRegistry.class);
-  private static final ThirdEyeCacheRegistry INSTANCE = new ThirdEyeCacheRegistry();
+
+  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeCacheRegistry.class);
+  private static ThirdEyeCacheRegistry instance;
 
   // DAO to ThirdEye's data and meta-data storage.
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
+  private final MetricConfigManager metricConfigManager;
+  private final DatasetConfigManager datasetConfigManager;
 
   // TODO: Rename QueryCache to a name like DataSourceCache.
   private QueryCache queryCache;
@@ -65,90 +72,26 @@ public class ThirdEyeCacheRegistry {
   private LoadingCache<String, String> dimensionFiltersCache;
   private DatasetListCache datasetsCache;
 
-  public static ThirdEyeCacheRegistry getInstance() {
-    return INSTANCE;
+  @Inject
+  public ThirdEyeCacheRegistry(
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager) {
+    this.metricConfigManager = metricConfigManager;
+    this.datasetConfigManager = datasetConfigManager;
   }
 
-  /**
-   * Initializes data sources and caches.
-   *
-   * @param thirdeyeConfig ThirdEye's configurations.
-   */
-  public static void initializeCaches(ThirdEyeConfiguration thirdeyeConfig) throws Exception {
-    initDataSources(thirdeyeConfig);
-    initMetaDataCaches();
-    initCentralizedCache(thirdeyeConfig);
+  public static synchronized ThirdEyeCacheRegistry getInstance() {
+    return requireNonNull(instance, "ThirdEyeCacheRegistry not initialized");
   }
 
-  /**
-   * Initializes the adaptor to data sources such as Pinot, MySQL, etc.
-   */
-  public static void initDataSources(ThirdEyeConfiguration thirdeyeConfig) {
-    try {
-      // Initialize adaptors to time series databases.
-      URL dataSourcesUrl = thirdeyeConfig.getDataSourcesAsUrl();
-      QueryCache queryCache = buildQueryCache(dataSourcesUrl);
-      ThirdEyeCacheRegistry.getInstance().registerQueryCache(queryCache);
-    } catch (Exception e) {
-     LOGGER.info("Caught exception while initializing caches", e);
-    }
-  }
-
-  public static QueryCache buildQueryCache(final URL dataSourcesUrl) {
-    DataSources dataSources = DataSourcesLoader.fromDataSourcesUrl(dataSourcesUrl);
-    if (dataSources == null) {
-      throw new IllegalStateException("Could not create data sources from path " + dataSourcesUrl);
-    }
-    // Query Cache
-    Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = DataSourcesLoader.getDataSourceMap(dataSources);
-    return new QueryCache(thirdEyeDataSourcesMap, Executors.newCachedThreadPool());
-  }
-
-  public static void initCentralizedCache(ThirdEyeConfiguration thirdeyeConfig) {
-    try {
-      URL cacheConfigUrl = thirdeyeConfig.getCacheConfigAsUrl();
-      CacheConfig cacheConfig = CacheConfigLoader.fromCacheConfigUrl(cacheConfigUrl);
-      if (cacheConfig == null) {
-        LOGGER.error("Could not get cache config from path {} - reverting to default settings", cacheConfigUrl);
-        setupDefaultTimeSeriesCacheSettings();
-      }
-
-      CacheDAO cacheDAO = null;
-      if (cacheConfig.useCentralizedCache()) {
-        cacheDAO = CacheConfigLoader.loadCacheDAO(cacheConfig);
-      }
-
-      if (INSTANCE.getTimeSeriesCache() == null) {
-        TimeSeriesCache timeSeriesCache = buildTimeSeriesCache(cacheDAO,
-            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            DAO_REGISTRY.getMetricConfigDAO(),
-            DAO_REGISTRY.getDatasetConfigDAO(),
-            CacheConfig.getInstance().getCentralizedCacheSettings().getMaxParallelInserts());
-
-        ThirdEyeCacheRegistry.getInstance().registerTimeSeriesCache(timeSeriesCache);
-      }
-    } catch (Exception e) {
-      LOGGER.error("Caught exception while initializing centralized cache - reverting to default settings", e);
-      setupDefaultTimeSeriesCacheSettings();
-    }
-  }
-
-  public static TimeSeriesCache buildTimeSeriesCache(
-      final CacheDAO cacheDAO,
-      final QueryCache queryCache,
-      final MetricConfigManager metricConfigDAO,
-      final DatasetConfigManager datasetConfigDAO,
-      final int maxParallelInserts) {
-    return new DefaultTimeSeriesCache(metricConfigDAO, datasetConfigDAO,
-        queryCache,
-        cacheDAO,
-        Executors.newFixedThreadPool(maxParallelInserts));
+  public static void setInstance(final ThirdEyeCacheRegistry instance) {
+    ThirdEyeCacheRegistry.instance = instance;
   }
 
   /**
    * Use "default" cache settings, meaning
    */
-  private static void setupDefaultTimeSeriesCacheSettings() {
+  private void setupDefaultTimeSeriesCacheSettings() {
     CentralizedCacheConfig cfg = new CentralizedCacheConfig();
     cfg.setMaxParallelInserts(1);
 
@@ -158,11 +101,84 @@ public class ThirdEyeCacheRegistry {
   }
 
   /**
-   * Initialize the cache for meta data. This method has to be invoked after data sources are connected.
+   * Initializes the adaptor to data sources such as Pinot, MySQL, etc.
    */
-  public static void initMetaDataCaches() {
-    ThirdEyeCacheRegistry cacheRegistry = ThirdEyeCacheRegistry.getInstance();
-    QueryCache queryCache = cacheRegistry.getQueryCache();
+  private void initDataSources(final URL dataSourcesUrl) {
+    try {
+      // Initialize adaptors to time series databases.
+      QueryCache queryCache = buildQueryCache(dataSourcesUrl);
+      registerQueryCache(queryCache);
+    } catch (Exception e) {
+      LOG.info("Caught exception while initializing caches", e);
+    }
+  }
+
+  public QueryCache buildQueryCache(final URL dataSourcesUrl) {
+    final DataSourcesLoader loader = new DataSourcesLoader();
+    final DataSources dataSources = requireNonNull(
+        loader.fromDataSourcesUrl(dataSourcesUrl),
+        "Could not create data sources from path " + dataSourcesUrl);
+
+    // Query Cache
+    final Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = loader
+        .getDataSourceMap(dataSources);
+    return new QueryCache(thirdEyeDataSourcesMap, Executors.newCachedThreadPool());
+  }
+
+  public TimeSeriesCache buildTimeSeriesCache(
+      final CacheDAO cacheDAO,
+      final int maxParallelInserts) {
+    return new DefaultTimeSeriesCache(metricConfigManager,
+        datasetConfigManager,
+        queryCache,
+        cacheDAO,
+        Executors.newFixedThreadPool(maxParallelInserts));
+  }
+
+  /**
+   * Initializes data sources and caches.
+   *
+   * @param thirdeyeConfig ThirdEye's configurations.
+   */
+  public void initializeCaches(ThirdEyeConfiguration thirdeyeConfig) {
+    initDataSources(thirdeyeConfig.getDataSourcesAsUrl());
+    initMetaDataCaches();
+    initCentralizedCache(thirdeyeConfig.getCacheConfigAsUrl());
+  }
+
+  private void initCentralizedCache(final URL cacheConfigUrl) {
+    try {
+      CacheConfig cacheConfig = CacheConfigLoader.fromCacheConfigUrl(cacheConfigUrl);
+      if (cacheConfig == null) {
+        LOG.error("Could not get cache config from path {} - reverting to default settings",
+            cacheConfigUrl);
+        setupDefaultTimeSeriesCacheSettings();
+      }
+
+      CacheDAO cacheDAO = null;
+      if (cacheConfig.useCentralizedCache()) {
+        cacheDAO = CacheConfigLoader.loadCacheDAO(cacheConfig);
+      }
+
+      if (instance.getTimeSeriesCache() == null) {
+        TimeSeriesCache timeSeriesCache = buildTimeSeriesCache(cacheDAO,
+            CacheConfig.getInstance().getCentralizedCacheSettings().getMaxParallelInserts());
+
+        registerTimeSeriesCache(timeSeriesCache);
+      }
+    } catch (Exception e) {
+      LOG.error(
+          "Caught exception while initializing centralized cache - reverting to default settings",
+          e);
+      setupDefaultTimeSeriesCacheSettings();
+    }
+  }
+
+  /**
+   * Initialize the cache for meta data. This method has to be invoked after data sources are
+   * connected.
+   */
+  public void initMetaDataCaches() {
     Preconditions.checkNotNull(queryCache,
         "Data sources are not initialized. Please invoke initDataSources() before this method.");
 
@@ -170,31 +186,32 @@ public class ThirdEyeCacheRegistry {
     // TODO deprecate. read from database directly
     LoadingCache<String, DatasetConfigDTO> datasetConfigCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES)
-        .build(new DatasetConfigCacheLoader(DAO_REGISTRY.getDatasetConfigDAO()));
-    cacheRegistry.registerDatasetConfigCache(datasetConfigCache);
+        .build(new DatasetConfigCacheLoader(datasetConfigManager));
+    registerDatasetConfigCache(datasetConfigCache);
 
     // MetricConfig cache
     // TODO deprecate. read from database directly
     LoadingCache<MetricDataset, MetricConfigDTO> metricConfigCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES)
-        .build(new MetricConfigCacheLoader(DAO_REGISTRY.getMetricConfigDAO()));
-    cacheRegistry.registerMetricConfigCache(metricConfigCache);
+        .build(new MetricConfigCacheLoader(metricConfigManager));
+    registerMetricConfigCache(metricConfigCache);
 
     // DatasetMaxDataTime Cache
     LoadingCache<String, Long> datasetMaxDataTimeCache = CacheBuilder.newBuilder()
         .expireAfterWrite(5, TimeUnit.MINUTES)
-        .build(new DatasetMaxDataTimeCacheLoader(queryCache, DAO_REGISTRY.getDatasetConfigDAO()));
-    cacheRegistry.registerDatasetMaxDataTimeCache(datasetMaxDataTimeCache);
+        .build(new DatasetMaxDataTimeCacheLoader(queryCache, datasetConfigManager));
+    registerDatasetMaxDataTimeCache(datasetMaxDataTimeCache);
 
     // Dimension Filter cache
     LoadingCache<String, String> dimensionFiltersCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
-        .build(new DimensionFiltersCacheLoader(queryCache, DAO_REGISTRY.getDatasetConfigDAO()));
-    cacheRegistry.registerDimensionFiltersCache(dimensionFiltersCache);
+        .build(new DimensionFiltersCacheLoader(queryCache, datasetConfigManager));
+    registerDimensionFiltersCache(dimensionFiltersCache);
 
     // Dataset list
-    DatasetListCache datasetListCache = new DatasetListCache(DAO_REGISTRY.getDatasetConfigDAO(), TimeUnit.HOURS.toMillis(1));
-    cacheRegistry.registerDatasetsCache(datasetListCache);
+    DatasetListCache datasetListCache = new DatasetListCache(datasetConfigManager,
+        TimeUnit.HOURS.toMillis(1));
+    registerDatasetsCache(datasetListCache);
   }
 
   public LoadingCache<String, Long> getDatasetMaxDataTimeCache() {
@@ -229,15 +246,20 @@ public class ThirdEyeCacheRegistry {
     this.queryCache = queryCache;
   }
 
-  public TimeSeriesCache getTimeSeriesCache() { return timeSeriesCache; }
+  public TimeSeriesCache getTimeSeriesCache() {
+    return timeSeriesCache;
+  }
 
-  public void registerTimeSeriesCache(TimeSeriesCache timeSeriesCache) { this.timeSeriesCache = timeSeriesCache; }
+  public void registerTimeSeriesCache(TimeSeriesCache timeSeriesCache) {
+    this.timeSeriesCache = timeSeriesCache;
+  }
 
   public LoadingCache<String, DatasetConfigDTO> getDatasetConfigCache() {
     return datasetConfigCache;
   }
 
-  public void registerDatasetConfigCache(LoadingCache<String, DatasetConfigDTO> datasetConfigCache) {
+  public void registerDatasetConfigCache(
+      LoadingCache<String, DatasetConfigDTO> datasetConfigCache) {
     this.datasetConfigCache = datasetConfigCache;
   }
 
@@ -245,7 +267,8 @@ public class ThirdEyeCacheRegistry {
     return metricConfigCache;
   }
 
-  public void registerMetricConfigCache(LoadingCache<MetricDataset, MetricConfigDTO> metricConfigCache) {
+  public void registerMetricConfigCache(
+      LoadingCache<MetricDataset, MetricConfigDTO> metricConfigCache) {
     this.metricConfigCache = metricConfigCache;
   }
 }

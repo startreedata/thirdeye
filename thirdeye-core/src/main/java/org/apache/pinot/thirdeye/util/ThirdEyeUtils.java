@@ -94,7 +94,6 @@ public abstract class ThirdEyeUtils {
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
-  private static final ThirdEyeCacheRegistry CACHE_REGISTRY = ThirdEyeCacheRegistry.getInstance();
 
   /**
    * Returns or modifies a filter that can be for querying the results corresponding to the given
@@ -269,7 +268,8 @@ public abstract class ThirdEyeUtils {
     String derivedMetricExpression = null;
     MetricDataset metricDataset = new MetricDataset(metricExpressionName, dataset);
 
-    MetricConfigDTO metricConfig = CACHE_REGISTRY.getMetricConfigCache().get(metricDataset);
+    MetricConfigDTO metricConfig = ThirdEyeCacheRegistry.getInstance().getMetricConfigCache()
+        .get(metricDataset);
 
     if (metricConfig != null && metricConfig.isDerived()) {
       derivedMetricExpression = metricConfig.getDerivedMetricExpression();
@@ -329,7 +329,7 @@ public abstract class ThirdEyeUtils {
   public static DatasetConfigDTO getDatasetConfigFromName(String dataset) {
     DatasetConfigDTO datasetConfig = null;
     try {
-      datasetConfig = CACHE_REGISTRY.getDatasetConfigCache().get(dataset);
+      datasetConfig = ThirdEyeCacheRegistry.getInstance().getDatasetConfigCache().get(dataset);
     } catch (ExecutionException e) {
       LOG.error("Exception in getting dataset config {} from cache", dataset, e);
     }
@@ -388,7 +388,7 @@ public abstract class ThirdEyeUtils {
       String dataset) {
     MetricConfigDTO metricConfig = null;
     try {
-      metricConfig = CACHE_REGISTRY.getMetricConfigCache()
+      metricConfig = ThirdEyeCacheRegistry.getInstance().getMetricConfigCache()
           .get(new MetricDataset(metricName, dataset));
     } catch (ExecutionException e) {
       LOG.error("Exception while fetching metric by name {} and dataset {}", metricName, dataset,
@@ -539,7 +539,7 @@ public abstract class ThirdEyeUtils {
 
     // Initialize Cache Registry
     try {
-      ThirdEyeCacheRegistry.initializeCaches(config);
+      ThirdEyeCacheRegistry.getInstance().initializeCaches(config);
     } catch (Exception e) {
       LOG.error("Exception while loading caches:", e);
       throw new RuntimeException(e);

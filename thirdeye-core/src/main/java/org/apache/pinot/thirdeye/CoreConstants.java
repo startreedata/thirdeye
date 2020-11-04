@@ -24,4 +24,7 @@ public interface CoreConstants {
 
   // default onboarding replay period
   long ONBOARDING_REPLAY_LOOKBACK = TimeUnit.DAYS.toMillis(30);
+
+  // TODO suvodeep remove this. Should be in config somewhere.
+  String DATA_SOURCES_CONFIG_YML = "file:config/data-sources/data-sources-config.yml";
 }

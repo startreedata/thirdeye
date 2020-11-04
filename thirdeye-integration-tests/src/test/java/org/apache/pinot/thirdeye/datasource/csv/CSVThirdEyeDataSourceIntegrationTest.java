@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.datasource.csv;
 
+import java.net.URL;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
@@ -27,9 +30,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import java.net.URL;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -77,7 +77,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     ThirdEyeConfiguration thirdEyeConfiguration = new ThirdEyeConfiguration();
     thirdEyeConfiguration.setDataSources(dataSourcesConfig.toString());
 
-    ThirdEyeCacheRegistry.initializeCaches(thirdEyeConfiguration);
+    ThirdEyeCacheRegistry.getInstance().initializeCaches(thirdEyeConfiguration);
     ThirdEyeCacheRegistry cacheRegistry = ThirdEyeCacheRegistry.getInstance();
 
 

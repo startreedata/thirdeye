@@ -57,7 +57,6 @@ import org.slf4j.LoggerFactory;
 
 public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
-  private static final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = ThirdEyeCacheRegistry.getInstance();
   private static final String PINOT = "Pinot";
   private String name;
 
@@ -310,7 +309,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public List<String> getDatasets() throws Exception {
-    return CACHE_REGISTRY_INSTANCE.getDatasetsCache().getDatasets();
+    return ThirdEyeCacheRegistry.getInstance().getDatasetsCache().getDatasets();
   }
 
   @Override

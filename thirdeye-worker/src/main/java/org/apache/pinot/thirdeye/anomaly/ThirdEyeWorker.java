@@ -102,7 +102,7 @@ public class ThirdEyeWorker
     LOG.info("Starting ThirdeyeAnomalyApplication : Scheduler {} Worker {}", config.isScheduler(), config.isWorker());
     super.initDAOs();
     try {
-      ThirdEyeCacheRegistry.initializeCaches(config);
+      ThirdEyeCacheRegistry.getInstance().initializeCaches(config);
     } catch (Exception e) {
       LOG.error("Exception while loading caches", e);
     }

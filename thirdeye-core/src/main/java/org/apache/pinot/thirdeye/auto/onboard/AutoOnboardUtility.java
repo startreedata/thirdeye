@@ -44,7 +44,7 @@ public class AutoOnboardUtility {
   public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(URL dataSourcesUrl) {
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = new HashMap<>();
 
-    DataSources dataSources = DataSourcesLoader.fromDataSourcesUrl(dataSourcesUrl);
+    DataSources dataSources = new DataSourcesLoader().fromDataSourcesUrl(dataSourcesUrl);
     if (dataSources == null) {
       throw new IllegalStateException("Could not create data sources config from path " + dataSourcesUrl);
     }

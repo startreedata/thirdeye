@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.util;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.configuration.YamlConfigurationFactory;
@@ -27,12 +29,14 @@ import java.io.File;
 import javax.validation.Validation;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AbstractManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.DatabaseConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class DaoProviderUtil {
+
+  private static final Logger LOG = LoggerFactory.getLogger(DaoProviderUtil.class);
 
   private static Injector injector;
 
@@ -44,11 +48,18 @@ public abstract class DaoProviderUtil {
   }
 
   public static void init(DataSource dataSource) {
-    injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
+    setInjector(Guice.createInjector(new ThirdEyePersistenceModule(dataSource)));
   }
 
-  public static <T extends AbstractManagerImpl<? extends AbstractDTO>> T getInstance(Class<T> c) {
-    return injector.getInstance(c);
+  public static synchronized void setInjector(final Injector injector) {
+    if (DaoProviderUtil.injector != null) {
+      LOG.error("OVERWRITING previous injector!!!");
+    }
+    DaoProviderUtil.injector = injector;
+  }
+
+  public static <T> T getInstance(Class<T> c) {
+    return requireNonNull(injector, "Injector not initialized").getInstance(c);
   }
 
   public static PersistenceConfig readPersistenceConfig(File configFile) {

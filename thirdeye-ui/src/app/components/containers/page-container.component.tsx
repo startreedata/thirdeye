@@ -6,11 +6,15 @@ import { pageContainerStyles } from "./page-container.styles";
 type Props = {
     children?: ReactNode;
     centered?: boolean;
+    noPadding?: boolean;
+    breadcrumbs?: ReactNode;
 };
 
 export const PageContainer: FunctionComponent<Props> = ({
     children,
     centered,
+    noPadding,
+    breadcrumbs,
 }: Props) => {
     const pageContainerClasses = pageContainerStyles();
 
@@ -18,13 +22,21 @@ export const PageContainer: FunctionComponent<Props> = ({
         <main
             className={classnames(
                 pageContainerClasses.main,
-                centered ? pageContainerClasses.centered : ""
+                noPadding ? pageContainerClasses.padding0 : ""
             )}
         >
             {/* Required to clip the container under AppBar */}
             <Toolbar />
 
-            <div>
+            {/* Add breadcrumbs at generic level */}
+            {breadcrumbs}
+
+            <div
+                className={classnames(
+                    pageContainerClasses.innerContainer,
+                    centered ? pageContainerClasses.centered : ""
+                )}
+            >
                 {/* Include children */}
                 {children}
             </div>

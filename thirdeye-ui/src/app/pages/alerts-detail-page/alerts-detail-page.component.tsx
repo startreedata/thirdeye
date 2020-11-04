@@ -1,14 +1,8 @@
-import {
-    Breadcrumbs,
-    Card,
-    Grid,
-    MenuItem,
-    Select,
-    Typography,
-} from "@material-ui/core";
+import { Card, Grid, MenuItem, Select, Typography } from "@material-ui/core";
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import AlertCard from "../../components/alerts/alert-card.component";
+import { CustomBreadcrumbs } from "../../components/breadcrumbs/breadcrumbs.component";
 import { PageContainer } from "../../components/containers/page-container.component";
 import { cardStyles } from "../../components/styles/common.styles";
 import { alerts } from "../../mock";
@@ -28,12 +22,15 @@ export const AlertsDetailPage = withRouter((props) => {
         return <>LOADING</>;
     }
 
+    const breadcrumbs = (
+        <CustomBreadcrumbs>
+            <Link to={AppRoute.ALERTS_ALL}>Alerts</Link>
+            <Typography color="textPrimary">{alert.name}</Typography>
+        </CustomBreadcrumbs>
+    );
+
     return (
-        <PageContainer>
-            <Breadcrumbs>
-                <Link to={AppRoute.ALERTS_ALL}>Alerts</Link>
-                <Typography color="textPrimary">{alert.name}</Typography>
-            </Breadcrumbs>
+        <PageContainer breadcrumbs={breadcrumbs}>
             <Typography variant="h4">{alert.name}</Typography>
             <AlertCard data={alert} />
             <Card className={cardClasses.base}>

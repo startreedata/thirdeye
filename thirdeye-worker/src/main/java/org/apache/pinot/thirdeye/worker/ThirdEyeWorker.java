@@ -17,17 +17,25 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.anomaly;
+package org.apache.pinot.thirdeye.worker;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
+import static org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil.readPersistenceConfig;
+
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityEventListenerDriver;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityTaskScheduler;
 import org.apache.pinot.thirdeye.anomaly.events.HolidayEventResource;
@@ -36,12 +44,17 @@ import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorJobScheduler;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriver;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardService;
-import org.apache.pinot.thirdeye.common.BaseThirdEyeApplication;
 import org.apache.pinot.thirdeye.common.ThirdEyeSwaggerBundle;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
+import org.apache.pinot.thirdeye.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.dataframe.util.DataFrameSerializer;
+import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
+import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
+import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
+import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.pinot.resources.PinotDataSourceResource;
@@ -49,10 +62,15 @@ import org.apache.pinot.thirdeye.model.download.ModelDownloaderManager;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
 
-public class ThirdEyeWorker
-    extends BaseThirdEyeApplication<ThirdEyeAnomalyConfiguration> {
+  protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
+
+  private DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
   private TaskDriver taskDriver = null;
   private MonitorJobScheduler monitorJobScheduler = null;
@@ -81,8 +99,19 @@ public class ThirdEyeWorker
     System.setProperty("dw.rootDir", thirdEyeConfigDir);
     String detectorApplicationConfigFile = thirdEyeConfigDir + "/" + "detector.yml";
     argList.set(lastIndex, detectorApplicationConfigFile); // replace config dir with the
-                                                           // actual config file
+    // actual config file
     new ThirdEyeWorker().run(argList.toArray(new String[argList.size()]));
+  }
+
+  /**
+   * Helper for Object mapper with DataFrame support
+   *
+   * @return initialized ObjectMapper
+   */
+  private static Module makeMapperModule() {
+    SimpleModule module = new SimpleModule();
+    module.addSerializer(DataFrame.class, new DataFrameSerializer());
+    return module;
   }
 
   @Override
@@ -97,19 +126,20 @@ public class ThirdEyeWorker
   }
 
   @Override
-  public void run(final ThirdEyeAnomalyConfiguration config, final Environment env)
-      throws Exception {
-    LOG.info("Starting ThirdeyeAnomalyApplication : Scheduler {} Worker {}", config.isScheduler(), config.isWorker());
-    super.initDAOs();
-    try {
-      ThirdEyeCacheRegistry.getInstance().initializeCaches(config);
-    } catch (Exception e) {
-      LOG.error("Exception while loading caches", e);
-    }
+  public void run(final ThirdEyeAnomalyConfiguration config, final Environment env) {
+    LOG.info("Starting ThirdeyeAnomalyApplication : Scheduler {} Worker {}", config.isScheduler(),
+        config.isWorker());
+    final DatabaseConfiguration dbConfig = getDatabaseConfiguration();
+    final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
 
-    env.getObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-    env.getObjectMapper().registerModule(BaseThirdEyeApplication.makeMapperModule());
+    final Injector injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource));
+    DaoProviderUtil.setInjector(injector);
 
+    final ThirdEyeCacheRegistry instance = injector.getInstance(ThirdEyeCacheRegistry.class);
+    ThirdEyeCacheRegistry.setInstance(instance);
+    instance.initializeCaches(config);
+
+    env.getObjectMapper().registerModule(makeMapperModule());
     env.lifecycle().manage(lifecycleManager(config, env));
   }
 
@@ -118,7 +148,8 @@ public class ThirdEyeWorker
       @Override
       public void start() throws Exception {
 
-        requestStatisticsLogger = new RequestStatisticsLogger(new TimeGranularity(1, TimeUnit.DAYS));
+        requestStatisticsLogger = new RequestStatisticsLogger(
+            new TimeGranularity(1, TimeUnit.DAYS));
         requestStatisticsLogger.start();
 
         if (config.isWorker()) {
@@ -141,20 +172,23 @@ public class ThirdEyeWorker
         }
         if (config.isHolidayEventsLoader()) {
           holidayEventsLoader =
-              new HolidayEventsLoader(config.getHolidayEventsLoaderConfiguration(), config.getCalendarApiKeyPath(),
+              new HolidayEventsLoader(config.getHolidayEventsLoaderConfiguration(),
+                  config.getCalendarApiKeyPath(),
                   DAORegistry.getInstance().getEventDAO());
           holidayEventsLoader.start();
           env.jersey().register(new HolidayEventResource(holidayEventsLoader));
         }
         if (config.isMockEventsLoader()) {
-          mockEventsLoader = new MockEventsLoader(config.getMockEventsLoaderConfiguration(), DAORegistry.getInstance().getEventDAO());
+          mockEventsLoader = new MockEventsLoader(config.getMockEventsLoaderConfiguration(),
+              DAORegistry.getInstance().getEventDAO());
           mockEventsLoader.run();
         }
         if (config.isPinotProxy()) {
           env.jersey().register(new PinotDataSourceResource());
         }
         if (config.isDetectionPipeline()) {
-          detectionScheduler = new DetectionCronScheduler(DAORegistry.getInstance().getDetectionConfigManager());
+          detectionScheduler = new DetectionCronScheduler(
+              DAORegistry.getInstance().getDetectionConfigManager());
           detectionScheduler.start();
         }
         if (config.isDetectionAlert()) {
@@ -162,7 +196,8 @@ public class ThirdEyeWorker
           subscriptionScheduler.start();
         }
         if (config.isDataAvailabilityEventListener()) {
-          dataAvailabilityEventListenerDriver = new DataAvailabilityEventListenerDriver(config.getDataAvailabilitySchedulingConfiguration());
+          dataAvailabilityEventListenerDriver = new DataAvailabilityEventListenerDriver(
+              config.getDataAvailabilitySchedulingConfiguration());
           dataAvailabilityEventListenerDriver.start();
         }
         if (config.isDataAvailabilityTaskScheduler()) {
@@ -178,7 +213,8 @@ public class ThirdEyeWorker
           modelDownloaderManager.start();
         }
         if (config.getThirdEyeRestClientConfiguration() != null) {
-          ThirdEyeRestClientConfiguration restClientConfig = config.getThirdEyeRestClientConfiguration();
+          ThirdEyeRestClientConfiguration restClientConfig = config
+              .getThirdEyeRestClientConfiguration();
           updateAdminSession(restClientConfig.getAdminUser(), restClientConfig.getSessionKey());
         }
       }
@@ -223,5 +259,23 @@ public class ThirdEyeWorker
       savedSession.setExpirationTime(expiryMillis);
       DAO_REGISTRY.getSessionDAO().update(savedSession);
     }
+  }
+
+  public DatabaseConfiguration getDatabaseConfiguration() {
+    String persistenceConfig = System.getProperty("dw.rootDir") + "/persistence.yml";
+    LOG.info("Loading persistence config from [{}]", persistenceConfig);
+
+    final PersistenceConfig configuration = readPersistenceConfig(new File(persistenceConfig));
+    return configuration.getDatabaseConfiguration();
+  }
+
+  /**
+   * Empty method to allow logging implementation to be lazily initialized, so that log4j2 can be
+   * used.
+   * More details can be found: https://github.com/dropwizard/dropwizard/pull/1900
+   */
+  @Override
+  protected void bootstrapLogging() {
+
   }
 }

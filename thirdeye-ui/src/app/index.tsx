@@ -8,7 +8,7 @@ import "./index.scss";
 ReactDOM.render(
     <StrictMode>
         <Router>
-            {/* App needs to be rendered by a router to allow navigation using AppBar */}
+            {/* App needs to be rendered by a router to allow navigation using ApplicationBar */}
             <Route component={App} />
         </Router>
     </StrictMode>,

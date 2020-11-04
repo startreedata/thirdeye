@@ -5,7 +5,6 @@ export interface Alert {
 
     lastTimestamp: number;
     active: boolean;
-
     subscriptionGroup: string[];
     metric: string;
     filters?: string | null;

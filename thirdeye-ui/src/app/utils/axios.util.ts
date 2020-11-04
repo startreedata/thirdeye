@@ -1,7 +1,8 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { getAccessToken, isAuthenticated } from "./authentication.util";
 
-export const setupInterceptors = (): void => {
+// Initializes axios interceptors
+export const initHTTPInterceptors = (): void => {
     axios.interceptors.request.use(
         (config: AxiosRequestConfig): AxiosRequestConfig => {
             if (isAuthenticated()) {

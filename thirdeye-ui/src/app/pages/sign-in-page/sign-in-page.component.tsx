@@ -12,7 +12,7 @@ export const SignInPage: FunctionComponent = () => {
         const authentication: Authentication = await login();
         setAuthentication(authentication.accessToken);
 
-        location.reload;
+        location.reload();
     };
 
     return <></>;

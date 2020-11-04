@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react";
 import { SWRConfig } from "swr";
 import { ApplicationBar } from "./components/application-bar/application-bar.component";
 import { AppRouter } from "./routers/app-router";
-import { setupInterceptors } from "./utils/axios.util";
+import { initHTTPInterceptors } from "./utils/axios.util";
 import { initI18next } from "./utils/i18next.util";
 import { theme } from "./utils/material-ui/theme.util";
 import { swrFetcher } from "./utils/swr.util";
@@ -12,7 +12,7 @@ import { swrFetcher } from "./utils/swr.util";
 initI18next();
 
 // Initialize axios
-setupInterceptors();
+initHTTPInterceptors();
 
 // ThirdEye UI app
 export const App: FunctionComponent = () => {

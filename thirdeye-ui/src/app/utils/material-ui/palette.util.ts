@@ -21,4 +21,8 @@ export const paletteOptions = <PaletteOptions>{
         light: Color.GREEN_LIGHT,
         main: Color.GREEN,
     },
+    background: {
+        paper: Color.WHITE,
+        default: Color.WHITE,
+    },
 };

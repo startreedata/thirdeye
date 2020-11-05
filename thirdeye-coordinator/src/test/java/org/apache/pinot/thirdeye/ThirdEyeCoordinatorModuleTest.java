@@ -8,6 +8,7 @@ import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
+import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.resources.RootResource;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -30,9 +31,9 @@ public class ThirdEyeCoordinatorModuleTest {
         configuration,
         dataSource
     ));
-    final ThirdEyeCacheRegistry instance = injector.getInstance(ThirdEyeCacheRegistry.class);
-    ThirdEyeCacheRegistry.setInstance(instance);
-    instance.initializeCaches(new ThirdEyeConfiguration());
+    DaoProviderUtil.setInjector(injector);
+
+    injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(new ThirdEyeConfiguration());
 
     assertThat(injector.getInstance(RootResource.class)).isNotNull();
   }

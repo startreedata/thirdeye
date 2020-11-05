@@ -48,7 +48,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
@@ -175,7 +174,6 @@ public class DataProviderTest {
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
     this.queryCache = new QueryCache(dataSourceMap, Executors.newSingleThreadExecutor());
 
-    ThirdEyeCacheRegistry.setInstance(DaoProviderUtil.getInstance(ThirdEyeCacheRegistry.class));
     ThirdEyeCacheRegistry cacheRegistry = ThirdEyeCacheRegistry.getInstance();
     cacheRegistry.registerMetricConfigCache(mockMetricConfigCache);
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);

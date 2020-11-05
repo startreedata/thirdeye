@@ -51,11 +51,10 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
         dataSource));
     DaoProviderUtil.setInjector(injector);
 
-    final ThirdEyeCacheRegistry instance = injector.getInstance(ThirdEyeCacheRegistry.class);
-    ThirdEyeCacheRegistry.setInstance(instance);
-
     // Initialize ThirdEyeCacheRegistry
-    instance.initializeCaches(new ThirdEyeConfiguration());
+    injector
+        .getInstance(ThirdEyeCacheRegistry.class)
+        .initializeCaches(new ThirdEyeConfiguration());
 
     env.jersey().register(injector.getInstance(RootResource.class));
   }

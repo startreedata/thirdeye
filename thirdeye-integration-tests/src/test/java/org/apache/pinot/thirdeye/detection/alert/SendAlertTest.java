@@ -32,9 +32,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -71,7 +69,6 @@ public class SendAlertTest {
     this.detectionDAO = daoRegistry.getDetectionConfigManager();
     this.metricDAO = daoRegistry.getMetricConfigDAO();
     this.dataSetDAO = daoRegistry.getDatasetConfigDAO();
-    ThirdEyeCacheRegistry.setInstance(DaoProviderUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
     metricConfigDTO.setName(METRIC_VALUE);

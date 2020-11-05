@@ -25,7 +25,6 @@ import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -63,8 +62,6 @@ public class TestSqlUtils {
     LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = Mockito
         .mock(LoadingCache.class);
     Mockito.when(mockMetricConfigCache.get(this.metricDataset)).thenReturn(new MetricConfigDTO());
-
-    ThirdEyeCacheRegistry.setInstance(DaoProviderUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     ThirdEyeCacheRegistry.getInstance().registerDatasetConfigCache(mockDatasetConfigCache);
     ThirdEyeCacheRegistry.getInstance().registerMetricConfigCache(mockMetricConfigCache);

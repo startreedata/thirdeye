@@ -135,9 +135,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
     final Injector injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource));
     DaoProviderUtil.setInjector(injector);
 
-    final ThirdEyeCacheRegistry instance = injector.getInstance(ThirdEyeCacheRegistry.class);
-    ThirdEyeCacheRegistry.setInstance(instance);
-    instance.initializeCaches(config);
+    injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
 
     env.getObjectMapper().registerModule(makeMapperModule());
     env.lifecycle().manage(lifecycleManager(config, env));

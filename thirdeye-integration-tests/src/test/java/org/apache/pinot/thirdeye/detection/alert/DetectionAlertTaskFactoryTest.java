@@ -11,9 +11,7 @@ import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +46,6 @@ public class DetectionAlertTaskFactoryTest {
     DAORegistry daoRegistry = DAORegistry.getInstance();
     this.alertConfigDAO = daoRegistry.getDetectionAlertConfigManager();
     this.alertConfigDTO = new SubscriptionGroupDTO();
-
-    // TODO suvodeep fix mega hack
-    ThirdEyeCacheRegistry.setInstance(DaoProviderUtil.getInstance(ThirdEyeCacheRegistry.class));
   }
 
   @AfterClass(alwaysRun = true)

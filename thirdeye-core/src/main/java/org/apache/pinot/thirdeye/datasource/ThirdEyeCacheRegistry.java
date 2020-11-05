@@ -35,6 +35,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetConfigCacheLoader;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetListCache;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetMaxDataTimeCacheLoader;
@@ -55,7 +56,6 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeCacheRegistry {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeCacheRegistry.class);
-  private static ThirdEyeCacheRegistry instance;
 
   // DAO to ThirdEye's data and meta-data storage.
   private final MetricConfigManager metricConfigManager;
@@ -81,11 +81,7 @@ public class ThirdEyeCacheRegistry {
   }
 
   public static synchronized ThirdEyeCacheRegistry getInstance() {
-    return requireNonNull(instance, "ThirdEyeCacheRegistry not initialized");
-  }
-
-  public static void setInstance(final ThirdEyeCacheRegistry instance) {
-    ThirdEyeCacheRegistry.instance = instance;
+    return DaoProviderUtil.getInstance(ThirdEyeCacheRegistry.class);
   }
 
   /**
@@ -160,7 +156,7 @@ public class ThirdEyeCacheRegistry {
         cacheDAO = CacheConfigLoader.loadCacheDAO(cacheConfig);
       }
 
-      if (instance.getTimeSeriesCache() == null) {
+      if (getTimeSeriesCache() == null) {
         TimeSeriesCache timeSeriesCache = buildTimeSeriesCache(cacheDAO,
             CacheConfig.getInstance().getCentralizedCacheSettings().getMaxParallelInserts());
 

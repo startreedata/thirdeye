@@ -55,7 +55,6 @@ and choose debug. This should run the application. However, it would need the ri
 
 In the debug configuration settings, set the following values:
 - Set program args to `server config/coordinator.yaml`
-- Set working dir to `repo/thirdeye/thirdeye-coordinator`
 
 You are all set. Run the debug now (you can just press the debug button) to run the server. By default,
 the server should be accessible at http://localhost:8080

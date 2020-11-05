@@ -1,7 +1,6 @@
 package org.apache.pinot.thirdeye.alert;
 
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 
 import com.google.common.primitives.Doubles;
@@ -94,7 +93,7 @@ public class AlertPreviewGenerator {
     }
 
     for (MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
-      final String name = requireNonNull(anomaly.getProperties().get("subEntityName"));
+      final String name = name(anomaly.getProperties().get("detectorComponentName"));
       map
           .computeIfAbsent(name, v -> new DetectionEvaluationApi())
           .getAnomalies()

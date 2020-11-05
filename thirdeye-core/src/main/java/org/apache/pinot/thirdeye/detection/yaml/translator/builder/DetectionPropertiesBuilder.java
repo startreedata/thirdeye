@@ -85,7 +85,7 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
   public Map<String, Object> buildMetricAlertExecutionPlan(
       final MetricConfigDTO metricConfigDTO,
       final DatasetConfigDTO datasetConfigDTO,
-      final String subEntityName,
+      final String alertName,
       final Map<String, Object> mergerProperties,
       final Map<String, Collection<String>> dimensionFiltersMap,
       final Map<String, Object> dimensionExploreYaml,
@@ -100,7 +100,8 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
     for (Map<String, Object> ruleYaml : ruleYamls) {
       List<Map<String, Object>> detectionYamls = ConfigUtils.getList(ruleYaml.get(PROP_DETECTION));
       List<Map<String, Object>> detectionProperties = buildListOfMergeWrapperProperties(
-          subEntityName, metricUrn, detectionYamls, mergerProperties, datasetConfigDTO.bucketTimeGranularity());
+          alertName, metricUrn, detectionYamls, mergerProperties,
+          datasetConfigDTO.bucketTimeGranularity());
 
       List<Map<String, Object>> filterYamls = ConfigUtils.getList(ruleYaml.get(PROP_FILTER));
       List<Map<String, Object>> labelerYamls = ConfigUtils.getList(ruleYaml.get(PROP_LABELER));
@@ -142,7 +143,7 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
     if (!grouperYamls.isEmpty()) {
       properties = buildWrapperProperties(
           EntityAnomalyMergeWrapper.class.getName(),
-          Collections.singletonList(buildGroupWrapperProperties(subEntityName, metricUrn, grouperYamls
+          Collections.singletonList(buildGroupWrapperProperties(alertName, metricUrn, grouperYamls
               .get(0), Collections.singletonList(properties))),
           mergerProperties);
 

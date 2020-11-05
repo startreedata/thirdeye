@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.alert;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.CoreConstants.ONBOARDING_REPLAY_LOOKBACK;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -73,45 +75,58 @@ public class AlertCreater {
     final DetectionPropertiesBuilder detectionTranslatorBuilder =
         new DetectionPropertiesBuilder(metricAttributesMap, dataProvider);
 
-    final String name = api.getDetections().keySet().iterator().next();
-    final AlertComponentApi component = api.getDetections().get(name);
+    // TODO Enhancement. Metrics can be on a per detection basis. Use the first one for now.
+    MetricConfigDTO metricConfigDTO = null;
+    DatasetConfigDTO datasetConfigDTO = null;
 
-    final String key = metricAttributesMap.loadMetricCache(
-        component.getMetric().getName(),
-        component.getMetric().getDataset().getName(),
-        api.getCron());
+    final List<Map<String, Object>> listOfDetectionMaps = new ArrayList<>();
+    for (Map.Entry<String, AlertComponentApi> e : api.getDetections().entrySet()) {
+      final String name = e.getKey();
+      final AlertComponentApi component = e.getValue();
 
-    final DetectionMetricProperties detectionMetricProperties = metricAttributesMap
-        .getDetectionMetricProperties(key);
-    final MetricConfigDTO metricConfigDTO = detectionMetricProperties.getMetricConfigDTO();
-    final DatasetConfigDTO datasetConfigDTO = detectionMetricProperties.getDatasetConfigDTO();
+      final String key = metricAttributesMap.loadMetricCache(
+          component.getMetric().getName(),
+          component.getMetric().getDataset().getName(),
+          api.getCron());
+
+      final DetectionMetricProperties detectionMetricProperties = metricAttributesMap
+          .getDetectionMetricProperties(key);
+
+      metricConfigDTO = detectionMetricProperties.getMetricConfigDTO();
+      datasetConfigDTO = detectionMetricProperties.getDatasetConfigDTO();
+      listOfDetectionMaps.add(ruleMap(name, component));
+    }
 
     return detectionTranslatorBuilder
         .buildMetricAlertExecutionPlan(
-            metricConfigDTO,
-            datasetConfigDTO,
-            name,
+            requireNonNull(metricConfigDTO),
+            requireNonNull(datasetConfigDTO),
+            api.getName(),
             Collections.emptyMap(),
             Collections.emptyMap(),
             Collections.emptyMap(),
             false,
-            toRuleYamls(name, component),
+            toRuleYamls(listOfDetectionMaps),
             Collections.emptyList()
         );
   }
 
-  private List<Map<String, Object>> toRuleYamls(final String name,
+  private List<Map<String, Object>> toRuleYamls(
+      final List<Map<String, Object>> listOfDetectionMaps) {
+    final Map<String, Object> map = new LinkedHashMap<>();
+    map.put("detection", listOfDetectionMaps);
+
+    return Collections.singletonList(map);
+  }
+
+  private Map<String, Object> ruleMap(
+      final String name,
       final AlertComponentApi component) {
-    final LinkedHashMap<String, Object> ruleMap = new LinkedHashMap<>();
+    final Map<String, Object> ruleMap = new LinkedHashMap<>();
     ruleMap.put("name", name);
     ruleMap.put("type", component.getType());
     ruleMap.put("params", component.getParams());
-
-    final LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-    map.put("detection", Collections.singletonList(ruleMap));
-
-    final List<Map<String, Object>> ruleYamls = Collections.singletonList(map);
-    return ruleYamls;
+    return ruleMap;
   }
 
   public AlertDTO toAlertDTO(final AlertApi api) {

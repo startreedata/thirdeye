@@ -34,6 +34,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
@@ -89,6 +90,7 @@ public class CurrentAndBaselineLoaderTest {
 
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
     QueryCache cache = new QueryCache(dataSourceMap, Executors.newSingleThreadExecutor());
+    ThirdEyeCacheRegistry.setInstance(DaoProviderUtil.getInstance(ThirdEyeCacheRegistry.class));
     ThirdEyeCacheRegistry.getInstance().registerQueryCache(cache);
     ThirdEyeCacheRegistry.getInstance().initMetaDataCaches();
 

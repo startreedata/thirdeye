@@ -43,13 +43,13 @@ public class ThirdEyeConfigurationTest {
     Assert.assertEquals(config.getDataSourcesAsUrl(), new URL("file:/myDir/myDataSources.yml"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testGetDataSourcesAsUrlRelative() throws Exception {
     config.setDataSources("myDir/myDataSources.yml");
     Assert.assertEquals(config.getDataSourcesAsUrl(), new URL("file:/myRoot/myDir/myDataSources.yml"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testGetDataSourcesAsUrlDefault() throws Exception {
     config.getDataSourcesAsUrl();
     Assert.assertEquals(config.getDataSourcesAsUrl(), new URL("file:/myRoot/data-sources/data-sources-config.yml"));

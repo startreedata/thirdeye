@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ResponseParserUtils {
-  public static ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = ThirdEyeCacheRegistry.getInstance();
+
   public static final Logger LOGGER = LoggerFactory.getLogger(ResponseParserUtils.class);
 
   public static String TIME_DIMENSION_JOINER_ESCAPED = "\\|";
@@ -86,7 +86,8 @@ public class ResponseParserUtils {
     requestBuilder.setDataSource(ThirdEyeUtils.getDataSourceFromMetricFunctions(request.getMetricFunctions()));
     ThirdEyeRequest metricSumsRequest = requestBuilder.build("metricSums");
     try {
-      ThirdEyeResponse metricSumsResponse = CACHE_REGISTRY_INSTANCE.getQueryCache().getQueryResult(metricSumsRequest);
+      ThirdEyeResponse metricSumsResponse = ThirdEyeCacheRegistry.getInstance().getQueryCache()
+          .getQueryResult(metricSumsRequest);
       return metricSumsResponse.getRow(0).getMetrics();
     } catch (Exception e) {
       LOGGER.error("Caught exception when executing metric sums request", e);
@@ -109,7 +110,7 @@ public class ResponseParserUtils {
     ThirdEyeResponse metricSumsResponse = null;
     try {
       metricSumsResponse =
-          CACHE_REGISTRY_INSTANCE.getQueryCache().getQueryResult(metricSumsRequest);
+          ThirdEyeCacheRegistry.getInstance().getQueryCache().getQueryResult(metricSumsRequest);
     } catch (Exception e) {
       LOGGER.error("Caught exception when executing metric sums request", e);
     }

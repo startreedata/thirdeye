@@ -48,10 +48,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Utils {
+
   private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static ThirdEyeCacheRegistry CACHE_REGISTRY = ThirdEyeCacheRegistry.getInstance();
 
   public static List<String> getSortedDimensionNames(String collection)
       throws Exception {
@@ -61,11 +61,13 @@ public class Utils {
   }
 
   public static List<String> getSchemaDimensionNames(String collection) throws Exception {
-    DatasetConfigDTO datasetConfig = CACHE_REGISTRY.getDatasetConfigCache().get(collection);
+    DatasetConfigDTO datasetConfig = ThirdEyeCacheRegistry.getInstance().getDatasetConfigCache()
+        .get(collection);
     return datasetConfig.getDimensions();
   }
 
-  public static List<String> getDimensionsToGroupBy(String collection, Multimap<String, String> filters)
+  public static List<String> getDimensionsToGroupBy(String collection,
+      Multimap<String, String> filters)
       throws Exception {
     List<String> dimensions = Utils.getSortedDimensionNames(collection);
 
@@ -84,7 +86,6 @@ public class Utils {
     return dimensionsToGroupBy;
   }
 
-
   public static List<MetricExpression> convertToMetricExpressions(String metricsJson,
       MetricAggFunction aggFunction, String dataset) throws ExecutionException {
 
@@ -94,7 +95,8 @@ public class Utils {
     }
     ArrayList<String> metricExpressionNames;
     try {
-      TypeReference<ArrayList<String>> valueTypeRef = new TypeReference<ArrayList<String>>() {};
+      TypeReference<ArrayList<String>> valueTypeRef = new TypeReference<ArrayList<String>>() {
+      };
       metricExpressionNames = OBJECT_MAPPER.readValue(metricsJson, valueTypeRef);
     } catch (Exception e) {
       metricExpressionNames = new ArrayList<>();
@@ -104,14 +106,15 @@ public class Utils {
       }
     }
     for (String metricExpressionName : metricExpressionNames) {
-      String derivedMetricExpression = ThirdEyeUtils.getDerivedMetricExpression(metricExpressionName, dataset);
-      MetricExpression metricExpression = new MetricExpression(metricExpressionName, derivedMetricExpression,
-           aggFunction, dataset);
+      String derivedMetricExpression = ThirdEyeUtils
+          .getDerivedMetricExpression(metricExpressionName, dataset);
+      MetricExpression metricExpression = new MetricExpression(metricExpressionName,
+          derivedMetricExpression,
+          aggFunction, dataset);
       metricExpressions.add(metricExpression);
     }
     return metricExpressions;
   }
-
 
   public static List<MetricFunction> computeMetricFunctionsFromExpressions(
       List<MetricExpression> metricExpressions) {
@@ -124,20 +127,22 @@ public class Utils {
   }
 
   /**
-   * If the dataset is non-additive, then the bucket granularity is return. Otherwise, a TimeGranularity that is
+   * If the dataset is non-additive, then the bucket granularity is return. Otherwise, a
+   * TimeGranularity that is
    * constructed from the given string of aggregation granularity is returned.
    *
    * @param aggTimeGranularity the string of aggregation granularity.
-   * @param dataset            the name of the dataset.
-   *
+   * @param dataset the name of the dataset.
    * @return the available aggregation granularity for the given dataset.
    */
-  public static TimeGranularity getAggregationTimeGranularity(String aggTimeGranularity, String dataset) {
+  public static TimeGranularity getAggregationTimeGranularity(String aggTimeGranularity,
+      String dataset) {
     DatasetConfigDTO datasetConfig;
     try {
-      datasetConfig = CACHE_REGISTRY.getDatasetConfigCache().get(dataset);
+      datasetConfig = ThirdEyeCacheRegistry.getInstance().getDatasetConfigCache().get(dataset);
     } catch (ExecutionException e) {
-      LOG.info("Unable to determine whether dataset: {} is additive, the given aggregation granularity: {} is used.",
+      LOG.info(
+          "Unable to determine whether dataset: {} is additive, the given aggregation granularity: {} is used.",
           dataset, aggTimeGranularity);
       return TimeGranularity.fromString(aggTimeGranularity);
     }
@@ -161,9 +166,10 @@ public class Utils {
    * @param timeGranularityString time granularity in String format.
    * @param targetChunkNum the target number of chunks.
    * @return the resized time granularity in order to divide the duration to the number of chunks
-   * that is smaller than or equals to the target chunk number.
+   *     that is smaller than or equals to the target chunk number.
    */
-  public static String resizeTimeGranularity(long duration, String timeGranularityString, int targetChunkNum) {
+  public static String resizeTimeGranularity(long duration, String timeGranularityString,
+      int targetChunkNum) {
     TimeGranularity timeGranularity = TimeGranularity.fromString(timeGranularityString);
 
     long timeGranularityMillis = timeGranularity.toMillis();
@@ -174,7 +180,8 @@ public class Utils {
     if (chunkNum > targetChunkNum) {
       long targetIntervalDuration = (long) Math.ceil((double) duration / (double) targetChunkNum);
       long unitTimeGranularityMillis = timeGranularity.getUnit().toMillis(1);
-      int size = (int) Math.ceil((double) targetIntervalDuration / (double) unitTimeGranularityMillis);
+      int size = (int) Math
+          .ceil((double) targetIntervalDuration / (double) unitTimeGranularityMillis);
       String newTimeGranularityString = size + "_" + timeGranularity.getUnit();
       return newTimeGranularityString;
     } else {
@@ -194,13 +201,15 @@ public class Utils {
   /*
    * This method returns the time zone of the data in this collection
    */
-  public static DateTimeZone getDataTimeZone(String collection)  {
+  public static DateTimeZone getDataTimeZone(String collection) {
     String timezone = TimeSpec.DEFAULT_TIMEZONE;
     try {
       DatasetConfigDTO datasetConfig;
-      LoadingCache<String, DatasetConfigDTO> datasetConfigCache = CACHE_REGISTRY.getDatasetConfigCache();
+      LoadingCache<String, DatasetConfigDTO> datasetConfigCache = ThirdEyeCacheRegistry
+          .getInstance()
+          .getDatasetConfigCache();
       if (datasetConfigCache != null && datasetConfigCache.get(collection) != null) {
-        datasetConfig = CACHE_REGISTRY.getDatasetConfigCache().get(collection);
+        datasetConfig = ThirdEyeCacheRegistry.getInstance().getDatasetConfigCache().get(collection);
       } else {
         datasetConfig = DAORegistry.getInstance().getDatasetConfigDAO().findByDataset(collection);
       }
@@ -237,7 +246,7 @@ public class Utils {
   public static long getMaxDataTimeForDataset(String dataset) {
     long endTime = 0;
     try {
-      endTime = CACHE_REGISTRY.getDatasetMaxDataTimeCache().get(dataset);
+      endTime = ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache().get(dataset);
     } catch (ExecutionException e) {
       LOG.error("Exception when getting max data time for {}", dataset);
     }

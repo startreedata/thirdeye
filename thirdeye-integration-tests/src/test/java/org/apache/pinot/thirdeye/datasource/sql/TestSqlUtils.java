@@ -25,6 +25,7 @@ import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -55,11 +56,15 @@ public class TestSqlUtils {
     this.daoTestBase = DAOTestBase.getInstance();
     this.metricDataset = new MetricDataset(metric, dataset);
 
-    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito.mock(LoadingCache.class);
+    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito
+        .mock(LoadingCache.class);
     Mockito.when(mockDatasetConfigCache.get(this.dataset)).thenReturn(new DatasetConfigDTO());
 
-    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = Mockito.mock(LoadingCache.class);
+    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = Mockito
+        .mock(LoadingCache.class);
     Mockito.when(mockMetricConfigCache.get(this.metricDataset)).thenReturn(new MetricConfigDTO());
+
+    ThirdEyeCacheRegistry.setInstance(DaoProviderUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     ThirdEyeCacheRegistry.getInstance().registerDatasetConfigCache(mockDatasetConfigCache);
     ThirdEyeCacheRegistry.getInstance().registerMetricConfigCache(mockMetricConfigCache);
@@ -67,7 +72,8 @@ public class TestSqlUtils {
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
     metricConfigDTO.setDataset(this.dataset);
     metricConfigDTO.setName(this.metricDataset.getMetricName());
-    metricConfigDTO.setAlias(this.metricDataset.getDataset() + "::" + this.metricDataset.getMetricName());
+    metricConfigDTO
+        .setAlias(this.metricDataset.getDataset() + "::" + this.metricDataset.getMetricName());
 
     metricFunction = new MetricFunction();
     metricFunction.setDataset(dataset);

@@ -22,61 +22,59 @@ package org.apache.pinot.thirdeye.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
-public class AlertEvaluationApi {
+public class DetectionDataApi {
 
-  private AlertApi alert;
-  private Map<String, DetectionEvaluationApi> detectionEvaluations;
-  private Date start;
-  private Date end;
-  private Date lastTimestamp;
+  private List<Long> timestamp;
+  private List<Double> upperBound;
+  private List<Double> lowerBound;
+  private List<Double> current;
+  private List<Double> expected;
 
-  public AlertApi getAlert() {
-    return alert;
+  public List<Long> getTimestamp() {
+    return timestamp;
   }
 
-  public AlertEvaluationApi setAlert(final AlertApi alert) {
-    this.alert = alert;
+  public DetectionDataApi setTimestamp(final List<Long> timestamp) {
+    this.timestamp = timestamp;
     return this;
   }
 
-  public Map<String, DetectionEvaluationApi> getDetectionEvaluations() {
-    return detectionEvaluations;
+  public List<Double> getUpperBound() {
+    return upperBound;
   }
 
-  public AlertEvaluationApi setDetectionEvaluations(
-      final Map<String, DetectionEvaluationApi> detectionEvaluations) {
-    this.detectionEvaluations = detectionEvaluations;
+  public DetectionDataApi setUpperBound(final List<Double> upperBound) {
+    this.upperBound = upperBound;
     return this;
   }
 
-  public Date getStart() {
-    return start;
+  public List<Double> getLowerBound() {
+    return lowerBound;
   }
 
-  public AlertEvaluationApi setStart(final Date start) {
-    this.start = start;
+  public DetectionDataApi setLowerBound(final List<Double> lowerBound) {
+    this.lowerBound = lowerBound;
     return this;
   }
 
-  public Date getEnd() {
-    return end;
+  public List<Double> getCurrent() {
+    return current;
   }
 
-  public AlertEvaluationApi setEnd(final Date end) {
-    this.end = end;
+  public DetectionDataApi setCurrent(final List<Double> current) {
+    this.current = current;
     return this;
   }
 
-  public Date getLastTimestamp() {
-    return lastTimestamp;
+  public List<Double> getExpected() {
+    return expected;
   }
 
-  public AlertEvaluationApi setLastTimestamp(final Date lastTimestamp) {
-    this.lastTimestamp = lastTimestamp;
+  public DetectionDataApi setExpected(final List<Double> expected) {
+    this.expected = expected;
     return this;
   }
 }

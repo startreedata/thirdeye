@@ -22,26 +22,31 @@ package org.apache.pinot.thirdeye.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
 
 @JsonInclude(Include.NON_NULL)
 public class DetectionEvaluationApi {
 
-  private AlertComponentApi detection;
-  private List<AnomalyApi> anomalies;
-  private Date lastTimestamp;
+  private Double mape;
+  private DetectionDataApi data;
+  private List<AnomalyApi> anomalies = new ArrayList<>();
 
-  private DataFrame data;
-
-  public AlertComponentApi getDetection() {
-    return detection;
+  public Double getMape() {
+    return mape;
   }
 
-  public DetectionEvaluationApi setDetection(
-      final AlertComponentApi detection) {
-    this.detection = detection;
+  public DetectionEvaluationApi setMape(final Double mape) {
+    this.mape = mape;
+    return this;
+  }
+
+  public DetectionDataApi getData() {
+    return data;
+  }
+
+  public DetectionEvaluationApi setData(final DetectionDataApi data) {
+    this.data = data;
     return this;
   }
 
@@ -52,24 +57,6 @@ public class DetectionEvaluationApi {
   public DetectionEvaluationApi setAnomalies(
       final List<AnomalyApi> anomalies) {
     this.anomalies = anomalies;
-    return this;
-  }
-
-  public Date getLastTimestamp() {
-    return lastTimestamp;
-  }
-
-  public DetectionEvaluationApi setLastTimestamp(final Date lastTimestamp) {
-    this.lastTimestamp = lastTimestamp;
-    return this;
-  }
-
-  public DataFrame getData() {
-    return data;
-  }
-
-  public DetectionEvaluationApi setData(final DataFrame data) {
-    this.data = data;
     return this;
   }
 }

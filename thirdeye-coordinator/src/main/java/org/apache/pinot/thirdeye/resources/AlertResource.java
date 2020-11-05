@@ -31,7 +31,6 @@ import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,9 +107,9 @@ public class AlertResource {
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
 
-    final DetectionPipelineResult pipelineResult = alertPreviewGenerator.runPreview(request);
+    final AlertEvaluationApi evaluation = alertPreviewGenerator.runPreview(request);
     return Response
-        .ok(pipelineResult)
+        .ok(evaluation)
         .build();
   }
 

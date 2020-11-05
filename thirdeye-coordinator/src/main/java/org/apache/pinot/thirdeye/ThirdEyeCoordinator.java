@@ -54,7 +54,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     // Initialize ThirdEyeCacheRegistry
     injector
         .getInstance(ThirdEyeCacheRegistry.class)
-        .initializeCaches(new ThirdEyeConfiguration());
+        .initializeCaches(new ThirdEyeConfiguration().setRootDir("config"));
 
     env.jersey().register(injector.getInstance(RootResource.class));
   }

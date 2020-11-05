@@ -35,8 +35,8 @@ public class ThirdEyeConfiguration extends Configuration {
    * Root directory for all other configuration
    */
   private String rootDir = "";
-  private String dataSources = "config/data-sources/data-sources-config.yml";
-  private String cacheDataSource = "config/data-sources/cache-config.yml";
+  private String dataSources = "data-sources/data-sources-config.yml";
+  private String cacheDataSource = "data-sources/cache-config.yml";
 
   private String dashboardHost;
 
@@ -68,7 +68,7 @@ public class ThirdEyeConfiguration extends Configuration {
    * @return the url of the data source
    */
   public URL getDataSourcesAsUrl() {
-    return getSourceAsUrl(this.dataSources);
+    return getSourceAsUrl(dataSources);
   }
 
   private URL getSourceAsUrl(String path) {
@@ -79,7 +79,7 @@ public class ThirdEyeConfiguration extends Configuration {
     }
 
     try {
-      URL rootUrl = new URL(String.format("file:%s", this.rootDir));
+      URL rootUrl = new URL(String.format("file:%s/", this.rootDir));
       return new URL(rootUrl, path);
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException(String.format("Could not parse relative path for rootDir '%s' and dataSources/cacheConfig '%s'", this.rootDir, path));
@@ -104,8 +104,9 @@ public class ThirdEyeConfiguration extends Configuration {
     return rootDir;
   }
 
-  public void setRootDir(String rootDir) {
+  public ThirdEyeConfiguration setRootDir(final String rootDir) {
     this.rootDir = rootDir;
+    return this;
   }
 
   public boolean isCors() {

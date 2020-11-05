@@ -33,7 +33,9 @@ public class ThirdEyeCoordinatorModuleTest {
     ));
     DaoProviderUtil.setInjector(injector);
 
-    injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(new ThirdEyeConfiguration());
+    injector
+        .getInstance(ThirdEyeCacheRegistry.class)
+        .initializeCaches(new ThirdEyeConfiguration().setRootDir("../config"));
 
     assertThat(injector.getInstance(RootResource.class)).isNotNull();
   }

@@ -1,9 +1,10 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toApi;
 
+import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -24,12 +25,16 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
 import org.apache.pinot.thirdeye.alert.AlertPreviewGenerator;
 import org.apache.pinot.thirdeye.api.AlertApi;
+import org.apache.pinot.thirdeye.api.AlertComponentApi;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
+import org.apache.pinot.thirdeye.api.DatasetApi;
+import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.api.UserApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
@@ -43,6 +48,7 @@ public class AlertResource {
   private static final Logger log = LoggerFactory.getLogger(AlertResource.class);
 
   private final AlertManager alertManager;
+  private final MetricConfigManager metricConfigManager;
   private final AlertCreater alertCreater;
   private final AuthService authService;
   private final AlertPreviewGenerator alertPreviewGenerator;
@@ -50,16 +56,19 @@ public class AlertResource {
   @Inject
   public AlertResource(
       final AlertManager alertManager,
+      final MetricConfigManager metricConfigManager,
       final AlertCreater alertCreater,
       final AuthService authService,
       final AlertPreviewGenerator alertPreviewGenerator) {
     this.alertManager = alertManager;
+    this.metricConfigManager = metricConfigManager;
     this.alertCreater = alertCreater;
     this.authService = authService;
     this.alertPreviewGenerator = alertPreviewGenerator;
   }
 
   @GET
+  @Timed
   public Response getAll(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader
   ) {
@@ -67,11 +76,12 @@ public class AlertResource {
 
     final List<AlertDTO> all = alertManager.findAll();
     return Response
-        .ok(all.stream().map(ApiBeanMapper::toApi))
+        .ok(all.stream().map(this::toApi))
         .build();
   }
 
   @POST
+  @Timed
   public Response createMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<AlertApi> list) {
@@ -92,8 +102,26 @@ public class AlertResource {
         .build();
   }
 
+  private AlertApi toApi(final AlertDTO dto) {
+    final AlertApi api = ApiBeanMapper.toApi(dto);
+
+    // Add metric and dataset info
+    api.getDetections().values().stream()
+        .map(AlertComponentApi::getMetric)
+        .forEach(metricApi -> optional(metricApi)
+            .map(MetricApi::getId)
+            .map(metricConfigManager::findById)
+            .ifPresent(metricDto -> metricApi
+                .setName(metricDto.getName())
+                .setDataset(new DatasetApi()
+                    .setName(metricDto.getDataset()))));
+
+    return api;
+  }
+
   @Path("preview")
   @POST
+  @Timed
   public Response preview(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       AlertEvaluationApi request)
@@ -114,6 +142,7 @@ public class AlertResource {
   }
 
   @PUT
+  @Timed
   public Response editMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<ApplicationApi> applicationApiList) {
@@ -126,6 +155,7 @@ public class AlertResource {
 
   @GET
   @Path("{id}")
+  @Timed
   public Response get(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
@@ -140,6 +170,7 @@ public class AlertResource {
 
   @DELETE
   @Path("{id}")
+  @Timed
   public Response delete(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {

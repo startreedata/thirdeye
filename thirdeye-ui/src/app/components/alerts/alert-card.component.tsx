@@ -4,19 +4,22 @@ import {
     Divider,
     Grid,
     makeStyles,
+    Switch,
     Theme,
     Tooltip,
     Typography,
 } from "@material-ui/core";
-import DragHandleIcon from "@material-ui/icons/DragHandle";
 import EditIcon from "@material-ui/icons/Edit";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import React, { ReactElement } from "react";
-import { Link } from "react-router-dom";
 import { Alert } from "../../utils/rest/alerts-rest/alerts-rest.interfaces";
+import { AppRoute } from "../../utils/routes.util";
+import { Button } from "../button/button.component";
+import { RouterLink } from "../router-link/router-link.component";
 
 type Props = {
     data: Alert;
+    mode: "detail" | "list";
 };
 
 const useStyles = makeStyles((them: Theme) => {
@@ -31,47 +34,76 @@ const useStyles = makeStyles((them: Theme) => {
     };
 });
 
-const AlertCard = ({ data }: Props): ReactElement => {
+const AlertCard = ({ data, mode = "list" }: Props): ReactElement => {
     const classes = useStyles();
     const {
         id,
-        breakdownBy,
-        createdBy,
-        datasetNames,
-        application,
-        filters,
-        metric,
         name,
-        subscriptionGroup,
-        rules,
+        active,
+        detections,
+        owner: { principal },
     } = data;
 
-    const detection = rules[0]?.detection;
+    const detection = detections[Object.keys(detections).pop() || ""];
 
     return (
         <Card className={classes.root}>
             <Box display="flex" justifyContent="space-between">
-                <Box display="flex">
-                    <Link to={`${id}`}>
-                        <Typography color="primary" variant="subtitle2">
-                            <strong>{name}</strong>&nbsp;
-                        </Typography>
-                    </Link>
-                    <Tooltip title="active">
-                        <FiberManualRecordIcon
-                            fontSize="small"
-                            htmlColor="green"
-                        />
-                    </Tooltip>
-                    <Tooltip title="Health: 50%">
+                {mode === "list" ? (
+                    <>
+                        <Box display="flex">
+                            <RouterLink to={`${id}`}>{name}</RouterLink>
+                            &emsp;
+                            {active && (
+                                <Tooltip title="active">
+                                    <FiberManualRecordIcon
+                                        fontSize="small"
+                                        htmlColor="green"
+                                    />
+                                </Tooltip>
+                            )}
+                            {/* Will add once get appropriate data from the API */}
+                            {/* <Tooltip title="Health: 50%">
                         <DragHandleIcon fontSize="small" htmlColor="#2D9CDB" />
-                    </Tooltip>
-                </Box>
-                <Tooltip title="Edit alert">
-                    <Link color="inherit" to={`/alerts/edit/${id}`}>
-                        <EditIcon fontSize="small" style={{ float: "right" }} />
-                    </Link>
-                </Tooltip>
+                    </Tooltip> */}
+                        </Box>
+                        <Tooltip title="Edit alert, Coming soon">
+                            <RouterLink to={`/alerts/edit/${id}`}>
+                                <EditIcon
+                                    fontSize="small"
+                                    style={{
+                                        float: "right",
+                                        color: "rgba(0, 0, 0, 0.54)",
+                                    }}
+                                />
+                            </RouterLink>
+                        </Tooltip>
+                    </>
+                ) : (
+                    <Box alignItems="center" display="flex">
+                        {active && (
+                            <Tooltip title="active">
+                                <>
+                                    <FiberManualRecordIcon
+                                        fontSize="small"
+                                        htmlColor="green"
+                                    />
+                                    Active
+                                </>
+                            </Tooltip>
+                        )}
+                        <Switch checked={active} color="primary" />
+                        <RouterLink to={`${AppRoute.ALERTS_EDIT}/${id}`}>
+                            <Button
+                                color="primary"
+                                startIcon={<EditIcon />}
+                                variant="outlined"
+                            >
+                                Edit Alert
+                            </Button>
+                        </RouterLink>
+                    </Box>
+                )}
             </Box>
             <Grid container style={{ marginTop: "8px" }}>
                 <Grid container item xs={12}>
@@ -79,25 +111,31 @@ const AlertCard = ({ data }: Props): ReactElement => {
                         <Typography variant="body1">
                             <strong>Metric</strong>
                         </Typography>
-                        <Typography variant="body1">{metric}</Typography>
+                        <Typography variant="body1">
+                            {detection &&
+                            detection.metric &&
+                            detection.metric.id
+                                ? detection.metric.id
+                                : "N/A"}
+                        </Typography>
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="body1">
                             <strong>Dataset</strong>
                         </Typography>
-                        <Typography variant="body1">{datasetNames}</Typography>
+                        <Typography variant="body1">N/A</Typography>
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="body1">
                             <strong>Application</strong>
                         </Typography>
-                        <Typography variant="body1">{application}</Typography>
+                        <Typography variant="body1">N/A</Typography>
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="body1">
                             <strong>Created by</strong>
                         </Typography>
-                        <Typography variant="body1">{createdBy}</Typography>
+                        <Typography variant="body1">{principal}</Typography>
                     </Grid>
                 </Grid>
                 <Grid container item xs={12}>
@@ -108,33 +146,27 @@ const AlertCard = ({ data }: Props): ReactElement => {
                         <Typography variant="body1">
                             <strong>Filtered by</strong>
                         </Typography>
-                        <Typography variant="body1">
-                            {filters || "N/A"}
-                        </Typography>
+                        <Typography variant="body1">{"N/A"}</Typography>
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="body1">
                             <strong>Breakdown by</strong>
                         </Typography>
-                        <Typography variant="body1">
-                            {breakdownBy || "N/A"}
-                        </Typography>
+                        <Typography variant="body1">{"N/A"}</Typography>
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="body1">
                             <strong>Detection Type</strong>
                         </Typography>
                         <Typography variant="body1">
-                            {detection.map((d) => d.name)}
+                            {detection.type}
                         </Typography>
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="body1">
                             <strong>Subscription Group</strong>
                         </Typography>
-                        <Typography variant="body1">
-                            {subscriptionGroup}
-                        </Typography>
+                        <Typography variant="body1">{"N/A"}</Typography>
                     </Grid>
                 </Grid>
             </Grid>

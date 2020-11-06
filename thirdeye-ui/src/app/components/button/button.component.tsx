@@ -5,5 +5,6 @@ export const Button = withStyles({
         border: "2px solid #54BAC9",
         boxSizing: "border-box",
         borderRadius: "8px",
+        margin: "8px 0",
     },
 })(MuiButton);

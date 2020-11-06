@@ -17,10 +17,13 @@ type Props = {
 const useStyles = makeStyles(() => {
     return {
         codemirror: {
-            border: "1px solid rgba(25, 25, 25, 0.38)",
-            fontSize: "12px",
-            fontFamily: "Roboto Slab !important",
-            fontWeight: 400,
+            "& .CodeMirror": {
+                border: "1px solid rgba(25, 25, 25, 0.38)",
+                fontSize: "12px",
+                fontFamily: "Roboto Slab !important",
+                borderRadius: 8,
+                fontWeight: 400,
+            },
         },
     };
 });

@@ -1,19 +1,14 @@
 import { Step, StepButton, StepLabel, Stepper } from "@material-ui/core";
-import React, { FunctionComponent, ReactNode, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { StepperProps } from "./stepper.interfaces";
 
-type Props = {
-    steps: {
-        label: string;
-        content: ReactNode;
-    }[];
-    clickable?: boolean;
-};
-
-export const CustomStepper: FunctionComponent<Props> = ({
+export const CustomStepper: FunctionComponent<StepperProps> = ({
     steps,
     clickable,
-}: Props) => {
-    const [activeStep, setActiveStep] = useState(0);
+    currentStep: controlledStep,
+    onStepChange,
+}: StepperProps) => {
+    const [activeStep, setActiveStep] = useState(controlledStep || 0);
     // Will be implemented
     const [completed] = useState(new Set());
     const [skipped] = useState(new Set());
@@ -28,7 +23,19 @@ export const CustomStepper: FunctionComponent<Props> = ({
 
     const handleStep = (step: number) => (): void => {
         setActiveStep(step);
+        onStepChange && onStepChange(step);
     };
+
+    const handleNext = (): void => {
+        setActiveStep(activeStep + 1);
+        onStepChange && onStepChange(activeStep + 1);
+    };
+
+    useEffect(() => {
+        setActiveStep(controlledStep || 0);
+    }, [controlledStep]);
+
+    const currentStep = steps[activeStep].content;
 
     return (
         <>
@@ -57,8 +64,10 @@ export const CustomStepper: FunctionComponent<Props> = ({
                     );
                 })}
             </Stepper>
-            {activeStep > -1 && activeStep < steps.length
-                ? steps[activeStep].content
+            {currentStep
+                ? typeof currentStep === "function"
+                    ? currentStep({ onNext: handleNext })
+                    : currentStep
                 : null}
         </>
     );

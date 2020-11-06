@@ -1,7 +1,11 @@
 import { AppBar, Link, Toolbar } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
 import classnames from "classnames";
 import React, { FunctionComponent } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { ReactComponent as ThirdEye } from "../../../assets/icons/third-eye.svg";
+import { AppRoute } from "../../utils/routes.util";
+import { Button } from "../button/button.component";
 import { applicationBarStyles } from "./application-bar.styles";
 
 // ThirdEye UI AppBar
@@ -40,6 +44,19 @@ export const ApplicationBar: FunctionComponent = () => {
                 >
                     Alerts
                 </Link>
+
+                <RouterLink
+                    style={{ textDecoration: "none" }}
+                    to={AppRoute.ALERT_NEW}
+                >
+                    <Button
+                        color="primary"
+                        startIcon={<AddIcon />}
+                        variant="text"
+                    >
+                        Create Alert
+                    </Button>
+                </RouterLink>
             </Toolbar>
         </AppBar>
     );

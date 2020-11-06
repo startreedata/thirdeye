@@ -4,6 +4,7 @@ export const AppRoute = {
     ALERTS_DETAIL: "/alerts/:id",
     ALERTS_EDIT: "/alerts/edit/:id",
     ALERTS_ALL: "/alerts/all",
+    ALERT_NEW: "/alerts/new",
     SIGN_IN: "/signIn",
 } as const;
 
@@ -25,6 +26,10 @@ export const getAlertsDetailsPath = (): string => {
 
 export const getAlertsEditPath = (): string => {
     return AppRoute.ALERTS_EDIT;
+};
+
+export const getCreateAlertPath = (): string => {
+    return AppRoute.ALERT_NEW;
 };
 
 export const getSignInPath = (): string => {

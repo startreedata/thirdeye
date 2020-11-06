@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertComponentApi;
+import org.apache.pinot.thirdeye.api.UserApi;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -101,13 +102,17 @@ public class AlertApiBeanMapper {
 
     dto.setName(api.getName());
     dto.setDescription(api.getDescription());
-    dto.setActive(true);
+    dto.setActive(optional(api.getActive()).orElse(true));
     dto.setCron(api.getCron());
     dto.setLastTimestamp(optional(api.getLastTimestamp())
         .map(d -> d.toInstant().toEpochMilli())
         .orElse(0L));
     dto.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-    dto.setCreatedBy(api.getOwner().getPrincipal());
+
+    // May not get updated while edits
+    optional(api.getOwner())
+        .map(UserApi::getPrincipal)
+        .ifPresent(dto::setCreatedBy);
 
     final DetectionMetricAttributeHolder metricAttributesMap =
         new DetectionMetricAttributeHolder(dataProvider);

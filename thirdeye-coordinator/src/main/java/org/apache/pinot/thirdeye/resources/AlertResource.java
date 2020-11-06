@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
@@ -9,6 +10,7 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
@@ -22,12 +24,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.thirdeye.alert.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
 import org.apache.pinot.thirdeye.alert.AlertPreviewGenerator;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertComponentApi;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
-import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.api.DatasetApi;
 import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.api.UserApi;
@@ -50,6 +52,7 @@ public class AlertResource {
   private final AlertManager alertManager;
   private final MetricConfigManager metricConfigManager;
   private final AlertCreater alertCreater;
+  private final AlertApiBeanMapper alertApiBeanMapper;
   private final AuthService authService;
   private final AlertPreviewGenerator alertPreviewGenerator;
 
@@ -58,11 +61,13 @@ public class AlertResource {
       final AlertManager alertManager,
       final MetricConfigManager metricConfigManager,
       final AlertCreater alertCreater,
+      final AlertApiBeanMapper alertApiBeanMapper,
       final AuthService authService,
       final AlertPreviewGenerator alertPreviewGenerator) {
     this.alertManager = alertManager;
     this.metricConfigManager = metricConfigManager;
     this.alertCreater = alertCreater;
+    this.alertApiBeanMapper = alertApiBeanMapper;
     this.authService = authService;
     this.alertPreviewGenerator = alertPreviewGenerator;
   }
@@ -88,18 +93,24 @@ public class AlertResource {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
     ensureExists(list, "Invalid request");
-    ensure(list.size() == 1, "Only 1 insert supported at this time.");
 
-    final AlertApi alertApi = list.get(0);
+    return Response
+        .ok(list.stream()
+            .map(alertApi -> createAlert(principal, alertApi))
+            .map(this::toApi)
+            .collect(Collectors.toList())
+        )
+        .build();
+  }
+
+  private AlertDTO createAlert(final ThirdEyePrincipal principal, final AlertApi alertApi) {
     ensureExists(alertApi.getName(), "Name must be present");
     ensureExists(alertApi.getDetections(), "Exactly 1 detection must be present");
     ensure(alertApi.getDetections().size() == 1, "Exactly 1 detection must be present");
 
-    return Response
-        .ok(toApi(alertCreater.create(alertApi
-            .setOwner(new UserApi().setPrincipal(principal.getName()))
-        )))
-        .build();
+    return alertCreater.create(alertApi
+        .setOwner(new UserApi().setPrincipal(principal.getName()))
+    );
   }
 
   private AlertApi toApi(final AlertDTO dto) {
@@ -145,12 +156,26 @@ public class AlertResource {
   @Timed
   public Response editMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      List<ApplicationApi> applicationApiList) {
+      List<AlertApi> list) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    ensure(false, "Unsupported Operation.");
     return Response
-        .ok()
+        .ok(list.stream()
+            .map(this::editAlert)
+            .collect(Collectors.toList()))
         .build();
+  }
+
+  private AlertApi editAlert(final AlertApi api) {
+    final Long id = ensureExists(api.getId(), ERR_MISSING_ID);
+    final AlertDTO existing = ensureExists(alertManager.findById(id));
+
+    final AlertDTO updated = alertApiBeanMapper.toAlertDTO(api);
+    updated.setId(id);
+    updated.setCreatedBy(existing.getCreatedBy());
+    updated.setLastTimestamp(existing.getLastTimestamp());
+
+    alertManager.update(updated);
+    return toApi(updated);
   }
 
   @GET

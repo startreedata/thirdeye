@@ -45,17 +45,17 @@ public class AlertPreviewGenerator {
 
   private final DataProvider dataProvider;
   private final AlertManager alertManager;
-  private final AlertCreater alertCreater;
+  private final AlertApiBeanMapper alertApiBeanMapper;
   private final ExecutorService executorService;
 
   @Inject
   public AlertPreviewGenerator(
       final DataProvider dataProvider,
       final AlertManager alertManager,
-      final AlertCreater alertCreater) {
+      final AlertApiBeanMapper alertApiBeanMapper) {
     this.dataProvider = dataProvider;
     this.alertManager = alertManager;
-    this.alertCreater = alertCreater;
+    this.alertApiBeanMapper = alertApiBeanMapper;
 
     this.executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
@@ -125,7 +125,7 @@ public class AlertPreviewGenerator {
     if (api.getId() != null) {
       dto = alertManager.findById(api.getId());
     } else {
-      dto = alertCreater.toAlertDTO(api);
+      dto = alertApiBeanMapper.toAlertDTO(api);
       dto.setId(System.currentTimeMillis());
     }
 

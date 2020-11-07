@@ -25,8 +25,8 @@ import java.util.Arrays;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class MetricEntityTest {
+
   @Test
   public void testType() {
     MetricEntity.fromURN("thirdeye:metric:12345", 1.0);
@@ -60,9 +60,11 @@ public class MetricEntityTest {
 
   @Test
   public void testFiltersMultikey() {
-    MetricEntity e = MetricEntity.fromURN("thirdeye:metric:12345:key=value:key=other:otherKey=yetAnotherValue", 1.0);
+    MetricEntity e = MetricEntity
+        .fromURN("thirdeye:metric:12345:key=value:key=other:otherKey=yetAnotherValue", 1.0);
     Assert.assertEquals(e.getFilters().size(), 3);
-    Assert.assertEquals(e.getFilters().get("key"), Arrays.asList("other", "value")); // stratification
+    Assert
+        .assertEquals(e.getFilters().get("key"), Arrays.asList("other", "value")); // stratification
     Assert.assertEquals(e.getFilters().get("otherKey").iterator().next(), "yetAnotherValue");
   }
 
@@ -125,5 +127,4 @@ public class MetricEntityTest {
     MetricEntity drop = e.withoutFilters();
     Assert.assertEquals(drop.getUrn(), "thirdeye:metric:123");
   }
-
 }

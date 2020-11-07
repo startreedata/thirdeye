@@ -16,7 +16,18 @@
 
 package org.apache.pinot.thirdeye.detection.wrapper;
 
+import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.makeAnomaly;
+import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.makeAnomalyWithProps;
+
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -26,22 +37,12 @@ import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.MockPipeline;
 import org.apache.pinot.thirdeye.detection.MockPipelineLoader;
 import org.apache.pinot.thirdeye.detection.MockPipelineOutput;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.*;
-
-
 public class ChildKeepingMergeWrapperTest {
+
   private AlertDTO config;
   private ChildKeepingMergeWrapper wrapper;
   private Map<String, Object> properties;
@@ -126,9 +127,11 @@ public class ChildKeepingMergeWrapperTest {
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
     Assert.assertEquals(output.getLastTimestamp(), 3000);
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250, ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(0, 1000), makeAnomaly(1100, 1200)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250,
+        ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(0, 1000), makeAnomaly(1100, 1200)))));
     Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1500, 2000)));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2200, 2800, ImmutableSet.of(makeAnomaly(2200, 2300), makeAnomaly(2400, 2800)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2200, 2800,
+        ImmutableSet.of(makeAnomaly(2200, 2300), makeAnomaly(2400, 2800)))));
   }
 
   @Test
@@ -141,8 +144,10 @@ public class ChildKeepingMergeWrapperTest {
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
     Assert.assertEquals(output.getLastTimestamp(), 3000);
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250, ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(0, 1000), makeAnomaly(1100, 1200)))));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1500, 2300, ImmutableSet.of(makeAnomaly(2200, 2300), makeAnomaly(1500, 2000)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250,
+        ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(0, 1000), makeAnomaly(1100, 1200)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1500, 2300,
+        ImmutableSet.of(makeAnomaly(2200, 2300), makeAnomaly(1500, 2000)))));
     Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2400, 2800)));
   }
 
@@ -167,10 +172,13 @@ public class ChildKeepingMergeWrapperTest {
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
     Assert.assertEquals(output.getLastTimestamp(), 3700);
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250, ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(0, 1000), makeAnomaly(1100, 1200)))));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1500, 2300, ImmutableSet.of(makeAnomaly(2200, 2300), makeAnomaly(1500, 2000)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250,
+        ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(0, 1000), makeAnomaly(1100, 1200)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1500, 2300,
+        ImmutableSet.of(makeAnomaly(2200, 2300), makeAnomaly(1500, 2000)))));
     Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2400, 2800)));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2800, 3800, ImmutableSet.of(makeAnomaly(2800, 3700), makeAnomaly(3700, 3800)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2800, 3800,
+        ImmutableSet.of(makeAnomaly(2800, 3700), makeAnomaly(3700, 3800)))));
   }
 
   @Test
@@ -194,10 +202,13 @@ public class ChildKeepingMergeWrapperTest {
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
     Assert.assertEquals(output.getLastTimestamp(), 3700);
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250, ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(0, 1000), makeAnomaly(1100, 1200)))));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1500, 2300, ImmutableSet.of(makeAnomaly(2200, 2300), makeAnomaly(1500, 2000)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250,
+        ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(0, 1000), makeAnomaly(1100, 1200)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1500, 2300,
+        ImmutableSet.of(makeAnomaly(2200, 2300), makeAnomaly(1500, 2000)))));
     Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2400, 2800)));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2800, 3800, ImmutableSet.of(makeAnomaly(2800, 3800), makeAnomaly(3500, 3600)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2800, 3800,
+        ImmutableSet.of(makeAnomaly(2800, 3800), makeAnomaly(3500, 3600)))));
   }
 
   @Test
@@ -212,7 +223,8 @@ public class ChildKeepingMergeWrapperTest {
       metrics.add(run.getConfig().getProperties().get(PROP_METRIC_URN).toString());
     }
 
-    Assert.assertEquals(metrics, new HashSet<>(Arrays.asList("thirdeye:metric:1", "thirdeye:metric:2")));
+    Assert.assertEquals(metrics,
+        new HashSet<>(Arrays.asList("thirdeye:metric:1", "thirdeye:metric:2")));
   }
 
   @Test
@@ -256,14 +268,18 @@ public class ChildKeepingMergeWrapperTest {
 
     Assert.assertEquals(output.getAnomalies().size(), 6);
     Assert.assertEquals(output.getLastTimestamp(), 3000);
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250, ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(1100, 1200), makeAnomaly(0, 1000)))));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1500, 2300, ImmutableSet.of(makeAnomaly(1500, 2000), makeAnomaly(2200, 2300)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(0, 1250,
+        ImmutableSet.of(makeAnomaly(1150, 1250), makeAnomaly(1100, 1200), makeAnomaly(0, 1000)))));
+    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1500, 2300,
+        ImmutableSet.of(makeAnomaly(1500, 2000), makeAnomaly(2200, 2300)))));
     Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2400, 2800)));
     Map<String, String> dim1 = Collections.singletonMap("key", "value");
     Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1150, 1300, dim1,
         ImmutableSet.of(makeAnomaly(1150, 1250, dim1), makeAnomaly(1250, 1300, dim1)))));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2400, 2800, Collections.singletonMap("otherKey", "value"))));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2700, 2900, Collections.singletonMap("otherKey", "otherValue"))));
+    Assert.assertTrue(output.getAnomalies()
+        .contains(makeAnomaly(2400, 2800, Collections.singletonMap("otherKey", "value"))));
+    Assert.assertTrue(output.getAnomalies()
+        .contains(makeAnomaly(2700, 2900, Collections.singletonMap("otherKey", "otherValue"))));
   }
 
   @Test
@@ -290,17 +306,18 @@ public class ChildKeepingMergeWrapperTest {
     config.setName(PROP_NAME_VALUE);
     config.setProperties(properties);
 
-    MockPipelineLoader mockLoader = new MockPipelineLoader(this.runs, Collections.singletonList(new MockPipelineOutput(Collections.singletonList(anomaly), -1L)));
+    MockPipelineLoader mockLoader = new MockPipelineLoader(this.runs,
+        Collections.singletonList(new MockPipelineOutput(Collections.singletonList(anomaly), -1L)));
 
     DataProvider provider = new MockDataProvider()
         .setLoader(mockLoader).setAnomalies(Collections.emptyList());
 
-    DetectionPipelineResult output = new ChildKeepingMergeWrapper(provider, config, 1000, 3000).run();
+    DetectionPipelineResult output = new ChildKeepingMergeWrapper(provider, config, 1000, 3000)
+        .run();
     List<MergedAnomalyResultDTO> anomalyResults = output.getAnomalies();
     Assert.assertEquals(anomalyResults.size(), 1);
     Assert.assertEquals(anomalyResults.get(0).getAvgBaselineVal(), 999.0);
     Assert.assertEquals(anomalyResults.get(0).getAvgCurrentVal(), 998.0);
-
   }
 
   @Test
@@ -323,12 +340,14 @@ public class ChildKeepingMergeWrapperTest {
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 5);
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomalyWithProps(2800, 3800, Collections.singletonMap("pattern", "UP"))));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomalyWithProps(3500, 3600, Collections.singletonMap("pattern", "DOWN"))));
+    Assert.assertTrue(output.getAnomalies()
+        .contains(makeAnomalyWithProps(2800, 3800, Collections.singletonMap("pattern", "UP"))));
+    Assert.assertTrue(output.getAnomalies()
+        .contains(makeAnomalyWithProps(3500, 3600, Collections.singletonMap("pattern", "DOWN"))));
   }
 
   @Test
-  public void testMergerInferredPattern() throws Exception{
+  public void testMergerInferredPattern() throws Exception {
     this.config.getProperties().put(PROP_MAX_GAP, 200);
     this.config.getProperties().put(PROP_MAX_DURATION, 1250);
 

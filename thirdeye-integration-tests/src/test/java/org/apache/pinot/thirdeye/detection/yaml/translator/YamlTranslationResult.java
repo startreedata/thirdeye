@@ -21,8 +21,8 @@ package org.apache.pinot.thirdeye.detection.yaml.translator;
 
 import java.util.Map;
 
-
 public class YamlTranslationResult {
+
   private Map<String, Object> properties;
   private Map<String, Object> dataQualityProperties;
   private Map<String, Object> components;
@@ -59,5 +59,4 @@ public class YamlTranslationResult {
   public String getCron() {
     return cron;
   }
-
 }

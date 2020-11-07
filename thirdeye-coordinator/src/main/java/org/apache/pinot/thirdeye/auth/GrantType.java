@@ -9,12 +9,10 @@ public enum GrantType {
    * or absolute URI of the extension grant type).
    * Overriding is only supported for the purpose of calling the super implementation and
    * changing the return type, but nothing else.
-   *
    */
   AUTHORIZATION_CODE("authorization_code"),
   PASSWORD("password"),
-  REFRESH_TOKEN("refresh_token")
-  ;
+  REFRESH_TOKEN("refresh_token");
 
   final String value;
 

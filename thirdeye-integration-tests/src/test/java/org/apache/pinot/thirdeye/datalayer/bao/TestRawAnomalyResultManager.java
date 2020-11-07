@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,17 +17,16 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.RawAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.RawAnomalyResultDTO;
 
 public class TestRawAnomalyResultManager {
 
@@ -37,6 +36,7 @@ public class TestRawAnomalyResultManager {
   private DAOTestBase testDAOProvider;
   private AnomalyFunctionManager anomalyFunctionDAO;
   private RawAnomalyResultManager rawAnomalyResultDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -98,5 +98,4 @@ public class TestRawAnomalyResultManager {
     anomalyResult.setDimensions(dimensionMap);
     return anomalyResult;
   }
-
 }

@@ -39,6 +39,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class PercentageChangeRuleAnomalyFilterTest {
+
   private static final String METRIC_URN = "thirdeye:metric:123";
   private static final long CONFIG_ID = 125L;
 
@@ -47,7 +48,8 @@ public class PercentageChangeRuleAnomalyFilterTest {
 
   @BeforeMethod
   public void beforeMethod() {
-    this.baseline = BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.MEAN, 1, 1, DateTimeZone.forID("UTC"));
+    this.baseline = BaselineAggregate
+        .fromWeekOverWeek(BaselineAggregateType.MEAN, 1, 1, DateTimeZone.forID("UTC"));
 
     MetricSlice slice1 = MetricSlice.from(123L, 1555570800000L, 1555693200000L);
     MetricSlice baselineSlice1 = this.baseline.scatter(slice1).get(0);
@@ -64,16 +66,20 @@ public class PercentageChangeRuleAnomalyFilterTest {
         new DataFrame().addSeries(DataFrame.COL_TIME, baselineSlice1.getStart()).addSeries(
             DataFrame.COL_VALUE, 200).setIndex(DataFrame.COL_TIME));
     aggregates.put(slice2,
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 500).addSeries(DataFrame.COL_TIME, slice2.getStart()).setIndex(
+        new DataFrame().addSeries(DataFrame.COL_VALUE, 500)
+            .addSeries(DataFrame.COL_TIME, slice2.getStart()).setIndex(
             DataFrame.COL_TIME));
     aggregates.put(baselineSlice2,
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 1000).addSeries(DataFrame.COL_TIME, baselineSlice2.getStart()).setIndex(
+        new DataFrame().addSeries(DataFrame.COL_VALUE, 1000)
+            .addSeries(DataFrame.COL_TIME, baselineSlice2.getStart()).setIndex(
             DataFrame.COL_TIME));
     aggregates.put(slice3,
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 200).addSeries(DataFrame.COL_TIME, slice3.getStart()).setIndex(
+        new DataFrame().addSeries(DataFrame.COL_VALUE, 200)
+            .addSeries(DataFrame.COL_TIME, slice3.getStart()).setIndex(
             DataFrame.COL_TIME));
     aggregates.put(baselineSlice3,
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 150).addSeries(DataFrame.COL_TIME, baselineSlice3.getStart()).setIndex(
+        new DataFrame().addSeries(DataFrame.COL_VALUE, 150)
+            .addSeries(DataFrame.COL_TIME, baselineSlice3.getStart()).setIndex(
             DataFrame.COL_TIME));
 
     this.testDataProvider = new MockDataProvider().setAggregates(aggregates);
@@ -88,8 +94,10 @@ public class PercentageChangeRuleAnomalyFilterTest {
     AnomalyFilter filter = new PercentageChangeRuleAnomalyFilter();
     filter.init(spec, new DefaultInputDataFetcher(this.testDataProvider, CONFIG_ID));
     List<Boolean> results =
-        Stream.of(DetectionTestUtils.makeAnomaly(1555570800000L, 1555693200000L, CONFIG_ID, METRIC_URN, 150),
-            DetectionTestUtils.makeAnomaly(1554163200000L, 1554249600000L, CONFIG_ID, METRIC_URN, 500))
+        Stream.of(DetectionTestUtils
+                .makeAnomaly(1555570800000L, 1555693200000L, CONFIG_ID, METRIC_URN, 150),
+            DetectionTestUtils
+                .makeAnomaly(1554163200000L, 1554249600000L, CONFIG_ID, METRIC_URN, 500))
             .map(anomaly -> filter.isQualified(anomaly))
             .collect(Collectors.toList());
     Assert.assertEquals(results, Arrays.asList(false, true));
@@ -105,9 +113,12 @@ public class PercentageChangeRuleAnomalyFilterTest {
     AnomalyFilter filter = new PercentageChangeRuleAnomalyFilter();
     filter.init(spec, new DefaultInputDataFetcher(this.testDataProvider, CONFIG_ID));
     List<Boolean> results =
-        Stream.of(DetectionTestUtils.makeAnomaly(1555570800000L, 1555693200000L, CONFIG_ID, METRIC_URN, 150),
-            DetectionTestUtils.makeAnomaly(1554163200000L, 1554249600000L, CONFIG_ID, METRIC_URN, 500),
-            DetectionTestUtils.makeAnomaly(1554076800000L, 1554163200000L, CONFIG_ID, METRIC_URN, 200))
+        Stream.of(DetectionTestUtils
+                .makeAnomaly(1555570800000L, 1555693200000L, CONFIG_ID, METRIC_URN, 150),
+            DetectionTestUtils
+                .makeAnomaly(1554163200000L, 1554249600000L, CONFIG_ID, METRIC_URN, 500),
+            DetectionTestUtils
+                .makeAnomaly(1554076800000L, 1554163200000L, CONFIG_ID, METRIC_URN, 200))
             .map(anomaly -> filter.isQualified(anomaly))
             .collect(Collectors.toList());
     Assert.assertEquals(results, Arrays.asList(false, true, true));

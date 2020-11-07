@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,21 +16,6 @@
 
 package org.apache.pinot.thirdeye.detection.algorithm;
 
-import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.dataframe.StringSeries;
-import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.MockDataProvider;
-import org.apache.pinot.thirdeye.detection.MockPipeline;
-import org.apache.pinot.thirdeye.detection.MockPipelineLoader;
-import org.apache.pinot.thirdeye.detection.MockPipelineOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,11 +23,26 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.dataframe.StringSeries;
+import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.detection.DataProvider;
+import org.apache.pinot.thirdeye.detection.MockDataProvider;
+import org.apache.pinot.thirdeye.detection.MockPipeline;
+import org.apache.pinot.thirdeye.detection.MockPipelineLoader;
+import org.apache.pinot.thirdeye.detection.MockPipelineOutput;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class DimensionWrapperTest {
+
   // exploration
   private static final String PROP_METRIC_URN = "metricUrn";
   private static final String PROP_DIMENSIONS = "dimensions";
@@ -61,7 +61,8 @@ public class DimensionWrapperTest {
   private static final Long PROP_ID_VALUE = 1000L;
   private static final String PROP_NAME_VALUE = "myName";
   private static final String PROP_CLASS_NAME_VALUE = "MyClassName";
-  private static final Collection<String> PROP_NESTED_METRIC_URN_VALUES = Collections.singleton("thirdeye:metric:2");
+  private static final Collection<String> PROP_NESTED_METRIC_URN_VALUES = Collections
+      .singleton("thirdeye:metric:2");
   private static final String PROP_NESTED_METRIC_URN_KEY_VALUE = "myMetricUrn";
 
   private DataProvider provider;
@@ -88,8 +89,10 @@ public class DimensionWrapperTest {
     this.aggregates = new HashMap<>();
     this.aggregates.put(MetricSlice.from(2, 10, 15),
         new DataFrame()
-            .addSeries("a", StringSeries.buildFrom("1", "1", "1", "1", "1", "2", "2", "2", "2", "2"))
-            .addSeries("b", StringSeries.buildFrom("1", "2", "1", "2", "3", "1", "2", "1", "2", "3"))
+            .addSeries("a",
+                StringSeries.buildFrom("1", "1", "1", "1", "1", "2", "2", "2", "2", "2"))
+            .addSeries("b",
+                StringSeries.buildFrom("1", "2", "1", "2", "3", "1", "2", "1", "2", "3"))
             .addSeries(DataFrame.COL_VALUE, DoubleSeries.buildFrom(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
 
     this.runs = new ArrayList<>();
@@ -216,7 +219,8 @@ public class DimensionWrapperTest {
   public void testNestedMetricsOnly() throws Exception {
     this.properties.remove(PROP_METRIC_URN);
     this.properties.remove(PROP_DIMENSIONS);
-    this.properties.put(PROP_NESTED_METRIC_URNS, Arrays.asList("thirdeye:metric:10", "thirdeye:metric:11", "thirdeye:metric:12"));
+    this.properties.put(PROP_NESTED_METRIC_URNS,
+        Arrays.asList("thirdeye:metric:10", "thirdeye:metric:11", "thirdeye:metric:12"));
 
     this.wrapper = new DimensionWrapper(this.provider, this.config, 10, 15);
     this.wrapper.run();
@@ -231,7 +235,8 @@ public class DimensionWrapperTest {
   public void testNestedMetricsAndDimensions() throws Exception {
     this.properties.put(PROP_DIMENSIONS, Collections.singleton("b"));
     this.properties.put(PROP_MIN_VALUE, 16.0d);
-    this.properties.put(PROP_NESTED_METRIC_URNS, Arrays.asList("thirdeye:metric:10", "thirdeye:metric:11"));
+    this.properties
+        .put(PROP_NESTED_METRIC_URNS, Arrays.asList("thirdeye:metric:10", "thirdeye:metric:11"));
 
     DatasetConfigDTO dataset = new DatasetConfigDTO();
     dataset.setDataset("TEST");
@@ -276,9 +281,8 @@ public class DimensionWrapperTest {
 
   private MockPipeline makePipeline(String metricUrn, long startTime, long endTime) {
     return new MockPipeline(this.provider, makeConfig(metricUrn), startTime, endTime,
-        new MockPipelineOutput(Collections.<MergedAnomalyResultDTO>emptyList(), -1));
+        new MockPipelineOutput(Collections.emptyList(), -1));
   }
-
 
   private static void assertEquals(MockPipeline a, MockPipeline b) {
     Assert.assertEquals(a, b);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,19 +19,19 @@ package org.apache.pinot.thirdeye.cube.data.node;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
-import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveCubeNode;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveRow;
+import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
+import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
 
 /**
  * Tests the hierarchy among cube nodes. The main challenge is handling parent and children nodes.
  */
 public class CubeNodeTest {
+
   @Test
   public void testHierarchicalEquals() {
     AdditiveCubeNode rootNode1 = buildHierarchicalNodes();
@@ -146,12 +146,12 @@ public class CubeNodeTest {
     return hierarchicalRows;
   }
 
-/**
- * Builds hierarchy:
- *      A
- *     / \
- *    B  C
- */
+  /**
+   * Builds hierarchy:
+   * A
+   * / \
+   * B  C
+   */
   private AdditiveCubeNode buildHierarchicalNodes() {
     List<List<Row>> rows = buildHierarchicalRows();
     // Root level

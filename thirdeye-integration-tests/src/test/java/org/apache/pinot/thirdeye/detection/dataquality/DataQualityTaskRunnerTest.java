@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,15 +32,15 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -60,6 +60,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class DataQualityTaskRunnerTest {
+
   private DetectionPipelineTaskInfo info;
   private TaskContext context;
   private DAOTestBase testDAOProvider;
@@ -77,7 +78,8 @@ public class DataQualityTaskRunnerTest {
   private DataProvider provider;
 
   private static final long GRANULARITY = TimeUnit.DAYS.toMillis(1);
-  private static final long START_TIME = new DateTime(System.currentTimeMillis(), DateTimeZone.forID("UTC"))
+  private static final long START_TIME = new DateTime(System.currentTimeMillis(),
+      DateTimeZone.forID("UTC"))
       .withMillisOfDay(0).getMillis();
 
   @BeforeMethod
@@ -132,7 +134,8 @@ public class DataQualityTaskRunnerTest {
    * Load and update the detection config from filePath into detectionId
    */
   private AlertDTO translateSlaConfig(long detectionId, String filePath) throws Exception {
-    String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream(filePath), StandardCharsets.UTF_8);
+    String yamlConfig = IOUtils
+        .toString(this.getClass().getResourceAsStream(filePath), StandardCharsets.UTF_8);
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO alertDTO = translator.translate();
     if (detectionId < 0) {
@@ -194,7 +197,8 @@ public class DataQualityTaskRunnerTest {
     anomalyDAO.deleteByIds(anomalies.stream().map(AbstractDTO::getId).collect(Collectors.toList()));
   }
 
-  private MergedAnomalyResultDTO makeSlaAnomaly(long offsetStart, long offsetEnd, String sla, String ruleName) {
+  private MergedAnomalyResultDTO makeSlaAnomaly(long offsetStart, long offsetEnd, String sla,
+      String ruleName) {
     MergedAnomalyResultDTO anomalyDTO = new MergedAnomalyResultDTO();
     anomalyDTO.setStartTime(START_TIME + offsetStart * GRANULARITY);
     anomalyDTO.setEndTime(START_TIME + offsetEnd * GRANULARITY);
@@ -307,7 +311,6 @@ public class DataQualityTaskRunnerTest {
     expectedAnomalies.clear();
     cleanUpAnomalies();
 
-
     // CHECK 3: Report data missing when delayed by (sla = 3_DAYS)
     alertDTO = translateSlaConfig(detectorId, "sla-config-3.yaml");
 
@@ -356,7 +359,6 @@ public class DataQualityTaskRunnerTest {
     expectedAnomalies.clear();
     cleanUpAnomalies();
 
-
     // CHECK 4: Report data missing when there is a gap btw LastRefreshTime & SLA window start
     alertDTO = translateSlaConfig(detectorId, "sla-config-1.yaml");
 
@@ -380,7 +382,6 @@ public class DataQualityTaskRunnerTest {
     // clean up
     expectedAnomalies.clear();
     cleanUpAnomalies();
-
 
     // b. no availability events - directly query source
     datasetConfigDTO.setLastRefreshTime(0);
@@ -443,7 +444,6 @@ public class DataQualityTaskRunnerTest {
     expectedAnomalies.clear();
     cleanUpAnomalies();
 
-
     // Create another detection window (2 - 10) with no empty data points.
     MetricSlice sliceWithFullDataPoints = prepareMetricSlice(2, 10);
     timeSeries.put(sliceWithFullDataPoints, prepareMockTimeseries(2, 9));
@@ -454,7 +454,6 @@ public class DataQualityTaskRunnerTest {
     // 0 data sla anomaly should be created as data is considered to be completely available (above threshold)
     anomalies = retrieveAllAnomalies();
     Assert.assertEquals(anomalies.size(), 0);
-
 
     // Create another detection window (2 - 10) with more data points than the data availability event.
     MetricSlice sliceWithMoreDataPointsThanEvent = prepareMetricSlice(2, 10);
@@ -525,7 +524,8 @@ public class DataQualityTaskRunnerTest {
     // Cached slice time window represents that we have complete data (4 points)
     Multimap<String, String> filters = HashMultimap.create();
     filters.put("dim1", "1");
-    MetricSlice dimensionSlice = MetricSlice.from(123L, START_TIME, START_TIME + 4 * GRANULARITY, filters);
+    MetricSlice dimensionSlice = MetricSlice
+        .from(123L, START_TIME, START_TIME + 4 * GRANULARITY, filters);
     // create 2 data points
     timeSeries.put(dimensionSlice, prepareMockTimeseries(0, 1));
     MockDataProvider mockDataProvider = new MockDataProvider()
@@ -562,7 +562,8 @@ public class DataQualityTaskRunnerTest {
     Assert.assertEquals(anomalies.get(0).getStartTime(), START_TIME + 4 * GRANULARITY);
     Assert.assertEquals(anomalies.get(0).getEndTime(), START_TIME + 6 * GRANULARITY);
     Assert.assertEquals(anomalies.get(0).getType(), AnomalyType.DATA_SLA);
-    Assert.assertTrue(anomalies.get(0).getAnomalyResultSource().equals(AnomalyResultSource.DATA_QUALITY_DETECTION));
+    Assert.assertTrue(anomalies.get(0).getAnomalyResultSource()
+        .equals(AnomalyResultSource.DATA_QUALITY_DETECTION));
     Map<String, String> anomalyProps = new HashMap<>();
     anomalyProps.put("datasetLastRefreshTime", String.valueOf(START_TIME + 4 * GRANULARITY - 1));
     anomalyProps.put("datasetLastRefreshTimeRoundUp", String.valueOf(START_TIME + 4 * GRANULARITY));
@@ -577,7 +578,7 @@ public class DataQualityTaskRunnerTest {
    */
   @Test
   public void testDataSlaAnomalyMerge() throws Exception {
-    Map<MetricSlice, DataFrame> timeSeries = prepareMockTimeseriesMap( 0, 3);
+    Map<MetricSlice, DataFrame> timeSeries = prepareMockTimeseriesMap(0, 3);
     MockDataProvider mockDataProvider = new MockDataProvider()
         .setLoader(this.loader)
         .setTimeseries(timeSeries)

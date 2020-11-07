@@ -20,6 +20,7 @@ import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFi
 import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter.PROP_CC;
 import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter.PROP_RECIPIENTS;
 import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter.PROP_TO;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -44,13 +45,13 @@ import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.common.metric.MetricType;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DataCompletenessConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;

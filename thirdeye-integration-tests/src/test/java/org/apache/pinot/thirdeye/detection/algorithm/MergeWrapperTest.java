@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,9 @@
  */
 
 package org.apache.pinot.thirdeye.detection.algorithm;
+
+import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.makeAnomaly;
+import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.setAnomalyId;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,10 +40,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.*;
-
-
 public class MergeWrapperTest {
+
   private AlertDTO config;
   private MergeWrapper wrapper;
   private Map<String, Object> properties;
@@ -106,9 +107,13 @@ public class MergeWrapperTest {
 
     this.outputs = new ArrayList<>();
 
-    this.outputs.add(new MockPipelineOutput(Arrays.asList(makeAnomaly(50, 1200), makeAnomaly(2200, 2300)), 2900));
+    this.outputs.add(
+        new MockPipelineOutput(Arrays.asList(makeAnomaly(50, 1200), makeAnomaly(2200, 2300)),
+            2900));
 
-    this.outputs.add(new MockPipelineOutput(Arrays.asList(makeAnomaly(1150, 1250), makeAnomaly(2400, 2800)), 3000));
+    this.outputs.add(
+        new MockPipelineOutput(Arrays.asList(makeAnomaly(1150, 1250), makeAnomaly(2400, 2800)),
+            3000));
 
     this.mockLoader = new MockPipelineLoader(this.runs, this.outputs);
 
@@ -165,7 +170,9 @@ public class MergeWrapperTest {
     this.config.getProperties().put(PROP_MAX_GAP, 200);
     this.config.getProperties().put(PROP_MAX_DURATION, 1250);
 
-    this.outputs.add(new MockPipelineOutput(Arrays.asList(makeAnomaly(2800, 3700), makeAnomaly(3700, 3800)), 3700));
+    this.outputs.add(
+        new MockPipelineOutput(Arrays.asList(makeAnomaly(2800, 3700), makeAnomaly(3700, 3800)),
+            3700));
 
     Map<String, Object> nestedProperties = new HashMap<>();
     nestedProperties.put(PROP_CLASS_NAME, "none");
@@ -189,7 +196,9 @@ public class MergeWrapperTest {
     this.config.getProperties().put(PROP_MAX_GAP, 200);
     this.config.getProperties().put(PROP_MAX_DURATION, 1250);
 
-    this.outputs.add(new MockPipelineOutput(Arrays.asList(makeAnomaly(2800, 3800), makeAnomaly(3500, 3600)), 3700));
+    this.outputs.add(
+        new MockPipelineOutput(Arrays.asList(makeAnomaly(2800, 3800), makeAnomaly(3500, 3600)),
+            3700));
 
     Map<String, Object> nestedProperties = new HashMap<>();
     nestedProperties.put(PROP_CLASS_NAME, "none");
@@ -212,7 +221,9 @@ public class MergeWrapperTest {
   public void testMergerMaxDurationEnforce() throws Exception {
     this.config.getProperties().put(PROP_MAX_DURATION, 500);
 
-    this.outputs.add(new MockPipelineOutput(Arrays.asList(makeAnomaly(2800, 3800), makeAnomaly(3500, 3600)), 3700));
+    this.outputs.add(
+        new MockPipelineOutput(Arrays.asList(makeAnomaly(2800, 3800), makeAnomaly(3500, 3600)),
+            3700));
 
     Map<String, Object> nestedProperties = new HashMap<>();
     nestedProperties.put(PROP_CLASS_NAME, "none");
@@ -245,7 +256,8 @@ public class MergeWrapperTest {
       metrics.add(run.getConfig().getProperties().get(PROP_METRIC_URN).toString());
     }
 
-    Assert.assertEquals(metrics, new HashSet<>(Arrays.asList("thirdeye:metric:1", "thirdeye:metric:2")));
+    Assert.assertEquals(metrics,
+        new HashSet<>(Arrays.asList("thirdeye:metric:1", "thirdeye:metric:2")));
   }
 
   @Test
@@ -290,11 +302,14 @@ public class MergeWrapperTest {
     Assert.assertTrue(output.getAnomalies().contains(setAnomalyId(makeAnomaly(50, 1250), 0)));
     Assert.assertTrue(output.getAnomalies().contains(setAnomalyId(makeAnomaly(1500, 2300), 1)));
     Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2400, 2800)));
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1150, 1300, Collections.singletonMap("key", "value"))));
+    Assert.assertTrue(output.getAnomalies()
+        .contains(makeAnomaly(1150, 1300, Collections.singletonMap("key", "value"))));
     Assert.assertTrue(
-        output.getAnomalies().contains(makeAnomaly(2400, 2800, Collections.singletonMap("otherKey", "value"))));
+        output.getAnomalies()
+            .contains(makeAnomaly(2400, 2800, Collections.singletonMap("otherKey", "value"))));
     Assert.assertTrue(
-        output.getAnomalies().contains(makeAnomaly(2700, 2900, Collections.singletonMap("otherKey", "otherValue"))));
+        output.getAnomalies()
+            .contains(makeAnomaly(2700, 2900, Collections.singletonMap("otherKey", "otherValue"))));
   }
 
   @Test
@@ -319,7 +334,8 @@ public class MergeWrapperTest {
     Assert.assertEquals(output.getAnomalies().size(), 1);
     Assert.assertEquals(output.getLastTimestamp(), 3700);
     Assert.assertTrue(output.getAnomalies().contains(setAnomalyId(makeAnomaly(50, 2800), 0)));
-    Assert.assertTrue(output.getAnomalies().get(0).getProperties().get(propertyKey).equals(propertyValue));
+    Assert.assertTrue(
+        output.getAnomalies().get(0).getProperties().get(propertyKey).equals(propertyValue));
   }
 
   @Test

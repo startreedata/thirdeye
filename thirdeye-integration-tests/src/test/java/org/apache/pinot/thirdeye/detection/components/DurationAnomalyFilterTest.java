@@ -20,6 +20,8 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.makeAnomaly;
+
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.spec.DurationAnomalyFilterSpec;
@@ -27,10 +29,8 @@ import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.*;
-
-
 public class DurationAnomalyFilterTest {
+
   @Test
   public void testIsQualified() {
     AnomalyFilter anomalyFilter = new DurationAnomalyFilter();
@@ -38,10 +38,14 @@ public class DurationAnomalyFilterTest {
     spec.setMaxDuration("PT3H");
     spec.setMinDuration("PT2H");
     anomalyFilter.init(spec, new DefaultInputDataFetcher(new MockDataProvider(), -1));
-    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547168400000L)), false);
-    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547172000000L)), true);
-    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547175600000L)), true);
-    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547179200000L)), false);
+    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547168400000L)),
+        false);
+    Assert
+        .assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547172000000L)), true);
+    Assert
+        .assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547175600000L)), true);
+    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547179200000L)),
+        false);
   }
 
   @Test
@@ -49,10 +53,13 @@ public class DurationAnomalyFilterTest {
     AnomalyFilter anomalyFilter = new DurationAnomalyFilter();
     DurationAnomalyFilterSpec spec = new DurationAnomalyFilterSpec();
     anomalyFilter.init(spec, new DefaultInputDataFetcher(new MockDataProvider(), -1));
-    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547168400000L)), true);
-    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547172000000L)), true);
-    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547175600000L)), true);
-    Assert.assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547179200000L)), true);
+    Assert
+        .assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547168400000L)), true);
+    Assert
+        .assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547172000000L)), true);
+    Assert
+        .assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547175600000L)), true);
+    Assert
+        .assertEquals(anomalyFilter.isQualified(makeAnomaly(1547164800000L, 1547179200000L)), true);
   }
-
 }

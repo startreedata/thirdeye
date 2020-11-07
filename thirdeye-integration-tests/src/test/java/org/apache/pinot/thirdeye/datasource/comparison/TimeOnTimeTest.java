@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,13 @@
 
 package org.apache.pinot.thirdeye.datasource.comparison;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import org.joda.time.DateTime;
-
-import com.google.common.collect.Lists;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.dashboard.Utils;
@@ -35,13 +32,16 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.apache.pinot.thirdeye.datasource.comparison.Row.Metric;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
+import org.joda.time.DateTime;
 
 /** Manual test for verifying code works as expected (ie without exceptions thrown) */
 public class TimeOnTimeTest {
+
   public static void main(String[] args) throws Exception {
-    PinotThirdEyeDataSource pinotThirdEyeDataSource = PinotThirdEyeDataSource.getDefaultTestDataSource(); // TODO
-                                                                                          // make
-                                                                                          // this
+    PinotThirdEyeDataSource pinotThirdEyeDataSource = PinotThirdEyeDataSource
+        .getDefaultTestDataSource(); // TODO
+    // make
+    // this
     // configurable;
     // PinotThirdEyeDataSource pinotThirdEyeDataSource =
     // PinotThirdEyeDataSource.fromHostList("localhost", 8100, "localhost:8099");
@@ -93,7 +93,8 @@ public class TimeOnTimeTest {
     comparisonRequest.setCurrentStart(new DateTime(2016, 4, 8, 00, 00));
     comparisonRequest.setCurrentEnd(new DateTime(2016, 4, 9, 00, 00));
     List<MetricFunction> metricFunctions = new ArrayList<>();
-    metricFunctions.add(new MetricFunction(MetricAggFunction.SUM, "__COUNT", null, collection, null, null));
+    metricFunctions
+        .add(new MetricFunction(MetricAggFunction.SUM, "__COUNT", null, collection, null, null));
     List<MetricExpression> metricExpressions = Utils.convertToMetricExpressions(metricFunctions);
     metricExpressions.add(new MetricExpression("submit_rate", "submits/impressions"));
     comparisonRequest.setMetricExpressions(metricExpressions);
@@ -115,7 +116,8 @@ public class TimeOnTimeTest {
         Lists.newArrayList("browserName", "contactsOrigin", "deviceName", "continent",
             "countryCode", "environment", "locale", "osName", "pageKey", "source", "sourceApp"));
     List<MetricFunction> metricFunctions = new ArrayList<>();
-    metricFunctions.add(new MetricFunction(MetricAggFunction.SUM, "__COUNT", null, collection, null, null));
+    metricFunctions
+        .add(new MetricFunction(MetricAggFunction.SUM, "__COUNT", null, collection, null, null));
     comparisonRequest.setMetricExpressions(Utils.convertToMetricExpressions(metricFunctions));
     comparisonRequest.setAggregationTimeGranularity(null);
     return comparisonRequest;
@@ -137,7 +139,8 @@ public class TimeOnTimeTest {
     comparisonRequest.setGroupByDimensions(Lists.newArrayList("environment"));
 
     List<MetricFunction> metricFunctions = new ArrayList<>();
-    metricFunctions.add(new MetricFunction(MetricAggFunction.SUM, "__COUNT", null, collection, null, null));
+    metricFunctions
+        .add(new MetricFunction(MetricAggFunction.SUM, "__COUNT", null, collection, null, null));
     comparisonRequest.setMetricExpressions(Utils.convertToMetricExpressions(metricFunctions));
     comparisonRequest.setAggregationTimeGranularity(new TimeGranularity(1, TimeUnit.HOURS));
     return comparisonRequest;

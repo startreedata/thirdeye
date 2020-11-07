@@ -52,14 +52,17 @@ public class PercentageChangeRuleDetectorTest {
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
-    try (Reader dataReader = new InputStreamReader(AlgorithmUtils.class.getResourceAsStream("timeseries-4w.csv"))) {
+    try (Reader dataReader = new InputStreamReader(
+        AlgorithmUtils.class.getResourceAsStream("timeseries-4w.csv"))) {
       this.data = DataFrame.fromCsv(dataReader);
       this.data.setIndex(DataFrame.COL_TIME);
-      this.data.addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
+      this.data
+          .addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
     }
 
     DataFrame weeklyData;
-    try (Reader dataReader = new InputStreamReader(AlgorithmUtils.class.getResourceAsStream("timeseries-2y.csv"))) {
+    try (Reader dataReader = new InputStreamReader(
+        AlgorithmUtils.class.getResourceAsStream("timeseries-2y.csv"))) {
       weeklyData = DataFrame.fromCsv(dataReader);
       weeklyData.setIndex(DataFrame.COL_TIME);
     }
@@ -109,7 +112,8 @@ public class PercentageChangeRuleDetectorTest {
     double percentageChange = 0.4;
     spec.setPercentageChange(percentageChange);
     detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    DetectionResult detectionResult = detector.runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
+    DetectionResult detectionResult = detector
+        .runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
     List<MergedAnomalyResultDTO> anomalies = detectionResult.getAnomalies();
     Assert.assertEquals(anomalies.size(), 2);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 2372400000L);
@@ -130,7 +134,8 @@ public class PercentageChangeRuleDetectorTest {
     spec.setOffset("median3w");
     spec.setPattern("up");
     detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    DetectionResult detectionResult = detector.runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
+    DetectionResult detectionResult = detector
+        .runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
     List<MergedAnomalyResultDTO> anomalies = detectionResult.getAnomalies();
     Assert.assertEquals(anomalies.size(), 4);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 2005200000L);
@@ -155,14 +160,16 @@ public class PercentageChangeRuleDetectorTest {
     spec.setOffset("median3w");
     spec.setPattern("down");
     detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    DetectionResult result = detector.runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
+    DetectionResult result = detector
+        .runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 2181600000L);
     Assert.assertEquals(anomalies.get(0).getEndTime(), 2185200000L);
     TimeSeries ts = result.getTimeseries();
     checkPercentageLowerBounds(ts, percentageChange);
-    Assert.assertEquals(ts.getPredictedUpperBound(), DoubleSeries.fillValues(ts.size(), Double.POSITIVE_INFINITY));
+    Assert.assertEquals(ts.getPredictedUpperBound(),
+        DoubleSeries.fillValues(ts.size(), Double.POSITIVE_INFINITY));
   }
 
   @Test
@@ -174,7 +181,8 @@ public class PercentageChangeRuleDetectorTest {
     spec.setOffset("median3w");
     spec.setPattern("up_or_down");
     detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    DetectionResult result = detector.runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
+    DetectionResult result = detector
+        .runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 5);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 2005200000L);
@@ -200,7 +208,9 @@ public class PercentageChangeRuleDetectorTest {
     spec.setPercentageChange(0.4);
     spec.setMonitoringGranularity("1_MONTHS");
     percentageRule.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    List<MergedAnomalyResultDTO> anomalies = percentageRule.runDetection(new Interval(1546214400000L, 1551312000000L), "thirdeye:metric:1").getAnomalies();
+    List<MergedAnomalyResultDTO> anomalies = percentageRule
+        .runDetection(new Interval(1546214400000L, 1551312000000L), "thirdeye:metric:1")
+        .getAnomalies();
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 1548892800000L);
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1551312000000L);
@@ -213,7 +223,9 @@ public class PercentageChangeRuleDetectorTest {
     spec.setOffset("wo1w");
     spec.setPercentageChange(0.1);
     percentageRule.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    List<MergedAnomalyResultDTO> anomalies = percentageRule.runDetection(new Interval(1551398400000L, 1551571200000L), "thirdeye:metric:1").getAnomalies();
+    List<MergedAnomalyResultDTO> anomalies = percentageRule
+        .runDetection(new Interval(1551398400000L, 1551571200000L), "thirdeye:metric:1")
+        .getAnomalies();
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 1551484800000L);
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1551488400000L);
@@ -228,7 +240,9 @@ public class PercentageChangeRuleDetectorTest {
     spec.setOffset("wo1w");
     spec.setMonitoringGranularity("1_WEEKS");
     percentageRule.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    List<MergedAnomalyResultDTO> anomalies = percentageRule.runDetection(new Interval(1562025600000L, 1562630400000L, DateTimeZone.UTC), "thirdeye:metric:1").getAnomalies();
+    List<MergedAnomalyResultDTO> anomalies = percentageRule
+        .runDetection(new Interval(1562025600000L, 1562630400000L, DateTimeZone.UTC),
+            "thirdeye:metric:1").getAnomalies();
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 1561420800000L);
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1562025600000L);
@@ -236,13 +250,15 @@ public class PercentageChangeRuleDetectorTest {
 
   private void checkPercentageUpperBounds(TimeSeries ts, double percentageChange) {
     for (int i = 0; i < ts.getDataFrame().size(); i++) {
-      Assert.assertEquals(ts.getPredictedUpperBound().get(i), ts.getPredictedBaseline().get(i) * (1 + percentageChange));
+      Assert.assertEquals(ts.getPredictedUpperBound().get(i),
+          ts.getPredictedBaseline().get(i) * (1 + percentageChange));
     }
   }
 
   private void checkPercentageLowerBounds(TimeSeries ts, double percentageChange) {
     for (int i = 0; i < ts.getDataFrame().size(); i++) {
-      Assert.assertEquals(ts.getPredictedLowerBound().get(i), ts.getPredictedBaseline().get(i) * (1 - percentageChange));
+      Assert.assertEquals(ts.getPredictedLowerBound().get(i),
+          ts.getPredictedBaseline().get(i) * (1 - percentageChange));
     }
   }
 }

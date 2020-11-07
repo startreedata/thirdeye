@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class DataFrameBenchmark {
   // TODO: validate benchmarking method - Dead Code Elimination, etc. may be playing tricks on us.
 
@@ -41,7 +40,8 @@ public class DataFrameBenchmark {
   private static final int N_WINDOW = 1000;
   private static final int N_GROUPS = 1000;
 
-  private static final String[] SERIES_NAMES = new String[] { "task", "min", "mid", "max", "outer", "checksum", "samples" };
+  private static final String[] SERIES_NAMES = new String[]{"task", "min", "mid", "max", "outer",
+      "checksum", "samples"};
 
   private static final long SEED = System.nanoTime();
 
@@ -49,7 +49,7 @@ public class DataFrameBenchmark {
   private long tStartOuter;
   private List<Long> times = new ArrayList<>();
   private long timeOuter;
-  private DataFrame.Builder results = DataFrame.builder(SERIES_NAMES);
+  private final DataFrame.Builder results = DataFrame.builder(SERIES_NAMES);
 
   private void benchmarkMapDoubleSeries() {
     startTimerOuter();
@@ -98,7 +98,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       double[] doubleValues = generateDoubleData(N_ELEMENTS);
       final double delta = r;
 
@@ -162,7 +162,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       final long delta = r;
 
@@ -188,19 +188,20 @@ public class DataFrameBenchmark {
       final long delta = r;
 
       startTimer();
-      ObjectSeries s = ObjectSeries.buildFrom((Object[])longValues);
+      ObjectSeries s = ObjectSeries.buildFrom((Object[]) longValues);
       ObjectSeries sResult = s.map(new Series.ObjectFunction() {
         @Override
         public Object apply(Object... values) {
-          return ((Long)values[0]) + delta;
+          return ((Long) values[0]) + delta;
         }
       });
       stopTimer();
 
       // to long array
       long[] values = new long[N_ELEMENTS];
-      for(int i=0; i<N_ELEMENTS; i++)
-        values[i] = (Long)sResult.getObject(i);
+      for (int i = 0; i < N_ELEMENTS; i++) {
+        values[i] = (Long) sResult.getObject(i);
+      }
 
       checksum ^= checksum(values);
     }
@@ -212,7 +213,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       Long[] longValues = generateLongObjectData(N_ELEMENTS);
       final long delta = r;
 
@@ -233,7 +234,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS_SLOW; r++) {
+    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       double[] doubleValues = generateDoubleData(N_ELEMENTS);
 
@@ -255,7 +256,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       double[] doubleValues = generateDoubleData(N_ELEMENTS);
 
@@ -282,7 +283,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       double[] doubleValues = generateDoubleData(N_ELEMENTS);
 
@@ -306,13 +307,13 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       double[] doubleValues = generateDoubleData(N_ELEMENTS);
 
       startTimer();
       double[] results = new double[N_ELEMENTS];
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         results[i] = longValues[i] * doubleValues[i];
       }
       stopTimer();
@@ -327,7 +328,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       double[] doubleValues = generateDoubleData(N_ELEMENTS);
       long[] otherValues = generateLongData(N_ELEMENTS);
@@ -356,14 +357,14 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       double[] doubleValues = generateDoubleData(N_ELEMENTS);
       long[] otherValues = generateLongData(N_ELEMENTS);
 
       startTimer();
       double[] results = new double[N_ELEMENTS];
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         results[i] = longValues[i] * doubleValues[i] + otherValues[i];
       }
       stopTimer();
@@ -378,7 +379,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       double[] doubleValues = generateDoubleData(N_ELEMENTS);
       long[] otherValues = generateLongData(N_ELEMENTS);
@@ -409,7 +410,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       double[] doubleValues = generateDoubleData(N_ELEMENTS);
       long[] otherValues = generateLongData(N_ELEMENTS);
@@ -417,7 +418,7 @@ public class DataFrameBenchmark {
 
       startTimer();
       double[] results = new double[N_ELEMENTS];
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         results[i] = longValues[i] * doubleValues[i] + otherValues[i] / anotherValues[i];
       }
       stopTimer();
@@ -432,7 +433,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries s = LongSeries.buildFrom(longValues);
 
@@ -451,7 +452,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
 
       startTimer();
@@ -459,8 +460,12 @@ public class DataFrameBenchmark {
       long max = longValues[0];
 
       for (long v : longValues) {
-        if (min > v) min = v;
-        if (max < v) max = v;
+        if (min > v) {
+          min = v;
+        }
+        if (max < v) {
+          max = v;
+        }
       }
       stopTimer();
 
@@ -474,13 +479,14 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       long[] otherValues = Arrays.copyOf(longValues, longValues.length);
 
       startTimer();
-      if(!Arrays.equals(longValues, otherValues))
+      if (!Arrays.equals(longValues, otherValues)) {
         throw new IllegalStateException("Arrays must be equal");
+      }
       stopTimer();
 
       checksum ^= checksum(longValues);
@@ -494,15 +500,16 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       long[] otherValues = Arrays.copyOf(longValues, longValues.length);
       LongSeries series = LongSeries.buildFrom(longValues);
       LongSeries other = LongSeries.buildFrom(otherValues);
 
       startTimer();
-      if(!series.equals(other))
+      if (!series.equals(other)) {
         throw new IllegalStateException("Series must be equal");
+      }
       stopTimer();
 
       checksum ^= checksum(series.values());
@@ -516,7 +523,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       long[] otherValues = Arrays.copyOf(longValues, longValues.length);
       LongSeries series = LongSeries.buildFrom(longValues);
@@ -526,8 +533,9 @@ public class DataFrameBenchmark {
       BooleanSeries res = series.eq(other);
       stopTimer();
 
-      if(res.hasFalse())
+      if (res.hasFalse()) {
         throw new IllegalStateException("Series must be equal");
+      }
 
       checksum ^= checksum(series.values());
       checksum ^= checksum(other.values());
@@ -540,7 +548,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS_SLOW; r++) {
+    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
 
       startTimer();
@@ -557,7 +565,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS_SLOW; r++) {
+    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
 
@@ -575,13 +583,14 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS_SLOW; r++) {
+    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
 
       startTimer();
       Set<Long> set = new HashSet<>();
-      for(long l : longValues)
+      for (long l : longValues) {
         set.add(l);
+      }
       long[] out = ArrayUtils.toPrimitive(set.toArray(new Long[set.size()]));
       stopTimer();
 
@@ -595,7 +604,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS_SLOW; r++) {
+    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
 
@@ -613,7 +622,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
 
       startTimer();
@@ -632,7 +641,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
 
@@ -650,9 +659,9 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
-      for(int i : randomIndices(N_ELEMENTS, N_NULLS)) {
+      for (int i : randomIndices(N_ELEMENTS, N_NULLS)) {
         longValues[i] = LongSeries.NULL;
       }
       LongSeries series = LongSeries.buildFrom(longValues);
@@ -671,16 +680,16 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
-      for(int i : randomIndices(N_ELEMENTS, N_NULLS)) {
+      for (int i : randomIndices(N_ELEMENTS, N_NULLS)) {
         longValues[i] = LongSeries.NULL;
       }
 
       startTimer();
       int count = 0;
-      for(int i=0; i<N_ELEMENTS; i++) {
-        if(longValues[i] != LongSeries.NULL) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
+        if (longValues[i] != LongSeries.NULL) {
           longValues[count] = longValues[i];
           count++;
         }
@@ -698,7 +707,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
 
@@ -716,12 +725,12 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
 
       startTimer();
       long sum = 0;
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         sum += longValues[i];
       }
       stopTimer();
@@ -736,7 +745,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
 
@@ -754,7 +763,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
 
@@ -772,13 +781,13 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
 
       startTimer();
       long sum = 0;
       long[] out = new long[N_ELEMENTS];
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         sum += longValues[i];
         out[i] = sum;
       }
@@ -794,7 +803,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
 
@@ -812,13 +821,13 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
 
       startTimer();
       long max = longValues[0];
       long[] out = new long[N_ELEMENTS];
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         max = Math.max(longValues[i], max);
         out[i] = max;
       }
@@ -834,7 +843,7 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
 
@@ -852,19 +861,19 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
 
       startTimer();
       long sum = 0;
       long[] out = new long[N_ELEMENTS];
-      for(int i=0; i<N_WINDOW - 1; i++) {
+      for (int i = 0; i < N_WINDOW - 1; i++) {
         sum += longValues[i];
         out[i] = LongSeries.NULL;
       }
       sum += longValues[N_WINDOW - 1];
       out[N_WINDOW - 1] = sum;
-      for(int i=N_WINDOW; i<N_ELEMENTS; i++) {
+      for (int i = N_WINDOW; i < N_ELEMENTS; i++) {
         sum += longValues[i] - longValues[i - N_WINDOW];
         out[i] = sum;
       }
@@ -880,17 +889,19 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS_SLOW; r++) {
+    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
       LongSeries other = LongSeries.buildFrom(shuffle(longValues));
 
       startTimer();
-      Series.JoinPairs pairs = Series.hashJoinOuter(new Series[] { series }, new Series[] { other });
+      Series.JoinPairs pairs = Series.hashJoinOuter(new Series[]{series}, new Series[]{other});
       stopTimer();
 
-      if(pairs.size() != N_ELEMENTS)
-        throw new IllegalStateException(String.format("Join incorrect (got %d pairs, should be %d)", pairs.size(), N_ELEMENTS));
+      if (pairs.size() != N_ELEMENTS) {
+        throw new IllegalStateException(
+            String.format("Join incorrect (got %d pairs, should be %d)", pairs.size(), N_ELEMENTS));
+      }
 
       checksum ^= checksum(pairs);
     }
@@ -902,17 +913,19 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS_SLOW; r++) {
+    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
       LongSeries other = LongSeries.buildFrom(shuffle(longValues));
 
       startTimer();
-      Series.JoinPairs pairs = Series.hashJoinOuterGuava(new Series[] { series }, new Series[] { other });
+      Series.JoinPairs pairs = Series.hashJoinOuterGuava(new Series[]{series}, new Series[]{other});
       stopTimer();
 
-      if(pairs.size() != N_ELEMENTS)
-        throw new IllegalStateException(String.format("Join incorrect (got %d pairs, should be %d)", pairs.size(), N_ELEMENTS));
+      if (pairs.size() != N_ELEMENTS) {
+        throw new IllegalStateException(
+            String.format("Join incorrect (got %d pairs, should be %d)", pairs.size(), N_ELEMENTS));
+      }
 
       checksum ^= checksum(pairs);
     }
@@ -924,17 +937,19 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS_SLOW; r++) {
+    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       LongSeries series = LongSeries.buildFrom(longValues);
       LongSeries other = LongSeries.buildFrom(shuffle(longValues));
 
       startTimer();
-      Series.JoinPairs pairs = Series.hashJoinInner(new Series[] { series }, new Series[] { other });
+      Series.JoinPairs pairs = Series.hashJoinInner(new Series[]{series}, new Series[]{other});
       stopTimer();
 
-      if(pairs.size() != N_ELEMENTS)
-        throw new IllegalStateException(String.format("Join incorrect (got %d pairs, should be %d)", pairs.size(), N_ELEMENTS));
+      if (pairs.size() != N_ELEMENTS) {
+        throw new IllegalStateException(
+            String.format("Join incorrect (got %d pairs, should be %d)", pairs.size(), N_ELEMENTS));
+      }
 
       checksum ^= checksum(pairs);
     }
@@ -946,10 +961,10 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS; r++) {
+    for (int r = 0; r < N_ROUNDS; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       long[] keyValues = new long[N_ELEMENTS];
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         keyValues[i] = i % N_GROUPS;
       }
 
@@ -961,8 +976,10 @@ public class DataFrameBenchmark {
       Grouping.GroupingDataFrame result = df.groupByValue("key").sum("value");
       stopTimer();
 
-      if(result.size() != N_GROUPS)
-        throw new IllegalStateException(String.format("GroupBy incorrect (got %d keys, should be %d)", result.size(), N_GROUPS));
+      if (result.size() != N_GROUPS) {
+        throw new IllegalStateException(String
+            .format("GroupBy incorrect (got %d keys, should be %d)", result.size(), N_GROUPS));
+      }
 
       checksum ^= checksum(result.getValues().getLongs().values());
     }
@@ -974,11 +991,11 @@ public class DataFrameBenchmark {
     startTimerOuter();
     long checksum = 0;
 
-    for(int r=0; r<N_ROUNDS_SLOW; r++) {
+    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
       long[] longValues = generateLongData(N_ELEMENTS);
       long[] longKeyValues = new long[N_ELEMENTS];
       double[] doubleKeyValues = new double[N_ELEMENTS];
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         longKeyValues[i] = i % N_GROUPS;
         doubleKeyValues[i] = i % N_GROUPS;
       }
@@ -992,8 +1009,10 @@ public class DataFrameBenchmark {
       Grouping.GroupingDataFrame result = df.groupByValue("longKey", "doubleKey").sum("value");
       stopTimer();
 
-      if(result.size() != N_GROUPS)
-        throw new IllegalStateException(String.format("GroupBy incorrect (got %d keys, should be %d)", result.size(), N_GROUPS));
+      if (result.size() != N_GROUPS) {
+        throw new IllegalStateException(String
+            .format("GroupBy incorrect (got %d keys, should be %d)", result.size(), N_GROUPS));
+      }
 
       checksum ^= checksum(result.getValues().getLongs().values());
     }
@@ -1070,7 +1089,8 @@ public class DataFrameBenchmark {
     long tMid = this.times.get(this.times.size() / 2);
     long tMin = Collections.min(this.times);
     long tMax = Collections.max(this.times);
-    LOG.info("{}: min/mid/max = {}ms {}ms {}ms [all={}ms, chk={}, cnt={}]", name, tMin / 1000000, tMid / 1000000, tMax / 1000000, timeOuter / 1000000, checksum % 1000, this.times.size());
+    LOG.info("{}: min/mid/max = {}ms {}ms {}ms [all={}ms, chk={}, cnt={}]", name, tMin / 1000000,
+        tMid / 1000000, tMax / 1000000, timeOuter / 1000000, checksum % 1000, this.times.size());
     this.results.append(name, tMin, tMid, tMax, this.timeOuter, checksum, this.times.size());
 
     // reset timer stats
@@ -1112,7 +1132,7 @@ public class DataFrameBenchmark {
     Random r = new Random();
     r.setSeed(SEED);
     int[] values = new int[n];
-    for(int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
       values[i] = r.nextInt(upperBound);
     }
     return values;
@@ -1122,7 +1142,7 @@ public class DataFrameBenchmark {
     Random r = new Random();
     r.setSeed(SEED);
     double[] values = new double[n];
-    for(int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
       values[i] = r.nextDouble();
     }
     return values;
@@ -1132,7 +1152,7 @@ public class DataFrameBenchmark {
     Random r = new Random();
     r.setSeed(SEED);
     long[] values = new long[n];
-    for(int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
       values[i] = r.nextLong();
     }
     return values;
@@ -1142,7 +1162,7 @@ public class DataFrameBenchmark {
     Random r = new Random();
     r.setSeed(SEED);
     Long[] values = new Long[n];
-    for(int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
       values[i] = r.nextLong();
     }
     return values;
@@ -1150,7 +1170,7 @@ public class DataFrameBenchmark {
 
   private static long checksum(double... values) {
     long bits = 0;
-    for(double v : values) {
+    for (double v : values) {
       bits ^= Double.doubleToLongBits(v);
     }
     return bits;
@@ -1158,7 +1178,7 @@ public class DataFrameBenchmark {
 
   private static long checksum(long... values) {
     long bits = 0;
-    for(long v : values) {
+    for (long v : values) {
       bits ^= v;
     }
     return bits;
@@ -1166,7 +1186,7 @@ public class DataFrameBenchmark {
 
   private static long checksum(int... values) {
     long bits = 0;
-    for(int v : values) {
+    for (int v : values) {
       bits ^= v;
     }
     return bits;
@@ -1174,10 +1194,10 @@ public class DataFrameBenchmark {
 
   private static long checksum(Series.JoinPairs pairs) {
     long bits = 0;
-    for(int i=0; i<pairs.size(); i++) {
+    for (int i = 0; i < pairs.size(); i++) {
       bits ^= pairs.left(i);
     }
-    for(int i=0; i<pairs.size(); i++) {
+    for (int i = 0; i < pairs.size(); i++) {
       bits ^= pairs.right(i);
     }
     return bits;
@@ -1187,7 +1207,7 @@ public class DataFrameBenchmark {
   private static long[] shuffle(long[] arr) {
     arr = Arrays.copyOf(arr, arr.length);
     Random rnd = ThreadLocalRandom.current();
-    for (int i=arr.length-1; i>0; i--) {
+    for (int i = arr.length - 1; i > 0; i--) {
       int index = rnd.nextInt(i + 1);
       long a = arr[index];
       arr[index] = arr[i];

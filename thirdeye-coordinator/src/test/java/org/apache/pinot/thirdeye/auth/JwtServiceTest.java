@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.auth;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;

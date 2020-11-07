@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,14 +22,14 @@ import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesC
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class TestAlertContentFormatterFactory {
 
   @Test
-  public void testGetEmailContentFormatter() throws Exception{
+  public void testGetEmailContentFormatter() throws Exception {
     BaseNotificationContent alertContent;
-    alertContent = new AlertContentFormatterFactory<MetricAnomaliesContent>().fromClassPath(MetricAnomaliesContent.class
-    .getCanonicalName());
+    alertContent = new AlertContentFormatterFactory<MetricAnomaliesContent>()
+        .fromClassPath(MetricAnomaliesContent.class
+            .getCanonicalName());
     Assert.assertNotNull(alertContent);
     Assert.assertTrue(alertContent instanceof MetricAnomaliesContent);
 

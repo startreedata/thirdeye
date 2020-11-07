@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.OnlineDetectionDataDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
@@ -7,9 +8,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
-
 public class TestOnlineDetectionDataManager {
+
   private DAOTestBase testDAOProvider;
   private OnlineDetectionDataManager dataDAO;
 
@@ -24,7 +24,6 @@ public class TestOnlineDetectionDataManager {
   void afterMethod() {
     testDAOProvider.cleanup();
   }
-
 
   @Test
   public void testFindByDatasetAndMetric() {

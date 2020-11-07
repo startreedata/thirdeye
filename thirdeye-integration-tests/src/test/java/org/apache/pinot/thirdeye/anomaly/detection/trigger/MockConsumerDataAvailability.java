@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-
 public class MockConsumerDataAvailability extends DataAvailabilityKafkaConsumer {
+
   private int callCount;
 
   public MockConsumerDataAvailability() {
@@ -42,9 +42,10 @@ public class MockConsumerDataAvailability extends DataAvailabilityKafkaConsumer 
 
   }
 
-  private static DataAvailabilityEvent createEvent(int suffix, long lowWatermark, long highWatermark) {
+  private static DataAvailabilityEvent createEvent(int suffix, long lowWatermark,
+      long highWatermark) {
     String datasetPrefix = DataAvailabilityEventListenerTest.TEST_DATASET_PREFIX;
-    String dataSource  = DataAvailabilityEventListenerTest.TEST_DATA_SOURCE;
+    String dataSource = DataAvailabilityEventListenerTest.TEST_DATA_SOURCE;
     MockDataAvailabilityEvent event = new MockDataAvailabilityEvent();
     event.setDatasetName(datasetPrefix + suffix);
     event.setDataStore(dataSource);

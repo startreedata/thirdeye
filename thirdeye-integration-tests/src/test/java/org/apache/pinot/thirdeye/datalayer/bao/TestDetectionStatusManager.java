@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,10 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -28,18 +28,17 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
-
 public class TestDetectionStatusManager {
 
   private Long detectionStatusId1;
   private Long detectionStatusId2;
-  private static String collection1 = "my dataset1";
-  private DateTime now = new DateTime();
-  private DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyyMMddHH");
+  private static final String collection1 = "my dataset1";
+  private final DateTime now = new DateTime();
+  private final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyyMMddHH");
 
   private DAOTestBase testDAOProvider;
   private DetectionStatusManager detectionStatusDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -57,18 +56,22 @@ public class TestDetectionStatusManager {
 
     String dateString = dateTimeFormatter.print(now.getMillis());
     long dateMillis = dateTimeFormatter.parseMillis(dateString);
-    detectionStatusId1 = detectionStatusDAO.save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, false, 1));
-    detectionStatusDAO.save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
+    detectionStatusId1 = detectionStatusDAO
+        .save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, false, 1));
+    detectionStatusDAO
+        .save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
 
     dateMillis = new DateTime(dateMillis).minusHours(1).getMillis();
     dateString = dateTimeFormatter.print(dateMillis);
     detectionStatusId2 = detectionStatusDAO.
         save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 1));
-    detectionStatusDAO.save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
+    detectionStatusDAO
+        .save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
 
     dateMillis = new DateTime(dateMillis).minusHours(1).getMillis();
     dateString = dateTimeFormatter.print(dateMillis);
-    detectionStatusDAO.save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
+    detectionStatusDAO
+        .save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
 
     Assert.assertNotNull(detectionStatusId1);
     Assert.assertNotNull(detectionStatusId2);
@@ -94,7 +97,5 @@ public class TestDetectionStatusManager {
     detectionStatusDTOs = detectionStatusDAO.
         findAllInTimeRangeForFunctionAndDetectionRun(dateMillis, now.getMillis(), 2, false);
     Assert.assertEquals(detectionStatusDTOs.size(), 0);
-
   }
-
 }

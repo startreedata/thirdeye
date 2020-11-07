@@ -19,20 +19,21 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.spi.model.InputData;
 import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class DefaultInputDataFetcherTest {
+
   @Test
   public void testFetchData() {
     MockDataProvider mockDataProvider = new MockDataProvider();
@@ -59,10 +60,11 @@ public class DefaultInputDataFetcherTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO));
     InputDataFetcher dataFetcher = new DefaultInputDataFetcher(mockDataProvider, -1);
 
-    InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(Collections.singletonList(slice))
-        .withMetricIds(Collections.singletonList(123L))
-        .withMetricIdsForDataset(Collections.singletonList(123L))
-        .withDatasetNames(Collections.singletonList("thirdeye-test-dataset")));
+    InputData data = dataFetcher
+        .fetchData(new InputDataSpec().withTimeseriesSlices(Collections.singletonList(slice))
+            .withMetricIds(Collections.singletonList(123L))
+            .withMetricIdsForDataset(Collections.singletonList(123L))
+            .withDatasetNames(Collections.singletonList("thirdeye-test-dataset")));
     Assert.assertEquals(data.getTimeseries().get(slice), timeSeries.get(slice));
     Assert.assertEquals(data.getMetrics().get(123L), metricConfigDTO);
     Assert.assertEquals(data.getDatasetForMetricId().get(123L), datasetConfigDTO);

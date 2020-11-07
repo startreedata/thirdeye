@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,6 @@
  */
 
 package org.apache.pinot.thirdeye.tools;
-
 
 public class CleanupAndRegenerateAnomaliesConfig {
 
@@ -39,50 +38,64 @@ public class CleanupAndRegenerateAnomaliesConfig {
   public String getPersistenceFile() {
     return persistenceFile;
   }
+
   public void setPersistenceFile(String persistenceFile) {
     this.persistenceFile = persistenceFile;
   }
+
   public String getDetectorHost() {
     return detectorHost;
   }
+
   public void setDetectorHost(String detectorHost) {
     this.detectorHost = detectorHost;
   }
+
   public int getDetectorPort() {
     return detectorPort;
   }
+
   public void setDetectorPort(int detectorPort) {
     this.detectorPort = detectorPort;
   }
+
   public String getStartTimeIso() {
     return startTimeIso;
   }
+
   public void setStartTimeIso(String startTimeIso) {
     this.startTimeIso = startTimeIso;
   }
+
   public String getEndTimeIso() {
     return endTimeIso;
   }
+
   public void setEndTimeIso(String endTimeIso) {
     this.endTimeIso = endTimeIso;
   }
+
   public String getDatasets() {
     return datasets;
   }
+
   public void setDatasets(String datasets) {
     this.datasets = datasets;
   }
+
   public String getFunctionIds() {
     return functionIds;
   }
+
   public void setFunctionIds(String functionIds) {
     this.functionIds = functionIds;
   }
+
   public String getForceBackfill() {
     return forceBackfill;
   }
+
   public void setForceBackfill(String forceBackfill) {
     this.forceBackfill = forceBackfill;
   }
-
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +16,15 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import java.util.Objects;
-
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 
 public class MockPipeline extends DetectionPipeline {
+
   private final MockPipelineOutput output;
 
-  public MockPipeline(DataProvider provider, AlertDTO config, long startTime, long endTime, MockPipelineOutput output) {
+  public MockPipeline(DataProvider provider, AlertDTO config, long startTime, long endTime,
+      MockPipelineOutput output) {
     super(provider, config, startTime, endTime);
     this.output = output;
   }
@@ -42,7 +43,8 @@ public class MockPipeline extends DetectionPipeline {
       return false;
     }
     MockPipeline that = (MockPipeline) o;
-    return startTime == that.startTime && endTime == that.endTime && Objects.equals(provider, that.provider)
+    return startTime == that.startTime && endTime == that.endTime && Objects
+        .equals(provider, that.provider)
         && Objects.equals(config, that.config) && Objects.equals(output, that.output);
   }
 

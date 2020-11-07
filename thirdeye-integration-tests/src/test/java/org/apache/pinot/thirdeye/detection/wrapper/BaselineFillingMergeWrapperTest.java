@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.detection.wrapper;
 
+import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.makeAnomaly;
+
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,10 +47,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.*;
-
-
 public class BaselineFillingMergeWrapperTest {
+
   private static final String PROP_BASELINE_PROVIDER = "baselineValueProvider";
 
   private AlertDTO config;
@@ -100,7 +100,8 @@ public class BaselineFillingMergeWrapperTest {
     // mock time series
     Map<MetricSlice, DataFrame> timeseries = new HashMap<>();
     timeseries.put(MetricSlice.from(1, 3000, 3600),
-        DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE").append(3000, 100).build());
+        DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE")
+            .append(3000, 100).build());
 
     // mock metric
     MetricConfigDTO metric = new MetricConfigDTO();
@@ -112,7 +113,8 @@ public class BaselineFillingMergeWrapperTest {
         .setMetrics(Collections.singletonList(metric))
         .setTimeseries(timeseries)
         .setAggregates(ImmutableMap.of(MetricSlice.from(1, 3000, 3600),
-            DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE").append(3000, 100).build()));
+            DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE")
+                .append(3000, 100).build()));
 
     // set up detection config properties
     this.config.getProperties().put(PROP_MAX_GAP, 100);
@@ -123,10 +125,12 @@ public class BaselineFillingMergeWrapperTest {
     BaselineProvider baselineProvider = new MockBaselineProvider();
     MockBaselineProviderSpec spec = new MockBaselineProviderSpec();
     spec.setBaselineAggregates(ImmutableMap.of(MetricSlice.from(1, 3000, 3600), 100.0));
-    spec.setBaselineTimeseries(ImmutableMap.of(MetricSlice.from(1, 3000, 3600), TimeSeries.fromDataFrame(
-        DataFrame.builder(
-            DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE" , DataFrame.COL_UPPER_BOUND + ":DOUBLE", DataFrame.COL_LOWER_BOUND + ":DOUBLE")
-            .append(3000, 100, 200, 50).build())));
+    spec.setBaselineTimeseries(
+        ImmutableMap.of(MetricSlice.from(1, 3000, 3600), TimeSeries.fromDataFrame(
+            DataFrame.builder(
+                DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE",
+                DataFrame.COL_UPPER_BOUND + ":DOUBLE", DataFrame.COL_LOWER_BOUND + ":DOUBLE")
+                .append(3000, 100, 200, 50).build())));
     InputDataFetcher dataFetcher = new DefaultInputDataFetcher(provider, this.config.getId());
     baselineProvider.init(spec, dataFetcher);
     this.config.setComponents(ImmutableMap.of("baseline", baselineProvider));
@@ -141,8 +145,10 @@ public class BaselineFillingMergeWrapperTest {
     Assert.assertEquals(anomalyResults.get(0).getAvgBaselineVal(), 100.0);
     Assert.assertEquals(anomalyResults.get(0).getAvgBaselineVal(), 100.0);
     Assert.assertEquals(anomalyResults.get(0).getAvgCurrentVal(), 100.0);
-    Assert.assertEquals(anomalyResults.get(0).getProperties().get("detectorComponentName"), "testDetector");
-    Assert.assertEquals(anomalyResults.get(0).getProperties().get("baselineProviderComponentName"), "baseline");
+    Assert.assertEquals(anomalyResults.get(0).getProperties().get("detectorComponentName"),
+        "testDetector");
+    Assert.assertEquals(anomalyResults.get(0).getProperties().get("baselineProviderComponentName"),
+        "baseline");
 
     TimeSeries ts = baselineProvider.computePredictedTimeSeries(MetricSlice.from(1, 3000, 3600));
     Assert.assertEquals(ts.getPredictedBaseline().get(0), 100.0);

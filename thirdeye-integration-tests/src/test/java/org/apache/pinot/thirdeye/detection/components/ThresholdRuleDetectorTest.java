@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -42,6 +42,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class ThresholdRuleDetectorTest {
+
   private DataProvider testDataProvider;
 
   @BeforeMethod
@@ -51,8 +52,10 @@ public class ThresholdRuleDetectorTest {
         new DataFrame().addSeries(DataFrame.COL_VALUE, 0, 100, 200, 500, 1000).addSeries(
             DataFrame.COL_TIME, 0, 2, 4, 6, 8));
     timeSeries.put(MetricSlice.from(123L, 1546214400000L, 1551398400000L),
-        new DataFrame().addSeries(DataFrame.COL_TIME, 1546214400000L, 1548892800000L, 1551312000000L).addSeries(
-            DataFrame.COL_VALUE, 100, 200, 300));
+        new DataFrame()
+            .addSeries(DataFrame.COL_TIME, 1546214400000L, 1548892800000L, 1551312000000L)
+            .addSeries(
+                DataFrame.COL_VALUE, 100, 200, 300));
 
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
     metricConfigDTO.setId(123L);
@@ -91,7 +94,8 @@ public class ThresholdRuleDetectorTest {
     spec.setMin(100);
     spec.setMax(500);
     thresholdAlgorithm.init(spec, new DefaultInputDataFetcher(testDataProvider, -1));
-    DetectionResult result = thresholdAlgorithm.runDetection(new Interval(0, 10), "thirdeye:metric:123");
+    DetectionResult result = thresholdAlgorithm
+        .runDetection(new Interval(0, 10), "thirdeye:metric:123");
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 2);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 0);
@@ -101,7 +105,8 @@ public class ThresholdRuleDetectorTest {
     TimeSeries ts = result.getTimeseries();
     Assert.assertEquals(ts.getPredictedUpperBound(), DoubleSeries.fillValues(ts.size(), 500));
     Assert.assertEquals(ts.getPredictedLowerBound(), DoubleSeries.fillValues(ts.size(), 100));
-    Assert.assertEquals(ts.getPredictedBaseline().values(), new double[]{100, 100L, 200L, 500L, 500L});
+    Assert.assertEquals(ts.getPredictedBaseline().values(),
+        new double[]{100, 100L, 200L, 500L, 500L});
   }
 
   @Test
@@ -111,7 +116,9 @@ public class ThresholdRuleDetectorTest {
     spec.setMin(200);
     spec.setMonitoringGranularity("1_MONTHS");
     thresholdRule.init(spec, new DefaultInputDataFetcher(testDataProvider, -1));
-    List<MergedAnomalyResultDTO> anomalies = thresholdRule.runDetection(new Interval(1546214400000L, 1551398400000L), "thirdeye:metric:123").getAnomalies();
+    List<MergedAnomalyResultDTO> anomalies = thresholdRule
+        .runDetection(new Interval(1546214400000L, 1551398400000L), "thirdeye:metric:123")
+        .getAnomalies();
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 1546214400000L);
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1548892800000L);
@@ -124,10 +131,11 @@ public class ThresholdRuleDetectorTest {
     spec.setMax(200);
     spec.setMonitoringGranularity("1_MONTHS");
     thresholdRule.init(spec, new DefaultInputDataFetcher(testDataProvider, -1));
-    List<MergedAnomalyResultDTO> anomalies = thresholdRule.runDetection(new Interval(1546214400000L, 1551398400000L), "thirdeye:metric:123").getAnomalies();
+    List<MergedAnomalyResultDTO> anomalies = thresholdRule
+        .runDetection(new Interval(1546214400000L, 1551398400000L), "thirdeye:metric:123")
+        .getAnomalies();
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 1551312000000L);
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1553731200000L);
   }
-
 }

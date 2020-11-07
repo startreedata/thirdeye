@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,17 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestEntityToEntityMappingManager {
+
   Long testId1 = null;
   Long testId2 = null;
   Long testId3 = null;
@@ -42,6 +43,7 @@ public class TestEntityToEntityMappingManager {
 
   private DAOTestBase testDAOProvider;
   private EntityToEntityMappingManager entityToEntityMappingDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -56,18 +58,20 @@ public class TestEntityToEntityMappingManager {
 
   @Test
   public void testCreate() {
-    EntityToEntityMappingDTO dto = DaoTestUtils.getTestEntityToEntityMapping(metricURN1, metricURN2, METRIC_TO_METRIC);
+    EntityToEntityMappingDTO dto = DaoTestUtils
+        .getTestEntityToEntityMapping(metricURN1, metricURN2, METRIC_TO_METRIC);
     testId1 = entityToEntityMappingDAO.save(dto);
     Assert.assertNotNull(testId1);
     dto = DaoTestUtils.getTestEntityToEntityMapping(metricURN1, serviceURN1, METRIC_TO_SERVICE);
     testId2 = entityToEntityMappingDAO.save(dto);
     Assert.assertNotNull(testId2);
-    dto = DaoTestUtils.getTestEntityToEntityMapping(dimensionURN1, dimensionURN2, DIMENSION_TO_DIMENSION);
+    dto = DaoTestUtils
+        .getTestEntityToEntityMapping(dimensionURN1, dimensionURN2, DIMENSION_TO_DIMENSION);
     testId3 = entityToEntityMappingDAO.save(dto);
     Assert.assertNotNull(testId3);
   }
 
-  @Test(dependsOnMethods = { "testCreate" })
+  @Test(dependsOnMethods = {"testCreate"})
   public void testFind() {
     EntityToEntityMappingDTO dto = entityToEntityMappingDAO.findById(testId1);
     Assert.assertEquals(dto.getId(), testId1);
@@ -97,7 +101,7 @@ public class TestEntityToEntityMappingManager {
     Assert.assertEquals(list.size(), 0);
   }
 
-  @Test(dependsOnMethods = { "testFind" })
+  @Test(dependsOnMethods = {"testFind"})
   public void testUpdate() {
     EntityToEntityMappingDTO dto = entityToEntityMappingDAO.findById(testId1);
     Assert.assertEquals(dto.getScore(), 1d);
@@ -107,7 +111,7 @@ public class TestEntityToEntityMappingManager {
     Assert.assertEquals(dto.getScore(), 10d);
   }
 
-  @Test(dependsOnMethods = { "testUpdate" })
+  @Test(dependsOnMethods = {"testUpdate"})
   public void testDelete() {
     entityToEntityMappingDAO.deleteById(testId1);
     EntityToEntityMappingDTO dto = entityToEntityMappingDAO.findById(testId1);

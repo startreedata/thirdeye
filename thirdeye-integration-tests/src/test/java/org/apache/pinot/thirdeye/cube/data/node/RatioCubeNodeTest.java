@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,6 @@ import org.apache.pinot.thirdeye.cube.ratio.RatioCubeNode;
 import org.apache.pinot.thirdeye.cube.ratio.RatioRow;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
 
 public class RatioCubeNodeTest {
 
@@ -44,7 +43,7 @@ public class RatioCubeNodeTest {
     rowUS.setCurrentNumeratorValue(80); // 70 left
     rowUS.setCurrentDenominatorValue(180); // 70 left
     RatioCubeNode nodeUS = new RatioCubeNode(1, 0, rowUS, rootNode);
-    Assert.assertEquals(nodeUS.changeRatio(), (80/180d) / (50d/120d));
+    Assert.assertEquals(nodeUS.changeRatio(), (80 / 180d) / (50d / 120d));
     Assert.assertEquals(nodeUS.side(), nodeUS.changeRatio() > 1d);
 
     // Ratio node doesn't have baseline
@@ -55,9 +54,9 @@ public class RatioCubeNodeTest {
     rowIN.setCurrentNumeratorValue(70); // 0 left
     rowIN.setCurrentDenominatorValue(50); // 20 left
     RatioCubeNode nodeIN = new RatioCubeNode(1, 1, rowIN, rootNode);
-    Assert.assertEquals(nodeIN.changeRatio(), Double.NaN); // The ratio will be inferred by algorithm itself
+    Assert.assertEquals(nodeIN.changeRatio(),
+        Double.NaN); // The ratio will be inferred by algorithm itself
     Assert.assertEquals(nodeIN.side(), nodeIN.getCurrentValue() > rootNode.getCurrentValue());
-
 
     // Ratio node doesn't have baseline
     RatioRow rowFR = new RatioRow(new Dimensions(Collections.singletonList("country")),
@@ -67,7 +66,8 @@ public class RatioCubeNodeTest {
     rowFR.setCurrentNumeratorValue(0); // 0 left
     rowFR.setCurrentDenominatorValue(0); // 20 left
     RatioCubeNode nodeFR = new RatioCubeNode(1, 2, rowFR, rootNode);
-    Assert.assertEquals(nodeFR.changeRatio(), Double.NaN); // The ratio will be inferred by algorithm itself
+    Assert.assertEquals(nodeFR.changeRatio(),
+        Double.NaN); // The ratio will be inferred by algorithm itself
     // The side of FR is UP because it's baseline has lower ratio than it's parent; hence, we expect that removing FR
     // will move the metric upward.
     Assert.assertEquals(nodeFR.side(), nodeFR.getBaselineValue() < rootNode.getBaselineValue());

@@ -19,12 +19,12 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.List;
 import java.util.Objects;
-
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 public class MockPipelineOutput {
+
   final List<MergedAnomalyResultDTO> anomalies;
   final long lastTimestamp;
 

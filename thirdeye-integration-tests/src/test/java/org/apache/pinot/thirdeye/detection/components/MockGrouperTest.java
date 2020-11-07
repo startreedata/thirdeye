@@ -16,6 +16,10 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
@@ -27,16 +31,13 @@ import org.apache.pinot.thirdeye.detection.spec.MockGrouperSpec;
 import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregate;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MockGrouperTest {
+
   private static final String METRIC_URN = "thirdeye:metric:123";
 
   private DataProvider testDataProvider;
@@ -44,7 +45,8 @@ public class MockGrouperTest {
 
   @BeforeMethod
   public void beforeMethod() {
-    this.baseline = BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.MEAN, 1, 1, DateTimeZone.forID("UTC"));
+    this.baseline = BaselineAggregate
+        .fromWeekOverWeek(BaselineAggregateType.MEAN, 1, 1, DateTimeZone.forID("UTC"));
 
     MetricSlice slice1 = MetricSlice.from(123L, 1555570800000L, 1555693200000L);
     MetricSlice baselineSlice1 = this.baseline.scatter(slice1).get(0);
@@ -54,10 +56,12 @@ public class MockGrouperTest {
     MetricSlice baselineSlice3 = this.baseline.scatter(slice3).get(0);
 
     Map<MetricSlice, DataFrame> aggregates = new HashMap<>();
-    aggregates.put(slice1, new DataFrame().addSeries(DataFrame.COL_TIME, slice1.getStart()).addSeries(
-        DataFrame.COL_VALUE, 150).setIndex(DataFrame.COL_TIME));
-    aggregates.put(baselineSlice1, new DataFrame().addSeries(DataFrame.COL_TIME, baselineSlice1.getStart()).addSeries(
-        DataFrame.COL_VALUE, 200).setIndex(DataFrame.COL_TIME));
+    aggregates
+        .put(slice1, new DataFrame().addSeries(DataFrame.COL_TIME, slice1.getStart()).addSeries(
+            DataFrame.COL_VALUE, 150).setIndex(DataFrame.COL_TIME));
+    aggregates.put(baselineSlice1,
+        new DataFrame().addSeries(DataFrame.COL_TIME, baselineSlice1.getStart()).addSeries(
+            DataFrame.COL_VALUE, 200).setIndex(DataFrame.COL_TIME));
     aggregates.put(slice2, new DataFrame().addSeries(DataFrame.COL_VALUE, 500).addSeries(
         DataFrame.COL_TIME, slice2.getStart()).setIndex(DataFrame.COL_TIME));
     aggregates.put(baselineSlice2, new DataFrame().addSeries(DataFrame.COL_VALUE, 1000).addSeries(
@@ -71,7 +75,7 @@ public class MockGrouperTest {
   }
 
   @Test
-  public void testGrouperInterface(){
+  public void testGrouperInterface() {
     MockGrouperSpec grouperSpec = new MockGrouperSpec();
     grouperSpec.setMockParam(0.5);
 
@@ -92,7 +96,8 @@ public class MockGrouperTest {
     Assert.assertEquals(groupedAnomalies.get(0).getProperties().get("TEST_KEY"), "TEST_VALUE");
   }
 
-  private static MergedAnomalyResultDTO makeAnomaly(long start, long end, Map<String, String> dimensions) {
+  private static MergedAnomalyResultDTO makeAnomaly(long start, long end,
+      Map<String, String> dimensions) {
     MergedAnomalyResultDTO anomaly = DetectionTestUtils.makeAnomaly(125L, start, end, dimensions);
     anomaly.setMetricUrn(METRIC_URN);
     return anomaly;

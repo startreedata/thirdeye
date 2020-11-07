@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,8 +41,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-
 public class MockThirdEyeDataSourceIntegrationTest {
+
   private DAOTestBase testDAOProvider;
   private DAORegistry daoRegistry;
 
@@ -134,9 +134,12 @@ public class MockThirdEyeDataSourceIntegrationTest {
 
   @Test
   public void testAggregation() throws Exception {
-    MetricSlice slice = MetricSlice.from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
-    RequestContainer requestContainer = DataFrameUtils.makeAggregateRequest(slice, Collections.<String>emptyList(), -1, "ref");
-    ThirdEyeResponse response = this.cacheRegistry.getQueryCache().getQueryResult(requestContainer.getRequest());
+    MetricSlice slice = MetricSlice
+        .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
+    RequestContainer requestContainer = DataFrameUtils
+        .makeAggregateRequest(slice, Collections.emptyList(), -1, "ref");
+    ThirdEyeResponse response = this.cacheRegistry.getQueryCache()
+        .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
 
     Assert.assertTrue(df.getDouble(DataFrame.COL_VALUE, 0) > 0);
@@ -144,14 +147,20 @@ public class MockThirdEyeDataSourceIntegrationTest {
 
   @Test
   public void testBreakdown() throws Exception {
-    MetricSlice slice = MetricSlice.from(this.metricRevenueId, this.timestamp - TimeUnit.HOURS.toMillis(25), this.timestamp); // allow for DST
-    RequestContainer requestContainer = DataFrameUtils.makeAggregateRequest(slice, Arrays.asList("country", "browser"), -1, "ref");
-    ThirdEyeResponse response = this.cacheRegistry.getQueryCache().getQueryResult(requestContainer.getRequest());
+    MetricSlice slice = MetricSlice
+        .from(this.metricRevenueId, this.timestamp - TimeUnit.HOURS.toMillis(25),
+            this.timestamp); // allow for DST
+    RequestContainer requestContainer = DataFrameUtils
+        .makeAggregateRequest(slice, Arrays.asList("country", "browser"), -1, "ref");
+    ThirdEyeResponse response = this.cacheRegistry.getQueryCache()
+        .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
 
     Assert.assertEquals(df.size(), 9);
-    Assert.assertEquals(new HashSet<>(df.getStrings("country").toList()), new HashSet<>(Arrays.asList("ca", "mx", "us")));
-    Assert.assertEquals(new HashSet<>(df.getStrings("browser").toList()), new HashSet<>(Arrays.asList("chrome", "edge", "safari")));
+    Assert.assertEquals(new HashSet<>(df.getStrings("country").toList()),
+        new HashSet<>(Arrays.asList("ca", "mx", "us")));
+    Assert.assertEquals(new HashSet<>(df.getStrings("browser").toList()),
+        new HashSet<>(Arrays.asList("chrome", "edge", "safari")));
     for (int i = 0; i < df.size(); i++) {
       Assert.assertTrue(df.getDouble(DataFrame.COL_VALUE, i) >= 0);
     }
@@ -159,9 +168,12 @@ public class MockThirdEyeDataSourceIntegrationTest {
 
   @Test
   public void testTimeSeries() throws Exception {
-    MetricSlice slice = MetricSlice.from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
-    TimeSeriesRequestContainer requestContainer = DataFrameUtils.makeTimeSeriesRequest(slice, "ref");
-    ThirdEyeResponse response = this.cacheRegistry.getQueryCache().getQueryResult(requestContainer.getRequest());
+    MetricSlice slice = MetricSlice
+        .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
+    TimeSeriesRequestContainer requestContainer = DataFrameUtils
+        .makeTimeSeriesRequest(slice, "ref");
+    ThirdEyeResponse response = this.cacheRegistry.getQueryCache()
+        .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
 
     Assert.assertEquals(df.size(), 2);
@@ -183,24 +195,35 @@ public class MockThirdEyeDataSourceIntegrationTest {
     SetMultimap<String, String> filtersDesktop = HashMultimap.create(filtersBasic);
     filtersDesktop.put("platform", "desktop");
 
-    MetricSlice sliceBasic = MetricSlice.from(this.metricAdImpressionsId, this.timestamp - 7200000, this.timestamp, filtersBasic);
-    MetricSlice sliceMobile = MetricSlice.from(this.metricAdImpressionsId, this.timestamp - 7200000, this.timestamp, filtersMobile);
-    MetricSlice sliceDesktop = MetricSlice.from(this.metricAdImpressionsId, this.timestamp - 7200000, this.timestamp, filtersDesktop);
+    MetricSlice sliceBasic = MetricSlice
+        .from(this.metricAdImpressionsId, this.timestamp - 7200000, this.timestamp, filtersBasic);
+    MetricSlice sliceMobile = MetricSlice
+        .from(this.metricAdImpressionsId, this.timestamp - 7200000, this.timestamp, filtersMobile);
+    MetricSlice sliceDesktop = MetricSlice
+        .from(this.metricAdImpressionsId, this.timestamp - 7200000, this.timestamp, filtersDesktop);
 
-    RequestContainer reqBasic = DataFrameUtils.makeAggregateRequest(sliceBasic, Collections.<String>emptyList(), -1, "ref");
-    ThirdEyeResponse resBasic = this.cacheRegistry.getQueryCache().getQueryResult(reqBasic.getRequest());
+    RequestContainer reqBasic = DataFrameUtils
+        .makeAggregateRequest(sliceBasic, Collections.emptyList(), -1, "ref");
+    ThirdEyeResponse resBasic = this.cacheRegistry.getQueryCache()
+        .getQueryResult(reqBasic.getRequest());
     DataFrame dfBasic = DataFrameUtils.evaluateResponse(resBasic, reqBasic);
 
-    RequestContainer reqMobile = DataFrameUtils.makeAggregateRequest(sliceMobile, Collections.<String>emptyList(), -1, "ref");
-    ThirdEyeResponse resMobile = this.cacheRegistry.getQueryCache().getQueryResult(reqMobile.getRequest());
+    RequestContainer reqMobile = DataFrameUtils
+        .makeAggregateRequest(sliceMobile, Collections.emptyList(), -1, "ref");
+    ThirdEyeResponse resMobile = this.cacheRegistry.getQueryCache()
+        .getQueryResult(reqMobile.getRequest());
     DataFrame dfMobile = DataFrameUtils.evaluateResponse(resMobile, reqMobile);
 
-    RequestContainer reqDesktop = DataFrameUtils.makeAggregateRequest(sliceDesktop, Collections.<String>emptyList(), -1, "ref");
-    ThirdEyeResponse resDesktop = this.cacheRegistry.getQueryCache().getQueryResult(reqDesktop.getRequest());
+    RequestContainer reqDesktop = DataFrameUtils
+        .makeAggregateRequest(sliceDesktop, Collections.emptyList(), -1, "ref");
+    ThirdEyeResponse resDesktop = this.cacheRegistry.getQueryCache()
+        .getQueryResult(reqDesktop.getRequest());
     DataFrame dfDesktop = DataFrameUtils.evaluateResponse(resDesktop, reqDesktop);
 
-    Assert.assertTrue(dfBasic.getDouble(DataFrame.COL_VALUE, 0) >= dfMobile.getDouble(DataFrame.COL_VALUE, 0));
-    Assert.assertTrue(dfBasic.getDouble(DataFrame.COL_VALUE, 0) >= dfDesktop.getDouble(DataFrame.COL_VALUE, 0));
+    Assert.assertTrue(
+        dfBasic.getDouble(DataFrame.COL_VALUE, 0) >= dfMobile.getDouble(DataFrame.COL_VALUE, 0));
+    Assert.assertTrue(
+        dfBasic.getDouble(DataFrame.COL_VALUE, 0) >= dfDesktop.getDouble(DataFrame.COL_VALUE, 0));
     Assert.assertEquals(dfBasic.getDouble(DataFrame.COL_VALUE, 0),
         dfDesktop.getDouble(DataFrame.COL_VALUE, 0) + dfMobile.getDouble(DataFrame.COL_VALUE, 0));
   }

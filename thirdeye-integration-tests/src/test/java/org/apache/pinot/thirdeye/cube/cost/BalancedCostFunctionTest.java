@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +16,12 @@
 
 package org.apache.pinot.thirdeye.cube.cost;
 
+import static org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction.CHANGE_CONTRIBUTION_THRESHOLD_PARAM;
+
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import static org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction.*;
-
 
 public class BalancedCostFunctionTest {
 
@@ -36,5 +34,4 @@ public class BalancedCostFunctionTest {
     BalancedCostFunction function = new BalancedCostFunction(params);
     Assert.assertEquals(function.getChangeContributionThreshold(), threshold);
   }
-
 }

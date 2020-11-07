@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,11 @@
 
 package org.apache.pinot.thirdeye.detector.email.filter;
 
+import static org.apache.pinot.thirdeye.constant.AnomalyFeedbackType.ANOMALY;
+import static org.apache.pinot.thirdeye.constant.AnomalyFeedbackType.NOT_ANOMALY;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
@@ -26,18 +31,14 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.ArrayList;
-import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.constant.AnomalyFeedbackType.*;
-
-
 public class TestUserReportUtils {
+
   private DAOTestBase testDAOProvider;
   private MergedAnomalyResultManager mergedAnomalyDAO;
   private AnomalyFunctionManager anomalyFunctionDAO;
@@ -57,13 +58,17 @@ public class TestUserReportUtils {
   }
 
   @Test(dataProvider = "provideAnomaliesWithUserReport")
-  public void testIsUserReportAnomalyIsQualified(MergedAnomalyResultDTO userReportAnomalyEmptyDimension,
+  public void testIsUserReportAnomalyIsQualified(
+      MergedAnomalyResultDTO userReportAnomalyEmptyDimension,
       MergedAnomalyResultDTO userReportAnomalyWithDimension,
       MergedAnomalyResultDTO userReportAnomalyFailRecovered) throws Exception {
     AlertFilter alertFilter = new DummyAlertFilter();
-    Assert.assertFalse(UserReportUtils.isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyEmptyDimension));
-    Assert.assertTrue(UserReportUtils.isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyWithDimension));
-    Assert.assertFalse(UserReportUtils.isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyFailRecovered));
+    Assert.assertFalse(UserReportUtils
+        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyEmptyDimension));
+    Assert.assertTrue(UserReportUtils
+        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyWithDimension));
+    Assert.assertFalse(UserReportUtils
+        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyFailRecovered));
   }
 
   @DataProvider(name = "provideAnomaliesWithUserReport")
@@ -83,7 +88,7 @@ public class TestUserReportUtils {
       anomaly.setFeedback(null);
       anomaly.setNotified(true);
       anomaly.setStartTime(i);
-      anomaly.setEndTime(i+1);
+      anomaly.setEndTime(i + 1);
       anomaly.setDimensions(dimensionMap);
       anomalyResultDTOS.add(anomaly);
       mergedAnomalyDAO.save(anomaly);
@@ -92,7 +97,8 @@ public class TestUserReportUtils {
     userReportAnomalyEmptyDimension.setNotified(false);
     userReportAnomalyEmptyDimension.setFunction(anomalyFunction);
     userReportAnomalyEmptyDimension.setFeedback(positiveFeedback);
-    userReportAnomalyEmptyDimension.setAnomalyResultSource(AnomalyResultSource.USER_LABELED_ANOMALY);
+    userReportAnomalyEmptyDimension
+        .setAnomalyResultSource(AnomalyResultSource.USER_LABELED_ANOMALY);
     userReportAnomalyEmptyDimension.setStartTime(0L);
     userReportAnomalyEmptyDimension.setEndTime(10L);
     mergedAnomalyDAO.save(userReportAnomalyEmptyDimension);
@@ -117,7 +123,7 @@ public class TestUserReportUtils {
     userReportAnomalyFailRecovered.setDimensions(dimensionMap);
     mergedAnomalyDAO.save(userReportAnomalyFailRecovered);
 
-
-    return new Object[][]{{userReportAnomalyEmptyDimension, userReportAnomalyWithDimension, userReportAnomalyFailRecovered}};
+    return new Object[][]{{userReportAnomalyEmptyDimension, userReportAnomalyWithDimension,
+        userReportAnomalyFailRecovered}};
   }
 }

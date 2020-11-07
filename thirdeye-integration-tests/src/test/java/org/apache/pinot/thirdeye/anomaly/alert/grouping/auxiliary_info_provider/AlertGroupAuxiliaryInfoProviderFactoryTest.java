@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,10 +22,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class AlertGroupAuxiliaryInfoProviderFactoryTest {
+
   @Test
   public void testFromSpecNull() throws Exception {
     AlertGroupRecipientProviderFactory alertGroupRecipientProviderFactory = new AlertGroupRecipientProviderFactory();
-    AlertGroupAuxiliaryInfoProvider recipientProvider = alertGroupRecipientProviderFactory.fromSpec(null);
+    AlertGroupAuxiliaryInfoProvider recipientProvider = alertGroupRecipientProviderFactory
+        .fromSpec(null);
     Assert.assertEquals(recipientProvider.getClass(), DummyAlertGroupAuxiliaryInfoProvider.class);
   }
 
@@ -34,7 +36,9 @@ public class AlertGroupAuxiliaryInfoProviderFactoryTest {
     AlertGroupRecipientProviderFactory alertGroupRecipientProviderFactory = new AlertGroupRecipientProviderFactory();
     Map<String, String> spec = new HashMap<>();
     spec.put(AlertGroupRecipientProviderFactory.GROUP_RECIPIENT_PROVIDER_TYPE_KEY, "diMenSionAL");
-    AlertGroupAuxiliaryInfoProvider alertGrouper = alertGroupRecipientProviderFactory.fromSpec(spec);
-    Assert.assertEquals(alertGrouper.getClass(), DimensionalAlertGroupAuxiliaryRecipientProvider.class);
+    AlertGroupAuxiliaryInfoProvider alertGrouper = alertGroupRecipientProviderFactory
+        .fromSpec(spec);
+    Assert.assertEquals(alertGrouper.getClass(),
+        DimensionalAlertGroupAuxiliaryRecipientProvider.class);
   }
 }

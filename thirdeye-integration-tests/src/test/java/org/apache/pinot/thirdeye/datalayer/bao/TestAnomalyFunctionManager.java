@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,27 +16,24 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.EmailConfig;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.EmailConfig;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-
 public class TestAnomalyFunctionManager {
 
   private Long anomalyFunctionId;
-  private static String collection = "my dataset";
-  private static String metricName = "__counts";
+  private static final String collection = "my dataset";
+  private static final String metricName = "__counts";
 
   private DAOTestBase testDAOProvider;
   private AnomalyFunctionManager anomalyFunctionDAO;
@@ -57,7 +54,8 @@ public class TestAnomalyFunctionManager {
 
   @Test
   public void testCreate() {
-    anomalyFunctionId = anomalyFunctionDAO.save(DaoTestUtils.getTestFunctionSpec(metricName, collection));
+    anomalyFunctionId = anomalyFunctionDAO
+        .save(DaoTestUtils.getTestFunctionSpec(metricName, collection));
     Assert.assertNotNull(anomalyFunctionId);
 
     // test fetch all
@@ -69,9 +67,11 @@ public class TestAnomalyFunctionManager {
   }
 
   @Test(dependsOnMethods = {"testCreate"})
-  public void testFindNameEquals(){
-    AnomalyFunctionDTO anomalyFunctionSpec = DaoTestUtils.getTestFunctionSpec(metricName, collection);
-    Assert.assertNotNull(anomalyFunctionDAO.findWhereNameEquals(anomalyFunctionSpec.getFunctionName()));
+  public void testFindNameEquals() {
+    AnomalyFunctionDTO anomalyFunctionSpec = DaoTestUtils
+        .getTestFunctionSpec(metricName, collection);
+    Assert.assertNotNull(
+        anomalyFunctionDAO.findWhereNameEquals(anomalyFunctionSpec.getFunctionName()));
   }
 
   @Test(dependsOnMethods = {"testCreate"})
@@ -86,7 +86,8 @@ public class TestAnomalyFunctionManager {
     Assert.assertEquals(metrics.get(0), metricName);
   }
 
-  @Test(dependsOnMethods = {"testFindNameEquals", "testFindAllByCollection", "testDistinctMetricsByCollection"})
+  @Test(dependsOnMethods = {"testFindNameEquals", "testFindAllByCollection",
+      "testDistinctMetricsByCollection"})
   public void testFindAllByApplication() {
     AlertConfigDTO alertConfigDTO = new AlertConfigDTO();
     alertConfigDTO.setName("test");
@@ -96,11 +97,12 @@ public class TestAnomalyFunctionManager {
     alertConfigDTO.setEmailConfig(emailConfig);
     alertConfigDAO.save(alertConfigDTO);
 
-    List<AnomalyFunctionDTO> applicationAnomalyFunctions = anomalyFunctionDAO.findAllByApplication("test");
+    List<AnomalyFunctionDTO> applicationAnomalyFunctions = anomalyFunctionDAO
+        .findAllByApplication("test");
     Assert.assertEquals(applicationAnomalyFunctions.size(), 1);
   }
 
-  @Test(dependsOnMethods = { "testFindAllByApplication" })
+  @Test(dependsOnMethods = {"testFindAllByApplication"})
   public void testUpdate() {
     AnomalyFunctionDTO spec = anomalyFunctionDAO.findById(anomalyFunctionId);
     Assert.assertNotNull(spec);
@@ -111,7 +113,7 @@ public class TestAnomalyFunctionManager {
     Assert.assertEquals(specReturned.getMetricFunction(), MetricAggFunction.COUNT);
   }
 
-  @Test(dependsOnMethods = { "testUpdate" })
+  @Test(dependsOnMethods = {"testUpdate"})
   public void testDelete() {
     anomalyFunctionDAO.deleteById(anomalyFunctionId);
     AnomalyFunctionDTO spec = anomalyFunctionDAO.findById(anomalyFunctionId);

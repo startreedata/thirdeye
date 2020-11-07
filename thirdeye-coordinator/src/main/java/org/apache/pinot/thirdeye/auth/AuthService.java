@@ -48,7 +48,6 @@ public class AuthService {
   }
 
   /**
-   *
    * @param principal principal identifier for user. username/email
    * @param password password for the user.
    * @return the principal

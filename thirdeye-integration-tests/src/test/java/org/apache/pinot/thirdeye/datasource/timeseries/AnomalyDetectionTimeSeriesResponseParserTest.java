@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.datasource.timeseries;
 
+import static org.apache.pinot.thirdeye.datasource.timeseries.BaseTimeSeriesResponseParserTest.buildMockedThirdEyeResponse;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -25,9 +27,8 @@ import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.datasource.timeseries.BaseTimeSeriesResponseParserTest.buildMockedThirdEyeResponse;
-
 public class AnomalyDetectionTimeSeriesResponseParserTest {
+
   @Test
   public void testParseGroupByTimeDimensionResponse() throws Exception {
     TimeSeriesResponseParser parser = new AnomalyDetectionTimeSeriesResponseParser();

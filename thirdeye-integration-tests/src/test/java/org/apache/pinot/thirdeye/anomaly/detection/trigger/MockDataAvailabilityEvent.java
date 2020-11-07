@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.anomaly.detection.trigger;
 
 public class MockDataAvailabilityEvent implements DataAvailabilityEvent {
+
   private Status status;
   private String datasetName;
   private String dataStore;

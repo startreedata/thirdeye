@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,20 +56,19 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-
 /**
  * This tests the notification task scheduler.
- * The notification task scheduler should not schedule notification task if there is no anomaly generated.
- *
+ * The notification task scheduler should not schedule notification task if there is no anomaly
+ * generated.
  */
 public class NotificationTaskSchedulerTest {
 
   private DetectionCronScheduler detectionJobScheduler = null;
   private SubscriptionCronScheduler alertJobScheduler = null;
-  private String detectionConfigFile = "/sample-detection-config.yml";
-  private String alertConfigFile = "/sample-alert-config.yml";
-  private String metric = "cost";
-  private String collection = "test-collection";
+  private final String detectionConfigFile = "/sample-detection-config.yml";
+  private final String alertConfigFile = "/sample-alert-config.yml";
+  private final String metric = "cost";
+  private final String collection = "test-collection";
   private DAOTestBase testDAOProvider = null;
   private DAORegistry daoRegistry = null;
   private MetricConfigManager metricDAO;
@@ -99,9 +98,10 @@ public class NotificationTaskSchedulerTest {
 
   void initRegistries() {
     DetectionRegistry.registerComponent(ThresholdRuleDetector.class.getName(), "THRESHOLD");
-    DetectionAlertRegistry.getInstance().registerAlertScheme("EMAIL", DetectionEmailAlerter.class.getName());
+    DetectionAlertRegistry.getInstance()
+        .registerAlertScheme("EMAIL", DetectionEmailAlerter.class.getName());
     DetectionAlertRegistry.getInstance().registerAlertFilter("DEFAULT_ALERTER_PIPELINE",
-        ToAllRecipientsDetectionAlertFilter.class.getName() );
+        ToAllRecipientsDetectionAlertFilter.class.getName());
   }
 
   void initDao() {
@@ -145,9 +145,11 @@ public class NotificationTaskSchedulerTest {
         aggregationLoader, detectionPipelineLoader, TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
 
-    detectionId = daoRegistry.getDetectionConfigManager().save(DaoTestUtils.getTestDetectionConfig(provider, detectionConfigFile));
+    detectionId = daoRegistry.getDetectionConfigManager()
+        .save(DaoTestUtils.getTestDetectionConfig(provider, detectionConfigFile));
     // create test alert configuration
-    daoRegistry.getDetectionAlertConfigManager().save(DaoTestUtils.getTestDetectionAlertConfig(alertConfigFile));
+    daoRegistry.getDetectionAlertConfigManager()
+        .save(DaoTestUtils.getTestDetectionAlertConfig(alertConfigFile));
   }
 
   @Test
@@ -166,7 +168,8 @@ public class NotificationTaskSchedulerTest {
     List<TaskDTO> tasks = taskDAO.findAll();
     Assert.assertTrue(tasks.size() > 0);
     //Assert.assertTrue(tasks.stream().anyMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION));
-    Assert.assertTrue(tasks.stream().noneMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION_ALERT));
+    Assert.assertTrue(
+        tasks.stream().noneMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION_ALERT));
 
     // generate an anomaly
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
@@ -179,7 +182,8 @@ public class NotificationTaskSchedulerTest {
     Thread.sleep(10000);
     tasks = taskDAO.findAll();
     Assert.assertTrue(tasks.size() > 0);
-    Assert.assertTrue(tasks.stream().anyMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION_ALERT));
+    Assert.assertTrue(
+        tasks.stream().anyMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION_ALERT));
   }
 
   private void startAlertScheduler() throws SchedulerException {
@@ -188,7 +192,8 @@ public class NotificationTaskSchedulerTest {
   }
 
   private void startDetectionScheduler() throws Exception {
-    detectionJobScheduler = new DetectionCronScheduler(DAORegistry.getInstance().getDetectionConfigManager());
+    detectionJobScheduler = new DetectionCronScheduler(
+        DAORegistry.getInstance().getDetectionConfigManager());
     detectionJobScheduler.start();
   }
 }

@@ -22,6 +22,7 @@ import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipie
 import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_DIMENSION_RECIPIENTS;
 import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_NOTIFY;
 import static org.apache.pinot.thirdeye.detection.alert.filter.DimensionsRecipientAlertFilter.PROP_REF_LINKS;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -36,9 +37,9 @@ import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;

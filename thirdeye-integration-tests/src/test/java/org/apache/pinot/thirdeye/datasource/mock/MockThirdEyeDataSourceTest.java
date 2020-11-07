@@ -1,10 +1,5 @@
 package org.apache.pinot.thirdeye.datasource.mock;
 
-import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Arrays;
@@ -13,13 +8,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yaml.snakeyaml.Yaml;
 
-
 public class MockThirdEyeDataSourceTest {
+
   private static final String COL_PURCHASES = "purchases";
   private static final String COL_REVENUE = "revenue";
   private static final String COL_PAGE_VIEWS = "pageViews";
@@ -30,10 +30,13 @@ public class MockThirdEyeDataSourceTest {
   @BeforeMethod
   public void beforeMethod() throws Exception {
     Yaml yaml = new Yaml();
-    try (Reader dataReader = new InputStreamReader(this.getClass().getResourceAsStream("data-sources-config.yml"))) {
+    try (Reader dataReader = new InputStreamReader(
+        this.getClass().getResourceAsStream("data-sources-config.yml"))) {
       // NOTE: Yes, static typing does this to you.
-      Map<String, List<Map<String, Map<String, Object>>>> config = (Map<String, List<Map<String, Map<String, Object>>>>) yaml.load(dataReader);
-      this.dataSource = new MockThirdEyeDataSource(config.get("dataSourceConfigs").get(0).get("properties"));
+      Map<String, List<Map<String, Map<String, Object>>>> config = (Map<String, List<Map<String, Map<String, Object>>>>) yaml
+          .load(dataReader);
+      this.dataSource = new MockThirdEyeDataSource(
+          config.get("dataSourceConfigs").get(0).get("properties"));
     }
   }
 
@@ -55,24 +58,31 @@ public class MockThirdEyeDataSourceTest {
 
   @Test
   public void testGetDatasets() throws Exception {
-    Assert.assertEquals(this.dataSource.getDatasets(), new HashSet<>(Arrays.asList("business", "tracking")));
+    Assert.assertEquals(this.dataSource.getDatasets(),
+        new HashSet<>(Arrays.asList("business", "tracking")));
   }
 
   @Test
   public void testGetDimensionFiltersTracking() throws Exception {
     Map<String, List<String>> filters = this.dataSource.getDimensionFilters("tracking");
-    Assert.assertEquals(filters.keySet(), new HashSet<>(Arrays.asList("country", "browser", "platform")));
-    Assert.assertEquals(new HashSet<>(filters.get("country")), new HashSet<>(Arrays.asList("ca", "mx", "us")));
-    Assert.assertEquals(new HashSet<>(filters.get("browser")), new HashSet<>(Arrays.asList("chrome", "edge", "firefox", "safari")));
-    Assert.assertEquals(new HashSet<>(filters.get("platform")), new HashSet<>(Arrays.asList("desktop", "mobile")));
+    Assert.assertEquals(filters.keySet(),
+        new HashSet<>(Arrays.asList("country", "browser", "platform")));
+    Assert.assertEquals(new HashSet<>(filters.get("country")),
+        new HashSet<>(Arrays.asList("ca", "mx", "us")));
+    Assert.assertEquals(new HashSet<>(filters.get("browser")),
+        new HashSet<>(Arrays.asList("chrome", "edge", "firefox", "safari")));
+    Assert.assertEquals(new HashSet<>(filters.get("platform")),
+        new HashSet<>(Arrays.asList("desktop", "mobile")));
   }
 
   @Test
   public void testGetDimensionFiltersBusiness() throws Exception {
     Map<String, List<String>> filters = this.dataSource.getDimensionFilters("business");
     Assert.assertEquals(filters.keySet(), new HashSet<>(Arrays.asList("country", "browser")));
-    Assert.assertEquals(new HashSet<>(filters.get("country")), new HashSet<>(Arrays.asList("ca", "mx", "us")));
-    Assert.assertEquals(new HashSet<>(filters.get("browser")), new HashSet<>(Arrays.asList("chrome", "edge", "safari")));
+    Assert.assertEquals(new HashSet<>(filters.get("country")),
+        new HashSet<>(Arrays.asList("ca", "mx", "us")));
+    Assert.assertEquals(new HashSet<>(filters.get("browser")),
+        new HashSet<>(Arrays.asList("chrome", "edge", "safari")));
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
@@ -84,7 +94,8 @@ public class MockThirdEyeDataSourceTest {
   public void testDataGenerator() {
     Assert.assertEquals(this.dataSource.datasetData.size(), 2);
     Assert.assertEquals(this.dataSource.datasetData.get("business").size(), 28 * 9);
-    Assert.assertTrue(this.dataSource.datasetData.get("tracking").size() > 27 * 21); // allow for DST
+    Assert
+        .assertTrue(this.dataSource.datasetData.get("tracking").size() > 27 * 21); // allow for DST
   }
 
   @Test
@@ -94,9 +105,11 @@ public class MockThirdEyeDataSourceTest {
     System.out.println(data.getDoubles(COL_PAGE_VIEWS).count());
 
     // allow for DST
-    Assert.assertTrue(data.getDoubles(COL_PAGE_VIEWS).count() >= (28 * 24 - 1) * 21); // allow for DST
+    Assert
+        .assertTrue(data.getDoubles(COL_PAGE_VIEWS).count() >= (28 * 24 - 1) * 21); // allow for DST
     Assert.assertTrue(data.getDoubles(COL_PAGE_VIEWS).count() <= (28 * 24 + 1) * 21);
-    Assert.assertTrue(data.getDoubles(COL_AD_IMPRESSIONS).count() >= (28 * 24 - 1) * 7); // allow for DST
+    Assert.assertTrue(
+        data.getDoubles(COL_AD_IMPRESSIONS).count() >= (28 * 24 - 1) * 7); // allow for DST
     Assert.assertTrue(data.getDoubles(COL_AD_IMPRESSIONS).count() <= (28 * 24 + 1) * 7);
 
     Assert.assertTrue(data.getDoubles(COL_PAGE_VIEWS).sum().doubleValue() > 0);
@@ -125,7 +138,8 @@ public class MockThirdEyeDataSourceTest {
       }
     }
 
-    MetricFunction metricFunction = new MetricFunction(MetricAggFunction.SUM, COL_PAGE_VIEWS, metricId, "tracking", null, null);
+    MetricFunction metricFunction = new MetricFunction(MetricAggFunction.SUM, COL_PAGE_VIEWS,
+        metricId, "tracking", null, null);
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setStartTimeInclusive(time - TimeUnit.DAYS.toMillis(1))
@@ -144,7 +158,8 @@ public class MockThirdEyeDataSourceTest {
       resultDimensions.add(response.getRow(i).getDimensions().get(0));
     }
 
-    Assert.assertEquals(resultDimensions, new HashSet<>(Arrays.asList("chrome", "edge", "firefox", "safari")));
+    Assert.assertEquals(resultDimensions,
+        new HashSet<>(Arrays.asList("chrome", "edge", "firefox", "safari")));
   }
 
   @Test

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,27 +16,26 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+public class TestMergedAnomalyResultManager {
 
-public class TestMergedAnomalyResultManager{
   private MergedAnomalyResultDTO mergedResult = null;
 
   private DAOTestBase testDAOProvider;
@@ -58,7 +57,8 @@ public class TestMergedAnomalyResultManager{
 
   @Test(dependsOnMethods = {"testSaveChildren"})
   public void testFeedback() {
-    MergedAnomalyResultDTO anomalyMergedResult = mergedAnomalyResultDAO.findById(mergedResult.getId());
+    MergedAnomalyResultDTO anomalyMergedResult = mergedAnomalyResultDAO
+        .findById(mergedResult.getId());
     AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO();
     feedback.setComment("this is a good find");
     feedback.setFeedbackType(AnomalyFeedbackType.ANOMALY);
@@ -107,7 +107,7 @@ public class TestMergedAnomalyResultManager{
             new DateTime(2019, 1, 3, 0, 0).getMillis(),
             detectionConfigId);
     Assert.assertEquals(fetchedAnomalies.size(), anomalies.size());
-    for (int i = 0; i < anomalies.size(); i ++) {
+    for (int i = 0; i < anomalies.size(); i++) {
       MergedAnomalyResultDTO actual = fetchedAnomalies.get(i);
       MergedAnomalyResultDTO expected = anomalies.get(i);
       Assert.assertNotNull(actual.getId());
@@ -120,7 +120,6 @@ public class TestMergedAnomalyResultManager{
     }
     this.detectionConfigDAO.deleteById(detectionConfigId);
   }
-
 
   @Test
   public void testFindByStartTimeInRangeAndDetectionConfigId() {
@@ -135,7 +134,7 @@ public class TestMergedAnomalyResultManager{
             new DateTime(2019, 1, 3, 0, 0).getMillis(),
             detectionConfigId);
     Assert.assertEquals(fetchedAnomalies.size(), anomalies.size());
-    for (int i = 0; i < anomalies.size(); i ++) {
+    for (int i = 0; i < anomalies.size(); i++) {
       MergedAnomalyResultDTO actual = fetchedAnomalies.get(i);
       MergedAnomalyResultDTO expected = anomalies.get(i);
       Assert.assertNotNull(actual.getId());
@@ -257,9 +256,14 @@ public class TestMergedAnomalyResultManager{
     Assert.assertFalse(read.getChildren().isEmpty());
     Assert.assertEquals(read.getChildren().iterator().next().getStartTime(), 1000);
     Assert.assertFalse(read.getChildren().iterator().next().getChildren().isEmpty());
-    Assert.assertEquals(read.getChildren().iterator().next().getChildren().iterator().next().getStartTime(), 1500);
-    Assert.assertFalse(read.getChildren().iterator().next().getChildren().iterator().next().getChildren().isEmpty());
-    Assert.assertEquals(read.getChildren().iterator().next().getChildren().iterator().next().getChildren().iterator().next().getStartTime(), 1600);
+    Assert.assertEquals(
+        read.getChildren().iterator().next().getChildren().iterator().next().getStartTime(), 1500);
+    Assert.assertFalse(
+        read.getChildren().iterator().next().getChildren().iterator().next().getChildren()
+            .isEmpty());
+    Assert.assertEquals(
+        read.getChildren().iterator().next().getChildren().iterator().next().getChildren()
+            .iterator().next().getStartTime(), 1600);
   }
 
   @Test

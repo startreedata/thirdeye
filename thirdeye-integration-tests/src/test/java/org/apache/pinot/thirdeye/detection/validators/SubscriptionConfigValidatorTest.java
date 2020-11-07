@@ -27,6 +27,7 @@ import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import io.swagger.util.Json;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +50,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yaml.snakeyaml.Yaml;
-
 
 public class SubscriptionConfigValidatorTest {
 
@@ -88,13 +88,17 @@ public class SubscriptionConfigValidatorTest {
 
     this.yaml = new Yaml();
     DetectionRegistry.registerComponent(ThresholdRuleDetector.class.getName(), "THRESHOLD");
-    DetectionRegistry.registerComponent(ThresholdRuleAnomalyFilter.class.getName(), "THRESHOLD_RULE_FILTER");
+    DetectionRegistry
+        .registerComponent(ThresholdRuleAnomalyFilter.class.getName(), "THRESHOLD_RULE_FILTER");
     DetectionRegistry.registerComponent(RuleBaselineProvider.class.getName(), "RULE_BASELINE");
     DetectionRegistry.registerComponent(MockGrouper.class.getName(), "MOCK_GROUPER");
-    this.provider = new MockDataProvider().setMetrics(Collections.singletonList(metricConfig)).setDatasets(Collections.singletonList(datasetConfigDTO));
+    this.provider = new MockDataProvider().setMetrics(Collections.singletonList(metricConfig))
+        .setDatasets(Collections.singletonList(datasetConfigDTO));
 
-    this.yamlConfig1 = ConfigUtils.getMap(this.yaml.load(this.getClass().getResourceAsStream("entity-pipeline-config-1.yaml")));
-    this.yamlConfig2 = ConfigUtils.getMap(this.yaml.load(this.getClass().getResourceAsStream("entity-pipeline-config-2.yaml")));
+    this.yamlConfig1 = ConfigUtils.getMap(
+        this.yaml.load(this.getClass().getResourceAsStream("entity-pipeline-config-1.yaml")));
+    this.yamlConfig2 = ConfigUtils.getMap(
+        this.yaml.load(this.getClass().getResourceAsStream("entity-pipeline-config-2.yaml")));
   }
 
   @Test
@@ -141,7 +145,8 @@ public class SubscriptionConfigValidatorTest {
   // Every rule must have at least 1 detection
   @Test(expectedExceptions = ConfigValidationException.class)
   public void testNoDetectionUnderRuleValidation() throws Exception {
-    ((Map<String, Object>) ConfigUtils.getList(this.yamlConfig1.get("rules")).get(0)).remove("detection");
+    ((Map<String, Object>) ConfigUtils.getList(this.yamlConfig1.get("rules")).get(0))
+        .remove("detection");
 
     DetectionConfigValidator detectionConfigValidator = new DetectionConfigValidator(provider);
     detectionConfigValidator.staticValidation(this.yaml.dump(this.yamlConfig1));
@@ -149,8 +154,9 @@ public class SubscriptionConfigValidatorTest {
 
   @Test(expectedExceptions = ConfigValidationException.class)
   public void testNoDetectionTypeUnderRuleValidation() throws Exception {
-    ((Map<String, Object>) ConfigUtils.getList(((Map<String, Object>) ConfigUtils.getList(this.yamlConfig1.get("rules")).get(0))
-        .get("detection")).get(0)).remove("type");
+    ((Map<String, Object>) ConfigUtils
+        .getList(((Map<String, Object>) ConfigUtils.getList(this.yamlConfig1.get("rules")).get(0))
+            .get("detection")).get(0)).remove("type");
 
     DetectionConfigValidator detectionConfigValidator = new DetectionConfigValidator(provider);
     detectionConfigValidator.staticValidation(this.yaml.dump(this.yamlConfig1));
@@ -158,8 +164,9 @@ public class SubscriptionConfigValidatorTest {
 
   @Test(expectedExceptions = ConfigValidationException.class)
   public void testNoDetectionNameUnderRuleValidation() throws Exception {
-    ((Map<String, Object>) ConfigUtils.getList(((Map<String, Object>) ConfigUtils.getList(this.yamlConfig1.get("rules")).get(0))
-        .get("detection")).get(0)).remove("name");
+    ((Map<String, Object>) ConfigUtils
+        .getList(((Map<String, Object>) ConfigUtils.getList(this.yamlConfig1.get("rules")).get(0))
+            .get("detection")).get(0)).remove("name");
 
     DetectionConfigValidator detectionConfigValidator = new DetectionConfigValidator(provider);
     detectionConfigValidator.staticValidation(this.yaml.dump(this.yamlConfig1));
@@ -170,7 +177,8 @@ public class SubscriptionConfigValidatorTest {
   public void testDuplicateDetectionNameUnderRuleValidation() throws Exception {
     // Update rule 1 detection name to that of rule 2 detection name
     ((Map<String, Object>) ConfigUtils.getList(
-        ((Map<String, Object>) ConfigUtils.getList(this.yamlConfig1.get("rules")).get(0)).get("detection")
+        ((Map<String, Object>) ConfigUtils.getList(this.yamlConfig1.get("rules")).get(0))
+            .get("detection")
     ).get(0)).put("name", "maxThreshold_2");
 
     DetectionConfigValidator detectionConfigValidator = new DetectionConfigValidator(provider);
@@ -192,13 +200,17 @@ public class SubscriptionConfigValidatorTest {
     final JsonSchema schema = factory.getJsonSchema(node);
 
     Yaml yaml = new Yaml();
-    String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream("detection-config-good-1.yaml"), "UTF-8");
+    String yamlConfig = IOUtils
+        .toString(this.getClass().getResourceAsStream("detection-config-good-1.yaml"),
+            StandardCharsets.UTF_8);
     Map<String, Object> configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     JsonNode config = Json.mapper().convertValue(configObject, JsonNode.class);
     ProcessingReport report = schema.validate(config);
     Assert.assertTrue(report.isSuccess());
 
-    yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream("composite-detection-config-good-1.yaml"), "UTF-8");
+    yamlConfig = IOUtils
+        .toString(this.getClass().getResourceAsStream("composite-detection-config-good-1.yaml"),
+            StandardCharsets.UTF_8);
     configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     config = Json.mapper().convertValue(configObject, JsonNode.class);
     report = schema.validate(config);
@@ -212,7 +224,9 @@ public class SubscriptionConfigValidatorTest {
     final JsonSchema schema = factory.getJsonSchema(node);
 
     Yaml yaml = new Yaml();
-    String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream("detection-config-bad-1.yaml"), "UTF-8");
+    String yamlConfig = IOUtils
+        .toString(this.getClass().getResourceAsStream("detection-config-bad-1.yaml"),
+            StandardCharsets.UTF_8);
     Map<String, Object> configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     JsonNode config = Json.mapper().convertValue(configObject, JsonNode.class);
 
@@ -261,7 +275,9 @@ public class SubscriptionConfigValidatorTest {
     final JsonSchema schema = factory.getJsonSchema(node);
 
     Yaml yaml = new Yaml();
-    String yamlConfig = IOUtils.toString(this.getClass().getResourceAsStream("composite-detection-config-bad-1.yaml"), "UTF-8");
+    String yamlConfig = IOUtils
+        .toString(this.getClass().getResourceAsStream("composite-detection-config-bad-1.yaml"),
+            StandardCharsets.UTF_8);
     Map<String, Object> configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     JsonNode config = Json.mapper().convertValue(configObject, JsonNode.class);
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,17 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
+import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.joda.time.DateTime;
 import org.testng.Assert;
@@ -29,20 +34,14 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
-import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
-
 public class TestAnomalyTaskManager {
 
   private Long anomalyTaskId1;
   private Long anomalyTaskId2;
   private Long anomalyJobId;
   private static final Set<TaskStatus> allowedOldTaskStatus = new HashSet<>();
-  static  {
+
+  static {
     allowedOldTaskStatus.add(TaskStatus.FAILED);
     allowedOldTaskStatus.add(TaskStatus.WAITING);
   }
@@ -50,6 +49,7 @@ public class TestAnomalyTaskManager {
   private DAOTestBase testDAOProvider;
   private JobManager jobDAO;
   private TaskManager taskDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -79,18 +79,18 @@ public class TestAnomalyTaskManager {
     Assert.assertEquals(anomalyTasks.size(), 2);
   }
 
-  @Test(dependsOnMethods = { "testFindAll" })
+  @Test(dependsOnMethods = {"testFindAll"})
   public void testUpdateStatusAndWorkerId() {
     Long workerId = 1L;
     TaskDTO taskDTO = taskDAO.findById(anomalyTaskId1);
     boolean status =
-        taskDAO.updateStatusAndWorkerId(workerId, anomalyTaskId1, allowedOldTaskStatus, taskDTO.getVersion());
+        taskDAO.updateStatusAndWorkerId(workerId, anomalyTaskId1, allowedOldTaskStatus,
+            taskDTO.getVersion());
     TaskDTO anomalyTask = taskDAO.findById(anomalyTaskId1);
     Assert.assertTrue(status);
     Assert.assertEquals(anomalyTask.getStatus(), TaskStatus.RUNNING);
     Assert.assertEquals(anomalyTask.getWorkerId(), workerId);
     Assert.assertEquals(anomalyTask.getVersion(), taskDTO.getVersion() + 1);
-
   }
 
   @Test(dependsOnMethods = {"testUpdateStatusAndWorkerId"})
@@ -105,7 +105,8 @@ public class TestAnomalyTaskManager {
     TaskStatus oldStatus = TaskStatus.RUNNING;
     TaskStatus newStatus = TaskStatus.COMPLETED;
     long taskEndTime = System.currentTimeMillis();
-    taskDAO.updateStatusAndTaskEndTime(anomalyTaskId1, oldStatus, newStatus, taskEndTime, "testMessage");
+    taskDAO.updateStatusAndTaskEndTime(anomalyTaskId1, oldStatus, newStatus, taskEndTime,
+        "testMessage");
     TaskDTO anomalyTask = taskDAO.findById(anomalyTaskId1);
     Assert.assertEquals(anomalyTask.getStatus(), newStatus);
     Assert.assertEquals(anomalyTask.getEndTime(), taskEndTime);
@@ -153,7 +154,8 @@ public class TestAnomalyTaskManager {
   }
 
   @Test(dependsOnMethods = {"testDeleteRecordOlderThanDaysWithStatus"})
-  public void testFindTimeoutTasksWithinDays() throws JsonProcessingException, InterruptedException {
+  public void testFindTimeoutTasksWithinDays()
+      throws JsonProcessingException, InterruptedException {
     TaskDTO task1 = taskDAO.findById(anomalyTaskId1);
     task1.setStatus(TaskStatus.RUNNING);
     taskDAO.update(task1);

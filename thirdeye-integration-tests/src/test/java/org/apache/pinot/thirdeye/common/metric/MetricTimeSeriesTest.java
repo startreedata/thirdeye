@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class MetricTimeSeriesTest {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetricTimeSeriesTest.class);
   private static final double NULL_DOUBLE = Double.NaN;
   private static final int NULL_INT = Integer.MIN_VALUE;
@@ -39,14 +40,15 @@ public class MetricTimeSeriesTest {
     List<String> metricNames = (List<String>) objectsArray[0];
     MetricTimeSeries metricTimeSeries = (MetricTimeSeries) objectsArray[1];
 
-    long[] timestamps = new long[] { 1, 2, 3, 4, 5 };
-    double[] doubleValues = new double[] {1.0, 2.0, 3.0, NULL_DOUBLE, 5.0};
-    int[] intValues = new int[] {NULL_INT, NULL_INT, NULL_INT, NULL_INT, NULL_INT};
-    long[] longValues = new long[] { 1, NULL_LONG, 3, NULL_LONG, 5 };
+    long[] timestamps = new long[]{1, 2, 3, 4, 5};
+    double[] doubleValues = new double[]{1.0, 2.0, 3.0, NULL_DOUBLE, 5.0};
+    int[] intValues = new int[]{NULL_INT, NULL_INT, NULL_INT, NULL_INT, NULL_INT};
+    long[] longValues = new long[]{1, NULL_LONG, 3, NULL_LONG, 5};
 
-    initializeMetricTimeSeries(metricNames, metricTimeSeries, timestamps, doubleValues, intValues, longValues);
+    initializeMetricTimeSeries(metricNames, metricTimeSeries, timestamps, doubleValues, intValues,
+        longValues);
 
-    return new Object[][] {
+    return new Object[][]{
         {metricNames, metricTimeSeries, timestamps}
     };
   }
@@ -60,36 +62,41 @@ public class MetricTimeSeriesTest {
     Object[] objectsArray2 = buildEmptyMetricTimeSeries()[0];
     MetricTimeSeries metricTimeSeries2 = (MetricTimeSeries) objectsArray2[1];
 
-    return new Object[][] {
+    return new Object[][]{
         {metricNames, metricTimeSeries1, metricTimeSeries2}
     };
   }
 
   @Test(dataProvider = "defaultMetricTimeSeries")
-  public void testGetOrDefault(List<String> metricNames, MetricTimeSeries metricTimeSeries, long[] timestamps) {
-    double[] expectedDValues = new double[] {1.0, 2.0, 3.0, NULL_DOUBLE, 5.0};
-    int[] expectedIValues = new int[] {NULL_INT, NULL_INT, NULL_INT, NULL_INT, NULL_INT};
-    long[] expectedLValues = new long[] { 1, NULL_LONG, 3, NULL_LONG, 5 };
+  public void testGetOrDefault(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+      long[] timestamps) {
+    double[] expectedDValues = new double[]{1.0, 2.0, 3.0, NULL_DOUBLE, 5.0};
+    int[] expectedIValues = new int[]{NULL_INT, NULL_INT, NULL_INT, NULL_INT, NULL_INT};
+    long[] expectedLValues = new long[]{1, NULL_LONG, 3, NULL_LONG, 5};
 
-    checkActualWithNullValues(metricNames, metricTimeSeries, timestamps, expectedDValues, expectedIValues,
+    checkActualWithNullValues(metricNames, metricTimeSeries, timestamps, expectedDValues,
+        expectedIValues,
         expectedLValues);
   }
 
   @Test(dataProvider = "defaultMetricTimeSeries")
-  public void testGet(List<String> metricNames, MetricTimeSeries metricTimeSeries, long[] timestamps) {
-    double[] expectedDValues = new double[] {1.0, 2.0, 3.0, 5.0};
-    int[] expectedIValues = new int[] {};
-    long[] expectedLValues = new long[] { 1, 3, 5 };
+  public void testGet(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+      long[] timestamps) {
+    double[] expectedDValues = new double[]{1.0, 2.0, 3.0, 5.0};
+    int[] expectedIValues = new int[]{};
+    long[] expectedLValues = new long[]{1, 3, 5};
 
-    checkActualWithPresetNullValues(metricNames, metricTimeSeries, timestamps, expectedDValues, expectedIValues,
+    checkActualWithPresetNullValues(metricNames, metricTimeSeries, timestamps, expectedDValues,
+        expectedIValues,
         expectedLValues);
   }
 
   @Test(dataProvider = "defaultMetricTimeSeries")
-  public void testIncrement(List<String> metricNames, MetricTimeSeries metricTimeSeries, long[] timestamps) {
-    double[] doubleDeltas = new double[] {1.0, NULL_DOUBLE, NULL_DOUBLE, 4.0, 5.0};
-    int[] intDeltas = new int[] {1, NULL_INT, 3, NULL_INT, 5};
-    long[] longDeltas = new long[] { NULL_LONG, 2, 2, NULL_LONG, 3 };
+  public void testIncrement(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+      long[] timestamps) {
+    double[] doubleDeltas = new double[]{1.0, NULL_DOUBLE, NULL_DOUBLE, 4.0, 5.0};
+    int[] intDeltas = new int[]{1, NULL_INT, 3, NULL_INT, 5};
+    long[] longDeltas = new long[]{NULL_LONG, 2, 2, NULL_LONG, 3};
 
     for (int i = 0; i < timestamps.length; i++) {
       double doubleDelta = doubleDeltas[i];
@@ -108,63 +115,73 @@ public class MetricTimeSeriesTest {
       }
     }
 
-    double[] expectedDValues = new double[] {2.0, 2.0, 3.0, 4.0, 10.0};
-    int[] expectedIValues = new int[] {1, NULL_INT, 3, NULL_INT, 5};
-    long[] expectedLValues = new long[] { 1, 2, 5, NULL_LONG, 8 };
+    double[] expectedDValues = new double[]{2.0, 2.0, 3.0, 4.0, 10.0};
+    int[] expectedIValues = new int[]{1, NULL_INT, 3, NULL_INT, 5};
+    long[] expectedLValues = new long[]{1, 2, 5, NULL_LONG, 8};
 
-    checkActualWithNullValues(metricNames, metricTimeSeries, timestamps, expectedDValues, expectedIValues,
+    checkActualWithNullValues(metricNames, metricTimeSeries, timestamps, expectedDValues,
+        expectedIValues,
         expectedLValues);
   }
 
   @Test(dataProvider = "emptyTwoMetricTimeSeries")
-  public void testAggregate(List<String> metricNames, MetricTimeSeries metricTimeSeries1, MetricTimeSeries metricTimeSeries2) {
-    long[] timestamps = new long[] { 1, 2, 3, 4, 5 };
-    double[] doubleValues1 = new double[] {1.0, 2.0, 3.0, NULL_DOUBLE, 5.0};
-    int[] intValues1 = new int[] {NULL_INT, NULL_INT, NULL_INT, NULL_INT, NULL_INT};
-    long[] longValues1 = new long[] { 1, NULL_LONG, 3, NULL_LONG, 5 };
-    initializeMetricTimeSeries(metricNames, metricTimeSeries1, timestamps, doubleValues1, intValues1, longValues1);
+  public void testAggregate(List<String> metricNames, MetricTimeSeries metricTimeSeries1,
+      MetricTimeSeries metricTimeSeries2) {
+    long[] timestamps = new long[]{1, 2, 3, 4, 5};
+    double[] doubleValues1 = new double[]{1.0, 2.0, 3.0, NULL_DOUBLE, 5.0};
+    int[] intValues1 = new int[]{NULL_INT, NULL_INT, NULL_INT, NULL_INT, NULL_INT};
+    long[] longValues1 = new long[]{1, NULL_LONG, 3, NULL_LONG, 5};
+    initializeMetricTimeSeries(metricNames, metricTimeSeries1, timestamps, doubleValues1,
+        intValues1, longValues1);
 
-    double[] doubleValues2 = new double[] {1.0, NULL_DOUBLE, NULL_DOUBLE, 4.0, 5.0};
-    int[] intValues2 = new int[] {1, NULL_INT, 3, NULL_INT, 5};
-    long[] longValues2 = new long[] { NULL_LONG, 2, 2, NULL_LONG, 3 };
-    initializeMetricTimeSeries(metricNames, metricTimeSeries2, timestamps, doubleValues2, intValues2, longValues2);
+    double[] doubleValues2 = new double[]{1.0, NULL_DOUBLE, NULL_DOUBLE, 4.0, 5.0};
+    int[] intValues2 = new int[]{1, NULL_INT, 3, NULL_INT, 5};
+    long[] longValues2 = new long[]{NULL_LONG, 2, 2, NULL_LONG, 3};
+    initializeMetricTimeSeries(metricNames, metricTimeSeries2, timestamps, doubleValues2,
+        intValues2, longValues2);
 
     metricTimeSeries1.aggregate(metricTimeSeries2);
 
-    double[] expectedDValues = new double[] {2.0, 2.0, 3.0, 4.0, 10.0};
-    int[] expectedIValues = new int[] {1, NULL_INT, 3, NULL_INT, 5};
-    long[] expectedLValues = new long[] { 1, 2, 5, NULL_LONG, 8 };
+    double[] expectedDValues = new double[]{2.0, 2.0, 3.0, 4.0, 10.0};
+    int[] expectedIValues = new int[]{1, NULL_INT, 3, NULL_INT, 5};
+    long[] expectedLValues = new long[]{1, 2, 5, NULL_LONG, 8};
 
-    checkActualWithNullValues(metricNames, metricTimeSeries1, timestamps, expectedDValues, expectedIValues,
+    checkActualWithNullValues(metricNames, metricTimeSeries1, timestamps, expectedDValues,
+        expectedIValues,
         expectedLValues);
   }
 
   @Test(dataProvider = "emptyTwoMetricTimeSeries")
-  public void testAggregateWithTimeRange(List<String> metricNames, MetricTimeSeries metricTimeSeries1, MetricTimeSeries metricTimeSeries2) {
-    long[] timestamps = new long[] { 1, 2, 3, 4, 5 };
-    double[] doubleValues1 = new double[] {1.0, 2.0, 3.0, NULL_DOUBLE, 5.0};
-    int[] intValues1 = new int[] {NULL_INT, NULL_INT, NULL_INT, NULL_INT, NULL_INT};
-    long[] longValues1 = new long[] { 1, NULL_LONG, 3, NULL_LONG, 5 };
-    initializeMetricTimeSeries(metricNames, metricTimeSeries1, timestamps, doubleValues1, intValues1, longValues1);
+  public void testAggregateWithTimeRange(List<String> metricNames,
+      MetricTimeSeries metricTimeSeries1, MetricTimeSeries metricTimeSeries2) {
+    long[] timestamps = new long[]{1, 2, 3, 4, 5};
+    double[] doubleValues1 = new double[]{1.0, 2.0, 3.0, NULL_DOUBLE, 5.0};
+    int[] intValues1 = new int[]{NULL_INT, NULL_INT, NULL_INT, NULL_INT, NULL_INT};
+    long[] longValues1 = new long[]{1, NULL_LONG, 3, NULL_LONG, 5};
+    initializeMetricTimeSeries(metricNames, metricTimeSeries1, timestamps, doubleValues1,
+        intValues1, longValues1);
 
-    double[] doubleValues2 = new double[] {1.0, NULL_DOUBLE, NULL_DOUBLE, 4.0, 5.0};
-    int[] intValues2 = new int[] {1, NULL_INT, 3, NULL_INT, 5};
-    long[] longValues2 = new long[] { NULL_LONG, 2, 2, NULL_LONG, 3 };
-    initializeMetricTimeSeries(metricNames, metricTimeSeries2, timestamps, doubleValues2, intValues2, longValues2);
+    double[] doubleValues2 = new double[]{1.0, NULL_DOUBLE, NULL_DOUBLE, 4.0, 5.0};
+    int[] intValues2 = new int[]{1, NULL_INT, 3, NULL_INT, 5};
+    long[] longValues2 = new long[]{NULL_LONG, 2, 2, NULL_LONG, 3};
+    initializeMetricTimeSeries(metricNames, metricTimeSeries2, timestamps, doubleValues2,
+        intValues2, longValues2);
 
     TimeRange timeRange = new TimeRange(2L, 4L);
     metricTimeSeries1.aggregate(metricTimeSeries2, timeRange);
 
-    double[] expectedDValues = new double[] {1.0, 2.0, 3.0, 4.0, 5.0};
-    int[] expectedIValues = new int[] {NULL_INT, NULL_INT, 3, NULL_INT, NULL_INT};
-    long[] expectedLValues = new long[] { 1, 2, 5, NULL_LONG, 5 };
+    double[] expectedDValues = new double[]{1.0, 2.0, 3.0, 4.0, 5.0};
+    int[] expectedIValues = new int[]{NULL_INT, NULL_INT, 3, NULL_INT, NULL_INT};
+    long[] expectedLValues = new long[]{1, 2, 5, NULL_LONG, 5};
 
-    checkActualWithNullValues(metricNames, metricTimeSeries1, timestamps, expectedDValues, expectedIValues,
+    checkActualWithNullValues(metricNames, metricTimeSeries1, timestamps, expectedDValues,
+        expectedIValues,
         expectedLValues);
   }
 
   @Test(dataProvider = "defaultMetricTimeSeries")
-  public void testGetTimeWindowSet(List<String> metricNames, MetricTimeSeries metricTimeSeries, long[] timestamps) {
+  public void testGetTimeWindowSet(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+      long[] timestamps) {
     Set<Long> expectedTimestamps = new HashSet<Long>() {{
       add(1L);
       add(2L);
@@ -176,34 +193,38 @@ public class MetricTimeSeriesTest {
   }
 
   @Test(dataProvider = "defaultMetricTimeSeries")
-  public void testToString(List<String> metricNames, MetricTimeSeries metricTimeSeries, long[] timestamps) {
+  public void testToString(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+      long[] timestamps) {
     LOG.info(metricTimeSeries.toString());
   }
 
   @Test(dataProvider = "defaultMetricTimeSeries")
-  public void testGetMetricSums(List<String> metricNames, MetricTimeSeries metricTimeSeries, long[] timestamps) {
+  public void testGetMetricSums(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+      long[] timestamps) {
     Number[] actualSums = metricTimeSeries.getMetricSums();
-    Number[] expectedSums = new Number[] {11.0, 0, 9L};
+    Number[] expectedSums = new Number[]{11.0, 0, 9L};
     Assert.assertEquals(actualSums, expectedSums);
   }
 
   @Test(dataProvider = "defaultMetricTimeSeries")
-  public void testGetMetricAvgs(List<String> metricNames, MetricTimeSeries metricTimeSeries, long[] timestamps) {
+  public void testGetMetricAvgs(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+      long[] timestamps) {
     // Fill Double.NaN for value of divided by zero
     Double[] actualAvgs = metricTimeSeries.getMetricAvgs(Double.NaN);
-    Double[] expectedAvgs = new Double[] {2.75d, Double.NaN, 3d};
+    Double[] expectedAvgs = new Double[]{2.75d, Double.NaN, 3d};
     Assert.assertEquals(actualAvgs, expectedAvgs);
 
     // Fill null for value of divided by zero
     actualAvgs = metricTimeSeries.getMetricAvgs();
-    expectedAvgs = new Double[] {2.75d, null, 3d};
+    expectedAvgs = new Double[]{2.75d, null, 3d};
     Assert.assertEquals(actualAvgs, expectedAvgs);
   }
 
   @Test(dataProvider = "defaultMetricTimeSeries")
-  public void testGetHasValueSums(List<String> metricNames, MetricTimeSeries metricTimeSeries, long[] timestamps) {
+  public void testGetHasValueSums(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+      long[] timestamps) {
     Integer[] actualSums = metricTimeSeries.getHasValueSums();
-    Integer[] expectedSums = new Integer[] {4, 0, 3};
+    Integer[] expectedSums = new Integer[]{4, 0, 3};
     Assert.assertEquals(actualSums, expectedSums);
   }
 
@@ -223,12 +244,13 @@ public class MetricTimeSeriesTest {
 
     MetricTimeSeries metricTimeSeries = new MetricTimeSeries(schema);
 
-    return new Object[][] {
+    return new Object[][]{
         {metricNames, metricTimeSeries}
     };
   }
 
-  private static void initializeMetricTimeSeries(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+  private static void initializeMetricTimeSeries(List<String> metricNames,
+      MetricTimeSeries metricTimeSeries,
       long[] timestamps, double[] doubleValues, int[] intValues, long[] longValues) {
     for (int i = 0; i < timestamps.length; i++) {
       double doubleValue = doubleValues[i];
@@ -248,16 +270,20 @@ public class MetricTimeSeriesTest {
     }
   }
 
-  private static void checkActualWithNullValues(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+  private static void checkActualWithNullValues(List<String> metricNames,
+      MetricTimeSeries metricTimeSeries,
       long[] timestamps, double[] expectedDValues, int[] expectedIValues, long[] expectedLValues) {
 
     double[] actualDValues = new double[5];
     int[] actualIValues = new int[5];
     long[] actualLValues = new long[5];
     for (int i = 0; i < timestamps.length; i++) {
-      actualDValues[i] = metricTimeSeries.getOrDefault(timestamps[i], metricNames.get(0), NULL_DOUBLE).doubleValue();
-      actualIValues[i] = metricTimeSeries.getOrDefault(timestamps[i], metricNames.get(1), NULL_INT).intValue();
-      actualLValues[i] = metricTimeSeries.getOrDefault(timestamps[i], metricNames.get(2), NULL_LONG).longValue();
+      actualDValues[i] = metricTimeSeries
+          .getOrDefault(timestamps[i], metricNames.get(0), NULL_DOUBLE).doubleValue();
+      actualIValues[i] = metricTimeSeries.getOrDefault(timestamps[i], metricNames.get(1), NULL_INT)
+          .intValue();
+      actualLValues[i] = metricTimeSeries.getOrDefault(timestamps[i], metricNames.get(2), NULL_LONG)
+          .longValue();
     }
 
     Assert.assertEquals(actualDValues, expectedDValues);
@@ -265,7 +291,8 @@ public class MetricTimeSeriesTest {
     Assert.assertEquals(actualLValues, expectedLValues);
   }
 
-  private static void checkActualWithPresetNullValues(List<String> metricNames, MetricTimeSeries metricTimeSeries,
+  private static void checkActualWithPresetNullValues(List<String> metricNames,
+      MetricTimeSeries metricTimeSeries,
       long[] timestamps, double[] expectedDValues, int[] expectedIValues, long[] expectedLValues) {
 
     List<Double> doubleList = new ArrayList<>();
@@ -305,5 +332,4 @@ public class MetricTimeSeriesTest {
     Assert.assertEquals(actualIValues, expectedIValues);
     Assert.assertEquals(actualLValues, expectedLValues);
   }
-
 }

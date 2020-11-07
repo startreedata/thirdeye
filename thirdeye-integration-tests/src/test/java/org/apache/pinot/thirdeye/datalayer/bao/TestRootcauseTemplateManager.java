@@ -28,8 +28,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class TestRootcauseTemplateManager {
+
   private DAOTestBase testDAOProvider;
   private RootcauseTemplateManager templateDao;
   private final static String TEMPLATE_NAME = "test_template_";
@@ -46,7 +46,6 @@ public class TestRootcauseTemplateManager {
   void afterMethod() {
     testDAOProvider.cleanup();
   }
-
 
   @Test
   public void testSaveOrUpdate() {
@@ -77,7 +76,7 @@ public class TestRootcauseTemplateManager {
   }
 
   private RootcauseTemplateDTO constructTemplate(int metricId) {
-    RootcauseTemplateDTO rootcauseTemplateDTO =  new RootcauseTemplateDTO();
+    RootcauseTemplateDTO rootcauseTemplateDTO = new RootcauseTemplateDTO();
     rootcauseTemplateDTO.setName(TEMPLATE_NAME + metricId);
     rootcauseTemplateDTO.setOwner("tester");
     rootcauseTemplateDTO.setApplication(APPLICATION_NAME);
@@ -85,6 +84,4 @@ public class TestRootcauseTemplateManager {
     rootcauseTemplateDTO.setModules(new ArrayList<>());
     return rootcauseTemplateDTO;
   }
-
-
 }

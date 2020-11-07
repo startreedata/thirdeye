@@ -16,6 +16,13 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
@@ -27,13 +34,6 @@ import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.algorithm.AlgorithmUtils;
 import org.apache.pinot.thirdeye.detection.spec.AbsoluteChangeRuleDetectorSpec;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.spi.model.DetectionResult;
 import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
 import org.joda.time.Interval;
@@ -42,15 +42,18 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class AbsoluteChangeRuleDetectorTest {
+
   private DataProvider provider;
   private DataFrame data;
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
-    try (Reader dataReader = new InputStreamReader(AlgorithmUtils.class.getResourceAsStream("timeseries-4w.csv"))) {
+    try (Reader dataReader = new InputStreamReader(
+        AlgorithmUtils.class.getResourceAsStream("timeseries-4w.csv"))) {
       this.data = DataFrame.fromCsv(dataReader);
       this.data.setIndex(DataFrame.COL_TIME);
-      this.data.addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
+      this.data
+          .addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
     }
 
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
@@ -72,7 +75,7 @@ public class AbsoluteChangeRuleDetectorTest {
     this.provider = new MockDataProvider()
         .setTimeseries(timeseries)
         .setMetrics(Collections.singletonList(metricConfigDTO))
-        .setDatasets(Collections.singletonList(datasetConfigDTO));;
+        .setDatasets(Collections.singletonList(datasetConfigDTO));
   }
 
   @Test
@@ -83,7 +86,8 @@ public class AbsoluteChangeRuleDetectorTest {
     spec.setAbsoluteChange(absoluteChange);
     spec.setPattern("up");
     detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    DetectionResult result = detector.runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
+    DetectionResult result = detector
+        .runDetection(new Interval(1814400000L, 2419200000L), "thirdeye:metric:1");
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
 
     Assert.assertEquals(anomalies.size(), 1);
@@ -96,7 +100,8 @@ public class AbsoluteChangeRuleDetectorTest {
 
   private void checkAbsoluteUpperBounds(TimeSeries ts, double absoluteChange) {
     for (int i = 0; i < ts.getDataFrame().size(); i++) {
-      Assert.assertEquals(ts.getPredictedUpperBound().get(i), ts.getPredictedBaseline().get(i) + absoluteChange);
+      Assert.assertEquals(ts.getPredictedUpperBound().get(i),
+          ts.getPredictedBaseline().get(i) + absoluteChange);
     }
   }
 }

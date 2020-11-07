@@ -36,8 +36,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class DetectionHealthTest {
+
   private DAOTestBase testDAOProvider;
   private MergedAnomalyResultManager anomalyDAO;
   private TaskManager taskDAO;
@@ -67,10 +67,13 @@ public class DetectionHealthTest {
     this.evaluationDAO.save(evaluation);
 
     DetectionHealth
-        health = new DetectionHealth.Builder(configId, startTime, endTime).addRegressionStatus(this.evaluationDAO).build();
-    Assert.assertEquals(health.getRegressionStatus().getDetectorMapes(), ImmutableMap.of(evaluation.getDetectorName(), evaluation.getMape()));
-    Assert.assertEquals(health.getRegressionStatus().getDetectorHealthStatus(), ImmutableMap.of(evaluation.getDetectorName(),
-        HealthStatus.GOOD));
+        health = new DetectionHealth.Builder(configId, startTime, endTime)
+        .addRegressionStatus(this.evaluationDAO).build();
+    Assert.assertEquals(health.getRegressionStatus().getDetectorMapes(),
+        ImmutableMap.of(evaluation.getDetectorName(), evaluation.getMape()));
+    Assert.assertEquals(health.getRegressionStatus().getDetectorHealthStatus(),
+        ImmutableMap.of(evaluation.getDetectorName(),
+            HealthStatus.GOOD));
     Assert.assertEquals(health.getRegressionStatus().getHealthStatus(), HealthStatus.GOOD);
   }
 
@@ -93,11 +96,13 @@ public class DetectionHealthTest {
     task2.setEndTime(140);
     task2.setTaskType(TaskConstants.TaskType.DETECTION);
     this.taskDAO.save(task2);
-    DetectionHealth health = new DetectionHealth.Builder(configId, startTime, endTime).addDetectionTaskStatus(this.taskDAO, 2).build();
+    DetectionHealth health = new DetectionHealth.Builder(configId, startTime, endTime)
+        .addDetectionTaskStatus(this.taskDAO, 2).build();
     Assert.assertEquals(health.getDetectionTaskStatus().getHealthStatus(), HealthStatus.MODERATE);
     Assert.assertEquals(health.getDetectionTaskStatus().getTaskCounts(),
-        ImmutableMap.of(TaskConstants.TaskStatus.COMPLETED, 1L, TaskConstants.TaskStatus.TIMEOUT, 0L,
-            TaskConstants.TaskStatus.WAITING, 0L, TaskConstants.TaskStatus.FAILED, 1L));
+        ImmutableMap
+            .of(TaskConstants.TaskStatus.COMPLETED, 1L, TaskConstants.TaskStatus.TIMEOUT, 0L,
+                TaskConstants.TaskStatus.WAITING, 0L, TaskConstants.TaskStatus.FAILED, 1L));
     Assert.assertEquals(health.getDetectionTaskStatus().getTaskSuccessRate(), 0.5);
     Assert.assertEquals(health.getDetectionTaskStatus().getTasks(), Arrays.asList(task2, task1));
   }
@@ -118,7 +123,8 @@ public class DetectionHealthTest {
     anomaly2.setEndTime(125);
     anomaly2.setMetricUrn("thirdeye:metric:1:country%3Dcn");
     this.anomalyDAO.save(anomaly2);
-    DetectionHealth health = new DetectionHealth.Builder(configId, startTime, endTime).addAnomalyCoverageStatus(this.anomalyDAO).build();
+    DetectionHealth health = new DetectionHealth.Builder(configId, startTime, endTime)
+        .addAnomalyCoverageStatus(this.anomalyDAO).build();
     Assert.assertEquals(health.getAnomalyCoverageStatus().getAnomalyCoverageRatio(), 0.15);
     Assert.assertEquals(health.getAnomalyCoverageStatus().getHealthStatus(), HealthStatus.GOOD);
   }

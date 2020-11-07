@@ -24,8 +24,8 @@ package org.apache.pinot.thirdeye.detection;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.MockModelEvaluator;
@@ -38,8 +38,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class DefaultModelMaintenanceFlowTest {
+
   private static final String METRIC_NAME = "test_metric";
   private static final String DATASET_NAME = "test_dataset";
 
@@ -57,7 +57,8 @@ public class DefaultModelMaintenanceFlowTest {
     DatasetConfigDTO dataset = new DatasetConfigDTO();
     dataset.setId(102L);
     dataset.setDataset(DATASET_NAME);
-    this.provider = new MockDataProvider().setMetrics(Collections.singletonList(metric)).setDatasets(Collections.singletonList(dataset));
+    this.provider = new MockDataProvider().setMetrics(Collections.singletonList(metric))
+        .setDatasets(Collections.singletonList(dataset));
     this.configId = 100L;
     this.dataFetcher = new DefaultInputDataFetcher(this.provider, this.configId);
     this.maintenanceFlow = new ModelRetuneFlow(this.provider, DetectionRegistry.getInstance());
@@ -91,7 +92,8 @@ public class DefaultModelMaintenanceFlowTest {
 
   @Test
   public void testMaintainTunableBad() {
-    DetectionRegistry.registerTunableComponent(MockTunableDetector.class.getName(), "MOCK_TUNABLE", "MOCK_TUNABLE");
+    DetectionRegistry.registerTunableComponent(MockTunableDetector.class.getName(), "MOCK_TUNABLE",
+        "MOCK_TUNABLE");
     AlertDTO configDTO = new AlertDTO();
     configDTO.setId(this.configId);
     configDTO.setYaml(String.format("metric: %s\ndataset: %s\n", METRIC_NAME, DATASET_NAME));
@@ -102,10 +104,10 @@ public class DefaultModelMaintenanceFlowTest {
     MockTunableDetector tunableDetector = new MockTunableDetector();
     configDTO.setComponents(ImmutableMap.of("evaluator_1", evaluator, "detector", tunableDetector));
     configDTO.setLastTuningTimestamp(1559175301000L);
-    configDTO.setComponentSpecs(ImmutableMap.of("detector:MOCK_TUNABLE", ImmutableMap.of("className", MockTunableDetector.class.getName())));
+    configDTO.setComponentSpecs(ImmutableMap.of("detector:MOCK_TUNABLE",
+        ImmutableMap.of("className", MockTunableDetector.class.getName())));
     Instant maintainTimestamp = Instant.now();
     AlertDTO maintainedConfig = this.maintenanceFlow.maintain(configDTO, maintainTimestamp);
     Assert.assertEquals(maintainedConfig.getLastTuningTimestamp(), maintainTimestamp.getMillis());
   }
-
 }

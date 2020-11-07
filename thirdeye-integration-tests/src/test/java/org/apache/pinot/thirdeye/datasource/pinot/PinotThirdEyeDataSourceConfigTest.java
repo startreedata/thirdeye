@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class PinotThirdEyeDataSourceConfigTest {
+
   private static final String CONTROLLER_HOST = "host";
   private static final String CONTROLLER_PORT = "1234";
   private static final String ZOOKEEPER_URL = "zookeeper";
@@ -36,11 +37,16 @@ public class PinotThirdEyeDataSourceConfigTest {
   @Test
   public void testCreateProcessedPropertyMap() throws Exception {
     Map<String, Object> properties = new HashMap<>();
-    properties.put(PinotThirdeyeDataSourceProperties.CONTROLLER_HOST.getValue(), SPACE_STRING + CONTROLLER_HOST);
-    properties.put(PinotThirdeyeDataSourceProperties.CONTROLLER_PORT.getValue(), CONTROLLER_PORT + SPACE_STRING);
-    properties.put(PinotThirdeyeDataSourceProperties.ZOOKEEPER_URL.getValue(), ZOOKEEPER_URL + SPACE_STRING);
-    properties.put(PinotThirdeyeDataSourceProperties.CLUSTER_NAME.getValue(), SPACE_STRING + CLUSTER_NAME);
-    properties.put(PinotThirdeyeDataSourceProperties.BROKER_URL.getValue(), SPACE_STRING + BROKER_URL);
+    properties.put(PinotThirdeyeDataSourceProperties.CONTROLLER_HOST.getValue(),
+        SPACE_STRING + CONTROLLER_HOST);
+    properties.put(PinotThirdeyeDataSourceProperties.CONTROLLER_PORT.getValue(),
+        CONTROLLER_PORT + SPACE_STRING);
+    properties.put(PinotThirdeyeDataSourceProperties.ZOOKEEPER_URL.getValue(),
+        ZOOKEEPER_URL + SPACE_STRING);
+    properties.put(PinotThirdeyeDataSourceProperties.CLUSTER_NAME.getValue(),
+        SPACE_STRING + CLUSTER_NAME);
+    properties
+        .put(PinotThirdeyeDataSourceProperties.BROKER_URL.getValue(), SPACE_STRING + BROKER_URL);
     properties.put(PinotThirdeyeDataSourceProperties.TAG.getValue(), TAG + SPACE_STRING);
 
     ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
@@ -61,14 +67,16 @@ public class PinotThirdEyeDataSourceConfigTest {
   public void testCreateProcessedPropertyMapWithEmptyMap() throws Exception {
     Map<String, Object> properties = new HashMap<>();
 
-    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfig.processPropertyMap(properties);
+    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfig
+        .processPropertyMap(properties);
 
     Assert.assertNull(processPropertyMap);
   }
 
   @Test
   public void testCreateProcessedPropertyMapWithNullMap() throws Exception {
-    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfig.processPropertyMap(null);
+    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfig
+        .processPropertyMap(null);
 
     Assert.assertNull(processPropertyMap);
   }
@@ -76,12 +84,16 @@ public class PinotThirdEyeDataSourceConfigTest {
   @Test
   public void testProcessPropertyMapWithMissingProperties() throws Exception {
     Map<String, Object> properties = new HashMap<>();
-    properties.put(PinotThirdeyeDataSourceProperties.CONTROLLER_HOST.getValue(), SPACE_STRING + CONTROLLER_HOST);
-    properties.put(PinotThirdeyeDataSourceProperties.CONTROLLER_PORT.getValue(), CONTROLLER_PORT + SPACE_STRING);
+    properties.put(PinotThirdeyeDataSourceProperties.CONTROLLER_HOST.getValue(),
+        SPACE_STRING + CONTROLLER_HOST);
+    properties.put(PinotThirdeyeDataSourceProperties.CONTROLLER_PORT.getValue(),
+        CONTROLLER_PORT + SPACE_STRING);
     // Missing ZOOKEEPER_URL
-    properties.put(PinotThirdeyeDataSourceProperties.CLUSTER_NAME.getValue(), SPACE_STRING + CLUSTER_NAME);
+    properties.put(PinotThirdeyeDataSourceProperties.CLUSTER_NAME.getValue(),
+        SPACE_STRING + CLUSTER_NAME);
     // Returned a null property map
-    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfig.processPropertyMap(properties);
+    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfig
+        .processPropertyMap(properties);
 
     Assert.assertNull(processPropertyMap);
   }
@@ -101,16 +113,17 @@ public class PinotThirdEyeDataSourceConfigTest {
     Assert.assertEquals(actualDataSourceConfig, expectedDataSourceConfig);
   }
 
-  @Test(expectedExceptions= {IllegalArgumentException.class})
+  @Test(expectedExceptions = {IllegalArgumentException.class})
   public void testBuilderWithIllegalArgument() throws Exception {
     PinotThirdEyeDataSourceConfig.Builder builder =
-        PinotThirdEyeDataSourceConfig.builder().setControllerHost(CONTROLLER_HOST).setZookeeperUrl(ZOOKEEPER_URL)
+        PinotThirdEyeDataSourceConfig.builder().setControllerHost(CONTROLLER_HOST)
+            .setZookeeperUrl(ZOOKEEPER_URL)
             .setClusterName(CLUSTER_NAME);
 
     builder.build();
   }
 
-  @Test(expectedExceptions= {NullPointerException.class})
+  @Test(expectedExceptions = {NullPointerException.class})
   public void testBuilderWithNullArgument() throws Exception {
     PinotThirdEyeDataSourceConfig.Builder builder =
         PinotThirdEyeDataSourceConfig.builder().setControllerHost(CONTROLLER_HOST)
@@ -118,5 +131,4 @@ public class PinotThirdEyeDataSourceConfigTest {
 
     builder.build();
   }
-
 }

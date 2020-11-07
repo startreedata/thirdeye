@@ -16,6 +16,11 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -27,17 +32,13 @@ import org.apache.pinot.thirdeye.detection.spec.SitewideImpactRuleAnomalyFilterS
 import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregate;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class SitewideImpactRuleAnomalyFilterTest {
+
   private static final String METRIC_URN = "thirdeye:metric:123";
   private static final long CONFIG_ID = 125L;
 
@@ -46,7 +47,8 @@ public class SitewideImpactRuleAnomalyFilterTest {
 
   @BeforeMethod
   public void beforeMethod() {
-    this.baseline = BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.MEDIAN, 1, 1, DateTimeZone.forID("UTC"));
+    this.baseline = BaselineAggregate
+        .fromWeekOverWeek(BaselineAggregateType.MEDIAN, 1, 1, DateTimeZone.forID("UTC"));
 
     MetricSlice slice1 = MetricSlice.from(123L, 0, 2);
     MetricSlice baselineSlice1 = this.baseline.scatter(slice1).get(0);
@@ -76,7 +78,9 @@ public class SitewideImpactRuleAnomalyFilterTest {
     filter.init(spec, new DefaultInputDataFetcher(this.testDataProvider, CONFIG_ID));
     List<Boolean> results =
         Arrays.asList(
-            DetectionTestUtils.makeAnomaly(0, 2, CONFIG_ID, METRIC_URN, 150), DetectionTestUtils.makeAnomaly(4, 6, CONFIG_ID, METRIC_URN, 500)).stream().map(anomaly -> filter.isQualified(anomaly)).collect(Collectors.toList());
+            DetectionTestUtils.makeAnomaly(0, 2, CONFIG_ID, METRIC_URN, 150),
+            DetectionTestUtils.makeAnomaly(4, 6, CONFIG_ID, METRIC_URN, 500)).stream()
+            .map(anomaly -> filter.isQualified(anomaly)).collect(Collectors.toList());
     Assert.assertEquals(results, Arrays.asList(false, true));
   }
 
@@ -88,15 +92,17 @@ public class SitewideImpactRuleAnomalyFilterTest {
     SitewideImpactRuleAnomalyFilter filter = new SitewideImpactRuleAnomalyFilter();
     filter.init(spec, new DefaultInputDataFetcher(this.testDataProvider, CONFIG_ID));
     List<MergedAnomalyResultDTO> anomalyResultDTOs = Arrays.asList(
-        DetectionTestUtils.makeAnomaly(0, 2, CONFIG_ID, METRIC_URN, 150), DetectionTestUtils.makeAnomaly(4, 6,
-        CONFIG_ID, METRIC_URN, 500));
+        DetectionTestUtils.makeAnomaly(0, 2, CONFIG_ID, METRIC_URN, 150),
+        DetectionTestUtils.makeAnomaly(4, 6,
+            CONFIG_ID, METRIC_URN, 500));
     anomalyResultDTOs.get(0).setAvgCurrentVal(150);
     anomalyResultDTOs.get(0).setAvgBaselineVal(200);
     anomalyResultDTOs.get(1).setAvgCurrentVal(500);
     anomalyResultDTOs.get(1).setAvgBaselineVal(1000);
 
     List<Boolean> results =
-        anomalyResultDTOs.stream().map(anomaly -> filter.isQualified(anomaly)).collect(Collectors.toList());
+        anomalyResultDTOs.stream().map(anomaly -> filter.isQualified(anomaly))
+            .collect(Collectors.toList());
     Assert.assertEquals(results, Arrays.asList(false, true));
   }
 }

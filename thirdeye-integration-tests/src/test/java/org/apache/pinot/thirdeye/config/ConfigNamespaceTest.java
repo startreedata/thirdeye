@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,20 +16,20 @@
 
 package org.apache.pinot.thirdeye.config;
 
-import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class ConfigNamespaceTest {
+
   private ConfigNamespace cn;
   private DAOTestBase testDAOProvider;
 
@@ -122,6 +122,7 @@ public class ConfigNamespaceTest {
   }
 
   public static class ObjectValue {
+
     final String sval;
     final int ival;
 
@@ -130,5 +131,4 @@ public class ConfigNamespaceTest {
       this.ival = ival;
     }
   }
-
 }

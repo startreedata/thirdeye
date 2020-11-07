@@ -19,15 +19,15 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
 import java.util.Arrays;
 import java.util.Collections;
+import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class EntityTypeTest {
+
   private final static EntityType TYPE = new EntityType("thirdeye:entity:");
 
   @Test(expectedExceptions = IllegalArgumentException.class)
@@ -47,13 +47,13 @@ public class EntityTypeTest {
 
   @Test
   public void testIsTypeEntity() {
-    Entity e = new Entity("thirdeye:entity:abc", 1.0, Collections.<Entity>emptyList());
+    Entity e = new Entity("thirdeye:entity:abc", 1.0, Collections.emptyList());
     Assert.assertTrue(TYPE.isType(e));
   }
 
   @Test
   public void testIsTypeEntityFail() {
-    Entity e = new Entity("thirdeye:notentity:abc", 1.0, Collections.<Entity>emptyList());
+    Entity e = new Entity("thirdeye:notentity:abc", 1.0, Collections.emptyList());
     Assert.assertFalse(TYPE.isType(e));
   }
 

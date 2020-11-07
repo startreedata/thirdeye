@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,24 +32,26 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class FetchAnomaliesInRangeAndOutputCSV {
-  private static final Logger LOG = LoggerFactory.getLogger(FetchAnomaliesInRangeAndOutputCSV.class);
+
+  private static final Logger LOG = LoggerFactory
+      .getLogger(FetchAnomaliesInRangeAndOutputCSV.class);
   private static DateTime dataRangeStart;
   private static DateTime dataRangeEnd;
-  private static DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+  private static final DateTimeFormatter dateTimeFormatter = DateTimeFormat
+      .forPattern("yyyy-MM-dd HH:mm");
 
   public static void init(File persistenceFile) {
     DeprecatedInjectorUtil.init(persistenceFile);
   }
 
   public static void outputResultNodesToFile(File outputFile,
-      List<FetchMetricDataAndExistingAnomaliesTool.ResultNode> resultNodes){
-    try{
+      List<FetchMetricDataAndExistingAnomaliesTool.ResultNode> resultNodes) {
+    try {
       BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
 
       int rowCount = 0;
-      if(resultNodes.size() > 0) {
+      if (resultNodes.size() > 0) {
         bw.write(StringUtils.join(resultNodes.get(0).getSchema(), ","));
         bw.newLine();
         for (FetchMetricDataAndExistingAnomaliesTool.ResultNode n : resultNodes) {
@@ -60,8 +62,7 @@ public class FetchAnomaliesInRangeAndOutputCSV {
         LOG.info("{} anomaly results has been written...", rowCount);
       }
       bw.close();
-    }
-    catch (IOException e){
+    } catch (IOException e) {
       LOG.error("Unable to write date-dimension anomaly results to given file {}", e);
     }
   }
@@ -77,8 +78,8 @@ public class FetchAnomaliesInRangeAndOutputCSV {
    *             5: monitoring length in days
    *             6: Output path
    */
-  public static void main(String args[]){
-    if(args.length < 7){
+  public static void main(String[] args) {
+    if (args.length < 7) {
       LOG.error("Insufficient number of arguments");
       return;
     }
@@ -94,26 +95,26 @@ public class FetchAnomaliesInRangeAndOutputCSV {
     FetchMetricDataAndExistingAnomaliesTool thirdEyeDAO = null;
     try {
       thirdEyeDAO = new FetchMetricDataAndExistingAnomaliesTool(new File(persistencePath));
-    }
-    catch (Exception e){
+    } catch (Exception e) {
       LOG.error("Error in loading the persistence file: {}", e);
       return;
     }
 
-    DateTime monitoringWindowStartTime = ISODateTimeFormat.dateTimeParser().parseDateTime(monitoringDateTime).withZone(dateTimeZone);
+    DateTime monitoringWindowStartTime = ISODateTimeFormat.dateTimeParser()
+        .parseDateTime(monitoringDateTime).withZone(dateTimeZone);
     Period period = new Period(0, 0, 0, monitoringLength, 0, 0, 0, 0);
     dataRangeStart = monitoringWindowStartTime.minus(period); // inclusive start
     dataRangeEnd = monitoringWindowStartTime; // exclusive end
 
-    if(!output_folder.exists() || !output_folder.canWrite()){
+    if (!output_folder.exists() || !output_folder.canWrite()) {
       LOG.error("{} is not accessible", output_folder.getAbsoluteFile());
       return;
     }
 
-
     // Print Merged Results
-    List<FetchMetricDataAndExistingAnomaliesTool.ResultNode> resultNodes = thirdEyeDAO.fetchMergedAnomaliesInRange(
-        collection, metric, dataRangeStart, dataRangeEnd);
+    List<FetchMetricDataAndExistingAnomaliesTool.ResultNode> resultNodes = thirdEyeDAO
+        .fetchMergedAnomaliesInRange(
+            collection, metric, dataRangeStart, dataRangeEnd);
 
     LOG.info("Printing merged anomaly results from db...");
     String outputname = output_folder.getAbsolutePath() + "/" +
@@ -122,5 +123,4 @@ public class FetchAnomaliesInRangeAndOutputCSV {
     outputResultNodesToFile(new File(outputname), resultNodes);
     LOG.info("Finish job and print merged anomaly results from db in {}...", outputname);
   }
-
 }

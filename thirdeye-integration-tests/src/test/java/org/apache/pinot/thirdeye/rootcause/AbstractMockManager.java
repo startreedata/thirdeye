@@ -19,14 +19,14 @@
 
 package org.apache.pinot.thirdeye.rootcause;
 
+import java.util.List;
+import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.AbstractManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import java.util.List;
-import java.util.Map;
-
 
 public abstract class AbstractMockManager<T extends AbstractDTO> implements AbstractManager<T> {
+
   @Override
   public Long save(T entity) {
     throw new AssertionError("not implemented");
@@ -93,7 +93,8 @@ public abstract class AbstractMockManager<T extends AbstractDTO> implements Abst
   }
 
   @Override
-  public List<Long> findIdsByPredicate(org.apache.pinot.thirdeye.datalayer.util.Predicate predicate) {
+  public List<Long> findIdsByPredicate(
+      org.apache.pinot.thirdeye.datalayer.util.Predicate predicate) {
     throw new AssertionError("not implemented");
   }
 

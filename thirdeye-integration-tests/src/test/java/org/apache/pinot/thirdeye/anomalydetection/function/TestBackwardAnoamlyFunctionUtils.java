@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,20 +16,21 @@
 
 package org.apache.pinot.thirdeye.anomalydetection.function;
 
-import org.apache.pinot.thirdeye.anomalydetection.context.TimeSeries;
-import org.apache.pinot.thirdeye.common.metric.MetricSchema;
-import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.common.metric.MetricType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.anomalydetection.context.TimeSeries;
+import org.apache.pinot.thirdeye.common.metric.MetricSchema;
+import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
+import org.apache.pinot.thirdeye.common.metric.MetricType;
 import org.joda.time.Interval;
 import org.testng.annotations.Test;
 
-
 public class TestBackwardAnoamlyFunctionUtils {
+
   private static final String TEST_METRIC = "test";
+
   @Test
   public void testSplitSetsOfTimeSeries() {
     List<String> metricNames = new ArrayList<>();
@@ -49,13 +50,14 @@ public class TestBackwardAnoamlyFunctionUtils {
     intervalList.add(new Interval(0, TimeUnit.DAYS.toMillis(140)));
 
     List<TimeSeries> timeSeriesList =
-        BackwardAnomalyFunctionUtils.splitSetsOfTimeSeries(metricTimeSeries, TEST_METRIC, intervalList);
-    assert(timeSeriesList.size() == 2);
-    assert(timeSeriesList.get(0).size() == 1);
-    assert(timeSeriesList.get(1).size() == 5);
+        BackwardAnomalyFunctionUtils
+            .splitSetsOfTimeSeries(metricTimeSeries, TEST_METRIC, intervalList);
+    assert (timeSeriesList.size() == 2);
+    assert (timeSeriesList.get(0).size() == 1);
+    assert (timeSeriesList.get(1).size() == 5);
 
     // assert current time series
-    assert(timeSeriesList.get(0).get(TimeUnit.DAYS.toMillis(140)).equals(5.0));
+    assert (timeSeriesList.get(0).get(TimeUnit.DAYS.toMillis(140)).equals(5.0));
 
     for (int i = 0; i < 5; i++) {
       assert (timeSeriesList.get(1).get(TimeUnit.DAYS.toMillis(28 * i)).equals(Double.valueOf(i)));

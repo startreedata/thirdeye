@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,11 @@
 
 package org.apache.pinot.thirdeye.anomaly.override;
 
-import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -56,7 +56,6 @@ public class TestOverrideConfigHelper {
         OverrideConfigHelper.getEntityTargetLevel("collection11", "metric11", 1);
     Assert.assertFalse(OverrideConfigHelper.isEnabled(entityTargetLevel, overrideConfigDTO));
 
-
     // Test "Only include any entity whose level has collection1, metric 1, metric 2"
     overrideTarget = new HashMap<>();
     overrideTarget.put(OverrideConfigHelper.TARGET_COLLECTION, Arrays.asList("collection1"));
@@ -78,7 +77,6 @@ public class TestOverrideConfigHelper {
     entityTargetLevel =
         OverrideConfigHelper.getEntityTargetLevel("collection11", "metric11", 1);
     Assert.assertFalse(OverrideConfigHelper.isEnabled(entityTargetLevel, overrideConfigDTO));
-
 
     // Test "Include everything but collection3"
     overrideTarget = new HashMap<>();

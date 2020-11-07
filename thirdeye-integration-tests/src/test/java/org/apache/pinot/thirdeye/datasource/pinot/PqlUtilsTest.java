@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,6 +44,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class PqlUtilsTest {
+
   private static final String COLLECTION = "collection";
   private static final MetricDataset METRIC = new MetricDataset("metric", COLLECTION);
 
@@ -77,18 +78,22 @@ public class PqlUtilsTest {
 
   @AfterMethod
   public void afterMethod() {
-    try { this.base.cleanup(); } catch (Exception ignore) {}
+    try {
+      this.base.cleanup();
+    } catch (Exception ignore) {
+    }
   }
 
   @Test(dataProvider = "betweenClauseArgs")
-  public void getBetweenClause(DateTime start, DateTime end, TimeSpec timeSpec, String expected) throws ExecutionException {
+  public void getBetweenClause(DateTime start, DateTime end, TimeSpec timeSpec, String expected)
+      throws ExecutionException {
     String betweenClause = PqlUtils.getBetweenClause(start, end, timeSpec, "collection");
     Assert.assertEquals(betweenClause, expected);
   }
 
   @DataProvider(name = "betweenClauseArgs")
   public Object[][] betweenClauseArgs() {
-    return new Object[][] {
+    return new Object[][]{
         // equal start+end, no format
         getBetweenClauseTestArgs("2016-01-01T00:00:00.000+00:00", "2016-01-01T00:00:00.000+00:00",
             "timeColumn", 2, TimeUnit.HOURS, null, " timeColumn = 201612"),
@@ -115,7 +120,7 @@ public class PqlUtilsTest {
   private Object[] getBetweenClauseTestArgs(String startISO, String endISO, String timeColumn,
       int timeGranularitySize, TimeUnit timeGranularityUnit, String timeSpecFormat,
       String expected) {
-    return new Object[] {
+    return new Object[]{
         new DateTime(startISO, DateTimeZone.UTC), new DateTime(endISO, DateTimeZone.UTC),
         new TimeSpec(timeColumn, new TimeGranularity(timeGranularitySize, timeGranularityUnit),
             timeSpecFormat),
@@ -140,7 +145,7 @@ public class PqlUtilsTest {
     dimensions.put("key4", "<=value4");
     dimensions.put("key5", ">value5");
     dimensions.put("key6", ">=value6");
-    dimensions.put("key7", "value71\'");
+    dimensions.put("key7", "value71'");
     dimensions.put("key7", "value72\"");
 
     String output = PqlUtils.getDimensionWhereClause(dimensions);
@@ -158,27 +163,29 @@ public class PqlUtilsTest {
         + "key4 <= \"value4\" AND "
         + "key5 > \"value5\" AND "
         + "key6 >= \"value6\" AND "
-        + "key7 IN (\"value71\'\", \'value72\"\')");
+        + "key7 IN (\"value71'\", 'value72\"')");
   }
 
   @Test
-  public  void testQuote() {
+  public void testQuote() {
     Assert.assertEquals(PqlUtils.quote("123"), "123");
     Assert.assertEquals(PqlUtils.quote("abc"), "\"abc\"");
-    Assert.assertEquals(PqlUtils.quote("123\'"), "\"123\'\"");
-    Assert.assertEquals(PqlUtils.quote("abc\""), "\'abc\"\'");
+    Assert.assertEquals(PqlUtils.quote("123'"), "\"123'\"");
+    Assert.assertEquals(PqlUtils.quote("abc\""), "'abc\"'");
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
-  public  void testQuoteFail() {
-    PqlUtils.quote("123\"\'");
+  public void testQuoteFail() {
+    PqlUtils.quote("123\"'");
   }
 
   @Test
   public void testLimit() throws Exception {
-    MetricFunction metricFunction = new MetricFunction(MetricAggFunction.AVG, METRIC.getMetricName(), this.metricId, COLLECTION, null, null);
+    MetricFunction metricFunction = new MetricFunction(MetricAggFunction.AVG,
+        METRIC.getMetricName(), this.metricId, COLLECTION, null, null);
 
-    TimeSpec timeSpec = new TimeSpec(METRIC.getMetricName(), TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
+    TimeSpec timeSpec = new TimeSpec(METRIC.getMetricName(),
+        TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setMetricFunctions(Collections.singletonList(metricFunction))
@@ -188,16 +195,20 @@ public class PqlUtilsTest {
         .setLimit(12345)
         .build("ref");
 
-    String pql = PqlUtils.getPql(request, metricFunction, ArrayListMultimap.<String, String>create(), timeSpec);
+    String pql = PqlUtils
+        .getPql(request, metricFunction, ArrayListMultimap.create(), timeSpec);
 
-    Assert.assertEquals(pql, "SELECT AVG(metric) FROM collection WHERE  metric >= 1 AND metric < 2 GROUP BY dimension TOP 12345");
+    Assert.assertEquals(pql,
+        "SELECT AVG(metric) FROM collection WHERE  metric >= 1 AND metric < 2 GROUP BY dimension TOP 12345");
   }
 
   @Test
   public void testLimitDefault() throws Exception {
-    MetricFunction metricFunction = new MetricFunction(MetricAggFunction.AVG, METRIC.getMetricName(), this.metricId, COLLECTION, null, null);
+    MetricFunction metricFunction = new MetricFunction(MetricAggFunction.AVG,
+        METRIC.getMetricName(), this.metricId, COLLECTION, null, null);
 
-    TimeSpec timeSpec = new TimeSpec(METRIC.getMetricName(), TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
+    TimeSpec timeSpec = new TimeSpec(METRIC.getMetricName(),
+        TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setMetricFunctions(Collections.singletonList(metricFunction))
@@ -206,8 +217,10 @@ public class PqlUtilsTest {
         .setGroupBy("dimension")
         .build("ref");
 
-    String pql = PqlUtils.getPql(request, metricFunction, ArrayListMultimap.<String, String>create(), timeSpec);
+    String pql = PqlUtils
+        .getPql(request, metricFunction, ArrayListMultimap.create(), timeSpec);
 
-    Assert.assertEquals(pql, "SELECT AVG(metric) FROM collection WHERE  metric >= 1 AND metric < 2 GROUP BY dimension TOP 100000");
+    Assert.assertEquals(pql,
+        "SELECT AVG(metric) FROM collection WHERE  metric >= 1 AND metric < 2 GROUP BY dimension TOP 100000");
   }
 }

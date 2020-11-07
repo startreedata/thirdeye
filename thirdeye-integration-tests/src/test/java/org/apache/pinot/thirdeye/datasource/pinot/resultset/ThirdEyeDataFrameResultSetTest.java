@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,18 +17,17 @@
 package org.apache.pinot.thirdeye.datasource.pinot.resultset;
 
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.ObjectSeries;
 import org.apache.pinot.thirdeye.dataframe.StringSeries;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
 
 public class ThirdEyeDataFrameResultSetTest {
 
@@ -48,7 +47,7 @@ public class ThirdEyeDataFrameResultSetTest {
 
     for (int rowIdx = 0; rowIdx < resultArray.size(); rowIdx++) {
       for (int columnIdx = 0; columnIdx < columnArray.size(); columnIdx++) {
-        resultArray.get(rowIdx)[columnIdx] = Integer.toString(rowIdx) + Integer.toString(columnIdx);
+        resultArray.get(rowIdx)[columnIdx] = Integer.toString(rowIdx) + columnIdx;
       }
     }
 
@@ -60,8 +59,10 @@ public class ThirdEyeDataFrameResultSetTest {
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries("col1", 0, 10, 20);
     dataFrame.addSeries("col2", 1, 11, 21);
-    ThirdEyeResultSetMetaData metaData = new ThirdEyeResultSetMetaData(Collections.<String>emptyList(), columnArray);
-    ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData, dataFrame);
+    ThirdEyeResultSetMetaData metaData = new ThirdEyeResultSetMetaData(
+        Collections.emptyList(), columnArray);
+    ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData,
+        dataFrame);
 
     Assert.assertEquals(actualDataFrameResultSet, expectedDataFrameResultSet);
     Assert.assertEquals(actualDataFrameResultSet.getGroupKeyLength(), 0);
@@ -72,15 +73,18 @@ public class ThirdEyeDataFrameResultSetTest {
   public void testFromPinotSingleAggregationResultSet() {
     final String functionName = "sum_metric_name";
 
-    ResultSet singleAggregationResultSet = new MockedSingleAggregationResultSet(functionName, "150.33576");
+    ResultSet singleAggregationResultSet = new MockedSingleAggregationResultSet(functionName,
+        "150.33576");
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
         ThirdEyeDataFrameResultSet.fromPinotResultSet(singleAggregationResultSet);
 
     ThirdEyeResultSetMetaData metaData =
-        new ThirdEyeResultSetMetaData(Collections.<String>emptyList(), Collections.singletonList(functionName));
+        new ThirdEyeResultSetMetaData(Collections.emptyList(),
+            Collections.singletonList(functionName));
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries(functionName, 150.33576);
-    ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData, dataFrame);
+    ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData,
+        dataFrame);
 
     Assert.assertEquals(actualDataFrameResultSet, expectedDataFrameResultSet);
     Assert.assertEquals(actualDataFrameResultSet.getGroupKeyLength(), 0);
@@ -96,12 +100,17 @@ public class ThirdEyeDataFrameResultSetTest {
     groupByColumnNames.add("pageName");
 
     List<MockedSingleGroupByResultSet.GroupByRowResult> resultArray = new ArrayList<>();
-    resultArray.add(new MockedSingleGroupByResultSet.GroupByRowResult(Arrays.asList("US", "page1"), "1111"));
-    resultArray.add(new MockedSingleGroupByResultSet.GroupByRowResult(Arrays.asList("US", "page2"), "2222.2"));
-    resultArray.add(new MockedSingleGroupByResultSet.GroupByRowResult(Arrays.asList("IN", "page3"), "333.3"));
-    resultArray.add(new MockedSingleGroupByResultSet.GroupByRowResult(Arrays.asList("JP", "page2"), "44444.4"));
+    resultArray.add(
+        new MockedSingleGroupByResultSet.GroupByRowResult(Arrays.asList("US", "page1"), "1111"));
+    resultArray.add(
+        new MockedSingleGroupByResultSet.GroupByRowResult(Arrays.asList("US", "page2"), "2222.2"));
+    resultArray.add(
+        new MockedSingleGroupByResultSet.GroupByRowResult(Arrays.asList("IN", "page3"), "333.3"));
+    resultArray.add(
+        new MockedSingleGroupByResultSet.GroupByRowResult(Arrays.asList("JP", "page2"), "44444.4"));
 
-    ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames, functionName, resultArray);
+    ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames,
+        functionName, resultArray);
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
         ThirdEyeDataFrameResultSet.fromPinotResultSet(singleGroupByResultSet);
 
@@ -111,7 +120,8 @@ public class ThirdEyeDataFrameResultSetTest {
     dataFrame.addSeries("country", "US", "US", "IN", "JP");
     dataFrame.addSeries("pageName", "page1", "page2", "page3", "page2");
     dataFrame.addSeries(functionName, 1111, 2222.2, 333.3, 44444.4);
-    ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData, dataFrame);
+    ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData,
+        dataFrame);
 
     Assert.assertEquals(actualDataFrameResultSet, expectedDataFrameResultSet);
     Assert.assertEquals(actualDataFrameResultSet.getGroupKeyLength(), 2);
@@ -128,7 +138,8 @@ public class ThirdEyeDataFrameResultSetTest {
 
     List<MockedSingleGroupByResultSet.GroupByRowResult> resultArray = new ArrayList<>();
 
-    ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames, functionName, resultArray);
+    ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames,
+        functionName, resultArray);
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
         ThirdEyeDataFrameResultSet.fromPinotResultSet(singleGroupByResultSet);
 
@@ -138,12 +149,14 @@ public class ThirdEyeDataFrameResultSetTest {
     dataFrame.addSeries("country", StringSeries.builder().build());
     dataFrame.addSeries("pageName", StringSeries.builder().build());
     dataFrame.addSeries(functionName, ObjectSeries.builder().build());
-    ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData, dataFrame);
+    ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData,
+        dataFrame);
 
     Assert.assertEquals(actualDataFrameResultSet, expectedDataFrameResultSet);
   }
 
   private static class MockedSingleGroupByResultSet extends MockedAbstractResultSet {
+
     List<String> groupByColumnNames = Collections.emptyList();
     String functionName;
     List<GroupByRowResult> resultArray = Collections.emptyList();
@@ -205,6 +218,7 @@ public class ThirdEyeDataFrameResultSetTest {
     }
 
     static class GroupByRowResult {
+
       List<String> groupByColumnValues;
       String value;
 
@@ -218,8 +232,8 @@ public class ThirdEyeDataFrameResultSetTest {
     }
   }
 
-
   private static class MockedSingleAggregationResultSet extends MockedAbstractResultSet {
+
     String functionName;
     String result;
 
@@ -249,7 +263,8 @@ public class ThirdEyeDataFrameResultSetTest {
     @Override
     public String getString(int rowIdx, int columnIdx) {
       if (rowIdx != 0 || columnIdx != 0) {
-        throw new IllegalArgumentException("Row or column index has to be 0 for single aggregation result.");
+        throw new IllegalArgumentException(
+            "Row or column index has to be 0 for single aggregation result.");
       }
       return result;
     }
@@ -271,6 +286,7 @@ public class ThirdEyeDataFrameResultSetTest {
   }
 
   private static class MockedSelectResultSet extends MockedAbstractResultSet {
+
     List<String> columnArray = Collections.emptyList();
     List<String[]> resultArray = Collections.emptyList();
 
@@ -284,7 +300,8 @@ public class ThirdEyeDataFrameResultSetTest {
           for (String[] aResultArray : resultArray) {
             int rowColumnCount = aResultArray.length;
             if (rowColumnCount != columnCount) {
-              throw new IllegalArgumentException("Result array needs to have rows in the same length.");
+              throw new IllegalArgumentException(
+                  "Result array needs to have rows in the same length.");
             }
           }
         }
@@ -329,6 +346,7 @@ public class ThirdEyeDataFrameResultSetTest {
   }
 
   private static abstract class MockedAbstractResultSet implements ResultSet {
+
     @Override
     public int getInt(int rowIdx) {
       return getInt(rowIdx, 0);

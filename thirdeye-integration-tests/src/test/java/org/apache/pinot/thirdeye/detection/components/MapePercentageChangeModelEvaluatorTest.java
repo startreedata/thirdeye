@@ -35,8 +35,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class MapePercentageChangeModelEvaluatorTest {
+
   private InputDataFetcher dataFetcher;
 
   @BeforeMethod
@@ -44,13 +44,16 @@ public class MapePercentageChangeModelEvaluatorTest {
     MockDataProvider dataProvider = new MockDataProvider();
     long mockDetectionConfigId = 100L;
     String mockMetricUrn = "thirdeye:metric:1";
-    EvaluationDTO eval1 = makeMockEvaluationDTO(mockDetectionConfigId, mockMetricUrn, 1557187200000L,1557273600000L, 0.06);
-    EvaluationDTO eval2 = makeMockEvaluationDTO(mockDetectionConfigId, mockMetricUrn, 1555368321000L,1555454721000L, 0.055);
+    EvaluationDTO eval1 = makeMockEvaluationDTO(mockDetectionConfigId, mockMetricUrn,
+        1557187200000L, 1557273600000L, 0.06);
+    EvaluationDTO eval2 = makeMockEvaluationDTO(mockDetectionConfigId, mockMetricUrn,
+        1555368321000L, 1555454721000L, 0.055);
     dataProvider.setEvaluations(Arrays.asList(eval1, eval2));
     dataFetcher = new DefaultInputDataFetcher(dataProvider, mockDetectionConfigId);
   }
 
-  private EvaluationDTO makeMockEvaluationDTO(long mockDetectionConfigId, String mockMetricUrn, long start, long end, Double mape) {
+  private EvaluationDTO makeMockEvaluationDTO(long mockDetectionConfigId, String mockMetricUrn,
+      long start, long end, Double mape) {
     EvaluationDTO eval = new EvaluationDTO();
     eval.setStartTime(start);
     eval.setEndTime(end);
@@ -66,7 +69,8 @@ public class MapePercentageChangeModelEvaluatorTest {
     spec.setThreshold(0.1);
     MapeAveragePercentageChangeModelEvaluator evaluator = new MapeAveragePercentageChangeModelEvaluator();
     evaluator.init(spec, dataFetcher);
-    ModelEvaluationResult result = evaluator.evaluateModel(Instant.parse("2019-05-08T20:00:00.000Z"));
+    ModelEvaluationResult result = evaluator
+        .evaluateModel(Instant.parse("2019-05-08T20:00:00.000Z"));
     Assert.assertEquals(result.getStatus(), ModelStatus.GOOD);
   }
 
@@ -76,7 +80,8 @@ public class MapePercentageChangeModelEvaluatorTest {
     spec.setThreshold(0.01);
     MapeAveragePercentageChangeModelEvaluator evaluator = new MapeAveragePercentageChangeModelEvaluator();
     evaluator.init(spec, dataFetcher);
-    ModelEvaluationResult result = evaluator.evaluateModel(Instant.parse("2019-05-08T20:00:00.000Z"));
+    ModelEvaluationResult result = evaluator
+        .evaluateModel(Instant.parse("2019-05-08T20:00:00.000Z"));
     Assert.assertEquals(result.getStatus(), ModelStatus.BAD);
   }
 }

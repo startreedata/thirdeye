@@ -17,6 +17,7 @@
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
 import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.makeAnomaly;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,8 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -238,7 +239,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
   }
 
   /**
-   * Test if the filter generates entries irrespective of the recipients & anomalies being present or not
+   * Test if the filter generates entries irrespective of the recipients & anomalies being present
+   * or not
    */
   @Test
   public void testGetAlertFilterResultWhenNoRecipient() throws Exception {
@@ -266,7 +268,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
   }
 
   /**
-   * Test to ensure this filter doesn't pick up anomalies with feedback (we do not want to notify them)
+   * Test to ensure this filter doesn't pick up anomalies with feedback (we do not want to notify
+   * them)
    */
   @Test
   public void testAlertFilterFeedback() throws Exception {

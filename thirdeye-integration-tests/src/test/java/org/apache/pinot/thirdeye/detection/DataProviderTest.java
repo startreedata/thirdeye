@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package org.apache.pinot.thirdeye.detection;
 
@@ -107,9 +106,12 @@ public class DataProviderTest {
     this.eventIds = new ArrayList<>();
     this.eventIds.add(this.eventDAO.save(makeEvent(3600000L, 7200000L)));
     this.eventIds.add(this.eventDAO.save(makeEvent(10800000L, 14400000L)));
-    this.eventIds.add(this.eventDAO.save(makeEvent(14400000L, 18000000L, Arrays.asList("a=1", "b=4", "b=2"))));
-    this.eventIds.add(this.eventDAO.save(makeEvent(604800000L, 1209600000L, Arrays.asList("b=2", "c=3"))));
-    this.eventIds.add(this.eventDAO.save(makeEvent(1209800000L, 1210600000L, Collections.singleton("b=4"))));
+    this.eventIds.add(
+        this.eventDAO.save(makeEvent(14400000L, 18000000L, Arrays.asList("a=1", "b=4", "b=2"))));
+    this.eventIds
+        .add(this.eventDAO.save(makeEvent(604800000L, 1209600000L, Arrays.asList("b=2", "c=3"))));
+    this.eventIds
+        .add(this.eventDAO.save(makeEvent(1209800000L, 1210600000L, Collections.singleton("b=4"))));
 
     // detections
     this.detectionIds = new ArrayList<>();
@@ -123,13 +125,25 @@ public class DataProviderTest {
 
     // anomalies
     this.anomalyIds = new ArrayList<>();
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(null, detectionIds.get(0), 4000000L, 8000000L, Arrays.asList("a=1", "c=3", "b=2"))));
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(null, detectionIds.get(0), 8000000L, 12000000L, Arrays.asList("a=1", "c=4"))));
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(null, detectionIds.get(1), 604800000L, 1209600000L, Collections.<String>emptyList())));
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "c=3"))));
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "a=2", "c=3"))));
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "a=3", "c=3"))));
-    this.anomalyIds.add(this.anomalyDAO.save(makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "a=2", "c=3", "d=4"))));
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(null, detectionIds.get(0), 4000000L, 8000000L,
+            Arrays.asList("a=1", "c=3", "b=2"))));
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(null, detectionIds.get(0), 8000000L, 12000000L, Arrays.asList("a=1", "c=4"))));
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(null, detectionIds.get(1), 604800000L, 1209600000L,
+            Collections.emptyList())));
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "c=3"))));
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
+            Arrays.asList("a=1", "a=2", "c=3"))));
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
+            Arrays.asList("a=1", "a=3", "c=3"))));
+    this.anomalyIds.add(this.anomalyDAO.save(
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
+            Arrays.asList("a=1", "a=2", "c=3", "d=4"))));
 
     // metrics
     this.metricIds = new ArrayList<>();
@@ -143,25 +157,28 @@ public class DataProviderTest {
     this.datasetIds.add(this.datasetDAO.save(makeDataset(null, "myDataset2")));
 
     // data
-    try (Reader dataReader = new InputStreamReader(this.getClass().getResourceAsStream("algorithm/timeseries-4w.csv"))) {
+    try (Reader dataReader = new InputStreamReader(
+        this.getClass().getResourceAsStream("algorithm/timeseries-4w.csv"))) {
       this.data = DataFrame.fromCsv(dataReader);
       this.data.setIndex(DataFrame.COL_TIME);
-      this.data.addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
+      this.data
+          .addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
     }
 
     // register caches
 
-    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito.mock(LoadingCache.class);
+    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito
+        .mock(LoadingCache.class);
     DatasetConfigDTO datasetConfig = this.datasetDAO.findByDataset("myDataset2");
     Mockito.when(mockDatasetConfigCache.get("myDataset2")).thenReturn(datasetConfig);
-
 
     LoadingCache<String, Long> mockDatasetMaxDataTimeCache = Mockito.mock(LoadingCache.class);
     Mockito.when(mockDatasetMaxDataTimeCache.get("myDataset2"))
         .thenReturn(Long.MAX_VALUE);
 
     MetricDataset metricDataset = new MetricDataset("myMetric2", "myDataset2");
-    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = Mockito.mock(LoadingCache.class);
+    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = Mockito
+        .mock(LoadingCache.class);
     MetricConfigDTO metricConfig = this.metricDAO.findByMetricAndDataset("myMetric2", "myDataset2");
     Mockito.when(mockMetricConfigCache.get(metricDataset)).thenReturn(metricConfig);
 
@@ -212,7 +229,8 @@ public class DataProviderTest {
 
   @Test
   public void testMetricSingle() {
-    MetricConfigDTO metric = this.provider.fetchMetrics(Collections.singleton(this.metricIds.get(1))).get(this.metricIds.get(1));
+    MetricConfigDTO metric = this.provider
+        .fetchMetrics(Collections.singleton(this.metricIds.get(1))).get(this.metricIds.get(1));
 
     Assert.assertNotNull(metric);
     Assert.assertEquals(metric, makeMetric(this.metricIds.get(1), "myMetric2", "myDataset2"));
@@ -220,17 +238,22 @@ public class DataProviderTest {
 
   @Test
   public void testMetricMultiple() {
-    Collection<MetricConfigDTO> metrics = this.provider.fetchMetrics(Arrays.asList(this.metricIds.get(1), this.metricIds.get(2))).values();
+    Collection<MetricConfigDTO> metrics = this.provider
+        .fetchMetrics(Arrays.asList(this.metricIds.get(1), this.metricIds.get(2))).values();
 
     Assert.assertEquals(metrics.size(), 2);
-    Assert.assertTrue(metrics.contains(makeMetric(this.metricIds.get(1), "myMetric2", "myDataset2")));
-    Assert.assertTrue(metrics.contains(makeMetric(this.metricIds.get(2), "myMetric3", "myDataset1")));
+    Assert
+        .assertTrue(metrics.contains(makeMetric(this.metricIds.get(1), "myMetric2", "myDataset2")));
+    Assert
+        .assertTrue(metrics.contains(makeMetric(this.metricIds.get(2), "myMetric3", "myDataset1")));
   }
 
   @Test
   public void testFetchAggregation() {
-    MetricSlice metricSlice = MetricSlice.from(this.metricIds.get(1), 0L, 32400000L, ArrayListMultimap.create());
-    Map<MetricSlice, DataFrame> aggregates = this.provider.fetchAggregates(Collections.singletonList(metricSlice), Collections.emptyList(), 1);
+    MetricSlice metricSlice = MetricSlice
+        .from(this.metricIds.get(1), 0L, 32400000L, ArrayListMultimap.create());
+    Map<MetricSlice, DataFrame> aggregates = this.provider
+        .fetchAggregates(Collections.singletonList(metricSlice), Collections.emptyList(), 1);
     Assert.assertEquals(aggregates.keySet().size(), 1);
   }
 
@@ -245,7 +268,8 @@ public class DataProviderTest {
 
   @Test
   public void testDatasetSingle() {
-    DatasetConfigDTO dataset = this.provider.fetchDatasets(Collections.singleton("myDataset1")).get("myDataset1");
+    DatasetConfigDTO dataset = this.provider.fetchDatasets(Collections.singleton("myDataset1"))
+        .get("myDataset1");
 
     Assert.assertNotNull(dataset);
     Assert.assertEquals(dataset, makeDataset(this.datasetIds.get(0), "myDataset1"));
@@ -253,7 +277,8 @@ public class DataProviderTest {
 
   @Test
   public void testDatasetMultiple() {
-    Collection<DatasetConfigDTO> datasets = this.provider.fetchDatasets(Arrays.asList("myDataset1", "myDataset2")).values();
+    Collection<DatasetConfigDTO> datasets = this.provider
+        .fetchDatasets(Arrays.asList("myDataset1", "myDataset2")).values();
 
     Assert.assertEquals(datasets.size(), 2);
     Assert.assertTrue(datasets.contains(makeDataset(this.datasetIds.get(0), "myDataset1")));
@@ -271,24 +296,30 @@ public class DataProviderTest {
 
   @Test
   public void testEventSingle() {
-    EventSlice slice = makeEventSlice(4000000L, 4100000L, Collections.<String>emptyList());
+    EventSlice slice = makeEventSlice(4000000L, 4100000L, Collections.emptyList());
 
-    Collection<EventDTO> events = this.provider.fetchEvents(Collections.singleton(slice)).get(slice);
+    Collection<EventDTO> events = this.provider.fetchEvents(Collections.singleton(slice))
+        .get(slice);
 
     Assert.assertEquals(events.size(), 1);
-    Assert.assertTrue(events.contains(makeEvent(this.eventIds.get(0), 3600000L, 7200000L, Collections.<String>emptyList())));
+    Assert.assertTrue(events.contains(
+        makeEvent(this.eventIds.get(0), 3600000L, 7200000L, Collections.emptyList())));
   }
 
   @Test
   public void testEventDimension() {
     EventSlice slice = makeEventSlice(10000000L, 1200000000L, Collections.singleton("b=2"));
 
-    Collection<EventDTO> events = this.provider.fetchEvents(Collections.singleton(slice)).get(slice);
+    Collection<EventDTO> events = this.provider.fetchEvents(Collections.singleton(slice))
+        .get(slice);
 
     Assert.assertEquals(events.size(), 3);
-    Assert.assertTrue(events.contains(makeEvent(this.eventIds.get(1), 10800000L, 14400000L, Collections.<String>emptyList())));
-    Assert.assertTrue(events.contains(makeEvent(this.eventIds.get(2), 14400000L, 18000000L, Arrays.asList("a=1", "b=4", "b=2"))));
-    Assert.assertTrue(events.contains(makeEvent(this.eventIds.get(3), 604800000L, 1209600000L, Arrays.asList("b=2", "c=3"))));
+    Assert.assertTrue(events.contains(
+        makeEvent(this.eventIds.get(1), 10800000L, 14400000L, Collections.emptyList())));
+    Assert.assertTrue(events.contains(
+        makeEvent(this.eventIds.get(2), 14400000L, 18000000L, Arrays.asList("a=1", "b=4", "b=2"))));
+    Assert.assertTrue(events.contains(
+        makeEvent(this.eventIds.get(3), 604800000L, 1209600000L, Arrays.asList("b=2", "c=3"))));
   }
 
   //
@@ -302,44 +333,64 @@ public class DataProviderTest {
 
   @Test
   public void testAnomalySingle() {
-    AnomalySlice slice = makeAnomalySlice(1209000000L, -1, Collections.<String>emptyList());
+    AnomalySlice slice = makeAnomalySlice(1209000000L, -1, Collections.emptyList());
 
-    Collection<MergedAnomalyResultDTO> anomalies = this.provider.fetchAnomalies(Collections.singleton(slice)).get(slice);
+    Collection<MergedAnomalyResultDTO> anomalies = this.provider
+        .fetchAnomalies(Collections.singleton(slice)).get(slice);
 
     Assert.assertEquals(anomalies.size(), 1);
-    Assert.assertTrue(anomalies.contains(makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L, Collections.<String>emptyList())));
+    Assert.assertTrue(anomalies.contains(
+        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L,
+            Collections.emptyList())));
   }
 
   @Test
   public void testAnomalyDimension() {
     AnomalySlice slice = makeAnomalySlice(0, -1, Arrays.asList("a=1", "c=3"));
 
-    Collection<MergedAnomalyResultDTO> anomalies = this.provider.fetchAnomalies(Collections.singleton(slice)).get(slice);
+    Collection<MergedAnomalyResultDTO> anomalies = this.provider
+        .fetchAnomalies(Collections.singleton(slice)).get(slice);
 
     Assert.assertEquals(anomalies.size(), 2);
-    Assert.assertTrue(anomalies.contains(makeAnomaly(this.anomalyIds.get(0), detectionIds.get(0), 4000000L, 8000000L, Arrays.asList("a=1", "c=3", "b=2"))));
-    Assert.assertTrue(anomalies.contains(makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "c=3"))));
+    Assert.assertTrue(anomalies.contains(
+        makeAnomaly(this.anomalyIds.get(0), detectionIds.get(0), 4000000L, 8000000L,
+            Arrays.asList("a=1", "c=3", "b=2"))));
+    Assert.assertTrue(anomalies.contains(
+        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L,
+            Arrays.asList("a=1", "c=3"))));
 
-    Assert.assertFalse(anomalies.contains(makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L, Collections.<String>emptyList())));
+    Assert.assertFalse(anomalies.contains(
+        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L,
+            Collections.emptyList())));
   }
 
   @Test
   public void testAnomalyMultiDimensions() {
     AnomalySlice slice = makeAnomalySlice(0, -1, Arrays.asList("a=1", "a=2", "c=3"));
 
-    Collection<MergedAnomalyResultDTO> anomalies = this.provider.fetchAnomalies(Collections.singleton(slice)).get(slice);
+    Collection<MergedAnomalyResultDTO> anomalies = this.provider
+        .fetchAnomalies(Collections.singleton(slice)).get(slice);
     Assert.assertEquals(anomalies.size(), 2);
-    Assert.assertTrue(anomalies.contains(makeAnomaly(this.anomalyIds.get(4), detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "a=2", "c=3"))));
-    Assert.assertTrue(anomalies.contains(makeAnomaly(this.anomalyIds.get(6), detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "a=2", "c=3", "d=4"))));
-    Assert.assertFalse(anomalies.contains(makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "c=3"))));
-    Assert.assertFalse(anomalies.contains(makeAnomaly(this.anomalyIds.get(5), detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "a=3", "c=3"))));
+    Assert.assertTrue(anomalies.contains(
+        makeAnomaly(this.anomalyIds.get(4), detectionIds.get(1), 14400000L, 18000000L,
+            Arrays.asList("a=1", "a=2", "c=3"))));
+    Assert.assertTrue(anomalies.contains(
+        makeAnomaly(this.anomalyIds.get(6), detectionIds.get(1), 14400000L, 18000000L,
+            Arrays.asList("a=1", "a=2", "c=3", "d=4"))));
+    Assert.assertFalse(anomalies.contains(
+        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L,
+            Arrays.asList("a=1", "c=3"))));
+    Assert.assertFalse(anomalies.contains(
+        makeAnomaly(this.anomalyIds.get(5), detectionIds.get(1), 14400000L, 18000000L,
+            Arrays.asList("a=1", "a=3", "c=3"))));
   }
 
   //
   // utils
   //
 
-  private static MergedAnomalyResultDTO makeAnomaly(Long id, Long configId, long start, long end, Iterable<String> filterStrings) {
+  private static MergedAnomalyResultDTO makeAnomaly(Long id, Long configId, long start, long end,
+      Iterable<String> filterStrings) {
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setDetectionConfigId(configId);
     anomaly.setStartTime(start);
@@ -358,7 +409,7 @@ public class DataProviderTest {
   }
 
   private static EventDTO makeEvent(long start, long end) {
-    return makeEvent(null, start, end, Collections.<String>emptyList());
+    return makeEvent(null, start, end, Collections.emptyList());
   }
 
   private static EventDTO makeEvent(long start, long end, Iterable<String> filterStrings) {
@@ -395,7 +446,8 @@ public class DataProviderTest {
     return new EventSlice(start, end, filters);
   }
 
-  private static AnomalySlice makeAnomalySlice(long start, long end, Iterable<String> filterStrings) {
+  private static AnomalySlice makeAnomalySlice(long start, long end,
+      Iterable<String> filterStrings) {
     SetMultimap<String, String> filters = HashMultimap.create();
     for (String fs : filterStrings) {
       String[] parts = fs.split("=");

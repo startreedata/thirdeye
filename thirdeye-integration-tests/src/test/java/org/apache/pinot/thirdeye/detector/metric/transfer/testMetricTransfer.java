@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,22 +16,21 @@
 
 package org.apache.pinot.thirdeye.detector.metric.transfer;
 
-import org.apache.pinot.thirdeye.common.metric.MetricSchema;
-import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.common.metric.MetricType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import org.testng.annotations.Test;
+import org.apache.pinot.thirdeye.common.metric.MetricSchema;
+import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
+import org.apache.pinot.thirdeye.common.metric.MetricType;
 import org.testng.Assert;
-
+import org.testng.annotations.Test;
 
 public class testMetricTransfer {
 
   @Test
-  public void transfer(){
+  public void transfer() {
 
     // create a mock MetricTimeSeries
     List<String> names = new ArrayList<>(1);
@@ -41,8 +40,8 @@ public class testMetricTransfer {
     MetricSchema metricSchema = new MetricSchema(names, types);
     MetricTimeSeries metrics = new MetricTimeSeries(metricSchema);
     // the last three values are current values; the rest values are baseline values
-    double [] m0 = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-    for (long i=0l; i<=5l; i++) {
+    double[] m0 = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    for (long i = 0l; i <= 5l; i++) {
       metrics.set(i, mName, 1.0);
     }
 
@@ -57,10 +56,10 @@ public class testMetricTransfer {
     properties.put(MetricTransfer.BASELINE_SEASONAL_PERIOD, "2"); // mistakenly set 2 on purpose
 
     MetricTransfer.rescaleMetric(metrics, 3, sfList0, mName, properties);
-    double [] m1_expected = {0.8, 0.8, Double.NaN, 1.0, 1.0, 1.0};
-    double [] m_actual = new double[6];
-    for (int i=0; i<=5; i++) {
-      m_actual[i]= metrics.getOrDefault(i, mName, 0).doubleValue();
+    double[] m1_expected = {0.8, 0.8, Double.NaN, 1.0, 1.0, 1.0};
+    double[] m_actual = new double[6];
+    for (int i = 0; i <= 5; i++) {
+      m_actual[i] = metrics.getOrDefault(i, mName, 0).doubleValue();
     }
     Assert.assertEquals(m_actual, m1_expected);
 
@@ -69,11 +68,9 @@ public class testMetricTransfer {
     ScalingFactor sf1 = new ScalingFactor(12l, 14l, 0.8);
     sfList0.add(sf1);
     MetricTransfer.rescaleMetric(metrics, 3, sfList0, mName, properties);
-    for (int i=0; i<=5; i++) {
-      m_actual[i]= metrics.getOrDefault(i, mName, 0).doubleValue();
+    for (int i = 0; i <= 5; i++) {
+      m_actual[i] = metrics.getOrDefault(i, mName, 0).doubleValue();
     }
     Assert.assertEquals(m_actual, m1_expected);
-
   }
-
 }

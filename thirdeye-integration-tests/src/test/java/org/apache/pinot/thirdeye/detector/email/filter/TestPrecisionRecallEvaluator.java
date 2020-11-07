@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,13 @@
 
 package org.apache.pinot.thirdeye.detector.email.filter;
 
+import static org.apache.pinot.thirdeye.constant.AnomalyFeedbackType.ANOMALY;
+import static org.apache.pinot.thirdeye.constant.AnomalyFeedbackType.NOT_ANOMALY;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
@@ -25,19 +32,14 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.ArrayList;
-import java.util.List;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.constant.AnomalyFeedbackType.*;
-import static org.testng.Assert.*;
-
-
 public class TestPrecisionRecallEvaluator {
+
   private static final String TEST = "test";
   private DAOTestBase testDAOProvider;
   private MergedAnomalyResultManager mergedAnomalyDAO;
@@ -69,8 +71,10 @@ public class TestPrecisionRecallEvaluator {
   }
 
   @Test(dataProvider = "provideMockAnomalies")
-  public void testSystemPrecisionAndRecall(List<MergedAnomalyResultDTO> anomalyResultDTOS, MergedAnomalyResultDTO notifiedTrueAnomaly,
-      MergedAnomalyResultDTO notifiedFalseAnomaly, MergedAnomalyResultDTO userReportAnomaly) throws Exception {
+  public void testSystemPrecisionAndRecall(List<MergedAnomalyResultDTO> anomalyResultDTOS,
+      MergedAnomalyResultDTO notifiedTrueAnomaly,
+      MergedAnomalyResultDTO notifiedFalseAnomaly, MergedAnomalyResultDTO userReportAnomaly)
+      throws Exception {
     // test anomalies when no feedback, and no user report anomaly
     PrecisionRecallEvaluator evaluator = new PrecisionRecallEvaluator(anomalyResultDTOS);
     assertEquals(evaluator.getPrecision(), 0.0, 0.0001);
@@ -83,7 +87,7 @@ public class TestPrecisionRecallEvaluator {
     assertEquals(evaluator.getPrecision(), 0.125, 0.0001);
     assertEquals(evaluator.getRecall(), 1, 0.00001);
     assertEquals(evaluator.getPrecisionInResponse(), 1.0, 0.00001);
-    assertEquals(evaluator.getResponseRate(), 1.0/8, 0.00001);
+    assertEquals(evaluator.getResponseRate(), 1.0 / 8, 0.00001);
 
     // test data with 1 positive feedback, 1 false alarm
     anomalyResultDTOS.add(notifiedFalseAnomaly);
@@ -91,36 +95,37 @@ public class TestPrecisionRecallEvaluator {
     assertEquals(evaluator.getPrecision(), 0.1111, 0.0001);
     assertEquals(evaluator.getRecall(), 1, 0.00001);
     assertEquals(evaluator.getPrecisionInResponse(), 0.5, 0.00001);
-    assertEquals(evaluator.getResponseRate(), 2.0/9, 0.00001);
+    assertEquals(evaluator.getResponseRate(), 2.0 / 9, 0.00001);
 
     // test data with 1 positive feedback, 1 user report anomaly, 1 false alarm
     anomalyResultDTOS.add(userReportAnomaly);
     evaluator.init(anomalyResultDTOS);
     // counting user report anomalies as part of the total anomalies
-    assertEquals(evaluator.getPrecision(),0.1, 0.0001);
+    assertEquals(evaluator.getPrecision(), 0.1, 0.0001);
     assertEquals(evaluator.getRecall(), 0.5, 0.00001);
-    assertEquals(evaluator.getPrecisionInResponse(), 1.0/3, 0.00001);
-    assertEquals(evaluator.getResponseRate(), 3.0/10, 0.00001);
+    assertEquals(evaluator.getPrecisionInResponse(), 1.0 / 3, 0.00001);
+    assertEquals(evaluator.getResponseRate(), 3.0 / 10, 0.00001);
   }
 
-
   @Test(dataProvider = "provideMockAnomalies")
-  public void testAlertFilterProjectPrecisionAndRecall(List<MergedAnomalyResultDTO> anomalyResultDTOS, MergedAnomalyResultDTO notifiedTrueAnomaly,
-      MergedAnomalyResultDTO notifiedFalseAnomaly, MergedAnomalyResultDTO userReportAnomaly) throws Exception{
+  public void testAlertFilterProjectPrecisionAndRecall(
+      List<MergedAnomalyResultDTO> anomalyResultDTOS, MergedAnomalyResultDTO notifiedTrueAnomaly,
+      MergedAnomalyResultDTO notifiedFalseAnomaly, MergedAnomalyResultDTO userReportAnomaly)
+      throws Exception {
     // test dummy alert filter's precision and recall
     // dummy alert filter is sending EVERYTHING out
     AlertFilter alertFilter = new DummyAlertFilter();
     anomalyResultDTOS.add(notifiedFalseAnomaly);
     anomalyResultDTOS.add(notifiedTrueAnomaly);
     anomalyResultDTOS.add(userReportAnomaly);
-    PrecisionRecallEvaluator evaluator = new PrecisionRecallEvaluator(alertFilter, anomalyResultDTOS);
-    assertEquals(evaluator.getPrecision(),0.2, 0.0001);
+    PrecisionRecallEvaluator evaluator = new PrecisionRecallEvaluator(alertFilter,
+        anomalyResultDTOS);
+    assertEquals(evaluator.getPrecision(), 0.2, 0.0001);
     assertEquals(evaluator.getRecall(), 1, 0.00001);
     assertEquals(evaluator.getWeightedPrecision(), 0.3076, 0.0001);
     // Here is the projected performance for alert filter (not simply based on "notified"), takes into user report anomaly as well
-    assertEquals(evaluator.getPrecisionInResponse(), 0.6666,0.0001);
+    assertEquals(evaluator.getPrecisionInResponse(), 0.6666, 0.0001);
   }
-
 
   @DataProvider(name = "provideMockAnomalies")
   public Object[][] getMockMergedAnomalies() {
@@ -156,6 +161,7 @@ public class TestPrecisionRecallEvaluator {
     userReportAnomaly.setAnomalyResultSource(AnomalyResultSource.USER_LABELED_ANOMALY);
     userReportAnomaly.setFunction(anomalyFunction);
     mergedAnomalyDAO.save(userReportAnomaly);
-    return new Object[][]{{anomalyResultDTOS, notifiedTrueAnomaly, notifiedFalseAnomaly, userReportAnomaly}};
+    return new Object[][]{
+        {anomalyResultDTOS, notifiedTrueAnomaly, notifiedFalseAnomaly, userReportAnomaly}};
   }
 }

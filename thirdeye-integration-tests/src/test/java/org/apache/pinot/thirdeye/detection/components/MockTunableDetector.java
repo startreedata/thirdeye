@@ -25,8 +25,6 @@ package org.apache.pinot.thirdeye.detection.components;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.detection.annotation.Components;
-import org.apache.pinot.thirdeye.detection.annotation.Tune;
 import org.apache.pinot.thirdeye.detection.spec.MockTunableSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.AnomalyDetector;
 import org.apache.pinot.thirdeye.detection.spi.components.Tunable;
@@ -34,16 +32,18 @@ import org.apache.pinot.thirdeye.detection.spi.exception.DetectorException;
 import org.apache.pinot.thirdeye.detection.spi.model.DetectionResult;
 import org.joda.time.Interval;
 
-public class MockTunableDetector implements AnomalyDetector<MockTunableSpec>, Tunable<MockTunableSpec> {
+public class MockTunableDetector implements AnomalyDetector<MockTunableSpec>,
+    Tunable<MockTunableSpec> {
+
   private int tuneRunes = 0;
 
   public int getTuneRuns() {
     return tuneRunes;
   }
 
-
   @Override
-  public Map<String, Object> tune(Map<String, Object> currentSpec, Interval tuningWindow, String metricUrn) {
+  public Map<String, Object> tune(Map<String, Object> currentSpec, Interval tuningWindow,
+      String metricUrn) {
     this.tuneRunes++;
     return Collections.emptyMap();
   }

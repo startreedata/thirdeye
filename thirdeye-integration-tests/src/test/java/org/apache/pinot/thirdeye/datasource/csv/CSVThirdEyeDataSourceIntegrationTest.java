@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,8 +36,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class CSVThirdEyeDataSourceIntegrationTest {
+
   private DAOTestBase testDAOProvider;
   private DAORegistry daoRegistry;
 
@@ -53,7 +53,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
   }
 
   @Test
-  public void integrationTest() throws Exception{
+  public void integrationTest() throws Exception {
     URL dataSourcesConfig = this.getClass().getResource("data-sources-config.yml");
 
     DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
@@ -65,7 +65,6 @@ public class CSVThirdEyeDataSourceIntegrationTest {
 
     daoRegistry.getDatasetConfigDAO().save(datasetConfigDTO);
     Assert.assertNotNull(datasetConfigDTO.getId());
-
 
     MetricConfigDTO configDTO = new MetricConfigDTO();
     configDTO.setName("views");
@@ -85,7 +84,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
 
     MetricSlice slice = MetricSlice.from(configDTO.getId(), 0, 7200000);
     RequestContainer requestContainer = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.<String>emptyList(), -1, "ref");
+        .makeAggregateRequest(slice, Collections.emptyList(), -1, "ref");
     ThirdEyeResponse response = cacheRegistry.getQueryCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
@@ -93,5 +92,4 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
         Collections.singletonList(1503d));
   }
-
 }

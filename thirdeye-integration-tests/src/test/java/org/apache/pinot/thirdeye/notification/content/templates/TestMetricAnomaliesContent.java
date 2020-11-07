@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -83,12 +83,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class TestMetricAnomaliesContent {
+
   private static final String TEST = "test";
-  private int id = 0;
-  private String dashboardHost = "http://localhost:8080/dashboard";
-  private String detectionConfigFile = "/sample-detection-config.yml";
+  private final int id = 0;
+  private final String dashboardHost = "http://localhost:8080/dashboard";
+  private final String detectionConfigFile = "/sample-detection-config.yml";
   private DAOTestBase testDAOProvider;
   private AlertManager detectionConfigDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
@@ -100,10 +100,10 @@ public class TestMetricAnomaliesContent {
   private EvaluationManager evaluationDAO;
   private DetectionPipelineLoader detectionPipelineLoader;
   private DataProvider provider;
-  private ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   @BeforeMethod
-  public void beforeMethod(){
+  public void beforeMethod() {
     testDAOProvider = DAOTestBase.getInstance();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     detectionConfigDAO = daoRegistry.getDetectionConfigManager();
@@ -212,7 +212,8 @@ public class TestMetricAnomaliesContent {
     anomaly.setAnomalyResultSource(AnomalyResultSource.DATA_QUALITY_DETECTION);
     anomaly.setMetricUrn("thirdeye:metric:3");
     props = new HashMap<>();
-    props.put("datasetLastRefreshTime", "" + new DateTime(2020, 1, 4, 0, 0, dateTimeZone).getMillis());
+    props.put("datasetLastRefreshTime",
+        "" + new DateTime(2020, 1, 4, 0, 0, dateTimeZone).getMillis());
     props.put("sla", "2_DAYS");
     anomaly.setProperties(props);
     mergedAnomalyResultDAO.save(anomaly);
@@ -227,7 +228,8 @@ public class TestMetricAnomaliesContent {
     anomaly.setAnomalyResultSource(AnomalyResultSource.DATA_QUALITY_DETECTION);
     anomaly.setMetricUrn("thirdeye:metric:3");
     props = new HashMap<>();
-    props.put("datasetLastRefreshTime", "" + new DateTime(2020, 1, 1, 10, 5, dateTimeZone).getMillis());
+    props.put("datasetLastRefreshTime",
+        "" + new DateTime(2020, 1, 1, 10, 5, dateTimeZone).getMillis());
     props.put("sla", "3_HOURS");
     anomaly.setProperties(props);
     mergedAnomalyResultDAO.save(anomaly);
@@ -247,7 +249,8 @@ public class TestMetricAnomaliesContent {
         thirdeyeAnomalyConfig, DaoTestUtils.getTestNotificationConfig("Test Config"));
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);
 
-    String htmlPath = ClassLoader.getSystemResource("test-metric-anomalies-template.html").getPath();
+    String htmlPath = ClassLoader.getSystemResource("test-metric-anomalies-template.html")
+        .getPath();
     Assert.assertEquals(
         ContentFormatterUtils.getEmailHtml(emailEntity).replaceAll("\\s", ""),
         ContentFormatterUtils.getHtmlContent(htmlPath).replaceAll("\\s", ""));
@@ -256,7 +259,8 @@ public class TestMetricAnomaliesContent {
   @Test
   public void testRCAHighlights() throws TemplateException, IOException {
     Configuration cfg = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
-    cfg.setClassForTemplateLoading(TestMetricAnomaliesContent.class, "/org/apache/pinot/thirdeye/detector/");
+    cfg.setClassForTemplateLoading(TestMetricAnomaliesContent.class,
+        "/org/apache/pinot/thirdeye/detector/");
     Template template = cfg.getTemplate("metric-anomalies-template.ftl");
     HashMap<String, Object> model = new HashMap<String, Object>();
     model.put("anomalyCount", 1);
@@ -274,8 +278,10 @@ public class TestMetricAnomaliesContent {
     Map<String, Object> cubeResults = mapper.readValue(new File(
         cubeResponsePath), new TypeReference<Map<String, Object>>() {
     });
-    model.put("cubeDimensions", ConfigUtils.getMap(cubeResults.get("cubeResults")).get("dimensions"));
-    model.put("cubeResponseRows", ConfigUtils.getMap(cubeResults.get("cubeResults")).get("responseRows"));
+    model.put("cubeDimensions",
+        ConfigUtils.getMap(cubeResults.get("cubeResults")).get("dimensions"));
+    model.put("cubeResponseRows",
+        ConfigUtils.getMap(cubeResults.get("cubeResults")).get("responseRows"));
 
     Writer out = new StringWriter();
     template.process(model, out);
@@ -288,7 +294,8 @@ public class TestMetricAnomaliesContent {
   @Test
   public void testRCAHighlightsWithErrorRCAResponse() throws TemplateException, IOException {
     Configuration cfg = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
-    cfg.setClassForTemplateLoading(TestMetricAnomaliesContent.class, "/org/apache/pinot/thirdeye/detector/");
+    cfg.setClassForTemplateLoading(TestMetricAnomaliesContent.class,
+        "/org/apache/pinot/thirdeye/detector/");
     Template template = cfg.getTemplate("metric-anomalies-template.ftl");
     HashMap<String, Object> model = new HashMap<String, Object>();
     model.put("anomalyCount", 1);
@@ -316,19 +323,24 @@ public class TestMetricAnomaliesContent {
     String cubeResponsePath = ClassLoader
         .getSystemResource("test-email-rca-highlights-cube-algo-response.json").getPath();
     Map<String, Object> cubeResults = Collections.unmodifiableMap(mapper.readValue(
-        new File(cubeResponsePath), new TypeReference<Map<String, Object>>() {}));
+        new File(cubeResponsePath), new TypeReference<Map<String, Object>>() {
+        }));
     model.put("cubeDimensions", null);
-    model.put("cubeResponseRows", ConfigUtils.getMap(cubeResults.get("cubeResults")).get("responseRows"));
+    model.put("cubeResponseRows",
+        ConfigUtils.getMap(cubeResults.get("cubeResults")).get("responseRows"));
     template.process(model, out);
     model.put("cubeDimensions", new ArrayList<>());
-    model.put("cubeResponseRows", ConfigUtils.getMap(cubeResults.get("cubeResults")).get("responseRows"));
+    model.put("cubeResponseRows",
+        ConfigUtils.getMap(cubeResults.get("cubeResults")).get("responseRows"));
     template.process(model, out);
 
     // email template should not break even if dimension field under cubeResults are null or empty
-    model.put("cubeDimensions", ConfigUtils.getMap(cubeResults.get("cubeResults")).get("dimensions"));
+    model.put("cubeDimensions",
+        ConfigUtils.getMap(cubeResults.get("cubeResults")).get("dimensions"));
     model.put("cubeResponseRows", null);
     template.process(model, out);
-    model.put("cubeDimensions", ConfigUtils.getMap(cubeResults.get("cubeResults")).get("dimensions"));
+    model.put("cubeDimensions",
+        ConfigUtils.getMap(cubeResults.get("cubeResults")).get("dimensions"));
     model.put("cubeResponseRows", new ArrayList<>());
     template.process(model, out);
   }

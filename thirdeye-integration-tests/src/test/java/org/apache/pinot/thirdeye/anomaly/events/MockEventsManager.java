@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,13 +26,12 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.EventBean;
 
-
 /**
  * The Mock events manager for testing
  */
 public class MockEventsManager extends AbstractManagerImpl<EventDTO> implements EventManager {
 
-  private Collection<EventDTO> entities;
+  private final Collection<EventDTO> entities;
 
   /**
    * Instantiates a new Mock events manager.
@@ -89,7 +88,8 @@ public class MockEventsManager extends AbstractManagerImpl<EventDTO> implements 
   }
 
   @Override
-  public List<EventDTO> findEventsBetweenTimeRangeByName(String eventType, String name, long startTime, long endTime) {
+  public List<EventDTO> findEventsBetweenTimeRangeByName(String eventType, String name,
+      long startTime, long endTime) {
     throw new AssertionError("not implemented");
   }
 }

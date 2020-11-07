@@ -16,11 +16,11 @@
 
 package org.apache.pinot.thirdeye.detection.spec;
 
-import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
 import java.util.Map;
+import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
 
+public class TestSpec extends AbstractSpec {
 
-public class TestSpec extends AbstractSpec{
   private int a = 123;
   private double b = 456.7;
   private String c = "default";

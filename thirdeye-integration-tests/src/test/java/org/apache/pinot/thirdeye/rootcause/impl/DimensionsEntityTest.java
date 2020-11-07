@@ -24,11 +24,12 @@ import com.google.common.collect.Multimap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class DimensionsEntityTest {
+
   @Test
   public void testWithoutDimensions() {
-    DimensionsEntity e = DimensionsEntity.fromDimensions(1.0, ArrayListMultimap.<String, String>create());
+    DimensionsEntity e = DimensionsEntity
+        .fromDimensions(1.0, ArrayListMultimap.create());
     Assert.assertEquals(e.getUrn(), "thirdeye:dimensions:");
     Assert.assertTrue(e.getDimensions().isEmpty());
   }
@@ -48,7 +49,8 @@ public class DimensionsEntityTest {
 
     DimensionsEntity e = DimensionsEntity.fromDimensions(1.0, dimensions);
 
-    Assert.assertEquals(e.getUrn(), "thirdeye:dimensions:key%3Dother%3DValue:key%3Dvalue!:otherKey%3Danother%3AValue");
+    Assert.assertEquals(e.getUrn(),
+        "thirdeye:dimensions:key%3Dother%3DValue:key%3Dvalue!:otherKey%3Danother%3AValue");
   }
 
   @Test

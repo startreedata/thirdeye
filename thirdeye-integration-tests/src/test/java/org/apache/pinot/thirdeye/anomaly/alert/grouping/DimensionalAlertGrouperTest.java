@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,20 +16,21 @@
 
 package org.apache.pinot.thirdeye.anomaly.alert.grouping;
 
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class DimensionalAlertGrouperTest {
+
   private final static String GROUP_BY_DIMENSION_NAME = "K1";
 
   private DimensionalAlertGrouper alertGrouper;
@@ -44,7 +45,7 @@ public class DimensionalAlertGrouperTest {
     alertGrouper.setParameters(props);
   }
 
-  @Test(dependsOnMethods = { "testCreate" })
+  @Test(dependsOnMethods = {"testCreate"})
   public void testConstructGroupKey() {
     DimensionMap alertGroupKey = new DimensionMap();
     alertGroupKey.put(GROUP_BY_DIMENSION_NAME, "V1");
@@ -56,8 +57,10 @@ public class DimensionalAlertGrouperTest {
     Assert.assertEquals(alertGroupKey, expectedDimensionMap);
   }
 
-  @Test(dataProvider = "prepareAnomalyGroups", dependsOnMethods = { "testCreate", "testConstructGroupKey" })
-  public void testGroup(List<MergedAnomalyResultDTO> anomalies, Set<MergedAnomalyResultDTO> expectedGroup1,
+  @Test(dataProvider = "prepareAnomalyGroups", dependsOnMethods = {"testCreate",
+      "testConstructGroupKey"})
+  public void testGroup(List<MergedAnomalyResultDTO> anomalies,
+      Set<MergedAnomalyResultDTO> expectedGroup1,
       Set<MergedAnomalyResultDTO> expectedGroup2, Set<MergedAnomalyResultDTO> expectedRollUpGroup) {
 
     Map<DimensionMap, GroupedAnomalyResultsDTO> groupedAnomalies = alertGrouper.group(anomalies);
@@ -161,7 +164,7 @@ public class DimensionalAlertGrouperTest {
     }
 
     List<Object[]> entries = new ArrayList<>();
-    entries.add(new Object[] {
+    entries.add(new Object[]{
         anomalies, expectedGroup1, expectedGroup2, expectedRollUpGroup
     });
     return entries.toArray(new Object[entries.size()][]);

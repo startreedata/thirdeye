@@ -38,6 +38,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class AbsoluteChangeRuleAnomalyFilterTest {
+
   private static final String METRIC_URN = "thirdeye:metric:123";
   private static final long CONFIG_ID = 125L;
 
@@ -46,7 +47,8 @@ public class AbsoluteChangeRuleAnomalyFilterTest {
 
   @BeforeMethod
   public void beforeMethod() {
-    this.baseline = BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.MEDIAN, 1, 1, DateTimeZone.forID("UTC"));
+    this.baseline = BaselineAggregate
+        .fromWeekOverWeek(BaselineAggregateType.MEDIAN, 1, 1, DateTimeZone.forID("UTC"));
 
     MetricSlice slice1 = MetricSlice.from(123L, 0, 2);
     MetricSlice baselineSlice1 = this.baseline.scatter(slice1).get(0);
@@ -67,7 +69,7 @@ public class AbsoluteChangeRuleAnomalyFilterTest {
   }
 
   @Test
-  public void testAbsoluteChangeFilter(){
+  public void testAbsoluteChangeFilter() {
     AbsoluteChangeRuleAnomalyFilterSpec spec = new AbsoluteChangeRuleAnomalyFilterSpec();
     spec.setOffset("median1w");
     spec.setThreshold(100);
@@ -75,7 +77,9 @@ public class AbsoluteChangeRuleAnomalyFilterTest {
     AnomalyFilter filter = new AbsoluteChangeRuleAnomalyFilter();
     filter.init(spec, new DefaultInputDataFetcher(this.testDataProvider, CONFIG_ID));
     List<Boolean> results =
-        Arrays.asList(DetectionTestUtils.makeAnomaly(0, 2, CONFIG_ID, METRIC_URN, 150), DetectionTestUtils.makeAnomaly(4, 6, CONFIG_ID, METRIC_URN, 500)).stream().map(anomaly -> filter.isQualified(anomaly)).collect(
+        Arrays.asList(DetectionTestUtils.makeAnomaly(0, 2, CONFIG_ID, METRIC_URN, 150),
+            DetectionTestUtils.makeAnomaly(4, 6, CONFIG_ID, METRIC_URN, 500)).stream()
+            .map(anomaly -> filter.isQualified(anomaly)).collect(
             Collectors.toList());
     Assert.assertEquals(results, Arrays.asList(false, true));
   }

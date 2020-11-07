@@ -18,6 +18,7 @@ package org.apache.pinot.thirdeye.notification.content.templates;
 
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_HOST_KEY;
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_PORT_KEY;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

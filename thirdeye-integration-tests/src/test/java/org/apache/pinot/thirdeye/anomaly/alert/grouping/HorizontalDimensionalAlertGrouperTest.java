@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,23 +16,25 @@
 
 package org.apache.pinot.thirdeye.anomaly.alert.grouping;
 
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class HorizontalDimensionalAlertGrouperTest {
+
   private final static String GROUP_BY_DIMENSION_NAME_1 = "G";
   private final static String GROUP_BY_DIMENSION_NAME_2 = "H";
-  private final static String GROUP_BY_DIMENSION_NAME = GROUP_BY_DIMENSION_NAME_1 + "," + GROUP_BY_DIMENSION_NAME_2;
+  private final static String GROUP_BY_DIMENSION_NAME =
+      GROUP_BY_DIMENSION_NAME_1 + "," + GROUP_BY_DIMENSION_NAME_2;
 
   private HorizontalDimensionalAlertGrouper alertGrouper;
 
@@ -50,8 +52,9 @@ public class HorizontalDimensionalAlertGrouperTest {
     }
   }
 
-  @Test(dataProvider = "prepareAnomalyGroups", dependsOnMethods = { "testCreate" })
-  public void testGroup(List<MergedAnomalyResultDTO> anomalies, Set<MergedAnomalyResultDTO> expectedGroupG1,
+  @Test(dataProvider = "prepareAnomalyGroups", dependsOnMethods = {"testCreate"})
+  public void testGroup(List<MergedAnomalyResultDTO> anomalies,
+      Set<MergedAnomalyResultDTO> expectedGroupG1,
       Set<MergedAnomalyResultDTO> expectedGroupG2, Set<MergedAnomalyResultDTO> expectedGroupH1,
       Set<MergedAnomalyResultDTO> expectedGroupH2) {
 
@@ -157,7 +160,7 @@ public class HorizontalDimensionalAlertGrouperTest {
 
     List<Object[]> entries = new ArrayList<>();
     entries.add(
-        new Object[] { anomalies, expectedGroupG1, expectedGroupG2, expectedGroupH1,
+        new Object[]{anomalies, expectedGroupG1, expectedGroupG2, expectedGroupH1,
             expectedGroupH2
         });
     return entries.toArray(new Object[entries.size()][]);

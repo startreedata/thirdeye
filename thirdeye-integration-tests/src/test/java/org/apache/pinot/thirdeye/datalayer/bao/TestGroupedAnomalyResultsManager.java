@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,13 +16,13 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.ArrayList;
-import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -34,6 +34,7 @@ public class TestGroupedAnomalyResultsManager {
   private DAOTestBase testDAOProvider;
   private GroupedAnomalyResultsManager groupedAnomalyResultsDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -47,7 +48,7 @@ public class TestGroupedAnomalyResultsManager {
     testDAOProvider.cleanup();
   }
 
-  @Test(dataProvider="groupedAnomalies")
+  @Test(dataProvider = "groupedAnomalies")
   public void testGroupedResultCRUD(List<MergedAnomalyResultDTO> mergedAnomalyResultsSet1,
       List<MergedAnomalyResultDTO> mergedAnomalyResultsSet2) {
 
@@ -63,13 +64,14 @@ public class TestGroupedAnomalyResultsManager {
     Assert.assertNotEquals(id, null);
 
     GroupedAnomalyResultsDTO groupedAnomalyResultsDTOByID = groupedAnomalyResultsDAO.findById(id);
-    Assert.assertEquals(groupedAnomalyResultsDTOByID.getAnomalyResults(), groupedAnomalyResultsDTO.getAnomalyResults());
+    Assert.assertEquals(groupedAnomalyResultsDTOByID.getAnomalyResults(),
+        groupedAnomalyResultsDTO.getAnomalyResults());
     Assert.assertEquals(groupedAnomalyResultsDTO.getEndTime(), 15);
     Assert.assertEquals(groupedAnomalyResultsDTO.getAlertConfigId(), 1);
     Assert.assertEquals(groupedAnomalyResultsDTO.getDimensions(), dimensionMap);
   }
 
-  @Test(dataProvider="groupedAnomalies", dependsOnMethods = "testGroupedResultCRUD")
+  @Test(dataProvider = "groupedAnomalies", dependsOnMethods = "testGroupedResultCRUD")
   public void testFindMostRecent(List<MergedAnomalyResultDTO> mergedAnomalyResultsSet1,
       List<MergedAnomalyResultDTO> mergedAnomalyResultsSet2) {
 
@@ -94,8 +96,10 @@ public class TestGroupedAnomalyResultsManager {
     GroupedAnomalyResultsDTO recentGroupedAnomalyResultsDTO =
         groupedAnomalyResultsDAO.findMostRecentInTimeWindow(1, dimensionMap.toString(), 0, 50);
     Assert.assertNotEquals(recentGroupedAnomalyResultsDTO, null);
-    Assert.assertEquals(recentGroupedAnomalyResultsDTO.getId(), groupedAnomalyResultsDTOByID.getId());
-    Assert.assertEquals(recentGroupedAnomalyResultsDTO.getAnomalyResults(), groupedAnomalyResultsDTO2.getAnomalyResults());
+    Assert
+        .assertEquals(recentGroupedAnomalyResultsDTO.getId(), groupedAnomalyResultsDTOByID.getId());
+    Assert.assertEquals(recentGroupedAnomalyResultsDTO.getAnomalyResults(),
+        groupedAnomalyResultsDTO2.getAnomalyResults());
   }
 
   @DataProvider(name = "groupedAnomalies")
@@ -134,8 +138,8 @@ public class TestGroupedAnomalyResultsManager {
     mergedAnomalyResultsSet2.add(mergedAnomalyResultDTO4);
     mergedAnomalyResultsSet2.add(mergedAnomalyResultDTO3);
 
-    return new Object[][] {
-        { mergedAnomalyResultsSet1, mergedAnomalyResultsSet2},
+    return new Object[][]{
+        {mergedAnomalyResultsSet1, mergedAnomalyResultsSet2},
     };
   }
 }

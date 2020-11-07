@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,10 @@
 
 package org.apache.pinot.thirdeye.datasource.timeseries;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
@@ -23,10 +27,6 @@ import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -52,9 +52,12 @@ public class BaseTimeSeriesResponseParserTest {
 
     {
       int timeBucketId = 0;
-      ThirdEyeResponseRow row1 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList1(), getMetricT1DV1());
-      ThirdEyeResponseRow row2 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList1(), getMetricT2DV1());
-      ThirdEyeResponseRow row3 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList1(), getMetricT3DV1());
+      ThirdEyeResponseRow row1 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList1(),
+          getMetricT1DV1());
+      ThirdEyeResponseRow row2 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList1(),
+          getMetricT2DV1());
+      ThirdEyeResponseRow row3 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList1(),
+          getMetricT3DV1());
       thirdEyeResponse.addRow(row1);
       thirdEyeResponse.addRow(row2);
       thirdEyeResponse.addRow(row3);
@@ -62,9 +65,12 @@ public class BaseTimeSeriesResponseParserTest {
 
     {
       int timeBucketId = 0;
-      ThirdEyeResponseRow row1 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList2(), getMetricT1DV2());
-      ThirdEyeResponseRow row2 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList2(), getMetricT2DV2());
-      ThirdEyeResponseRow row3 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList2(), getMetricT3DV2());
+      ThirdEyeResponseRow row1 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList2(),
+          getMetricT1DV2());
+      ThirdEyeResponseRow row2 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList2(),
+          getMetricT2DV2());
+      ThirdEyeResponseRow row3 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList2(),
+          getMetricT3DV2());
       thirdEyeResponse.addRow(row1);
       thirdEyeResponse.addRow(row2);
       thirdEyeResponse.addRow(row3);
@@ -72,9 +78,12 @@ public class BaseTimeSeriesResponseParserTest {
 
     {
       int timeBucketId = 0;
-      ThirdEyeResponseRow row1 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList3(), getMetricT1DV3());
-      ThirdEyeResponseRow row2 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList3(), getMetricT2DV3());
-      ThirdEyeResponseRow row3 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList3(), getMetricT3DV3());
+      ThirdEyeResponseRow row1 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList3(),
+          getMetricT1DV3());
+      ThirdEyeResponseRow row2 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList3(),
+          getMetricT2DV3());
+      ThirdEyeResponseRow row3 = new ThirdEyeResponseRow(timeBucketId++, getDimensionValueList3(),
+          getMetricT3DV3());
       thirdEyeResponse.addRow(row1);
       thirdEyeResponse.addRow(row2);
       thirdEyeResponse.addRow(row3);
@@ -222,6 +231,7 @@ public class BaseTimeSeriesResponseParserTest {
   }
 
   static class MockedThirdEyeResponse implements ThirdEyeResponse {
+
     List<ThirdEyeResponseRow> responseRows = new ArrayList<>();
     List<MetricFunction> metricFunctions = new ArrayList<>();
     ThirdEyeRequest thirdEyeRequest;

@@ -21,6 +21,12 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -30,18 +36,12 @@ import org.apache.pinot.thirdeye.rootcause.MockEntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.rootcause.MockMetricConfigManager;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class MetricMappingPipelineTest {
+
   private static final String TYPE_DEFAULT = "DEFAULT";
   private static final String TYPE_DIMENSION = "DIMENSION_TO_DIMENSION";
 
@@ -77,17 +77,20 @@ public class MetricMappingPipelineTest {
         makeMapping("thirdeye:dataset:b", "thirdeye:metric:104", TYPE_DEFAULT),
         makeMapping("thirdeye:dataset:c", "thirdeye:metric:106", TYPE_DEFAULT),
         makeMapping("thirdeye:dimension:L:", "thirdeye:dimension:Q:", TYPE_DIMENSION),
-        makeMapping("thirdeye:dimension:Q:", "thirdeye:dimension:R:", TYPE_DIMENSION), // transitive mapping Q to R
-        makeMapping("thirdeye:dimension:Q:1", "thirdeye:dimension:S:one", TYPE_DIMENSION)); // transitive mapping with value
-
+        makeMapping("thirdeye:dimension:Q:", "thirdeye:dimension:R:", TYPE_DIMENSION),
+        // transitive mapping Q to R
+        makeMapping("thirdeye:dimension:Q:1", "thirdeye:dimension:S:one",
+            TYPE_DIMENSION)); // transitive mapping with value
   }
 
   @Test
   public void testExploreMetrics() {
-    MetricMappingPipeline pipeline = new MetricMappingPipeline("OUTPUT", Collections.singleton("INPUT"), false, Collections.<String>emptySet(),
-        new MockMetricConfigManager(metrics), new MockDatasetConfigManager(datasets), new MockEntityToEntityMappingManager(mappings));
+    MetricMappingPipeline pipeline = new MetricMappingPipeline("OUTPUT",
+        Collections.singleton("INPUT"), false, Collections.emptySet(),
+        new MockMetricConfigManager(metrics), new MockDatasetConfigManager(datasets),
+        new MockEntityToEntityMappingManager(mappings));
 
-    Set<Entity> input = Collections.singleton((Entity) MetricEntity.fromMetric(1.0, 100));
+    Set<Entity> input = Collections.singleton(MetricEntity.fromMetric(1.0, 100));
     PipelineContext context = new PipelineContext(Collections.singletonMap("INPUT", input));
 
     List<MetricEntity> result = getSorted(pipeline.run(context));
@@ -104,8 +107,10 @@ public class MetricMappingPipelineTest {
 
   @Test
   public void testExploreMetricsWithFilters() {
-    MetricMappingPipeline pipeline = new MetricMappingPipeline("OUTPUT", Collections.singleton("INPUT"), true, Collections.<String>emptySet(),
-        new MockMetricConfigManager(metrics), new MockDatasetConfigManager(datasets), new MockEntityToEntityMappingManager(mappings));
+    MetricMappingPipeline pipeline = new MetricMappingPipeline("OUTPUT",
+        Collections.singleton("INPUT"), true, Collections.emptySet(),
+        new MockMetricConfigManager(metrics), new MockDatasetConfigManager(datasets),
+        new MockEntityToEntityMappingManager(mappings));
 
     Multimap<String, String> filters = ArrayListMultimap.create();
     filters.put("invalid", "0");
@@ -114,7 +119,7 @@ public class MetricMappingPipelineTest {
     filters.put("M", "3");
     filters.put("N", "4");
 
-    Set<Entity> input = Collections.singleton((Entity) MetricEntity.fromMetric(1.0, 100, filters));
+    Set<Entity> input = Collections.singleton(MetricEntity.fromMetric(1.0, 100, filters));
     PipelineContext context = new PipelineContext(Collections.singletonMap("INPUT", input));
 
     List<MetricEntity> result = getSorted(pipeline.run(context));
@@ -162,8 +167,9 @@ public class MetricMappingPipelineTest {
       @Override
       public int compare(MetricEntity o1, MetricEntity o2) {
         int urn = o1.getUrn().compareTo(o2.getUrn());
-        if (urn != 0)
+        if (urn != 0) {
           return urn;
+        }
         return Double.compare(o1.getScore(), o2.getScore());
       }
     });

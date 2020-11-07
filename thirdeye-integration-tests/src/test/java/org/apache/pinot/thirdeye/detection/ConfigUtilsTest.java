@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,8 +28,8 @@ import org.joda.time.PeriodType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class ConfigUtilsTest {
+
   @Test
   public void testGetListNull() {
     Assert.assertTrue(ConfigUtils.getList(null).isEmpty());
@@ -67,7 +67,8 @@ public class ConfigUtilsTest {
 
   @Test
   public void testGetMultimapPartialNull() {
-    Assert.assertEquals(ConfigUtils.getMultimap(Collections.singletonMap("a", Arrays.asList("A", null))).size(), 2);
+    Assert.assertEquals(
+        ConfigUtils.getMultimap(Collections.singletonMap("a", Arrays.asList("A", null))).size(), 2);
   }
 
   @Test
@@ -88,12 +89,18 @@ public class ConfigUtilsTest {
 
   @Test
   public void testPeriodParser() {
-    Assert.assertEquals(ConfigUtils.parsePeriod("3600"), new Period().withField(DurationFieldType.millis(), 3600));
-    Assert.assertEquals(ConfigUtils.parsePeriod("1d"), new Period().withField(DurationFieldType.days(), 1));
-    Assert.assertEquals(ConfigUtils.parsePeriod("2hours"), new Period().withField(DurationFieldType.hours(), 2));
-    Assert.assertEquals(ConfigUtils.parsePeriod("24 hrs"), new Period().withField(DurationFieldType.hours(), 24));
-    Assert.assertEquals(ConfigUtils.parsePeriod("1 year"), new Period().withField(DurationFieldType.years(), 1));
-    Assert.assertEquals(ConfigUtils.parsePeriod("  3   w  "), new Period().withField(DurationFieldType.weeks(), 3));
+    Assert.assertEquals(ConfigUtils.parsePeriod("3600"),
+        new Period().withField(DurationFieldType.millis(), 3600));
+    Assert.assertEquals(ConfigUtils.parsePeriod("1d"),
+        new Period().withField(DurationFieldType.days(), 1));
+    Assert.assertEquals(ConfigUtils.parsePeriod("2hours"),
+        new Period().withField(DurationFieldType.hours(), 2));
+    Assert.assertEquals(ConfigUtils.parsePeriod("24 hrs"),
+        new Period().withField(DurationFieldType.hours(), 24));
+    Assert.assertEquals(ConfigUtils.parsePeriod("1 year"),
+        new Period().withField(DurationFieldType.years(), 1));
+    Assert.assertEquals(ConfigUtils.parsePeriod("  3   w  "),
+        new Period().withField(DurationFieldType.weeks(), 3));
   }
 
   @Test

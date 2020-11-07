@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,12 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import org.joda.time.DateTime;
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import org.apache.pinot.thirdeye.common.dimension.DimensionKey;
 import org.apache.pinot.thirdeye.common.metric.MetricSchema;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
@@ -37,13 +31,18 @@ import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.Builder;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
+import org.joda.time.DateTime;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 public class TestTimeSeriesResponseUtils {
 
   @Test(dataProvider = "toMapProvider")
   public void toMap(String testName, TimeSeriesResponse response, List<String> schemaDimensions,
       Map<DimensionKey, MetricTimeSeries> expected) {
-    Map<DimensionKey, MetricTimeSeries> actual = TimeSeriesResponseConverter.toMap(response, schemaDimensions);
+    Map<DimensionKey, MetricTimeSeries> actual = TimeSeriesResponseConverter
+        .toMap(response, schemaDimensions);
     Assert.assertEquals(actual, expected);
   }
 
@@ -85,7 +84,7 @@ public class TestTimeSeriesResponseUtils {
     // dimension
     // key appear
     // in one row.
-    return new Object[][] {
+    return new Object[][]{
         noGroupByArgsOneMetricPerRow, noGroupByArgsAllMetricsInRow,
         dimensionGroupByArgsOneMetricPerRow, dimensionGroupByWithAllMetricsInRow
     };
@@ -99,7 +98,7 @@ public class TestTimeSeriesResponseUtils {
       boolean groupTimeSeriesMetricsIntoRow) {
     List<String> dimensions = Arrays.asList("dim1", "dim2", "dim3", "all");
     List<String> dimensionValueSuffixes = Arrays.asList("_a", "_b", "_c"); // appended to each
-                                                                           // dimension
+    // dimension
     List<MetricFunction> metricFunctions = createSumFunctions("m1", "m2", "m3");
     ConversionDataGenerator dataGenerator =
         new ConversionDataGenerator(dimensions, metricFunctions);
@@ -107,9 +106,9 @@ public class TestTimeSeriesResponseUtils {
       DateTime start = new DateTime(hoursSinceEpoch);
       DateTime end = start.plusHours(1);
       for (String dimension : (groupByDimension ? dimensions
-          : Collections.<String> singleton("all"))) {
+          : Collections.singleton("all"))) {
         for (String dimensionValueSuffix : (groupByDimension ? dimensionValueSuffixes
-            : Collections.<String> singleton("all"))) {
+            : Collections.singleton("all"))) {
           String dimensionValue;
           if (groupByDimension) {
             dimensionValue = dimension + dimensionValueSuffix;
@@ -120,26 +119,29 @@ public class TestTimeSeriesResponseUtils {
           for (MetricFunction metricFunction : metricFunctions) {
             Double value = (double) (Objects.hash(start, end, dimension, dimensionValue,
                 metricFunction.toString()) % 1000); // doesn't matter, the test is that values are
-                                                    // consistent between data
-                                                    // structures.
+            // consistent between data
+            // structures.
             TimeSeriesMetric timeSeriesMetric =
                 new TimeSeriesMetric(metricFunction.getMetricName(), value);
             timeSeriesMetrics.add(timeSeriesMetric);
           }
           if (groupTimeSeriesMetricsIntoRow) {
             // add them all at once
-            dataGenerator.addEntry(Arrays.asList(dimension), Arrays.asList(dimensionValue), start, end,
-                timeSeriesMetrics.toArray(new TimeSeriesMetric[timeSeriesMetrics.size()]));
+            dataGenerator
+                .addEntry(Arrays.asList(dimension), Arrays.asList(dimensionValue), start, end,
+                    timeSeriesMetrics.toArray(new TimeSeriesMetric[timeSeriesMetrics.size()]));
           } else {
             // add them individually (one metric per row)
             for (TimeSeriesMetric timeSeriesMetric : timeSeriesMetrics) {
-              dataGenerator.addEntry(Arrays.asList(dimension), Arrays.asList(dimensionValue), start, end, timeSeriesMetric);
+              dataGenerator
+                  .addEntry(Arrays.asList(dimension), Arrays.asList(dimensionValue), start, end,
+                      timeSeriesMetric);
             }
           }
         }
       }
     }
-    Object[] dimensionGroupByArgs = new Object[] {
+    Object[] dimensionGroupByArgs = new Object[]{
         testName, dataGenerator.getResponse(), dimensions, dataGenerator.getMap()
     };
     return dimensionGroupByArgs;
@@ -159,6 +161,7 @@ public class TestTimeSeriesResponseUtils {
    * MetricTimeSeries> with the provided addEntry method.
    */
   private class ConversionDataGenerator {
+
     private final List<TimeSeriesRow> timeSeriesRows = new ArrayList<>();
     private final Map<DimensionKey, MetricTimeSeries> map = new HashMap<>();
     private final List<String> dimensions;
@@ -178,7 +181,8 @@ public class TestTimeSeriesResponseUtils {
           new MetricSchema(metricNames, Collections.nCopies(metricNames.size(), MetricType.DOUBLE));
     }
 
-    void addEntry(List<String> dimensionNames, List<String> dimensionValues, DateTime start, DateTime end,
+    void addEntry(List<String> dimensionNames, List<String> dimensionValues, DateTime start,
+        DateTime end,
         TimeSeriesMetric... timeSeriesMetrics) {
       validateArgs(dimensionNames, dimensionValues, start, end, timeSeriesMetrics);
       timeSeriesRows.add(createRow(dimensionNames, dimensionValues, start, end, timeSeriesMetrics));
@@ -196,7 +200,8 @@ public class TestTimeSeriesResponseUtils {
       incrementMetricData(map.get(dimensionKey), start, end, timeSeriesMetrics);
     }
 
-    private void validateArgs(List<String> dimensionNames, List<String> dimensionValue, DateTime start,
+    private void validateArgs(List<String> dimensionNames, List<String> dimensionValue,
+        DateTime start,
         DateTime end, TimeSeriesMetric[] timeSeriesMetrics) {
       if (dimensionNames != null && dimensionNames.size() != 0) {
         for (String dimensionName : dimensionNames) {
@@ -208,7 +213,8 @@ public class TestTimeSeriesResponseUtils {
       }
     }
 
-    private TimeSeriesRow createRow(List<String> dimensionNames, List<String> dimensionValues, DateTime start,
+    private TimeSeriesRow createRow(List<String> dimensionNames, List<String> dimensionValues,
+        DateTime start,
         DateTime end, TimeSeriesMetric... timeSeriesMetrics) {
       Builder builder = new TimeSeriesRow.Builder();
       builder.setDimensionNames(dimensionNames);
@@ -234,7 +240,5 @@ public class TestTimeSeriesResponseUtils {
     private Map<DimensionKey, MetricTimeSeries> getMap() {
       return map;
     }
-
   }
-
 }

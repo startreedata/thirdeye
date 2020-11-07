@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.apache.pinot.thirdeye.datasource.timeseries;
 
+import com.google.common.collect.Lists;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,10 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import org.joda.time.DateTime;
-
-import com.google.common.collect.Lists;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.dashboard.Utils;
@@ -36,9 +33,11 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
+import org.joda.time.DateTime;
 
 /** Manual test for verifying code works as expected (ie without exceptions thrown) */
 public class TimeSeriesTest {
+
   private static final ArrayList<String> ABOOK_DIMENSIONS =
       Lists.newArrayList("browserName", "contactsOrigin", "deviceName", "continent", "countryCode",
           "environment", "locale", "osName", "pageKey", "source", "sourceApp");
@@ -55,15 +54,16 @@ public class TimeSeriesTest {
     if (resource == null) {
       resource = TimeSeriesHandler.class.getClassLoader().getResource("logback.x");
     }
-    PinotThirdEyeDataSource pinotThirdEyeDataSource = PinotThirdEyeDataSource.getDefaultTestDataSource(); // TODO
-                                                                                          // make
-                                                                                          // this
+    PinotThirdEyeDataSource pinotThirdEyeDataSource = PinotThirdEyeDataSource
+        .getDefaultTestDataSource(); // TODO
+    // make
+    // this
     // configurable
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
     dataSourceMap.put(PinotThirdEyeDataSource.class.getSimpleName(), pinotThirdEyeDataSource);
 
     QueryCache queryCache = new QueryCache(dataSourceMap, Executors.newFixedThreadPool(10));
-    TimeSeriesRequest[] requests = new TimeSeriesRequest[] {
+    TimeSeriesRequest[] requests = new TimeSeriesRequest[]{
         generateGroupByTimeRequest(),
         // generateGroupByDimensionRequest(),
         // generateGroupByTimeAndDimension()

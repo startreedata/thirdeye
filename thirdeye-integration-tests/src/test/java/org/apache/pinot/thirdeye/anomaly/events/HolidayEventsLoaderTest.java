@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,11 +31,11 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 /**
  *  Holiday events loader test.
  */
 public class HolidayEventsLoaderTest {
+
   private HolidayEventsLoader holidayEventsLoader;
   private Map<String, List<EventDTO>> holidayNameToHolidayEvent;
   private MockEventsManager eventsDAO;
@@ -57,8 +57,10 @@ public class HolidayEventsLoaderTest {
     anotherEventDTO.setTargetDimensionMap(countryCodes);
     eventDTO.setId(0L);
     anotherEventDTO.setId(1L);
-    eventsDAO = new MockEventsManager(new HashSet<>(Arrays.asList(eventDTO, anotherEventDTO)), null);
-    holidayEventsLoader = new HolidayEventsLoader(holidayEventsLoaderConfiguration, "path to key", eventsDAO);
+    eventsDAO = new MockEventsManager(new HashSet<>(Arrays.asList(eventDTO, anotherEventDTO)),
+        null);
+    holidayEventsLoader = new HolidayEventsLoader(holidayEventsLoaderConfiguration, "path to key",
+        eventsDAO);
   }
 
   /**
@@ -68,24 +70,30 @@ public class HolidayEventsLoaderTest {
   public void testGetHolidayNameToEventDtoMap() {
     Map<HolidayEventsLoader.HolidayEvent, Set<String>> newHolidayEventToCountryCodes = new HashMap<>();
     HolidayEventsLoader.HolidayEvent firstHolidayEvent =
-        new HolidayEventsLoader.HolidayEvent("Some festival", EventType.HOLIDAY.toString(), 1521676800L, 1521763200L);
+        new HolidayEventsLoader.HolidayEvent("Some festival", EventType.HOLIDAY.toString(),
+            1521676800L, 1521763200L);
 
     HolidayEventsLoader.HolidayEvent secondHolidayEvent =
-        new HolidayEventsLoader.HolidayEvent("Some special day", EventType.HOLIDAY.toString(), 1521676800L,
+        new HolidayEventsLoader.HolidayEvent("Some special day", EventType.HOLIDAY.toString(),
+            1521676800L,
             1521763200L);
 
     HolidayEventsLoader.HolidayEvent thirdHolidayEvent =
-        new HolidayEventsLoader.HolidayEvent("Some festival", EventType.HOLIDAY.toString(), 1521504000L, 1521590400L);
+        new HolidayEventsLoader.HolidayEvent("Some festival", EventType.HOLIDAY.toString(),
+            1521504000L, 1521590400L);
 
     newHolidayEventToCountryCodes.put(firstHolidayEvent, new HashSet<>(Arrays.asList("us", "cn")));
     newHolidayEventToCountryCodes.put(secondHolidayEvent, Collections.singleton("us"));
     newHolidayEventToCountryCodes.put(thirdHolidayEvent, Collections.singleton("uk"));
 
-    holidayNameToHolidayEvent = holidayEventsLoader.getHolidayNameToEventDtoMap(newHolidayEventToCountryCodes);
+    holidayNameToHolidayEvent = holidayEventsLoader
+        .getHolidayNameToEventDtoMap(newHolidayEventToCountryCodes);
     Assert.assertEquals(holidayNameToHolidayEvent.get("Some festival").size(), 2);
     Assert.assertEquals(holidayNameToHolidayEvent.get("Some special day").size(), 1);
-    Assert.assertEquals(holidayNameToHolidayEvent.get("Some festival").get(0).getName(), "Some festival");
-    Assert.assertEquals(holidayNameToHolidayEvent.get("Some festival").get(1).getName(), "Some festival");
+    Assert.assertEquals(holidayNameToHolidayEvent.get("Some festival").get(0).getName(),
+        "Some festival");
+    Assert.assertEquals(holidayNameToHolidayEvent.get("Some festival").get(1).getName(),
+        "Some festival");
   }
 
   /**
@@ -106,7 +114,8 @@ public class HolidayEventsLoaderTest {
     Assert.assertFalse(eventNameToEventDto.containsKey("Disappeared festival"));
     Assert.assertTrue(eventNameToEventDto.containsKey("Some special day"));
     Assert.assertEquals(eventNameToEventDto.get("Some special day").size(), 1);
-    Assert.assertEquals(eventNameToEventDto.get("Some special day").get(0).getTargetDimensionMap().get("countryCode"),
+    Assert.assertEquals(eventNameToEventDto.get("Some special day").get(0).getTargetDimensionMap()
+            .get("countryCode"),
         Collections.singletonList("us"));
     Assert.assertTrue(eventNameToEventDto.containsKey("Some festival"));
     List<EventDTO> festivalEvents = eventNameToEventDto.get("Some festival");
@@ -116,11 +125,13 @@ public class HolidayEventsLoaderTest {
     Collections.sort(festivalEvents, new Comparator<EventDTO>() {
       @Override
       public int compare(EventDTO o1, EventDTO o2) {
-        return o1.getTargetDimensionMap().get("countryCode").size() - o2.getTargetDimensionMap().get("countryCode").size();
+        return o1.getTargetDimensionMap().get("countryCode").size() - o2.getTargetDimensionMap()
+            .get("countryCode").size();
       }
     });
 
-    Assert.assertTrue(festivalEvents.get(0).getTargetDimensionMap().get("countryCode").equals(Collections.singletonList("uk"))
+    Assert.assertTrue(festivalEvents.get(0).getTargetDimensionMap().get("countryCode")
+        .equals(Collections.singletonList("uk"))
         && new HashSet<>(festivalEvents.get(1).getTargetDimensionMap().get("countryCode")).equals(
         new HashSet<>(Arrays.asList("us", "cn"))));
   }

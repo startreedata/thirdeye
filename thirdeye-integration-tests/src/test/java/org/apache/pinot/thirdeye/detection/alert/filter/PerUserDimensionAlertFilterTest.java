@@ -17,6 +17,7 @@
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
 import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.makeAnomaly;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
-import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveCubeNode;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveRow;
-import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
+import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
+import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
+import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNodeUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -35,15 +35,16 @@ public class CubeTest {
   @Test
   public void testSortDimensionNoHierarchy() throws Exception {
     List<Cube.DimensionCost> dimensionCosts = getBasicDimensionCosts();
-    Dimensions expectedSortedDimensions1 = new Dimensions(Arrays.asList("country", "page", "continent"));
+    Dimensions expectedSortedDimensions1 = new Dimensions(
+        Arrays.asList("country", "page", "continent"));
 
     // No hierarchy
     Dimensions sortedDimensionsMaxDepth =
-        Cube.sortDimensions(dimensionCosts, 3, Collections.<List<String>>emptyList());
+        Cube.sortDimensions(dimensionCosts, 3, Collections.emptyList());
     Assert.assertEquals(sortedDimensionsMaxDepth, expectedSortedDimensions1);
 
     Dimensions sortedDimensionsExceedMaxDepth =
-        Cube.sortDimensions(dimensionCosts, 4, Collections.<List<String>>emptyList());
+        Cube.sortDimensions(dimensionCosts, 4, Collections.emptyList());
     Assert.assertEquals(sortedDimensionsExceedMaxDepth, expectedSortedDimensions1);
   }
 
@@ -53,20 +54,24 @@ public class CubeTest {
 
     // Hierarchy with depth = 1
     Dimensions sortedDimensionsDepth1 =
-        Cube.sortDimensions(dimensionCosts, 1, Collections.singletonList(Arrays.asList("continent", "country")));
+        Cube.sortDimensions(dimensionCosts, 1,
+            Collections.singletonList(Arrays.asList("continent", "country")));
     Dimensions expectedSortedDimensions4 = new Dimensions(Arrays.asList("country"));
     Assert.assertEquals(sortedDimensionsDepth1, expectedSortedDimensions4);
 
     // Hierarchy with depth = 2
     Dimensions sortedDimensionsDepth2 =
-        Cube.sortDimensions(dimensionCosts, 2, Collections.singletonList(Arrays.asList("continent", "country")));
+        Cube.sortDimensions(dimensionCosts, 2,
+            Collections.singletonList(Arrays.asList("continent", "country")));
     Dimensions expectedSortedDimensions2 = new Dimensions(Arrays.asList("country", "page"));
     Assert.assertEquals(sortedDimensionsDepth2, expectedSortedDimensions2);
 
     // Hierarchy with depth = 3
     Dimensions sortedDimensionsDepth3 =
-        Cube.sortDimensions(dimensionCosts, 3, Collections.singletonList(Arrays.asList("continent", "country")));
-    Dimensions expectedSortedDimensions3 = new Dimensions(Arrays.asList("page", "continent", "country"));
+        Cube.sortDimensions(dimensionCosts, 3,
+            Collections.singletonList(Arrays.asList("continent", "country")));
+    Dimensions expectedSortedDimensions3 = new Dimensions(
+        Arrays.asList("page", "continent", "country"));
     Assert.assertEquals(sortedDimensionsDepth3, expectedSortedDimensions3);
 
     Assert.assertEquals(dimensionCosts, getBasicDimensionCosts());
@@ -92,12 +97,12 @@ public class CubeTest {
   private List<DimNameValueCostEntry> getBasicCostSet() {
     List<DimNameValueCostEntry> costSet = new ArrayList<>();
     costSet.add(new DimNameValueCostEntry("country", "US", 0, 0, 0d, 0d, 0, 0, 0, 7));
-    costSet.add(new DimNameValueCostEntry("country", "IN", 0, 0, 0d, 0d, 0, 0,  0, 3));
-    costSet.add(new DimNameValueCostEntry("continent", "N. America", 0, 0, 0d, 0d, 0,  0, 0, 4));
-    costSet.add(new DimNameValueCostEntry("continent", "S. America", 0, 0, 0d, 0d, 0, 0, 0,  1));
-    costSet.add(new DimNameValueCostEntry("page", "front_page", 0, 0, 0d, 0d, 0, 0,  0, 4));
-    costSet.add(new DimNameValueCostEntry("page", "page", 0, 0, 0d, 0d, 0, 0,  0, 3));
-    costSet.add(new DimNameValueCostEntry("page", "page2", 0, 0, 0d, 0d, 0, 0,  0, 1));
+    costSet.add(new DimNameValueCostEntry("country", "IN", 0, 0, 0d, 0d, 0, 0, 0, 3));
+    costSet.add(new DimNameValueCostEntry("continent", "N. America", 0, 0, 0d, 0d, 0, 0, 0, 4));
+    costSet.add(new DimNameValueCostEntry("continent", "S. America", 0, 0, 0d, 0d, 0, 0, 0, 1));
+    costSet.add(new DimNameValueCostEntry("page", "front_page", 0, 0, 0d, 0d, 0, 0, 0, 4));
+    costSet.add(new DimNameValueCostEntry("page", "page", 0, 0, 0d, 0d, 0, 0, 0, 3));
+    costSet.add(new DimNameValueCostEntry("page", "page2", 0, 0, 0d, 0d, 0, 0, 0, 1));
     return costSet;
   }
 
@@ -113,7 +118,8 @@ public class CubeTest {
     Assert.assertEquals(actualNodes, expectedNodes);
 
     // Test the structure of the hierarchy
-    Assert.assertTrue(CubeNodeUtils.equalHierarchy(actualNodes.get(0).get(0), expectedNodes.get(0).get(0)));
+    Assert.assertTrue(
+        CubeNodeUtils.equalHierarchy(actualNodes.get(0).get(0), expectedNodes.get(0).get(0)));
   }
 
   private List<List<Row>> buildHierarchicalRows() {
@@ -141,17 +147,20 @@ public class CubeTest {
     {
       List<Row> level2 = new ArrayList<>();
       Row row1 =
-          new AdditiveRow(new Dimensions(Arrays.asList("country", "page")), new DimensionValues(Arrays.asList("US", "page1")),
+          new AdditiveRow(new Dimensions(Arrays.asList("country", "page")),
+              new DimensionValues(Arrays.asList("US", "page1")),
               8, 10);
       level2.add(row1);
 
       Row row2 =
-          new AdditiveRow(new Dimensions(Arrays.asList("country", "page")), new DimensionValues(Arrays.asList("US", "page2")),
+          new AdditiveRow(new Dimensions(Arrays.asList("country", "page")),
+              new DimensionValues(Arrays.asList("US", "page2")),
               12, 20);
       level2.add(row2);
 
       Row row3 =
-          new AdditiveRow(new Dimensions(Arrays.asList("country", "page")), new DimensionValues(Arrays.asList("IN", "page1")),
+          new AdditiveRow(new Dimensions(Arrays.asList("country", "page")),
+              new DimensionValues(Arrays.asList("IN", "page1")),
               10, 15);
       level2.add(row3);
 

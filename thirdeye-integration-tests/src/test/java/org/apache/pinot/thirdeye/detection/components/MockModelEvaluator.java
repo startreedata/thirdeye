@@ -29,8 +29,8 @@ import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelStatus;
 import org.joda.time.Instant;
 
-
 public class MockModelEvaluator implements ModelEvaluator<MockModelEvaluatorSpec> {
+
   private ModelStatus status;
 
   @Override

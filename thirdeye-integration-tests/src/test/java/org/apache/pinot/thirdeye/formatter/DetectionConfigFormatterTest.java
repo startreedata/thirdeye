@@ -20,6 +20,18 @@
 
 package org.apache.pinot.thirdeye.formatter;
 
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_ALERT_DETAILS_WINDOW_SIZE;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_CREATED_BY;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_DESCRIPTION;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_ID;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_IS_ACTIVE;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_LAST_TIMESTAMP;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_METRIC_URNS;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_NAME;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_RULES;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_UPDATED_BY;
+import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.ATTR_YAML;
+
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.Arrays;
@@ -36,10 +48,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter.*;
-
-
 public class DetectionConfigFormatterTest {
+
   private DAOTestBase testDAOProvider;
   private DAORegistry daoRegistry;
 
@@ -54,15 +64,19 @@ public class DetectionConfigFormatterTest {
     AlertDTO configDTO = new AlertDTO();
     configDTO.setName("test");
     configDTO.setActive(true);
-    configDTO.setYaml(IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream("sample-detection-config.yml")));
+    configDTO.setYaml(IOUtils.toString(Thread.currentThread().getContextClassLoader()
+        .getResourceAsStream("sample-detection-config.yml")));
     configDTO.setDescription("description");
     configDTO.setCreatedBy("test");
     configDTO.setUpdatedBy("test");
     configDTO.setId(1L);
-    configDTO.setProperties(ImmutableMap.of("nestedMetricUrns", Collections.singleton("thirdeye:metric:1"), "nested",
-        Collections.singletonList(ImmutableMap.of("nestedMetricUrns", Collections.singleton("thirdeye:metric:2")))));
+    configDTO.setProperties(
+        ImmutableMap.of("nestedMetricUrns", Collections.singleton("thirdeye:metric:1"), "nested",
+            Collections.singletonList(
+                ImmutableMap.of("nestedMetricUrns", Collections.singleton("thirdeye:metric:2")))));
     DetectionConfigFormatter formatter =
-        new DetectionConfigFormatter(this.daoRegistry.getMetricConfigDAO(), this.daoRegistry.getDatasetConfigDAO());
+        new DetectionConfigFormatter(this.daoRegistry.getMetricConfigDAO(),
+            this.daoRegistry.getDatasetConfigDAO());
     Map<String, Object> result = formatter.format(configDTO);
     Assert.assertEquals(result.get(ATTR_ID), configDTO.getId());
     Assert.assertEquals(result.get(ATTR_IS_ACTIVE), configDTO.isActive());

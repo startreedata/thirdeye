@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,15 +17,15 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyFeedConfig;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -36,7 +36,7 @@ public class TestAlertConfigManager {
   Long alertConfigid;
   private DAOTestBase testDAOProvider;
   private AlertConfigManager alertConfigDAO;
-  private List<Long> batchAlertConfigIdList = new ArrayList<>();
+  private final List<Long> batchAlertConfigIdList = new ArrayList<>();
 
   @BeforeClass
   void beforeClass() {
@@ -66,7 +66,7 @@ public class TestAlertConfigManager {
     Assert.assertNotNull(alertConfigDAO.findWhereNameEquals(sample.getName()));
   }
 
-  @Test (dependsOnMethods = {"testDeleteAlertConfig"})
+  @Test(dependsOnMethods = {"testDeleteAlertConfig"})
   public void testCreateAlertConfigWithAnomalyFeedConfig() {
     AlertConfigDTO dto = new AlertConfigDTO();
     dto.setActive(true);
@@ -78,12 +78,13 @@ public class TestAlertConfigManager {
     AnomalyFeedConfig feedConfig = dto.getAnomalyFeedConfig();
     AnomalyFeedConfig newFeedConfig = newDto.getAnomalyFeedConfig();
 
-    Assert.assertEquals(newFeedConfig.getAnomalyFetcherConfigs().size(), feedConfig.getAnomalyFetcherConfigs().size());
+    Assert.assertEquals(newFeedConfig.getAnomalyFetcherConfigs().size(),
+        feedConfig.getAnomalyFetcherConfigs().size());
     Assert.assertEquals(newFeedConfig.getAlertFilterConfigs(), feedConfig.getAlertFilterConfigs());
     Assert.assertEquals(newFeedConfig.getAnomalySource(), feedConfig.getAnomalySource());
   }
 
-  @Test (dependsOnMethods = {"testCreateAlertConfig"})
+  @Test(dependsOnMethods = {"testCreateAlertConfig"})
   public void testFetchAlertConfig() {
     // find by id
     AlertConfigDTO response = alertConfigDAO.findById(alertConfigid);
@@ -92,7 +93,7 @@ public class TestAlertConfigManager {
     Assert.assertEquals(alertConfigDAO.findAll().size(), 1);
   }
 
-  @Test (dependsOnMethods = {"testFetchAlertConfig"})
+  @Test(dependsOnMethods = {"testFetchAlertConfig"})
   public void testDeleteAlertConfig() {
     alertConfigDAO.deleteById(alertConfigid);
     Assert.assertEquals(alertConfigDAO.findAll().size(), 0);
@@ -117,16 +118,16 @@ public class TestAlertConfigManager {
     return alertConfigDTO;
   }
 
-  @Test (expectedExceptions = IllegalArgumentException.class)
+  @Test(expectedExceptions = IllegalArgumentException.class)
   public void testNullUpdate() {
     AlertConfigDTO alertConfig = createAlertConfig("nullID");
     alertConfigDAO.update(alertConfig);
   }
 
-  @Test (dependsOnMethods = "testDeleteAlertConfig")
+  @Test(dependsOnMethods = "testDeleteAlertConfig")
   public void testInterruptedSingleUpdate() {
     AlertConfigDTO alertConfig1 = createAlertConfig("100");
-    Long id1 =alertConfigDAO.save(alertConfig1);
+    Long id1 = alertConfigDAO.save(alertConfig1);
 
     AlertConfigDTO alertConfig2 = createAlertConfig("200");
     Long id2 = alertConfigDAO.save(alertConfig2);
@@ -144,7 +145,7 @@ public class TestAlertConfigManager {
     alertConfigDAO.deleteByIds(Arrays.asList(id1, id2));
   }
 
-  @Test (dependsOnMethods = "testInterruptedSingleUpdate")
+  @Test(dependsOnMethods = "testInterruptedSingleUpdate")
   public void testBatchUpdate() {
     List<AlertConfigDTO> initAlertConfigs = createBatchAlertConfigs();
     // Add multiple alert config to DB
@@ -171,7 +172,7 @@ public class TestAlertConfigManager {
     }
   }
 
-  @Test (dependsOnMethods = {"testBatchUpdate"})
+  @Test(dependsOnMethods = {"testBatchUpdate"})
   public void testBatchDeletion() {
     // Ensure that there are multiple alert configs in the DB; otherwise, this test is meaningless.
     Preconditions.checkState(batchAlertConfigIdList.size() > 1);
@@ -197,7 +198,7 @@ public class TestAlertConfigManager {
     }
   }
 
-  @Test (dependsOnMethods = "testBatchDeletion")
+  @Test(dependsOnMethods = "testBatchDeletion")
   public void testBatchUpdateWithDuplicateName() {
     List<AlertConfigDTO> initAlertConfigs = createBatchAlertConfigs();
     List<Long> localBatchAlertConfigIdList = new ArrayList<>();
@@ -224,21 +225,24 @@ public class TestAlertConfigManager {
     AlertConfigDTO firstAlert = alertConfigDAO.findById(localBatchAlertConfigIdList.get(0));
     Assert.assertEquals(firstAlert.getName(), "4");
     Assert.assertEquals(alertConfigDAO.findByPredicate(Predicate.EQ("name", "1")).size(), 0);
-    Assert.assertEquals(alertConfigDAO.findByPredicate(Predicate.EQ("name", "4")).get(0), firstAlert);
+    Assert
+        .assertEquals(alertConfigDAO.findByPredicate(Predicate.EQ("name", "4")).get(0), firstAlert);
 
     AlertConfigDTO secondAlert = alertConfigDAO.findById(localBatchAlertConfigIdList.get(1));
     Assert.assertEquals(secondAlert.getName(), "2");
-    Assert.assertEquals(alertConfigDAO.findByPredicate(Predicate.EQ("name", "2")).get(0), secondAlert);
+    Assert.assertEquals(alertConfigDAO.findByPredicate(Predicate.EQ("name", "2")).get(0),
+        secondAlert);
 
     AlertConfigDTO thirdAlert = alertConfigDAO.findById(localBatchAlertConfigIdList.get(2));
     Assert.assertEquals(thirdAlert.getName(), "3");
-    Assert.assertEquals(alertConfigDAO.findByPredicate(Predicate.EQ("name", "3")).get(0), thirdAlert);
+    Assert
+        .assertEquals(alertConfigDAO.findByPredicate(Predicate.EQ("name", "3")).get(0), thirdAlert);
 
     // Clean up
     alertConfigDAO.deleteByIds(localBatchAlertConfigIdList);
   }
 
-  @Test (dependsOnMethods = "testBatchUpdateWithDuplicateName")
+  @Test(dependsOnMethods = "testBatchUpdateWithDuplicateName")
   public void testBatchUpdateWithNullID() {
     List<AlertConfigDTO> initAlertConfigs = createBatchAlertConfigs();
     List<Long> localBatchAlertConfigIdList = new ArrayList<>();

@@ -47,8 +47,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class CurrentAndBaselineLoaderTest {
+
   private static final String COLLECTION_VALUE = "test_dataset";
   private static final String DETECTION_NAME_VALUE = "test detection";
   private static final String METRIC_VALUE = "test_metric";
@@ -115,7 +115,8 @@ public class CurrentAndBaselineLoaderTest {
         DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
             .getDatasetMaxDataTimeCache());
 
-    this.currentAndBaselineLoader = new CurrentAndBaselineLoader(this.metricDAO, this.dataSetDAO, this.aggregationLoader);
+    this.currentAndBaselineLoader = new CurrentAndBaselineLoader(this.metricDAO, this.dataSetDAO,
+        this.aggregationLoader);
   }
 
   @AfterMethod
@@ -138,6 +139,5 @@ public class CurrentAndBaselineLoaderTest {
 
     Assert.assertEquals(anomaly.getAvgBaselineVal(), 100.0);
     Assert.assertEquals(anomaly.getAvgCurrentVal(), 200.0);
-
   }
 }

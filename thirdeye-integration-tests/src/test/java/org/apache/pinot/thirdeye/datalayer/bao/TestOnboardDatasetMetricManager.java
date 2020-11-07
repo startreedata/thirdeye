@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,32 +16,31 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.dto.OnboardDatasetMetricDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import org.apache.pinot.thirdeye.datalayer.dto.OnboardDatasetMetricDTO;
 
 public class TestOnboardDatasetMetricManager {
 
   private Long id1 = null;
   private Long id2 = null;
   private Long id3 = null;
-  private static String dataSource1 = "ds1";
-  private static String dataSource2 = "ds2";
-  private static String dataset1 = "d1";
-  private static String dataset2 = "d2";
-  private static String metric1 = "m1";
-  private static String metric2 = "m2";
-  private static String metric3 = "m3";
+  private static final String dataSource1 = "ds1";
+  private static final String dataSource2 = "ds2";
+  private static final String dataset1 = "d1";
+  private static final String dataset2 = "d2";
+  private static final String metric1 = "m1";
+  private static final String metric2 = "m2";
+  private static final String metric3 = "m3";
 
   private DAOTestBase testDAOProvider;
   private OnboardDatasetMetricManager onboardDatasetMetricDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -70,7 +69,6 @@ public class TestOnboardDatasetMetricManager {
     dto = DaoTestUtils.getTestOnboardConfig(dataset2, metric3, dataSource2);
     id3 = onboardDatasetMetricDAO.save(dto);
     Assert.assertNotNull(id3);
-
   }
 
   @Test(dependsOnMethods = {"testCreateOnboardConfig"})
@@ -87,19 +85,19 @@ public class TestOnboardDatasetMetricManager {
     Assert.assertEquals(dtos.size(), 1);
   }
 
-  @Test(dependsOnMethods = { "testFindOnboardConfig" })
+  @Test(dependsOnMethods = {"testFindOnboardConfig"})
   public void testUpdateOnboardConfig() {
     OnboardDatasetMetricDTO dto = onboardDatasetMetricDAO.findById(id1);
     Assert.assertFalse(dto.isOnboarded());
     dto.setOnboarded(true);
     onboardDatasetMetricDAO.update(dto);
-    List<OnboardDatasetMetricDTO> dtos = onboardDatasetMetricDAO.findByDataSourceAndOnboarded(dataSource1, true);
+    List<OnboardDatasetMetricDTO> dtos = onboardDatasetMetricDAO
+        .findByDataSourceAndOnboarded(dataSource1, true);
     Assert.assertEquals(dtos.size(), 1);
     Assert.assertTrue(dtos.get(0).isOnboarded());
-
   }
 
-  @Test(dependsOnMethods = { "testUpdateOnboardConfig" })
+  @Test(dependsOnMethods = {"testUpdateOnboardConfig"})
   public void testDeleteOnboardConfig() {
     onboardDatasetMetricDAO.deleteById(id1);
     OnboardDatasetMetricDTO dto = onboardDatasetMetricDAO.findById(id1);

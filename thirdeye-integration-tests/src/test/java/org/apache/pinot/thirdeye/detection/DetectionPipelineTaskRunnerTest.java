@@ -19,28 +19,28 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class DetectionPipelineTaskRunnerTest {
+
   private List<MockPipeline> runs;
   private List<MockPipelineOutput> outputs;
 
@@ -98,7 +98,6 @@ public class DetectionPipelineTaskRunnerTest {
     this.info.setEnd(1500);
 
     this.context = new TaskContext();
-
   }
 
   @AfterMethod(alwaysRun = true)
@@ -115,13 +114,16 @@ public class DetectionPipelineTaskRunnerTest {
     Assert.assertEquals(this.runs.get(0).getEndTime(), 1500);
     Assert.assertEquals(this.runs.get(0).getConfig().getName(), "myName");
     Assert.assertEquals(this.runs.get(0).getConfig().getDescription(), "myDescription");
-    Assert.assertEquals(this.runs.get(0).getConfig().getProperties().get("className"), "myClassName");
+    Assert
+        .assertEquals(this.runs.get(0).getConfig().getProperties().get("className"), "myClassName");
     Assert.assertEquals(this.runs.get(0).getConfig().getCron(), "myCron");
   }
 
   @Test
   public void testTaskRunnerPersistence() throws Exception {
-    MergedAnomalyResultDTO anomaly = DetectionTestUtils.makeAnomaly(this.detectorId, 1300, 1400, null, null, Collections.singletonMap("myKey", "myValue"));
+    MergedAnomalyResultDTO anomaly = DetectionTestUtils
+        .makeAnomaly(this.detectorId, 1300, 1400, null, null,
+            Collections.singletonMap("myKey", "myValue"));
 
     this.outputs.add(new MockPipelineOutput(Collections.singletonList(anomaly), 1400));
 
@@ -138,8 +140,9 @@ public class DetectionPipelineTaskRunnerTest {
 
   @Test
   public void testTaskRunnerPersistenceFailTimestamp() throws Exception {
-    MergedAnomalyResultDTO anomaly = DetectionTestUtils.makeAnomaly(this.detectorId, 1300, 1400, null, null,
-        Collections.singletonMap("myKey", "myValue"));
+    MergedAnomalyResultDTO anomaly = DetectionTestUtils
+        .makeAnomaly(this.detectorId, 1300, 1400, null, null,
+            Collections.singletonMap("myKey", "myValue"));
 
     this.outputs.add(new MockPipelineOutput(Collections.singletonList(anomaly), -1));
 

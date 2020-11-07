@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class PrimitiveMultimapBenchmark {
   // TODO: validate benchmarking method - Dead Code Elimination, etc. may be playing tricks on us.
 
@@ -38,7 +37,8 @@ public class PrimitiveMultimapBenchmark {
   private static final int N_ROUNDS = 15;
   private static final int N_ELEMENTS = 10_000_000;
 
-  private static final String[] SERIES_NAMES = new String[] { "task", "min", "mid", "max", "outer", "checksum", "samples", "collisions", "rereads" };
+  private static final String[] SERIES_NAMES = new String[]{"task", "min", "mid", "max", "outer",
+      "checksum", "samples", "collisions", "rereads"};
 
   private static final long SEED = System.nanoTime();
 
@@ -46,7 +46,7 @@ public class PrimitiveMultimapBenchmark {
   private long tStartOuter;
   private List<Long> times = new ArrayList<>();
   private long timeOuter;
-  private DataFrame.Builder results = DataFrame.builder(SERIES_NAMES);
+  private final DataFrame.Builder results = DataFrame.builder(SERIES_NAMES);
 
   private void benchmarkPrimitiveMap() {
     startTimerOuter();
@@ -61,10 +61,10 @@ public class PrimitiveMultimapBenchmark {
       PrimitiveMultimap m = new PrimitiveMultimap(N_ELEMENTS);
 
       startTimer();
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         m.put(keys[i], values[i]);
       }
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         output[i] = m.get(keys[i]);
       }
       stopTimer();
@@ -89,10 +89,10 @@ public class PrimitiveMultimapBenchmark {
       Map<Integer, Integer> m = new HashMap<>(N_ELEMENTS);
 
       startTimer();
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         m.put(keys[i], values[i]);
       }
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         output[i] = m.get(keys[i]);
       }
       stopTimer();
@@ -115,12 +115,13 @@ public class PrimitiveMultimapBenchmark {
       Multimap<Integer, Integer> m = ArrayListMultimap.create(N_ELEMENTS, 1);
 
       startTimer();
-      for(int i=0; i<N_ELEMENTS; i++) {
+      for (int i = 0; i < N_ELEMENTS; i++) {
         m.put(keys[i], values[i]);
       }
-      for(int i=0; i<N_ELEMENTS; i++) {
-        for(int v : m.get(keys[i]))
+      for (int i = 0; i < N_ELEMENTS; i++) {
+        for (int v : m.get(keys[i])) {
           output[i] = v;
+        }
       }
       stopTimer();
 
@@ -143,22 +144,24 @@ public class PrimitiveMultimapBenchmark {
       PrimitiveMultimap m = new PrimitiveMultimap(N_ELEMENTS);
 
       startTimer();
-      for(int i=N_ELEMENTS-1; i>=0; i--) {
+      for (int i = N_ELEMENTS - 1; i >= 0; i--) {
         m.put(i & (0x400 - 1), values[i]);
       }
 
       int cntr = 0;
-      for(int i=0; i<0x400; i++) {
+      for (int i = 0; i < 0x400; i++) {
         int val = m.get(i);
-        while(val != -1) {
+        while (val != -1) {
           output[cntr++] = val;
           val = m.getNext();
         }
       }
       stopTimer();
 
-      if(cntr != N_ELEMENTS)
-        throw new IllegalStateException(String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      if (cntr != N_ELEMENTS) {
+        throw new IllegalStateException(
+            String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      }
       assertEqualsSorted(output, values);
       checksum ^= checksum(output);
       collisions += m.getCollisions();
@@ -178,19 +181,22 @@ public class PrimitiveMultimapBenchmark {
       Multimap<Integer, Integer> m = ArrayListMultimap.create(0x400, (N_ELEMENTS >>> 10) + 1);
 
       startTimer();
-      for(int i=N_ELEMENTS-1; i>=0; i--) {
+      for (int i = N_ELEMENTS - 1; i >= 0; i--) {
         m.put(i & (0x400 - 1), values[i]);
       }
 
       int cntr = 0;
-      for(int i=0; i<0x400; i++) {
-        for(int val : m.get(i))
+      for (int i = 0; i < 0x400; i++) {
+        for (int val : m.get(i)) {
           output[cntr++] = val;
+        }
       }
       stopTimer();
 
-      if(cntr != N_ELEMENTS)
-        throw new IllegalStateException(String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      if (cntr != N_ELEMENTS) {
+        throw new IllegalStateException(
+            String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      }
       assertEqualsSorted(output, values);
       checksum ^= checksum(output);
     }
@@ -210,22 +216,24 @@ public class PrimitiveMultimapBenchmark {
       PrimitiveMultimap m = new PrimitiveMultimap(N_ELEMENTS);
 
       startTimer();
-      for(int i=N_ELEMENTS-1; i>=0; i--) {
+      for (int i = N_ELEMENTS - 1; i >= 0; i--) {
         m.put(i & (0x10 - 1), values[i]);
       }
 
       int cntr = 0;
-      for(int i=0; i<0x10; i++) {
+      for (int i = 0; i < 0x10; i++) {
         int val = m.get(i);
-        while(val != -1) {
+        while (val != -1) {
           output[cntr++] = val;
           val = m.getNext();
         }
       }
       stopTimer();
 
-      if(cntr != N_ELEMENTS)
-        throw new IllegalStateException(String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      if (cntr != N_ELEMENTS) {
+        throw new IllegalStateException(
+            String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      }
       assertEqualsSorted(output, values);
       checksum ^= checksum(output);
       collisions += m.getCollisions();
@@ -245,20 +253,22 @@ public class PrimitiveMultimapBenchmark {
       Multimap<Integer, Integer> m = ArrayListMultimap.create(0x10, (N_ELEMENTS >>> 4) + 1);
 
       startTimer();
-      for(int i=N_ELEMENTS-1; i>=0; i--) {
+      for (int i = N_ELEMENTS - 1; i >= 0; i--) {
         m.put(i & (0x10 - 1), values[i]);
       }
 
       int cntr = 0;
-      for(int i=0; i<0x10; i++) {
-        for(int val : m.get(i)) {
+      for (int i = 0; i < 0x10; i++) {
+        for (int val : m.get(i)) {
           output[cntr++] = val;
         }
       }
       stopTimer();
 
-      if(cntr != N_ELEMENTS)
-        throw new IllegalStateException(String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      if (cntr != N_ELEMENTS) {
+        throw new IllegalStateException(
+            String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      }
       assertEqualsSorted(output, values);
       checksum ^= checksum(output);
     }
@@ -278,22 +288,24 @@ public class PrimitiveMultimapBenchmark {
       PrimitiveMultimap m = new PrimitiveMultimap(N_ELEMENTS);
 
       startTimer();
-      for(int i=N_ELEMENTS-1; i>=0; i--) {
+      for (int i = N_ELEMENTS - 1; i >= 0; i--) {
         m.put(i >>> 4, values[i]);
       }
 
       int cntr = 0;
-      for(int i=0; i<N_ELEMENTS >>> 4; i++) {
+      for (int i = 0; i < N_ELEMENTS >>> 4; i++) {
         int val = m.get(i);
-        while(val != -1) {
+        while (val != -1) {
           output[cntr++] = val;
           val = m.getNext();
         }
       }
       stopTimer();
 
-      if(cntr != N_ELEMENTS)
-        throw new IllegalStateException(String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      if (cntr != N_ELEMENTS) {
+        throw new IllegalStateException(
+            String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      }
       assertEqualsSorted(output, values);
       checksum ^= checksum(output);
       collisions += m.getCollisions();
@@ -313,20 +325,22 @@ public class PrimitiveMultimapBenchmark {
       Multimap<Integer, Integer> m = ArrayListMultimap.create(N_ELEMENTS >>> 4, 0x10 + 1);
 
       startTimer();
-      for(int i=N_ELEMENTS-1; i>=0; i--) {
+      for (int i = N_ELEMENTS - 1; i >= 0; i--) {
         m.put(i >>> 4, values[i]);
       }
 
       int cntr = 0;
-      for(int i=0; i<N_ELEMENTS >>> 4; i++) {
-        for(int val : m.get(i)) {
+      for (int i = 0; i < N_ELEMENTS >>> 4; i++) {
+        for (int val : m.get(i)) {
           output[cntr++] = val;
         }
       }
       stopTimer();
 
-      if(cntr != N_ELEMENTS)
-        throw new IllegalStateException(String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      if (cntr != N_ELEMENTS) {
+        throw new IllegalStateException(
+            String.format("Expected %d elements, but got %d", N_ELEMENTS, cntr));
+      }
       assertEqualsSorted(output, values);
       checksum ^= checksum(output);
     }
@@ -369,8 +383,12 @@ public class PrimitiveMultimapBenchmark {
     long tMid = this.times.get(this.times.size() / 2);
     long tMin = Collections.min(this.times);
     long tMax = Collections.max(this.times);
-    LOG.info("{}: min/mid/max = {}ms {}ms {}ms [all={}ms, chk={}, cnt={}, colls={}, rread={}]", name, tMin / 1000000, tMid / 1000000, tMax / 1000000, timeOuter / 1000000, checksum % 1000, this.times.size(), collissions, rereads);
-    this.results.append(name, tMin, tMid, tMax, this.timeOuter, checksum, this.times.size(), collissions, rereads);
+    LOG.info("{}: min/mid/max = {}ms {}ms {}ms [all={}ms, chk={}, cnt={}, colls={}, rread={}]",
+        name, tMin / 1000000, tMid / 1000000, tMax / 1000000, timeOuter / 1000000, checksum % 1000,
+        this.times.size(), collissions, rereads);
+    this.results
+        .append(name, tMin, tMid, tMax, this.timeOuter, checksum, this.times.size(), collissions,
+            rereads);
 
     // reset timer stats
     this.times = new ArrayList<>();
@@ -411,7 +429,7 @@ public class PrimitiveMultimapBenchmark {
     Random r = new Random();
     r.setSeed(SEED);
     int[] values = new int[n];
-    for(int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
       values[i] = r.nextInt() & 0x7FFFFFFF;
     }
     return values;
@@ -419,7 +437,7 @@ public class PrimitiveMultimapBenchmark {
 
   private static long checksum(double... values) {
     long bits = 0;
-    for(double v : values) {
+    for (double v : values) {
       bits ^= Double.doubleToLongBits(v);
     }
     return bits;
@@ -427,7 +445,7 @@ public class PrimitiveMultimapBenchmark {
 
   private static long checksum(long... values) {
     long bits = 0;
-    for(long v : values) {
+    for (long v : values) {
       bits ^= v;
     }
     return bits;
@@ -435,18 +453,22 @@ public class PrimitiveMultimapBenchmark {
 
   private static long checksum(int... values) {
     long bits = 0;
-    for(int v : values) {
+    for (int v : values) {
       bits ^= v;
     }
     return bits;
   }
 
   private static int[] assertEquals(int[] actual, int[] expected) {
-    if(actual.length != expected.length)
-      throw new IllegalArgumentException(String.format("expected length %d, but got %d", expected.length, actual.length));
-    for(int i=0; i<expected.length; i++) {
-      if(expected[i] != actual[i])
-        throw new IllegalArgumentException(String.format("Expected index=%d value %d, but got %d", i, expected[i], actual[i]));
+    if (actual.length != expected.length) {
+      throw new IllegalArgumentException(
+          String.format("expected length %d, but got %d", expected.length, actual.length));
+    }
+    for (int i = 0; i < expected.length; i++) {
+      if (expected[i] != actual[i]) {
+        throw new IllegalArgumentException(
+            String.format("Expected index=%d value %d, but got %d", i, expected[i], actual[i]));
+      }
     }
     return actual;
   }
@@ -461,7 +483,7 @@ public class PrimitiveMultimapBenchmark {
   private static long[] shuffle(long[] arr) {
     arr = Arrays.copyOf(arr, arr.length);
     Random rnd = ThreadLocalRandom.current();
-    for (int i=arr.length-1; i>0; i--) {
+    for (int i = arr.length - 1; i > 0; i--) {
       int index = rnd.nextInt(i + 1);
       long a = arr[index];
       arr[index] = arr[i];

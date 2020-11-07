@@ -70,7 +70,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
 
   protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-  private DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
+  private final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
   private TaskDriver taskDriver = null;
 

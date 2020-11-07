@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,20 +16,17 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
+import com.google.common.collect.Range;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.Range;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-
 
 public class TestTimeRangeUtils {
 
@@ -45,14 +42,14 @@ public class TestTimeRangeUtils {
     DateTime now = DateTime.now();
     DateTime yesterday = now.minusDays(1);
     List<Object[]> entries = new ArrayList<>();
-    entries.add(new Object[] {
+    entries.add(new Object[]{
         null, yesterday, now, Collections.singletonList(Range.closedOpen(yesterday, now))
     });
-    entries.add(new Object[] {
+    entries.add(new Object[]{
         new TimeGranularity(1, TimeUnit.DAYS), yesterday, now,
         Collections.singletonList(Range.closedOpen(yesterday, now))
     });
-    entries.add(new Object[] {
+    entries.add(new Object[]{
         new TimeGranularity(6, TimeUnit.HOURS), yesterday, now,
         Arrays.asList(Range.closedOpen(yesterday, yesterday.plusHours(6)),
             Range.closedOpen(yesterday.plusHours(6), yesterday.plusHours(12)),

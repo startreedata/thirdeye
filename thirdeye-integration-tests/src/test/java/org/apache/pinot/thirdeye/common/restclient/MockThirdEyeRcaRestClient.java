@@ -23,6 +23,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
@@ -30,7 +31,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
-
 
 public class MockThirdEyeRcaRestClient {
 

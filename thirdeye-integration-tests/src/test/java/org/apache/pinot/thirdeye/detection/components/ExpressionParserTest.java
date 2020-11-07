@@ -22,7 +22,6 @@ import org.apache.pinot.thirdeye.detection.ExpressionParser;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class ExpressionParserTest {
 
   static final String PROP_AND = "and";
@@ -57,7 +56,6 @@ public class ExpressionParserTest {
     Assert.assertNotNull(rightOperators.get(PROP_VALUE));
     Assert.assertEquals(rightOperators.get(PROP_VALUE), "entityB");
   }
-
 
   @Test
   public void testComplexExpression() {

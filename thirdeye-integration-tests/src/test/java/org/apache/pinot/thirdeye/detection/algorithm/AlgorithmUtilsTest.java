@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,25 +16,28 @@
 
 package org.apache.pinot.thirdeye.detection.algorithm;
 
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import org.apache.pinot.thirdeye.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.joda.time.Duration;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class AlgorithmUtilsTest {
+
   DataFrame data;
   DataFrame outlierData;
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
-    try (Reader dataReader = new InputStreamReader(this.getClass().getResourceAsStream("timeseries-4w.csv"))) {
+    try (Reader dataReader = new InputStreamReader(
+        this.getClass().getResourceAsStream("timeseries-4w.csv"))) {
       this.data = DataFrame.fromCsv(dataReader);
       this.data.setIndex(DataFrame.COL_TIME);
-      this.data.addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
+      this.data
+          .addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
     }
 
     this.outlierData = new DataFrame(this.data);
@@ -55,13 +58,16 @@ public class AlgorithmUtilsTest {
 
   @Test
   public void testOutlierTooShort() {
-    Assert.assertTrue(AlgorithmUtils.getOutliers(this.outlierData, new Duration(86400000L * 3)).allFalse());
+    Assert.assertTrue(
+        AlgorithmUtils.getOutliers(this.outlierData, new Duration(86400000L * 3)).allFalse());
   }
 
   @Test
   public void testOutlier() {
     // NOTE: spline smoothing effect expands window
-    Assert.assertEquals(AlgorithmUtils.getOutliers(this.outlierData, new Duration(86400000L)).sum().longValue(), 57);
+    Assert.assertEquals(
+        AlgorithmUtils.getOutliers(this.outlierData, new Duration(86400000L)).sum().longValue(),
+        57);
   }
 
   @Test
@@ -71,19 +77,24 @@ public class AlgorithmUtilsTest {
 
   @Test
   public void testChangeNone() {
-    Assert.assertTrue(AlgorithmUtils.getChangePoints(this.data, new Duration(86400000L * 7)).isEmpty());
+    Assert.assertTrue(
+        AlgorithmUtils.getChangePoints(this.data, new Duration(86400000L * 7)).isEmpty());
   }
 
   @Test
   public void testChangeTooShort() {
-    Assert.assertTrue(AlgorithmUtils.getChangePoints(this.outlierData, new Duration(86400000L * 8)).isEmpty());
+    Assert.assertTrue(
+        AlgorithmUtils.getChangePoints(this.outlierData, new Duration(86400000L * 8)).isEmpty());
   }
 
   @Test
   public void testChange() {
-    Assert.assertEquals(AlgorithmUtils.getChangePoints(this.outlierData, new Duration(86400000L)).size(), 2);
-    Assert.assertNotNull(AlgorithmUtils.getChangePoints(this.outlierData, new Duration(86400000L)).lower(86400000L));
-    Assert.assertNotNull(AlgorithmUtils.getChangePoints(this.outlierData, new Duration(86400000L)).higher(86400000L * 2));
+    Assert.assertEquals(
+        AlgorithmUtils.getChangePoints(this.outlierData, new Duration(86400000L)).size(), 2);
+    Assert.assertNotNull(
+        AlgorithmUtils.getChangePoints(this.outlierData, new Duration(86400000L)).lower(86400000L));
+    Assert.assertNotNull(AlgorithmUtils.getChangePoints(this.outlierData, new Duration(86400000L))
+        .higher(86400000L * 2));
   }
 
 //  @Test
@@ -117,13 +128,16 @@ public class AlgorithmUtilsTest {
   @Test
   public void testFastBSplineTwoElements() {
     DoubleSeries s = DoubleSeries.buildFrom(5, 6);
-    Assert.assertTrue(equals(AlgorithmUtils.fastBSpline(s, 1), DoubleSeries.buildFrom(5.5, 5.5), 0.001));
+    Assert.assertTrue(
+        equals(AlgorithmUtils.fastBSpline(s, 1), DoubleSeries.buildFrom(5.5, 5.5), 0.001));
   }
 
   @Test
   public void testFastBSpline() {
     DoubleSeries s = DoubleSeries.buildFrom(1, 2, 3, 1, 2, 3, 1, 3, 2);
-    Assert.assertTrue(equals(AlgorithmUtils.fastBSpline(s, 4), DoubleSeries.buildFrom(2, 2, 2, 2, 2, 2, 2, 2, 2), 0.25));
+    Assert.assertTrue(
+        equals(AlgorithmUtils.fastBSpline(s, 4), DoubleSeries.buildFrom(2, 2, 2, 2, 2, 2, 2, 2, 2),
+            0.25));
   }
 
   @Test
@@ -135,19 +149,23 @@ public class AlgorithmUtilsTest {
   @Test
   public void testRobustMeanSingleWindow() {
     DoubleSeries s = DoubleSeries.buildFrom(1, 2, 3);
-    Assert.assertTrue(equals(AlgorithmUtils.robustMean(s, 1), DoubleSeries.buildFrom(1, 2, 3), 0.001));
+    Assert.assertTrue(
+        equals(AlgorithmUtils.robustMean(s, 1), DoubleSeries.buildFrom(1, 2, 3), 0.001));
   }
 
   @Test
   public void testRobustMeanSmallWindow() {
     DoubleSeries s = DoubleSeries.buildFrom(1, 2, 3);
-    Assert.assertTrue(equals(AlgorithmUtils.robustMean(s, 2), DoubleSeries.buildFrom(Double.NaN, 1.5, 2.5), 0.001));
+    Assert.assertTrue(
+        equals(AlgorithmUtils.robustMean(s, 2), DoubleSeries.buildFrom(Double.NaN, 1.5, 2.5),
+            0.001));
   }
 
   @Test
   public void testRobustMean() {
     DoubleSeries s = DoubleSeries.buildFrom(1, 2, 3, 4, 5, 6);
-    Assert.assertTrue(equals(AlgorithmUtils.robustMean(s, 4), DoubleSeries.buildFrom(Double.NaN, Double.NaN, Double.NaN, 2.5, 3.5, 4.5), 0.001));
+    Assert.assertTrue(equals(AlgorithmUtils.robustMean(s, 4),
+        DoubleSeries.buildFrom(Double.NaN, Double.NaN, Double.NaN, 2.5, 3.5, 4.5), 0.001));
   }
 
   private static boolean equals(DataFrame a, DataFrame b, double epsilon) {

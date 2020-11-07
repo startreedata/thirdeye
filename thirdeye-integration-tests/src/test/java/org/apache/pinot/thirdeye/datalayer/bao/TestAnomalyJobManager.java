@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,16 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.Arrays;
 import java.util.List;
-
+import org.apache.pinot.thirdeye.Constants.JobStatus;
+import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import org.apache.pinot.thirdeye.Constants.JobStatus;
-import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 
 public class TestAnomalyJobManager {
 
@@ -37,6 +35,7 @@ public class TestAnomalyJobManager {
 
   private DAOTestBase testDAOProvider;
   private JobManager jobDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -65,7 +64,7 @@ public class TestAnomalyJobManager {
     Assert.assertEquals(anomalyJobs.size(), 3);
   }
 
-  @Test(dependsOnMethods = { "testFindAll" })
+  @Test(dependsOnMethods = {"testFindAll"})
   public void testUpdateStatusAndJobEndTime() {
     JobStatus status = JobStatus.COMPLETED;
     long jobEndTime = System.currentTimeMillis();
@@ -87,14 +86,14 @@ public class TestAnomalyJobManager {
 
   private void printAll(String msg) {
     List<JobDTO> allAnomalyJobs = jobDAO.findAll();
-    System.out.println("START:ALL JOB after:"+ msg);
-    for(JobDTO jobDTO:allAnomalyJobs){
+    System.out.println("START:ALL JOB after:" + msg);
+    for (JobDTO jobDTO : allAnomalyJobs) {
       System.out.println(jobDTO);
     }
-    System.out.println("END:ALL JOB after:"+ msg);
+    System.out.println("END:ALL JOB after:" + msg);
   }
 
-  @Test(dependsOnMethods = { "testFindByStatus" })
+  @Test(dependsOnMethods = {"testFindByStatus"})
   public void testDeleteRecordsOlderThanDaysWithStatus() {
     JobStatus status = JobStatus.COMPLETED;
     int numRecordsDeleted = jobDAO.deleteRecordsOlderThanDaysWithStatus(0, status);
@@ -120,6 +119,4 @@ public class TestAnomalyJobManager {
     List<JobDTO> jobsWithOneDays = jobDAO.findByStatusWithinDays(JobStatus.SCHEDULED, 1);
     Assert.assertTrue(jobsWithOneDays.size() > 0);
   }
-
-
 }

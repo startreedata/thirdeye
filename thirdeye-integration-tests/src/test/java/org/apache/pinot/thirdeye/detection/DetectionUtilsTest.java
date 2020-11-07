@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.detection;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class DetectionUtilsTest {
 
   @Test
@@ -47,5 +46,4 @@ public class DetectionUtilsTest {
       Assert.assertTrue(true);
     }
   }
-
 }

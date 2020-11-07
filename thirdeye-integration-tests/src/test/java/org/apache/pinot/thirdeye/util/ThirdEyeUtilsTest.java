@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -114,7 +114,6 @@ public class ThirdEyeUtilsTest {
     };
   }*/
 
-
   @Test
   public void testGetRoundedDouble() {
     double value = 123.456789;
@@ -162,8 +161,10 @@ public class ThirdEyeUtilsTest {
   @Test
   public void testGetRoundedValueNonRegularNumber() {
     Assert.assertEquals(ThirdEyeUtils.getRoundedValue(Double.NaN), Double.toString(Double.NaN));
-    Assert.assertEquals(ThirdEyeUtils.getRoundedValue(Double.POSITIVE_INFINITY), Double.toString(Double.POSITIVE_INFINITY));
-    Assert.assertEquals(ThirdEyeUtils.getRoundedValue(Double.NEGATIVE_INFINITY), Double.toString(Double.NEGATIVE_INFINITY));
+    Assert.assertEquals(ThirdEyeUtils.getRoundedValue(Double.POSITIVE_INFINITY),
+        Double.toString(Double.POSITIVE_INFINITY));
+    Assert.assertEquals(ThirdEyeUtils.getRoundedValue(Double.NEGATIVE_INFINITY),
+        Double.toString(Double.NEGATIVE_INFINITY));
   }
 
   @Test
@@ -206,7 +207,7 @@ public class ThirdEyeUtilsTest {
   }
 
   @Test
-  public void testMergeAnomalySnapshotWithOverlap() throws Exception{
+  public void testMergeAnomalySnapshotWithOverlap() throws Exception {
     final long now = System.currentTimeMillis();
     final long bucketSize = 300_000;
     final double delta = 0.000001;
@@ -216,9 +217,10 @@ public class ThirdEyeUtilsTest {
     parentProperties.put("anomalyTimelinesView",
         generateAnomalyTimelineView(now, bucketSize, 10, parentVal).toJsonString());
     childProperties.put("anomalyTimelinesView",
-        generateAnomalyTimelineView(now + bucketSize, bucketSize, 10,  childVal).toJsonString());
+        generateAnomalyTimelineView(now + bucketSize, bucketSize, 10, childVal).toJsonString());
     ThirdEyeUtils.mergeAnomalyProperties(parentProperties, childProperties);
-    AnomalyTimelinesView merged = AnomalyTimelinesView.fromJsonString(parentProperties.get("anomalyTimelinesView"));
+    AnomalyTimelinesView merged = AnomalyTimelinesView
+        .fromJsonString(parentProperties.get("anomalyTimelinesView"));
     Assert.assertEquals(merged.getTimeBuckets().size(), 11);
     Assert.assertTrue(Math.abs(merged.getCurrentValues().get(0) - parentVal) < delta);
     Assert.assertTrue(Math.abs(merged.getCurrentValues().get(1) - parentVal) < delta);
@@ -226,7 +228,7 @@ public class ThirdEyeUtilsTest {
   }
 
   @Test
-  public void testMergeAnomalySnapshotWithGap() throws Exception{
+  public void testMergeAnomalySnapshotWithGap() throws Exception {
     final long now = System.currentTimeMillis();
     final long bucketSize = 300_000;
     final double delta = 0.000001;
@@ -236,14 +238,15 @@ public class ThirdEyeUtilsTest {
     parentProperties.put("anomalyTimelinesView",
         generateAnomalyTimelineView(now, bucketSize, 10, parentVal).toJsonString());
     childProperties.put("anomalyTimelinesView",
-        generateAnomalyTimelineView(now + bucketSize * 20, bucketSize, 10,  childVal).toJsonString());
+        generateAnomalyTimelineView(now + bucketSize * 20, bucketSize, 10, childVal)
+            .toJsonString());
     ThirdEyeUtils.mergeAnomalyProperties(parentProperties, childProperties);
-    AnomalyTimelinesView merged = AnomalyTimelinesView.fromJsonString(parentProperties.get("anomalyTimelinesView"));
+    AnomalyTimelinesView merged = AnomalyTimelinesView
+        .fromJsonString(parentProperties.get("anomalyTimelinesView"));
     Assert.assertEquals(merged.getTimeBuckets().size(), 20);
     Assert.assertTrue(Math.abs(merged.getCurrentValues().get(0) - parentVal) < delta);
     Assert.assertTrue(Math.abs(merged.getCurrentValues().get(1) - parentVal) < delta);
     Assert.assertTrue(Math.abs(merged.getCurrentValues().get(19) - childVal) < delta);
-
   }
 
   private AnomalyTimelinesView generateAnomalyTimelineView(
@@ -252,9 +255,9 @@ public class ThirdEyeUtilsTest {
     for (int i = 0; i < numBucket; i++) {
       res.addTimeBuckets(new TimeBucket(
           bucketSizeMillis * i + startMillis,
-          (bucketSizeMillis + 1) * i +startMillis,
+          (bucketSizeMillis + 1) * i + startMillis,
           bucketSizeMillis * i + startMillis,
-          (bucketSizeMillis + 1) * i +startMillis
+          (bucketSizeMillis + 1) * i + startMillis
       ));
       res.addBaselineValues(metricVal);
       res.addCurrentValues(metricVal);

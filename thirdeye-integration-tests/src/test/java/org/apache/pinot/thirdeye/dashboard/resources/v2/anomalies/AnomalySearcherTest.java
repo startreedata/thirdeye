@@ -35,11 +35,12 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-
 public class AnomalySearcherTest {
+
   private DAOTestBase testDAOProvider;
   private MergedAnomalyResultManager anomalyDAO;
   private MergedAnomalyResultDTO anomaly4;
+
   @BeforeClass
   public void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -83,8 +84,10 @@ public class AnomalySearcherTest {
   public void testSearchWithFilters() {
     AnomalySearcher anomalySearcher = new AnomalySearcher();
     Map<String, Object> result = anomalySearcher.search(
-        new AnomalySearchFilter(1L, 3L, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
-            Collections.emptyList(), Arrays.asList("test_dataset_1"), Collections.emptyList()), 10, 0);
+        new AnomalySearchFilter(1L, 3L, Collections.emptyList(), Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptyList(), Arrays.asList("test_dataset_1"), Collections.emptyList()), 10,
+        0);
     Assert.assertEquals(result.get("count"), 1L);
     Assert.assertEquals(result.get("limit"), 10);
     Assert.assertEquals(result.get("offset"), 0);
@@ -97,8 +100,10 @@ public class AnomalySearcherTest {
   public void testSearchWithFiltersChild() {
     AnomalySearcher anomalySearcher = new AnomalySearcher();
     Map<String, Object> result = anomalySearcher.search(
-        new AnomalySearchFilter(1L, 3L, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
-            Collections.emptyList(), Collections.emptyList(), Collections.singletonList(anomaly4.getId())), 10, 0);
+        new AnomalySearchFilter(1L, 3L, Collections.emptyList(), Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptyList(), Collections.emptyList(),
+            Collections.singletonList(anomaly4.getId())), 10, 0);
     Assert.assertEquals(result.get("count"), 1L);
     Assert.assertEquals(result.get("limit"), 10);
     Assert.assertEquals(result.get("offset"), 0);
@@ -106,5 +111,4 @@ public class AnomalySearcherTest {
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(anomalies.get(0), anomalyDAO.findById(anomaly4.getId()));
   }
-
 }

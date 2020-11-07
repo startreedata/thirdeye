@@ -21,15 +21,16 @@ package org.apache.pinot.thirdeye.rootcause;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 
+public class MockMetricConfigManager extends AbstractMockManager<MetricConfigDTO> implements
+    MetricConfigManager {
 
-public class MockMetricConfigManager extends AbstractMockManager<MetricConfigDTO> implements MetricConfigManager {
   private final Collection<MetricConfigDTO> metrics;
 
   public MockMetricConfigManager(Collection<MetricConfigDTO> metrics) {
@@ -38,15 +39,17 @@ public class MockMetricConfigManager extends AbstractMockManager<MetricConfigDTO
 
   @Override
   public MetricConfigDTO findById(final Long id) {
-    Collection<MetricConfigDTO> output = Collections2.filter(this.metrics, new Predicate<MetricConfigDTO>() {
-      @Override
-      public boolean apply(MetricConfigDTO dto) {
-        return dto.getId().equals(id);
-      }
-    });
+    Collection<MetricConfigDTO> output = Collections2
+        .filter(this.metrics, new Predicate<MetricConfigDTO>() {
+          @Override
+          public boolean apply(MetricConfigDTO dto) {
+            return dto.getId().equals(id);
+          }
+        });
 
-    if (output.isEmpty())
+    if (output.isEmpty()) {
       return null;
+    }
     return output.iterator().next();
   }
 

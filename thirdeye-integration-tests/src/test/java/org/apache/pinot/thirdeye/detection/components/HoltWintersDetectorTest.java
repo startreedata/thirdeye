@@ -48,18 +48,21 @@ import org.testng.annotations.Test;
  * Test class for HoltWinters detector
  */
 public class HoltWintersDetectorTest {
+
   private DataProvider provider;
 
   @BeforeTest
   public void setUp() throws Exception {
     DataFrame dailyData;
     DataFrame hourlyData;
-    try (Reader dataReader = new InputStreamReader(AlgorithmUtils.class.getResourceAsStream("daily.csv"))) {
+    try (Reader dataReader = new InputStreamReader(
+        AlgorithmUtils.class.getResourceAsStream("daily.csv"))) {
       dailyData = DataFrame.fromCsv(dataReader);
       dailyData.setIndex(DataFrame.COL_TIME);
     }
 
-    try (Reader dataReader = new InputStreamReader(AlgorithmUtils.class.getResourceAsStream("hourly.csv"))) {
+    try (Reader dataReader = new InputStreamReader(
+        AlgorithmUtils.class.getResourceAsStream("hourly.csv"))) {
       hourlyData = DataFrame.fromCsv(dataReader);
       hourlyData.setIndex(DataFrame.COL_TIME);
     }
@@ -104,7 +107,8 @@ public class HoltWintersDetectorTest {
     Interval window = new Interval(1306627200000L, 1309219200000L);
     String metricUrn = "thirdeye:metric:1";
     MetricEntity me = MetricEntity.fromURN(metricUrn);
-    MetricSlice slice = MetricSlice.from(me.getId(), window.getStartMillis(), window.getEndMillis(), me.getFilters());
+    MetricSlice slice = MetricSlice
+        .from(me.getId(), window.getStartMillis(), window.getEndMillis(), me.getFilters());
     TimeSeries timeSeries = detector.computePredictedTimeSeries(slice);
 
     Assert.assertEquals(timeSeries.getPredictedBaseline().size(), 29);
@@ -118,7 +122,8 @@ public class HoltWintersDetectorTest {
     detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
     Interval window = new Interval(1306627200000L, 1309219200000L);
     String metricUrn = "thirdeye:metric:1";
-    List<MergedAnomalyResultDTO> anomalies = detector.runDetection(window, metricUrn).getAnomalies();
+    List<MergedAnomalyResultDTO> anomalies = detector.runDetection(window, metricUrn)
+        .getAnomalies();
 
     Assert.assertEquals(anomalies.size(), 6);
   }
@@ -133,7 +138,8 @@ public class HoltWintersDetectorTest {
 
     String metricUrn = "thirdeye:metric:123";
     MetricEntity me = MetricEntity.fromURN(metricUrn);
-    MetricSlice slice = MetricSlice.from(me.getId(), window.getStartMillis(), window.getEndMillis(), me.getFilters());
+    MetricSlice slice = MetricSlice
+        .from(me.getId(), window.getStartMillis(), window.getEndMillis(), me.getFilters());
     TimeSeries timeSeries = detector.computePredictedTimeSeries(slice);
 
     Assert.assertEquals(timeSeries.getPredictedBaseline().size(), 167);
@@ -147,7 +153,8 @@ public class HoltWintersDetectorTest {
     detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
     Interval window = new Interval(1322773200000L, 1323378000000L);
     String metricUrn = "thirdeye:metric:123";
-    List<MergedAnomalyResultDTO> anomalies = detector.runDetection(window, metricUrn).getAnomalies();
+    List<MergedAnomalyResultDTO> anomalies = detector.runDetection(window, metricUrn)
+        .getAnomalies();
 
     Assert.assertEquals(anomalies.size(), 2);
   }

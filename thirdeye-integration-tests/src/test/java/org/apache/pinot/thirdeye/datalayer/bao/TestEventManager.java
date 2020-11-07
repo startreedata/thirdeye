@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,22 +16,24 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.anomaly.events.EventType;
-import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.anomaly.events.EventType;
+import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestEventManager {
+
   long testEventId;
 
   private DAOTestBase testDAOProvider;
   private EventManager eventDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -60,7 +62,7 @@ public class TestEventManager {
     Assert.assertTrue(testEventId > 0);
   }
 
-  @Test(dependsOnMethods = { "testCreate" })
+  @Test(dependsOnMethods = {"testCreate"})
   public void testGetById() {
     EventDTO testEventDTO = eventDAO.findById(testEventId);
     Assert.assertEquals(testEventDTO.getId().longValue(), testEventId);
@@ -75,7 +77,7 @@ public class TestEventManager {
     Assert.assertEquals(results1.size(), 1);
   }
 
-  @Test(dependsOnMethods = { "testGetById" })
+  @Test(dependsOnMethods = {"testGetById"})
   public void testDelete() {
     eventDAO.deleteById(testEventId);
     EventDTO testEventDTO = eventDAO.findById(testEventId);

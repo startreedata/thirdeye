@@ -247,7 +247,8 @@ public class RunAdhocDatabaseQueriesTool {
   }
 
   /**
-   * Delete the specified dataset. The anomaly functions, raw anomalies, merged anomalies, data completeness
+   * Delete the specified dataset. The anomaly functions, raw anomalies, merged anomalies, data
+   * completeness
    * entries, detection status entries, and metrics of the dataset will be deleted too.
    *
    * @param datasetName the dataset to be deleted.
@@ -559,7 +560,8 @@ public class RunAdhocDatabaseQueriesTool {
   }
 
   /**
-   * Generates a report of the status, owner and recipients of all the subscription groups by application
+   * Generates a report of the status, owner and recipients of all the subscription groups by
+   * application
    */
   private void notificationOwners() {
     List<ApplicationDTO> apps = applicationDAO.findAll();
@@ -576,7 +578,8 @@ public class RunAdhocDatabaseQueriesTool {
   }
 
   /**
-   * Generates a report of the status, owner and recipients of all the subscribed anomaly functions by application
+   * Generates a report of the status, owner and recipients of all the subscribed anomaly functions
+   * by application
    */
   private void detectionOwners() {
     List<ApplicationDTO> apps = applicationDAO.findAll();
@@ -641,7 +644,8 @@ public class RunAdhocDatabaseQueriesTool {
   }
 
   /**
-   * Replayed anomalies are flagged accordingly and such anomalies are excluded from the email report.
+   * Replayed anomalies are flagged accordingly and such anomalies are excluded from the email
+   * report.
    * This method removes the replay flag to test an email report from replayed results.
    */
   private void removeReplayFlagFromAnomalies(long detectionConfigId) {

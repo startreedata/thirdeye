@@ -35,17 +35,17 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class ThirdEyeCacheResponseTest {
 
   private static final String COLLECTION = "collection";
   private static final MetricDataset METRIC = new MetricDataset("metric", COLLECTION);
 
   private ThirdEyeCacheResponse cacheResponse;
-  private List<TimeSeriesDataPoint> rows = new ArrayList<>();
+  private final List<TimeSeriesDataPoint> rows = new ArrayList<>();
 
   private static final MetricFunction
-      metricFunction = new MetricFunction(MetricAggFunction.AVG, METRIC.getMetricName(), 1L, COLLECTION, null, null);
+      metricFunction = new MetricFunction(MetricAggFunction.AVG, METRIC.getMetricName(), 1L,
+      COLLECTION, null, null);
 
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
       .setMetricFunctions(Collections.singletonList(metricFunction))
@@ -55,9 +55,11 @@ public class ThirdEyeCacheResponseTest {
       .setLimit(12345)
       .build("ref");
 
-  private static final TimeSpec timeSpec = new TimeSpec(METRIC.getMetricName(), TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
+  private static final TimeSpec timeSpec = new TimeSpec(METRIC.getMetricName(),
+      TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
 
-  private static final String metricUrn = MetricEntity.fromMetric(request.getFilterSet().asMap(), metricFunction.getMetricId()).getUrn();
+  private static final String metricUrn = MetricEntity
+      .fromMetric(request.getFilterSet().asMap(), metricFunction.getMetricId()).getUrn();
   private static final ThirdEyeCacheRequest cacheRequest = ThirdEyeCacheRequest.from(request);
 
   @BeforeMethod
@@ -95,109 +97,135 @@ public class ThirdEyeCacheResponseTest {
 
   @Test
   public void testIsMissingSliceWithMissingStartSlice() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 2000, metricFunction.getMetricId(), "123");
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000, metricFunction.getMetricId(), "321");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 2000,
+        metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000,
+        metricFunction.getMetricId(), "321");
     rows.add(startDataPoint);
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
 
-    Assert.assertTrue(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(), request.getEndTimeExclusive().getMillis()));
+    Assert.assertTrue(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(),
+        request.getEndTimeExclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingSliceWithoutMissingStartSlice() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 0, metricFunction.getMetricId(), "123");
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000, metricFunction.getMetricId(), "321");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 0,
+        metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000,
+        metricFunction.getMetricId(), "321");
     rows.add(startDataPoint);
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
 
-    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(), request.getEndTimeExclusive().getMillis()));
+    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(),
+        request.getEndTimeExclusive().getMillis()));
   }
 
   // makes sure that documents with less than 1 time granularity difference aren't counted as missing slices.
   @Test
   public void testIsMissingSliceWithMisalignedStart() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1050, metricFunction.getMetricId(), "123");
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000, metricFunction.getMetricId(), "321");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1050,
+        metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000,
+        metricFunction.getMetricId(), "321");
     rows.add(startDataPoint);
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
 
-    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(), request.getEndTimeExclusive().getMillis()));
+    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(),
+        request.getEndTimeExclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingSliceWithMissingEndSlice() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000, metricFunction.getMetricId(), "123");
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 18000, metricFunction.getMetricId(), "321");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000,
+        metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 18000,
+        metricFunction.getMetricId(), "321");
     rows.add(startDataPoint);
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
 
-    Assert.assertTrue(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(), request.getEndTimeExclusive().getMillis()));
+    Assert.assertTrue(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(),
+        request.getEndTimeExclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingSliceWithoutMissingEndSlice() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000, metricFunction.getMetricId(), "123");
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000, metricFunction.getMetricId(), "321");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000,
+        metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000,
+        metricFunction.getMetricId(), "321");
     rows.add(startDataPoint);
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
 
-    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(), request.getEndTimeExclusive().getMillis()));
+    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(),
+        request.getEndTimeExclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingSliceWithMisalignedEnd() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000, metricFunction.getMetricId(), "123");
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 19500, metricFunction.getMetricId(), "321");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000,
+        metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 19500,
+        metricFunction.getMetricId(), "321");
     rows.add(startDataPoint);
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
 
-    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(), request.getEndTimeExclusive().getMillis()));
+    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(),
+        request.getEndTimeExclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingSliceWithMissingStartAndEndSlices() {
-    TimeSeriesDataPoint dp = new TimeSeriesDataPoint(metricUrn, 10000, metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint dp = new TimeSeriesDataPoint(metricUrn, 10000, metricFunction.getMetricId(),
+        "123");
     rows.add(dp);
     cacheResponse.setFirstTimestamp(dp.getTimestamp());
     cacheResponse.setLastTimestamp(dp.getTimestamp());
 
-    Assert.assertTrue(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(), request.getEndTimeExclusive().getMillis()));
+    Assert.assertTrue(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(),
+        request.getEndTimeExclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingSliceWithoutMissingStartAndEndSlices() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 0, metricFunction.getMetricId(), "123");
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 25000, metricFunction.getMetricId(), "321");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 0,
+        metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 25000,
+        metricFunction.getMetricId(), "321");
     rows.add(startDataPoint);
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
 
-    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(), request.getEndTimeExclusive().getMillis()));
+    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(),
+        request.getEndTimeExclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingSliceWithMisalignedStartAndEndSlices() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1050, metricFunction.getMetricId(), "123");
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 19500, metricFunction.getMetricId(), "321");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1050,
+        metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 19500,
+        metricFunction.getMetricId(), "321");
     rows.add(startDataPoint);
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
 
-    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(), request.getEndTimeExclusive().getMillis()));
+    Assert.assertFalse(cacheResponse.isMissingSlice(request.getStartTimeInclusive().getMillis(),
+        request.getEndTimeExclusive().getMillis()));
   }
 
   /**
@@ -206,49 +234,57 @@ public class ThirdEyeCacheResponseTest {
 
   @Test
   public void testIsMissingStartSliceWithNoRows() {
-    Assert.assertTrue(cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
+    Assert
+        .assertTrue(cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingStartSliceWithMissingStartSlice() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 2000, metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 2000,
+        metricFunction.getMetricId(), "123");
     rows.add(startDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(startDataPoint.getTimestamp());
 
-    Assert.assertTrue(cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
+    Assert
+        .assertTrue(cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingStartSliceWithoutMissingStartSlice() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000, metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000,
+        metricFunction.getMetricId(), "123");
     rows.add(startDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(startDataPoint.getTimestamp());
 
-    Assert.assertFalse(cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
+    Assert.assertFalse(
+        cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingStartSliceWithExactStartSlice() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000, metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1000,
+        metricFunction.getMetricId(), "123");
     rows.add(startDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(startDataPoint.getTimestamp());
 
-    Assert.assertFalse(cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
+    Assert.assertFalse(
+        cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
   }
 
   @Test
   public void testIsMissingStartSliceWithMisalignedStart() {
-    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1099, metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint startDataPoint = new TimeSeriesDataPoint(metricUrn, 1099,
+        metricFunction.getMetricId(), "123");
     rows.add(startDataPoint);
     cacheResponse.setFirstTimestamp(startDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(startDataPoint.getTimestamp());
 
-    Assert.assertFalse(cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
+    Assert.assertFalse(
+        cacheResponse.isMissingStartSlice(request.getStartTimeInclusive().getMillis()));
   }
-
 
   /**
    * ThirdEyeCacheResponse.isMissingEndSlice() tests
@@ -261,7 +297,8 @@ public class ThirdEyeCacheResponseTest {
 
   @Test
   public void testIsMissingEndSliceWithMissingEndSlice() {
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 10000, metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 10000,
+        metricFunction.getMetricId(), "123");
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(endDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
@@ -271,7 +308,8 @@ public class ThirdEyeCacheResponseTest {
 
   @Test
   public void testIsMissingEndSliceWithoutMissingEndSlice() {
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 19000, metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 19000,
+        metricFunction.getMetricId(), "123");
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(endDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
@@ -281,7 +319,8 @@ public class ThirdEyeCacheResponseTest {
 
   @Test
   public void testIsMissingEndSliceWithExactEndSlice() {
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000, metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 20000,
+        metricFunction.getMetricId(), "123");
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(endDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
@@ -291,7 +330,8 @@ public class ThirdEyeCacheResponseTest {
 
   @Test
   public void testIsMissingStartSliceWithMisalignedEnd() {
-    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 19999, metricFunction.getMetricId(), "123");
+    TimeSeriesDataPoint endDataPoint = new TimeSeriesDataPoint(metricUrn, 19999,
+        metricFunction.getMetricId(), "123");
     rows.add(endDataPoint);
     cacheResponse.setFirstTimestamp(endDataPoint.getTimestamp());
     cacheResponse.setLastTimestamp(endDataPoint.getTimestamp());
@@ -306,7 +346,8 @@ public class ThirdEyeCacheResponseTest {
   @Test
   public void testMergeSliceIntoRowsAppend() {
     for (int i = 0; i < 10; i++) {
-      TimeSeriesDataPoint dataPoint = new TimeSeriesDataPoint(metricUrn, i * 1000, metricFunction.getMetricId(), String.valueOf(i));
+      TimeSeriesDataPoint dataPoint = new TimeSeriesDataPoint(metricUrn, i * 1000,
+          metricFunction.getMetricId(), String.valueOf(i));
       rows.add(dataPoint);
     }
 

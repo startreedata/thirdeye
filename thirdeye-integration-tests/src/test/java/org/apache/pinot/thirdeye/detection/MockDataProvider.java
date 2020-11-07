@@ -22,12 +22,18 @@ package org.apache.pinot.thirdeye.detection;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.Grouping;
 import org.apache.pinot.thirdeye.dataframe.Series;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -35,14 +41,9 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.detection.spi.model.EvaluationSlice;
 import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public class MockDataProvider implements DataProvider {
+
   private static final String COL_KEY = Grouping.GROUP_KEY;
 
   private static final Multimap<String, String> NO_FILTERS = HashMultimap.create();
@@ -53,7 +54,7 @@ public class MockDataProvider implements DataProvider {
   private List<MergedAnomalyResultDTO> anomalies;
   private List<MetricConfigDTO> metrics;
   private List<DatasetConfigDTO> datasets;
-  private List<EvaluationDTO>  evaluations;
+  private List<EvaluationDTO> evaluations;
   private DetectionPipelineLoader loader;
 
   public MockDataProvider() {
@@ -102,13 +103,15 @@ public class MockDataProvider implements DataProvider {
         }
       }, DataFrame.COL_TIME).dropNull();
 
-      result.put(slice, out.groupByValue(groupBy).aggregate(groupByExpr).dropSeries(COL_KEY).setIndex(groupBy));
+      result.put(slice,
+          out.groupByValue(groupBy).aggregate(groupByExpr).dropSeries(COL_KEY).setIndex(groupBy));
     }
     return result;
   }
 
   @Override
-  public Map<MetricSlice, DataFrame> fetchAggregates(Collection<MetricSlice> slices, final List<String> dimensions, int limit) {
+  public Map<MetricSlice, DataFrame> fetchAggregates(Collection<MetricSlice> slices,
+      final List<String> dimensions, int limit) {
     Map<MetricSlice, DataFrame> result = new HashMap<>();
     for (MetricSlice slice : slices) {
       List<String> expr = new ArrayList<>();
@@ -119,7 +122,6 @@ public class MockDataProvider implements DataProvider {
 
       if (dimensions.isEmpty()) {
         result.put(slice, this.aggregates.get(slice.withFilters(NO_FILTERS)));
-
       } else {
         DataFrame aggResult = this.aggregates.get(slice.withFilters(NO_FILTERS))
             .groupByValue(new ArrayList<>(dimensions)).aggregate(expr);
@@ -134,7 +136,8 @@ public class MockDataProvider implements DataProvider {
   }
 
   @Override
-  public Multimap<AnomalySlice, MergedAnomalyResultDTO> fetchAnomalies(Collection<AnomalySlice> slices) {
+  public Multimap<AnomalySlice, MergedAnomalyResultDTO> fetchAnomalies(
+      Collection<AnomalySlice> slices) {
     Multimap<AnomalySlice, MergedAnomalyResultDTO> result = ArrayListMultimap.create();
     for (AnomalySlice slice : slices) {
       for (MergedAnomalyResultDTO anomaly : this.anomalies) {
@@ -154,7 +157,7 @@ public class MockDataProvider implements DataProvider {
   public Multimap<EventSlice, EventDTO> fetchEvents(Collection<EventSlice> slices) {
     Multimap<EventSlice, EventDTO> result = ArrayListMultimap.create();
     for (EventSlice slice : slices) {
-      for (EventDTO event  :this.events) {
+      for (EventDTO event : this.events) {
         if (slice.match(event)) {
           result.put(slice, event);
         }
@@ -164,11 +167,12 @@ public class MockDataProvider implements DataProvider {
   }
 
   @Override
-  public Multimap<EvaluationSlice, EvaluationDTO> fetchEvaluations(Collection<EvaluationSlice> slices,
+  public Multimap<EvaluationSlice, EvaluationDTO> fetchEvaluations(
+      Collection<EvaluationSlice> slices,
       long configId) {
     Multimap<EvaluationSlice, EvaluationDTO> result = ArrayListMultimap.create();
     for (EvaluationSlice slice : slices) {
-      for (EvaluationDTO evaluation  :this.evaluations) {
+      for (EvaluationDTO evaluation : this.evaluations) {
         if (slice.match(evaluation) && evaluation.getDetectionConfigId() == configId) {
           result.put(slice, evaluation);
         }
@@ -310,7 +314,8 @@ public class MockDataProvider implements DataProvider {
       return false;
     }
     MockDataProvider that = (MockDataProvider) o;
-    return Objects.equals(timeseries, that.timeseries) && Objects.equals(aggregates, that.aggregates)
+    return Objects.equals(timeseries, that.timeseries) && Objects
+        .equals(aggregates, that.aggregates)
         && Objects.equals(events, that.events) && Objects.equals(anomalies, that.anomalies)
         && Objects.equals(metrics, that.metrics) && Objects.equals(loader, that.loader);
   }

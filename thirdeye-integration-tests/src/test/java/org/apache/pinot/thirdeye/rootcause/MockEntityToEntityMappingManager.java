@@ -21,15 +21,16 @@ package org.apache.pinot.thirdeye.rootcause;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
-import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
+import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
 
+public class MockEntityToEntityMappingManager extends
+    AbstractMockManager<EntityToEntityMappingDTO> implements EntityToEntityMappingManager {
 
-public class MockEntityToEntityMappingManager extends AbstractMockManager<EntityToEntityMappingDTO> implements EntityToEntityMappingManager {
   private final Collection<EntityToEntityMappingDTO> entities;
 
   public MockEntityToEntityMappingManager(Collection<EntityToEntityMappingDTO> entities) {
@@ -38,12 +39,13 @@ public class MockEntityToEntityMappingManager extends AbstractMockManager<Entity
 
   @Override
   public List<EntityToEntityMappingDTO> findByFromURN(final String fromURN) {
-    return new ArrayList<>(Collections2.filter(this.entities, new Predicate<EntityToEntityMappingDTO>() {
-      @Override
-      public boolean apply(EntityToEntityMappingDTO dto) {
-        return dto.getFromURN().equals(fromURN);
-      }
-    }));
+    return new ArrayList<>(
+        Collections2.filter(this.entities, new Predicate<EntityToEntityMappingDTO>() {
+          @Override
+          public boolean apply(EntityToEntityMappingDTO dto) {
+            return dto.getFromURN().equals(fromURN);
+          }
+        }));
   }
 
   @Override
@@ -53,12 +55,13 @@ public class MockEntityToEntityMappingManager extends AbstractMockManager<Entity
 
   @Override
   public List<EntityToEntityMappingDTO> findByToURN(final String toURN) {
-    return new ArrayList<>(Collections2.filter(this.entities, new Predicate<EntityToEntityMappingDTO>() {
-      @Override
-      public boolean apply(EntityToEntityMappingDTO dto) {
-        return dto.getToURN().equals(toURN);
-      }
-    }));
+    return new ArrayList<>(
+        Collections2.filter(this.entities, new Predicate<EntityToEntityMappingDTO>() {
+          @Override
+          public boolean apply(EntityToEntityMappingDTO dto) {
+            return dto.getToURN().equals(toURN);
+          }
+        }));
   }
 
   @Override
@@ -73,21 +76,24 @@ public class MockEntityToEntityMappingManager extends AbstractMockManager<Entity
 
   @Override
   public List<EntityToEntityMappingDTO> findByMappingType(final String mappingType) {
-    return new ArrayList<>(Collections2.filter(this.entities, new Predicate<EntityToEntityMappingDTO>() {
-      @Override
-      public boolean apply(EntityToEntityMappingDTO dto) {
-        return dto.getMappingType().equals(mappingType);
-      }
-    }));
+    return new ArrayList<>(
+        Collections2.filter(this.entities, new Predicate<EntityToEntityMappingDTO>() {
+          @Override
+          public boolean apply(EntityToEntityMappingDTO dto) {
+            return dto.getMappingType().equals(mappingType);
+          }
+        }));
   }
 
   @Override
-  public List<EntityToEntityMappingDTO> findByFromURNAndMappingType(String fromURN, String mappingType) {
+  public List<EntityToEntityMappingDTO> findByFromURNAndMappingType(String fromURN,
+      String mappingType) {
     throw new AssertionError("not implemented");
   }
 
   @Override
-  public List<EntityToEntityMappingDTO> findByToURNAndMappingType(String toURN, String mappingType) {
+  public List<EntityToEntityMappingDTO> findByToURNAndMappingType(String toURN,
+      String mappingType) {
     throw new AssertionError("not implemented");
   }
 

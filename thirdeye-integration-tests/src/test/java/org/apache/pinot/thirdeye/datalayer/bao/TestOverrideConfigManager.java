@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,15 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.override.OverrideConfigHelper;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -32,11 +32,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestOverrideConfigManager {
+
   private Long overrideConfigId1 = null;
-  private DateTime now = new DateTime();
+  private final DateTime now = new DateTime();
 
   private DAOTestBase testDAOProvider;
   private OverrideConfigManager overrideConfigDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -84,8 +86,10 @@ public class TestOverrideConfigManager {
     OverrideConfigDTO overrideConfigDTO = overrideConfigDAO.findById(overrideConfigId1);
     Assert.assertNotNull(overrideConfigDTO);
     Assert.assertNotNull(overrideConfigDTO.getOverrideProperties());
-    Assert.assertNotNull(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR));
-    Assert.assertEquals(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR), "1.2");
+    Assert
+        .assertNotNull(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR));
+    Assert.assertEquals(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR),
+        "1.2");
     Map<String, String> newOverrideProperties = new HashMap<>();
     newOverrideProperties.put(ScalingFactor.SCALING_FACTOR, "0.8");
     overrideConfigDTO.setOverrideProperties(newOverrideProperties);
@@ -94,8 +98,10 @@ public class TestOverrideConfigManager {
     overrideConfigDTO = overrideConfigDAO.findById(overrideConfigId1);
     Assert.assertNotNull(overrideConfigDTO);
     Assert.assertNotNull(overrideConfigDTO.getOverrideProperties());
-    Assert.assertNotNull(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR));
-    Assert.assertEquals(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR), "0.8");
+    Assert
+        .assertNotNull(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR));
+    Assert.assertEquals(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR),
+        "0.8");
 
     // Test update of target level
     overrideConfigDTO = overrideConfigDAO.findById(overrideConfigId1);
@@ -117,7 +123,7 @@ public class TestOverrideConfigManager {
     Assert.assertEquals(targetLevel, Arrays.asList("collection1", "collection4"));
   }
 
-  @Test(dependsOnMethods = { "testUpdate" })
+  @Test(dependsOnMethods = {"testUpdate"})
   public void testDelete() {
     overrideConfigDAO.deleteById(overrideConfigId1);
     OverrideConfigDTO overrideConfigDTO = overrideConfigDAO.findById(overrideConfigId1);

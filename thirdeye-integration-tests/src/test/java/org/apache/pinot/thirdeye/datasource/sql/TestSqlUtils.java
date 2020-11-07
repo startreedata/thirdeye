@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,7 +40,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 
 public class TestSqlUtils {
 
@@ -86,13 +85,17 @@ public class TestSqlUtils {
 
   @AfterMethod
   public void afterMethod() {
-    try { this.daoTestBase.cleanup(); } catch (Exception ignore) {}
+    try {
+      this.daoTestBase.cleanup();
+    } catch (Exception ignore) {
+    }
   }
 
   @Test
   public void testSqlWithExplicitLimit() {
     TimeGranularity timeGranularity = new TimeGranularity(1, TimeUnit.DAYS);
-    DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd").withZone(DateTimeZone.UTC);
+    DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+        .withZone(DateTimeZone.UTC);
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setDataSource(this.dataset)
         .setLimit(100)
@@ -104,7 +107,8 @@ public class TestSqlUtils {
 
     String timeFormat = TimeSpec.SINCE_EPOCH_FORMAT;
     TimeSpec timeSpec = new TimeSpec("date", timeGranularity, timeFormat);
-    String actualSql = SqlUtils.getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset);
+    String actualSql = SqlUtils
+        .getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset);
     String expected = "SELECT date, country, SUM(metric) FROM table WHERE  date = 18383 GROUP BY date, country ORDER BY SUM(metric) DESC LIMIT 100";
     Assert.assertEquals(actualSql, expected);
   }
@@ -112,7 +116,8 @@ public class TestSqlUtils {
   @Test
   public void testSqlWithoutExplicitLimit() {
     TimeGranularity timeGranularity = new TimeGranularity(1, TimeUnit.DAYS);
-    DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd").withZone(DateTimeZone.UTC);
+    DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+        .withZone(DateTimeZone.UTC);
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setDataSource(this.dataset)
         .setGroupBy("country")
@@ -123,7 +128,8 @@ public class TestSqlUtils {
 
     String timeFormat = TimeSpec.SINCE_EPOCH_FORMAT;
     TimeSpec timeSpec = new TimeSpec("date", timeGranularity, timeFormat);
-    String actual = SqlUtils.getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset);
+    String actual = SqlUtils
+        .getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset);
     String expected = "SELECT date, country, SUM(metric) FROM table WHERE  date = 18383 GROUP BY date, country LIMIT 100000";
     Assert.assertEquals(actual, expected);
   }

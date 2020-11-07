@@ -23,4 +23,5 @@
 package org.apache.pinot.thirdeye.detection.spec;
 
 public class MockTunableSpec extends AbstractSpec {
+
 }

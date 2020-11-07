@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,19 +44,21 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHttpUtils {
 
-public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHttpUtils{
-  private static final Logger LOG = LoggerFactory.getLogger(FetchMetricDataAndExistingAnomaliesTool.class);
+  private static final Logger LOG = LoggerFactory
+      .getLogger(FetchMetricDataAndExistingAnomaliesTool.class);
   private AnomalyFunctionManager anomalyFunctionDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
 
-  public FetchMetricDataAndExistingAnomaliesTool(File persistenceFile) throws Exception{
+  public FetchMetricDataAndExistingAnomaliesTool(File persistenceFile) throws Exception {
     super(null);
     init(persistenceFile);
   }
 
   // Private class for storing and sorting results
-  public class ResultNode implements Comparable<ResultNode>{
+  public class ResultNode implements Comparable<ResultNode> {
+
     long functionId;
     String functionName;
     private String filters;
@@ -67,10 +69,11 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
     double windowSize;
     AnomalyFeedbackType feedbackType;
 
-    public ResultNode(){}
+    public ResultNode() {
+    }
 
-    public void setFilters(String filterStr){
-      if(StringUtils.isBlank(filterStr)){
+    public void setFilters(String filterStr) {
+      if (StringUtils.isBlank(filterStr)) {
         filters = "";
         return;
       }
@@ -81,14 +84,14 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
     }
 
     @Override
-    public int compareTo(ResultNode o){
+    public int compareTo(ResultNode o) {
       return this.startTime.compareTo(o.startTime);
     }
 
-    public String dimensionString(){
+    public String dimensionString() {
       StringBuilder sb = new StringBuilder();
       sb.append("[");
-      if(!dimensions.isEmpty()) {
+      if (!dimensions.isEmpty()) {
         for (Map.Entry<String, String> entry : dimensions.entrySet()) {
           sb.append(entry.getKey() + ":");
           sb.append(entry.getValue() + "|");
@@ -98,18 +101,21 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
       sb.append("]");
       return sb.toString();
     }
-    public String[] getSchema(){
+
+    public String[] getSchema() {
       return new String[]{
-          "StartDate", "EndDate", "Dimensions", "Filters", "FunctionID", "FunctionName", "Severity", "WindowSize","feedbackType"
+          "StartDate", "EndDate", "Dimensions", "Filters", "FunctionID", "FunctionName", "Severity",
+          "WindowSize", "feedbackType"
       };
     }
-    public String toString(){
+
+    public String toString() {
       DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
       return String.format("%s,%s,%s,%s,%s,%s,%s,%s %s", fmt.print(startTime), fmt.print(endTime),
-          dimensionString(), (filters == null)? "":filters,
-          Long.toString(functionId), functionName, Double.toString(severity),
-          Double.toString(windowSize),
-          (feedbackType == null)? "N/A" : feedbackType.toString());
+          dimensionString(), (filters == null) ? "" : filters,
+          functionId, functionName, severity,
+          windowSize,
+          (feedbackType == null) ? "N/A" : feedbackType.toString());
     }
   }
 
@@ -131,18 +137,21 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
     return anomalyFunctionDAO.findById(functionId);
   }
 
-  public List<ResultNode> fetchMergedAnomaliesInRangeByFunctionId(long functionId, DateTime startTime, DateTime endTime){
+  public List<ResultNode> fetchMergedAnomaliesInRangeByFunctionId(long functionId,
+      DateTime startTime, DateTime endTime) {
     AnomalyFunctionDTO anomalyFunction = anomalyFunctionDAO.findById(functionId);
     LOG.info("Loading merged anaomaly results of functionId {} from db...", functionId);
     List<ResultNode> resultNodes = new ArrayList<>();
 
-    if(anomalyFunction == null){ // no such function
-      return  resultNodes;
+    if (anomalyFunction == null) { // no such function
+      return resultNodes;
     }
 
     List<MergedAnomalyResultDTO> mergedResults =
-        mergedAnomalyResultDAO.findByStartTimeInRangeAndFunctionId(startTime.getMillis(), endTime.getMillis(), functionId);
-    for(MergedAnomalyResultDTO mergedResult : mergedResults){
+        mergedAnomalyResultDAO
+            .findByStartTimeInRangeAndFunctionId(startTime.getMillis(), endTime.getMillis(),
+                functionId);
+    for (MergedAnomalyResultDTO mergedResult : mergedResults) {
       ResultNode res = new ResultNode();
       res.functionId = functionId;
       res.functionName = anomalyFunction.getFunctionName();
@@ -153,27 +162,33 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
       res.severity = mergedResult.getWeight();
       res.windowSize = 1.0 * (mergedResult.getEndTime() - mergedResult.getStartTime()) / 3600_000;
       AnomalyFeedback feedback = mergedResult.getFeedback();
-      res.feedbackType = (feedback == null)? null : feedback.getFeedbackType();
+      res.feedbackType = (feedback == null) ? null : feedback.getFeedbackType();
       resultNodes.add(res);
     }
     return resultNodes;
   }
+
   /**
    * Fetch merged anomaly results from thirdeye db
+   *
    * @param collection database/collection name
    * @param metric metric name
    * @param startTime start time of the requested data in DateTime format
    * @param endTime end time of the requested data in DateTime format
    * @return List of merged anomaly results
    */
-  public List<ResultNode> fetchMergedAnomaliesInRange (String collection, String metric, DateTime startTime, DateTime endTime){
+  public List<ResultNode> fetchMergedAnomaliesInRange(String collection, String metric,
+      DateTime startTime, DateTime endTime) {
     List<AnomalyFunctionDTO> anomalyFunctions = anomalyFunctionDAO.findAllByCollection(collection);
     LOG.info("Loading merged anaomaly results from db...");
     List<ResultNode> resultNodes = new ArrayList<>();
-    for(AnomalyFunctionDTO anomalyDto : anomalyFunctions){
-      if(!anomalyDto.getTopicMetric().equals(metric)) continue;
+    for (AnomalyFunctionDTO anomalyDto : anomalyFunctions) {
+      if (!anomalyDto.getTopicMetric().equals(metric)) {
+        continue;
+      }
 
-      resultNodes.addAll(fetchMergedAnomaliesInRangeByFunctionId(anomalyDto.getId(), startTime, endTime));
+      resultNodes
+          .addAll(fetchMergedAnomaliesInRangeByFunctionId(anomalyDto.getId(), startTime, endTime));
     }
     Collections.sort(resultNodes);
     return resultNodes;
@@ -193,11 +208,14 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
    * @return {dimension-> {DateTime: value}}
    * @throws IOException
    */
-  public Map<String, Map<Long, String>> fetchMetric(String host, int port, String authToken, String dataset, String metric, DateTime startTime,
+  public Map<String, Map<Long, String>> fetchMetric(String host, int port, String authToken,
+      String dataset, String metric, DateTime startTime,
       DateTime endTime, TimeUnit timeUnit, String dimensions, String filterJson, String timezone)
-      throws  Exception{
+      throws Exception {
     DashboardHttpUtils httpUtils = new DashboardHttpUtils(host, port, authToken);
-    String content = httpUtils.handleMetricViewRequest(dataset, metric, startTime, endTime, timeUnit, dimensions, filterJson, timezone);
+    String content = httpUtils
+        .handleMetricViewRequest(dataset, metric, startTime, endTime, timeUnit, dimensions,
+            filterJson, timezone);
     Map<String, Map<Long, String>> resultMap = null;
     try {
       JSONObject jsonObject = new JSONObject(content);
@@ -206,7 +224,7 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
 
       resultMap = new HashMap<>();
       Iterator<String> timeSeriesDataIterator = timeSeriesData.keys();
-      while(timeSeriesDataIterator.hasNext()) {
+      while (timeSeriesDataIterator.hasNext()) {
         String key = timeSeriesDataIterator.next();
         if (key.equalsIgnoreCase("time")) {
           continue;
@@ -220,8 +238,7 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
         }
         resultMap.put(key, entry);
       }
-    }
-    catch (JSONException e){
+    } catch (JSONException e) {
       LOG.error("Unable to resolve JSON string {}", e);
     }
     return resultMap;

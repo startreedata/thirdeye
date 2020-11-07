@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.apache.pinot.thirdeye.cube.summary;
+
+import static org.apache.pinot.thirdeye.cube.summary.SummaryResponse.NOT_ALL;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,11 +31,9 @@ import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.cube.summary.SummaryResponse.*;
-
-
 public class SummaryResponseTest {
-  private static double EPSILON = 0.0001d;
+
+  private static final double EPSILON = 0.0001d;
 
   @Test
   public void testBuildDiffSummary() {
@@ -45,13 +45,15 @@ public class SummaryResponseTest {
     double baselineSize = cubeNodes.get(rootIdx).getOriginalBaselineSize();
     double currentSize = cubeNodes.get(rootIdx).getOriginalCurrentSize();
     // Build the response
-    SummaryResponse response = new SummaryResponse(baselineTotal, currentTotal, baselineSize, currentSize);
+    SummaryResponse response = new SummaryResponse(baselineTotal, currentTotal, baselineSize,
+        currentSize);
     response.buildDiffSummary(cubeNodes, 2, new BalancedCostFunction());
     response.setMetricUrn("testMetricUrn");
 
     // Validation
     List<SummaryResponseRow> responseRows = response.getResponseRows();
-    Assert.assertEquals(responseRows.size(), 2); // Our test summary contains only root (OTHER) and US node.
+    Assert.assertEquals(responseRows.size(),
+        2); // Our test summary contains only root (OTHER) and US node.
     List<SummaryResponseRow> expectedResponseRows = buildExpectedResponseRows();
     for (int i = 0; i < expectedResponseRows.size(); ++i) {
       SummaryResponseRow actualRow = responseRows.get(i);
@@ -61,7 +63,8 @@ public class SummaryResponseTest {
       Assert.assertEquals(actualRow.cost, expectedRow.cost, EPSILON);
       Assert.assertEquals(actualRow.baselineValue, expectedRow.baselineValue);
       Assert.assertEquals(actualRow.currentValue, expectedRow.currentValue);
-      Assert.assertEquals(Double.parseDouble(actualRow.percentageChange.split("%")[0]), Double.parseDouble(expectedRow.percentageChange.split("%")[0]));
+      Assert.assertEquals(Double.parseDouble(actualRow.percentageChange.split("%")[0]),
+          Double.parseDouble(expectedRow.percentageChange.split("%")[0]));
       Assert.assertEquals(actualRow.sizeFactor, expectedRow.sizeFactor, EPSILON);
     }
   }
@@ -84,15 +87,18 @@ public class SummaryResponseTest {
     // Level 1
     List<Row> level1 = new ArrayList<>();
     Row row1 =
-        new AdditiveRow(new Dimensions(dimensions), new DimensionValues(Collections.singletonList("US")), 20, 30);
+        new AdditiveRow(new Dimensions(dimensions),
+            new DimensionValues(Collections.singletonList("US")), 20, 30);
     level1.add(row1);
 
     Row row2 =
-        new AdditiveRow(new Dimensions(dimensions), new DimensionValues(Collections.singletonList("IN")), 10, 11);
+        new AdditiveRow(new Dimensions(dimensions),
+            new DimensionValues(Collections.singletonList("IN")), 10, 11);
     level1.add(row2);
 
     Row row3 =
-        new AdditiveRow(new Dimensions(dimensions), new DimensionValues(Collections.singletonList("FR")), 15, 17);
+        new AdditiveRow(new Dimensions(dimensions),
+            new DimensionValues(Collections.singletonList("FR")), 15, 17);
     level1.add(row3);
 
     hierarchicalRows.add(level1);

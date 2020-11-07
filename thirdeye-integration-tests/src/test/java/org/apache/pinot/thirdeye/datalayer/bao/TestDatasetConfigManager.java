@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,10 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -29,11 +29,12 @@ public class TestDatasetConfigManager {
 
   private Long datasetConfigId1;
   private Long datasetConfigId2;
-  private static String collection1 = "my dataset1";
-  private static String collection2 = "my dataset2";
+  private static final String collection1 = "my dataset1";
+  private static final String collection2 = "my dataset2";
 
   private DAOTestBase testDAOProvider;
   private DatasetConfigManager datasetConfigDAO;
+
   @BeforeClass
   void beforeClass() {
     testDAOProvider = DAOTestBase.getInstance();
@@ -71,7 +72,7 @@ public class TestDatasetConfigManager {
     Assert.assertEquals(datasetConfigs.getDataset(), collection1);
   }
 
-  @Test(dependsOnMethods = { "testFindByDataset" })
+  @Test(dependsOnMethods = {"testFindByDataset"})
   public void testUpdate() {
     DatasetConfigDTO datasetConfig = datasetConfigDAO.findById(datasetConfigId1);
     Assert.assertNotNull(datasetConfig);
@@ -83,11 +84,10 @@ public class TestDatasetConfigManager {
     Assert.assertTrue(datasetConfig.isRealtime());
   }
 
-  @Test(dependsOnMethods = { "testUpdate" })
+  @Test(dependsOnMethods = {"testUpdate"})
   public void testDelete() {
     datasetConfigDAO.deleteById(datasetConfigId2);
     DatasetConfigDTO datasetConfig = datasetConfigDAO.findById(datasetConfigId2);
     Assert.assertNull(datasetConfig);
   }
-
 }

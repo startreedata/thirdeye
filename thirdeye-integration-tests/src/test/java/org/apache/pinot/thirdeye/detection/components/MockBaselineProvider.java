@@ -23,8 +23,8 @@ import org.apache.pinot.thirdeye.detection.spec.MockBaselineProviderSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
 import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
 
-
 public class MockBaselineProvider implements BaselineProvider<MockBaselineProviderSpec> {
+
   private MockBaselineProviderSpec mockSpec;
 
   @Override
@@ -38,7 +38,8 @@ public class MockBaselineProvider implements BaselineProvider<MockBaselineProvid
   }
 
   @Override
-  public Double computePredictedAggregates(MetricSlice slice, Series.DoubleFunction aggregateFunction) {
+  public Double computePredictedAggregates(MetricSlice slice,
+      Series.DoubleFunction aggregateFunction) {
     return this.mockSpec.getBaselineAggregates().get(slice);
   }
 }

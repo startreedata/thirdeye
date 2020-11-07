@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,16 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 
 public class TestRootcauseSessionManager {
 
@@ -102,10 +101,14 @@ public class TestRootcauseSessionManager {
     this.sessionDAO.save(makeName("BDC"));
     this.sessionDAO.save(makeName("CB"));
 
-    List<RootcauseSessionDTO> sessionsAB = this.sessionDAO.findByNameLike(new HashSet<>(Arrays.asList("A", "B")));
-    List<RootcauseSessionDTO> sessionsBC = this.sessionDAO.findByNameLike(new HashSet<>(Arrays.asList("B", "C")));
-    List<RootcauseSessionDTO> sessionsCD = this.sessionDAO.findByNameLike(new HashSet<>(Arrays.asList("C", "D")));
-    List<RootcauseSessionDTO> sessionsABCD = this.sessionDAO.findByNameLike(new HashSet<>(Arrays.asList("A", "B", "C", "D")));
+    List<RootcauseSessionDTO> sessionsAB = this.sessionDAO
+        .findByNameLike(new HashSet<>(Arrays.asList("A", "B")));
+    List<RootcauseSessionDTO> sessionsBC = this.sessionDAO
+        .findByNameLike(new HashSet<>(Arrays.asList("B", "C")));
+    List<RootcauseSessionDTO> sessionsCD = this.sessionDAO
+        .findByNameLike(new HashSet<>(Arrays.asList("C", "D")));
+    List<RootcauseSessionDTO> sessionsABCD = this.sessionDAO
+        .findByNameLike(new HashSet<>(Arrays.asList("A", "B", "C", "D")));
 
     Assert.assertEquals(sessionsAB.size(), 1);
     Assert.assertEquals(sessionsBC.size(), 3);

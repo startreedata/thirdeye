@@ -24,7 +24,6 @@ import java.util.TreeMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class TestAbstractRestClient extends AbstractRestClient {
 
   /**
@@ -38,24 +37,24 @@ public class TestAbstractRestClient extends AbstractRestClient {
     String actualUrl = composeUrl(host, api, null);
     String expectedUrl = String.format("http://%s%s", host, api);
 
-    Assert.assertEquals(actualUrl,expectedUrl);
+    Assert.assertEquals(actualUrl, expectedUrl);
   }
 
   /**
    * Test compose url parameter with space create a valid url
    */
   @Test
-  public void testComposeUrlGenericParameterWithSpaceAndSlash() throws IOException{
+  public void testComposeUrlGenericParameterWithSpaceAndSlash() throws IOException {
     String api = "/api/my/api";
     String host = "host";
     String parameterName = "parameter";
     String parameterValue = "param value";
     TreeMap<String, String> queryParameters = new TreeMap<String, String>();
-    queryParameters.put(parameterName,parameterValue);
+    queryParameters.put(parameterName, parameterValue);
 
     String actualUrl = composeUrlGeneric(Protocol.HTTPS, host, api, queryParameters);
     String expectedUrl = "https://host/api/my/api?parameter=param%20value";
 
-    Assert.assertEquals(actualUrl,expectedUrl);
+    Assert.assertEquals(actualUrl, expectedUrl);
   }
 }

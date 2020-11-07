@@ -24,8 +24,8 @@ package org.apache.pinot.thirdeye.detection.spec;
 
 import org.apache.pinot.thirdeye.detection.spi.model.ModelStatus;
 
-
 public class MockModelEvaluatorSpec extends AbstractSpec {
+
   private ModelStatus mockModelStatus;
 
   public ModelStatus getMockModelStatus() {

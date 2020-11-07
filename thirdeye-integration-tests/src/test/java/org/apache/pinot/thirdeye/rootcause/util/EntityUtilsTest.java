@@ -20,30 +20,30 @@
 package org.apache.pinot.thirdeye.rootcause.util;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.pinot.thirdeye.rootcause.impl.EntityType;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import javax.validation.constraints.AssertTrue;
+import org.apache.pinot.thirdeye.rootcause.impl.EntityType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class EntityUtilsTest {
-  private static final String URN_TEST_VECTOR_DECODED = " A BCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-_=+`~[{]}\\|\'\";:/?,<. > ";
+
+  private static final String URN_TEST_VECTOR_DECODED = " A BCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-_=+`~[{]}\\|'\";:/?,<. > ";
   private static final String URN_TEST_VECTOR_ENCODED = "%20A%20BCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!%40%23%24%25%5E%26*()-_%3D%2B%60~%5B%7B%5D%7D%5C%7C'%22%3B%3A%2F%3F%2C%3C.%20%3E%20";
 
   @Test
   public void testEncodeURN() {
-    Assert.assertEquals(EntityUtils.encodeURNComponent(URN_TEST_VECTOR_DECODED), URN_TEST_VECTOR_ENCODED);
+    Assert.assertEquals(EntityUtils.encodeURNComponent(URN_TEST_VECTOR_DECODED),
+        URN_TEST_VECTOR_ENCODED);
   }
 
   @Test
   public void testDecodeURN() {
-    Assert.assertEquals(EntityUtils.decodeURNComponent(URN_TEST_VECTOR_ENCODED), URN_TEST_VECTOR_DECODED);
+    Assert.assertEquals(EntityUtils.decodeURNComponent(URN_TEST_VECTOR_ENCODED),
+        URN_TEST_VECTOR_DECODED);
   }
 
   @Test
@@ -57,7 +57,6 @@ public class EntityUtilsTest {
 
     Assert.assertEquals(actual, expected);
   }
-
 
   @Test
   public void testParseUrnStringWithFilters() {
@@ -73,7 +72,9 @@ public class EntityUtilsTest {
             new FilterPredicate("key", ">", "value")
         )));
 
-    ParsedUrn actual = EntityUtils.parseUrnString("thirdeye:metric:12345:key=value:key==value:key!=value:key<=value:key>=value:key<value:key>value", 3);
+    ParsedUrn actual = EntityUtils.parseUrnString(
+        "thirdeye:metric:12345:key=value:key==value:key!=value:key<=value:key>=value:key<value:key>value",
+        3);
 
     Assert.assertEquals(actual, expected);
   }
@@ -88,7 +89,8 @@ public class EntityUtilsTest {
             new FilterPredicate("key", "<=", "value")
         )));
 
-    ParsedUrn actual = EntityUtils.parseUrnString("thirdeye:metric:12345:key=value:key!=::::key<=value", 3);
+    ParsedUrn actual = EntityUtils
+        .parseUrnString("thirdeye:metric:12345:key=value:key!=::::key<=value", 3);
 
     Assert.assertEquals(actual, expected);
   }
@@ -105,7 +107,7 @@ public class EntityUtilsTest {
     ParsedUrn expected = new ParsedUrn(
         Arrays.asList("thirdeye", "entity", "abc"),
         Collections.singleton(new FilterPredicate("key", "=", "value"))
-        );
+    );
 
     ParsedUrn actual = EntityUtils.parseUrnString("thirdeye:entity:abc:key=value", type, 3);
 
@@ -125,7 +127,8 @@ public class EntityUtilsTest {
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testAssertPrefixOnlyFail() {
-    new ParsedUrn(Arrays.asList("thirdeye", "entity", "abc"), Collections.singleton(new FilterPredicate("key", "=", "value"))).assertPrefixOnly();
+    new ParsedUrn(Arrays.asList("thirdeye", "entity", "abc"),
+        Collections.singleton(new FilterPredicate("key", "=", "value"))).assertPrefixOnly();
   }
 
   @Test
@@ -138,7 +141,8 @@ public class EntityUtilsTest {
             new FilterPredicate("key", "<=", "value")
         )));
 
-    Assert.assertEquals(parsedUrn.toFilters().get("key"), Arrays.asList("!:::", "<=value", "value"));
+    Assert
+        .assertEquals(parsedUrn.toFilters().get("key"), Arrays.asList("!:::", "<=value", "value"));
   }
 
   @Test

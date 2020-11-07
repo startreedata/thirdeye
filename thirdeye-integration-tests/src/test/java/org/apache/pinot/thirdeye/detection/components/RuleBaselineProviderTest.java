@@ -31,6 +31,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class RuleBaselineProviderTest {
+
   RuleBaselineProvider baselineProvider;
   MockDataProvider dataProvider;
   MetricSlice slice1;
@@ -45,13 +46,15 @@ public class RuleBaselineProviderTest {
     MetricSlice slice1Wow = MetricSlice.from(1L, 1537915928000L, 1538002328000L);
     MetricSlice slice2Wow = MetricSlice.from(1L, 1537920000000L, 1538006400000L);
     Map<MetricSlice, DataFrame> aggregates = new HashMap<>();
-    aggregates.put(slice1Wow, DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE")
-        .append(-1, 150)
-        .build()
-        .setIndex(DataFrame.COL_TIME));
-    aggregates.put(slice2Wow, DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE")
-        .build()
-        .setIndex(DataFrame.COL_TIME));
+    aggregates.put(slice1Wow,
+        DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE")
+            .append(-1, 150)
+            .build()
+            .setIndex(DataFrame.COL_TIME));
+    aggregates.put(slice2Wow,
+        DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE")
+            .build()
+            .setIndex(DataFrame.COL_TIME));
     InputDataFetcher dataFetcher = new DefaultInputDataFetcher(dataProvider, -1);
 
     baselineProvider.init(new RuleBaselineProviderSpec("UTC", "wo1w"), dataFetcher);
@@ -70,7 +73,6 @@ public class RuleBaselineProviderTest {
     Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).get(0), 100.0);
     Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).get(1), 200.0);
   }
-
 
   @Test
   public void testFetchBaselineAggregates() {

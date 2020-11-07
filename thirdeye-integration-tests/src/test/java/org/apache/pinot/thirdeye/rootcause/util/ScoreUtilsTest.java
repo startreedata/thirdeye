@@ -19,13 +19,12 @@
 
 package org.apache.pinot.thirdeye.rootcause.util;
 
-import org.apache.pinot.thirdeye.rootcause.util.ScoreUtils;
 import java.util.concurrent.TimeUnit;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class ScoreUtilsTest {
+
   private final static double EPSILON = 0.0001;
 
   @Test
@@ -53,7 +52,8 @@ public class ScoreUtilsTest {
 
   @Test
   public void testQuadraticTriangularTimeRangeStrategy() {
-    ScoreUtils.TimeRangeStrategy scorer = new ScoreUtils.QuadraticTriangularStartTimeStrategy(10, 20, 40);
+    ScoreUtils.TimeRangeStrategy scorer = new ScoreUtils.QuadraticTriangularStartTimeStrategy(10,
+        20, 40);
     Assert.assertEquals(scorer.score(9, -1), 0.0d, EPSILON);
     Assert.assertEquals(scorer.score(10, -1), 0.0d, EPSILON);
     Assert.assertEquals(scorer.score(19, -1), 0.81d, EPSILON);

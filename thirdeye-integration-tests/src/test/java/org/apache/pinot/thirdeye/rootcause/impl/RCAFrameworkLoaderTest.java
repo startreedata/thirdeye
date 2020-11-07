@@ -25,8 +25,8 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class RCAFrameworkLoaderTest {
+
   @Test
   public void testAugmentPathProperty() {
     File rcaConfig = new File("/my/path/config.yml");

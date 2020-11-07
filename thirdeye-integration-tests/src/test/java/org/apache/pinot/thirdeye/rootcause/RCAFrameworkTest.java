@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.rootcause;
 
-import org.apache.pinot.thirdeye.rootcause.impl.LinearAggregationPipeline;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,28 +29,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import org.apache.pinot.thirdeye.rootcause.impl.LinearAggregationPipeline;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class RCAFrameworkTest {
+
   private static final String INPUT = RCAFramework.INPUT;
   private static final String OUTPUT = RCAFramework.OUTPUT;
 
   static class DummyPipeline extends Pipeline {
+
     public DummyPipeline(String name, Set<String> inputs) {
       super(name, inputs);
     }
 
     @Override
     public PipelineResult run(PipelineContext context) {
-      return new PipelineResult(context, Collections.<Entity>emptySet());
+      return new PipelineResult(context, Collections.emptySet());
     }
   }
 
   @Test
   public void testLinearAggregationPipeline() {
-    LinearAggregationPipeline agg = new LinearAggregationPipeline("", Collections.<String>emptySet(), -1);
+    LinearAggregationPipeline agg = new LinearAggregationPipeline("",
+        Collections.emptySet(), -1);
 
     Entity e1 = new Entity("e:one", 1.0, new ArrayList<Entity>());
     Entity e2 = new Entity("e:two", 2.1, new ArrayList<Entity>());

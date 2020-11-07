@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,10 @@ package org.apache.pinot.thirdeye.anomaly.detection;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -26,15 +29,10 @@ import org.joda.time.format.DateTimeFormatter;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
-
 public class TestDetectionJobSchedulerUtils {
 
-  DateTimeFormatter minuteDateTimeFormatter = DateTimeFormat.forPattern("yyyyMMddHHmm").withZone(DateTimeZone.UTC);
-
+  DateTimeFormatter minuteDateTimeFormatter = DateTimeFormat.forPattern("yyyyMMddHHmm")
+      .withZone(DateTimeZone.UTC);
 
   @Test
   public void testGetNewEntriesForDetectionSchedulerHourly() throws Exception {
@@ -57,9 +55,11 @@ public class TestDetectionJobSchedulerUtils {
 
     // null last entry
     Map<String, Long> newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry same as current time
     lastEntryForFunction = new DetectionStatusDTO();
@@ -67,7 +67,8 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(currentDateTimeRounded.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 0);
 
     // last entry 1 hour before current time
@@ -78,9 +79,11 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry 3 hours before current time
     lastEntryDateTimeString = "2017021400";
@@ -90,13 +93,14 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 3);
     Assert.assertNotNull(newEntries.get("2017021401"));
     Assert.assertNotNull(newEntries.get("2017021402"));
     Assert.assertNotNull(newEntries.get("2017021403"));
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
-
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
   }
 
   @Test
@@ -123,9 +127,11 @@ public class TestDetectionJobSchedulerUtils {
 
     // null last entry
     Map<String, Long> newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry same as current time
     lastEntryForFunction = new DetectionStatusDTO();
@@ -133,7 +139,8 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(currentDateTimeRounded.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 0);
 
     // last entry 15 MINUTES before current time
@@ -144,9 +151,11 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry 45 MINUTES  before current time
     lastEntryDateTimeString = "201702140245";
@@ -156,13 +165,14 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 3);
     Assert.assertNotNull(newEntries.get("201702140300"));
     Assert.assertNotNull(newEntries.get("201702140315"));
     Assert.assertNotNull(newEntries.get("201702140330"));
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
-
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
   }
 
   @Test
@@ -186,9 +196,11 @@ public class TestDetectionJobSchedulerUtils {
 
     // null last entry
     Map<String, Long> newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry same as current time
     lastEntryForFunction = new DetectionStatusDTO();
@@ -196,7 +208,8 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(currentDateTimeRounded.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 0);
 
     // last entry 1 day before current time
@@ -207,9 +220,11 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry 3 days before current time
     lastEntryDateTimeString = "20170211";
@@ -219,12 +234,14 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 3);
     Assert.assertNotNull(newEntries.get("20170212"));
     Assert.assertNotNull(newEntries.get("20170213"));
     Assert.assertNotNull(newEntries.get("20170214"));
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
   }
 
   @Test
@@ -249,9 +266,11 @@ public class TestDetectionJobSchedulerUtils {
 
     // null last entry
     Map<String, Long> newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry same as current time
     lastEntryForFunction = new DetectionStatusDTO();
@@ -259,7 +278,8 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(currentDateTimeRounded.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 0);
 
     // last entry 1 day before current time, before DST
@@ -270,9 +290,11 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry 3 days before current time
     lastEntryDateTimeString = "20170309";
@@ -282,12 +304,14 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 3);
     Assert.assertNotNull(newEntries.get("20170310"));
     Assert.assertNotNull(newEntries.get("20170311"));
     Assert.assertNotNull(newEntries.get("20170312"));
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
   }
 
   @Test
@@ -312,9 +336,11 @@ public class TestDetectionJobSchedulerUtils {
 
     // null last entry
     Map<String, Long> newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry same as current time
     lastEntryForFunction = new DetectionStatusDTO();
@@ -322,7 +348,8 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(currentDateTimeRounded.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 0);
 
     // last entry 1 day before current time, before DST ended
@@ -333,9 +360,11 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 1);
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
 
     // last entry 3 days before current time
     lastEntryDateTimeString = "20161103";
@@ -345,13 +374,13 @@ public class TestDetectionJobSchedulerUtils {
     lastEntryForFunction.setDateToCheckInMS(lastEntryDateTime.getMillis());
 
     newEntries = DetectionJobSchedulerUtils.
-        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig, dateTimeZone);
+        getNewEntries(currentDateTime, lastEntryForFunction, anomalyFunction, datasetConfig,
+            dateTimeZone);
     Assert.assertEquals(newEntries.size(), 3);
     Assert.assertNotNull(newEntries.get("20161104"));
     Assert.assertNotNull(newEntries.get("20161105"));
     Assert.assertNotNull(newEntries.get("20161106"));
-    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded), new Long(currentDateTimeRounded.getMillis()));
+    Assert.assertEquals(newEntries.get(currentDateTimeStringRounded),
+        new Long(currentDateTimeRounded.getMillis()));
   }
-
-
 }

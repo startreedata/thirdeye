@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class ThirdEyeConfigurationTest {
+
   ThirdEyeConfiguration config;
 
   @BeforeMethod
@@ -46,12 +46,14 @@ public class ThirdEyeConfigurationTest {
   @Test
   public void testGetDataSourcesAsUrlRelative() throws Exception {
     config.setDataSources("myDir/myDataSources.yml");
-    Assert.assertEquals(config.getDataSourcesAsUrl(), new URL("file:/myRoot/myDir/myDataSources.yml"));
+    Assert.assertEquals(config.getDataSourcesAsUrl(),
+        new URL("file:/myRoot/myDir/myDataSources.yml"));
   }
 
   @Test
   public void testGetDataSourcesAsUrlDefault() throws Exception {
     config.getDataSourcesAsUrl();
-    Assert.assertEquals(config.getDataSourcesAsUrl(), new URL("file:/myRoot/data-sources/data-sources-config.yml"));
+    Assert.assertEquals(config.getDataSourcesAsUrl(),
+        new URL("file:/myRoot/data-sources/data-sources-config.yml"));
   }
 }

@@ -7,6 +7,7 @@ import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertT
 import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.TIME_WINDOW_SUPPRESSOR_KEY;
 import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.WINDOW_END_TIME_KEY;
 import static org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor.WINDOW_START_TIME_KEY;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

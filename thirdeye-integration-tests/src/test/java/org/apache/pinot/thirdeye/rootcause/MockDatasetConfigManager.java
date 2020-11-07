@@ -21,14 +21,15 @@ package org.apache.pinot.thirdeye.rootcause;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 
+public class MockDatasetConfigManager extends AbstractMockManager<DatasetConfigDTO> implements
+    DatasetConfigManager {
 
-public class MockDatasetConfigManager extends AbstractMockManager<DatasetConfigDTO> implements DatasetConfigManager {
   private final Collection<DatasetConfigDTO> datasets;
 
   public MockDatasetConfigManager(Collection<DatasetConfigDTO> datasets) {
@@ -37,15 +38,17 @@ public class MockDatasetConfigManager extends AbstractMockManager<DatasetConfigD
 
   @Override
   public DatasetConfigDTO findById(final Long id) {
-    Collection<DatasetConfigDTO> output = Collections2.filter(this.datasets, new Predicate<DatasetConfigDTO>() {
-      @Override
-      public boolean apply(DatasetConfigDTO dto) {
-        return dto.getId().equals(id);
-      }
-    });
+    Collection<DatasetConfigDTO> output = Collections2
+        .filter(this.datasets, new Predicate<DatasetConfigDTO>() {
+          @Override
+          public boolean apply(DatasetConfigDTO dto) {
+            return dto.getId().equals(id);
+          }
+        });
 
-    if (output.isEmpty())
+    if (output.isEmpty()) {
       return null;
+    }
     return output.iterator().next();
   }
 
@@ -61,15 +64,17 @@ public class MockDatasetConfigManager extends AbstractMockManager<DatasetConfigD
 
   @Override
   public DatasetConfigDTO findByDataset(final String dataset) {
-    Collection<DatasetConfigDTO> output = new ArrayList<>(Collections2.filter(this.datasets, new Predicate<DatasetConfigDTO>() {
-      @Override
-      public boolean apply(DatasetConfigDTO dto) {
-        return dto.getDataset().equals(dataset);
-      }
-    }));
+    Collection<DatasetConfigDTO> output = new ArrayList<>(
+        Collections2.filter(this.datasets, new Predicate<DatasetConfigDTO>() {
+          @Override
+          public boolean apply(DatasetConfigDTO dto) {
+            return dto.getDataset().equals(dataset);
+          }
+        }));
 
-    if (output.isEmpty())
+    if (output.isEmpty()) {
       return null;
+    }
     return output.iterator().next();
   }
 

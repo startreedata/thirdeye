@@ -53,16 +53,16 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class TimeSeriesCacheTest {
+
   private MetricConfigManager metricDAO;
   private DatasetConfigManager datasetDAO;
   private QueryCache queryCache;
   private CouchbaseCacheDAO cacheDAO;
   private DefaultTimeSeriesCache cache;
 
-  private boolean centralizedCacheToggle = CacheConfig.getInstance().useCentralizedCache();
-  private CacheConfig config = new CacheConfig();
+  private final boolean centralizedCacheToggle = CacheConfig.getInstance().useCentralizedCache();
+  private final CacheConfig config = new CacheConfig();
 
   ExecutorService executor;
 
@@ -71,7 +71,8 @@ public class TimeSeriesCacheTest {
   private static final String COLLECTION = "collection";
   private static final MetricDataset METRIC = new MetricDataset("metric", COLLECTION);
   private static final MetricFunction
-      metricFunction = new MetricFunction(MetricAggFunction.AVG, METRIC.getMetricName(), 1L, COLLECTION, null, null);
+      metricFunction = new MetricFunction(MetricAggFunction.AVG, METRIC.getMetricName(), 1L,
+      COLLECTION, null, null);
 
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
       .setMetricFunctions(Collections.singletonList(metricFunction))
@@ -82,10 +83,11 @@ public class TimeSeriesCacheTest {
       .build("ref");
 
   private static final TimeSpec
-      timeSpec = new TimeSpec(METRIC.getMetricName(), TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
+      timeSpec = new TimeSpec(METRIC.getMetricName(), TimeGranularity.fromString("1_SECONDS"),
+      TimeSpec.SINCE_EPOCH_FORMAT);
 
-  private static final String metricUrn = MetricEntity.fromMetric(request.getFilterSet().asMap(), metricFunction.getMetricId()).getUrn();
-
+  private static final String metricUrn = MetricEntity
+      .fromMetric(request.getFilterSet().asMap(), metricFunction.getMetricId()).getUrn();
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
@@ -96,7 +98,7 @@ public class TimeSeriesCacheTest {
     // mock DAO object so that inserts put data into list
     this.cacheDAO = mock(CouchbaseCacheDAO.class);
     Mockito.doAnswer(invocation ->
-      this.pretendCacheStore.add((TimeSeriesDataPoint) invocation.getArguments()[0])
+        this.pretendCacheStore.add((TimeSeriesDataPoint) invocation.getArguments()[0])
     ).when(this.cacheDAO).insertTimeSeriesDataPoint(any(TimeSeriesDataPoint.class));
 
     this.datasetDAO = mock(DatasetConfigManager.class);
@@ -143,7 +145,7 @@ public class TimeSeriesCacheTest {
         .when(this.queryCache.getQueryResult(any(ThirdEyeRequest.class)))
         .thenAnswer(invocation -> {
           return new RelationalThirdEyeResponse(
-              (ThirdEyeRequest)invocation.getArguments()[0],
+              (ThirdEyeRequest) invocation.getArguments()[0],
               rows,
               timeSpec);
         });
@@ -162,7 +164,7 @@ public class TimeSeriesCacheTest {
         .when(this.cacheDAO.tryFetchExistingTimeSeries(any(ThirdEyeCacheRequest.class)))
         .thenAnswer(invocation -> {
           return new ThirdEyeCacheResponse(
-              (ThirdEyeCacheRequest)invocation.getArguments()[0], new ArrayList<>());
+              (ThirdEyeCacheRequest) invocation.getArguments()[0], new ArrayList<>());
         });
 
     Mockito.when(this.datasetDAO.findByDataset(anyString())).thenReturn(makeDatasetDTO());
@@ -173,7 +175,7 @@ public class TimeSeriesCacheTest {
     Mockito
         .when(this.queryCache.getQueryResult(any(ThirdEyeRequest.class)))
         .thenAnswer(invocation -> {
-          ThirdEyeRequest request = (ThirdEyeRequest)invocation.getArguments()[0];
+          ThirdEyeRequest request = (ThirdEyeRequest) invocation.getArguments()[0];
           Assert.assertEquals(request.getStartTimeInclusive().getMillis(), 0);
           Assert.assertEquals(request.getEndTimeExclusive().getMillis(), 10000);
           return new RelationalThirdEyeResponse(request, rows, timeSpec);
@@ -205,13 +207,12 @@ public class TimeSeriesCacheTest {
       dataPoints.add(dp);
     }
 
-
     // mock tryFetch method to return a ThirdEyeResponse with the correct data points in it.
     Mockito
         .when(this.cacheDAO.tryFetchExistingTimeSeries(any(ThirdEyeCacheRequest.class)))
         .thenAnswer(invocation -> {
           return new ThirdEyeCacheResponse(
-              (ThirdEyeCacheRequest)invocation.getArguments()[0], dataPoints);
+              (ThirdEyeCacheRequest) invocation.getArguments()[0], dataPoints);
         });
 
     Mockito.when(this.datasetDAO.findByDataset(anyString())).thenReturn(makeDatasetDTO());
@@ -221,11 +222,14 @@ public class TimeSeriesCacheTest {
   }
 
   /**
-   *   TODO: figure out how to test cases where the cache only has partial data.
-   *   Right now it's difficult to do so because we are using DataFrameUtils.makeTimeSeriesRequestAligned(),
-   *   which is a static method. We may have to refactor our code to do these tests. One idea could be to
-   *   have all classes that use TimeSeriesLoader use TimeSeriesCache instead, and TimeSeriesCache is the
-   *   only class to use TimeSeriesLoader.
+   * TODO: figure out how to test cases where the cache only has partial data.
+   * Right now it's difficult to do so because we are using DataFrameUtils.makeTimeSeriesRequestAligned(),
+   * which is a static method. We may have to refactor our code to do these tests. One idea could
+   * be
+   * to
+   * have all classes that use TimeSeriesLoader use TimeSeriesCache instead, and TimeSeriesCache is
+   * the
+   * only class to use TimeSeriesLoader.
    */
 
 //  @Test
@@ -262,7 +266,6 @@ public class TimeSeriesCacheTest {
 //    ThirdEyeResponse response = this.cache.fetchTimeSeries(request);
 //    verifyRowSeriesCorrectness(response);
 //  }
-
   private List<String[]> buildRawResponseRowsWithTimestamps(int start, int end) {
     List<String[]> rows = new ArrayList<>();
     // index 0 is time bucket id, index 1 is value, index 2 is timestamp
@@ -289,7 +292,8 @@ public class TimeSeriesCacheTest {
 
   private void verifyRowSeriesCorrectness(ThirdEyeResponse response) {
     for (MetricFunction metric : response.getMetricFunctions()) {
-      String metricUrn = MetricEntity.fromMetric(response.getRequest().getFilterSet().asMap(), metric.getMetricId()).getUrn();
+      String metricUrn = MetricEntity
+          .fromMetric(response.getRequest().getFilterSet().asMap(), metric.getMetricId()).getUrn();
       for (int i = 0; i < response.getNumRowsFor(metric); i++) {
         Map<String, String> row = response.getRow(metric, i);
         Assert.assertEquals(row.get("AVG_metric"), String.valueOf(i));

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,16 @@
 
 package org.apache.pinot.thirdeye.tools;
 
-import org.apache.pinot.thirdeye.anomaly.utils.AbstractResourceHttpUtils;
 import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.pinot.thirdeye.anomaly.utils.AbstractResourceHttpUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-
 public class DashboardHttpUtils extends AbstractResourceHttpUtils {
+
   private final String DEFAULT_PATH_TO_TIMESERIES = "/dashboard/data/timeseries?";
   private final String DATASET = "dataset";
   private final String METRIC = "metrics";
@@ -44,8 +44,9 @@ public class DashboardHttpUtils extends AbstractResourceHttpUtils {
     addAuthenticationCookie(authToken);
   }
 
-  public String handleMetricViewRequest(String dataset, String metric, DateTime startTime, DateTime endTime,
-      TimeUnit timeUnit, String dimensions, String filterJson, String timezone) throws Exception{
+  public String handleMetricViewRequest(String dataset, String metric, DateTime startTime,
+      DateTime endTime,
+      TimeUnit timeUnit, String dimensions, String filterJson, String timezone) throws Exception {
     DateTimeZone dateTimeZone = DateTimeZone.forID(timezone);
     startTime = new DateTime(startTime, dateTimeZone);
     endTime = new DateTime(endTime, dateTimeZone);
@@ -54,8 +55,8 @@ public class DashboardHttpUtils extends AbstractResourceHttpUtils {
     urlBuilder.append(DATASET + EQUALS + dataset + AND);
     urlBuilder.append(METRIC + EQUALS + metric + AND);
     urlBuilder.append(VIEW + EQUALS + DEFAULT_VIEW + AND);
-    urlBuilder.append(TIME_START + EQUALS + Long.toString(startTime.getMillis()) + AND);
-    urlBuilder.append(TIME_END + EQUALS + Long.toString(endTime.getMillis()) + AND);
+    urlBuilder.append(TIME_START + EQUALS + startTime.getMillis() + AND);
+    urlBuilder.append(TIME_END + EQUALS + endTime.getMillis() + AND);
     urlBuilder.append(GRANULARITY + EQUALS + timeUnit.name() + AND);
     if (dimensions != null && !dimensions.isEmpty()) {
       urlBuilder.append(DIMENSIONS + EQUALS + dimensions + AND);

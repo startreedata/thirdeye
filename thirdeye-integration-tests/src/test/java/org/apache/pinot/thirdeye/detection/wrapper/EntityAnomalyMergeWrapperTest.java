@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.detection.wrapper;
 
+import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.makeAnomaly;
+import static org.apache.pinot.thirdeye.detection.DetectionUtils.setEntityChildMapping;
+
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,11 +40,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.*;
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.*;
-
-
 public class EntityAnomalyMergeWrapperTest {
+
   private AlertDTO config;
   private EntityAnomalyMergeWrapper mergeWrapper;
   private Map<String, Object> properties;
@@ -95,7 +95,7 @@ public class EntityAnomalyMergeWrapperTest {
     MergedAnomalyResultDTO parentAnomaly1 = DetectionTestUtils.makeAnomaly(1000, 1400);
     this.childAnomaly1 = DetectionTestUtils.makeAnomaly(1000, 1050);
     this.childAnomaly1.setId(2000L);
-    this.childAnomaly2 =  DetectionTestUtils.makeAnomaly(1350, 1400);
+    this.childAnomaly2 = DetectionTestUtils.makeAnomaly(1350, 1400);
     this.childAnomaly2.setId(3000L);
     setEntityChildMapping(parentAnomaly1, this.childAnomaly1);
     setEntityChildMapping(parentAnomaly1, this.childAnomaly2);
@@ -131,7 +131,9 @@ public class EntityAnomalyMergeWrapperTest {
     Assert.assertEquals(output.getAnomalies().get(0).getEndTime(), 2000L);
     Assert.assertEquals(output.getAnomalies().get(0).getChildren().size(), 3);
 
-    Set<MergedAnomalyResultDTO> expectedChildAnomalies = ImmutableSet.of(childAnomaly1, childAnomaly3, childAnomaly4);
-    Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(1000L, 2000L, expectedChildAnomalies)));
+    Set<MergedAnomalyResultDTO> expectedChildAnomalies = ImmutableSet
+        .of(childAnomaly1, childAnomaly3, childAnomaly4);
+    Assert.assertTrue(
+        output.getAnomalies().contains(makeAnomaly(1000L, 2000L, expectedChildAnomalies)));
   }
 }

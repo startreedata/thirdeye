@@ -19,14 +19,12 @@
 
 package org.apache.pinot.thirdeye.rootcause;
 
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import java.util.Collections;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class MaxScoreSetTest {
+
   @Test
   public void testContains() {
     MaxScoreSet<Entity> s = new MaxScoreSet<>();
@@ -63,6 +61,6 @@ public class MaxScoreSetTest {
   }
 
   private static Entity makeEntity(double score) {
-    return new Entity("aaa", score, Collections.<Entity>emptyList());
+    return new Entity("aaa", score, Collections.emptyList());
   }
 }

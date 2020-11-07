@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package org.apache.pinot.thirdeye.dataframe;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
 
 public class PrimitiveMultimapTest {
 
@@ -56,15 +55,24 @@ public class PrimitiveMultimapTest {
   @Test
   public void testCapacityEffective() {
     Assert.assertEquals(new PrimitiveMultimap(0).capacityEffective(), 2);
-    Assert.assertEquals(new PrimitiveMultimap(1).capacityEffective(), (int) (2 * PrimitiveMultimap.SCALING_FACTOR));
-    Assert.assertEquals(new PrimitiveMultimap(2).capacityEffective(), (int) (4 * PrimitiveMultimap.SCALING_FACTOR));
-    Assert.assertEquals(new PrimitiveMultimap(3).capacityEffective(), (int) (4 * PrimitiveMultimap.SCALING_FACTOR));
-    Assert.assertEquals(new PrimitiveMultimap(4).capacityEffective(), (int) (8 * PrimitiveMultimap.SCALING_FACTOR));
-    Assert.assertEquals(new PrimitiveMultimap(5).capacityEffective(), (int) (8 * PrimitiveMultimap.SCALING_FACTOR));
-    Assert.assertEquals(new PrimitiveMultimap(6).capacityEffective(), (int) (8 * PrimitiveMultimap.SCALING_FACTOR));
-    Assert.assertEquals(new PrimitiveMultimap(7).capacityEffective(), (int) (8 * PrimitiveMultimap.SCALING_FACTOR));
-    Assert.assertEquals(new PrimitiveMultimap(8).capacityEffective(), (int) (16 * PrimitiveMultimap.SCALING_FACTOR));
-    Assert.assertEquals(new PrimitiveMultimap(9).capacityEffective(), (int) (16 * PrimitiveMultimap.SCALING_FACTOR));
+    Assert.assertEquals(new PrimitiveMultimap(1).capacityEffective(),
+        (int) (2 * PrimitiveMultimap.SCALING_FACTOR));
+    Assert.assertEquals(new PrimitiveMultimap(2).capacityEffective(),
+        (int) (4 * PrimitiveMultimap.SCALING_FACTOR));
+    Assert.assertEquals(new PrimitiveMultimap(3).capacityEffective(),
+        (int) (4 * PrimitiveMultimap.SCALING_FACTOR));
+    Assert.assertEquals(new PrimitiveMultimap(4).capacityEffective(),
+        (int) (8 * PrimitiveMultimap.SCALING_FACTOR));
+    Assert.assertEquals(new PrimitiveMultimap(5).capacityEffective(),
+        (int) (8 * PrimitiveMultimap.SCALING_FACTOR));
+    Assert.assertEquals(new PrimitiveMultimap(6).capacityEffective(),
+        (int) (8 * PrimitiveMultimap.SCALING_FACTOR));
+    Assert.assertEquals(new PrimitiveMultimap(7).capacityEffective(),
+        (int) (8 * PrimitiveMultimap.SCALING_FACTOR));
+    Assert.assertEquals(new PrimitiveMultimap(8).capacityEffective(),
+        (int) (16 * PrimitiveMultimap.SCALING_FACTOR));
+    Assert.assertEquals(new PrimitiveMultimap(9).capacityEffective(),
+        (int) (16 * PrimitiveMultimap.SCALING_FACTOR));
   }
 
   @Test
@@ -170,14 +178,14 @@ public class PrimitiveMultimapTest {
   @Test
   public void testMultisetSequential() {
     PrimitiveMultimap m = new PrimitiveMultimap(10000);
-    for(int i=0; i<1000; i++) {
-      for(int j=0; j<10; j++) {
+    for (int i = 0; i < 1000; i++) {
+      for (int j = 0; j < 10; j++) {
         m.put(i, j);
       }
     }
 
-    for(int i=0; i<1000; i++) {
-      for(int j=0; j<10; j++) {
+    for (int i = 0; i < 1000; i++) {
+      for (int j = 0; j < 10; j++) {
         Assert.assertEquals(m.get(i, j), j);
       }
       Assert.assertEquals(m.get(i, 10), -1);
@@ -187,11 +195,11 @@ public class PrimitiveMultimapTest {
   @Test
   public void testMultisetRoundRobin() {
     PrimitiveMultimap m = new PrimitiveMultimap(10000);
-    for(int i=0; i<10000; i++) {
+    for (int i = 0; i < 10000; i++) {
       m.put(i % 10, i);
     }
 
-    for(int i=0; i<10000; i++) {
+    for (int i = 0; i < 10000; i++) {
       Assert.assertEquals(m.get(i % 10, i / 10), i);
     }
   }
@@ -199,15 +207,15 @@ public class PrimitiveMultimapTest {
   @Test
   public void testMultisetIterator() {
     PrimitiveMultimap m = new PrimitiveMultimap(10000);
-    for(int i=0; i<1000; i++) {
-      for(int j=0; j<10; j++) {
+    for (int i = 0; i < 1000; i++) {
+      for (int j = 0; j < 10; j++) {
         m.put(i, j);
       }
     }
 
-    for(int i=0; i<1000; i++) {
+    for (int i = 0; i < 1000; i++) {
       Assert.assertEquals(m.get(i, 0), 0);
-      for(int j=1; j<10; j++) {
+      for (int j = 1; j < 10; j++) {
         Assert.assertEquals(m.getNext(), j);
       }
       Assert.assertEquals(m.getNext(), -1);
@@ -217,13 +225,13 @@ public class PrimitiveMultimapTest {
   @Test
   public void testMultisetSingleKey() {
     PrimitiveMultimap m = new PrimitiveMultimap(1000);
-    for(int i=0; i<1000; i++) {
+    for (int i = 0; i < 1000; i++) {
       m.put(12345, i);
     }
 
     int cntr = 0;
     int val = m.get(12345);
-    while(val != -1) {
+    while (val != -1) {
       Assert.assertEquals(val, cntr++);
       val = m.getNext();
     }

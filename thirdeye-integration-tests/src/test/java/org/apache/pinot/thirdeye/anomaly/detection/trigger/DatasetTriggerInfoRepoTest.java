@@ -22,12 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DatasetTriggerInfoRepo;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
@@ -36,9 +36,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class DatasetTriggerInfoRepoTest {
-  private static String TEST_DATA_SOURCE = "TestSource";
-  private static String TEST_DATASET_PREFIX = "test_dataset_";
-  private static String TEST_METRIC_PREFIX = "test_metric_";
+
+  private static final String TEST_DATA_SOURCE = "TestSource";
+  private static final String TEST_DATASET_PREFIX = "test_dataset_";
+  private static final String TEST_METRIC_PREFIX = "test_metric_";
   private DAOTestBase testDAOProvider;
 
   @BeforeMethod
@@ -88,28 +89,32 @@ public class DatasetTriggerInfoRepoTest {
   }
 
   @Test
-  public void testInitAndGetInstance () {
+  public void testInitAndGetInstance() {
     DatasetTriggerInfoRepo datasetTriggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
-        Assert.assertSame(datasetTriggerInfoRepo, DatasetTriggerInfoRepo.getInstance());
+    Assert.assertSame(datasetTriggerInfoRepo, DatasetTriggerInfoRepo.getInstance());
     Assert.assertSame(datasetTriggerInfoRepo, DatasetTriggerInfoRepo.getInstance());
     Assert.assertTrue(datasetTriggerInfoRepo.isDatasetActive(TEST_DATASET_PREFIX + 1));
     Assert.assertTrue(datasetTriggerInfoRepo.isDatasetActive(TEST_DATASET_PREFIX + 2));
     Assert.assertFalse(datasetTriggerInfoRepo.isDatasetActive(TEST_DATASET_PREFIX + 3));
-    Assert.assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 1000);
-    Assert.assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 2000);
+    Assert
+        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 1000);
+    Assert
+        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 2000);
     Assert.assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 3), 0);
   }
 
-  @Test(dependsOnMethods = { "testInitAndGetInstance" })
+  @Test(dependsOnMethods = {"testInitAndGetInstance"})
   public void testSetLastUpdateTimestamp() {
     DatasetTriggerInfoRepo datasetTriggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
     datasetTriggerInfoRepo.setLastUpdateTimestamp(TEST_DATASET_PREFIX + 1, 3000);
-    Assert.assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 3000);
-    Assert.assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 2000);
+    Assert
+        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 3000);
+    Assert
+        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 2000);
     Assert.assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 4), 0);
   }
 
-  @Test(dependsOnMethods = { "testSetLastUpdateTimestamp" })
+  @Test(dependsOnMethods = {"testSetLastUpdateTimestamp"})
   public void testRefresh() throws InterruptedException {
     AlertManager alertManager = DAORegistry.getInstance().getDetectionConfigManager();
     MetricConfigManager metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
@@ -141,7 +146,8 @@ public class DatasetTriggerInfoRepoTest {
 
     Thread.sleep(65 * 1000); // wait for datasetTriggerInfoRepo to refresh
     Assert.assertTrue(datasetTriggerInfoRepo.isDatasetActive(TEST_DATASET_PREFIX + 3));
-    Assert.assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 3), 3000);
+    Assert
+        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 3), 3000);
   }
 
   @AfterMethod

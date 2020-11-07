@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.pinot.thirdeye.util;
 
 import com.couchbase.client.java.document.json.JsonObject;
@@ -35,8 +34,8 @@ public class CacheUtilTest {
   private static final String START = "start";
   private static final String END = "end";
 
-  private static String metricUrn = "thirdeye:metric:1";
-  private static String metricUrnHash = "624972944";
+  private static final String metricUrn = "thirdeye:metric:1";
+  private static final String metricUrnHash = "624972944";
   private final long timestamp = 1234567;
   private final long metricId = 1;
   private final String dataValue = "100.0";
@@ -44,7 +43,6 @@ public class CacheUtilTest {
 
   private TimeSeriesDataPoint dataPoint;
   private JsonObject jsonObject;
-
 
   @BeforeMethod
   public void beforeMethod() {
@@ -69,7 +67,7 @@ public class CacheUtilTest {
 
     Assert.assertEquals(mappedDataPoint.getLong("timestamp").longValue(), 1234567);
     Assert.assertEquals(mappedDataPoint.getLong("metricId").longValue(), 1);
-    Assert.assertEquals(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash()), (double)100);
+    Assert.assertEquals(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash()), (double) 100);
   }
 
   @Test
@@ -77,7 +75,7 @@ public class CacheUtilTest {
     dataPoint.setDataValue(null);
     JsonObject mappedDataPoint = CacheUtils.buildDocumentStructure(dataPoint);
 
-    Assert.assertEquals(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash()), (double)0);
+    Assert.assertEquals(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash()), (double) 0);
   }
 
   @Test
@@ -85,7 +83,7 @@ public class CacheUtilTest {
     dataPoint.setDataValue("null");
     JsonObject mappedDataPoint = CacheUtils.buildDocumentStructure(dataPoint);
 
-    Assert.assertEquals(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash()), (double)0);
+    Assert.assertEquals(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash()), (double) 0);
   }
 
   @Test

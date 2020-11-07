@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import static org.apache.pinot.thirdeye.detection.DetectionUtils.mergeAndSortAnomalies;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,15 +32,11 @@ import org.apache.pinot.thirdeye.detection.spec.TriggerConditionGrouperSpec;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.*;
-import static org.apache.pinot.thirdeye.detection.components.TriggerConditionGrouper.*;
-import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.*;
-
-
 public class TriggerConditionGrouperTest {
 
   public static MergedAnomalyResultDTO makeAnomaly(long start, long end, String entity) {
-    MergedAnomalyResultDTO anomaly = DetectionTestUtils.makeAnomaly(1000l, start, end, null, null, Collections.<String, String>emptyMap());
+    MergedAnomalyResultDTO anomaly = DetectionTestUtils
+        .makeAnomaly(1000l, start, end, null, null, Collections.emptyMap());
     Map<String, String> props = new HashMap<>();
     props.put(PROP_SUB_ENTITY_NAME, entity);
     anomaly.setProperties(props);
@@ -45,16 +44,14 @@ public class TriggerConditionGrouperTest {
   }
 
   /**
+   * 0           1000    1500       2000
+   * A        |-------------|      |-----------|
    *
-   *           0           1000    1500       2000
-   *  A        |-------------|      |-----------|
+   * 500                       2000     2500      3000
+   * B              |--------------------------|        |---------|
    *
-   *                500                       2000     2500      3000
-   *  B              |--------------------------|        |---------|
-   *
-   *                500    1000    1500       2000
-   *  A && B         |-------|      |-----------|
-   *
+   * 500    1000    1500       2000
+   * A && B         |-------|      |-----------|
    */
   @Test
   public void testAndGrouping() {
@@ -90,16 +87,14 @@ public class TriggerConditionGrouperTest {
   }
 
   /**
+   * 0           1000    1500       2000
+   * A        |-------------|      |-----------|
    *
-   *           0           1000    1500       2000
-   *  A        |-------------|      |-----------|
+   * 500                       2000     2500      3000
+   * B              |--------------------------|       |---------|
    *
-   *                500                       2000     2500      3000
-   *  B              |--------------------------|       |---------|
-   *
-   *           0                              2000     2500      3000
-   *  A || B   |--------------------------------|       |---------|
-   *
+   * 0                              2000     2500      3000
+   * A || B   |--------------------------------|       |---------|
    */
   @Test
   public void testOrGrouping() {
@@ -135,22 +130,20 @@ public class TriggerConditionGrouperTest {
   }
 
   /**
+   * 0           1000    1500       2000
+   * A                  |-------------|      |-----------|
    *
-   *                     0           1000    1500       2000
-   *  A                  |-------------|      |-----------|
+   * 500                       2000     2500      3000
+   * B                         |-------------------------|       |---------|
    *
-   *                           500                       2000     2500      3000
-   *  B                         |-------------------------|       |---------|
+   * 1600  1900
+   * C                                          |----|
    *
-   *                                           1600  1900
-   *  C                                          |----|
+   * 500                       2000     2500      3000
+   * B || C                    |-------------------------|       |---------|
    *
-   *                           500                       2000     2500      3000
-   *  B || C                    |-------------------------|       |---------|
-   *
-   *                           500   1000    1500        2000
-   *  A && (B || C)             |------|       |----------|
-   *
+   * 500   1000    1500        2000
+   * A && (B || C)             |------|       |----------|
    */
   @Test
   public void testAndOrGrouping() {

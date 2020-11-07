@@ -22,16 +22,16 @@ package org.apache.pinot.thirdeye.dashboard.resources.v2.alerts;
 
 import java.util.Collections;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 public class AlertSearcherTest {
+
   private DAOTestBase testDAOProvider;
 
   @BeforeMethod
@@ -58,7 +58,7 @@ public class AlertSearcherTest {
   @Test
   public void testSearch() {
     AlertSearcher searcher = new AlertSearcher();
-    Map<String, Object> result = searcher.search(new AlertSearchFilter(), 10 ,0);
+    Map<String, Object> result = searcher.search(new AlertSearchFilter(), 10, 0);
     Assert.assertEquals(result.get("count"), 4L);
     Assert.assertEquals(result.get("limit"), 10L);
     Assert.assertEquals(result.get("offset"), 0L);
@@ -67,7 +67,11 @@ public class AlertSearcherTest {
   @Test
   public void testSearchActive() {
     AlertSearcher searcher = new AlertSearcher();
-    Map<String, Object> result = searcher.search(new AlertSearchFilter(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), true), 10 ,0);
+    Map<String, Object> result = searcher.search(
+        new AlertSearchFilter(Collections.emptyList(), Collections.emptyList(),
+            Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
+            Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), true), 10,
+        0);
     Assert.assertEquals(result.get("count"), 1L);
     Assert.assertEquals(result.get("limit"), 10L);
     Assert.assertEquals(result.get("offset"), 0L);

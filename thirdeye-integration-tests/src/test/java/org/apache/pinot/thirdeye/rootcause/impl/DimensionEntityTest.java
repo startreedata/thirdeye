@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 
 @Deprecated
 public class DimensionEntityTest {
+
   @Test
   public void testFromDimension() {
     DimensionEntity e = DimensionEntity.fromDimension(1.0, "myname", "myvalue", "mytype");
@@ -46,7 +47,8 @@ public class DimensionEntityTest {
 
   @Test
   public void testFromURNDecode() {
-    DimensionEntity e = DimensionEntity.fromURN("thirdeye:dimension:my%3Aname:my%3Dvalue:mytype", 1.0);
+    DimensionEntity e = DimensionEntity
+        .fromURN("thirdeye:dimension:my%3Aname:my%3Dvalue:mytype", 1.0);
     Assert.assertEquals(e.getName(), "my:name");
     Assert.assertEquals(e.getValue(), "my=value");
     Assert.assertEquals(e.getType(), "mytype");

@@ -20,12 +20,6 @@
 package org.apache.pinot.thirdeye.rootcause.timeseries;
 
 import com.google.common.collect.ArrayListMultimap;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.dataframe.StringSeries;
-import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,18 +28,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.dataframe.LongSeries;
+import org.apache.pinot.thirdeye.dataframe.StringSeries;
+import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class BaselineTest {
+
   private static final String COL_TIME = Baseline.COL_TIME;
   private static final String COL_VALUE = Baseline.COL_VALUE;
 
-  private static final MetricSlice BASE_SLICE = MetricSlice.from(12345, 15000, 17000, ArrayListMultimap.<String, String>create(), new TimeGranularity(500, TimeUnit.MILLISECONDS));
+  private static final MetricSlice BASE_SLICE = MetricSlice
+      .from(12345, 15000, 17000, ArrayListMultimap.create(),
+          new TimeGranularity(500, TimeUnit.MILLISECONDS));
 
   // PDT -> PST 2018
   // 1520681115000 // Saturday, March 10, 2018 3:25:15 AM GMT-08:00
@@ -55,8 +57,12 @@ public class BaselineTest {
   // 1541240715000 // Saturday, November 3, 2018 3:25:15 AM GMT-07:00
   // 1541409345000 // Monday, November 5, 2018 1:15:45 AM GMT-08:00
 
-  private static final MetricSlice PDT_PST_SLICE = MetricSlice.from(12345, 1520681115000L, 1520842545000L, ArrayListMultimap.<String, String>create(), new TimeGranularity(500, TimeUnit.MILLISECONDS));
-  private static final MetricSlice PST_PDT_SLICE = MetricSlice.from(12345, 1541240715000L, 1541409345000L, ArrayListMultimap.<String, String>create(), new TimeGranularity(500, TimeUnit.MILLISECONDS));
+  private static final MetricSlice PDT_PST_SLICE = MetricSlice
+      .from(12345, 1520681115000L, 1520842545000L, ArrayListMultimap.create(),
+          new TimeGranularity(500, TimeUnit.MILLISECONDS));
+  private static final MetricSlice PST_PDT_SLICE = MetricSlice
+      .from(12345, 1541240715000L, 1541409345000L, ArrayListMultimap.create(),
+          new TimeGranularity(500, TimeUnit.MILLISECONDS));
 
   @Test
   public void testBaselineOffsetFrom() {
@@ -124,12 +130,14 @@ public class BaselineTest {
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testBaselineOffsetComputeInvalidDataSize() {
     BaselineOffset baseline = BaselineOffset.fromOffset(-1000);
-    baseline.gather(BASE_SLICE, Collections.<MetricSlice, DataFrame>emptyMap());
+    baseline.gather(BASE_SLICE, Collections.emptyMap());
   }
 
   @Test
   public void testBaselineAggregateFrom() {
-    BaselineAggregate baseline = BaselineAggregate.fromOffsets(BaselineAggregateType.MEDIAN, makePeriods(PeriodType.millis(), -1200L, -4500L), DateTimeZone.UTC);
+    BaselineAggregate baseline = BaselineAggregate
+        .fromOffsets(BaselineAggregateType.MEDIAN, makePeriods(PeriodType.millis(), -1200L, -4500L),
+            DateTimeZone.UTC);
 
     List<MetricSlice> slices = baseline.scatter(BASE_SLICE);
     Assert.assertEquals(slices.size(), 2);
@@ -143,7 +151,9 @@ public class BaselineTest {
 
   @Test
   public void testBaselineAggregateCompute() {
-    BaselineAggregate baseline = BaselineAggregate.fromOffsets(BaselineAggregateType.MEDIAN, makePeriods(PeriodType.millis(), -1200L, -4500L), DateTimeZone.UTC);
+    BaselineAggregate baseline = BaselineAggregate
+        .fromOffsets(BaselineAggregateType.MEDIAN, makePeriods(PeriodType.millis(), -1200L, -4500L),
+            DateTimeZone.UTC);
 
     Map<MetricSlice, DataFrame> data = new HashMap<>();
     data.put(BASE_SLICE.withStart(13800).withEnd(15800),
@@ -167,19 +177,23 @@ public class BaselineTest {
 
   @Test
   public void testBaselineAggregateComputeMultiIndex() {
-    BaselineAggregate baseline = BaselineAggregate.fromOffsets(BaselineAggregateType.MEDIAN, makePeriods(PeriodType.millis(), -1200L, -4500L), DateTimeZone.UTC);
+    BaselineAggregate baseline = BaselineAggregate
+        .fromOffsets(BaselineAggregateType.MEDIAN, makePeriods(PeriodType.millis(), -1200L, -4500L),
+            DateTimeZone.UTC);
 
     Map<MetricSlice, DataFrame> data = new HashMap<>();
     data.put(BASE_SLICE.withStart(13800).withEnd(15800),
         new DataFrame()
-            .addSeries(COL_TIME, LongSeries.buildFrom(13800L, 13800L, 14300L, 14300L, 14800L, 14800L, 15300L, 15300L))
+            .addSeries(COL_TIME, LongSeries
+                .buildFrom(13800L, 13800L, 14300L, 14300L, 14800L, 14800L, 15300L, 15300L))
             .addSeries("string", StringSeries.buildFrom("A", "B", "A", "B", "A", "B", "A", "B"))
             .addSeries(COL_VALUE, 400d, 4000d, 500d, 5000d, 600d, 6000d, 700d, 7000d)
             .setIndex(COL_TIME, "string")
     );
     data.put(BASE_SLICE.withStart(10500).withEnd(12500),
         new DataFrame()
-            .addSeries(COL_TIME, LongSeries.buildFrom(10500L, 11000L, 11500L, 12000L, 10500, 11000L, 11500L, 12000L))
+            .addSeries(COL_TIME,
+                LongSeries.buildFrom(10500L, 11000L, 11500L, 12000L, 10500, 11000L, 11500L, 12000L))
             .addSeries("string", StringSeries.buildFrom("A", "A", "A", "A", "B", "B", "B", "B"))
             .addSeries(COL_VALUE, 500d, 600d, 700d, 800d, 5000d, 6000d, 7000d, 8000d)
             .setIndex(COL_TIME, "string")
@@ -187,71 +201,97 @@ public class BaselineTest {
 
     DataFrame result = baseline.gather(BASE_SLICE, data).sortedBy("string", COL_TIME);
 
-    assertEquals(result.getLongs(COL_TIME), 15000L, 15500L, 16000L, 16500L, 15000L, 15500L, 16000L, 16500L);
+    assertEquals(result.getLongs(COL_TIME), 15000L, 15500L, 16000L, 16500L, 15000L, 15500L, 16000L,
+        16500L);
     assertEquals(result.getStrings("string"), "A", "A", "A", "A", "B", "B", "B", "B");
     assertEquals(result.getDoubles(COL_VALUE), 450d, 550d, 650d, 750d, 4500d, 5500d, 6500d, 7500d);
   }
 
   @Test
   public void testBaselineWeekly() {
-    BaselineAggregate baseline = BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.MEDIAN, 2, 1, DateTimeZone.forID("America/Los_Angeles"));
+    BaselineAggregate baseline = BaselineAggregate
+        .fromWeekOverWeek(BaselineAggregateType.MEDIAN, 2, 1,
+            DateTimeZone.forID("America/Los_Angeles"));
 
     List<MetricSlice> slicesDefault = baseline.scatter(PDT_PST_SLICE);
 
     // expect DST correction
-    Assert.assertEquals(slicesDefault.get(0).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(7));
-    Assert.assertEquals(slicesDefault.get(0).getEnd(), 1520842545000L - TimeUnit.DAYS.toMillis(7) + TimeUnit.HOURS.toMillis(1));
-    Assert.assertEquals(slicesDefault.get(1).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(14));
-    Assert.assertEquals(slicesDefault.get(1).getEnd(), 1520842545000L - TimeUnit.DAYS.toMillis(14) + TimeUnit.HOURS.toMillis(1));
+    Assert
+        .assertEquals(slicesDefault.get(0).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(7));
+    Assert.assertEquals(slicesDefault.get(0).getEnd(),
+        1520842545000L - TimeUnit.DAYS.toMillis(7) + TimeUnit.HOURS.toMillis(1));
+    Assert
+        .assertEquals(slicesDefault.get(1).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(14));
+    Assert.assertEquals(slicesDefault.get(1).getEnd(),
+        1520842545000L - TimeUnit.DAYS.toMillis(14) + TimeUnit.HOURS.toMillis(1));
 
     List<MetricSlice> slicesSummer = baseline.scatter(PST_PDT_SLICE);
 
     // expect DST correction
     Assert.assertEquals(slicesSummer.get(0).getStart(), 1541240715000L - TimeUnit.DAYS.toMillis(7));
-    Assert.assertEquals(slicesSummer.get(0).getEnd(), 1541409345000L - TimeUnit.DAYS.toMillis(7) - TimeUnit.HOURS.toMillis(1));
-    Assert.assertEquals(slicesSummer.get(1).getStart(), 1541240715000L - TimeUnit.DAYS.toMillis(14));
-    Assert.assertEquals(slicesSummer.get(1).getEnd(), 1541409345000L - TimeUnit.DAYS.toMillis(14) - TimeUnit.HOURS.toMillis(1));
+    Assert.assertEquals(slicesSummer.get(0).getEnd(),
+        1541409345000L - TimeUnit.DAYS.toMillis(7) - TimeUnit.HOURS.toMillis(1));
+    Assert
+        .assertEquals(slicesSummer.get(1).getStart(), 1541240715000L - TimeUnit.DAYS.toMillis(14));
+    Assert.assertEquals(slicesSummer.get(1).getEnd(),
+        1541409345000L - TimeUnit.DAYS.toMillis(14) - TimeUnit.HOURS.toMillis(1));
   }
 
   @Test
   public void testBaselineDaily() {
-    BaselineAggregate baseline = BaselineAggregate.fromDayOverDay(BaselineAggregateType.MEDIAN, 2, 1, DateTimeZone.forID("America/Los_Angeles"));
+    BaselineAggregate baseline = BaselineAggregate
+        .fromDayOverDay(BaselineAggregateType.MEDIAN, 2, 1,
+            DateTimeZone.forID("America/Los_Angeles"));
 
     List<MetricSlice> slicesDefault = baseline.scatter(PDT_PST_SLICE);
 
     // expect DST correction
-    Assert.assertEquals(slicesDefault.get(0).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(1));
-    Assert.assertEquals(slicesDefault.get(0).getEnd(), 1520842545000L - TimeUnit.DAYS.toMillis(1) + TimeUnit.HOURS.toMillis(1));
-    Assert.assertEquals(slicesDefault.get(1).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(2));
-    Assert.assertEquals(slicesDefault.get(1).getEnd(), 1520842545000L - TimeUnit.DAYS.toMillis(2) + TimeUnit.HOURS.toMillis(1));
+    Assert
+        .assertEquals(slicesDefault.get(0).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(1));
+    Assert.assertEquals(slicesDefault.get(0).getEnd(),
+        1520842545000L - TimeUnit.DAYS.toMillis(1) + TimeUnit.HOURS.toMillis(1));
+    Assert
+        .assertEquals(slicesDefault.get(1).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(2));
+    Assert.assertEquals(slicesDefault.get(1).getEnd(),
+        1520842545000L - TimeUnit.DAYS.toMillis(2) + TimeUnit.HOURS.toMillis(1));
 
     List<MetricSlice> slicesSummer = baseline.scatter(PST_PDT_SLICE);
 
     // expect DST correction
     Assert.assertEquals(slicesSummer.get(0).getStart(), 1541240715000L - TimeUnit.DAYS.toMillis(1));
-    Assert.assertEquals(slicesSummer.get(0).getEnd(), 1541409345000L - TimeUnit.DAYS.toMillis(1) - TimeUnit.HOURS.toMillis(1));
+    Assert.assertEquals(slicesSummer.get(0).getEnd(),
+        1541409345000L - TimeUnit.DAYS.toMillis(1) - TimeUnit.HOURS.toMillis(1));
     Assert.assertEquals(slicesSummer.get(1).getStart(), 1541240715000L - TimeUnit.DAYS.toMillis(2));
-    Assert.assertEquals(slicesSummer.get(1).getEnd(), 1541409345000L - TimeUnit.DAYS.toMillis(2) - TimeUnit.HOURS.toMillis(1));
+    Assert.assertEquals(slicesSummer.get(1).getEnd(),
+        1541409345000L - TimeUnit.DAYS.toMillis(2) - TimeUnit.HOURS.toMillis(1));
   }
 
   @Test
   public void testBaselineHourly() {
-    BaselineAggregate baseline = BaselineAggregate.fromHourOverHour(BaselineAggregateType.MEDIAN, 2, 23, DateTimeZone.forID("America/Los_Angeles"));
+    BaselineAggregate baseline = BaselineAggregate
+        .fromHourOverHour(BaselineAggregateType.MEDIAN, 2, 23,
+            DateTimeZone.forID("America/Los_Angeles"));
 
     List<MetricSlice> slicesDefault = baseline.scatter(PDT_PST_SLICE);
 
     // do NOT expect DST correction
-    Assert.assertEquals(slicesDefault.get(0).getStart(), 1520681115000L - TimeUnit.HOURS.toMillis(23));
-    Assert.assertEquals(slicesDefault.get(0).getEnd(), 1520842545000L - TimeUnit.HOURS.toMillis(23));
-    Assert.assertEquals(slicesDefault.get(1).getStart(), 1520681115000L - TimeUnit.HOURS.toMillis(24));
-    Assert.assertEquals(slicesDefault.get(1).getEnd(), 1520842545000L - TimeUnit.HOURS.toMillis(24));
+    Assert.assertEquals(slicesDefault.get(0).getStart(),
+        1520681115000L - TimeUnit.HOURS.toMillis(23));
+    Assert
+        .assertEquals(slicesDefault.get(0).getEnd(), 1520842545000L - TimeUnit.HOURS.toMillis(23));
+    Assert.assertEquals(slicesDefault.get(1).getStart(),
+        1520681115000L - TimeUnit.HOURS.toMillis(24));
+    Assert
+        .assertEquals(slicesDefault.get(1).getEnd(), 1520842545000L - TimeUnit.HOURS.toMillis(24));
 
     List<MetricSlice> slicesSummer = baseline.scatter(PST_PDT_SLICE);
 
     // do NOT expect DST correction
-    Assert.assertEquals(slicesSummer.get(0).getStart(), 1541240715000L - TimeUnit.HOURS.toMillis(23));
+    Assert
+        .assertEquals(slicesSummer.get(0).getStart(), 1541240715000L - TimeUnit.HOURS.toMillis(23));
     Assert.assertEquals(slicesSummer.get(0).getEnd(), 1541409345000L - TimeUnit.HOURS.toMillis(23));
-    Assert.assertEquals(slicesSummer.get(1).getStart(), 1541240715000L - TimeUnit.HOURS.toMillis(24));
+    Assert
+        .assertEquals(slicesSummer.get(1).getStart(), 1541240715000L - TimeUnit.HOURS.toMillis(24));
     Assert.assertEquals(slicesSummer.get(1).getEnd(), 1541409345000L - TimeUnit.HOURS.toMillis(24));
   }
 

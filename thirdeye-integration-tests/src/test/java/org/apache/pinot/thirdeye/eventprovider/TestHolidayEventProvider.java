@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,28 +17,26 @@
 package org.apache.pinot.thirdeye.eventprovider;
 
 import com.google.common.collect.Lists;
-import org.apache.pinot.thirdeye.anomaly.events.HolidayEventProvider;
-import org.apache.pinot.thirdeye.anomaly.events.EventFilter;
-import org.apache.pinot.thirdeye.anomaly.events.EventType;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
-
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import org.apache.pinot.thirdeye.anomaly.events.EventFilter;
+import org.apache.pinot.thirdeye.anomaly.events.EventType;
+import org.apache.pinot.thirdeye.anomaly.events.HolidayEventProvider;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 public class TestHolidayEventProvider {
 
-
-
   public class TestEventManager {
+
     long testEventId;
     HolidayEventProvider holidayEventProvider = null;
     long hoursAgo5 = new DateTime().minusHours(5).getMillis();
@@ -48,6 +46,7 @@ public class TestHolidayEventProvider {
 
     private DAOTestBase testDAOProvider;
     private EventManager eventDAO;
+
     @BeforeClass
     void beforeClass() {
       testDAOProvider = DAOTestBase.getInstance();

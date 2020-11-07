@@ -18,6 +18,7 @@ import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionCo
 import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_TYPE;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

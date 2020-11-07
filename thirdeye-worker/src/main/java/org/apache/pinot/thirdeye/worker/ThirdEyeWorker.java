@@ -52,7 +52,6 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameSerializer;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -62,6 +61,7 @@ import org.apache.pinot.thirdeye.model.download.ModelDownloaderManager;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +135,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
 
     final Injector injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource));
-    DaoProviderUtil.setInjector(injector);
+    DeprecatedInjectorUtil.setInjector(injector);
 
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
 

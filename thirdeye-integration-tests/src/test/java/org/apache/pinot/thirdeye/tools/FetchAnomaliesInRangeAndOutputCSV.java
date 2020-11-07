@@ -16,13 +16,13 @@
 
 package org.apache.pinot.thirdeye.tools;
 
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -40,7 +40,7 @@ public class FetchAnomaliesInRangeAndOutputCSV {
   private static DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
   public static void init(File persistenceFile) {
-    DaoProviderUtil.init(persistenceFile);
+    DeprecatedInjectorUtil.init(persistenceFile);
   }
 
   public static void outputResultNodesToFile(File outputFile,

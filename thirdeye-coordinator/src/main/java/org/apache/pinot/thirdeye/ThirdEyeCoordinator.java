@@ -11,9 +11,9 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.resources.RootResource;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,
         dataSource));
-    DaoProviderUtil.setInjector(injector);
+    DeprecatedInjectorUtil.setInjector(injector);
 
     // Initialize ThirdEyeCacheRegistry
     injector

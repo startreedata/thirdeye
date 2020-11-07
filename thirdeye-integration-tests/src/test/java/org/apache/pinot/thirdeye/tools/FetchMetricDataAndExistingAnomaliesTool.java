@@ -16,15 +16,6 @@
 
 package org.apache.pinot.thirdeye.tools;
 
-import org.apache.pinot.thirdeye.anomaly.utils.AbstractResourceHttpUtils;
-import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.anomaly.utils.AbstractResourceHttpUtils;
+import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
+import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
+import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -119,11 +119,12 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
    * @throws Exception
    */
   public void init(File persistenceFile) throws Exception {
-    DaoProviderUtil.init(persistenceFile);
-    anomalyFunctionDAO = DaoProviderUtil
+    DeprecatedInjectorUtil.init(persistenceFile);
+    anomalyFunctionDAO = DeprecatedInjectorUtil
         .getInstance(org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl.class);
-    mergedAnomalyResultDAO = DaoProviderUtil
-        .getInstance(org.apache.pinot.thirdeye.datalayer.bao.jdbc.MergedAnomalyResultManagerImpl.class);
+    mergedAnomalyResultDAO = DeprecatedInjectorUtil
+        .getInstance(
+            org.apache.pinot.thirdeye.datalayer.bao.jdbc.MergedAnomalyResultManagerImpl.class);
   }
 
   public AnomalyFunctionDTO getAnomalyFunctionDTO(long functionId) {

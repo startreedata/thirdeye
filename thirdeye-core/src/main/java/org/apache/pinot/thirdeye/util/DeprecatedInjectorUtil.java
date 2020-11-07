@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datalayer.util;
+package org.apache.pinot.thirdeye.util;
 
 import static java.util.Objects.requireNonNull;
 
@@ -26,13 +26,15 @@ import com.google.inject.Injector;
 import java.io.File;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
+import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
+import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DaoProviderUtil {
+public abstract class DeprecatedInjectorUtil {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DaoProviderUtil.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DeprecatedInjectorUtil.class);
 
   private static Injector injector;
 
@@ -49,10 +51,10 @@ public abstract class DaoProviderUtil {
   }
 
   public static synchronized void setInjector(final Injector injector) {
-    if (DaoProviderUtil.injector != null) {
+    if (DeprecatedInjectorUtil.injector != null) {
       LOG.error("OVERWRITING previous injector!!!");
     }
-    DaoProviderUtil.injector = injector;
+    DeprecatedInjectorUtil.injector = injector;
   }
 
   public static <T> T getInstance(Class<T> c) {

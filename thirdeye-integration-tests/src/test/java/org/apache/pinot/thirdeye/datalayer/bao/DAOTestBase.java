@@ -23,8 +23,8 @@ import java.net.URL;
 import java.sql.Connection;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.pinot.thirdeye.datalayer.ScriptRunner;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class DAOTestBase {
@@ -49,7 +49,7 @@ public class DAOTestBase {
       PersistenceConfig configuration = PersistenceConfig.readPersistenceConfig(configFile);
       initializeDs(configuration);
 
-      DaoProviderUtil.init(ds);
+      DeprecatedInjectorUtil.init(ds);
 
 //      daoRegistry = DAORegistry.getInstance();
     } catch (Exception e) {

@@ -7,9 +7,9 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.Connection;
 import org.apache.commons.io.output.NullWriter;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class TestDatabase {
       final PersistenceConfig configuration = testPersistenceConfig();
       final DataSource dataSource = createDataSource(configuration);
 
-      DaoProviderUtil.init(dataSource);
+      DeprecatedInjectorUtil.init(dataSource);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

@@ -73,7 +73,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.COMPARE_MODE;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
@@ -518,7 +517,7 @@ public abstract class ThirdEyeUtils {
     // Initialize DAO Registry
     String persistenceConfig = thirdEyeConfigDir + "/persistence.yml";
     LOG.info("Loading persistence config from [{}]", persistenceConfig);
-    DaoProviderUtil.init(new File(persistenceConfig));
+    DeprecatedInjectorUtil.init(new File(persistenceConfig));
 
     // Read configuration for data sources, etc.
     // TODO spyne Fix dependency loading

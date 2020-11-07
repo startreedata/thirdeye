@@ -44,13 +44,13 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.apache.pinot.thirdeye.rootcause.RCAFrameworkExecutionResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -113,7 +113,7 @@ public class RCAFrameworkRunner {
     File config = new File(cmd.getOptionValue(CLI_THIRDEYE_CONFIG));
 
     File daoConfig = new File(config.getAbsolutePath() + "/persistence.yml");
-    DaoProviderUtil.init(daoConfig);
+    DeprecatedInjectorUtil.init(daoConfig);
 
     ThirdEyeConfiguration thirdEyeConfig = new ThirdEyeAnomalyConfiguration();
     thirdEyeConfig.setRootDir(config.getAbsolutePath());

@@ -37,13 +37,13 @@ import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DataCompletenessConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
 import org.apache.pinot.thirdeye.datalayer.bao.JobManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.RawAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
@@ -52,7 +52,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ApplicationManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ClassificationConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataCompletenessConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EventManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.JobManagerImpl;
@@ -60,15 +59,16 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MergedAnomalyResultManagerIm
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MetricConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OverrideConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RawAnomalyResultManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.TaskManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DataCompletenessConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -76,7 +76,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -90,6 +89,7 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -132,24 +132,26 @@ public class RunAdhocDatabaseQueriesTool {
   }
 
   public void init(File persistenceFile) throws Exception {
-    DaoProviderUtil.init(persistenceFile);
-    detectionConfigDAO = DaoProviderUtil.getInstance(AlertManagerImpl.class);
-    detectionAlertConfigDAO = DaoProviderUtil.getInstance(SubscriptionGroupManagerImpl.class);
-    eventDAO = DaoProviderUtil.getInstance(EventManagerImpl.class);
-    anomalyFunctionDAO = DaoProviderUtil.getInstance(AnomalyFunctionManagerImpl.class);
-    rawResultDAO = DaoProviderUtil.getInstance(RawAnomalyResultManagerImpl.class);
-    mergedResultDAO = DaoProviderUtil.getInstance(MergedAnomalyResultManagerImpl.class);
-    metricConfigDAO = DaoProviderUtil.getInstance(MetricConfigManagerImpl.class);
-    overrideConfigDAO = DaoProviderUtil.getInstance(OverrideConfigManagerImpl.class);
-    jobDAO = DaoProviderUtil.getInstance(JobManagerImpl.class);
-    taskDAO = DaoProviderUtil.getInstance(TaskManagerImpl.class);
-    dataCompletenessConfigDAO = DaoProviderUtil
+    DeprecatedInjectorUtil.init(persistenceFile);
+    detectionConfigDAO = DeprecatedInjectorUtil.getInstance(AlertManagerImpl.class);
+    detectionAlertConfigDAO = DeprecatedInjectorUtil
+        .getInstance(SubscriptionGroupManagerImpl.class);
+    eventDAO = DeprecatedInjectorUtil.getInstance(EventManagerImpl.class);
+    anomalyFunctionDAO = DeprecatedInjectorUtil.getInstance(AnomalyFunctionManagerImpl.class);
+    rawResultDAO = DeprecatedInjectorUtil.getInstance(RawAnomalyResultManagerImpl.class);
+    mergedResultDAO = DeprecatedInjectorUtil.getInstance(MergedAnomalyResultManagerImpl.class);
+    metricConfigDAO = DeprecatedInjectorUtil.getInstance(MetricConfigManagerImpl.class);
+    overrideConfigDAO = DeprecatedInjectorUtil.getInstance(OverrideConfigManagerImpl.class);
+    jobDAO = DeprecatedInjectorUtil.getInstance(JobManagerImpl.class);
+    taskDAO = DeprecatedInjectorUtil.getInstance(TaskManagerImpl.class);
+    dataCompletenessConfigDAO = DeprecatedInjectorUtil
         .getInstance(DataCompletenessConfigManagerImpl.class);
-    datasetConfigDAO = DaoProviderUtil.getInstance(DatasetConfigManagerImpl.class);
-    detectionStatusDAO = DaoProviderUtil.getInstance(DetectionStatusManagerImpl.class);
-    alertConfigDAO = DaoProviderUtil.getInstance(AlertConfigManagerImpl.class);
-    classificationConfigDAO = DaoProviderUtil.getInstance(ClassificationConfigManagerImpl.class);
-    applicationDAO = DaoProviderUtil.getInstance(ApplicationManagerImpl.class);
+    datasetConfigDAO = DeprecatedInjectorUtil.getInstance(DatasetConfigManagerImpl.class);
+    detectionStatusDAO = DeprecatedInjectorUtil.getInstance(DetectionStatusManagerImpl.class);
+    alertConfigDAO = DeprecatedInjectorUtil.getInstance(AlertConfigManagerImpl.class);
+    classificationConfigDAO = DeprecatedInjectorUtil
+        .getInstance(ClassificationConfigManagerImpl.class);
+    applicationDAO = DeprecatedInjectorUtil.getInstance(ApplicationManagerImpl.class);
   }
 
   private void toggleAnomalyFunction(Long id) {

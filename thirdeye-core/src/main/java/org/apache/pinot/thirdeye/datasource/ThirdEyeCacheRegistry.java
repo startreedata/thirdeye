@@ -35,7 +35,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetConfigCacheLoader;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetListCache;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetMaxDataTimeCacheLoader;
@@ -49,6 +48,7 @@ import org.apache.pinot.thirdeye.detection.cache.CacheDAO;
 import org.apache.pinot.thirdeye.detection.cache.CentralizedCacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.DefaultTimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +81,7 @@ public class ThirdEyeCacheRegistry {
   }
 
   public static synchronized ThirdEyeCacheRegistry getInstance() {
-    return DaoProviderUtil.getInstance(ThirdEyeCacheRegistry.class);
+    return DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class);
   }
 
   /**

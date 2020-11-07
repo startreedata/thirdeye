@@ -3,8 +3,8 @@ package org.apache.pinot.thirdeye.datalayer;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.h2.store.fs.FileUtils;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public class DataSourceBuilder {
         final ScriptRunner scriptRunner = new ScriptRunner(conn, false);
         scriptRunner.setDelimiter(";");
 
-        InputStream createSchema = DaoProviderUtil.class
+        InputStream createSchema = DeprecatedInjectorUtil.class
             .getResourceAsStream("/schema/create-schema.sql");
         scriptRunner.runScript(new InputStreamReader(createSchema));
       } catch (Exception e) {

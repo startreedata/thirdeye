@@ -73,7 +73,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseTemplateManagerImpl
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SessionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.TaskManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 
 /**
  * Singleton service registry for Data Access Objects (DAOs)
@@ -90,121 +90,122 @@ public class DAORegistry {
     return INSTANCE;
   }
 
-
   /**
    * internal constructor.
    */
-  private DAORegistry() {}
+  private DAORegistry() {
+  }
 
   /****************************************************************************
    * GETTERS/SETTERS
    */
 
   public AnomalyFunctionManager getAnomalyFunctionDAO() {
-    return DaoProviderUtil.getInstance(AnomalyFunctionManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(AnomalyFunctionManagerImpl.class);
   }
 
   public AlertConfigManager getAlertConfigDAO() {
-    return DaoProviderUtil.getInstance(AlertConfigManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(AlertConfigManagerImpl.class);
   }
 
   public RawAnomalyResultManager getRawAnomalyResultDAO() {
-    return DaoProviderUtil.getInstance(RawAnomalyResultManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(RawAnomalyResultManagerImpl.class);
   }
 
   public MergedAnomalyResultManager getMergedAnomalyResultDAO() {
-    return DaoProviderUtil.getInstance(MergedAnomalyResultManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(MergedAnomalyResultManagerImpl.class);
   }
 
   public JobManager getJobDAO() {
-    return DaoProviderUtil.getInstance(JobManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(JobManagerImpl.class);
   }
 
   public TaskManager getTaskDAO() {
-    return DaoProviderUtil.getInstance(TaskManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(TaskManagerImpl.class);
   }
 
   public DatasetConfigManager getDatasetConfigDAO() {
-    return DaoProviderUtil.getInstance(DatasetConfigManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(DatasetConfigManagerImpl.class);
   }
 
   public MetricConfigManager getMetricConfigDAO() {
-    return DaoProviderUtil.getInstance(MetricConfigManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(MetricConfigManagerImpl.class);
   }
 
   public OverrideConfigManager getOverrideConfigDAO() {
-    return DaoProviderUtil.getInstance(OverrideConfigManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(OverrideConfigManagerImpl.class);
   }
 
   public DataCompletenessConfigManager getDataCompletenessConfigDAO() {
-    return DaoProviderUtil.getInstance(DataCompletenessConfigManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(DataCompletenessConfigManagerImpl.class);
   }
 
   public EventManager getEventDAO() {
-    return DaoProviderUtil.getInstance(EventManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(EventManagerImpl.class);
   }
 
   public DetectionStatusManager getDetectionStatusDAO() {
-    return DaoProviderUtil.getInstance(DetectionStatusManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(DetectionStatusManagerImpl.class);
   }
 
   public ClassificationConfigManager getClassificationConfigDAO() {
-    return DaoProviderUtil.getInstance(ClassificationConfigManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(ClassificationConfigManagerImpl.class);
   }
 
   public EntityToEntityMappingManager getEntityToEntityMappingDAO() {
-    return DaoProviderUtil.getInstance(EntityToEntityMappingManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(EntityToEntityMappingManagerImpl.class);
   }
 
   public GroupedAnomalyResultsManager getGroupedAnomalyResultsDAO() {
-    return DaoProviderUtil.getInstance(GroupedAnomalyResultsManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(GroupedAnomalyResultsManagerImpl.class);
   }
 
   public OnboardDatasetMetricManager getOnboardDatasetMetricDAO() {
-    return DaoProviderUtil.getInstance(OnboardDatasetMetricManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(OnboardDatasetMetricManagerImpl.class);
   }
 
   public ConfigManager getConfigDAO() {
-    return DaoProviderUtil.getInstance(ConfigManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(ConfigManagerImpl.class);
   }
 
   public ApplicationManager getApplicationDAO() {
-    return DaoProviderUtil.getInstance(ApplicationManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(ApplicationManagerImpl.class);
   }
 
   public AlertSnapshotManager getAlertSnapshotDAO() {
-    return DaoProviderUtil.getInstance(AlertSnapshotManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(AlertSnapshotManagerImpl.class);
   }
 
   public RootcauseSessionManager getRootcauseSessionDAO() {
-    return DaoProviderUtil.getInstance(RootcauseSessionManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(RootcauseSessionManagerImpl.class);
   }
 
   public RootcauseTemplateManager getRootcauseTemplateDao() {
-    return DaoProviderUtil.getInstance(RootcauseTemplateManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(RootcauseTemplateManagerImpl.class);
   }
 
   public SessionManager getSessionDAO() {
-    return DaoProviderUtil.getInstance(SessionManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(SessionManagerImpl.class);
   }
 
   public AlertManager getDetectionConfigManager() {
-    return DaoProviderUtil.getInstance(AlertManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(AlertManagerImpl.class);
   }
 
   public SubscriptionGroupManager getDetectionAlertConfigManager() {
-    return DaoProviderUtil.getInstance(SubscriptionGroupManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(SubscriptionGroupManagerImpl.class);
   }
 
   public EvaluationManager getEvaluationManager() {
-    return DaoProviderUtil.getInstance(EvaluationManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(EvaluationManagerImpl.class);
   }
 
   public OnlineDetectionDataManager getOnlineDetectionDataManager() {
-    return DaoProviderUtil.getInstance(OnlineDetectionDataManagerImpl.class);
+    return DeprecatedInjectorUtil.getInstance(OnlineDetectionDataManagerImpl.class);
   }
 
   public AnomalySubscriptionGroupNotificationManager getAnomalySubscriptionGroupNotificationManager() {
-    return DaoProviderUtil.getInstance(AnomalySubscriptionGroupNotificationManagerImpl.class);
+    return DeprecatedInjectorUtil
+        .getInstance(AnomalySubscriptionGroupNotificationManagerImpl.class);
   }
 }

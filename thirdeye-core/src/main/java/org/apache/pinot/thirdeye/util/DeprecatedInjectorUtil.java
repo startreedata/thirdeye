@@ -32,6 +32,14 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class is deprecated and will be subsequently removed. It hasn't been marked @Deprecated
+ * because the alternative is currently a WIP.
+ *
+ * The goal is to use Guice entirely for service construction. It currently is used both in the
+ * coordinator and worker modules. Eventually all the dependencies expected to be injected rather
+ * than referenced using DAO_REGISTRY.getInstance()
+ */
 public abstract class DeprecatedInjectorUtil {
 
   private static final Logger LOG = LoggerFactory.getLogger(DeprecatedInjectorUtil.class);

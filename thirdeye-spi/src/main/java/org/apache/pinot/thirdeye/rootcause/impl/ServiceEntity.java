@@ -67,6 +67,6 @@ public class ServiceEntity extends Entity {
     parsedUrn.assertPrefixOnly();
 
     String service = parsedUrn.getPrefixes().get(2);
-    return new ServiceEntity(urn, score, Collections.<Entity>emptyList(), service);
+    return new ServiceEntity(urn, score, Collections.emptyList(), service);
   }
 }

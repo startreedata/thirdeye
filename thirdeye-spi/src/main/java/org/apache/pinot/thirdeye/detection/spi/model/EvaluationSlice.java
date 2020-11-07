@@ -62,9 +62,6 @@ public class EvaluationSlice {
     if (this.start >= 0 && evaluationDTO.getEndTime() <= this.start) {
       return false;
     }
-    if (this.end >= 0 && evaluationDTO.getStartTime() >= this.end) {
-      return false;
-    }
-    return true;
+    return this.end < 0 || evaluationDTO.getStartTime() < this.end;
   }
 }

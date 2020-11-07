@@ -74,6 +74,6 @@ public class DatasetEntity extends Entity {
     parsedUrn.assertPrefixOnly();
 
     String dataset = parsedUrn.getPrefixes().get(2);
-    return new DatasetEntity(urn, score, Collections.<Entity>emptyList(), dataset);
+    return new DatasetEntity(urn, score, Collections.emptyList(), dataset);
   }
 }

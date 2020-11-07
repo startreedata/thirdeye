@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.common.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;

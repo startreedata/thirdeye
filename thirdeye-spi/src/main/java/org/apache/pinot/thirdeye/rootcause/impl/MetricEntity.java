@@ -86,7 +86,7 @@ public class MetricEntity extends Entity {
 
   public static MetricEntity fromMetric(double score, Collection<? extends Entity> related,
       long id) {
-    return fromMetric(score, related, id, TreeMultimap.<String, String>create());
+    return fromMetric(score, related, id, TreeMultimap.create());
   }
 
   public static MetricEntity fromMetric(double score, long id, Multimap<String, String> filters) {
@@ -94,7 +94,7 @@ public class MetricEntity extends Entity {
   }
 
   public static MetricEntity fromMetric(double score, long id) {
-    return fromMetric(score, new ArrayList<Entity>(), id, TreeMultimap.<String, String>create());
+    return fromMetric(score, new ArrayList<Entity>(), id, TreeMultimap.create());
   }
 
   public static MetricEntity fromMetric(Map<String, Collection<String>> filterMaps, long id) {
@@ -111,7 +111,7 @@ public class MetricEntity extends Entity {
   public static MetricEntity fromURN(String urn, double score) {
     ParsedUrn parsedUrn = EntityUtils.parseUrnString(urn, TYPE, 3);
     long id = Long.parseLong(parsedUrn.getPrefixes().get(2));
-    return new MetricEntity(urn, score, Collections.<Entity>emptyList(), id, parsedUrn.toFilters());
+    return new MetricEntity(urn, score, Collections.emptyList(), id, parsedUrn.toFilters());
   }
 
   public static MetricEntity fromURN(String urn) {

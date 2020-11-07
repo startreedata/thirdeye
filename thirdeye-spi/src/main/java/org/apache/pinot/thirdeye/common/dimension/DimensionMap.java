@@ -55,7 +55,7 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
     Serializable {
 
   private static final Logger LOG = LoggerFactory.getLogger(DimensionMap.class);
-  private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   // Dimension name to dimension value pairs, which are sorted by dimension names
   private SortedMap<String, String> sortedDimensionMap = new TreeMap<>();

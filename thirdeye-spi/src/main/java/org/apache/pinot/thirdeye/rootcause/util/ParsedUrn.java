@@ -30,7 +30,7 @@ import java.util.Set;
 
 public final class ParsedUrn {
 
-  private static Map<String, String> OPERATOR_TO_FILTER = new HashMap<>();
+  private static final Map<String, String> OPERATOR_TO_FILTER = new HashMap<>();
 
   static {
     OPERATOR_TO_FILTER.put("!=", "!");

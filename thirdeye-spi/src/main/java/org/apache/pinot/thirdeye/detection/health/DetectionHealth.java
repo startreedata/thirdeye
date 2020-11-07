@@ -100,12 +100,12 @@ public class DetectionHealth {
     private DetectionHealth lastDetectionHealth;
 
     // database column name constants
-    private static String COL_NAME_START_TIME = "startTime";
-    private static String COL_NAME_END_TIME = "endTime";
-    private static String COL_NAME_DETECTION_CONFIG_ID = "detectionConfigId";
-    private static String COL_NAME_TASK_NAME = "name";
-    private static String COL_NAME_TASK_STATUS = "status";
-    private static String COL_NAME_TASK_TYPE = "type";
+    private static final String COL_NAME_START_TIME = "startTime";
+    private static final String COL_NAME_END_TIME = "endTime";
+    private static final String COL_NAME_DETECTION_CONFIG_ID = "detectionConfigId";
+    private static final String COL_NAME_TASK_NAME = "name";
+    private static final String COL_NAME_TASK_STATUS = "status";
+    private static final String COL_NAME_TASK_TYPE = "type";
 
     public Builder(long detectionConfigId, long startTime, long endTime) {
       Preconditions.checkArgument(endTime >= startTime, "end time must be after start time");

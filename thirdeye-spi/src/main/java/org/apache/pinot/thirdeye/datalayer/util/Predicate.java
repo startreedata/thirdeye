@@ -23,10 +23,14 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class Predicate {
 
+  private final OPER oper;
+
+  private String lhs;
+
   enum OPER {
     AND("AND"), OR("OR"), EQ("="), GT(">"), GE(">="), LT("<"), LE("<="), NEQ("!="), IN(
         "IN"), BETWEEN("BETWEEN"), LIKE("LIKE");
-    private String sign;
+    private final String sign;
 
     OPER(String sign) {
       this.sign = sign;
@@ -37,9 +41,6 @@ public class Predicate {
       return sign;
     }
   }
-
-  private String lhs;
-  private OPER oper;
   private Object rhs;
   private Predicate[] childPredicates;
 

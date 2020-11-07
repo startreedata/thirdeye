@@ -26,7 +26,7 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -53,7 +53,7 @@ public class DimensionKey implements Comparable<DimensionKey> {
   }
 
   final int hashCode;
-  private String[] dimensionValues;
+  private final String[] dimensionValues;
 
   /**
    *
@@ -73,6 +73,30 @@ public class DimensionKey implements Comparable<DimensionKey> {
   /**
    *
    */
+  public static DimensionKey fromBytes(byte[] bytes) throws IOException {
+    DataInput in = new DataInputStream(new ByteArrayInputStream(bytes));
+    // read the number of dimensions
+    int size = in.readInt();
+    String[] dimensionValues = new String[size];
+    // for each dimension read the length of each dimension followed by the
+    // values
+    try {
+      for (int i = 0; i < size; i++) {
+        int length = in.readInt();
+        byte[] b = new byte[length];
+        in.readFully(b);
+        dimensionValues[i] = new String(b, StandardCharsets.UTF_8);
+      }
+    } catch (Exception e) {
+      LOGGER.info(Arrays.toString(bytes), e);
+      throw new RuntimeException(e);
+    }
+    return new DimensionKey(dimensionValues);
+  }
+
+  /**
+   *
+   */
   public byte[] toBytes() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(baos);
@@ -81,7 +105,7 @@ public class DimensionKey implements Comparable<DimensionKey> {
     // for each dimension write the length of each dimension followed by the
     // values
     for (String dimensionValue : dimensionValues) {
-      byte[] bytes = dimensionValue.getBytes(Charset.forName("utf-8"));
+      byte[] bytes = dimensionValue.getBytes(StandardCharsets.UTF_8);
       out.writeInt(bytes.length);
       out.write(bytes);
     }
@@ -97,33 +121,9 @@ public class DimensionKey implements Comparable<DimensionKey> {
     return byteArray;
   }
 
-  /**
-   *
-   */
-  public static DimensionKey fromBytes(byte[] bytes) throws IOException {
-    DataInput in = new DataInputStream(new ByteArrayInputStream(bytes));
-    // read the number of dimensions
-    int size = in.readInt();
-    String[] dimensionValues = new String[size];
-    // for each dimension read the length of each dimension followed by the
-    // values
-    try {
-      for (int i = 0; i < size; i++) {
-        int length = in.readInt();
-        byte[] b = new byte[length];
-        in.readFully(b);
-        dimensionValues[i] = new String(b, "UTF-8");
-      }
-    } catch (Exception e) {
-      LOGGER.info(Arrays.toString(bytes), e);
-      throw new RuntimeException(e);
-    }
-    return new DimensionKey(dimensionValues);
-  }
-
   public byte[] toMD5() {
     synchronized (md5) {
-      byte[] digest = md5.digest(toString().getBytes(Charset.forName("UTF-8")));
+      byte[] digest = md5.digest(toString().getBytes(StandardCharsets.UTF_8));
       return digest;
     }
   }

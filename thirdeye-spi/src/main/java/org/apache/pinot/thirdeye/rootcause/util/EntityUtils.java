@@ -54,9 +54,9 @@ import org.apache.pinot.thirdeye.rootcause.impl.TimeRangeEntity;
  */
 public class EntityUtils {
 
-  private static Pattern PATTERN_FILTER_OPERATOR = Pattern.compile("!=|>=|<=|==|>|<|=");
+  private static final Pattern PATTERN_FILTER_OPERATOR = Pattern.compile("!=|>=|<=|==|>|<|=");
 
-  private static Map<String, String> FILTER_TO_OPERATOR = new LinkedHashMap<>();
+  private static final Map<String, String> FILTER_TO_OPERATOR = new LinkedHashMap<>();
 
   static {
     FILTER_TO_OPERATOR.put("!", "!=");
@@ -360,7 +360,7 @@ public class EntityUtils {
       return URLEncoder.encode(value, "UTF-8")
           .replace("+", "%20")
           .replace("%21", "!")
-          .replace("%27", "\'")
+          .replace("%27", "'")
           .replace("%28", "(")
           .replace("%29", ")")
           .replace("%7E", "~");
@@ -433,7 +433,7 @@ public class EntityUtils {
    * @return ParsedUrn
    */
   public static ParsedUrn parseUrnString(String urn) {
-    return new ParsedUrn(Arrays.asList(urn.split(":")), Collections.<FilterPredicate>emptySet());
+    return new ParsedUrn(Arrays.asList(urn.split(":")), Collections.emptySet());
   }
 
   /**

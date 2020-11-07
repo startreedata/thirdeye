@@ -50,6 +50,6 @@ public class HyperlinkEntity extends Entity {
   public static HyperlinkEntity fromURL(String url, double score) {
     ParsedUrn parsedUrn = EntityUtils.parseUrnString(url, TYPE);
     parsedUrn.assertPrefixOnly();
-    return new HyperlinkEntity(url, score, Collections.<Entity>emptyList());
+    return new HyperlinkEntity(url, score, Collections.emptyList());
   }
 }

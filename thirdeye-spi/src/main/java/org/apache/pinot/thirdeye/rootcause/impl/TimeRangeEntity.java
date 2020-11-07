@@ -88,7 +88,7 @@ public class TimeRangeEntity extends Entity {
 
   public static TimeRangeEntity fromRange(double score, String type, long start, long end) {
     String urn = TYPE.formatURN(type, start, end);
-    return new TimeRangeEntity(urn, score, Collections.<Entity>emptyList(), type, start, end);
+    return new TimeRangeEntity(urn, score, Collections.emptyList(), type, start, end);
   }
 
   /**

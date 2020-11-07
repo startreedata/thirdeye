@@ -67,7 +67,7 @@ public class DimensionsEntity extends Entity {
   }
 
   public static DimensionsEntity fromDimensions(double score, Multimap<String, String> dimensions) {
-    return fromDimensions(score, Collections.<Entity>emptyList(), dimensions);
+    return fromDimensions(score, Collections.emptyList(), dimensions);
   }
 
   public static DimensionsEntity fromDimensions(double score, Collection<? extends Entity> related,

@@ -58,6 +58,6 @@ public class AnomalyEventEntity extends EventEntity {
     parsedUrn.assertPrefixOnly();
 
     long id = Long.parseLong(parsedUrn.getPrefixes().get(3));
-    return new AnomalyEventEntity(urn, score, Collections.<Entity>emptyList(), id);
+    return new AnomalyEventEntity(urn, score, Collections.emptyList(), id);
   }
 }

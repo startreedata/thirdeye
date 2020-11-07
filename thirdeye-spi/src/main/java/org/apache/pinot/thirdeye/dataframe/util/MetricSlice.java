@@ -88,7 +88,7 @@ public final class MetricSlice {
   }
 
   public static MetricSlice from(long metricId, long start, long end) {
-    return new MetricSlice(metricId, start, end, ArrayListMultimap.<String, String>create(),
+    return new MetricSlice(metricId, start, end, ArrayListMultimap.create(),
         NATIVE_GRANULARITY);
   }
 

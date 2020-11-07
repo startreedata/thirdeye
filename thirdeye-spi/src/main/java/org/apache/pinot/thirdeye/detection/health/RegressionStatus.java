@@ -102,10 +102,10 @@ public class RegressionStatus {
     if (detectorHealthStatus.isEmpty()) {
       return HealthStatus.UNKNOWN;
     }
-    if (detectorHealthStatus.values().contains(HealthStatus.GOOD)) {
+    if (detectorHealthStatus.containsValue(HealthStatus.GOOD)) {
       return HealthStatus.GOOD;
     }
-    if (detectorHealthStatus.values().contains(HealthStatus.MODERATE)) {
+    if (detectorHealthStatus.containsValue(HealthStatus.MODERATE)) {
       return HealthStatus.MODERATE;
     }
     return HealthStatus.BAD;

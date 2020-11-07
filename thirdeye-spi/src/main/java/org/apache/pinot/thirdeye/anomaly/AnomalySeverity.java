@@ -28,5 +28,5 @@ public enum AnomalySeverity {
   HIGH,
   MEDIUM,
   LOW,
-  DEFAULT;
+  DEFAULT
 }

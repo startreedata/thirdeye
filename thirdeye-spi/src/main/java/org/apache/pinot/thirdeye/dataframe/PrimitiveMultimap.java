@@ -39,7 +39,7 @@ class PrimitiveMultimap {
   private final int maxSize;
   private final int shift;
   private final long[] data;
-  private int[] writeInfo;
+  private final int[] writeInfo;
 
   private int size;
   private long collisions = 0;

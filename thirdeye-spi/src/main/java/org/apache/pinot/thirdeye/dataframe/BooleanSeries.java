@@ -284,7 +284,7 @@ public final class BooleanSeries extends TypedSeries<BooleanSeries> {
     if (isNull(value)) {
       return DoubleSeries.NULL;
     }
-    return (double) value;
+    return value;
   }
 
   @Override

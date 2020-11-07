@@ -29,7 +29,7 @@ public enum AnomalyType {
   // The metric is not available within specified time.
   DATA_SLA("SLA Violation");
 
-  private String label;
+  private final String label;
 
   AnomalyType(String label) {
     this.label = label;

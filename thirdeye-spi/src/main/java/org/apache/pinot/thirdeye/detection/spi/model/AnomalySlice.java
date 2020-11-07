@@ -40,7 +40,7 @@ public class AnomalySlice {
   private final long detectionId;
   private final long start;
   private final long end;
-  private Multimap<String, String> filters;
+  private final Multimap<String, String> filters;
   private final List<String> detectionComponentNames;
   private final boolean isTaggedAsChild;
 

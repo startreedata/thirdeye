@@ -2470,7 +2470,7 @@ public class DataFrame {
 
     Set<String> variables = new HashSet<>();
     while (m.find()) {
-      if (this.series.keySet().contains(m.group(1))) {
+      if (this.series.containsKey(m.group(1))) {
         variables.add(m.group(1));
       } else {
         throw new IllegalArgumentException(

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
-import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.DatabaseConfiguration;
+import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 
 public class ThirdEyeCoordinatorConfiguration extends Configuration {
 

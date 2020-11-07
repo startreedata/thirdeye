@@ -46,7 +46,7 @@ public class DAOTestBase {
     try {
       URL url = DAOTestBase.class.getResource("/persistence-local.yml");
       File configFile = new File(url.toURI());
-      PersistenceConfig configuration = DaoProviderUtil.readPersistenceConfig(configFile);
+      PersistenceConfig configuration = PersistenceConfig.readPersistenceConfig(configFile);
       initializeDs(configuration);
 
       DaoProviderUtil.init(ds);

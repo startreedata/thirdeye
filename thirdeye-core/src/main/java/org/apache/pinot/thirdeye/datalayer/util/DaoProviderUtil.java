@@ -23,13 +23,9 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.dropwizard.configuration.YamlConfigurationFactory;
-import io.dropwizard.jackson.Jackson;
 import java.io.File;
-import javax.validation.Validation;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
-import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.DatabaseConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +37,8 @@ public abstract class DaoProviderUtil {
   private static Injector injector;
 
   public static void init(File localConfigFile) {
-    final PersistenceConfig configuration = readPersistenceConfig(localConfigFile);
+    final PersistenceConfig configuration = PersistenceConfig
+        .readPersistenceConfig(localConfigFile);
     final DatabaseConfiguration dbConfig = configuration.getDatabaseConfiguration();
 
     init(new DataSourceBuilder().build(dbConfig));
@@ -60,18 +57,5 @@ public abstract class DaoProviderUtil {
 
   public static <T> T getInstance(Class<T> c) {
     return requireNonNull(injector, "Injector not initialized").getInstance(c);
-  }
-
-  public static PersistenceConfig readPersistenceConfig(File configFile) {
-    YamlConfigurationFactory<PersistenceConfig> factory = new YamlConfigurationFactory<>(
-        PersistenceConfig.class,
-        Validation.buildDefaultValidatorFactory().getValidator(),
-        Jackson.newObjectMapper(),
-        "");
-    try {
-      return factory.build(configFile);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 }

@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.worker;
 
-import static org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil.readPersistenceConfig;
+import static org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.readPersistenceConfig;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -53,8 +53,8 @@ import org.apache.pinot.thirdeye.dataframe.util.DataFrameSerializer;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.DaoProviderUtil;
+import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
-import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.pinot.resources.PinotDataSourceResource;
@@ -73,16 +73,18 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
   private DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
   private TaskDriver taskDriver = null;
+
   private MonitorJobScheduler monitorJobScheduler = null;
-  private AutoOnboardService autoOnboardService = null;
-  private HolidayEventsLoader holidayEventsLoader = null;
-  private MockEventsLoader mockEventsLoader = null;
-  private RequestStatisticsLogger requestStatisticsLogger = null;
-  private DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver = null;
   private DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler = null;
   private DetectionCronScheduler detectionScheduler = null;
   private SubscriptionCronScheduler subscriptionScheduler = null;
+  private AutoOnboardService autoOnboardService = null;
+  private HolidayEventsLoader holidayEventsLoader = null;
+  private MockEventsLoader mockEventsLoader = null;
+  private DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver = null;
   private ModelDownloaderManager modelDownloaderManager = null;
+
+  private RequestStatisticsLogger requestStatisticsLogger = null;
 
   public static void main(final String[] args) throws Exception {
     List<String> argList = new ArrayList<>(Arrays.asList(args));

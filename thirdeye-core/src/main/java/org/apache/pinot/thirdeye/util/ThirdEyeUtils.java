@@ -267,7 +267,8 @@ public abstract class ThirdEyeUtils {
     String derivedMetricExpression = null;
     MetricDataset metricDataset = new MetricDataset(metricExpressionName, dataset);
 
-    MetricConfigDTO metricConfig = ThirdEyeCacheRegistry.getInstance().getMetricConfigCache()
+    MetricConfigDTO metricConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        .getMetricConfigCache()
         .get(metricDataset);
 
     if (metricConfig != null && metricConfig.isDerived()) {
@@ -328,7 +329,8 @@ public abstract class ThirdEyeUtils {
   public static DatasetConfigDTO getDatasetConfigFromName(String dataset) {
     DatasetConfigDTO datasetConfig = null;
     try {
-      datasetConfig = ThirdEyeCacheRegistry.getInstance().getDatasetConfigCache().get(dataset);
+      datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+          .getDatasetConfigCache().get(dataset);
     } catch (ExecutionException e) {
       LOG.error("Exception in getting dataset config {} from cache", dataset, e);
     }
@@ -387,7 +389,8 @@ public abstract class ThirdEyeUtils {
       String dataset) {
     MetricConfigDTO metricConfig = null;
     try {
-      metricConfig = ThirdEyeCacheRegistry.getInstance().getMetricConfigCache()
+      metricConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+          .getMetricConfigCache()
           .get(new MetricDataset(metricName, dataset));
     } catch (ExecutionException e) {
       LOG.error("Exception while fetching metric by name {} and dataset {}", metricName, dataset,
@@ -538,7 +541,7 @@ public abstract class ThirdEyeUtils {
 
     // Initialize Cache Registry
     try {
-      ThirdEyeCacheRegistry.getInstance().initializeCaches(config);
+      DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
     } catch (Exception e) {
       LOG.error("Exception while loading caches:", e);
       throw new RuntimeException(e);

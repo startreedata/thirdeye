@@ -51,6 +51,7 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -309,7 +310,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public List<String> getDatasets() throws Exception {
-    return ThirdEyeCacheRegistry.getInstance().getDatasetsCache().getDatasets();
+    return DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDatasetsCache()
+        .getDatasets();
   }
 
   @Override

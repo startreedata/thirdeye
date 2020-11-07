@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.integration;
 
+import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestDatasetConfig;
+import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestMetricConfig;
+
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
@@ -34,13 +37,9 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
-import org.apache.pinot.thirdeye.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
-import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
-import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
 import org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
@@ -48,13 +47,14 @@ import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
+import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.quartz.SchedulerException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.*;
 
 
 /**
@@ -136,8 +136,10 @@ public class NotificationTaskSchedulerTest {
     this.appDAO.save(app);
 
     AggregationLoader aggregationLoader =
-        new DefaultAggregationLoader(metricDAO, datasetDAO, ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
+        new DefaultAggregationLoader(metricDAO, datasetDAO, DeprecatedInjectorUtil
+            .getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+                .getDatasetMaxDataTimeCache());
 
     DataProvider provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, evaluationDAO,
         aggregationLoader, detectionPipelineLoader, TimeSeriesCacheBuilder.getInstance(),

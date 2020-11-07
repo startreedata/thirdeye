@@ -36,14 +36,16 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
+
   private static final Logger LOG = LoggerFactory.getLogger(SqlThirdEyeDataSource.class);
-  private static final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = ThirdEyeCacheRegistry.getInstance();
+  private static final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = DeprecatedInjectorUtil
+      .getInstance(ThirdEyeCacheRegistry.class);
   protected LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> sqlResponseCache;
   private SqlResponseCacheLoader sqlResponseCacheLoader;
   private String name;

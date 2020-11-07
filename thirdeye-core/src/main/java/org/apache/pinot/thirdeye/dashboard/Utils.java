@@ -42,6 +42,7 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -61,7 +62,8 @@ public class Utils {
   }
 
   public static List<String> getSchemaDimensionNames(String collection) throws Exception {
-    DatasetConfigDTO datasetConfig = ThirdEyeCacheRegistry.getInstance().getDatasetConfigCache()
+    DatasetConfigDTO datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        .getDatasetConfigCache()
         .get(collection);
     return datasetConfig.getDimensions();
   }
@@ -139,7 +141,8 @@ public class Utils {
       String dataset) {
     DatasetConfigDTO datasetConfig;
     try {
-      datasetConfig = ThirdEyeCacheRegistry.getInstance().getDatasetConfigCache().get(dataset);
+      datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+          .getDatasetConfigCache().get(dataset);
     } catch (ExecutionException e) {
       LOG.info(
           "Unable to determine whether dataset: {} is additive, the given aggregation granularity: {} is used.",
@@ -205,11 +208,12 @@ public class Utils {
     String timezone = TimeSpec.DEFAULT_TIMEZONE;
     try {
       DatasetConfigDTO datasetConfig;
-      LoadingCache<String, DatasetConfigDTO> datasetConfigCache = ThirdEyeCacheRegistry
-          .getInstance()
+      LoadingCache<String, DatasetConfigDTO> datasetConfigCache = DeprecatedInjectorUtil
+          .getInstance(ThirdEyeCacheRegistry.class)
           .getDatasetConfigCache();
       if (datasetConfigCache != null && datasetConfigCache.get(collection) != null) {
-        datasetConfig = ThirdEyeCacheRegistry.getInstance().getDatasetConfigCache().get(collection);
+        datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+            .getDatasetConfigCache().get(collection);
       } else {
         datasetConfig = DAORegistry.getInstance().getDatasetConfigDAO().findByDataset(collection);
       }
@@ -246,7 +250,8 @@ public class Utils {
   public static long getMaxDataTimeForDataset(String dataset) {
     long endTime = 0;
     try {
-      endTime = ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache().get(dataset);
+      endTime = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+          .getDatasetMaxDataTimeCache().get(dataset);
     } catch (ExecutionException e) {
       LOG.error("Exception when getting max data time for {}", dataset);
     }

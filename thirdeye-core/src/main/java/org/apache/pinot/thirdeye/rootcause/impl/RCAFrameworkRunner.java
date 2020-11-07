@@ -118,7 +118,8 @@ public class RCAFrameworkRunner {
     ThirdEyeConfiguration thirdEyeConfig = new ThirdEyeAnomalyConfiguration();
     thirdEyeConfig.setRootDir(config.getAbsolutePath());
 
-    ThirdEyeCacheRegistry.getInstance().initializeCaches(thirdEyeConfig);
+    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        .initializeCaches(thirdEyeConfig);
 
     // ************************************************************************
     // Framework setup

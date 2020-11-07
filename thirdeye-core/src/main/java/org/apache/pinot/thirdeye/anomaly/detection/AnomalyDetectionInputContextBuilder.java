@@ -59,6 +59,7 @@ import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow;
 import org.apache.pinot.thirdeye.detector.function.AnomalyFunctionFactory;
 import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -641,7 +642,8 @@ public class AnomalyDetectionInputContextBuilder {
       throws JobExecutionException, ExecutionException {
 
     TimeSeriesHandler timeSeriesHandler =
-        new TimeSeriesHandler(ThirdEyeCacheRegistry.getInstance().getQueryCache());
+        new TimeSeriesHandler(
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache());
 
     // Seed request with top-level...
     TimeSeriesRequest seedRequest = new TimeSeriesRequest();

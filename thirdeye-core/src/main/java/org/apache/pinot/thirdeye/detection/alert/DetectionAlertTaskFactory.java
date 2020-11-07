@@ -44,6 +44,7 @@ import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,8 +65,9 @@ public class DetectionAlertTaskFactory {
     DatasetConfigManager datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
     EvaluationManager evaluationDAO = DAO_REGISTRY.getEvaluationManager();
     AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO, datasetDAO,
-        ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-        ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+            .getDatasetMaxDataTimeCache());
     this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO,
         evaluationDAO,
         aggregationLoader, new DetectionPipelineLoader(),

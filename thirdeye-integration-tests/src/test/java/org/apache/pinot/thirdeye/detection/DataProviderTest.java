@@ -62,6 +62,7 @@ import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -174,17 +175,20 @@ public class DataProviderTest {
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
     this.queryCache = new QueryCache(dataSourceMap, Executors.newSingleThreadExecutor());
 
-    ThirdEyeCacheRegistry cacheRegistry = ThirdEyeCacheRegistry.getInstance();
+    ThirdEyeCacheRegistry cacheRegistry = DeprecatedInjectorUtil
+        .getInstance(ThirdEyeCacheRegistry.class);
     cacheRegistry.registerMetricConfigCache(mockMetricConfigCache);
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);
     cacheRegistry.registerQueryCache(this.queryCache);
     cacheRegistry.registerDatasetMaxDataTimeCache(mockDatasetMaxDataTimeCache);
 
     // time series loader
-    this.timeseriesLoader = new DefaultTimeSeriesLoader(this.metricDAO, this.datasetDAO, this.queryCache, null);
+    this.timeseriesLoader = new DefaultTimeSeriesLoader(this.metricDAO, this.datasetDAO,
+        this.queryCache, null);
 
     // aggregation loader
-    this.aggregationLoader = new DefaultAggregationLoader(this.metricDAO, this.datasetDAO, this.queryCache, mockDatasetMaxDataTimeCache);
+    this.aggregationLoader = new DefaultAggregationLoader(this.metricDAO, this.datasetDAO,
+        this.queryCache, mockDatasetMaxDataTimeCache);
 
     // provider
     this.provider = new DefaultDataProvider(this.metricDAO, this.datasetDAO, this.eventDAO,

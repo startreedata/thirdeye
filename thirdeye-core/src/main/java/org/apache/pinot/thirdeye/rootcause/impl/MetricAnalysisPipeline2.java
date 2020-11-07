@@ -54,6 +54,7 @@ import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregate;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
@@ -127,8 +128,9 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = ThirdEyeCacheRegistry.getInstance().getQueryCache();
-    this.strategyFactory = parseStrategyFactory(MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
+    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
+    this.strategyFactory = parseStrategyFactory(
+        MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
     this.granularity = TimeGranularity.fromString(MapUtils.getString(properties, PROP_GRANULARITY, PROP_GRANULARITY_DEFAULT));
   }
 

@@ -47,6 +47,7 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
 import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
@@ -240,7 +241,8 @@ public class DataFrameUtils {
   public static DataFrame fetchTimeSeries(MetricSlice slice) throws Exception {
     MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    QueryCache cache = ThirdEyeCacheRegistry.getInstance().getQueryCache();
+    QueryCache cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        .getQueryCache();
     return fetchTimeSeries(slice, metricDAO, datasetDAO, cache);
   }
 

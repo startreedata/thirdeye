@@ -38,6 +38,7 @@ import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetSerializer;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,12 +93,14 @@ public class PinotDataSourceResource {
    */
   private void initPinotDataSource() {
     if (pinotDataSource == null) {
-      Preconditions.checkNotNull(ThirdEyeCacheRegistry.getInstance(),
+      Preconditions.checkNotNull(DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class),
           "Failed to get Pinot data source because ThirdEye cache registry is not initialized.");
-      pinotDataSource = (PinotThirdEyeDataSource) ThirdEyeCacheRegistry.getInstance().getQueryCache()
+      pinotDataSource = (PinotThirdEyeDataSource) DeprecatedInjectorUtil
+          .getInstance(ThirdEyeCacheRegistry.class).getQueryCache()
           .getDataSource(PinotThirdEyeDataSource.class.getSimpleName());
       Preconditions
-          .checkNotNull(pinotDataSource, "Failed to get Pinot data source because it is not initialized in ThirdEye.");
+          .checkNotNull(pinotDataSource,
+              "Failed to get Pinot data source because it is not initialized in ThirdEye.");
     }
   }
 }

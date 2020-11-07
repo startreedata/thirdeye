@@ -41,6 +41,7 @@ import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -89,8 +90,8 @@ public class CurrentAndBaselineLoaderTest {
 
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
     QueryCache cache = new QueryCache(dataSourceMap, Executors.newSingleThreadExecutor());
-    ThirdEyeCacheRegistry.getInstance().registerQueryCache(cache);
-    ThirdEyeCacheRegistry.getInstance().initMetaDataCaches();
+    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).registerQueryCache(cache);
+    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).initMetaDataCaches();
 
     AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName(DETECTION_NAME_VALUE);
@@ -110,8 +111,9 @@ public class CurrentAndBaselineLoaderTest {
     this.dataSetDAO.save(datasetConfigDTO);
 
     this.aggregationLoader = new DefaultAggregationLoader(this.metricDAO, this.dataSetDAO,
-        ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-        ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+            .getDatasetMaxDataTimeCache());
 
     this.currentAndBaselineLoader = new CurrentAndBaselineLoader(this.metricDAO, this.dataSetDAO, this.aggregationLoader);
   }

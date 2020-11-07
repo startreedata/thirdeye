@@ -30,6 +30,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -77,16 +78,20 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     ThirdEyeConfiguration thirdEyeConfiguration = new ThirdEyeConfiguration();
     thirdEyeConfiguration.setDataSources(dataSourcesConfig.toString());
 
-    ThirdEyeCacheRegistry.getInstance().initializeCaches(thirdEyeConfiguration);
-    ThirdEyeCacheRegistry cacheRegistry = ThirdEyeCacheRegistry.getInstance();
-
+    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        .initializeCaches(thirdEyeConfiguration);
+    ThirdEyeCacheRegistry cacheRegistry = DeprecatedInjectorUtil
+        .getInstance(ThirdEyeCacheRegistry.class);
 
     MetricSlice slice = MetricSlice.from(configDTO.getId(), 0, 7200000);
-    RequestContainer requestContainer = DataFrameUtils.makeAggregateRequest(slice, Collections.<String>emptyList(), -1, "ref");
-    ThirdEyeResponse response = cacheRegistry.getQueryCache().getQueryResult(requestContainer.getRequest());
+    RequestContainer requestContainer = DataFrameUtils
+        .makeAggregateRequest(slice, Collections.<String>emptyList(), -1, "ref");
+    ThirdEyeResponse response = cacheRegistry.getQueryCache()
+        .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
 
-    Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(), Collections.singletonList(1503d));
+    Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
+        Collections.singletonList(1503d));
   }
 
 }

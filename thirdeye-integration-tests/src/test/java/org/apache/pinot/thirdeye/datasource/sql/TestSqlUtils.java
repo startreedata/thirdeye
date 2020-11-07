@@ -30,6 +30,7 @@ import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -63,8 +64,10 @@ public class TestSqlUtils {
         .mock(LoadingCache.class);
     Mockito.when(mockMetricConfigCache.get(this.metricDataset)).thenReturn(new MetricConfigDTO());
 
-    ThirdEyeCacheRegistry.getInstance().registerDatasetConfigCache(mockDatasetConfigCache);
-    ThirdEyeCacheRegistry.getInstance().registerMetricConfigCache(mockMetricConfigCache);
+    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        .registerDatasetConfigCache(mockDatasetConfigCache);
+    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        .registerMetricConfigCache(mockMetricConfigCache);
 
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
     metricConfigDTO.setDataset(this.dataset);

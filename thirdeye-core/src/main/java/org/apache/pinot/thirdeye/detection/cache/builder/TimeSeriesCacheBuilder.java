@@ -40,6 +40,7 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,8 +78,8 @@ public class TimeSeriesCacheBuilder {
         timeSeriesLoader = new DefaultTimeSeriesLoader(
             DAORegistry.getInstance().getMetricConfigDAO(),
             DAORegistry.getInstance().getDatasetConfigDAO(),
-            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getTimeSeriesCache());
       }
       INSTANCE.setTimeseriesLoader(timeSeriesLoader);
     }

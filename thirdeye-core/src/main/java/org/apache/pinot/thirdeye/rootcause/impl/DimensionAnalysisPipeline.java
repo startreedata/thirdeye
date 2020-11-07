@@ -55,6 +55,7 @@ import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,8 +124,9 @@ public class DimensionAnalysisPipeline extends Pipeline {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = ThirdEyeCacheRegistry.getInstance().getQueryCache();
-    this.executor = Executors.newFixedThreadPool(MapUtils.getInteger(properties, PROP_PARALLELISM, PROP_PARALLELISM_DEFAULT));
+    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
+    this.executor = Executors.newFixedThreadPool(
+        MapUtils.getInteger(properties, PROP_PARALLELISM, PROP_PARALLELISM_DEFAULT));
     this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
   }
 

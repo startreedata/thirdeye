@@ -48,7 +48,6 @@ import org.apache.pinot.thirdeye.detection.cache.CacheDAO;
 import org.apache.pinot.thirdeye.detection.cache.CentralizedCacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.DefaultTimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,10 +77,6 @@ public class ThirdEyeCacheRegistry {
       final DatasetConfigManager datasetConfigManager) {
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
-  }
-
-  public static synchronized ThirdEyeCacheRegistry getInstance() {
-    return DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class);
   }
 
   /**

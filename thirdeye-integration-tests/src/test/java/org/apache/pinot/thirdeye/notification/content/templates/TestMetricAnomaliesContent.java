@@ -16,6 +16,11 @@
 
 package org.apache.pinot.thirdeye.notification.content.templates;
 
+import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestDatasetConfig;
+import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestMetricConfig;
+import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_HOST_KEY;
+import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_PORT_KEY;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
@@ -25,18 +30,35 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.AnomalyType;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
+import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
+import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
@@ -50,35 +72,16 @@ import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.notification.ContentFormatterUtils;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
-import org.apache.pinot.thirdeye.notification.ContentFormatterUtils;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
-import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
-import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
-import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.*;
-import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.*;
 
 
 public class TestMetricAnomaliesContent {
@@ -116,8 +119,10 @@ public class TestMetricAnomaliesContent {
     TimeSeriesLoader timeseriesLoader =
         new DefaultTimeSeriesLoader(daoRegistry.getMetricConfigDAO(), datasetDAO, null, null);
     AggregationLoader aggregationLoader =
-        new DefaultAggregationLoader(metricDAO, datasetDAO, ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
+        new DefaultAggregationLoader(metricDAO, datasetDAO, DeprecatedInjectorUtil
+            .getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+                .getDatasetMaxDataTimeCache());
 
     provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, evaluationDAO,
         aggregationLoader, detectionPipelineLoader, TimeSeriesCacheBuilder.getInstance(),

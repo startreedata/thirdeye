@@ -60,26 +60,30 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.summary.SummaryResponse;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class MultiDimensionalSummaryCLITool {
+
   private static final Logger LOG = LoggerFactory.getLogger(MultiDimensionalSummaryCLITool.class);
   private static final ObjectMapper objectMapper = new ObjectMapper();
-  private static final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = ThirdEyeCacheRegistry.getInstance();
+  private static final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = DeprecatedInjectorUtil
+      .getInstance(ThirdEyeCacheRegistry.class);
 
   public static final String TOP_K_POSTFIX = "_topk";
 
   private static Options buildOptions() {
     Options options = new Options();
 
-    Option dataset = Option.builder("dataset").desc("dataset name").hasArg().argName("NAME").required().build();
+    Option dataset = Option.builder("dataset").desc("dataset name").hasArg().argName("NAME")
+        .required().build();
     options.addOption(dataset);
 
-    Option metricName = Option.builder("metric").desc("metric name").hasArg().argName("NAME").required().build();
+    Option metricName = Option.builder("metric").desc("metric name").hasArg().argName("NAME")
+        .required().build();
     options.addOption(metricName);
 
     Option dimensions =

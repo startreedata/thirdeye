@@ -50,6 +50,7 @@ import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,8 +86,10 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
 
     AggregationLoader aggregationLoader =
-        new DefaultAggregationLoader(metricDAO, datasetDAO, ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
+        new DefaultAggregationLoader(metricDAO, datasetDAO, DeprecatedInjectorUtil
+            .getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+                .getDatasetMaxDataTimeCache());
 
     this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, evaluationDAO,
         aggregationLoader, loader, TimeSeriesCacheBuilder.getInstance(),

@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,8 @@ public class ResponseParserUtils {
     requestBuilder.setDataSource(ThirdEyeUtils.getDataSourceFromMetricFunctions(request.getMetricFunctions()));
     ThirdEyeRequest metricSumsRequest = requestBuilder.build("metricSums");
     try {
-      ThirdEyeResponse metricSumsResponse = ThirdEyeCacheRegistry.getInstance().getQueryCache()
+      ThirdEyeResponse metricSumsResponse = DeprecatedInjectorUtil
+          .getInstance(ThirdEyeCacheRegistry.class).getQueryCache()
           .getQueryResult(metricSumsRequest);
       return metricSumsResponse.getRow(0).getMetrics();
     } catch (Exception e) {
@@ -110,7 +112,8 @@ public class ResponseParserUtils {
     ThirdEyeResponse metricSumsResponse = null;
     try {
       metricSumsResponse =
-          ThirdEyeCacheRegistry.getInstance().getQueryCache().getQueryResult(metricSumsRequest);
+          DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache()
+              .getQueryResult(metricSumsRequest);
     } catch (Exception e) {
       LOGGER.error("Caught exception when executing metric sums request", e);
     }

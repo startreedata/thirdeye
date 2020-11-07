@@ -47,6 +47,7 @@ import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,7 +124,7 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = ThirdEyeCacheRegistry.getInstance().getQueryCache();
+    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
 
     if(!properties.containsKey(PROP_TARGET_INPUT))
       throw new IllegalArgumentException(String.format("Property '%s' required, but not found.", PROP_TARGET_INPUT));

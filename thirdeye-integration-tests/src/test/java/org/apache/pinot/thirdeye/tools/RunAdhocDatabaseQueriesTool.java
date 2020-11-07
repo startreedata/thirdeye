@@ -775,12 +775,13 @@ public class RunAdhocDatabaseQueriesTool {
   private void printEntityAnomalyTrees(long detectionId, long start, long end) {
     TimeSeriesLoader timeseriesLoader =
         new DefaultTimeSeriesLoader(metricConfigDAO, datasetConfigDAO,
-            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            ThirdEyeCacheRegistry.getInstance().getTimeSeriesCache());
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getTimeSeriesCache());
     AggregationLoader aggregationLoader =
         new DefaultAggregationLoader(metricConfigDAO, datasetConfigDAO,
-            ThirdEyeCacheRegistry.getInstance().getQueryCache(),
-            ThirdEyeCacheRegistry.getInstance().getDatasetMaxDataTimeCache());
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+                .getDatasetMaxDataTimeCache());
     DefaultDataProvider provider =
         new DefaultDataProvider(metricConfigDAO, datasetConfigDAO, eventDAO,
             DAORegistry.getInstance().getEvaluationManager(), aggregationLoader,

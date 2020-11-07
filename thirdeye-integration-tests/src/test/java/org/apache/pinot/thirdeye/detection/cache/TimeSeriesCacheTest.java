@@ -19,6 +19,12 @@
 
 package org.apache.pinot.thirdeye.detection.cache;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,13 +46,12 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
 import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.mockito.Mockito.*;
 
 
 public class TimeSeriesCacheTest {
@@ -100,7 +105,8 @@ public class TimeSeriesCacheTest {
     this.executor = Executors.newSingleThreadExecutor();
 
     this.cache = new DefaultTimeSeriesCache(metricDAO, datasetDAO, queryCache, cacheDAO, executor);
-    ThirdEyeCacheRegistry.getInstance().registerTimeSeriesCache(this.cache);
+    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        .registerTimeSeriesCache(this.cache);
   }
 
   @AfterMethod

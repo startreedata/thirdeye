@@ -40,7 +40,8 @@ import org.joda.time.DateTime;
 
 public class SeverityComputationUtil {
 
-  private static final ThirdEyeCacheRegistry CACHE_REGISTRY = ThirdEyeCacheRegistry.getInstance();
+  private static final ThirdEyeCacheRegistry CACHE_REGISTRY = DeprecatedInjectorUtil
+      .getInstance(ThirdEyeCacheRegistry.class);
   private String collectionName;
   private String metricName;
 
@@ -49,7 +50,8 @@ public class SeverityComputationUtil {
     this.metricName = metricName;
   }
 
-  public Map<String, Object> computeSeverity(long currentWindowStart, long currentWindowEnd, long seasonalPeriod,
+  public Map<String, Object> computeSeverity(long currentWindowStart, long currentWindowEnd,
+      long seasonalPeriod,
       long seasonCount)
       throws Exception {
     // CURRENT

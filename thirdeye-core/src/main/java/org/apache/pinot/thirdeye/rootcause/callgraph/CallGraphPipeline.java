@@ -50,6 +50,7 @@ import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.impl.DimensionsEntity;
 import org.apache.pinot.thirdeye.rootcause.impl.TimeRangeEntity;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,7 +135,7 @@ public class CallGraphPipeline extends Pipeline {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = ThirdEyeCacheRegistry.getInstance().getQueryCache();
+    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
     this.dataset = MapUtils.getString(properties, PROP_DATASET, PROP_DATASET_DEFAULT);
     this.metricCount = MapUtils.getString(properties, PROP_METRIC_COUNT, PROP_METRIC_COUNT_DEFAULT);
     this.metricLatency = MapUtils.getString(properties, PROP_METRIC_LATENCY, PROP_METRIC_LATENCY_DEFAULT);

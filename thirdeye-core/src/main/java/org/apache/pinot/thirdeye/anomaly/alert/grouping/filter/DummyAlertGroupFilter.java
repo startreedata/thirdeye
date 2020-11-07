@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
 
 public class DummyAlertGroupFilter extends BaseAlertGroupFilter {
+
   @Override
   public void setParameters(Map<String, String> props) {
   }

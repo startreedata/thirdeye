@@ -22,11 +22,11 @@ package org.apache.pinot.thirdeye.rootcause.util;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.Period;
 
-
 /**
  * Utility for scoring entities
  */
 public class ScoreUtils {
+
   public enum StrategyType {
     LINEAR,
     TRIANGULAR,
@@ -55,7 +55,7 @@ public class ScoreUtils {
     if (parts.length == 1) {
       try {
         return Long.parseLong(parts[0]);
-      } catch(NumberFormatException ignore) {
+      } catch (NumberFormatException ignore) {
         // ignore, parse individual parts
       }
     }
@@ -64,13 +64,13 @@ public class ScoreUtils {
       final String prefix = part.substring(0, part.length() - 1);
       if (part.endsWith("w")) {
         p = p.withWeeks(Integer.parseInt(prefix));
-      } else if(part.endsWith("d")) {
+      } else if (part.endsWith("d")) {
         p = p.withDays(Integer.parseInt(prefix));
-      } else if(part.endsWith("h")) {
+      } else if (part.endsWith("h")) {
         p = p.withHours(Integer.parseInt(prefix));
-      } else if(part.endsWith("m")) {
+      } else if (part.endsWith("m")) {
         p = p.withMinutes(Integer.parseInt(prefix));
-      } else if(part.endsWith("s")) {
+      } else if (part.endsWith("s")) {
         p = p.withSeconds(Integer.parseInt(prefix));
       } else {
         throw new IllegalArgumentException(String.format("Invalid token '%s'", part));
@@ -100,7 +100,7 @@ public class ScoreUtils {
    * @return scorer instance
    */
   public static TimeRangeStrategy build(StrategyType type, long lookback, long start, long end) {
-    switch(type) {
+    switch (type) {
       case LINEAR:
         return new LinearStartTimeStrategy(start, end);
       case TRIANGULAR:
@@ -136,20 +136,23 @@ public class ScoreUtils {
    * entity's start time lies outside the window, the score is zero.
    */
   public static final class LinearStartTimeStrategy implements TimeRangeStrategy {
+
     private final long start;
     private final long duration;
 
     public LinearStartTimeStrategy(long start, long end) {
-      if (start > end)
+      if (start > end) {
         throw new IllegalArgumentException("Requires start <= end");
+      }
       this.start = start;
       this.duration = end - start;
     }
 
     @Override
     public double score(long start, long end) {
-      if (start < this.start)
+      if (start < this.start) {
         return 0;
+      }
       long offset = start - this.start;
       return Math.min(Math.max(1.0d - offset / (double) this.duration, 0), 1.0);
     }
@@ -163,15 +166,18 @@ public class ScoreUtils {
    * between {@code start} and {@code end}.
    */
   public static final class TriangularStartTimeStrategy implements TimeRangeStrategy {
+
     private final long lookback;
     private final long start;
     private final long end;
 
     public TriangularStartTimeStrategy(long lookback, long start, long end) {
-      if (lookback > start)
+      if (lookback > start) {
         throw new IllegalArgumentException("Requires lookback <= start");
-      if (start > end)
+      }
+      if (start > end) {
         throw new IllegalArgumentException("Requires start <= end");
+      }
 
       this.lookback = lookback;
       this.start = start;
@@ -180,10 +186,12 @@ public class ScoreUtils {
 
     @Override
     public double score(long start, long end) {
-      if (start < this.lookback)
+      if (start < this.lookback) {
         return 0;
-      if (start >= this.end)
+      }
+      if (start >= this.end) {
         return 0;
+      }
 
       if (start < this.start) {
         // in lookback
@@ -206,6 +214,7 @@ public class ScoreUtils {
    * @see TriangularStartTimeStrategy
    */
   public static final class QuadraticTriangularStartTimeStrategy implements TimeRangeStrategy {
+
     private final TriangularStartTimeStrategy delegate;
 
     public QuadraticTriangularStartTimeStrategy(long lookback, long start, long end) {
@@ -224,6 +233,7 @@ public class ScoreUtils {
    * {@code 0.0} after the midpoint of this region.
    */
   public static final class HyperbolaStrategy implements TimeRangeStrategy {
+
     private static final double COEFFICIENT = 1.0d / TimeUnit.HOURS.toMillis(1);
 
     private final long start;
@@ -236,8 +246,9 @@ public class ScoreUtils {
 
     @Override
     public double score(long start, long end) {
-      if (start >= (this.start + this.end) / 2)
+      if (start >= (this.start + this.end) / 2) {
         return 0;
+      }
       return 1.0d / (COEFFICIENT * Math.abs(start - this.start) + 1.0);
     }
   }

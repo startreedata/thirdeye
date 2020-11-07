@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class DatasetConfigIndex extends AbstractIndexEntity {
+
   String dataset;
   String displayName;
   boolean active;

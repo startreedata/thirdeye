@@ -35,11 +35,11 @@ import org.apache.pinot.thirdeye.datalayer.pojo.DatasetConfigBean;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 
-
 /**
  * Utility class for (semi-)safely extracting complex config values.
  */
 public class ConfigUtils {
+
   private static final Pattern PATTERN_PERIOD = Pattern.compile("([0-9]+)\\s*(\\S*)");
 
   private ConfigUtils() {
@@ -53,8 +53,8 @@ public class ConfigUtils {
    *
    * @param value value to cast
    * @param <T> list item type
-   * @throws IllegalArgumentException if value cannot be casted to List
    * @return value casted as List
+   * @throws IllegalArgumentException if value cannot be casted to List
    */
   public static <T> List<T> getList(Object value) {
     return getList(value, new ArrayList<T>());
@@ -68,8 +68,8 @@ public class ConfigUtils {
    * @param value value to cast
    * @param defaultValue default value to return on {@code null} value
    * @param <T> list item type
-   * @throws IllegalArgumentException if value cannot be casted to List
    * @return value casted as List
+   * @throws IllegalArgumentException if value cannot be casted to List
    */
   public static <T> List<T> getList(Object value, List<T> defaultValue) {
     if (value == null) {
@@ -91,8 +91,8 @@ public class ConfigUtils {
    * @param value value to cast
    * @param <K> map key type
    * @param <V> map value type
-   * @throws IllegalArgumentException if value cannot be casted to Map
    * @return value casted as map
+   * @throws IllegalArgumentException if value cannot be casted to Map
    */
   public static <K, V> Map<K, V> getMap(Object value) {
     return getMap(value, new HashMap<K, V>());
@@ -107,8 +107,8 @@ public class ConfigUtils {
    * @param defaultValue default value to return on {@code null} value
    * @param <K> map key type
    * @param <V> map value type
-   * @throws IllegalArgumentException if value cannot be casted to Map
    * @return value casted as map
+   * @throws IllegalArgumentException if value cannot be casted to Map
    */
   public static <K, V> Map<K, V> getMap(Object value, Map<K, V> defaultValue) {
     if (value == null) {
@@ -123,13 +123,14 @@ public class ConfigUtils {
   }
 
   /**
-   * Returns {@code value} casted as List via {@code getList(Object value)} and parsed via {@code getLongs(Collection&lt;Number&gt;)}.
+   * Returns {@code value} casted as List via {@code getList(Object value)} and parsed via {@code
+   * getLongs(Collection&lt;Number&gt;)}.
    *
    * @param value value casted as list and parsed
    * @return equivalent collection of Long without nulls
    */
   public static List<Long> getLongs(Object value) {
-    return getLongs(ConfigUtils.<Number>getList(value));
+    return getLongs(ConfigUtils.getList(value));
   }
 
   /**
@@ -155,17 +156,19 @@ public class ConfigUtils {
   }
 
   /**
-   * Returns {@code value} casted as Map via {@code getMap(Object value)} and parsed via {@code getMultimap(Map&lt;K, Collection&lt;V&gt;&gt;)}.
+   * Returns {@code value} casted as Map via {@code getMap(Object value)} and parsed via {@code
+   * getMultimap(Map&lt;K, Collection&lt;V&gt;&gt;)}.
    *
    * @param value value casted as map and parsed
    * @return equivalent multimap
    */
   public static <K, V> Multimap<K, V> getMultimap(Object value) {
-    return getMultimap(ConfigUtils.<K, Collection<V>>getMap(value));
+    return getMultimap(ConfigUtils.getMap(value));
   }
 
   /**
-   * Returns a map with nested collection as a {@code Multimap} with matching types. if {@code nestedMap}
+   * Returns a map with nested collection as a {@code Multimap} with matching types. if {@code
+   * nestedMap}
    * is {@code null} returns an empty Multimap.
    *
    * @param nestedMap map with nested collection values
@@ -189,14 +192,12 @@ public class ConfigUtils {
 
   /**
    * Helper for parsing a period string from config (e.g. '3 days', '1min', '3600000')
-   *
-   * @param period
-   * @return
    */
   public static Period parsePeriod(String period) {
     Matcher m = PATTERN_PERIOD.matcher(period);
     if (!m.find()) {
-      throw new IllegalArgumentException(String.format("Could not parse period expression '%s'", period));
+      throw new IllegalArgumentException(
+          String.format("Could not parse period expression '%s'", period));
     }
 
     int size = Integer.valueOf(m.group(1).trim());
@@ -247,14 +248,17 @@ public class ConfigUtils {
   }
 
   /**
-   * Fetch dataset config DTO using the dataset name and data provider. Lookup based on dataset name first, if not found,
+   * Fetch dataset config DTO using the dataset name and data provider. Lookup based on dataset name
+   * first, if not found,
    * lookup based on the dataset display name.
+   *
    * @param provider the data provider
    * @param datasetName the dataset name, can be either dataset's key or display name
    * @return the dataset config DTO
    */
   public static DatasetConfigDTO fetchDatasetConfigDTO(DataProvider provider, String datasetName) {
-    DatasetConfigDTO datasetConfig = provider.fetchDatasets(Collections.singletonList(datasetName)).get(datasetName);
+    DatasetConfigDTO datasetConfig = provider.fetchDatasets(Collections.singletonList(datasetName))
+        .get(datasetName);
     // if dataset cannot be located in database by real dataset name (usually the pinot table name), they might be using the display name
     if (datasetConfig == null) {
       List<DatasetConfigDTO> datasetConfigs = provider.fetchDatasetByDisplayName(datasetName);
@@ -264,7 +268,8 @@ public class ConfigUtils {
       if (datasetConfigs.size() > 1) {
         throw new RuntimeException(String.format(
             "multiple datasets found based on the dataset's display name %s, please specify which one to use. candidates: %s",
-            datasetName, datasetConfigs.stream().map(DatasetConfigBean::getDataset).collect(Collectors.joining(", "))));
+            datasetName, datasetConfigs.stream().map(DatasetConfigBean::getDataset)
+                .collect(Collectors.joining(", "))));
       }
       datasetConfig = datasetConfigs.get(0);
     }

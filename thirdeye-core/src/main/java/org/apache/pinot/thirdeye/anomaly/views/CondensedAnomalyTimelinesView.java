@@ -50,7 +50,7 @@ public class CondensedAnomalyTimelinesView {
   public static final int DEFAULT_MAX_LENGTH = 1024 * 10; // 10 kilobytes
   public static final int DEFAULT_DECIMAL_DIGITS = 3; // only keep 3 decimal digits
   public static final Long DEFAULT_MIN_BUCKET_UNIT = Minutes.ONE.toStandardDuration().getMillis();
-  private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   Long timestampOffset = 0L; // the timestamp offset of the original time series
   Long minBucketUnit = 1L;
   Long bucketMillis = 0L;  // the bucket size of original time series

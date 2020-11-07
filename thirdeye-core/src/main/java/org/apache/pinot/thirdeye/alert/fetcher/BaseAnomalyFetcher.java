@@ -33,8 +33,8 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
+
   private static final Logger LOG = LoggerFactory.getLogger(BaseAnomalyFetcher.class);
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -47,7 +47,7 @@ public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
   protected MergedAnomalyResultManager mergedAnomalyResultDAO;
   protected boolean active = true;
 
-  public BaseAnomalyFetcher(){
+  public BaseAnomalyFetcher() {
   }
 
   public static String getSnapshotKey(MergedAnomalyResultDTO anomaly) {
@@ -58,11 +58,13 @@ public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
   public void init(AnomalyFetcherConfig anomalyFetcherConfig) {
     mergedAnomalyResultDAO = DAO_REGISTRY.getMergedAnomalyResultDAO();
     this.anomalyFetcherConfig = anomalyFetcherConfig;
-    this.properties = ThirdEyeSpiUtils.decodeCompactedProperties(anomalyFetcherConfig.getProperties());
+    this.properties = ThirdEyeSpiUtils
+        .decodeCompactedProperties(anomalyFetcherConfig.getProperties());
   }
 
   @Override
-  public abstract Collection<MergedAnomalyResultDTO> getAlertCandidates(DateTime current, AlertSnapshotDTO alertSnapShot);
+  public abstract Collection<MergedAnomalyResultDTO> getAlertCandidates(DateTime current,
+      AlertSnapshotDTO alertSnapShot);
 
   public boolean isActive() {
     return active;

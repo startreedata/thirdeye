@@ -23,7 +23,7 @@ public enum Protocol {
   HTTP("http://"),
   HTTPS("https://");
 
-  private String val;
+  private final String val;
 
   Protocol(String val) {
     this.val = val;

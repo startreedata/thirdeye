@@ -71,17 +71,17 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * MockThirdEyeDataSource generates time series based on generator configs. Once generated,
  * the data is cached in memory until the application terminates. This data source serves
  * testing and demo purposes.
  */
 public class MockThirdEyeDataSource implements ThirdEyeDataSource {
+
   private static final Logger LOG = LoggerFactory.getLogger(MockThirdEyeDataSource.class);
 
-  private static double COMPONENT_ALPHA_DAILY = 0.25;
-  private static double COMPONENT_ALPHA_WEEKLY = 0.5;
+  private static final double COMPONENT_ALPHA_DAILY = 0.25;
+  private static final double COMPONENT_ALPHA_WEEKLY = 0.5;
 
   private static final String PROP_POPULATE_META_DATA = "populateMetaData";
   private static final String PROP_LOOKBACK = "lookback";
@@ -104,14 +104,15 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
    * @throws Exception if properties cannot be parsed
    */
   public MockThirdEyeDataSource(Map<String, Object> properties) throws Exception {
-    this.name = MapUtils.getString(properties, "name", MockThirdEyeDataSource.class.getSimpleName());
+    this.name = MapUtils
+        .getString(properties, "name", MockThirdEyeDataSource.class.getSimpleName());
 
     // datasets
     this.datasets = new HashMap<>();
     Map<String, Object> config = ConfigUtils.getMap(properties.get(DATASETS));
     for (Map.Entry<String, Object> entry : config.entrySet()) {
       this.datasets.put(entry.getKey(), MockDataset.fromMap(
-          entry.getKey(), ConfigUtils.<String, Object>getMap(entry.getValue())
+          entry.getKey(), ConfigUtils.getMap(entry.getValue())
       ));
     }
 
@@ -128,9 +129,10 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
     Map<Tuple, DataFrame> rawData = new HashMap<>();
     for (MockDataset dataset : this.datasets.values()) {
       for (String metric : dataset.metrics.keySet()) {
-        String[] basePrefix = new String[] { dataset.name, PROP_DATASET_METRICS, metric };
+        String[] basePrefix = new String[]{dataset.name, PROP_DATASET_METRICS, metric};
 
-        Collection<Tuple> paths = makeTuples(dataset.metrics.get(metric), basePrefix, dataset.dimensions.size() + basePrefix.length);
+        Collection<Tuple> paths = makeTuples(dataset.metrics.get(metric), basePrefix,
+            dataset.dimensions.size() + basePrefix.length);
         for (Tuple path : paths) {
           LOG.info("Generating '{}'", Arrays.asList(path.values));
 
@@ -167,7 +169,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
       for (String metric : sortedMetrics) {
         this.metricNameMap.put(1 + metricNameCounter++, metric);
 
-        String[] prefix = new String[] { dataset.name, PROP_DATASET_METRICS, metric };
+        String[] prefix = new String[]{dataset.name, PROP_DATASET_METRICS, metric};
         Collection<Tuple> tuples = filterTuples(rawData.keySet(), prefix);
 
         // per dimension
@@ -175,7 +177,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
         for (Tuple tuple : tuples) {
           String metricName = tuple.values[2]; // ["dataset", "metrics", "metric", ...]
 
-          DataFrame dfExpanded = new DataFrame(rawData.get(tuple)).renameSeries(COL_VALUE, metricName);
+          DataFrame dfExpanded = new DataFrame(rawData.get(tuple))
+              .renameSeries(COL_VALUE, metricName);
 
           for (int i = 0; i < dataset.dimensions.size(); i++) {
             String dimValue = tuple.values[i + 3];
@@ -210,7 +213,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
 
       this.datasetData.put(dataset.name, dfDataset);
 
-      LOG.info("Merged '{}' with {} rows and {} columns", dataset.name, dfDataset.size(), dfDataset.getSeriesNames().size());
+      LOG.info("Merged '{}' with {} rows and {} columns", dataset.name, dfDataset.size(),
+          dfDataset.getSeriesNames().size());
     }
 
     this.delegate = CSVThirdEyeDataSource.fromDataFrame(this.datasetData, this.metricNameMap);
@@ -260,10 +264,12 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
 
             List<String> metrics = new ArrayList<>(dataset.getMetrics().keySet());
 
-            SqlUtils.createTableOverride(h2DataSource, tableName, dataset.getTimeColumn(), metrics, dataset.getDimensions());
+            SqlUtils.createTableOverride(h2DataSource, tableName, dataset.getTimeColumn(), metrics,
+                dataset.getDimensions());
             SqlUtils.onBoardSqlDataset(dataset);
 
-            DateTimeFormatter fmt = DateTimeFormat.forPattern(dataset.getTimeFormat()).withZone(DateTimeZone.forID(dataset.getTimezone()));
+            DateTimeFormatter fmt = DateTimeFormat.forPattern(dataset.getTimeFormat())
+                .withZone(DateTimeZone.forID(dataset.getTimezone()));
 
             if (dataset.getDataFile().length() > 0) {
               String thirdEyeConfigDir = System.getProperty("dw.rootDir");
@@ -280,7 +286,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
                   }
                   h2Rows.add(columnValues);
                 }
-                int days = (int) ((DateTime.now().getMillis() - maxDateTime.getMillis()) / TimeUnit.DAYS.toMillis(1));
+                int days = (int) ((DateTime.now().getMillis() - maxDateTime.getMillis())
+                    / TimeUnit.DAYS.toMillis(1));
                 for (String[] columnValues : h2Rows) {
                   columnValues[0] = fmt.print(DateTime.parse(columnValues[0], fmt).plusDays(days));
                   SqlUtils.insertCSVRow(h2DataSource, tableName, columnNames, columnValues);
@@ -346,7 +353,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
    * @param interval time granularity
    * @return DataFrame with mock data
    */
-  private static DataFrame makeData(Map<String, Object> config, DateTime start, DateTime end, Period interval) {
+  private static DataFrame makeData(Map<String, Object> config, DateTime start, DateTime end,
+      Period interval) {
     List<Long> timestamps = new ArrayList<>();
     List<Double> values = new ArrayList<>();
 
@@ -365,8 +373,12 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
 
       timestamps.add(origin.getMillis());
 
-      double compDaily = weekly * (COMPONENT_ALPHA_WEEKLY + Math.sin(origin.getDayOfWeek() / 7.0 * 2 * Math.PI + 1) / 2 * (1 - COMPONENT_ALPHA_WEEKLY));
-      double compHourly = daily * (COMPONENT_ALPHA_DAILY + Math.sin(origin.getHourOfDay() / 24.0 * 2 * Math.PI + 1) / 2 * (1 - COMPONENT_ALPHA_DAILY));
+      double compDaily = weekly * (COMPONENT_ALPHA_WEEKLY
+          + Math.sin(origin.getDayOfWeek() / 7.0 * 2 * Math.PI + 1) / 2 * (1
+          - COMPONENT_ALPHA_WEEKLY));
+      double compHourly = daily * (COMPONENT_ALPHA_DAILY
+          + Math.sin(origin.getHourOfDay() / 24.0 * 2 * Math.PI + 1) / 2 * (1
+          - COMPONENT_ALPHA_DAILY));
       double compEpsilon = dist.sample();
 
       values.add((double) Math.max(Math.round(compDaily + compHourly + compEpsilon), 0));
@@ -386,7 +398,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
    * @param maxDepth max expected level of depth
    * @return metric tuples
    */
-  private static List<Tuple> makeTuples(Map<String, Object> map, String[] basePrefix, int maxDepth) {
+  private static List<Tuple> makeTuples(Map<String, Object> map, String[] basePrefix,
+      int maxDepth) {
     List<Tuple> tuples = new ArrayList<>();
 
     LinkedList<MetricTuple> stack = new LinkedList<>();
@@ -396,7 +409,6 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
       MetricTuple tuple = stack.pop();
       if (tuple.prefix.length >= maxDepth) {
         tuples.add(new Tuple(tuple.prefix));
-
       } else {
         for (Map.Entry<String, Object> entry : tuple.map.entrySet()) {
           Map<String, Object> nested = (Map<String, Object>) entry.getValue();
@@ -412,7 +424,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   /**
-   * Returns the bottom-level config for a given metric tuple from the root of a nested generator config
+   * Returns the bottom-level config for a given metric tuple from the root of a nested generator
+   * config
    *
    * @param map nested config with generator configs
    * @param path metric generator path
@@ -455,13 +468,15 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
    * Container class for datasets and their generator configs
    */
   static final class MockDataset {
+
     final String name;
     final DateTimeZone timezone;
     final List<String> dimensions;
     final Map<String, Map<String, Object>> metrics;
     final Period granularity;
 
-    MockDataset(String name, DateTimeZone timezone, List<String> dimensions, Map<String, Map<String, Object>> metrics, Period granularity) {
+    MockDataset(String name, DateTimeZone timezone, List<String> dimensions,
+        Map<String, Map<String, Object>> metrics, Period granularity) {
       this.name = name;
       this.timezone = timezone;
       this.dimensions = dimensions;
@@ -473,8 +488,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
       return new MockDataset(
           name,
           DateTimeZone.forID(MapUtils.getString(map, "timezone", "America/Los_Angeles")),
-          ConfigUtils.<String>getList(map.get("dimensions")),
-          ConfigUtils.<String, Map<String, Object>>getMap(map.get("metrics")),
+          ConfigUtils.getList(map.get("dimensions")),
+          ConfigUtils.getMap(map.get("metrics")),
           ConfigUtils.parsePeriod(MapUtils.getString(map, "granularity", "1hour")));
     }
   }
@@ -483,6 +498,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
    * Helper class for depth-first iteration of metric dimensions
    */
   static final class MetricTuple {
+
     final String[] prefix;
     final Map<String, Object> map;
 
@@ -515,6 +531,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
    * Helper class for comparable tuples
    */
   static final class Tuple {
+
     final String[] values;
 
     public Tuple(String[] values) {

@@ -58,10 +58,10 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The MetricComponentAnalysisPipeline performs iterative factor analysis on a metric's dimensions.
- * Returns the k biggest outliers (contributors to relative change, similar to principal components).
+ * Returns the k biggest outliers (contributors to relative change, similar to principal
+ * components).
  *
  * Iteration executes by choosing the the dimension value (slice) with the biggest change in
  * contribution and then re-running the analysis while excluding this (and all previously chosen)
@@ -71,6 +71,7 @@ import org.slf4j.LoggerFactory;
  * @see Cube
  */
 public class MetricComponentAnalysisPipeline extends Pipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetricComponentAnalysisPipeline.class);
 
   private static final String COL_RAW = "raw";
@@ -108,8 +109,10 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
    * @param cache query cache for running contribution analysis
    * @param executor executor service for parallel task execution
    */
-  public MetricComponentAnalysisPipeline(String outputName, Set<String> inputNames, MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, QueryCache cache, ExecutorService executor, Set<String> excludeDimensions, int k) {
+  public MetricComponentAnalysisPipeline(String outputName, Set<String> inputNames,
+      MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO, QueryCache cache, ExecutorService executor,
+      Set<String> excludeDimensions, int k) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
@@ -124,9 +127,11 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
    *
    * @param outputName pipeline output name
    * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_K}, {@code PROP_PARALLELISM}, {@code PROP_EXCLUDE_DIMENSIONS})
+   * @param properties configuration properties ({@code PROP_K}, {@code PROP_PARALLELISM},
+   *     {@code PROP_EXCLUDE_DIMENSIONS})
    */
-  public MetricComponentAnalysisPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public MetricComponentAnalysisPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
@@ -136,7 +141,8 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
 
     if (properties.containsKey(PROP_EXCLUDE_DIMENSIONS)) {
-      this.excludeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
+      this.excludeDimensions = new HashSet<>(
+          (Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
     } else {
       this.excludeDimensions = PROP_EXCLUDE_DIMENSIONS_DEFAULT;
     }
@@ -167,11 +173,11 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     final Multimap<String, String> filters = HashMultimap.create(metric.getFilters());
 
     // metric total for score calculation
-    final MetricSlice sliceTotal = MetricSlice.from(metric.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
+    final MetricSlice sliceTotal = MetricSlice
+        .from(metric.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
     final double total;
     try {
       total = getTotal(sliceTotal);
-
     } catch (Exception e) {
       LOG.warn("Could not retrieve total for '{}'", metric.getUrn());
       return new PipelineResult(context, dimensions);
@@ -179,15 +185,18 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
 
     for (int k = 0; k < this.k; k++) {
       try {
-        final MetricSlice sliceCurrent = MetricSlice.from(metric.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
-        final MetricSlice sliceBaseline = MetricSlice.from(metric.getId(), baseline.getStart(), baseline.getEnd(), filters);
+        final MetricSlice sliceCurrent = MetricSlice
+            .from(metric.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
+        final MetricSlice sliceBaseline = MetricSlice
+            .from(metric.getId(), baseline.getStart(), baseline.getEnd(), filters);
 
         final double subTotal = getTotal(sliceCurrent);
 
         final DataFrame dfScoresRaw = getDimensionScores(sliceCurrent, sliceBaseline);
 
         final double percentage = Math.round(subTotal / total * 10000) / 100.0;
-        LOG.info("Iteration {}: analyzing '{}' ({} %)\n{}", k, filters, percentage, dfScoresRaw.head(20));
+        LOG.info("Iteration {}: analyzing '{}' ({} %)\n{}", k, filters, percentage,
+            dfScoresRaw.head(20));
 
         // ignore zero scores, known combinations
         final DataFrame dfScores = dfScoresRaw
@@ -205,14 +214,14 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
 
         String name = dfScores.getString(COL_DIM_NAME, 0);
         String value = dfScores.getString(COL_DIM_VALUE, 0);
-         // double score = Math.abs(dfScores.getDouble(COL_DELTA, 0)); // scaling issue
+        // double score = Math.abs(dfScores.getDouble(COL_DELTA, 0)); // scaling issue
         double score = subTotal / total;
 
         rawDimensions.put(name, value);
-        dimensions.add(DimensionEntity.fromDimension(score * metric.getScore(), name, value, DimensionEntity.TYPE_GENERATED));
+        dimensions.add(DimensionEntity
+            .fromDimension(score * metric.getScore(), name, value, DimensionEntity.TYPE_GENERATED));
 
         filters.put(name, "!" + value);
-
       } catch (Exception e) {
         LOG.warn("Error calculating dimension scores for '{}'. Skipping.", metric.getUrn(), e);
       }
@@ -223,7 +232,9 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
 
   private double getTotal(MetricSlice slice) throws Exception {
     String ref = String.format("%d", slice.getMetricId());
-    RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice, Collections.<String>emptyList(), -1, ref, this.metricDAO, this.datasetDAO);
+    RequestContainer rc = DataFrameUtils
+        .makeAggregateRequest(slice, Collections.emptyList(), -1, ref, this.metricDAO,
+            this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc);
@@ -233,7 +244,9 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
 
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
-    RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO, this.datasetDAO);
+    RequestContainer rc = DataFrameUtils
+        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO,
+            this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc);
@@ -247,7 +260,8 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     return out;
   }
 
-  private DataFrame getContributionDelta(MetricSlice current, MetricSlice baseline, String dimension) throws Exception {
+  private DataFrame getContributionDelta(MetricSlice current, MetricSlice baseline,
+      String dimension) throws Exception {
     DataFrame curr = getContribution(current, dimension);
     DataFrame base = getContribution(baseline, dimension);
 
@@ -283,7 +297,8 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     return df;
   }
 
-  private Future<DataFrame> getContributionDeltaPackedAsync(final MetricSlice current, final MetricSlice baseline, final String dimension) throws Exception {
+  private Future<DataFrame> getContributionDeltaPackedAsync(final MetricSlice current,
+      final MetricSlice baseline, final String dimension) throws Exception {
     return this.executor.submit(new Callable<DataFrame>() {
       @Override
       public DataFrame call() throws Exception {
@@ -298,16 +313,19 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     }
 
     MetricConfigDTO metric = this.metricDAO.findById(current.getMetricId());
-    if(metric == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id '%d'", current.getMetricId()));
+    if (metric == null) {
+      throw new IllegalArgumentException(
+          String.format("Could not resolve metric id '%d'", current.getMetricId()));
     }
 
     DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
-    if(dataset == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(), metric.getId()));
+    if (dataset == null) {
+      throw new IllegalArgumentException(String
+          .format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(),
+              metric.getId()));
     }
 
-    if(!dataset.isAdditive()) {
+    if (!dataset.isAdditive()) {
       LOG.warn("Contribution analysis on non-additive dataset");
 
       // TODO read additive from metric property when available
@@ -315,7 +333,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     }
 
     Collection<Future<DataFrame>> futures = new ArrayList<>();
-    for(String dimension : dataset.getDimensions()) {
+    for (String dimension : dataset.getDimensions()) {
       // don't explore dimensions that are excluded
       if (this.excludeDimensions.contains(dimension)) {
         continue;
@@ -326,7 +344,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
 
     final long timeout = System.currentTimeMillis() + TIMEOUT;
     List<DataFrame> contributors = new ArrayList<>();
-    for(Future<DataFrame> future : futures) {
+    for (Future<DataFrame> future : futures) {
       final long timeLeft = Math.max(timeout - System.currentTimeMillis(), 0);
       contributors.add(future.get(timeLeft, TimeUnit.MILLISECONDS));
     }

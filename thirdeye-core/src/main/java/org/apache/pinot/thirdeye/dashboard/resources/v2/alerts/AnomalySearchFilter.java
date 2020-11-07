@@ -23,11 +23,11 @@ package org.apache.pinot.thirdeye.dashboard.resources.v2.alerts;
 import java.util.Collections;
 import java.util.List;
 
-
 /**
  * The type Anomaly search filter.
  */
 public class AnomalySearchFilter {
+
   private final List<String> feedbacks;
   private final List<String> subscriptionGroups;
   private final List<String> detectionNames;
@@ -66,7 +66,8 @@ public class AnomalySearchFilter {
    * @param datasets the datasets
    * @param anomalyIds the anomaly ids
    */
-  public AnomalySearchFilter(Long startTime, Long endTime, List<String> feedbacks, List<String> subscriptionGroups, List<String> detectionNames,
+  public AnomalySearchFilter(Long startTime, Long endTime, List<String> feedbacks,
+      List<String> subscriptionGroups, List<String> detectionNames,
       List<String> metrics, List<String> datasets, List<Long> anomalyIds) {
     this.feedbacks = feedbacks;
     this.subscriptionGroups = subscriptionGroups;

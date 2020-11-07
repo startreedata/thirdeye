@@ -41,18 +41,19 @@ import org.slf4j.LoggerFactory;
  * @author kgopalak
  */
 public class MetricTimeSeries {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(MetricTimeSeries.class);
   private static final String NULL_NUMBER_TOSTRING_STRING = "null";
 
   // Mapping from timestamp to the value of metrics. (One value per metric and multiple metrics per timestamp.)
-  private Map<Long, ByteBuffer> metricsValue;
+  private final Map<Long, ByteBuffer> metricsValue;
 
-  private Map<Long, boolean[]> hasValue;
+  private final Map<Long, boolean[]> hasValue;
 
-  private MetricSchema schema;
+  private final MetricSchema schema;
 
   /**
-   * @param schema
+   *
    */
   public MetricTimeSeries(MetricSchema schema) {
     metricsValue = new HashMap<>();
@@ -103,7 +104,6 @@ public class MetricTimeSeries {
    *
    * @param timeWindow the timestamp.
    * @param name the metric name.
-   *
    * @return the metric value if exists; otherwise, null is returned.
    */
   public Number get(long timeWindow, String name) {
@@ -111,13 +111,15 @@ public class MetricTimeSeries {
   }
 
   /**
-   * Gets the metric value with the timestamp if the value exists; otherwise, the default number is returned.
+   * Gets the metric value with the timestamp if the value exists; otherwise, the default number is
+   * returned.
    *
    * @param timeWindow the timestamp.
    * @param name the metric name.
-   * @param defaultNumber the default number for the returned value if the target value does not exist.
-   *
-   * @return the metric value with the timestamp if the value exists; otherwise, the default number is returned.
+   * @param defaultNumber the default number for the returned value if the target value does not
+   *     exist.
+   * @return the metric value with the timestamp if the value exists; otherwise, the default number
+   *     is returned.
    */
   public Number getOrDefault(long timeWindow, String name, Number defaultNumber) {
     Number ret = defaultNumber;
@@ -172,10 +174,8 @@ public class MetricTimeSeries {
   }
 
   /**
-   * @param series
-   *          A time series whose values should be reflected in this time series
-   * @param timeRange
-   *          Only include values from series that are in this time range
+   * @param series A time series whose values should be reflected in this time series
+   * @param timeRange Only include values from series that are in this time range
    */
   public void aggregate(MetricTimeSeries series, TimeRange timeRange) {
     for (long timeWindow : series.metricsValue.keySet()) {
@@ -212,7 +212,7 @@ public class MetricTimeSeries {
   }
 
   /**
-   * @return
+   *
    */
   public Set<Long> getTimeWindowSet() {
     return metricsValue.keySet();
@@ -272,7 +272,8 @@ public class MetricTimeSeries {
   }
 
   /**
-   * Returns the average values of metrics. If a metric does not have any values, then its average value is null.
+   * Returns the average values of metrics. If a metric does not have any values, then its average
+   * value is null.
    *
    * @return the average values of metrics.
    */
@@ -281,11 +282,11 @@ public class MetricTimeSeries {
   }
 
   /**
-   * Returns the average values of metrics. If a metric does not have any values, then its average value is
+   * Returns the average values of metrics. If a metric does not have any values, then its average
+   * value is
    * valueOfdividedByZero.
    *
    * @param valueOfdividedByZero the value to be used when a metric does not have any values.
-   *
    * @return the average values of metrics.
    */
   public Double[] getMetricAvgs(Double valueOfdividedByZero) {
@@ -319,23 +320,23 @@ public class MetricTimeSeries {
 
         if (metricValue != null) {
           switch (metricType) {
-          case INT:
-            sum[i] = sum[i].intValue() + metricValue.intValue();
-            break;
-          case SHORT:
-            sum[i] = sum[i].shortValue() + metricValue.shortValue();
-            break;
-          case LONG:
-            sum[i] = sum[i].longValue() + metricValue.longValue();
-            break;
-          case FLOAT:
-            sum[i] = sum[i].floatValue() + metricValue.floatValue();
-            break;
-          case DOUBLE:
-            sum[i] = sum[i].doubleValue() + metricValue.doubleValue();
-            break;
-          default:
-            throw new IllegalStateException();
+            case INT:
+              sum[i] = sum[i].intValue() + metricValue.intValue();
+              break;
+            case SHORT:
+              sum[i] = sum[i].shortValue() + metricValue.shortValue();
+              break;
+            case LONG:
+              sum[i] = sum[i].longValue() + metricValue.longValue();
+              break;
+            case FLOAT:
+              sum[i] = sum[i].floatValue() + metricValue.floatValue();
+              break;
+            case DOUBLE:
+              sum[i] = sum[i].doubleValue() + metricValue.doubleValue();
+              break;
+            default:
+              throw new IllegalStateException();
           }
           ++bucketCount[i];
         }

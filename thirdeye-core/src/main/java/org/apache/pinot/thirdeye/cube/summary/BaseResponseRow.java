@@ -19,11 +19,11 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
-
 /**
  * A POJO for front-end representation.
  */
 public class BaseResponseRow {
+
   public double baselineValue;
   public double currentValue;
   public double sizeFactor;

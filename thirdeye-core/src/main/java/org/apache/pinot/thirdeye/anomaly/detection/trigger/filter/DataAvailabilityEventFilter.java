@@ -22,5 +22,6 @@ package org.apache.pinot.thirdeye.anomaly.detection.trigger.filter;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityEvent;
 
 public interface DataAvailabilityEventFilter {
+
   boolean isPassed(DataAvailabilityEvent e);
 }

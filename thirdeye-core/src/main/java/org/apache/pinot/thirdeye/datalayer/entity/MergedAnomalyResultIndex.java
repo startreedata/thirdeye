@@ -21,9 +21,7 @@ package org.apache.pinot.thirdeye.datalayer.entity;
 
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 
-
 public class MergedAnomalyResultIndex extends AbstractIndexEntity {
-
 
   long functionId;
   long detectionConfigId;

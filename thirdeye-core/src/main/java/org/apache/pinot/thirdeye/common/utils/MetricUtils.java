@@ -22,13 +22,13 @@ package org.apache.pinot.thirdeye.common.utils;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 
-
 /**
  * Utility class for ThirdEye metrics
  */
 public class MetricUtils {
 
-  private MetricUtils() {}
+  private MetricUtils() {
+  }
 
   /**
    * check if the metric aggregation is cumulative

@@ -23,14 +23,15 @@ package org.apache.pinot.thirdeye.formatter;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 
-
 /**
  * Class for building UI formatters for DTOs. Takes in a DTO and returns
  * a map that contains human-readable data for display on the UI.
  */
 public interface DTOFormatter<T extends AbstractDTO> {
+
   /**
    * Format a DTO object and returns a human-readable map
+   *
    * @param dto the DTO object to be formatted
    * @return the formatted map
    */

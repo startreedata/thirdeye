@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.anomaly.alert.template.pojo;
 import java.util.Map;
 
 public class MetricDimensionReport {
+
   long metricId;
   String dataset;
   String metricName;

@@ -23,6 +23,7 @@ package org.apache.pinot.thirdeye.detection.cache;
   Constants used for centralized-cache related code.
  */
 public class CacheConstants {
+
   // timestamp field used to get timestamp in RelationalThirdEyeResponse
   public static final String TIMESTAMP = "timestamp";
 
@@ -38,5 +39,4 @@ public class CacheConstants {
 
   // refers to hashed metricURN which is used as the key to data for a dimension combination.
   public static final String DIMENSION_KEY = "dimensionKey";
-
 }

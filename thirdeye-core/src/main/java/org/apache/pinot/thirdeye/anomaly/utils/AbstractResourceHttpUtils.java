@@ -38,7 +38,7 @@ import org.apache.http.util.EntityUtils;
 public abstract class AbstractResourceHttpUtils {
 
   private final HttpHost resourceHttpHost;
-  private CookieStore cookieStore;
+  private final CookieStore cookieStore;
 
   protected AbstractResourceHttpUtils(HttpHost httpHost) {
     this.resourceHttpHost = httpHost;
@@ -72,7 +72,6 @@ public abstract class AbstractResourceHttpUtils {
       }
       InputStream content = res.getEntity().getContent();
       response = IOUtils.toString(content);
-
     } finally {
       if (res.getEntity() != null) {
         EntityUtils.consume(res.getEntity());

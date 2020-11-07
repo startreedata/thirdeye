@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.collections4.MapUtils;
 
-
 public class JiraConfiguration {
 
   public static final String JIRA_CONFIG_KEY = "jiraConfiguration";
@@ -100,16 +99,18 @@ public class JiraConfiguration {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add(JIRA_URL_KEY, jiraUrl).add(JIRA_USER_KEY, jiraUser).toString();
+    return MoreObjects.toStringHelper(this).add(JIRA_URL_KEY, jiraUrl).add(JIRA_USER_KEY, jiraUser)
+        .toString();
   }
 
-  public static JiraConfiguration createFromProperties(Map<String,Object> jiraConfiguration) {
+  public static JiraConfiguration createFromProperties(Map<String, Object> jiraConfiguration) {
     JiraConfiguration conf = new JiraConfiguration();
     try {
       conf.setJiraHost(MapUtils.getString(jiraConfiguration, JIRA_URL_KEY));
       conf.setJiraUser(MapUtils.getString(jiraConfiguration, JIRA_USER_KEY));
       conf.setJiraPassword(MapUtils.getString(jiraConfiguration, JIRA_PASSWD_KEY));
-      conf.setJiraDefaultProjectKey(MapUtils.getString(jiraConfiguration, JIRA_DEFAULT_PROJECT_KEY, "THIRDEYE"));
+      conf.setJiraDefaultProjectKey(
+          MapUtils.getString(jiraConfiguration, JIRA_DEFAULT_PROJECT_KEY, "THIRDEYE"));
       conf.setJiraIssueTypeId(MapUtils.getLong(jiraConfiguration, JIRA_ISSUE_TYPE_KEY, 19L));
     } catch (Exception e) {
       throw new RuntimeException("Error occurred while parsing jira configuration into object.", e);

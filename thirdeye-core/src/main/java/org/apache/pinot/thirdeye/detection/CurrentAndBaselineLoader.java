@@ -45,11 +45,12 @@ import org.joda.time.DateTimeZone;
  * The Current and baseline loader.
  */
 public class CurrentAndBaselineLoader {
+
   private static final long TIMEOUT = 60000;
 
-  private MetricConfigManager metricDAO;
-  private DatasetConfigManager datasetDAO;
-  private AggregationLoader aggregationLoader;
+  private final MetricConfigManager metricDAO;
+  private final DatasetConfigManager datasetDAO;
+  private final AggregationLoader aggregationLoader;
 
   /**
    * Instantiates a new Current and baseline loader.
@@ -71,7 +72,8 @@ public class CurrentAndBaselineLoader {
    * @param anomalies the anomalies
    * @throws Exception the exception
    */
-  public void fillInCurrentAndBaselineValue(Collection<MergedAnomalyResultDTO> anomalies) throws Exception {
+  public void fillInCurrentAndBaselineValue(Collection<MergedAnomalyResultDTO> anomalies)
+      throws Exception {
     ExecutorService executor = Executors.newCachedThreadPool();
 
     for (final MergedAnomalyResultDTO anomaly : anomalies) {
@@ -86,15 +88,18 @@ public class CurrentAndBaselineLoader {
 
         DatasetConfigDTO datasetConfigDTO = this.datasetDAO.findByDataset(anomaly.getCollection());
         if (datasetConfigDTO == null) {
-          throw new IllegalArgumentException(String.format("Could not dataset '%s'", anomaly.getCollection()));
+          throw new IllegalArgumentException(
+              String.format("Could not dataset '%s'", anomaly.getCollection()));
         }
 
         Multimap<String, String> filters = getFiltersFromDimensionMaps(anomaly);
 
-        final MetricSlice slice = MetricSlice.from(metricConfigDTO.getId(), anomaly.getStartTime(), anomaly.getEndTime(), filters);
+        final MetricSlice slice = MetricSlice
+            .from(metricConfigDTO.getId(), anomaly.getStartTime(), anomaly.getEndTime(), filters);
 
         DateTimeZone timezone = getDateTimeZone(datasetConfigDTO);
-        final Baseline baseline = BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.SUM, 1, 1, timezone);
+        final Baseline baseline = BaselineAggregate
+            .fromWeekOverWeek(BaselineAggregateType.SUM, 1, 1, timezone);
 
         executor.submit(new Runnable() {
           @Override
@@ -123,8 +128,9 @@ public class CurrentAndBaselineLoader {
 
   private double getAggregate(MetricSlice slice) {
     try {
-      return this.aggregationLoader.loadAggregate(slice, Collections.<String>emptyList(), -1).getDouble(
-          DataFrame.COL_VALUE, 0);
+      return this.aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1)
+          .getDouble(
+              DataFrame.COL_VALUE, 0);
     } catch (Exception e) {
       return Double.NaN;
     }

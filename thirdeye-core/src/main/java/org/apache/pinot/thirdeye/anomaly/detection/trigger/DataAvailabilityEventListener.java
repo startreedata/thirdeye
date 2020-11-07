@@ -29,20 +29,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is to listen to Kafka trigger events and update metadata in the metadata store based on the events,
+ * This class is to listen to Kafka trigger events and update metadata in the metadata store based
+ * on the events,
  * so that new anomaly detection can be trigger accordingly.
  */
 public class DataAvailabilityEventListener implements Runnable {
+
   private static final Logger LOG = LoggerFactory.getLogger(DataAvailabilityEventListener.class);
-  private DataAvailabilityKafkaConsumer consumer;
+  private final DataAvailabilityKafkaConsumer consumer;
   private final List<DataAvailabilityEventFilter> filters;
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
-  private DatasetTriggerInfoRepo datasetTriggerInfoRepo;
-  private DatasetConfigManager datasetConfigManager;
-  private long sleepTimeInMilli;
-  private long pollTimeInMilli;
+  private final DatasetTriggerInfoRepo datasetTriggerInfoRepo;
+  private final DatasetConfigManager datasetConfigManager;
+  private final long sleepTimeInMilli;
+  private final long pollTimeInMilli;
 
-  public DataAvailabilityEventListener(DataAvailabilityKafkaConsumer consumer, List<DataAvailabilityEventFilter> filters,
+  public DataAvailabilityEventListener(DataAvailabilityKafkaConsumer consumer,
+      List<DataAvailabilityEventFilter> filters,
       long sleepTimeInMilli, long pollTimeInMilli) {
     this.consumer = consumer;
     this.filters = filters;
@@ -63,7 +66,8 @@ public class DataAvailabilityEventListener implements Runnable {
     } finally {
       consumer.close();
     }
-    LOG.info("DataAvailabilityEventListener under thread {} is closed.", Thread.currentThread().getName());
+    LOG.info("DataAvailabilityEventListener under thread {} is closed.",
+        Thread.currentThread().getName());
   }
 
   public void close() {
@@ -76,11 +80,13 @@ public class DataAvailabilityEventListener implements Runnable {
     for (DataAvailabilityEvent event : events) {
       if (checkAllFiltersPassed(event)) {
         try {
-          LOG.info("Processing event: " + event.getDatasetName() + " with watermark " + event.getHighWatermark());
+          LOG.info("Processing event: " + event.getDatasetName() + " with watermark " + event
+              .getHighWatermark());
           String dataset = event.getDatasetName();
           datasetTriggerInfoRepo.setLastUpdateTimestamp(dataset, event.getHighWatermark());
           //Note: Batch update the timestamps of dataset if the event traffic spikes
-          datasetConfigManager.updateLastRefreshTime(dataset, event.getHighWatermark(), System.currentTimeMillis());
+          datasetConfigManager
+              .updateLastRefreshTime(dataset, event.getHighWatermark(), System.currentTimeMillis());
           ThirdeyeMetricsUtil.processedTriggerEventCounter.inc();
           LOG.debug("Finished processing event: " + event.getDatasetName());
         } catch (Exception e) {
@@ -98,8 +104,9 @@ public class DataAvailabilityEventListener implements Runnable {
 
   private boolean checkAllFiltersPassed(DataAvailabilityEvent event) {
     for (DataAvailabilityEventFilter filter : filters) {
-      if (!filter.isPassed(event))
+      if (!filter.isPassed(event)) {
         return false;
+      }
     }
     return true;
   }

@@ -22,7 +22,9 @@ package org.apache.pinot.thirdeye.anomaly.alert.grouping.auxiliary_info_provider
 import java.util.Collections;
 import java.util.Map;
 
-public abstract class BaseAlertGroupAuxiliaryInfoProvider implements AlertGroupAuxiliaryInfoProvider {
+public abstract class BaseAlertGroupAuxiliaryInfoProvider implements
+    AlertGroupAuxiliaryInfoProvider {
+
   public static AuxiliaryAlertGroupInfo EMPTY_AUXILIARY_ALERT_GROUP_INFO = new AuxiliaryAlertGroupInfo();
   public static String RECIPIENTS_SEPARATOR = ",";
 

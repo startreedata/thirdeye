@@ -24,10 +24,8 @@ import java.util.List;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
 
-
 /**
  * The database client that provides the function of data retrieval for the cube algorithm.
- * @param <R>
  */
 public interface CubeClient<R extends Row> {
 
@@ -41,29 +39,32 @@ public interface CubeClient<R extends Row> {
 
   /**
    * Returns the baseline and current value for nodes at each dimension from the given list.
-   * For instance, if the list has ["country", "page name"], then it returns nodes of ["US", "IN", "JP", ...,
+   * For instance, if the list has ["country", "page name"], then it returns nodes of ["US", "IN",
+   * "JP", ...,
    * "linkedin.com", "google.com", ...]
    *
    * @param dimensions the list of dimensions.
    * @param filterSets the data filter.
-   *
    * @return the baseline and current value for nodes at each dimension from the given list.
    */
-  List<List<R>> getAggregatedValuesOfDimension(Dimensions dimensions, Multimap<String, String> filterSets)
+  List<List<R>> getAggregatedValuesOfDimension(Dimensions dimensions,
+      Multimap<String, String> filterSets)
       throws Exception;
 
   /**
    * Returns the baseline and current value for nodes for each dimension combination.
    * For instance, if the list has ["country", "page name"], then it returns nodes of
    * [
-   *   ["US", "IN", "JP", ...,],
-   *   ["US, linkedin.com", "US, google.com", "IN, linkedin.com", "IN, google.com", "JP, linkedin.com", "JP, google.com", ...]
+   * ["US", "IN", "JP", ...,],
+   * ["US, linkedin.com", "US, google.com", "IN, linkedin.com", "IN, google.com", "JP,
+   * linkedin.com", "JP, google.com", ...]
    * ]
+   *
    * @param dimensions the dimensions to be drilled down.
    * @param filterSets the data filter.
-   *
    * @return the baseline and current value for nodes for each dimension combination.
    */
-  List<List<R>> getAggregatedValuesOfLevels(Dimensions dimensions, Multimap<String, String> filterSets)
+  List<List<R>> getAggregatedValuesOfLevels(Dimensions dimensions,
+      Multimap<String, String> filterSets)
       throws Exception;
 }

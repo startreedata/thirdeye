@@ -27,12 +27,12 @@ import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 
-
 /**
  * EmptyPipeline serves as a dummy implementation or sink that does not emit any output.
  * Can be used to construct an validate a DAG without a full implementation of component pipelines.
  */
 public class EmptyPipeline extends Pipeline {
+
   /**
    * Constructor for dependency injection
    *

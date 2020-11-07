@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ThirdEyeResultSetUtils {
+
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeResultSetUtils.class);
   private static final String MYSQL = "MySQL";
   private static final String H2 = "H2";
@@ -76,7 +77,8 @@ public class ThirdEyeResultSetUtils {
     int position = 0;
     Map<String, String[]> dataMap = new HashMap<>();
     Map<String, Integer> countMap = new HashMap<>();
-    for (Map.Entry<MetricFunction, List<ThirdEyeResultSet>> entry : metricFunctionToResultSetList.entrySet()) {
+    for (Map.Entry<MetricFunction, List<ThirdEyeResultSet>> entry : metricFunctionToResultSetList
+        .entrySet()) {
 
       MetricFunction metricFunction = entry.getKey();
 
@@ -120,10 +122,11 @@ public class ThirdEyeResultSetUtils {
                 if (!isISOFormat) {
                   millis = dataGranularity.toMillis(Double.valueOf(groupKeyVal).longValue());
                 } else {
-                    millis = DateTime.parse(groupKeyVal, inputDataDateTimeFormatter).getMillis();
+                  millis = DateTime.parse(groupKeyVal, inputDataDateTimeFormatter).getMillis();
                 }
                 if (millis < startTime) {
-                  LOG.error("Data point earlier than requested start time {}: {}", new Date(startTime), new Date(millis));
+                  LOG.error("Data point earlier than requested start time {}: {}",
+                      new Date(startTime), new Date(millis));
                   skipRowDueToError = true;
                   break;
                 }
@@ -139,7 +142,7 @@ public class ThirdEyeResultSetUtils {
               continue;
             }
           } else {
-            groupKeys = new String[] {};
+            groupKeys = new String[]{};
           }
           String compositeGroupKey = StringUtils.join(groupKeys, "|");
 
@@ -178,14 +181,15 @@ public class ThirdEyeResultSetUtils {
           }
         }
       }
-      position ++;
+      position++;
     }
     List<String[]> rows = new ArrayList<>();
     rows.addAll(dataMap.values());
     return rows;
   }
 
-  public static double reduce(double aggregate, double value, int prevCount, MetricAggFunction aggFunction, String sourceName) {
+  public static double reduce(double aggregate, double value, int prevCount,
+      MetricAggFunction aggFunction, String sourceName) {
     if (aggFunction.equals(MetricAggFunction.SUM)) {
       return aggregate + value;
     } else if (aggFunction.equals(MetricAggFunction.AVG) || aggFunction.isPercentile()) {
@@ -195,7 +199,8 @@ public class ThirdEyeResultSetUtils {
     } else if (aggFunction.equals(MetricAggFunction.COUNT)) { // For all COUNT cases
       return aggregate + value;
     } else {
-      throw new IllegalArgumentException(String.format("Unknown aggregation function '%s'", aggFunction));
+      throw new IllegalArgumentException(
+          String.format("Unknown aggregation function '%s'", aggFunction));
     }
   }
 }

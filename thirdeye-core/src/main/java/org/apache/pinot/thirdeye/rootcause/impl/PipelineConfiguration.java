@@ -30,6 +30,7 @@ import java.util.Map;
  * properties: map of property name and value, which are required by this pipeline for instantiation
  */
 public class PipelineConfiguration {
+
   private String outputName;
   private String className;
   private List<String> inputNames;
@@ -38,24 +39,31 @@ public class PipelineConfiguration {
   public String getOutputName() {
     return outputName;
   }
+
   public void setOutputName(String outputName) {
     this.outputName = outputName;
   }
+
   public String getClassName() {
     return className;
   }
+
   public void setClassName(String className) {
     this.className = className;
   }
+
   public Map<String, Object> getProperties() {
     return properties;
   }
+
   public void setProperties(Map<String, Object> properties) {
     this.properties = properties;
   }
+
   public List<String> getInputNames() {
     return inputNames;
   }
+
   public void setInputNames(List<String> inputNames) {
     this.inputNames = inputNames;
   }

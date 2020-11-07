@@ -40,12 +40,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Percentage change anomaly filter. Check if the anomaly's percentage change compared to baseline is above the threshold.
+ * Percentage change anomaly filter. Check if the anomaly's percentage change compared to baseline
+ * is above the threshold.
  * If not, filters the anomaly.
  */
 @Components(type = "PERCENTAGE_CHANGE_FILTER", tags = {DetectionTag.RULE_FILTER})
-public class PercentageChangeRuleAnomalyFilter implements AnomalyFilter<PercentageChangeRuleAnomalyFilterSpec> {
-  private static final Logger LOG = LoggerFactory.getLogger(PercentageChangeRuleAnomalyFilter.class);
+public class PercentageChangeRuleAnomalyFilter implements
+    AnomalyFilter<PercentageChangeRuleAnomalyFilterSpec> {
+
+  private static final Logger LOG = LoggerFactory
+      .getLogger(PercentageChangeRuleAnomalyFilter.class);
   private double threshold;
   private double upThreshold;
   private double downThreshold;
@@ -57,7 +61,8 @@ public class PercentageChangeRuleAnomalyFilter implements AnomalyFilter<Percenta
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
     MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
     List<MetricSlice> slices = new ArrayList<>();
-    MetricSlice currentSlice = MetricSlice.from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
+    MetricSlice currentSlice = MetricSlice
+        .from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
     // customize baseline offset
     if (baseline != null) {
       slices.addAll(this.baseline.scatter(currentSlice));
@@ -72,16 +77,20 @@ public class PercentageChangeRuleAnomalyFilter implements AnomalyFilter<Percenta
       baselineValue = anomaly.getAvgBaselineVal();
     } else {
       try {
-        baselineValue = this.baseline.gather(currentSlice, aggregates).getDouble(DataFrame.COL_VALUE, 0);
+        baselineValue = this.baseline.gather(currentSlice, aggregates)
+            .getDouble(DataFrame.COL_VALUE, 0);
       } catch (Exception e) {
         baselineValue = anomaly.getAvgBaselineVal();
-        LOG.warn("Unable to fetch baseline for anomaly {}. start = {} end = {} filters = {}. Using anomaly"
-            + " baseline ", anomaly.getId(), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters(), e);
+        LOG.warn(
+            "Unable to fetch baseline for anomaly {}. start = {} end = {} filters = {}. Using anomaly"
+                + " baseline ", anomaly.getId(), anomaly.getStartTime(), anomaly.getEndTime(),
+            me.getFilters(), e);
       }
     }
 
     // if inconsistent with up/down, filter the anomaly
-    if (!pattern.equals(Pattern.UP_OR_DOWN) && (currentValue < baselineValue && pattern.equals(Pattern.UP)) || (
+    if (!pattern.equals(Pattern.UP_OR_DOWN) && (currentValue < baselineValue && pattern
+        .equals(Pattern.UP)) || (
         currentValue > baselineValue && pattern.equals(Pattern.DOWN))) {
       return false;
     }

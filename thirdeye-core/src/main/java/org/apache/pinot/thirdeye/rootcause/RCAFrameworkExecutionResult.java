@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  * Container object for framework execution results. Holds the results aggregated across all
  * pipeline executions as well as the results for each individual pipeline (keyed by pipeline name).
- *
  */
 public final class RCAFrameworkExecutionResult {
+
   private final Set<Entity> results;
   private final Map<String, PipelineResult> pipelineResults;
 
-  public RCAFrameworkExecutionResult(Set<? extends Entity> results, Map<String, PipelineResult> pipelineResults) {
+  public RCAFrameworkExecutionResult(Set<? extends Entity> results,
+      Map<String, PipelineResult> pipelineResults) {
     this.results = new HashSet<>(results);
     this.pipelineResults = pipelineResults;
   }

@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.datalayer.entity;
 import java.util.List;
 
 public abstract class AbstractMappingEntity<P extends AbstractJsonEntity, Q extends AbstractJsonEntity> {
+
   List<P> ps;
   List<Q> qs;
 

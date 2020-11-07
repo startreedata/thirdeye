@@ -26,16 +26,19 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 /**
- * The filter remove the anomalies whose average current value does not increase over its average baseline value by
- * the threshold, i.e., only anomalies whose (avg. current - avg. baseline > threshold) pass the filter.
+ * The filter remove the anomalies whose average current value does not increase over its average
+ * baseline value by
+ * the threshold, i.e., only anomalies whose (avg. current - avg. baseline > threshold) pass the
+ * filter.
  */
 public class AverageChangeThresholdAlertFilter extends BaseAlertFilter {
+
   // These default parameters are accessed through Java reflection. Do not remove.
   public static final String DEFAULT_THRESHOLD = "100";
 
   public static final String THRESHOLD = "threshold";
 
-  private double threshold = Double.parseDouble(DEFAULT_THRESHOLD);
+  private final double threshold = Double.parseDouble(DEFAULT_THRESHOLD);
 
   @Override
   public List<String> getPropertyNames() {

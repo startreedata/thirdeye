@@ -49,8 +49,8 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class DetectionCronScheduler implements ThirdEyeCronScheduler {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionCronScheduler.class);
 
   public static final int DEFAULT_DETECTION_DELAY = 1;
@@ -70,7 +70,8 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void start() throws SchedulerException {
     this.scheduler.start();
-    this.executorService.scheduleWithFixedDelay(this, 0, DEFAULT_DETECTION_DELAY, DEFAULT_ALERT_DELAY_UNIT);
+    this.executorService
+        .scheduleWithFixedDelay(this, 0, DEFAULT_DETECTION_DELAY, DEFAULT_ALERT_DELAY_UNIT);
   }
 
   @Override
@@ -85,17 +86,21 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
           continue;
         }
         if (config.isDataAvailabilitySchedule()) {
-          LOG.debug("Detection config " + config.getId() + " is enabled for data availability scheduling. Skipping.");
+          LOG.debug("Detection config " + config.getId()
+              + " is enabled for data availability scheduling. Skipping.");
           continue;
         }
 
         try {
           // Schedule detection jobs
-          JobKey detectionJobKey = new JobKey(getJobKey(config.getId(), TaskConstants.TaskType.DETECTION),
+          JobKey detectionJobKey = new JobKey(
+              getJobKey(config.getId(), TaskConstants.TaskType.DETECTION),
               QUARTZ_DETECTION_GROUPER);
-          JobDetail detectionJob = JobBuilder.newJob(DetectionPipelineJob.class).withIdentity(detectionJobKey).build();
+          JobDetail detectionJob = JobBuilder.newJob(DetectionPipelineJob.class)
+              .withIdentity(detectionJobKey).build();
           if (scheduler.checkExists(detectionJobKey)) {
-            LOG.info("Detection config " + detectionJobKey.getName() + " is already scheduled for detection");
+            LOG.info("Detection config " + detectionJobKey.getName()
+                + " is already scheduled for detection");
             if (isJobUpdated(config, detectionJobKey)) {
               restartJob(config, detectionJob);
             }
@@ -104,11 +109,14 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
           }
 
           // Schedule data quality jobs
-          JobKey dataQualityJobKey = new JobKey(getJobKey(config.getId(), TaskConstants.TaskType.DATA_QUALITY),
+          JobKey dataQualityJobKey = new JobKey(
+              getJobKey(config.getId(), TaskConstants.TaskType.DATA_QUALITY),
               QUARTZ_DETECTION_GROUPER);
-          JobDetail dataQualityJob = JobBuilder.newJob(DataQualityPipelineJob.class).withIdentity(dataQualityJobKey).build();
+          JobDetail dataQualityJob = JobBuilder.newJob(DataQualityPipelineJob.class)
+              .withIdentity(dataQualityJobKey).build();
           if (scheduler.checkExists(dataQualityJobKey)) {
-            LOG.info("Detection config " + dataQualityJobKey.getName() + " is already scheduled for data quality");
+            LOG.info("Detection config " + dataQualityJobKey.getName()
+                + " is already scheduled for data quality");
             if (isJobUpdated(config, dataQualityJobKey)) {
               restartJob(config, dataQualityJob);
             }
@@ -128,7 +136,8 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
           Long id = TaskUtils.getIdFromJobKey(jobKey.getName());
           AlertDTO detectionDTO = detectionDAO.findById(id);
           if (detectionDTO == null) {
-            LOG.info("Found a scheduled detection config task, but not found in the database {}", id);
+            LOG.info("Found a scheduled detection config task, but not found in the database {}",
+                id);
             stopJob(jobKey);
             continue;
           } else if (!detectionDTO.isActive()) {
@@ -194,7 +203,8 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
     String cronInSchedule = cronTrigger.getCronExpression();
 
     if (!config.getCron().equals(cronInSchedule)) {
-      LOG.info("Cron expression for detection pipeline {} has been changed from {}  to {}. " + "Restarting schedule",
+      LOG.info("Cron expression for detection pipeline {} has been changed from {}  to {}. "
+              + "Restarting schedule",
           config.getId(), cronInSchedule, config.getCron());
       return true;
     }

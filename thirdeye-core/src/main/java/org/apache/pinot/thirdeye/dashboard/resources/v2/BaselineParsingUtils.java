@@ -27,8 +27,8 @@ import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineNone;
 import org.joda.time.DateTimeZone;
 
-
 public class BaselineParsingUtils {
+
   private static final Pattern PATTERN_NONE = Pattern.compile("none");
   private static final Pattern PATTERN_PREDICTED = Pattern.compile("predicted");
   private static final Pattern PATTERN_CURRENT = Pattern.compile("current");
@@ -64,7 +64,8 @@ public class BaselineParsingUtils {
   }
 
   /**
-   * Returns a configured instance of Baseline for the given, named offset. The method uses slice and
+   * Returns a configured instance of Baseline for the given, named offset. The method uses slice
+   * and
    * timezone information to adjust for daylight savings time.
    *
    * <p>Supported offsets:</p>
@@ -174,7 +175,7 @@ public class BaselineParsingUtils {
       unit = Unit.fromUnit(mMax.group(2));
     }
 
-    if (agg == null || unit == null || shift == Integer.MIN_VALUE || count == Integer.MIN_VALUE ) {
+    if (agg == null || unit == null || shift == Integer.MIN_VALUE || count == Integer.MIN_VALUE) {
       throw new IllegalArgumentException(String.format("Unsupported offset '%s'", offset));
     }
 

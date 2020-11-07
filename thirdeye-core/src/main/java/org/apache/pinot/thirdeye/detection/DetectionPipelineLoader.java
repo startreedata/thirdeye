@@ -22,14 +22,15 @@ package org.apache.pinot.thirdeye.detection;
 import java.lang.reflect.Constructor;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 
-
 public class DetectionPipelineLoader {
+
   private static final String PROP_CLASS_NAME = "className";
 
   public DetectionPipeline from(DataProvider provider, AlertDTO config, long start, long end) {
     String className = config.getProperties().get(PROP_CLASS_NAME).toString();
     try {
-      Constructor<?> constructor = Class.forName(className).getConstructor(DataProvider.class, AlertDTO.class, long.class, long.class);
+      Constructor<?> constructor = Class.forName(className)
+          .getConstructor(DataProvider.class, AlertDTO.class, long.class, long.class);
       return (DetectionPipeline) constructor.newInstance(provider, config, start, end);
     } catch (Exception e) {
       throw new IllegalArgumentException("Failed to initialize the detection pipeline.", e);

@@ -38,13 +38,13 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 
-
 /**
  * Synthetic baseline from a list of time offsets, aggregated with a user-specified function.
  *
  * @see BaselineAggregateType
  */
 public class BaselineAggregate implements Baseline {
+
   private static final String COL_KEY = Grouping.GROUP_KEY;
 
   private final BaselineAggregateType type;
@@ -52,7 +52,8 @@ public class BaselineAggregate implements Baseline {
   private final DateTimeZone timeZone;
   private final PeriodType periodType;
 
-  private BaselineAggregate(BaselineAggregateType type, List<Period> offsets, DateTimeZone timezone, PeriodType periodType) {
+  private BaselineAggregate(BaselineAggregateType type, List<Period> offsets, DateTimeZone timezone,
+      PeriodType periodType) {
     this.type = type;
     this.offsets = offsets;
     this.timeZone = timezone;
@@ -122,7 +123,8 @@ public class BaselineAggregate implements Baseline {
       DataFrame df = new DataFrame(entry.getValue());
 
       DataFrame dfTransform = new DataFrame(df);
-      dfTransform.addSeries(COL_TIME, this.toVirtualSeries(s.getStart(), dfTransform.getLongs(COL_TIME)));
+      dfTransform
+          .addSeries(COL_TIME, this.toVirtualSeries(s.getStart(), dfTransform.getLongs(COL_TIME)));
       dfTransform = eliminateDuplicates(dfTransform);
 
       dfTransform.renameSeries(COL_VALUE, colName);
@@ -130,7 +132,6 @@ public class BaselineAggregate implements Baseline {
       if (output.isEmpty()) {
         // handle multi-index via prototyping
         output = dfTransform;
-
       } else {
         output = output.joinOuter(dfTransform);
       }
@@ -171,7 +172,8 @@ public class BaselineAggregate implements Baseline {
     }
     aggExpressions.add(COL_VALUE + ":MEAN");
 
-    DataFrame res = df.groupByValue(df.getIndexNames()).aggregate(aggExpressions).dropSeries(COL_KEY);
+    DataFrame res = df.groupByValue(df.getIndexNames()).aggregate(aggExpressions)
+        .dropSeries(COL_KEY);
 
     return res.setIndex(df.getIndexNames());
   }
@@ -186,7 +188,8 @@ public class BaselineAggregate implements Baseline {
    * @return double series
    */
   // TODO move this into DataFrame API?
-  private static DoubleSeries mapWithNull(DataFrame df, Series.DoubleFunction f, String[] colNames) {
+  private static DoubleSeries mapWithNull(DataFrame df, Series.DoubleFunction f,
+      String[] colNames) {
     double[] values = new double[df.size()];
 
     double[] row = new double[colNames.length];
@@ -213,13 +216,13 @@ public class BaselineAggregate implements Baseline {
   /**
    * Returns an instance of BaselineAggregate for the specified type and offsets
    *
-   * @see BaselineAggregateType
-   *
    * @param type aggregation type
    * @param offsets time offsets
    * @return BaselineAggregate with given type and offsets
+   * @see BaselineAggregateType
    */
-  public static BaselineAggregate fromOffsets(BaselineAggregateType type, List<Period> offsets, DateTimeZone timeZone) {
+  public static BaselineAggregate fromOffsets(BaselineAggregateType type, List<Period> offsets,
+      DateTimeZone timeZone) {
     if (offsets.isEmpty()) {
       throw new IllegalArgumentException("Must provide at least one offset");
     }
@@ -227,7 +230,9 @@ public class BaselineAggregate implements Baseline {
     PeriodType periodType = offsets.get(0).getPeriodType();
     for (Period p : offsets) {
       if (!periodType.equals(p.getPeriodType())) {
-        throw new IllegalArgumentException(String.format("Expected uniform period type but found '%s' and '%s'", periodType, p.getPeriodType()));
+        throw new IllegalArgumentException(String
+            .format("Expected uniform period type but found '%s' and '%s'", periodType,
+                p.getPeriodType()));
       }
     }
 
@@ -239,15 +244,15 @@ public class BaselineAggregate implements Baseline {
    * computed on a consecutive month-over-month basis starting with a lag of {@code offsetMonths}.
    * <br/><b>NOTE:</b> this will apply DST correction
    *
-   * @see BaselineAggregateType
-   *
    * @param type aggregation type
    * @param numMonths number of consecutive months
    * @param offsetMonths lag for starting consecutive months
    * @param timeZone time zone
    * @return BaselineAggregate with given type and monthly offsets
+   * @see BaselineAggregateType
    */
-  public static BaselineAggregate fromMonthOverMonth(BaselineAggregateType type, int numMonths, int offsetMonths, DateTimeZone timeZone) {
+  public static BaselineAggregate fromMonthOverMonth(BaselineAggregateType type, int numMonths,
+      int offsetMonths, DateTimeZone timeZone) {
     List<Period> offsets = new ArrayList<>();
     for (int i = 0; i < numMonths; i++) {
       offsets.add(new Period(0, -1 * (i + offsetMonths), 0, 0, 0, 0, 0, 0, PeriodType.months()));
@@ -260,15 +265,15 @@ public class BaselineAggregate implements Baseline {
    * computed on a consecutive week-over-week basis starting with a lag of {@code offsetWeeks}.
    * <br/><b>NOTE:</b> this will apply DST correction (modeled as 7 days)
    *
-   * @see BaselineAggregateType
-   *
    * @param type aggregation type
    * @param numWeeks number of consecutive weeks
    * @param offsetWeeks lag for starting consecutive weeks
    * @param timeZone time zone
    * @return BaselineAggregate with given type and weekly offsets
+   * @see BaselineAggregateType
    */
-  public static BaselineAggregate fromWeekOverWeek(BaselineAggregateType type, int numWeeks, int offsetWeeks, DateTimeZone timeZone) {
+  public static BaselineAggregate fromWeekOverWeek(BaselineAggregateType type, int numWeeks,
+      int offsetWeeks, DateTimeZone timeZone) {
     List<Period> offsets = new ArrayList<>();
     for (int i = 0; i < numWeeks; i++) {
       offsets.add(new Period(0, 0, 0, -1 * 7 * (i + offsetWeeks), 0, 0, 0, 0, PeriodType.days()));
@@ -281,15 +286,15 @@ public class BaselineAggregate implements Baseline {
    * computed on a consecutive day-over-day basis starting with a lag of {@code offsetDays}.
    * <br/><b>NOTE:</b> this will apply DST correction
    *
-   * @see BaselineAggregateType
-   *
    * @param type aggregation type
    * @param numDays number of consecutive weeks
    * @param offsetDays lag for starting consecutive weeks
    * @param timeZone time zone
    * @return BaselineAggregate with given type and daily offsets
+   * @see BaselineAggregateType
    */
-  public static BaselineAggregate fromDayOverDay(BaselineAggregateType type, int numDays, int offsetDays, DateTimeZone timeZone) {
+  public static BaselineAggregate fromDayOverDay(BaselineAggregateType type, int numDays,
+      int offsetDays, DateTimeZone timeZone) {
     List<Period> offsets = new ArrayList<>();
     for (int i = 0; i < numDays; i++) {
       offsets.add(new Period(0, 0, 0, -1 * (i + offsetDays), 0, 0, 0, 0, PeriodType.days()));
@@ -302,15 +307,15 @@ public class BaselineAggregate implements Baseline {
    * computed on a consecutive day-over-day basis starting with a lag of {@code offsetHours}.
    * <br/><b>NOTE:</b> this will <b>NOT</b> apply DST correction
    *
-   * @see BaselineAggregateType
-   *
    * @param type aggregation type
    * @param numHours number of consecutive weeks
    * @param offsetHours lag for starting consecutive weeks
    * @param timeZone time zone
    * @return BaselineAggregate with given type and daily offsets
+   * @see BaselineAggregateType
    */
-  public static BaselineAggregate fromHourOverHour(BaselineAggregateType type, int numHours, int offsetHours, DateTimeZone timeZone) {
+  public static BaselineAggregate fromHourOverHour(BaselineAggregateType type, int numHours,
+      int offsetHours, DateTimeZone timeZone) {
     List<Period> offsets = new ArrayList<>();
     for (int i = 0; i < numHours; i++) {
       offsets.add(new Period(0, 0, 0, 0, -1 * (i + offsetHours), 0, 0, 0, PeriodType.hours()));
@@ -326,7 +331,8 @@ public class BaselineAggregate implements Baseline {
    * @return day-time-of-day series
    */
   private LongSeries toVirtualSeries(long origin, LongSeries timestampSeries) {
-    final DateTime dateOrigin = new DateTime(origin, this.timeZone).withFields(DataFrameUtils.makeOrigin(this.periodType));
+    final DateTime dateOrigin = new DateTime(origin, this.timeZone)
+        .withFields(DataFrameUtils.makeOrigin(this.periodType));
     return timestampSeries.map(this.makeTimestampToVirtualFunction(dateOrigin));
   }
 
@@ -338,7 +344,8 @@ public class BaselineAggregate implements Baseline {
    * @return utc timestamp series
    */
   private LongSeries toTimestampSeries(long origin, LongSeries virtualSeries) {
-    final DateTime dateOrigin = new DateTime(origin, this.timeZone).withFields(DataFrameUtils.makeOrigin(this.periodType));
+    final DateTime dateOrigin = new DateTime(origin, this.timeZone)
+        .withFields(DataFrameUtils.makeOrigin(this.periodType));
     return virtualSeries.map(this.makeVirtualToTimestampFunction(dateOrigin));
   }
 
@@ -357,30 +364,29 @@ public class BaselineAggregate implements Baseline {
           return values[0] - origin.getMillis();
         }
       };
-
     } else if (PeriodType.seconds().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
         public long apply(long... values) {
           DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
-          long seconds = new Period(origin, dateTime, BaselineAggregate.this.periodType).getSeconds();
+          long seconds = new Period(origin, dateTime, BaselineAggregate.this.periodType)
+              .getSeconds();
           long millis = dateTime.getMillisOfSecond();
           return seconds * 1000L + millis;
         }
       };
-
     } else if (PeriodType.minutes().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
         public long apply(long... values) {
           DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
-          long minutes = new Period(origin, dateTime, BaselineAggregate.this.periodType).getMinutes();
+          long minutes = new Period(origin, dateTime, BaselineAggregate.this.periodType)
+              .getMinutes();
           long seconds = dateTime.getSecondOfMinute();
           long millis = dateTime.getMillisOfSecond();
           return minutes * 100000L + seconds * 1000L + millis;
         }
       };
-
     } else if (PeriodType.hours().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
@@ -393,7 +399,6 @@ public class BaselineAggregate implements Baseline {
           return hours * 10000000L + minutes * 100000L + seconds * 1000L + millis;
         }
       };
-
     } else if (PeriodType.days().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
@@ -404,10 +409,10 @@ public class BaselineAggregate implements Baseline {
           long minutes = dateTime.getMinuteOfHour();
           long seconds = dateTime.getSecondOfMinute();
           long millis = dateTime.getMillisOfSecond();
-          return days * 1000000000L + hours * 10000000L + minutes * 100000L + seconds * 1000L + millis;
+          return days * 1000000000L + hours * 10000000L + minutes * 100000L + seconds * 1000L
+              + millis;
         }
       };
-
     } else if (PeriodType.months().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
@@ -423,12 +428,13 @@ public class BaselineAggregate implements Baseline {
           long minutes = dateTime.getMinuteOfHour();
           long seconds = dateTime.getSecondOfMinute();
           long millis = dateTime.getMillisOfSecond();
-          return months * 100000000000L + days * 1000000000L + hours * 10000000L + minutes * 100000L + seconds * 1000L + millis;
+          return months * 100000000000L + days * 1000000000L + hours * 10000000L + minutes * 100000L
+              + seconds * 1000L + millis;
         }
       };
-
     } else {
-      throw new IllegalArgumentException(String.format("Unsupported PeriodType '%s'", this.periodType));
+      throw new IllegalArgumentException(
+          String.format("Unsupported PeriodType '%s'", this.periodType));
     }
   }
 
@@ -447,7 +453,6 @@ public class BaselineAggregate implements Baseline {
           return values[0] + origin.getMillis();
         }
       };
-
     } else if (PeriodType.seconds().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
@@ -460,7 +465,6 @@ public class BaselineAggregate implements Baseline {
               .getMillis();
         }
       };
-
     } else if (PeriodType.minutes().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
@@ -475,7 +479,6 @@ public class BaselineAggregate implements Baseline {
               .getMillis();
         }
       };
-
     } else if (PeriodType.hours().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
@@ -492,7 +495,6 @@ public class BaselineAggregate implements Baseline {
               .getMillis();
         }
       };
-
     } else if (PeriodType.days().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
@@ -511,7 +513,6 @@ public class BaselineAggregate implements Baseline {
               .getMillis();
         }
       };
-
     } else if (PeriodType.months().equals(this.periodType)) {
       return new Series.LongFunction() {
         @Override
@@ -531,7 +532,8 @@ public class BaselineAggregate implements Baseline {
           }
 
           // unsupported destination day (e.g. 31st of Feb)
-          if (originPlusMonth.dayOfMonth().getMaximumValue() < originPlusMonth.getDayOfMonth() + days) {
+          if (originPlusMonth.dayOfMonth().getMaximumValue()
+              < originPlusMonth.getDayOfMonth() + days) {
             return LongSeries.NULL;
           }
 
@@ -545,9 +547,9 @@ public class BaselineAggregate implements Baseline {
           return target.getMillis();
         }
       };
-
     } else {
-      throw new IllegalArgumentException(String.format("Unsupported PeriodType '%s'", this.periodType));
+      throw new IllegalArgumentException(
+          String.format("Unsupported PeriodType '%s'", this.periodType));
     }
   }
 }

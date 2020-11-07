@@ -31,11 +31,11 @@ import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.yaml.snakeyaml.Yaml;
 
-
 /**
  * Validate a user supplied config like detection or subscription group config
  */
-public abstract class ThirdEyeUserConfigValidator<T extends AbstractDTO> implements ConfigValidator<T> {
+public abstract class ThirdEyeUserConfigValidator<T extends AbstractDTO> implements
+    ConfigValidator<T> {
 
   public static final String USER_CONFIG_VALIDATION_FAILED_KEY = "Validation errors: ";
   protected static final String PROP_DISABLE_VALD = "disableValidation";

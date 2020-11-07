@@ -23,8 +23,8 @@ import java.util.List;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 
-
 public interface AggregationLoader {
+
   String COL_DIMENSION_NAME = "dimName";
   String COL_DIMENSION_VALUE = "dimValue";
   String COL_VALUE = DataFrame.COL_VALUE;
@@ -36,7 +36,6 @@ public interface AggregationLoader {
    * @param slice metric slice
    * @param limit top k element limit per dimension name ({@code -1} for default)
    * @return de-aggregation data frame
-   * @throws Exception
    */
   DataFrame loadBreakdown(MetricSlice slice, int limit) throws Exception;
 
@@ -47,7 +46,6 @@ public interface AggregationLoader {
    * @param dimensions dimension names to group by
    * @param limit top k element limit ({@code -1} for default)
    * @return aggregates data frame
-   * @throws Exception
    */
   DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit) throws Exception;
 }

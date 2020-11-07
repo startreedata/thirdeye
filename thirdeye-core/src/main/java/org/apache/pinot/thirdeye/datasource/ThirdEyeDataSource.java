@@ -33,16 +33,18 @@ public interface ThirdEyeDataSource {
 
   List<String> getDatasets() throws Exception;
 
-  /** Clear any cached values. */
+  /**
+   * Clear any cached values.
+   */
   void clear() throws Exception;
 
   void close() throws Exception;
 
   /**
    * Returns max dateTime in millis for the dataset
+   *
    * @param dataset name of the dataset
    * @return the time corresponding to the earliest available data point.
-   * @throws Exception
    */
   default long getMinDataTime(String dataset) throws Exception {
     return -1L;
@@ -50,18 +52,13 @@ public interface ThirdEyeDataSource {
 
   /**
    * Returns max dateTime in millis for the dataset
-   * @param dataset
-   * @return
-   * @throws Exception
    */
   long getMaxDataTime(String dataset) throws Exception;
 
   /**
    * Returns map of dimension name to dimension values for filters
-   * @param dataset
+   *
    * @return dimension map
-   * @throws Exception
    */
   Map<String, List<String>> getDimensionFilters(String dataset) throws Exception;
-
 }

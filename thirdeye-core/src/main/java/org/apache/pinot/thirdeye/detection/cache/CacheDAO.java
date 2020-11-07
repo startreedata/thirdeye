@@ -26,6 +26,7 @@ public interface CacheDAO {
 
   /**
    * Tries to fetch the data for a given ThirdEyeCacheRequest and returns it.
+   *
    * @param request ThirdEyeCacheRequest
    * @return ThirdEyeCacheResponse containing a list of {@link org.apache.pinot.thirdeye.detection.cache.TimeSeriesDataPoint}
    * @throws Exception Only thrown if query errored out, NOT if no data was found!
@@ -33,8 +34,11 @@ public interface CacheDAO {
   ThirdEyeCacheResponse tryFetchExistingTimeSeries(ThirdEyeCacheRequest request) throws Exception;
 
   /**
-   * Insert a TimeSeriesDataPoint into data store. Schema design is up to the user, although we show an example
+   * Insert a TimeSeriesDataPoint into data store. Schema design is up to the user, although we
+   * show
+   * an example
    * schema that we use for Couchbase in {@link CouchbaseCacheDAO#insertTimeSeriesDataPoint(TimeSeriesDataPoint)}
+   *
    * @param point TimeSeriesDataPoint
    */
   void insertTimeSeriesDataPoint(TimeSeriesDataPoint point);

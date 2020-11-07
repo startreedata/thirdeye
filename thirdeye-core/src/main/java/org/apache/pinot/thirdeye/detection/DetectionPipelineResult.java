@@ -26,8 +26,8 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
-
 public class DetectionPipelineResult {
+
   public static String DIAGNOSTICS_DATA = "data";
   public static String DIAGNOSTICS_CHANGE_POINTS = "changepoints";
 
@@ -65,7 +65,6 @@ public class DetectionPipelineResult {
     this.diagnostics = new HashMap<>();
   }
 
-
   public List<PredictionResult> getPredictions() {
     return predictions;
   }
@@ -73,7 +72,6 @@ public class DetectionPipelineResult {
   public List<MergedAnomalyResultDTO> getAnomalies() {
     return anomalies;
   }
-
 
   public long getLastTimestamp() {
     return lastTimestamp;

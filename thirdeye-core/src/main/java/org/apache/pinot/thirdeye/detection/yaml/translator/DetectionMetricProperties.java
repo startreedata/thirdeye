@@ -22,14 +22,14 @@ package org.apache.pinot.thirdeye.detection.yaml.translator;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 
-
 public class DetectionMetricProperties {
 
   String cron;
   DatasetConfigDTO datasetConfigDTO;
   MetricConfigDTO metricConfigDTO;
 
-  DetectionMetricProperties(String cron, MetricConfigDTO metricConfig, DatasetConfigDTO datasetConfig) {
+  DetectionMetricProperties(String cron, MetricConfigDTO metricConfig,
+      DatasetConfigDTO datasetConfig) {
     this.cron = cron;
     this.metricConfigDTO = metricConfig;
     this.datasetConfigDTO = datasetConfig;
@@ -58,5 +58,4 @@ public class DetectionMetricProperties {
   public void setMetricConfigDTO(MetricConfigDTO metricConfigDTO) {
     this.metricConfigDTO = metricConfigDTO;
   }
-
 }

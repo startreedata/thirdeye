@@ -27,14 +27,15 @@ import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 
-
 /**
- * TopKPipeline is a generic pipeline implementation for ordering, filtering, and truncating incoming
+ * TopKPipeline is a generic pipeline implementation for ordering, filtering, and truncating
+ * incoming
  * Entities. The pipeline first filters incoming Entities based on their {@code class} and then
  * orders them based on score from highest to lowest. It finally truncates the result to at most
  * {@code k} elements and emits the result.
  */
 public class TopKPipeline extends Pipeline {
+
   public static final String PROP_K = "k";
   public static final String PROP_CLASS = "class";
 
@@ -51,7 +52,8 @@ public class TopKPipeline extends Pipeline {
    * @param clazz (super) class to filter by
    * @param k maximum number of result elements
    */
-  public TopKPipeline(String outputName, Set<String> inputNames, Class<? extends Entity> clazz, int k) {
+  public TopKPipeline(String outputName, Set<String> inputNames, Class<? extends Entity> clazz,
+      int k) {
     super(outputName, inputNames);
     this.k = k;
     this.clazz = clazz;
@@ -65,21 +67,25 @@ public class TopKPipeline extends Pipeline {
    * @param properties configuration properties ({@code PROP_K}, {@code PROP_CLASS})
    */
   @SuppressWarnings("unchecked")
-  public TopKPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) throws Exception {
+  public TopKPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties)
+      throws Exception {
     super(outputName, inputNames);
 
-    if(!properties.containsKey(PROP_K))
-      throw new IllegalArgumentException(String.format("Property '%s' required, but not found", PROP_K));
+    if (!properties.containsKey(PROP_K)) {
+      throw new IllegalArgumentException(
+          String.format("Property '%s' required, but not found", PROP_K));
+    }
     this.k = Integer.parseInt(properties.get(PROP_K).toString());
 
     String classProp = PROP_CLASS_DEFAULT;
-    if(properties.containsKey(PROP_CLASS))
+    if (properties.containsKey(PROP_CLASS)) {
       classProp = properties.get(PROP_CLASS).toString();
+    }
     this.clazz = (Class<? extends Entity>) Class.forName(classProp);
   }
 
   @Override
   public PipelineResult run(PipelineContext context) {
-   return new PipelineResult(context, EntityUtils.topk(context.filter(this.clazz), this.k));
+    return new PipelineResult(context, EntityUtils.topk(context.filter(this.clazz), this.k));
   }
 }

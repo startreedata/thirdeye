@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Map;
 
 abstract class BaseDataFilter implements DataFilter {
+
   protected Map<String, String> props = Collections.emptyMap();
 
   @Override

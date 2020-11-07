@@ -41,7 +41,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 
-
 /**
  * ThirdEye API Client to communicate with ThirdEye RCA services
  */
@@ -51,8 +50,8 @@ public class ThirdEyeRcaRestClient extends AbstractRestClient {
   private final String THIRDEYE_RCA_CUBE_URI = "/dashboard/summary/autoDimensionOrder/v2";
   private final String THIRDEYE_RCA_HIGHLIGHTS_URI = "/rootcause/highlights";
 
-  private ThirdEyePrincipal principal;
-  private String thirdEyeHost;
+  private final ThirdEyePrincipal principal;
+  private final String thirdEyeHost;
 
   public ThirdEyeRcaRestClient(ThirdEyePrincipal principal, String host) {
     super();
@@ -65,7 +64,10 @@ public class ThirdEyeRcaRestClient extends AbstractRestClient {
     }
   }
 
-  /** For testing only, create a client with an alternate Client. This constructor allows unit tests to mock server communication. */
+  /**
+   * For testing only, create a client with an alternate Client. This constructor allows unit tests
+   * to mock server communication.
+   */
   /* package private */  ThirdEyeRcaRestClient(Client client, ThirdEyePrincipal principal) {
     super(client);
     this.principal = principal;
@@ -91,7 +93,8 @@ public class ThirdEyeRcaRestClient extends AbstractRestClient {
   /**
    * Retrieve the top dimension slices that explain the anomaly using the Cube Algorithm using wo1w
    */
-  public Map<String, Object> getDimensionSummaryHighlights(String metricUrn, long startTime, long endTime,
+  public Map<String, Object> getDimensionSummaryHighlights(String metricUrn, long startTime,
+      long endTime,
       long cubeDepth, long cubeSummarySize, boolean isOneSidedError) throws IOException {
     TreeMap<String, String> queryParameters = new TreeMap<String, String>();
     queryParameters.put(METRIC_URN, metricUrn);

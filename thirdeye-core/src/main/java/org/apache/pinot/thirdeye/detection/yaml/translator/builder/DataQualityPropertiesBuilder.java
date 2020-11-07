@@ -35,7 +35,6 @@ import org.apache.pinot.thirdeye.detection.wrapper.DataQualityMergeWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 
-
 /**
  * This class is responsible for translating the data quality properties
  */
@@ -43,7 +42,8 @@ public class DataQualityPropertiesBuilder extends DetectionConfigPropertiesBuild
 
   static final String PROP_QUALITY_CHECK = "qualityCheck";
 
-  public DataQualityPropertiesBuilder(DetectionMetricAttributeHolder metricAttributesMap, DataProvider provider) {
+  public DataQualityPropertiesBuilder(DetectionMetricAttributeHolder metricAttributesMap,
+      DataProvider provider) {
     super(metricAttributesMap, provider);
   }
 
@@ -58,10 +58,13 @@ public class DataQualityPropertiesBuilder extends DetectionConfigPropertiesBuild
     MetricConfigDTO metricConfigDTO = metricAttributesMap.fetchMetric(metricAlertConfigMap);
 
     String subEntityName = MapUtils.getString(metricAlertConfigMap, PROP_NAME);
-    Map<String, Object> mergerProperties = ConfigUtils.getMap(metricAlertConfigMap.get(PROP_MERGER));
+    Map<String, Object> mergerProperties = ConfigUtils
+        .getMap(metricAlertConfigMap.get(PROP_MERGER));
 
-    Map<String, Collection<String>> dimensionFiltersMap = ConfigUtils.getMap(metricAlertConfigMap.get(PROP_FILTERS));
-    String metricUrn = MetricEntity.fromMetric(dimensionFiltersMap, metricConfigDTO.getId()).getUrn();
+    Map<String, Collection<String>> dimensionFiltersMap = ConfigUtils
+        .getMap(metricAlertConfigMap.get(PROP_FILTERS));
+    String metricUrn = MetricEntity.fromMetric(dimensionFiltersMap, metricConfigDTO.getId())
+        .getUrn();
 
     // Translate all the rules
     List<Map<String, Object>> ruleYamls = getList(metricAlertConfigMap.get(PROP_RULES));
@@ -80,20 +83,25 @@ public class DataQualityPropertiesBuilder extends DetectionConfigPropertiesBuild
       return properties;
     }
 
-    properties.putAll(buildWrapperProperties(DataQualityMergeWrapper.class.getName(), nestedPipelines, mergerProperties));
+    properties.putAll(
+        buildWrapperProperties(DataQualityMergeWrapper.class.getName(), nestedPipelines,
+            mergerProperties));
     return properties;
   }
 
   @Override
-  public Map<String, Object> buildCompositeAlertProperties(Map<String, Object> compositeAlertConfigMap) {
+  public Map<String, Object> buildCompositeAlertProperties(
+      Map<String, Object> compositeAlertConfigMap) {
     Map<String, Object> properties = new HashMap<>();
 
     // Recursively translate all the sub-alerts
-    List<Map<String, Object>> subDetectionYamls = ConfigUtils.getList(compositeAlertConfigMap.get(PROP_ALERTS));
+    List<Map<String, Object>> subDetectionYamls = ConfigUtils
+        .getList(compositeAlertConfigMap.get(PROP_ALERTS));
     List<Map<String, Object>> nestedPropertiesList = new ArrayList<>();
     for (Map<String, Object> subDetectionYaml : subDetectionYamls) {
       Map<String, Object> subProps;
-      if (subDetectionYaml.containsKey(PROP_TYPE) && subDetectionYaml.get(PROP_TYPE).equals(COMPOSITE_ALERT)) {
+      if (subDetectionYaml.containsKey(PROP_TYPE) && subDetectionYaml.get(PROP_TYPE)
+          .equals(COMPOSITE_ALERT)) {
         subProps = buildCompositeAlertProperties(subDetectionYaml);
       } else {
         subProps = buildMetricAlertProperties(subDetectionYaml);
@@ -105,20 +113,24 @@ public class DataQualityPropertiesBuilder extends DetectionConfigPropertiesBuild
       return properties;
     }
 
-    properties.putAll(compositePropertyBuilderHelper(nestedPropertiesList, compositeAlertConfigMap));
+    properties
+        .putAll(compositePropertyBuilderHelper(nestedPropertiesList, compositeAlertConfigMap));
     return properties;
   }
 
-  private List<Map<String, Object>> buildListOfDataQualityProperties(String subEntityName, String metricUrn,
+  private List<Map<String, Object>> buildListOfDataQualityProperties(String subEntityName,
+      String metricUrn,
       List<Map<String, Object>> yamlConfigs, Map<String, Object> mergerProperties) {
     List<Map<String, Object>> properties = new ArrayList<>();
     for (Map<String, Object> yamlConfig : yamlConfigs) {
-      properties.add(buildDataQualityWrapperProperties(subEntityName, metricUrn, yamlConfig, mergerProperties));
+      properties.add(buildDataQualityWrapperProperties(subEntityName, metricUrn, yamlConfig,
+          mergerProperties));
     }
     return properties;
   }
 
-  private Map<String, Object> buildDataQualityWrapperProperties(String subEntityName, String metricUrn,
+  private Map<String, Object> buildDataQualityWrapperProperties(String subEntityName,
+      String metricUrn,
       Map<String, Object> yamlConfig, Map<String, Object> mergerProperties) {
     String qualityType = MapUtils.getString(yamlConfig, PROP_TYPE);
     String name = MapUtils.getString(yamlConfig, PROP_NAME);

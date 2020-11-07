@@ -23,11 +23,11 @@ import com.github.fge.jsonschema.core.report.ProcessingReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Thrown if any requirement from the {@link ConfigValidator} was violated.
  */
 public class ConfigValidationException extends Exception {
+
   protected static final Logger LOG = LoggerFactory.getLogger(ConfigValidationException.class);
 
   private final ProcessingReport report;

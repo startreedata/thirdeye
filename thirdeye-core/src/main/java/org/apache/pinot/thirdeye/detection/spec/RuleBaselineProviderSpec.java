@@ -21,9 +21,9 @@ package org.apache.pinot.thirdeye.detection.spec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RuleBaselineProviderSpec extends AbstractSpec{
+public class RuleBaselineProviderSpec extends AbstractSpec {
+
   private String timezone = DEFAULT_TIMEZONE;
   private String offset = "wo1w";
 

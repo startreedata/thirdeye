@@ -33,7 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AnomalyFunctionFactory {
-  private static Logger LOGGER = LoggerFactory.getLogger(AnomalyFunctionFactory.class);
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AnomalyFunctionFactory.class);
   private final Properties props;
 
   public AnomalyFunctionFactory(String functionConfigPath) {
@@ -80,7 +81,8 @@ public class AnomalyFunctionFactory {
     return anomalyFunction;
   }
 
-  public List<BaseAnomalyFunction> getSecondaryAnomalyFunctions(AnomalyFunctionDTO functionSpec) throws Exception {
+  public List<BaseAnomalyFunction> getSecondaryAnomalyFunctions(AnomalyFunctionDTO functionSpec)
+      throws Exception {
     List<String> secondaryAnomalyFunctionsType = functionSpec.getSecondaryAnomalyFunctionsType();
 
     if (secondaryAnomalyFunctionsType == null) {
@@ -90,12 +92,14 @@ public class AnomalyFunctionFactory {
 
     List<BaseAnomalyFunction> baseAnomalyFunctions = new ArrayList<>();
     for (String secondaryAnomalyFunctionType : secondaryAnomalyFunctionsType) {
-      if (secondaryAnomalyFunctionType == null || !props.containsKey(secondaryAnomalyFunctionType)) {
+      if (secondaryAnomalyFunctionType == null || !props
+          .containsKey(secondaryAnomalyFunctionType)) {
         LOGGER.error("Unsupported secondary anomaly function type " + secondaryAnomalyFunctionType);
         continue;
       }
       String className = props.getProperty(secondaryAnomalyFunctionType);
-      BaseAnomalyFunction anomalyFunction = (BaseAnomalyFunction) Class.forName(className).newInstance();
+      BaseAnomalyFunction anomalyFunction = (BaseAnomalyFunction) Class.forName(className)
+          .newInstance();
       anomalyFunction.init(functionSpec);
       baseAnomalyFunctions.add(anomalyFunction);
     }

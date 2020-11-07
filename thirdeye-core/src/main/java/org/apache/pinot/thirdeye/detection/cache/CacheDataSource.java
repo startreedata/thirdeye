@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.detection.cache;
 
 import java.util.Map;
 
-
 /**
  * Config for a single centralized cache data source.
  * For example, this class could be for Couchbase, or Redis, or Cassandra, etc.
@@ -40,11 +39,22 @@ public class CacheDataSource {
   private Map<String, Object> config;
 
   // left blank
-  public CacheDataSource() {}
+  public CacheDataSource() {
+  }
 
-  public String getClassName() { return className; }
-  public Map<String, Object> getConfig() { return config; }
+  public String getClassName() {
+    return className;
+  }
 
-  public void setClassName(String className) { this.className = className; }
-  public void setConfig(Map<String, Object> config) { this.config = config; }
+  public Map<String, Object> getConfig() {
+    return config;
+  }
+
+  public void setClassName(String className) {
+    this.className = className;
+  }
+
+  public void setConfig(Map<String, Object> config) {
+    this.config = config;
+  }
 }

@@ -26,12 +26,13 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 
-
 /**
- * An simple class for storing the detection result from anomaly functions. An instance of RawAnomalyResult is
+ * An simple class for storing the detection result from anomaly functions. An instance of
+ * RawAnomalyResult is
  * supposed to be used to update or create an existing or new merged anomaly, respectively.
  */
 public class RawAnomalyResult implements AnomalyResult {
+
   private long startTime;
   private long endTime;
   private DimensionMap dimensions = new DimensionMap();
@@ -42,7 +43,6 @@ public class RawAnomalyResult implements AnomalyResult {
   private double avgBaselineVal;
   private Map<String, String> properties = Collections.emptyMap();
   private AnomalyFeedbackDTO feedback = null;
-
 
   @Override
   public long getStartTime() {

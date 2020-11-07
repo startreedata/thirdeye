@@ -28,10 +28,10 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-
 public class DimensionValues implements Comparable<DimensionValues> {
+
   @JsonProperty("values")
-  private ImmutableList<String> values;
+  private final ImmutableList<String> values;
 
   public DimensionValues() {
     this.values = ImmutableList.of();
@@ -60,6 +60,7 @@ public class DimensionValues implements Comparable<DimensionValues> {
    * 3. D1 = {"s"} D2 = {"a", "b"} ==> compare strings "a" and "s" directly (i.e., D1 > D2).
    *
    * {@inheritDoc}
+   *
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   @Override

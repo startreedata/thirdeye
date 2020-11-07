@@ -62,7 +62,8 @@ public class GenericResultSetMapper {
     this.entityMappingHolder = entityMappingHolder;
   }
 
-  public <E extends AbstractEntity> E mapSingle(ResultSet rs, Class<? extends AbstractEntity> entityClass)
+  public <E extends AbstractEntity> E mapSingle(ResultSet rs,
+      Class<? extends AbstractEntity> entityClass)
       throws Exception {
     List<E> resultMapList = (List<E>) toEntityList(rs, entityClass);
     if (resultMapList.size() > 0) {
@@ -125,7 +126,6 @@ public class GenericResultSetMapper {
     }
 
     return entityList;
-
   }
 
   public AbstractEntity mapSingleOLD(ResultSet rs,

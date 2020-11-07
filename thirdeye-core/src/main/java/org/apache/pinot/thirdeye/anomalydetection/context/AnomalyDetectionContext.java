@@ -32,21 +32,22 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
  * the intermediate results such as transformed time series, trained prediction model, etc.
  */
 public class AnomalyDetectionContext {
+
   // The followings are inputs for anomaly detection
   private AnomalyDetectionFunction anomalyDetectionFunction;
 
   private TimeSeriesKey timeSeriesKey;
   private long bucketSizeInMS; // the bucket size, gap between timestamps, in millisecond
 
-  private Map<String, TimeSeries> current = new HashMap<>();
-  private Map<String, List<TimeSeries>> baselines = new HashMap<>();
+  private final Map<String, TimeSeries> current = new HashMap<>();
+  private final Map<String, List<TimeSeries>> baselines = new HashMap<>();
 
   //TODO: Add DAO for accessing historical anomalies or scaling factor
   private List<MergedAnomalyResultDTO> historicalAnomalies = new ArrayList<>();
 
   // The followings are intermediate results and are appended during anomaly detection
-  private Map<String, TimeSeries> transformedCurrent = new HashMap<>();
-  private Map<String, List<TimeSeries>> transformedBaselines = new HashMap<>();
+  private final Map<String, TimeSeries> transformedCurrent = new HashMap<>();
+  private final Map<String, List<TimeSeries>> transformedBaselines = new HashMap<>();
 
   /**
    * Returns the key of the time series, which contains metric name and dimension map.

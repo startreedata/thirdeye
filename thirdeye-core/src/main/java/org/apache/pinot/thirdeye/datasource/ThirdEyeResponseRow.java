@@ -45,5 +45,4 @@ public class ThirdEyeResponseRow {
   public int getTimeBucketId() {
     return timeBucketId;
   }
-
 }

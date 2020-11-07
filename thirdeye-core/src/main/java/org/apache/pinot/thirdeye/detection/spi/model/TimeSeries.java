@@ -25,10 +25,12 @@ import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 
 /**
- * Time series. wrapper object of data frame. Used by baselineProvider to return the predicted time series
+ * Time series. wrapper object of data frame. Used by baselineProvider to return the predicted time
+ * series
  */
 public class TimeSeries {
-  private DataFrame df;
+
+  private final DataFrame df;
 
   private TimeSeries() {
     this.df = new DataFrame();
@@ -50,6 +52,7 @@ public class TimeSeries {
 
   /**
    * the size of the time series
+   *
    * @return the size of the time series (number of data points)
    */
   public int size() {
@@ -58,6 +61,7 @@ public class TimeSeries {
 
   /**
    * Add the series into TimeSeries if it exists in the DataFrame.
+   *
    * @param df The source DataFrame.
    * @param name The series name.
    */
@@ -69,6 +73,7 @@ public class TimeSeries {
 
   /**
    * return a empty time series
+   *
    * @return a empty time series
    */
   public static TimeSeries empty() {
@@ -84,6 +89,7 @@ public class TimeSeries {
 
   /**
    * Add DataFrame into TimeSeries.
+   *
    * @param df The source DataFrame.
    * @return TimeSeries that contains the predicted values.
    */

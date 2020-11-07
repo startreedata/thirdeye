@@ -23,22 +23,25 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 
-
 /**
- * Classes to keep the information that can be used to construct the metric value from Pinot results.
+ * Classes to keep the information that can be used to construct the metric value from Pinot
+ * results.
  */
 public class ThirdEyeRequestMetricExpressions {
-  private ThirdEyeRequest thirdEyeRequest;
-  private List<MetricExpression> metricExpressions;
+
+  private final ThirdEyeRequest thirdEyeRequest;
+  private final List<MetricExpression> metricExpressions;
 
   /**
-   * Construct a pair of ThirdEye request and metric expression, which can be used to construct the metric value from
+   * Construct a pair of ThirdEye request and metric expression, which can be used to construct the
+   * metric value from
    * Pinot results.
    *
    * @param thirdEyeRequest the ThirdEye request.
    * @param metricExpressions the metric expression of the ThirdEye request.
    */
-  public ThirdEyeRequestMetricExpressions(ThirdEyeRequest thirdEyeRequest, List<MetricExpression> metricExpressions) {
+  public ThirdEyeRequestMetricExpressions(ThirdEyeRequest thirdEyeRequest,
+      List<MetricExpression> metricExpressions) {
     this.thirdEyeRequest = thirdEyeRequest;
     this.metricExpressions = metricExpressions;
   }

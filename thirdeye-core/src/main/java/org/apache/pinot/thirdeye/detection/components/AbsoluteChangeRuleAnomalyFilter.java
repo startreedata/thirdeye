@@ -38,11 +38,14 @@ import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
 
 /**
- * Absolute change anomaly filter. Check if the anomaly's absolute change compared to baseline is above the threshold.
+ * Absolute change anomaly filter. Check if the anomaly's absolute change compared to baseline is
+ * above the threshold.
  * If not, filters the anomaly.
  */
 @Components(type = "ABSOLUTE_CHANGE_FILTER", tags = {DetectionTag.RULE_FILTER})
-public class AbsoluteChangeRuleAnomalyFilter implements AnomalyFilter<AbsoluteChangeRuleAnomalyFilterSpec> {
+public class AbsoluteChangeRuleAnomalyFilter implements
+    AnomalyFilter<AbsoluteChangeRuleAnomalyFilterSpec> {
+
   private double threshold;
   private InputDataFetcher dataFetcher;
   private Baseline baseline;
@@ -65,10 +68,12 @@ public class AbsoluteChangeRuleAnomalyFilter implements AnomalyFilter<AbsoluteCh
 
     double currentValue = anomaly.getAvgCurrentVal();
     double baselineValue =
-        baseline == null ? anomaly.getAvgBaselineVal() : this.baseline.gather(currentSlice, aggregates).getDouble(
-            DataFrame.COL_VALUE, 0);
+        baseline == null ? anomaly.getAvgBaselineVal()
+            : this.baseline.gather(currentSlice, aggregates).getDouble(
+                DataFrame.COL_VALUE, 0);
     // if inconsistent with up/down, filter the anomaly
-    if (!pattern.equals(Pattern.UP_OR_DOWN) && (currentValue < baselineValue && pattern.equals(Pattern.UP)) || (
+    if (!pattern.equals(Pattern.UP_OR_DOWN) && (currentValue < baselineValue && pattern
+        .equals(Pattern.UP)) || (
         currentValue > baselineValue && pattern.equals(Pattern.DOWN))) {
       return false;
     }

@@ -28,10 +28,10 @@ import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-
 public class Dimensions {
+
   @JsonProperty("names")
-  private ImmutableList<String> names;
+  private final ImmutableList<String> names;
 
   public Dimensions() {
     names = ImmutableList.of();
@@ -51,14 +51,14 @@ public class Dimensions {
 
   /**
    * Returns all dimensions
-   * @return
    */
   public List<String> names() {
     return names;
   }
 
   /**
-   * Returns a sublist of dimension names to the specified depth. Depth starts from 0, which is the top level.
+   * Returns a sublist of dimension names to the specified depth. Depth starts from 0, which is the
+   * top level.
    *
    * @param depth the depth of the sublist.
    * @return a sublist of dimension names to the specified depth.
@@ -68,15 +68,16 @@ public class Dimensions {
   }
 
   /**
-   * Checks if the current dimension is the parent to the given dimension. A dimension A is a parent to dimension B if
+   * Checks if the current dimension is the parent to the given dimension. A dimension A is a parent
+   * to dimension B if
    * and only if dimension A is a subset of dimension B.
    *
    * @param child the given child dimension.
-   *
    * @return true if the current dimension is a parent (subset) to the given dimension.
    */
   public boolean isParentOf(Dimensions child) {
-    if (child == null) { // null dimension is always the top level and hence it is a parent to every dimension
+    if (child
+        == null) { // null dimension is always the top level and hence it is a parent to every dimension
       return false;
     }
     if (names.size() >= child.size()) {

@@ -44,20 +44,25 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * This class generates query requests to the backend database and retrieve the data for summary algorithm.
+ * This class generates query requests to the backend database and retrieve the data for summary
+ * algorithm.
  *
  * The generated requests are organized the following tree structure:
- *   Root level by GroupBy dimensions.
- *   Mid  level by "baseline" or "current"; The "baseline" request is ordered before the "current" request.
- *   Leaf level by metric functions; This level is handled by the request itself, i.e., a request can gather multiple
- *   metric functions at the same time.
- * The generated requests are store in a List. Because of the tree structure, the requests belong to the same
- * timeline (baseline or current) are located together. Then, the requests belong to the same GroupBy dimension are
+ * Root level by GroupBy dimensions.
+ * Mid  level by "baseline" or "current"; The "baseline" request is ordered before the "current"
+ * request.
+ * Leaf level by metric functions; This level is handled by the request itself, i.e., a request can
+ * gather multiple
+ * metric functions at the same time.
+ * The generated requests are store in a List. Because of the tree structure, the requests belong to
+ * the same
+ * timeline (baseline or current) are located together. Then, the requests belong to the same
+ * GroupBy dimension are
  * located together.
  */
 public abstract class BaseCubePinotClient<R extends Row> implements CubePinotClient<R> {
+
   protected static final Logger LOG = LoggerFactory.getLogger(BaseCubePinotClient.class);
 
   protected final static DateTime NULL_DATETIME = new DateTime();
@@ -113,8 +118,10 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
    * @param filterSets the data filter.
    * @return a list of ThirdEye requests.
    */
-  protected static Map<CubeTag, ThirdEyeRequestMetricExpressions> constructBulkRequests(String dataset,
-      List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets) throws ExecutionException {
+  protected static Map<CubeTag, ThirdEyeRequestMetricExpressions> constructBulkRequests(
+      String dataset,
+      List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets)
+      throws ExecutionException {
 
     Map<CubeTag, ThirdEyeRequestMetricExpressions> requests = new HashMap<>();
 
@@ -138,7 +145,8 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
       builder.setFilterSet(filterSets);
 
       requests.put(cubeSpec.getTag(),
-          new ThirdEyeRequestMetricExpressions(builder.build(cubeSpec.getTag().toString()), metricExpressions));
+          new ThirdEyeRequestMetricExpressions(builder.build(cubeSpec.getTag().toString()),
+              metricExpressions));
     }
 
     return requests;
@@ -165,13 +173,16 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
 
   /**
    * Returns a list of rows. The value of each row is evaluated and no further processing is needed.
+   *
    * @param dimensions dimensions of the response
    * @param response the response from backend database
    * @param rowTable the storage for rows
    * @param tag true if the response is for baseline values
    */
-  protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions, List<MetricExpression> metricExpressions,
-      List<MetricFunction> metricFunctions, ThirdEyeResponse response, Map<List<String>, R> rowTable, CubeTag tag) {
+  protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions,
+      List<MetricExpression> metricExpressions,
+      List<MetricFunction> metricFunctions, ThirdEyeResponse response,
+      Map<List<String>, R> rowTable, CubeTag tag) {
     Map<String, Double> context = new HashMap<>();
     for (int rowIdx = 0; rowIdx < response.getNumRows(); ++rowIdx) {
       double value = 0d;
@@ -212,7 +223,8 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
       }
     }
 
-    Map<ThirdEyeRequest, Future<ThirdEyeResponse>> queryResponses = queryCache.getQueryResultsAsync(allRequests);
+    Map<ThirdEyeRequest, Future<ThirdEyeResponse>> queryResponses = queryCache
+        .getQueryResultsAsync(allRequests);
 
     List<List<R>> res = new ArrayList<>();
     int level = 0;
@@ -222,12 +234,14 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
       for (Map.Entry<CubeTag, ThirdEyeRequestMetricExpressions> entry : bulkRequest.entrySet()) {
         CubeTag tag = entry.getKey();
         ThirdEyeRequest thirdEyeRequest = entry.getValue().getThirdEyeRequest();
-        ThirdEyeResponse thirdEyeResponse = queryResponses.get(thirdEyeRequest).get(TIME_OUT_VALUE, TIME_OUT_UNIT);
+        ThirdEyeResponse thirdEyeResponse = queryResponses.get(thirdEyeRequest)
+            .get(TIME_OUT_VALUE, TIME_OUT_UNIT);
         if (thirdEyeResponse.getNumRows() == 0) {
           LOG.warn("Get 0 rows from the request(s): {}", thirdEyeRequest);
         }
         List<MetricExpression> metricExpressions = entry.getValue().getMetricExpressions();
-        buildMetricFunctionOrExpressionsRows(dimensions, metricExpressions, thirdEyeRequest.getMetricFunctions(),
+        buildMetricFunctionOrExpressionsRows(dimensions, metricExpressions,
+            thirdEyeRequest.getMetricFunctions(),
             thirdEyeResponse, rowOfSameLevel, tag);
       }
       if (rowOfSameLevel.size() == 0) {
@@ -250,23 +264,27 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
   }
 
   @Override
-  public List<List<R>> getAggregatedValuesOfDimension(Dimensions dimensions, Multimap<String, String> filterSets)
+  public List<List<R>> getAggregatedValuesOfDimension(Dimensions dimensions,
+      Multimap<String, String> filterSets)
       throws Exception {
     List<Map<CubeTag, ThirdEyeRequestMetricExpressions>> bulkRequests = new ArrayList<>();
     for (int level = 0; level < dimensions.size(); ++level) {
       List<String> groupBy = Lists.newArrayList(dimensions.get(level));
-      bulkRequests.add(BaseCubePinotClient.constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
+      bulkRequests.add(
+          BaseCubePinotClient.constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }
 
   @Override
-  public List<List<R>> getAggregatedValuesOfLevels(Dimensions dimensions, Multimap<String, String> filterSets)
+  public List<List<R>> getAggregatedValuesOfLevels(Dimensions dimensions,
+      Multimap<String, String> filterSets)
       throws Exception {
     List<Map<CubeTag, ThirdEyeRequestMetricExpressions>> bulkRequests = new ArrayList<>();
     for (int level = 0; level < dimensions.size() + 1; ++level) {
       List<String> groupBy = Lists.newArrayList(dimensions.namesToDepth(level));
-      bulkRequests.add(BaseCubePinotClient.constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
+      bulkRequests.add(
+          BaseCubePinotClient.constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }

@@ -30,13 +30,11 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 public class AlertFilterFactory {
-  private static Logger LOGGER = LoggerFactory.getLogger(AlertFilterFactory.class);
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AlertFilterFactory.class);
   public static final String FILTER_TYPE_KEY = "type";
   private final Properties props;
-
 
   public AlertFilterFactory(String AlertFilterConfigPath) {
     props = new Properties();
@@ -68,15 +66,15 @@ public class AlertFilterFactory {
     }
   }
 
-
   /**
    * Get an alert filter for the given alert filter spec.
    *
    * @param alertFilterSpec the anomaly function that contains the alert filter spec.
-   *        alertFilterSpec can be obtained by using AnomalyFunctionDTO getAlertFilter()
+   *     alertFilterSpec can be obtained by using AnomalyFunctionDTO getAlertFilter()
    * @return the alert filter specified by the alert filter spec or a dummy filter if the function
-   * does not have an alert filter spec or this method fails to initiates an alert filter from the
-   * spec.
+   *     does not have an alert filter spec or this method fails to initiates an alert filter from
+   *     the
+   *     spec.
    */
   public BaseAlertFilter fromSpec(Map<String, String> alertFilterSpec) {
     if (alertFilterSpec == null) {
@@ -86,7 +84,7 @@ public class AlertFilterFactory {
     BaseAlertFilter alertFilter = new DummyAlertFilter();
     if (alertFilterSpec.containsKey(FILTER_TYPE_KEY)) {
       String alertFilterType = alertFilterSpec.get(FILTER_TYPE_KEY);
-      if(props.containsKey(alertFilterType.toUpperCase())) {
+      if (props.containsKey(alertFilterType.toUpperCase())) {
         String className = props.getProperty(alertFilterType.toUpperCase());
         try {
           alertFilter = (BaseAlertFilter) Class.forName(className).newInstance();

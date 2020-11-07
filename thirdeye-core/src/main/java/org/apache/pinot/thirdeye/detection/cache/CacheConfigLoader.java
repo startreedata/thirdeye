@@ -27,16 +27,17 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Helper methods to load cache config
  */
 public class CacheConfigLoader {
+
   private static final Logger LOG = LoggerFactory.getLogger(CacheConfigLoader.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
   /**
    * Returns cache config from yml file
+   *
    * @param cacheConfigUrl URL to cache config
    * @return cacheConfig
    */

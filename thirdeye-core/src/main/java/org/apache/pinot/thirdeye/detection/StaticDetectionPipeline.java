@@ -34,7 +34,6 @@ import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
 import org.apache.pinot.thirdeye.detection.spi.model.InputData;
 import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
 
-
 /**
  * StaticDetectionPipeline serves as the foundation for custom detection algorithms.
  *
@@ -44,7 +43,6 @@ import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
  *   <li>dataSpec: describes all data required to perform detection</li>
  *   <li>execution: performs any computation necessary to arrive at the detection result</li>
  * </ul>
- *
  */
 public abstract class StaticDetectionPipeline extends DetectionPipeline {
 
@@ -56,7 +54,8 @@ public abstract class StaticDetectionPipeline extends DetectionPipeline {
    * @param startTime detection start time
    * @param endTime detection end time
    */
-  protected StaticDetectionPipeline(DataProvider provider, AlertDTO config, long startTime, long endTime) {
+  protected StaticDetectionPipeline(DataProvider provider, AlertDTO config, long startTime,
+      long endTime) {
     super(provider, config, startTime, endTime);
   }
 
@@ -80,14 +79,17 @@ public abstract class StaticDetectionPipeline extends DetectionPipeline {
   @Override
   public final DetectionPipelineResult run() throws Exception {
     InputDataSpec dataSpec = this.getInputDataSpec();
-    Map<MetricSlice, DataFrame> timeseries = this.provider.fetchTimeseries(dataSpec.getTimeseriesSlices());
-    Map<MetricSlice, DataFrame> aggregates = this.provider.fetchAggregates(dataSpec.getAggregateSlices(), Collections.<String>emptyList(), -1);
+    Map<MetricSlice, DataFrame> timeseries = this.provider
+        .fetchTimeseries(dataSpec.getTimeseriesSlices());
+    Map<MetricSlice, DataFrame> aggregates = this.provider
+        .fetchAggregates(dataSpec.getAggregateSlices(), Collections.emptyList(), -1);
 
     Collection<AnomalySlice> updatedSlices = new HashSet<>();
     for (AnomalySlice slice : dataSpec.getAnomalySlices()) {
       updatedSlices.add(slice.withDetectionId(this.config.getId()));
     }
-    Multimap<AnomalySlice, MergedAnomalyResultDTO> anomalies = this.provider.fetchAnomalies(updatedSlices);
+    Multimap<AnomalySlice, MergedAnomalyResultDTO> anomalies = this.provider
+        .fetchAnomalies(updatedSlices);
     Multimap<EventSlice, EventDTO> events = this.provider.fetchEvents(dataSpec.getEventSlices());
 
     InputData data = new InputData(

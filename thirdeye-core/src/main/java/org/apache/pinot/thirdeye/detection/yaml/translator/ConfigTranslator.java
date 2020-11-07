@@ -24,7 +24,6 @@ import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidator;
 import org.yaml.snakeyaml.Yaml;
 
-
 /**
  * Translate a raw yaml config and map it to a config object
  */

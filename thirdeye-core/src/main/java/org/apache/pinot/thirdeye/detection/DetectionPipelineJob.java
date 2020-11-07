@@ -31,11 +31,11 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class DetectionPipelineJob implements Job {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineJob.class);
 
-  private TaskManager taskDAO = DAORegistry.getInstance().getTaskDAO();
+  private final TaskManager taskDAO = DAORegistry.getInstance().getTaskDAO();
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final long DETECTION_TASK_TIMEOUT = TimeUnit.DAYS.toMillis(1);
@@ -47,7 +47,9 @@ public class DetectionPipelineJob implements Job {
     // if a task is pending and not time out yet, don't schedule more
     String jobName = String.format("%s_%d", TaskConstants.TaskType.DETECTION, taskInfo.configId);
     if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DETECTION_TASK_TIMEOUT)) {
-      LOG.info("Skip scheduling detection task for {} with start time {}. Task is already in the queue.", jobName,
+      LOG.info(
+          "Skip scheduling detection task for {} with start time {}. Task is already in the queue.",
+          jobName,
           taskInfo.getStart());
       return;
     }
@@ -56,12 +58,15 @@ public class DetectionPipelineJob implements Job {
     try {
       taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
     } catch (JsonProcessingException e) {
-      LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString", taskInfo, e);
+      LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString", taskInfo,
+          e);
     }
 
-    TaskDTO taskDTO = TaskUtils.buildTask(taskInfo.configId, taskInfoJson, TaskConstants.TaskType.DETECTION);
+    TaskDTO taskDTO = TaskUtils
+        .buildTask(taskInfo.configId, taskInfoJson, TaskConstants.TaskType.DETECTION);
     long taskId = taskDAO.save(taskDTO);
-    LOG.info("Created {} task {} with taskId {}", TaskConstants.TaskType.DETECTION, taskDTO, taskId);
+    LOG.info("Created {} task {} with taskId {}", TaskConstants.TaskType.DETECTION, taskDTO,
+        taskId);
   }
 }
 

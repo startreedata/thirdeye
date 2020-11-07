@@ -44,9 +44,12 @@ import org.slf4j.LoggerFactory;
 
 public abstract class BaseAnomalyFunction implements AnomalyFunction {
 
-  private static final TimeGranularity DEFAULT_VIEW_OFFSET_FOR_DAILY = new TimeGranularity(3, TimeUnit.DAYS);
-  private static final TimeGranularity DEFAULT_VIEW_OFFSET_FOR_HOURLY = new TimeGranularity(10, TimeUnit.HOURS);
-  private static final TimeGranularity DEFAULT_VIEW_OFFSET_FOR_MINUTE = new TimeGranularity(60, TimeUnit.MINUTES);
+  private static final TimeGranularity DEFAULT_VIEW_OFFSET_FOR_DAILY = new TimeGranularity(3,
+      TimeUnit.DAYS);
+  private static final TimeGranularity DEFAULT_VIEW_OFFSET_FOR_HOURLY = new TimeGranularity(10,
+      TimeUnit.HOURS);
+  private static final TimeGranularity DEFAULT_VIEW_OFFSET_FOR_MINUTE = new TimeGranularity(60,
+      TimeUnit.MINUTES);
   protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
   protected AnomalyFunctionDTO spec;
@@ -81,11 +84,12 @@ public abstract class BaseAnomalyFunction implements AnomalyFunction {
   }
 
   @Override
-  public List<AnomalyResult> offlineAnalyze(DimensionMap exploredDimensions, MetricTimeSeries timeSeries,
-      DateTime windowStart, DateTime windowEnd, List<MergedAnomalyResultDTO> knownAnomalies) throws Exception {
+  public List<AnomalyResult> offlineAnalyze(DimensionMap exploredDimensions,
+      MetricTimeSeries timeSeries,
+      DateTime windowStart, DateTime windowEnd, List<MergedAnomalyResultDTO> knownAnomalies)
+      throws Exception {
     return Collections.emptyList();
   }
-
 
   /**
    * This method provides a view of current time series, i.e., no baseline time series.
@@ -96,7 +100,6 @@ public abstract class BaseAnomalyFunction implements AnomalyFunction {
    * @param viewWindowStartTime the start time bucket of current time series, inclusive
    * @param viewWindowEndTime the end time buckets of current time series, exclusive
    * @param knownAnomalies it is assumed to be null for presentational purpose.
-   * @return
    */
   @Override
   public AnomalyTimelinesView getTimeSeriesView(MetricTimeSeries timeSeries, long bucketMillis,
@@ -111,11 +114,14 @@ public abstract class BaseAnomalyFunction implements AnomalyFunction {
       long currentBucketMillis = viewWindowStartTime + i * bucketMillis;
       long baselineBucketMillis = currentBucketMillis - TimeUnit.DAYS.toMillis(7);
       TimeBucket timebucket =
-          new TimeBucket(currentBucketMillis, currentBucketMillis + bucketMillis, baselineBucketMillis,
+          new TimeBucket(currentBucketMillis, currentBucketMillis + bucketMillis,
+              baselineBucketMillis,
               baselineBucketMillis + bucketMillis);
       anomalyTimelinesView.addTimeBuckets(timebucket);
-      anomalyTimelinesView.addCurrentValues(timeSeries.getOrDefault(currentBucketMillis, metric, 0).doubleValue());
-      anomalyTimelinesView.addBaselineValues(timeSeries.getOrDefault(baselineBucketMillis, metric, 0).doubleValue());
+      anomalyTimelinesView
+          .addCurrentValues(timeSeries.getOrDefault(currentBucketMillis, metric, 0).doubleValue());
+      anomalyTimelinesView.addBaselineValues(
+          timeSeries.getOrDefault(baselineBucketMillis, metric, 0).doubleValue());
     }
 
     return anomalyTimelinesView;
@@ -123,9 +129,6 @@ public abstract class BaseAnomalyFunction implements AnomalyFunction {
 
   /**
    * Returns unit change from baseline value
-   * @param currentValue
-   * @param baselineValue
-   * @return
    */
   protected double calculateChange(double currentValue, double baselineValue) {
     return (currentValue - baselineValue) / baselineValue;
@@ -133,6 +136,7 @@ public abstract class BaseAnomalyFunction implements AnomalyFunction {
 
   /**
    * Returns true if this anomaly function uses the information of history anomalies
+   *
    * @return true if this anomaly function uses the information of history anomalies
    */
   public boolean useHistoryAnomaly() {
@@ -145,7 +149,6 @@ public abstract class BaseAnomalyFunction implements AnomalyFunction {
     AnomalyOffset anomalyWindowOffset = getDefaultOffsets(datasetConfig);
     return anomalyWindowOffset;
   }
-
 
   @Override
   public AnomalyOffset getViewWindowOffset(DatasetConfigDTO datasetConfig) {
@@ -177,13 +180,15 @@ public abstract class BaseAnomalyFunction implements AnomalyFunction {
 
   /**
    * Specify the property keys used for merge comparison
-   * Each anomaly detection function will be capable to overwrite this function to return the key lists when merging two anomalies
+   * Each anomaly detection function will be capable to overwrite this function to return the key
+   * lists when merging two anomalies
    * If two anomalies don't have equal value on the specified keys, they won't be merged
-   * If this function is not being overwritten, empty list will be returned and anomalies won't be compared on mergeable keys when merging
+   * If this function is not being overwritten, empty list will be returned and anomalies won't be
+   * compared on mergeable keys when merging
+   *
    * @return A list of keys to used for comparing if two anomalies are equal on mergeable keys
    */
-  public List<String> getMergeablePropertyKeys(){
+  public List<String> getMergeablePropertyKeys() {
     return Collections.emptyList();
   }
-
 }

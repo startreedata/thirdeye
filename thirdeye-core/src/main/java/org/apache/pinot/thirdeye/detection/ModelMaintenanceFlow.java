@@ -25,14 +25,15 @@ package org.apache.pinot.thirdeye.detection;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.joda.time.Instant;
 
-
 /**
- * The model maintenance flow. This flow re-tunes the detection model automatically if the the model's performance is bad.
+ * The model maintenance flow. This flow re-tunes the detection model automatically if the the
+ * model's performance is bad.
  */
 public interface ModelMaintenanceFlow {
 
   /**
    * Maintain the detection model
+   *
    * @param detectionConfig the detection config to maintain
    * @param timestamp the time stamp of this maintenance
    * @return the maintained detection config

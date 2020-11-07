@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ThirdEyeResultSetSerializer extends StdSerializer<ThirdEyeResultSet> {
+
   public static final String GROUP_COLUMN_NAMES_FIELD = "groupColumnNames";
   public static final String METRIC_COLUMN_NAMES_FIELD = "metricColumnNames";
   public static final String ROWS_FIELD = "rows";

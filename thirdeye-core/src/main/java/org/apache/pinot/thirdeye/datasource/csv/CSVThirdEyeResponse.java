@@ -33,12 +33,12 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
 import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
 import org.joda.time.DateTime;
 
-
 /**
  * The response of ThirdEye if the data source is a CSV file.
  * Used by {@link CSVThirdEyeDataSource}
  */
 public class CSVThirdEyeResponse extends BaseThirdEyeResponse {
+
   private static final String COL_TIMESTAMP = CSVThirdEyeDataSource.COL_TIMESTAMP;
   /**
    * The Dataframe.
@@ -74,8 +74,8 @@ public class CSVThirdEyeResponse extends BaseThirdEyeResponse {
    * @return a ThirdEyeResponseRow
    */
   @Override
-  public ThirdEyeResponseRow getRow(int rowId)  {
-    if(rowId >= dataframe.size()){
+  public ThirdEyeResponseRow getRow(int rowId) {
+    if (rowId >= dataframe.size()) {
       throw new IllegalArgumentException();
     }
     int timeBucketId = -1;
@@ -83,18 +83,18 @@ public class CSVThirdEyeResponse extends BaseThirdEyeResponse {
     if (dataframe.contains(COL_TIMESTAMP)) {
       long time = dataframe.getLong(COL_TIMESTAMP, rowId);
       timeBucketId = TimeRangeUtils.computeBucketIndex(
-              dataTimeSpec.getDataGranularity(),
-              request.getStartTimeInclusive(),
-              new DateTime(time));
+          dataTimeSpec.getDataGranularity(),
+          request.getStartTimeInclusive(),
+          new DateTime(time));
     }
 
     List<String> dimensions = new ArrayList<>();
-    for (String dimension : request.getGroupBy()){
+    for (String dimension : request.getGroupBy()) {
       dimensions.add(dataframe.getString(dimension, rowId));
     }
 
     List<Double> metrics = new ArrayList<>();
-    for(MetricFunction function : request.getMetricFunctions()){
+    for (MetricFunction function : request.getMetricFunctions()) {
       metrics.add(dataframe.getDouble(function.toString(), rowId));
     }
     return new ThirdEyeResponseRow(timeBucketId, dimensions, metrics);
@@ -110,7 +110,6 @@ public class CSVThirdEyeResponse extends BaseThirdEyeResponse {
   public int getNumRowsFor(MetricFunction metricFunction) {
     return dataframe.size();
   }
-
 
   /**
    * Get the row that corresponds to a metric function.

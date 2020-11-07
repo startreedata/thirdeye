@@ -30,7 +30,8 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 
 public class HistoricalAnomalyEventProvider implements EventDataProvider<EventDTO> {
 
-  private MergedAnomalyResultManager mergedAnomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
+  private final MergedAnomalyResultManager mergedAnomalyDAO = DAORegistry.getInstance()
+      .getMergedAnomalyResultDAO();
 
   @Override
   public List<EventDTO> getEvents(EventFilter eventFilter) {
@@ -46,7 +47,7 @@ public class HistoricalAnomalyEventProvider implements EventDataProvider<EventDT
     }
 
     if (mergedAnomalies != null) {
-      for(MergedAnomalyResultDTO mergedAnomalyResultDTO : mergedAnomalies) {
+      for (MergedAnomalyResultDTO mergedAnomalyResultDTO : mergedAnomalies) {
         events.add(getAnomalyEvent(mergedAnomalyResultDTO));
       }
     }
@@ -82,5 +83,4 @@ public class HistoricalAnomalyEventProvider implements EventDataProvider<EventDT
   public String getEventType() {
     return EventType.HISTORICAL_ANOMALY.toString();
   }
-
 }

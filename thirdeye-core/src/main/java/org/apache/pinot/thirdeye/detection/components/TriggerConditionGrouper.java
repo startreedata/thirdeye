@@ -43,13 +43,13 @@ import org.apache.pinot.thirdeye.detection.spi.components.Grouper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Expression based grouper - supports AND, OR and nested combinations of grouping
  */
 @Components(title = "TriggerCondition", type = "GROUPER",
     tags = {DetectionTag.GROUPER}, description = "An expression based grouper")
 public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperSpec> {
+
   protected static final Logger LOG = LoggerFactory.getLogger(TriggerConditionGrouper.class);
 
   private String expression;
@@ -72,7 +72,8 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
    * before calling the grouper, we do not have to deal with overlapping
    * anomalies within an entity/metric
    *
-   * Sort anomalies and incrementally compare two anomalies for overlap criteria; break when no overlap
+   * Sort anomalies and incrementally compare two anomalies for overlap criteria; break when no
+   * overlap
    */
   private List<MergedAnomalyResultDTO> andGrouping(
       List<MergedAnomalyResultDTO> anomalyListA, List<MergedAnomalyResultDTO> anomalyListB) {
@@ -87,8 +88,9 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
         // Check for overlap and output it
         if (anomalies.get(j).getStartTime() <= anomalies.get(i).getEndTime()) {
           MergedAnomalyResultDTO currentAnomaly = makeParentEntityAnomaly(anomalies.get(i));
-          currentAnomaly.setEndTime(Math.min(currentAnomaly.getEndTime(), anomalies.get(j). getEndTime()));
-          currentAnomaly.setStartTime(anomalies.get(j). getStartTime());
+          currentAnomaly
+              .setEndTime(Math.min(currentAnomaly.getEndTime(), anomalies.get(j).getEndTime()));
+          currentAnomaly.setStartTime(anomalies.get(j).getStartTime());
           setEntityChildMapping(currentAnomaly, anomalies.get(j));
 
           groupedAnomalies.add(currentAnomaly);
@@ -120,12 +122,13 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
     }
 
     MergedAnomalyResultDTO currentAnomaly = makeParentEntityAnomaly(anomalies.get(0));
-    for (int i = 1; i < anomalies.size();  i++) {
+    for (int i = 1; i < anomalies.size(); i++) {
       if (anomalies.get(i).getStartTime() <= currentAnomaly.getEndTime()) {
         // Partial or full overlap
-        currentAnomaly.setEndTime(Math.max(anomalies.get(i).getEndTime(), currentAnomaly.getEndTime()));
+        currentAnomaly
+            .setEndTime(Math.max(anomalies.get(i).getEndTime(), currentAnomaly.getEndTime()));
         setEntityChildMapping(currentAnomaly, anomalies.get(i));
-      }  else {
+      } else {
         // No overlap
         groupedAnomalies.add(currentAnomaly);
         currentAnomaly = makeParentEntityAnomaly(anomalies.get(i));
@@ -139,7 +142,8 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
   /**
    * Groups the anomalies based on the parsed operator tree
    */
-  private List<MergedAnomalyResultDTO> groupAnomaliesByOperator(Map<String, Object> operatorNode, List<MergedAnomalyResultDTO> anomalies) {
+  private List<MergedAnomalyResultDTO> groupAnomaliesByOperator(Map<String, Object> operatorNode,
+      List<MergedAnomalyResultDTO> anomalies) {
     Preconditions.checkNotNull(operatorNode);
 
     // Base condition - If reached leaf node of operator tree, then return the anomalies corresponding to the entity/metric
@@ -147,8 +151,8 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
     if (value != null) {
       return anomalies.stream().filter(anomaly ->
           anomaly.getProperties() != null
-          && anomaly.getProperties().containsKey(PROP_SUB_ENTITY_NAME)
-          && anomaly.getProperties().get(PROP_SUB_ENTITY_NAME).equals(value)
+              && anomaly.getProperties().containsKey(PROP_SUB_ENTITY_NAME)
+              && anomaly.getProperties().get(PROP_SUB_ENTITY_NAME).equals(value)
       ).collect(Collectors.toList());
     }
 

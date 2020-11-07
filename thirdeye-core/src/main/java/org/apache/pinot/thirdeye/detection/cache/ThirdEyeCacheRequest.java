@@ -23,7 +23,6 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.util.CacheUtils;
 
-
 /**
  * Class used to hold data needed to make a request to centralized cache.
  * Can be derived from ThirdEyeRequest, but it's meant to save some developer
@@ -32,17 +31,19 @@ import org.apache.pinot.thirdeye.util.CacheUtils;
 public class ThirdEyeCacheRequest {
 
   ThirdEyeRequest request;
-  private String metricUrn;
-  private String dimensionKey;
+  private final String metricUrn;
+  private final String dimensionKey;
 
   public ThirdEyeCacheRequest(ThirdEyeRequest request) {
     this.request = request;
-    this.metricUrn = MetricEntity.fromMetric(request.getFilterSet().asMap(), this.getMetricId()).getUrn();
+    this.metricUrn = MetricEntity.fromMetric(request.getFilterSet().asMap(), this.getMetricId())
+        .getUrn();
     this.dimensionKey = CacheUtils.hashMetricUrn(this.metricUrn);
   }
 
   /**
    * shorthand to create a ThirdEyeCacheRequest from a ThirdEyeRequest
+   *
    * @param request ThirdEyeRequest
    * @return ThirdEyeCacheRequest
    */
@@ -50,15 +51,27 @@ public class ThirdEyeCacheRequest {
     return new ThirdEyeCacheRequest(request);
   }
 
-  public ThirdEyeRequest getRequest() { return request; }
+  public ThirdEyeRequest getRequest() {
+    return request;
+  }
 
-  public long getMetricId() { return request.getMetricFunctions().get(0).getMetricId(); }
+  public long getMetricId() {
+    return request.getMetricFunctions().get(0).getMetricId();
+  }
 
-  public String getMetricUrn() { return metricUrn; }
+  public String getMetricUrn() {
+    return metricUrn;
+  }
 
-  public long getStartTimeInclusive() { return request.getStartTimeInclusive().getMillis(); }
+  public long getStartTimeInclusive() {
+    return request.getStartTimeInclusive().getMillis();
+  }
 
-  public long getEndTimeExclusive() { return request.getEndTimeExclusive().getMillis(); }
+  public long getEndTimeExclusive() {
+    return request.getEndTimeExclusive().getMillis();
+  }
 
-  public String getDimensionKey() { return dimensionKey; }
+  public String getDimensionKey() {
+    return dimensionKey;
+  }
 }

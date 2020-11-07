@@ -42,11 +42,11 @@ import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 
-
 /**
  * The type Anomaly searcher.
  */
 public class AnomalySearcher {
+
   private final MergedAnomalyResultManager anomalyDAO;
   private final AlertManager detectionConfigDAO;
   private final SubscriptionGroupManager detectionAlertConfigDAO;
@@ -86,7 +86,8 @@ public class AnomalySearcher {
     Set<Long> subscribedDetectionConfigIds = new HashSet<>();
     if (!searchFilter.getDetectionNames().isEmpty()) {
       detectionConfigIds =
-          this.detectionConfigDAO.findByPredicate(Predicate.IN("name", searchFilter.getDetectionNames().toArray()))
+          this.detectionConfigDAO
+              .findByPredicate(Predicate.IN("name", searchFilter.getDetectionNames().toArray()))
               .stream()
               .map(DetectionConfigBean::getId)
               .collect(Collectors.toSet());
@@ -99,19 +100,23 @@ public class AnomalySearcher {
           .flatMap(Collection::stream)
           .collect(Collectors.toSet());
     }
-    if (!searchFilter.getDetectionNames().isEmpty() && !searchFilter.getSubscriptionGroups().isEmpty()) {
+    if (!searchFilter.getDetectionNames().isEmpty() && !searchFilter.getSubscriptionGroups()
+        .isEmpty()) {
       // intersect the detection config ids if searching by both
       detectionConfigIds.retainAll(subscribedDetectionConfigIds);
     } else {
       detectionConfigIds.addAll(subscribedDetectionConfigIds);
     }
-    if (!searchFilter.getDetectionNames().isEmpty() || !searchFilter.getSubscriptionGroups().isEmpty()) {
+    if (!searchFilter.getDetectionNames().isEmpty() || !searchFilter.getSubscriptionGroups()
+        .isEmpty()) {
       // add the predicate using detection config id
       if (detectionConfigIds.isEmpty()) {
         // if detection not found, return empty result
-        return ImmutableMap.of("count", 0, "limit", limit, "offset", offset, "elements", Collections.emptyList());
+        return ImmutableMap
+            .of("count", 0, "limit", limit, "offset", offset, "elements", Collections.emptyList());
       }
-      predicate = Predicate.AND(predicate, Predicate.IN("detectionConfigId", detectionConfigIds.toArray()));
+      predicate = Predicate
+          .AND(predicate, Predicate.IN("detectionConfigId", detectionConfigIds.toArray()));
     }
 
     // search by datasets
@@ -120,15 +125,18 @@ public class AnomalySearcher {
       for (String dataset : searchFilter.getDatasets()) {
         datasetPredicates.add(Predicate.LIKE("collection", "%" + dataset + "%"));
       }
-      predicate = Predicate.AND(predicate, Predicate.OR(datasetPredicates.toArray(new Predicate[0])));
+      predicate = Predicate
+          .AND(predicate, Predicate.OR(datasetPredicates.toArray(new Predicate[0])));
     }
     // search by metrics
     if (!searchFilter.getMetrics().isEmpty()) {
-      predicate = Predicate.AND(predicate, Predicate.IN("metric", searchFilter.getMetrics().toArray()));
+      predicate = Predicate
+          .AND(predicate, Predicate.IN("metric", searchFilter.getMetrics().toArray()));
     }
     // search by ids
     if (!searchFilter.getAnomalyIds().isEmpty()) {
-      predicate = Predicate.AND(predicate, Predicate.IN("baseId", searchFilter.getAnomalyIds().toArray()));
+      predicate = Predicate
+          .AND(predicate, Predicate.IN("baseId", searchFilter.getAnomalyIds().toArray()));
     }
 
     long count;
@@ -145,10 +153,14 @@ public class AnomalySearcher {
       // filter by feedback types if requested
       List<MergedAnomalyResultDTO> anomalies = this.anomalyDAO.findByPredicate(predicate);
       Set<AnomalyFeedbackType> feedbackFilters =
-          searchFilter.getFeedbacks().stream().map(AnomalyFeedbackType::valueOf).collect(Collectors.toSet());
+          searchFilter.getFeedbacks().stream().map(AnomalyFeedbackType::valueOf)
+              .collect(Collectors.toSet());
       results = anomalies.stream()
-          .filter(anomaly -> (anomaly.getFeedback() == null && feedbackFilters.contains(NO_FEEDBACK)) || (
-              anomaly.getFeedback() != null && feedbackFilters.contains(anomaly.getFeedback().getFeedbackType())))
+          .filter(
+              anomaly -> (anomaly.getFeedback() == null && feedbackFilters.contains(NO_FEEDBACK))
+                  || (
+                  anomaly.getFeedback() != null && feedbackFilters
+                      .contains(anomaly.getFeedback().getFeedbackType())))
           .sorted(Comparator.comparingLong(AbstractDTO::getId).reversed())
           .collect(Collectors.toList());
       count = results.size();

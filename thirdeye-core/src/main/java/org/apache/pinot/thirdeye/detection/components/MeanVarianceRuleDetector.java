@@ -64,7 +64,8 @@ import org.slf4j.LoggerFactory;
         @Param(name = "lookback"),
         @Param(name = "sensitivity")})
 public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRuleDetectorSpec>,
-                                                 BaselineProvider<MeanVarianceRuleDetectorSpec> {
+    BaselineProvider<MeanVarianceRuleDetectorSpec> {
+
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
   private InputDataFetcher dataFetcher;
   private Pattern pattern;
@@ -98,9 +99,10 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     //Lookback spec validation
     //Minimum lookback set to 9. That's 8 change data points.
     if (this.lookback < 9) {
-      throw new IllegalArgumentException(String.format("Lookback of %d is too small. Please increase to greater than 9.", this.lookback));
+      throw new IllegalArgumentException(String
+          .format("Lookback of %d is too small. Please increase to greater than 9.",
+              this.lookback));
     }
-
   }
 
   @Override
@@ -118,10 +120,12 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     }
 
     DatasetConfigDTO datasetConfig = this.dataFetcher.fetchData(new InputDataSpec()
-        .withMetricIdsForDataset(Collections.singleton(metricEntity.getId()))).getDatasetForMetricId()
+        .withMetricIdsForDataset(Collections.singleton(metricEntity.getId())))
+        .getDatasetForMetricId()
         .get(metricEntity.getId());
     DataFrame inputDf = fetchData(metricEntity, trainStart.getMillis(), window.getEndMillis());
-    DataFrame resultDF = computePredictionInterval(inputDf, window.getStartMillis(), datasetConfig.getTimezone());
+    DataFrame resultDF = computePredictionInterval(inputDf, window.getStartMillis(),
+        datasetConfig.getTimezone());
     resultDF = resultDF.joinLeft(inputDf.renameSeries(
         DataFrame.COL_VALUE, COL_CURR), DataFrame.COL_TIME);
 
@@ -146,7 +150,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       fetchStart = window.getStart().minusWeeks(lookback);
     }
 
-    MetricSlice slice = MetricSlice.from(me.getId(), fetchStart.getMillis(), window.getEndMillis(), me.getFilters(), timeGranularity);
+    MetricSlice slice = MetricSlice
+        .from(me.getId(), fetchStart.getMillis(), window.getEndMillis(), me.getFilters(),
+            timeGranularity);
     DatasetConfigDTO datasetConfig = this.dataFetcher.fetchData(new InputDataSpec()
         .withMetricIdsForDataset(Collections.singleton(me.getId()))).getDatasetForMetricId()
         .get(me.getId());
@@ -154,13 +160,14 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     LOG.info("Getting data for" + slice.toString());
     DataFrame dfInput = fetchData(me, fetchStart.getMillis(), window.getEndMillis());
     DataFrame dfCurr = new DataFrame(dfInput).renameSeries(DataFrame.COL_VALUE, COL_CURR);
-    DataFrame dfBase = computePredictionInterval(dfInput, window.getStartMillis(), datasetConfig.getTimezone());
+    DataFrame dfBase = computePredictionInterval(dfInput, window.getStartMillis(),
+        datasetConfig.getTimezone());
     DataFrame df = new DataFrame(dfCurr).addSeries(dfBase, DataFrame.COL_VALUE, COL_ERROR);
     df.addSeries(COL_DIFF, df.getDoubles(COL_CURR).subtract(df.get(DataFrame.COL_VALUE)));
     df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
 
     // Filter pattern
-    if (pattern.equals(Pattern.UP_OR_DOWN) ) {
+    if (pattern.equals(Pattern.UP_OR_DOWN)) {
       df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
     } else {
       df.addSeries(COL_PATTERN, pattern.equals(Pattern.UP) ? df.getDoubles(COL_DIFF).gt(0) :
@@ -170,14 +177,17 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     // Anomalies
-    List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.makeAnomalies(slice, df, COL_ANOMALY,
-        DetectionUtils.getMonitoringGranularityPeriod(timeGranularity.toAggregationGranularityString(),
-            datasetConfig), datasetConfig);
+    List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils
+        .makeAnomalies(slice, df, COL_ANOMALY,
+            DetectionUtils
+                .getMonitoringGranularityPeriod(timeGranularity.toAggregationGranularityString(),
+                    datasetConfig), datasetConfig);
     dfBase = dfBase.joinRight(df.retainSeries(DataFrame.COL_TIME, COL_CURR), DataFrame.COL_TIME);
     return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(dfBase));
   }
 
-  private DataFrame computePredictionInterval(DataFrame inputDF, long windowStartTime, String timezone) {
+  private DataFrame computePredictionInterval(DataFrame inputDF, long windowStartTime,
+      String timezone) {
 
     DataFrame resultDF = new DataFrame();
     //filter the data inside window for current values.
@@ -202,13 +212,16 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       DataFrame trainingDF;
       trainingDF = getLookbackDF(inputDF, forecastDF.getLong(DataFrame.COL_TIME, k));
       //the get historical WoW mean and std.
-      std[k]= trainingDF.getDoubles(COL_CHANGE).std().value();
+      std[k] = trainingDF.getDoubles(COL_CHANGE).std().value();
       mean[k] = trainingDF.getDoubles(COL_CHANGE).mean().value();
 
       //calculate baseline, error , upper and lower bound for prediction window.
       resultTimeArray[k] = forecastDF.getLong(DataFrame.COL_TIME, k);
-      baselineArray[k] = trainingDF.getDouble(DataFrame.COL_VALUE,trainingDF.size()-1) * (1 + mean[k]);
-      errorArray[k] = trainingDF.getDouble(DataFrame.COL_VALUE,trainingDF.size()-1) * sensitivityToSigma(this.sensitivity) * std[k];
+      baselineArray[k] =
+          trainingDF.getDouble(DataFrame.COL_VALUE, trainingDF.size() - 1) * (1 + mean[k]);
+      errorArray[k] =
+          trainingDF.getDouble(DataFrame.COL_VALUE, trainingDF.size() - 1) * sensitivityToSigma(
+              this.sensitivity) * std[k];
       upperBoundArray[k] = baselineArray[k] + errorArray[k];
       lowerBoundArray[k] = baselineArray[k] - errorArray[k];
     }
@@ -242,6 +255,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   /**
    * Returns a data frame containing lookback number of data before prediction time
+   *
    * @param originalDF the original dataframe
    * @param time the prediction time, in unix timestamp
    * @return DataFrame containing lookback number of data
@@ -256,7 +270,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       df = df.append(originalDF.slice(indexStart, indexEnd));
     }
     // calculate percentage change
-    df.addSeries(COL_CURR,df.getDoubles(DataFrame.COL_VALUE).shift(-1));
+    df.addSeries(COL_CURR, df.getDoubles(DataFrame.COL_VALUE).shift(-1));
     df.addSeries(COL_CHANGE, map((DoubleFunction) values -> {
       if (Double.compare(values[1], 0.0) == 0) {
         // divide by zero handling
@@ -269,11 +283,13 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   // Check whether monitoring timeGranularity is multiple days
   private boolean isMultiDayGranularity() {
-    return !timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY) && timeGranularity.getUnit() == TimeUnit.DAYS;
+    return !timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
+        && timeGranularity.getUnit() == TimeUnit.DAYS;
   }
 
   /**
    * Mapping of sensitivity to sigma on range of 0.5 - 1.5
+   *
    * @param sensitivity double from 0 to 10
    * @return sigma
    */
@@ -287,5 +303,4 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     double sigma = 0.5 + 0.1 * (10 - sensitivity);
     return sigma;
   }
-
 }

@@ -23,12 +23,14 @@ import com.google.common.cache.CacheLoader;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 
-public abstract class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
+public abstract class PinotResponseCacheLoader extends
+    CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
+
   /**
    * Initializes the cache loader using the given property map.
    *
-   * @param properties the property map that provides the information to connect to the data source.
-   *
+   * @param properties the property map that provides the information to connect to the data
+   *     source.
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
   public abstract void init(Map<String, Object> properties) throws Exception;

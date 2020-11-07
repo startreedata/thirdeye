@@ -26,8 +26,8 @@ import java.io.IOException;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.Series;
 
-
 public class DataFrameSerializer extends StdSerializer<DataFrame> {
+
   public DataFrameSerializer() {
     this(null);
   }
@@ -37,7 +37,8 @@ public class DataFrameSerializer extends StdSerializer<DataFrame> {
   }
 
   @Override
-  public void serialize(DataFrame dataFrame, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+  public void serialize(DataFrame dataFrame, JsonGenerator jsonGenerator,
+      SerializerProvider serializerProvider)
       throws IOException {
 
     jsonGenerator.writeStartObject();

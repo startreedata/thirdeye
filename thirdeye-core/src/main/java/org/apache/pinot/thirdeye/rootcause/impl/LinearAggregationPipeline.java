@@ -36,14 +36,14 @@ import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Implementation of an aggregator that handles the same entity being returned from multiple
  * pipelines by summing the entity's weights. It optionally allows to truncate the input for
  * each input pipeline <i>separately</i> to its top {@code k} elements before aggregation.
  */
 public class LinearAggregationPipeline extends Pipeline {
-  private static Logger LOG = LoggerFactory.getLogger(LinearAggregationPipeline.class);
+
+  private static final Logger LOG = LoggerFactory.getLogger(LinearAggregationPipeline.class);
 
   private final static String PROP_K = "k";
   private final static String PROP_K_DEFAULT = "-1";
@@ -73,12 +73,14 @@ public class LinearAggregationPipeline extends Pipeline {
    * @param inputNames input pipeline names
    * @param properties configuration properties ({@code PROP_K})
    */
-  public LinearAggregationPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public LinearAggregationPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
 
     String kProp = PROP_K_DEFAULT;
-    if(properties.containsKey(PROP_K))
+    if (properties.containsKey(PROP_K)) {
       kProp = properties.get(PROP_K).toString();
+    }
     this.k = Integer.parseInt(kProp);
   }
 
@@ -88,10 +90,10 @@ public class LinearAggregationPipeline extends Pipeline {
     DoubleSeries.Builder scoreBuilder = DoubleSeries.builder();
 
     Multimap<String, Entity> urn2entity = ArrayListMultimap.create();
-    for(Map.Entry<String, Set<Entity>> entry : context.getInputs().entrySet()) {
+    for (Map.Entry<String, Set<Entity>> entry : context.getInputs().entrySet()) {
       DataFrame df = toDataFrame(entry.getValue());
 
-      if(this.k >= 0) {
+      if (this.k >= 0) {
         LOG.info("Truncating '{}' to {} entities (from {})", entry.getKey(), this.k, df.size());
         df = df.sortedBy(SCORE).tail(this.k);
       }
@@ -100,7 +102,7 @@ public class LinearAggregationPipeline extends Pipeline {
       urnBuilder.addSeries(df.get(URN));
       scoreBuilder.addSeries(df.getDoubles(SCORE));
 
-      for(Entity e : entry.getValue()) {
+      for (Entity e : entry.getValue()) {
         urn2entity.put(e.getUrn(), e);
       }
     }
@@ -122,7 +124,7 @@ public class LinearAggregationPipeline extends Pipeline {
     String[] urns = new String[entities.size()];
     double[] scores = new double[entities.size()];
     int i = 0;
-    for(Entity e : entities) {
+    for (Entity e : entities) {
       urns[i] = e.getUrn();
       scores[i] = e.getScore();
       i++;
@@ -130,13 +132,14 @@ public class LinearAggregationPipeline extends Pipeline {
     return new DataFrame().addSeries(URN, urns).addSeries(SCORE, scores);
   }
 
-  private static Set<Entity> toEntities(DataFrame df, String colUrn, String colScore, Multimap<String, Entity> urn2entity) {
+  private static Set<Entity> toEntities(DataFrame df, String colUrn, String colScore,
+      Multimap<String, Entity> urn2entity) {
     Set<Entity> entities = new HashSet<>();
-    for(int i=0; i<df.size(); i++) {
+    for (int i = 0; i < df.size(); i++) {
       final String urn = df.getString(colUrn, i);
-      entities.add(new Entity(urn, df.getDouble(colScore, i), new ArrayList<>(urn2entity.get(urn))));
+      entities
+          .add(new Entity(urn, df.getDouble(colScore, i), new ArrayList<>(urn2entity.get(urn))));
     }
     return entities;
   }
-
 }

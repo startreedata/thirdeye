@@ -23,9 +23,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataSlaQualityCheckerSpec extends AbstractSpec {
+
   public static final String DEFAULT_DATA_SLA = "3_DAYS";
   private String sla;
 

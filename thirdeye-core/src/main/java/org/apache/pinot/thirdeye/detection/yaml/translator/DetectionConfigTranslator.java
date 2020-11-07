@@ -36,57 +36,56 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DataQualityPr
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder;
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionPropertiesBuilder;
 
-
 /**
  * The YAML translator of composite pipeline. Convert YAML file into detection pipeline properties.
  * This pipeline supports multiple detection algorithm running in OR relationship.
  * Supports running multiple filter rule running in AND relationship.
  * Conceptually, the pipeline has the following structure.
  *
- *         +-----------+
- *         | Dimension |
- *         |Exploration|
- *         +-----+-----+
- *               |
- *         +-----v-----+
- *         |Dimension  |
- *         |Filter     |
- *       +-------------+--+
- *       |                |
- *       |                |
+ * +-----------+
+ * | Dimension |
+ * |Exploration|
+ * +-----+-----+
+ * |
+ * +-----v-----+
+ * |Dimension  |
+ * |Filter     |
+ * +-------------+--+
+ * |                |
+ * |                |
  * +-----v----+     +-----v----+
  * | Rule     |     | Algorithm|
  * | detection|     | Detection|
  * +----------+     +-----+----+
- *       |                |
+ * |                |
  * +-----v----+     +-----v----+
  * |Rule      |     |Algorithm |
  * |  Merger  |     |  Merger  |
  * +-----+----+     +-----+----+
- *       |                |
- *       v                v
+ * |                |
+ * v                v
  * +-----+----+     +-----+----+
  * |Rule      |     |Algorithm |
  * |Filters   |     |Filters   |
  * +-----+----+     +-----+----+
- *       |                |
- *       v                v
+ * |                |
+ * v                v
  * +-----+----+     +-----+----+
  * |Rule      |     |Algorithm |
  * |Labelers  |     |Labelers  |
  * +-----+----+     +-----+----+
- *       +-------+--------+
- *               |
- *         +-----v-----+
- *         |   Merger  |
- *         |           |
- *         +-----+-----+
- *               |
- *               |
- *         +-----v-----+
- *         |  Grouper  |
- *         |           |
- *         +-----------+
+ * +-------+--------+
+ * |
+ * +-----v-----+
+ * |   Merger  |
+ * |           |
+ * +-----+-----+
+ * |
+ * |
+ * +-----v-----+
+ * |  Grouper  |
+ * |           |
+ * +-----------+
  *
  *
  * This translator translates a yaml that describes the above detection flow
@@ -118,9 +117,10 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionProp
  * |  |                                           |  |
  * |  +-------------------------------------------+  |
  * +-------------------------------------------------+
- *
  */
-public class DetectionConfigTranslator extends ConfigTranslator<AlertDTO, DetectionConfigValidator> {
+public class DetectionConfigTranslator extends
+    ConfigTranslator<AlertDTO, DetectionConfigValidator> {
+
   public static final String PROP_SUB_ENTITY_NAME = "subEntityName";
 
   private static final String PROP_CRON = "cron";
@@ -144,11 +144,13 @@ public class DetectionConfigTranslator extends ConfigTranslator<AlertDTO, Detect
     this(yamlConfig, provider, new DetectionConfigValidator(provider));
   }
 
-  public DetectionConfigTranslator(String yamlConfig, DataProvider provider, DetectionConfigValidator validator) {
+  public DetectionConfigTranslator(String yamlConfig, DataProvider provider,
+      DetectionConfigValidator validator) {
     super(yamlConfig, validator);
     this.metricAttributesMap = new DetectionMetricAttributeHolder(provider);
     this.detectionTranslatorBuilder = new DetectionPropertiesBuilder(metricAttributesMap, provider);
-    this.dataQualityTranslatorBuilder = new DataQualityPropertiesBuilder(metricAttributesMap, provider);
+    this.dataQualityTranslatorBuilder = new DataQualityPropertiesBuilder(metricAttributesMap,
+        provider);
   }
 
   @Override
@@ -173,7 +175,8 @@ public class DetectionConfigTranslator extends ConfigTranslator<AlertDTO, Detect
       qualityProperties = dataQualityTranslatorBuilder.buildCompositeAlertProperties(yamlConfigMap);
 
       // TODO: discuss strategy for default cron
-      Preconditions.checkArgument(yamlConfigMap.containsKey(PROP_CRON), "Missing property (" + PROP_CRON + ") in alert");
+      Preconditions.checkArgument(yamlConfigMap.containsKey(PROP_CRON),
+          "Missing property (" + PROP_CRON + ") in alert");
       cron = MapUtils.getString(yamlConfigMap, PROP_CRON);
     } else {
       detectionProperties = detectionTranslatorBuilder.buildMetricAlertProperties(yamlConfigMap);
@@ -185,7 +188,8 @@ public class DetectionConfigTranslator extends ConfigTranslator<AlertDTO, Detect
   }
 
   /**
-   * Fill in common fields of detection config. Properties of the pipeline is filled by the subclass.
+   * Fill in common fields of detection config. Properties of the pipeline is filled by the
+   * subclass.
    */
   private AlertDTO generateDetectionConfig(Map<String, Object> yamlConfigMap,
       Map<String, Object> detectionProperties, Map<String, Object> qualityProperties, String cron) {
@@ -214,8 +218,10 @@ public class DetectionConfigTranslator extends ConfigTranslator<AlertDTO, Detect
     //TODO: data-availability trigger is only enabled for detections running on PINOT daily dataset only
     List<DatasetConfigDTO> datasetConfigs = this.metricAttributesMap.getAllDatasets();
     if (MapUtils.getString(yamlConfigMap, PROP_CRON) == null
-        && datasetConfigs.stream().allMatch(c -> c.bucketTimeGranularity().getUnit().equals(TimeUnit.DAYS))
-        && datasetConfigs.stream().allMatch(c -> c.getDataSource().equals(PinotThirdEyeDataSource.class.getSimpleName()))) {
+        && datasetConfigs.stream()
+        .allMatch(c -> c.bucketTimeGranularity().getUnit().equals(TimeUnit.DAYS))
+        && datasetConfigs.stream()
+        .allMatch(c -> c.getDataSource().equals(PinotThirdEyeDataSource.class.getSimpleName()))) {
       config.setDataAvailabilitySchedule(true);
     }
     return config;

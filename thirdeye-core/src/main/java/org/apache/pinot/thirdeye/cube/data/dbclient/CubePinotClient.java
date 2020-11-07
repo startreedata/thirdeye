@@ -22,10 +22,8 @@ package org.apache.pinot.thirdeye.cube.data.dbclient;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
 import org.joda.time.DateTime;
 
-
 /**
  * The CubeClient that is based on Pinot.
- * @param <R>
  */
 public interface CubePinotClient<R extends Row> extends CubeClient<R> {
 
@@ -63,5 +61,4 @@ public interface CubePinotClient<R extends Row> extends CubeClient<R> {
    * @param dateTime the end date time of current (exclusive).
    */
   void setCurrentEndExclusive(DateTime dateTime);
-
 }

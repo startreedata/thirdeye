@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.util;
 import org.joda.time.Period;
 
 public class AnomalyOffset {
+
   Period preOffsetPeriod;
   Period postOffsetPeriod;
 
@@ -33,12 +34,15 @@ public class AnomalyOffset {
   public Period getPreOffsetPeriod() {
     return preOffsetPeriod;
   }
+
   public void setPreOffsetPeriod(Period preOffsetPeriod) {
     this.preOffsetPeriod = preOffsetPeriod;
   }
+
   public Period getPostOffsetPeriod() {
     return postOffsetPeriod;
   }
+
   public void setPostOffsetPeriod(Period postOffsetPeriod) {
     this.postOffsetPeriod = postOffsetPeriod;
   }

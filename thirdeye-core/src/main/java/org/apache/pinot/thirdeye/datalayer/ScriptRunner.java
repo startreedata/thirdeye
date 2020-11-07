@@ -96,11 +96,10 @@ public class ScriptRunner {
   /**
    * Runs an SQL script (read in using the Reader parameter) using the connection passed in
    *
-   * @param conn   - the connection to use for the script
+   * @param conn - the connection to use for the script
    * @param reader - the source of the script
-   *
    * @throws SQLException if any SQL errors occur
-   * @throws IOException  if there is an error reading from the Reader
+   * @throws IOException if there is an error reading from the Reader
    */
   private void runScript(Connection conn, Reader reader) throws IOException, SQLException {
     StringBuffer command = null;
@@ -148,7 +147,6 @@ public class ScriptRunner {
    * The create-schema script is used to create schema in the testing env which uses H2. However,
    * H2 db doesn't have an InnoDB engine and raises error.
    * Fix: When connecting to H2, remove InnoDB engine config from SQL
-   *
    *
    * @param sql SQL statement to be executed.
    * @return sanitized sql statement

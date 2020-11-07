@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
@@ -58,11 +57,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class SqlUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(SqlUtils.class);
-
 
   private static final Joiner AND = Joiner.on(" AND ");
   private static final Joiner COMMA = Joiner.on(", ");
@@ -106,10 +103,10 @@ public class SqlUtils {
     sb.append("drop table if exists ").append(tableName).append(";");
     sb.append("create table ").append(tableName).append(" (");
 
-    for (String metric: metrics) {
+    for (String metric : metrics) {
       sb.append(metric).append(" decimal(50,3), ");
     }
-    for (String dimension: dimensions) {
+    for (String dimension : dimensions) {
       sb.append(dimension).append(" varchar(50), ");
     }
     sb.append(timeColumn).append(" varchar(50) ) ENGINE=InnoDB;");
@@ -119,25 +116,25 @@ public class SqlUtils {
     LOG.info("Creating H2 table: " + sql);
 
     try (Connection connection = ds.getConnection();
-        Statement statement = connection.createStatement()){
+        Statement statement = connection.createStatement()) {
       statement.execute(sql);
     }
   }
 
-
   /**
-   * Run SQL query to insert a row in a CSV file to a datasource, for now only used by H2 initialization
+   * Run SQL query to insert a row in a CSV file to a datasource, for now only used by H2
+   * initialization
    *
    * @param tableName table name
    * @param columnNames column names in CSV, separated by ,
    * @param items row items
-   * @throws SQLException
    */
-  public static void insertCSVRow(DataSource ds, String tableName, String columnNames, String[] items) throws SQLException {
+  public static void insertCSVRow(DataSource ds, String tableName, String columnNames,
+      String[] items) throws SQLException {
     // Put quotes around values that contains spaces
     StringBuilder sb = new StringBuilder();
     String prefix = "";
-    for (String item: items) {
+    for (String item : items) {
       sb.append(prefix);
       prefix = ",";
       if (!StringUtils.isNumeric(item)) {
@@ -147,29 +144,32 @@ public class SqlUtils {
       }
     }
 
-    String sql = String.format("INSERT INTO %s(%s) VALUES(%s)", tableName, columnNames, sb.toString());
+    String sql = String
+        .format("INSERT INTO %s(%s) VALUES(%s)", tableName, columnNames, sb.toString());
     try (Connection connection = ds.getConnection();
-        Statement statement = connection.createStatement()){
+        Statement statement = connection.createStatement()) {
       statement.execute(sql);
     }
   }
-
 
   /**
    * Returns sql to calculate the sum of all raw metrics required for <tt>request</tt>, grouped by
    * time within the requested date range. </br>
    * Due to the summation, all metric column values can be assumed to be doubles.
-   * @throws ExecutionException
    */
   public static String getSql(ThirdEyeRequest request, MetricFunction metricFunction,
       Multimap<String, String> filterSet, TimeSpec dataTimeSpec, String sourceName) {
-    return getSql(metricFunction, request.getStartTimeInclusive(), request.getEndTimeExclusive(), filterSet,
-        request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec, request.getLimit(), sourceName);
+    return getSql(metricFunction, request.getStartTimeInclusive(), request.getEndTimeExclusive(),
+        filterSet,
+        request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec, request.getLimit(),
+        sourceName);
   }
 
   /**
-   * Onboard dataset config and metric config from SqlDataset object. If the current dataset/metric exists,
+   * Onboard dataset config and metric config from SqlDataset object. If the current dataset/metric
+   * exists,
    * just update them.
+   *
    * @param dataset SqlDataset Object
    */
   public static void onBoardSqlDataset(SqlDataset dataset) {
@@ -198,12 +198,11 @@ public class SqlUtils {
     datasetConfig.setTimeColumn(dataset.getTimeColumn());
     datasetConfig.setTimeFormat(dataset.getTimeFormat());
 
-
     List<String> sortedMetrics = new ArrayList<>(dataset.getMetrics().keySet());
 
     Collections.sort(sortedMetrics);
 
-    for (Map.Entry<String, MetricAggFunction> metric: dataset.getMetrics().entrySet()) {
+    for (Map.Entry<String, MetricAggFunction> metric : dataset.getMetrics().entrySet()) {
       MetricConfigDTO metricConfig = metricDAO.findByMetricAndDataset(metric.getKey(), datasetName);
       if (metricConfig == null) {
         metricConfig = new MetricConfigDTO();
@@ -241,18 +240,19 @@ public class SqlUtils {
       DateTime endTimeExclusive, Multimap<String, String> filterSet, List<String> groupBy,
       TimeGranularity timeGranularity, TimeSpec dataTimeSpec, int limit, String sourceName) {
 
-    MetricConfigDTO metricConfig = ThirdEyeUtils.getMetricConfigFromId(metricFunction.getMetricId());
+    MetricConfigDTO metricConfig = ThirdEyeUtils
+        .getMetricConfigFromId(metricFunction.getMetricId());
     String dataset = metricFunction.getDataset();
 
     StringBuilder sb = new StringBuilder();
-    String selectionClause = getSelectionClause(metricConfig, metricFunction, groupBy, timeGranularity, dataTimeSpec);
+    String selectionClause = getSelectionClause(metricConfig, metricFunction, groupBy,
+        timeGranularity, dataTimeSpec);
     String tableName = computeSqlTableName(dataset);
 
     sb.append("SELECT ").append(selectionClause).append(" FROM ").append(tableName);
     String betweenClause = getBetweenClause(startTime, endTimeExclusive, dataTimeSpec, sourceName);
     sb.append(" WHERE ");
     sb.append(betweenClause);
-
 
     String dimensionWhereClause = getDimensionWhereClause(filterSet);
     if (StringUtils.isNotBlank(dimensionWhereClause)) {
@@ -264,7 +264,7 @@ public class SqlUtils {
       sb.append(" ").append(groupByClause);
     }
 
-    if (limit > 0 ){
+    if (limit > 0) {
       sb.append(" ORDER BY " + getSelectMetricClause(metricConfig, metricFunction) + " DESC");
     }
 
@@ -281,7 +281,9 @@ public class SqlUtils {
     return "SELECT DISTINCT(" + dimension + ") FROM " + tableName;
   }
 
-  private static String getSelectionClause(MetricConfigDTO metricConfig, MetricFunction metricFunction, List<String> groupByKeys, TimeGranularity granularity, TimeSpec dateTimeSpec) {
+  private static String getSelectionClause(MetricConfigDTO metricConfig,
+      MetricFunction metricFunction, List<String> groupByKeys, TimeGranularity granularity,
+      TimeSpec dateTimeSpec) {
     StringBuilder builder = new StringBuilder();
 
     if (granularity != null) {
@@ -294,7 +296,7 @@ public class SqlUtils {
       }
     }
 
-    for (String groupByKey: groupByKeys) {
+    for (String groupByKey : groupByKeys) {
       builder.append(groupByKey).append(", ");
     }
 
@@ -304,7 +306,8 @@ public class SqlUtils {
     return builder.toString();
   }
 
-  private static String getSelectMetricClause(MetricConfigDTO metricConfig, MetricFunction metricFunction) {
+  private static String getSelectMetricClause(MetricConfigDTO metricConfig,
+      MetricFunction metricFunction) {
     StringBuilder builder = new StringBuilder();
     String metricName = null;
     if (metricFunction.getMetricName().equals("*")) {
@@ -312,16 +315,18 @@ public class SqlUtils {
     } else {
       metricName = metricConfig.getName();
     }
-    builder.append(convertAggFunction(metricFunction.getFunctionName())).append("(").append(metricName).append(")");
+    builder.append(convertAggFunction(metricFunction.getFunctionName())).append("(")
+        .append(metricName).append(")");
     return builder.toString();
   }
 
   static String computeSqlTableName(String datasetName) {
     String[] tableComponents = datasetName.split("\\.");
-    return datasetName.substring(tableComponents[0].length()+tableComponents[1].length()+2);
+    return datasetName.substring(tableComponents[0].length() + tableComponents[1].length() + 2);
   }
 
-  static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeSpec, String sourceName) {
+  static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeSpec,
+      String sourceName) {
     TimeGranularity dataGranularity = timeSpec.getDataGranularity();
     long dataGranularityMillis = dataGranularity.toMillis();
 
@@ -347,13 +352,17 @@ public class SqlUtils {
     long endUnits = (long) Math.ceil(endExclusive.getMillis()) / 1000;
 
     if (Objects.equals(startUnits, endUnits)) {
-      return String.format(" %s = %d", getToUnixTimeClause(timeFormat, timeField, sourceName), startUnits);
+      return String
+          .format(" %s = %d", getToUnixTimeClause(timeFormat, timeField, sourceName), startUnits);
     }
-    return String.format(" %s BETWEEN %d AND %d", getToUnixTimeClause(timeFormat, timeField, sourceName), startUnits, endUnits);
+    return String
+        .format(" %s BETWEEN %d AND %d", getToUnixTimeClause(timeFormat, timeField, sourceName),
+            startUnits, endUnits);
   }
 
   /**
    * For presto performance optimization
+   *
    * @param startTime start time of where clause
    * @return datepartition filtering clause
    */
@@ -407,12 +416,17 @@ public class SqlUtils {
         components.add(makeComponentGrouped(key, OPERATOR_EQUALS, equals));
       }
       if (!notEquals.isEmpty()) {
-        components.add(makeComponentGrouped(key, OPERATOR_NOT_EQUALS, tokenize(PREFIX_NOT_EQUALS, notEquals)));
+        components.add(
+            makeComponentGrouped(key, OPERATOR_NOT_EQUALS, tokenize(PREFIX_NOT_EQUALS, notEquals)));
       }
-      components.addAll(makeComponents(key, OPERATOR_GREATER_THAN, tokenize(PREFIX_GREATER_THAN, greaterThan)));
-      components.addAll(makeComponents(key, OPERATOR_GREATER_THAN_EQUALS, tokenize(PREFIX_GREATER_THAN_EQUALS, greaterThanEquals)));
-      components.addAll(makeComponents(key, OPERATOR_LESS_THAN, tokenize(PREFIX_LESS_THAN, lessThen)));
-      components.addAll(makeComponents(key, OPERATOR_LESS_THAN_EQUALS, tokenize(PREFIX_LESS_THAN_EQUALS, lessThanEquals)));
+      components.addAll(
+          makeComponents(key, OPERATOR_GREATER_THAN, tokenize(PREFIX_GREATER_THAN, greaterThan)));
+      components.addAll(makeComponents(key, OPERATOR_GREATER_THAN_EQUALS,
+          tokenize(PREFIX_GREATER_THAN_EQUALS, greaterThanEquals)));
+      components
+          .addAll(makeComponents(key, OPERATOR_LESS_THAN, tokenize(PREFIX_LESS_THAN, lessThen)));
+      components.addAll(makeComponents(key, OPERATOR_LESS_THAN_EQUALS,
+          tokenize(PREFIX_LESS_THAN_EQUALS, lessThanEquals)));
     }
 
     if (components.isEmpty()) {
@@ -431,13 +445,13 @@ public class SqlUtils {
     if (aggregationGranularity != null && !groups.contains(timeColumnName)) {
       groups.add(timeColumnName);
     }
-      if (groupBy != null) {
-        groups.addAll(groupBy);
-      }
-      if (groups.isEmpty()) {
-        return "";
-      }
-      return String.format("GROUP BY %s", COMMA.join(groups));
+    if (groupBy != null) {
+      groups.addAll(groupBy);
+    }
+    if (groups.isEmpty()) {
+      return "";
+    }
+    return String.format("GROUP BY %s", COMMA.join(groups));
   }
 
   /**
@@ -450,7 +464,7 @@ public class SqlUtils {
   static String quote(String value) {
     String quoteChar = "";
     if (!StringUtils.isNumeric(value)) {
-      quoteChar = "\'";
+      quoteChar = "'";
       if (value.contains("'")) {
         value = value.replace("'", "''");
       }
@@ -459,14 +473,16 @@ public class SqlUtils {
   }
 
   /**
-   * Convert the name of the MetricAggFunction to the name expected by Presto. See SQL Documentation for details.
+   * Convert the name of the MetricAggFunction to the name expected by Presto. See SQL Documentation
+   * for details.
    *
    * @param aggFunction function enum to convert
    * @return a valid pinot function name
    */
   private static String convertAggFunction(MetricAggFunction aggFunction) {
     if (aggFunction.isPercentile()) {
-      return aggFunction.name().replaceFirst(MetricAggFunction.PERCENTILE_PREFIX, PERCENTILE_TDIGEST_PREFIX);
+      return aggFunction.name()
+          .replaceFirst(MetricAggFunction.PERCENTILE_PREFIX, PERCENTILE_TDIGEST_PREFIX);
     }
     return aggFunction.name();
   }
@@ -479,7 +495,8 @@ public class SqlUtils {
    * @param values values
    * @return grouped component
    */
-  private static String makeComponentGrouped(String key, String operator, Collection<String> values) {
+  private static String makeComponentGrouped(String key, String operator,
+      Collection<String> values) {
     List<String> quoted = new ArrayList<>();
     for (String value : values) {
       quoted.add(quote(value));
@@ -496,7 +513,8 @@ public class SqlUtils {
    * @param values collection of values
    * @return set of components
    */
-  private static Set<String> makeComponents(String key, String operator, Collection<String> values) {
+  private static Set<String> makeComponents(String key, String operator,
+      Collection<String> values) {
     Set<String> output = new HashSet<>();
     for (String value : values) {
       output.add(makeComponent(key, operator, value));
@@ -509,7 +527,7 @@ public class SqlUtils {
    *
    * @param key key
    * @param value raw value
-   * @param operator  operator
+   * @param operator operator
    * @return pair of prefix, value
    */
   private static String makeComponent(String key, String operator, String value) {
@@ -540,7 +558,8 @@ public class SqlUtils {
    */
   private static String tokenize(String prefix, String value) {
     if (!value.startsWith(prefix)) {
-      throw new IllegalArgumentException(String.format("Expected value with prefix '%s' but got '%s", prefix, value));
+      throw new IllegalArgumentException(
+          String.format("Expected value with prefix '%s' but got '%s", prefix, value));
     }
     return value.substring(prefix.length());
   }
@@ -564,7 +583,6 @@ public class SqlUtils {
   /**
    * Convert java SimpleDateFormat to MySQL's format
    *
-   * @param timeFormat
    * @return MySQL's time format
    */
   private static String timeFormatToMySQLFormat(String timeFormat) {
@@ -576,7 +594,7 @@ public class SqlUtils {
       case "yyyy-MM-dd-HH":
         return "%Y-%m-%d-%H";
       default:
-          return "%Y-%m-%d %H:%i:%s";
+        return "%Y-%m-%d %H:%i:%s";
     }
   }
 
@@ -591,7 +609,6 @@ public class SqlUtils {
   /**
    * Convert java SimpleDateFormat to BigQuery StandardSQL's format
    *
-   * @param timeFormat
    * @return BigQuery Standard SQL time format
    */
   private static String timeFormatToBigQueryFormat(String timeFormat) {
@@ -607,26 +624,30 @@ public class SqlUtils {
     }
   }
 
-
   /**
    * Return a SQL clause that cast any timeColumn as unix timestamp
    *
    * @param timeFormat format of time column
    * @param timeColumn time column name
    * @param sourceName Database name
-   * @return
    */
-  private static String getToUnixTimeClause(String timeFormat, String timeColumn, String sourceName) {
+  private static String getToUnixTimeClause(String timeFormat, String timeColumn,
+      String sourceName) {
     if (sourceName.equals(PRESTO)) {
-      return "TO_UNIXTIME(PARSE_DATETIME(CAST(" + timeColumn + " AS VARCHAR), '" + timeFormat + "'))";
+      return "TO_UNIXTIME(PARSE_DATETIME(CAST(" + timeColumn + " AS VARCHAR), '" + timeFormat
+          + "'))";
     } else if (sourceName.equals(MYSQL)) {
-      return "UNIX_TIMESTAMP(STR_TO_DATE(CAST(" + timeColumn + " AS CHAR), '" + timeFormatToMySQLFormat(timeFormat) + "'))";
-    } else if (sourceName.equals(H2)){
-      return "TO_UNIXTIME(PARSEDATETIME(CAST(" + timeColumn + " AS VARCHAR), '" + timeFormat + "'))";
+      return "UNIX_TIMESTAMP(STR_TO_DATE(CAST(" + timeColumn + " AS CHAR), '"
+          + timeFormatToMySQLFormat(timeFormat) + "'))";
+    } else if (sourceName.equals(H2)) {
+      return "TO_UNIXTIME(PARSEDATETIME(CAST(" + timeColumn + " AS VARCHAR), '" + timeFormat
+          + "'))";
     } else if (sourceName.equals(VERTICA)) {
-      return "EXTRACT(EPOCH FROM to_timestamp(to_char(" + timeColumn + "), '" + timeFormatToVerticaFormat(timeFormat) + "'))";
+      return "EXTRACT(EPOCH FROM to_timestamp(to_char(" + timeColumn + "), '"
+          + timeFormatToVerticaFormat(timeFormat) + "'))";
     } else if (sourceName.equals(BIGQUERY)) {
-      return "UNIX_SECONDS(TIMESTAMP(PARSE_DATETIME(\"" + timeFormatToBigQueryFormat(timeFormat) + "\", " + timeColumn + ")))";
+      return "UNIX_SECONDS(TIMESTAMP(PARSE_DATETIME(\"" + timeFormatToBigQueryFormat(timeFormat)
+          + "\", " + timeColumn + ")))";
     }
     return "";
   }

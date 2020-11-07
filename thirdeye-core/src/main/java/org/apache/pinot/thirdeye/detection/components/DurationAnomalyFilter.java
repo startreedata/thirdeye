@@ -27,7 +27,6 @@ import org.apache.pinot.thirdeye.detection.annotation.Components;
 import org.apache.pinot.thirdeye.detection.spec.DurationAnomalyFilterSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
 
-
 /**
  * Duration filter. Filter the anomaly based on the anomaly duration.
  * USE WITH CAUTION. If min duration is set larger than the maximum possible anomaly duration
@@ -35,18 +34,20 @@ import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
  */
 @Components(type = "DURATION_FILTER")
 public class DurationAnomalyFilter implements AnomalyFilter<DurationAnomalyFilterSpec> {
+
   private Duration minDuration;
   private Duration maxDuration;
 
   @Override
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
     long anomalyDuration = anomaly.getEndTime() - anomaly.getStartTime();
-    return anomalyDuration >= this.minDuration.toMillis() && anomalyDuration <= this.maxDuration.toMillis();
+    return anomalyDuration >= this.minDuration.toMillis() && anomalyDuration <= this.maxDuration
+        .toMillis();
   }
 
   @Override
   public void init(DurationAnomalyFilterSpec spec, InputDataFetcher dataFetcher) {
-    if (spec.getMinDuration() != null){
+    if (spec.getMinDuration() != null) {
       this.minDuration = Duration.parse(spec.getMinDuration());
     }
     if (spec.getMaxDuration() != null) {

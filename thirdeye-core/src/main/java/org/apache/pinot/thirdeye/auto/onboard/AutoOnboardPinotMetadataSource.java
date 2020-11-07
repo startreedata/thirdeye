@@ -61,13 +61,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This is a service to onboard datasets automatically to thirdeye from pinot
- * The run method is invoked periodically by the AutoOnboardService, and it checks for new tables in pinot, to add to thirdeye
+ * The run method is invoked periodically by the AutoOnboardService, and it checks for new tables in
+ * pinot, to add to thirdeye
  * It also looks for any changes in dimensions or metrics to the existing tables
  */
 public class AutoOnboardPinotMetadataSource extends AutoOnboard {
+
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardPinotMetadataSource.class);
 
-  private static final Set<String> DIMENSION_SUFFIX_BLACKLIST = new HashSet<>(Arrays.asList("_topk", "_approximate", "_tDigest"));
+  private static final Set<String> DIMENSION_SUFFIX_BLACKLIST = new HashSet<>(
+      Arrays.asList("_topk", "_approximate", "_tDigest"));
 
   /**
    * Use "ROW_COUNT" as the special token for the count(*) metric for a pinot table
@@ -79,7 +82,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
   private final MetricConfigManager metricDAO;
   private final String dataSourceName;
 
-  private AutoOnboardPinotMetricsUtils autoLoadPinotMetricsUtils;
+  private final AutoOnboardPinotMetricsUtils autoLoadPinotMetricsUtils;
 
   public AutoOnboardPinotMetadataSource(MetadataSourceConfig metadataSourceConfig)
       throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
@@ -93,16 +96,19 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     this.datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
     this.metricDAO = DAO_REGISTRY.getMetricConfigDAO();
     this.alertDAO = DAO_REGISTRY.getAlertConfigDAO();
-    this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name", PinotThirdEyeDataSource.class.getSimpleName());
+    this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
+        PinotThirdEyeDataSource.class.getSimpleName());
   }
 
-  public AutoOnboardPinotMetadataSource(MetadataSourceConfig metadataSourceConfig, AutoOnboardPinotMetricsUtils utils) {
+  public AutoOnboardPinotMetadataSource(MetadataSourceConfig metadataSourceConfig,
+      AutoOnboardPinotMetricsUtils utils) {
     super(metadataSourceConfig);
     autoLoadPinotMetricsUtils = utils;
     this.datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
     this.metricDAO = DAO_REGISTRY.getMetricConfigDAO();
     this.alertDAO = DAO_REGISTRY.getAlertConfigDAO();
-    this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name", PinotThirdEyeDataSource.class.getSimpleName());
+    this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
+        PinotThirdEyeDataSource.class.getSimpleName());
   }
 
   public void run() {
@@ -132,12 +138,14 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     List<DatasetConfigDTO> allExistingDataset = this.datasetDAO.findAll();
     Set<String> datasets = new HashSet<>(allDatasets);
 
-    Collection<DatasetConfigDTO> filtered = Collections2.filter(allExistingDataset, new com.google.common.base.Predicate<DatasetConfigDTO>() {
-      @Override
-      public boolean apply(@Nullable DatasetConfigDTO datasetConfigDTO) {
-        return datasetConfigDTO.getDataSource().equals(AutoOnboardPinotMetadataSource.this.dataSourceName);
-      }
-    });
+    Collection<DatasetConfigDTO> filtered = Collections2
+        .filter(allExistingDataset, new com.google.common.base.Predicate<DatasetConfigDTO>() {
+          @Override
+          public boolean apply(@Nullable DatasetConfigDTO datasetConfigDTO) {
+            return datasetConfigDTO.getDataSource()
+                .equals(AutoOnboardPinotMetadataSource.this.dataSourceName);
+          }
+        });
 
     for (DatasetConfigDTO datasetConfigDTO : filtered) {
       if (shouldDeactivateDataset(datasetConfigDTO, datasets)) {
@@ -165,11 +173,11 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     }
   }
 
-
   /**
    * Adds a dataset to the thirdeye database
    */
-  public void addPinotDataset(String dataset, Schema schema, String timeColumnName, Map<String, String> customConfigs,
+  public void addPinotDataset(String dataset, Schema schema, String timeColumnName,
+      Map<String, String> customConfigs,
       DatasetConfigDTO datasetConfig)
       throws Exception {
     if (datasetConfig == null) {
@@ -184,17 +192,20 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
   /**
    * Adds a new dataset to the thirdeye database
    */
-  private void addNewDataset(String dataset, Schema schema, String timeColumnName, Map<String, String> customConfigs) {
+  private void addNewDataset(String dataset, Schema schema, String timeColumnName,
+      Map<String, String> customConfigs) {
     List<MetricFieldSpec> metricSpecs = schema.getMetricFieldSpecs();
 
     // Create DatasetConfig
-    DatasetConfigDTO datasetConfigDTO = ConfigGenerator.generateDatasetConfig(dataset, schema, timeColumnName, customConfigs, this.dataSourceName);
+    DatasetConfigDTO datasetConfigDTO = ConfigGenerator
+        .generateDatasetConfig(dataset, schema, timeColumnName, customConfigs, this.dataSourceName);
     LOG.info("Creating dataset for {}", dataset);
     this.datasetDAO.save(datasetConfigDTO);
 
     // Create MetricConfig
     for (MetricFieldSpec metricFieldSpec : metricSpecs) {
-      MetricConfigDTO metricConfigDTO = ConfigGenerator.generateMetricConfig(metricFieldSpec, dataset);
+      MetricConfigDTO metricConfigDTO = ConfigGenerator
+          .generateMetricConfig(metricFieldSpec, dataset);
       LOG.info("Creating metric {} for {}", metricConfigDTO.getName(), dataset);
       this.metricDAO.save(metricConfigDTO);
     }
@@ -214,7 +225,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     datasetConfig.setActive(true);
   }
 
-  private void checkDimensionChanges(String dataset, DatasetConfigDTO datasetConfig, Schema schema) {
+  private void checkDimensionChanges(String dataset, DatasetConfigDTO datasetConfig,
+      Schema schema) {
     LOG.info("Checking for dimensions changes in {}", dataset);
     List<String> schemaDimensions = schema.getDimensionNames();
     List<String> datasetDimensions = datasetConfig.getDimensions();
@@ -238,9 +250,11 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
       if (metricConfig.isDimensionAsMetric()) {
         Map<String, String> metricProperties = metricConfig.getMetricProperties();
         if (MapUtils.isNotEmpty(metricProperties)) {
-          String metricNames = metricProperties.get(DimensionAsMetricProperties.METRIC_NAMES_COLUMNS.toString());
+          String metricNames = metricProperties
+              .get(DimensionAsMetricProperties.METRIC_NAMES_COLUMNS.toString());
           if (StringUtils.isNotBlank(metricNames)) {
-            dimensionsAsMetrics.addAll(Lists.newArrayList(metricNames.split(MetricConfigBean.METRIC_PROPERTIES_SEPARATOR)));
+            dimensionsAsMetrics.addAll(Lists
+                .newArrayList(metricNames.split(MetricConfigBean.METRIC_PROPERTIES_SEPARATOR)));
           }
         }
       }
@@ -252,7 +266,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
 
     // dimensions which are new in the pinot schema
     for (String dimensionName : schemaDimensions) {
-      if (!datasetDimensions.contains(dimensionName) && !dimensionsAsMetrics.contains(dimensionName)) {
+      if (!datasetDimensions.contains(dimensionName) && !dimensionsAsMetrics
+          .contains(dimensionName)) {
         dimensionsToAdd.add(dimensionName);
       }
     }
@@ -265,14 +280,16 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     }
 
     // apply diff
-    if (CollectionUtils.isNotEmpty(dimensionsToAdd) || CollectionUtils.isNotEmpty(dimensionsToRemove)) {
+    if (CollectionUtils.isNotEmpty(dimensionsToAdd) || CollectionUtils
+        .isNotEmpty(dimensionsToRemove)) {
       datasetDimensions.addAll(dimensionsToAdd);
       datasetDimensions.removeAll(dimensionsToRemove);
       datasetConfig.setDimensions(datasetDimensions);
 
       if (!datasetConfig.isAdditive()
           && CollectionUtils.isNotEmpty(datasetConfig.getDimensionsHaveNoPreAggregation())) {
-        List<String> dimensionsHaveNoPreAggregation = datasetConfig.getDimensionsHaveNoPreAggregation();
+        List<String> dimensionsHaveNoPreAggregation = datasetConfig
+            .getDimensionsHaveNoPreAggregation();
         dimensionsHaveNoPreAggregation.removeAll(dimensionsToRemove);
         datasetConfig.setDimensionsHaveNoPreAggregation(dimensionsHaveNoPreAggregation);
       }
@@ -285,7 +302,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     LOG.info("Checking for metric changes in {}", dataset);
 
     // Fetch metrics from Thirdeye
-    List<MetricConfigDTO> datasetMetricConfigs = DAO_REGISTRY.getMetricConfigDAO().findByDataset(dataset);
+    List<MetricConfigDTO> datasetMetricConfigs = DAO_REGISTRY.getMetricConfigDAO()
+        .findByDataset(dataset);
 
     // Fetch metrics from Pinot
     List<MetricFieldSpec> schemaMetricSpecs = schema.getMetricFieldSpecs();
@@ -338,7 +356,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
 
   }
 
-  private void checkTimeFieldChanges(DatasetConfigDTO datasetConfig, Schema schema, String timeColumnName) {
+  private void checkTimeFieldChanges(DatasetConfigDTO datasetConfig, Schema schema,
+      String timeColumnName) {
     DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(timeColumnName);
     DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
     String timeFormatStr = formatSpec.getTimeFormat().equals(TimeFormat.SIMPLE_DATE_FORMAT) ? String
@@ -348,7 +367,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
         || !datasetConfig.getTimeFormat().equals(timeFormatStr)
         || datasetConfig.bucketTimeGranularity().getUnit() != formatSpec.getColumnUnit()
         || datasetConfig.bucketTimeGranularity().getSize() != formatSpec.getColumnSize()) {
-      ConfigGenerator.setDateTimeSpecs(datasetConfig, timeColumnName, timeFormatStr, formatSpec.getColumnSize(),
+      ConfigGenerator.setDateTimeSpecs(datasetConfig, timeColumnName, timeFormatStr,
+          formatSpec.getColumnSize(),
           formatSpec.getColumnUnit());
       DAO_REGISTRY.getDatasetConfigDAO().update(datasetConfig);
       LOG.info("Refreshed time field. name = {}, format = {}, type = {}, unit size = {}.",
@@ -357,14 +377,16 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
   }
 
   /**
-   * This method ensures that the given custom configs exist in the dataset config and their value are the same.
+   * This method ensures that the given custom configs exist in the dataset config and their value
+   * are the same.
    *
    * @param datasetConfig the current dataset config to be appended with new custom config.
    * @param customConfigs the custom config to be matched with that from dataset config.
    *
-   * TODO: Remove out-of-date Pinot custom config from dataset config.
+   *     TODO: Remove out-of-date Pinot custom config from dataset config.
    */
-  private void appendNewCustomConfigs(DatasetConfigDTO datasetConfig, Map<String, String> customConfigs) {
+  private void appendNewCustomConfigs(DatasetConfigDTO datasetConfig,
+      Map<String, String> customConfigs) {
     if (MapUtils.isNotEmpty(customConfigs)) {
       Map<String, String> properties = datasetConfig.getProperties();
       boolean hasUpdate = false;
@@ -396,7 +418,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
    * 3. Custom property map from Pinot table config
    */
   private void loadDatasets(List<String> allDatasets, Map<String, Schema> allSchemas,
-      Map<String, Map<String, String>> allCustomConfigs, Map<String, String> datasetToTimeColumnMap) throws IOException {
+      Map<String, Map<String, String>> allCustomConfigs, Map<String, String> datasetToTimeColumnMap)
+      throws IOException {
 
     JsonNode tables = autoLoadPinotMetricsUtils.getAllTablesFromPinot();
     LOG.info("Getting all schemas");
@@ -404,11 +427,13 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
       String dataset = table.asText();
       Schema schema = autoLoadPinotMetricsUtils.getSchemaFromPinot(dataset);
       if (schema != null) {
-        JsonNode tableConfigJson = autoLoadPinotMetricsUtils.getTableConfigFromPinotEndpoint(dataset);
+        JsonNode tableConfigJson = autoLoadPinotMetricsUtils
+            .getTableConfigFromPinotEndpoint(dataset);
         String timeColumnName = null;
         Map<String, String> pinotCustomProperty = null;
         if (tableConfigJson != null && !tableConfigJson.isNull()) {
-          timeColumnName = autoLoadPinotMetricsUtils.extractTimeColumnFromPinotTable(tableConfigJson);
+          timeColumnName = autoLoadPinotMetricsUtils
+              .extractTimeColumnFromPinotTable(tableConfigJson);
           pinotCustomProperty =
               autoLoadPinotMetricsUtils.extractCustomConfigsFromPinotTable(tableConfigJson);
         }
@@ -440,7 +465,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     } else {
       return metricConfig.getName();
     }
-    throw new IllegalArgumentException(String.format("Could not resolve column name for '%s'", metricConfig));
+    throw new IllegalArgumentException(
+        String.format("Could not resolve column name for '%s'", metricConfig));
   }
 
   @Override
@@ -448,5 +474,4 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     LOG.info("Triggering adhoc run for AutoOnboard Pinot data source");
     run();
   }
-
 }

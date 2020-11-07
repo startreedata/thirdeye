@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class OnlineDetectionDataIndex extends AbstractIndexEntity {
+
   String dataset;
   String metric;
 

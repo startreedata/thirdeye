@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 
-
 public class ModelDownloaderConfiguration {
+
   private TimeGranularity runFrequency;
   private String className;
   private String destinationPath;

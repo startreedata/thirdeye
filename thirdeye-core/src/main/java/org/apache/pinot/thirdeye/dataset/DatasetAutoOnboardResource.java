@@ -34,10 +34,10 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 
-
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class DatasetAutoOnboardResource {
+
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private final MetricConfigManager metricDAO;
   private final AlertManager detectionDAO;

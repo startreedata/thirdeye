@@ -27,7 +27,6 @@ import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardConfiguration;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 
-
 public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
 
   private boolean alert = false;
@@ -67,7 +66,8 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return holidayEventsLoaderConfiguration;
   }
 
-  public void setHolidayEventsLoaderConfiguration(HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration) {
+  public void setHolidayEventsLoaderConfiguration(
+      HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration) {
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
   }
 
@@ -83,7 +83,8 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return mockEventsLoaderConfiguration;
   }
 
-  public void setMockEventsLoaderConfiguration(MockEventsLoaderConfiguration mockEventsLoaderConfiguration) {
+  public void setMockEventsLoaderConfiguration(
+      MockEventsLoaderConfiguration mockEventsLoaderConfiguration) {
     this.mockEventsLoaderConfiguration = mockEventsLoaderConfiguration;
   }
 

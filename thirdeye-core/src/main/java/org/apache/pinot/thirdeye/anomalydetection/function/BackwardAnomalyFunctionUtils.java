@@ -36,6 +36,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 public class BackwardAnomalyFunctionUtils {
+
   private static final Double NULL_DOUBLE = Double.NaN;
 
   public static List<Pair<Long, Long>> toBackwardCompatibleDataRanges(
@@ -53,7 +54,8 @@ public class BackwardAnomalyFunctionUtils {
    * series is sorted by the start time of their interval in the reversed natural order. Therefore,
    * the current time series is located at the beginning of the returned list.
    *
-   * @param metricTimeSeries the metric time series that contains current and baseline time series.
+   * @param metricTimeSeries the metric time series that contains current and baseline time
+   *     series.
    * @param metricName the metric name to retrieve the value from the given metric time series.
    * @param timeSeriesIntervals the intervals of the split time series.
    * @return a list of time series, which are split from the metric time series.
@@ -76,7 +78,8 @@ public class BackwardAnomalyFunctionUtils {
     for (long timestamp : metricTimeSeries.getTimeWindowSet()) {
       for (TimeSeries timeSeries : timeSeriesList) {
         if (timeSeries.getTimeSeriesInterval().contains(timestamp)) {
-          double value = metricTimeSeries.getOrDefault(timestamp, metricName, NULL_DOUBLE).doubleValue();
+          double value = metricTimeSeries.getOrDefault(timestamp, metricName, NULL_DOUBLE)
+              .doubleValue();
           if (Double.compare(value, NULL_DOUBLE) != 0) {
             timeSeries.set(timestamp, value);
           }
@@ -96,7 +99,6 @@ public class BackwardAnomalyFunctionUtils {
    * @param windowStart the start of the interval of the time series.
    * @param windowEnd the end of the interval of the time series.
    * @param knownAnomalies the list of historical merged anomalies.
-   *
    * @return an anomaly detection context from the given information.
    */
   public static AnomalyDetectionContext buildAnomalyDetectionContext(
@@ -129,7 +131,6 @@ public class BackwardAnomalyFunctionUtils {
       anomalyDetectionContext.setBaselines(metricName, timeSeriesList);
     }
 
-
     return anomalyDetectionContext;
   }
 
@@ -137,7 +138,9 @@ public class BackwardAnomalyFunctionUtils {
    * Compares Time Series by the start time of their interval.
    */
   private static class TimeSeriesStartTimeComparator implements Comparator<TimeSeries> {
-    @Override public int compare(TimeSeries ts1, TimeSeries ts2) {
+
+    @Override
+    public int compare(TimeSeries ts1, TimeSeries ts2) {
       long startTime1 = ts1.getTimeSeriesInterval().getStartMillis();
       long startTime2 = ts2.getTimeSeriesInterval().getStartMillis();
       return Long.compare(startTime1, startTime2);

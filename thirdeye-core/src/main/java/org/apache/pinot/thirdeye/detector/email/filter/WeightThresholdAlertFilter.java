@@ -27,16 +27,18 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Created by ychung on 2/14/17.
  *
- * This WeightThresholdAlertFilter checks if the weight level of given merged anomaly result is between given up
- * and down threshold. The up and down threshold should be positive floating point number. This class return false if
+ * This WeightThresholdAlertFilter checks if the weight level of given merged anomaly result is
+ * between given up
+ * and down threshold. The up and down threshold should be positive floating point number. This
+ * class return false if
  * - downThreshold < weight < upThreshold; otherwise, return true.
  * Note that, down and up thresholds are supposed to be positive double value
  */
 public class WeightThresholdAlertFilter extends BaseAlertFilter {
+
   private final static Logger LOG = LoggerFactory.getLogger(WeightThresholdAlertFilter.class);
 
   public static final String DEFAULT_UP_THRESHOLD = Double.toString(Double.POSITIVE_INFINITY);
@@ -64,19 +66,19 @@ public class WeightThresholdAlertFilter extends BaseAlertFilter {
     this.downThreshold = Math.abs(downThreshold);
   }
 
-
-  public WeightThresholdAlertFilter(){
+  public WeightThresholdAlertFilter() {
 
   }
 
-  public WeightThresholdAlertFilter(double upThreshold, double downThreshold){
+  public WeightThresholdAlertFilter(double upThreshold, double downThreshold) {
     setUpThreshold(upThreshold);
     setDownThreshold(downThreshold);
   }
 
   @Override
   public List<String> getPropertyNames() {
-    return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(UP_THRESHOLD, DOWN_THRESHOLD)));
+    return Collections
+        .unmodifiableList(new ArrayList<>(Arrays.asList(UP_THRESHOLD, DOWN_THRESHOLD)));
   }
 
   // Check if the weight of the given MergedAnomalyResultDTO is greater or equal to the up threshold

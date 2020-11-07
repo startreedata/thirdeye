@@ -37,16 +37,19 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class AnomalyUtils {
+
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyUtils.class);
 
   /**
-   * Logs the known anomalies whose window overlaps with the given window, whose range is defined by windowStart
+   * Logs the known anomalies whose window overlaps with the given window, whose range is defined by
+   * windowStart
    * and windowEnd.
    *
-   * Reason to log the overlapped anomalies: During anomaly detection, the know anomalies are supposedly used to remove
-   * abnormal baseline values but not current values. This method provides a check before sending the known anomalies to
+   * Reason to log the overlapped anomalies: During anomaly detection, the know anomalies are
+   * supposedly used to remove
+   * abnormal baseline values but not current values. This method provides a check before sending
+   * the known anomalies to
    * anomaly detection functions.
    *
    * @param windowStart the inclusive start time of the window
@@ -61,7 +64,8 @@ public class AnomalyUtils {
 
     List<MergedAnomalyResultDTO> overlappedAnomalies = new ArrayList<>();
     for (MergedAnomalyResultDTO knownAnomaly : knownAnomalies) {
-      if (knownAnomaly.getStartTime() <= windowEnd.getMillis() && knownAnomaly.getEndTime() >= windowStart.getMillis()) {
+      if (knownAnomaly.getStartTime() <= windowEnd.getMillis()
+          && knownAnomaly.getEndTime() >= windowStart.getMillis()) {
         overlappedAnomalies.add(knownAnomaly);
       }
     }
@@ -70,10 +74,12 @@ public class AnomalyUtils {
       StringBuffer sb = new StringBuffer();
       String separator = "";
       for (MergedAnomalyResultDTO overlappedAnomaly : overlappedAnomalies) {
-        sb.append(separator).append(overlappedAnomaly.getStartTime()).append("--").append(overlappedAnomaly.getEndTime());
+        sb.append(separator).append(overlappedAnomaly.getStartTime()).append("--")
+            .append(overlappedAnomaly.getEndTime());
         separator = ", ";
       }
-      LOG.warn("{} merged anomalies overlap with this window {} -- {}. Anomalies: {}", overlappedAnomalies.size(),
+      LOG.warn("{} merged anomalies overlap with this window {} -- {}. Anomalies: {}",
+          overlappedAnomalies.size(),
           windowStart, windowEnd, sb.toString());
     }
   }
@@ -81,13 +87,13 @@ public class AnomalyUtils {
   /**
    * This function checks if the input list of merged anomalies has at least one positive label.
    * It is a helper for alert filter auto tuning
-   * @param mergedAnomalyResultDTOS
+   *
    * @return true if the list of merged anomalies has at least one positive label, false otherwise
    */
-  public static Boolean checkHasLabels(List<MergedAnomalyResultDTO> mergedAnomalyResultDTOS){
-    for(MergedAnomalyResultDTO anomaly: mergedAnomalyResultDTOS){
+  public static Boolean checkHasLabels(List<MergedAnomalyResultDTO> mergedAnomalyResultDTOS) {
+    for (MergedAnomalyResultDTO anomaly : mergedAnomalyResultDTOS) {
       AnomalyFeedback feedback = anomaly.getFeedback();
-      if (feedback != null){
+      if (feedback != null) {
         return true;
       }
     }
@@ -101,7 +107,8 @@ public class AnomalyUtils {
    * @param executorService the executor service to be shutdown.
    * @param ownerClass the class that owns the executor service; it could be null.
    */
-  public static void safelyShutdownExecutionService(ExecutorService executorService, Class ownerClass) {
+  public static void safelyShutdownExecutionService(ExecutorService executorService,
+      Class ownerClass) {
     safelyShutdownExecutionService(executorService, 300, ownerClass);
   }
 
@@ -113,7 +120,8 @@ public class AnomalyUtils {
    * @param maxWaitTimeInSeconds max wait time for threads that are still running.
    * @param ownerClass the class that owns the executor service; it could be null.
    */
-  public static void safelyShutdownExecutionService(ExecutorService executorService, int maxWaitTimeInSeconds,
+  public static void safelyShutdownExecutionService(ExecutorService executorService,
+      int maxWaitTimeInSeconds,
       Class ownerClass) {
     if (executorService == null) {
       return;
@@ -148,6 +156,7 @@ public class AnomalyUtils {
    * This is a subclass describing anomalies features as training data for alert filter
    */
   public static class MetaDataNode {
+
     public double windowSize;
     public double severity;
     public String startTimeISO;
@@ -156,33 +165,38 @@ public class AnomalyUtils {
     public String feedback;
     public long anomalyId;
 
-    public MetaDataNode(MergedAnomalyResultDTO anomaly){
+    public MetaDataNode(MergedAnomalyResultDTO anomaly) {
       this.windowSize = 1. * (anomaly.getEndTime() - anomaly.getStartTime()) / 3600000L;
       this.severity = anomaly.getWeight();
       this.startTimeISO = new Timestamp(anomaly.getStartTime()).toString();
       this.endTimeISO = new Timestamp(anomaly.getEndTime()).toString();
       this.functionName = anomaly.getFunction().getFunctionName();
-      this.feedback = (anomaly.getFeedback() == null)? "null" : String.valueOf(anomaly.getFeedback().getFeedbackType());
+      this.feedback = (anomaly.getFeedback() == null) ? "null"
+          : String.valueOf(anomaly.getFeedback().getFeedbackType());
       this.anomalyId = anomaly.getId();
     }
   }
 
   /**
-   * Returns the filter set to query the time series on UI. The filter set is constructed by combining the dimension
+   * Returns the filter set to query the time series on UI. The filter set is constructed by
+   * combining the dimension
    * information of the given anomaly and the filter set from its corresponding anomaly function.
    *
-   * For instance, assume that the dimension from the detected anomaly is {"country":"US"} and the filter on its
-   * anomaly function is {"country":["US", "IN"],"page_key":["p1,p2"]}, then the returned filter set for querying
+   * For instance, assume that the dimension from the detected anomaly is {"country":"US"} and the
+   * filter on its
+   * anomaly function is {"country":["US", "IN"],"page_key":["p1,p2"]}, then the returned filter set
+   * for querying
    * is {"country":["US"],"page_key":["p1,p2"]}.
    *
    * @param mergedAnomaly the target anomaly for which we want to generate the query filter set.
-   *
    * @return the filter set for querying the time series that produce the anomaly.
    */
-  public static Multimap<String, String> generateFilterSetForTimeSeriesQuery(MergedAnomalyResultDTO mergedAnomaly) {
+  public static Multimap<String, String> generateFilterSetForTimeSeriesQuery(
+      MergedAnomalyResultDTO mergedAnomaly) {
     AnomalyFunctionDTO anomalyFunctionDTO = mergedAnomaly.getFunction();
     Multimap<String, String> filterSet = anomalyFunctionDTO.getFilterSet();
-    Multimap<String, String> newFilterSet = generateFilterSetWithDimensionMap(mergedAnomaly.getDimensions(), filterSet);
+    Multimap<String, String> newFilterSet = generateFilterSetWithDimensionMap(
+        mergedAnomaly.getDimensions(), filterSet);
     return newFilterSet;
   }
 
@@ -210,5 +224,4 @@ public class AnomalyUtils {
 
     return newFilterSet;
   }
-
 }

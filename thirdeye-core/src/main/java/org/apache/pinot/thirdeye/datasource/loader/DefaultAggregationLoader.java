@@ -41,9 +41,9 @@ import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class DefaultAggregationLoader implements AggregationLoader {
-  private static Logger LOG = LoggerFactory.getLogger(DefaultAggregationLoader.class);
+
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultAggregationLoader.class);
 
   private static final long TIMEOUT = 600000;
 
@@ -52,7 +52,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
   private final QueryCache cache;
   private final LoadingCache<String, Long> maxTimeCache;
 
-  public DefaultAggregationLoader(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO, QueryCache cache, LoadingCache<String, Long> maxTimeCache) {
+  public DefaultAggregationLoader(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
+      QueryCache cache, LoadingCache<String, Long> maxTimeCache) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.cache = cache;
@@ -71,7 +72,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
     if (dataset == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve dataset '%s'", metric.getDataset()));
+      throw new IllegalArgumentException(
+          String.format("Could not resolve dataset '%s'", metric.getDataset()));
     }
 
     List<String> dimensions = new ArrayList<>(dataset.getDimensions());
@@ -81,7 +83,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
     LOG.info("De-Aggregating '{}' for dimensions '{}'", slice, dimensions);
 
     DataFrame dfAll = DataFrame
-        .builder(COL_DIMENSION_NAME + ":STRING", COL_DIMENSION_VALUE + ":STRING", COL_VALUE + ":DOUBLE").build()
+        .builder(COL_DIMENSION_NAME + ":STRING", COL_DIMENSION_VALUE + ":STRING",
+            COL_VALUE + ":DOUBLE").build()
         .setIndex(COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
 
     Map<String, RequestContainer> requests = new HashMap<>();
@@ -89,7 +92,9 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     // submit requests
     for (String dimension : dimensions) {
-      RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref", this.metricDAO, this.datasetDAO);
+      RequestContainer rc = DataFrameUtils
+          .makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref",
+              this.metricDAO, this.datasetDAO);
       Future<ThirdEyeResponse> res = this.cache.getQueryResultAsync(rc.getRequest());
 
       requests.put(dimension, rc);
@@ -102,7 +107,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
     List<DataFrame> results = new ArrayList<>();
     for (String dimension : dimensions) {
       RequestContainer rc = requests.get(dimension);
-      ThirdEyeResponse res = responses.get(dimension).get(makeTimeout(deadline), TimeUnit.MILLISECONDS);
+      ThirdEyeResponse res = responses.get(dimension)
+          .get(makeTimeout(deadline), TimeUnit.MILLISECONDS);
       DataFrame dfRaw = DataFrameUtils.evaluateResponse(res, rc);
       DataFrame dfResult = new DataFrame()
           .addSeries(COL_DIMENSION_NAME, StringSeries.fillValues(dfRaw.size(), dimension))
@@ -115,7 +121,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
   }
 
   @Override
-  public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit) throws Exception {
+  public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit)
+      throws Exception {
     final long metricId = slice.getMetricId();
 
     // fetch meta data
@@ -126,7 +133,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
     if (dataset == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve dataset '%s'", metric.getDataset()));
+      throw new IllegalArgumentException(
+          String.format("Could not resolve dataset '%s'", metric.getDataset()));
     }
 
     LOG.info("Aggregating '{}'", slice);
@@ -144,7 +152,9 @@ public class DefaultAggregationLoader implements AggregationLoader {
       return dfEmpty;
     }
 
-    RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref", this.metricDAO, this.datasetDAO);
+    RequestContainer rc = DataFrameUtils
+        .makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref", this.metricDAO,
+            this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
     return DataFrameUtils.evaluateResponse(res, rc);
   }

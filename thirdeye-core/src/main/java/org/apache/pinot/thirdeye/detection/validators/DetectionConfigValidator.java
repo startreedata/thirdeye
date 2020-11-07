@@ -38,11 +38,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-
 /**
  * Application specific constraints and validations on detection config are defined here
  */
 public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertDTO> {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionConfigValidator.class);
 
   private final DetectionPipelineLoader loader;
@@ -91,7 +91,8 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
     detectionConfig.setId(id);
   }
 
-  private void validateMetricAlertConfig(Map<String, Object> detectionYaml, Set<String> ruleNames) throws ConfigValidationException {
+  private void validateMetricAlertConfig(Map<String, Object> detectionYaml, Set<String> ruleNames)
+      throws ConfigValidationException {
     String alertName = MapUtils.getString(detectionYaml, PROP_NAME);
     String metric = MapUtils.getString(detectionYaml, PROP_METRIC);
     String dataset = MapUtils.getString(detectionYaml, PROP_DATASET);
@@ -105,12 +106,14 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
     }
     MetricConfigDTO metricConfig = provider.fetchMetric(metric, datasetConfig.getDataset());
     ConfigValidationUtils.checkArgument(metricConfig != null,
-        String.format("metric/dataset doesn't exist in our records. metric %s in dataset %s in alert %s",
+        String.format(
+            "metric/dataset doesn't exist in our records. metric %s in dataset %s in alert %s",
             metric, dataset, alertName));
 
     // We support only one grouper per metric
-    ConfigValidationUtils.checkArgument(ConfigUtils.getList(detectionYaml.get(PROP_GROUPER)).size() <= 1,
-        "Multiple groupers detected for metric in sub-alert " + alertName);
+    ConfigValidationUtils
+        .checkArgument(ConfigUtils.getList(detectionYaml.get(PROP_GROUPER)).size() <= 1,
+            "Multiple groupers detected for metric in sub-alert " + alertName);
 
     // Validate all the rules
     List<Map<String, Object>> ruleYamls = ConfigUtils.getList(detectionYaml.get(PROP_RULES));
@@ -118,11 +121,13 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
       Map<String, Object> ruleYaml = ruleYamls.get(ruleIndex - 1);
 
       // Validate detection rules
-      validateDuplicateRuleNames(alertName, ruleIndex, ConfigUtils.getList(ruleYaml.get(PROP_DETECTION)), ruleNames);
+      validateDuplicateRuleNames(alertName, ruleIndex,
+          ConfigUtils.getList(ruleYaml.get(PROP_DETECTION)), ruleNames);
 
       // Validate filter rules
       if (ruleYaml.containsKey(PROP_FILTER)) {
-        validateDuplicateRuleNames(alertName, ruleIndex, ConfigUtils.getList(ruleYaml.get(PROP_FILTER)), ruleNames);
+        validateDuplicateRuleNames(alertName, ruleIndex,
+            ConfigUtils.getList(ruleYaml.get(PROP_FILTER)), ruleNames);
       }
     }
   }
@@ -130,23 +135,28 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
   /**
    * Validates to ensure the rule/filter name is unique within the alert
    */
-  private void validateDuplicateRuleNames(String alertName, int ruleIndex, List<Map<String, Object>> ruleYamls,
+  private void validateDuplicateRuleNames(String alertName, int ruleIndex,
+      List<Map<String, Object>> ruleYamls,
       Set<String> ruleNames) throws ConfigValidationException {
     for (Map<String, Object> ruleYaml : ruleYamls) {
       String name = MapUtils.getString(ruleYaml, PROP_NAME);
       ConfigValidationUtils.checkArgument(!ruleNames.contains(name),
-          "Duplicate rule name (" + name + ") found for sub-alert " + alertName + " rule no. " + ruleIndex
+          "Duplicate rule name (" + name + ") found for sub-alert " + alertName + " rule no. "
+              + ruleIndex
               + ". Names have to be unique within a config.");
       ruleNames.add(MapUtils.getString(ruleYaml, PROP_NAME));
     }
   }
 
-  private void validateCompositeAlertConfig(Map<String, Object> detectionYaml, Set<String> ruleNames)
+  private void validateCompositeAlertConfig(Map<String, Object> detectionYaml,
+      Set<String> ruleNames)
       throws ConfigValidationException {
     // validate all the sub-alerts depending on the type (METRIC_ALERT OR COMPOSITE_ALERT)
-    List<Map<String, Object>> subDetectionYamls = ConfigUtils.getList(detectionYaml.get(PROP_ALERTS));
+    List<Map<String, Object>> subDetectionYamls = ConfigUtils
+        .getList(detectionYaml.get(PROP_ALERTS));
     for (Map<String, Object> subDetectionYaml : subDetectionYamls) {
-      if (subDetectionYaml.containsKey(PROP_TYPE) && subDetectionYaml.get(PROP_TYPE).equals(COMPOSITE_ALERT)) {
+      if (subDetectionYaml.containsKey(PROP_TYPE) && subDetectionYaml.get(PROP_TYPE)
+          .equals(COMPOSITE_ALERT)) {
         validateCompositeAlertConfig(subDetectionYaml, ruleNames);
       } else {
         validateMetricAlertConfig(subDetectionYaml, ruleNames);
@@ -162,7 +172,8 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
   @Override
   public void staticValidation(String config) throws ConfigValidationException {
     Map<String, Object> detectionConfigMap = ConfigUtils.getMap(new Yaml().load(config));
-    if (detectionConfigMap.containsKey(PROP_DISABLE_VALD) && MapUtils.getBoolean(detectionConfigMap, PROP_DISABLE_VALD)) {
+    if (detectionConfigMap.containsKey(PROP_DISABLE_VALD) && MapUtils
+        .getBoolean(detectionConfigMap, PROP_DISABLE_VALD)) {
       LOG.info("Validation disabled for detection config " + config);
       return;
     }
@@ -184,7 +195,8 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
 
     // Validate config depending on the type (METRIC_ALERT OR COMPOSITE_ALERT)
     Set<String> ruleNames = new HashSet<>();
-    if (detectionConfigMap.get(PROP_TYPE) == null || detectionConfigMap.get(PROP_TYPE).equals(METRIC_ALERT)) {
+    if (detectionConfigMap.get(PROP_TYPE) == null || detectionConfigMap.get(PROP_TYPE)
+        .equals(METRIC_ALERT)) {
       // By default, we treat every alert as a METRIC_ALERT unless explicitly specified.
       // Even the legacy type termed 'COMPOSITE' will be treated as a metric alert along
       // with the new convention METRIC_ALERT. This is applicable only at the root level

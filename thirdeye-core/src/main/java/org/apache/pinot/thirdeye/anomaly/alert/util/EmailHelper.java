@@ -29,7 +29,6 @@ import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Stateless class to provide util methods to help build anomaly report
  */
@@ -40,13 +39,17 @@ public abstract class EmailHelper {
   private EmailHelper() {
   }
 
-  public static void sendEmailWithTextBody(HtmlEmail email, SmtpConfiguration smtpConfigutation, String subject,
-      String textBody, String fromAddress, DetectionAlertFilterRecipients recipients) throws EmailException {
+  public static void sendEmailWithTextBody(HtmlEmail email, SmtpConfiguration smtpConfigutation,
+      String subject,
+      String textBody, String fromAddress, DetectionAlertFilterRecipients recipients)
+      throws EmailException {
     email.setTextMsg(textBody);
     sendEmail(smtpConfigutation, email, subject, fromAddress, recipients);
   }
 
-  /** Sends email according to the provided config. */
+  /**
+   * Sends email according to the provided config.
+   */
   private static void sendEmail(SmtpConfiguration config, HtmlEmail email, String subject,
       String fromAddress, DetectionAlertFilterRecipients recipients) throws EmailException {
     if (config != null) {

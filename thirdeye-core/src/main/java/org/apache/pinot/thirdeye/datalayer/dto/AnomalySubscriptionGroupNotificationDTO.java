@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.datalayer.dto;
 
 import org.apache.pinot.thirdeye.datalayer.pojo.AnomalySubscriptionGroupNotificationBean;
 
+public class AnomalySubscriptionGroupNotificationDTO extends
+    AnomalySubscriptionGroupNotificationBean {
 
-public class AnomalySubscriptionGroupNotificationDTO extends AnomalySubscriptionGroupNotificationBean {
 }

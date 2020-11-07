@@ -22,12 +22,14 @@ package org.apache.pinot.thirdeye.anomaly.alert.grouping.auxiliary_info_provider
 import java.util.Objects;
 
 public class AuxiliaryAlertGroupInfo {
+
   private boolean skipGroupAlert = false;
   private String auxiliaryRecipients = "";
   private String groupTag = "";
 
   /**
    * True means this group's alert should be skipped.
+   *
    * @return if this group's alert should be skipped.
    */
   public boolean isSkipGroupAlert() {
@@ -36,6 +38,7 @@ public class AuxiliaryAlertGroupInfo {
 
   /**
    * Set if this group's alert should be skipped.
+   *
    * @param skipGroupAlert the flag that indicates if this group's alert should be skipped.
    */
   public void setSkipGroupAlert(boolean skipGroupAlert) {
@@ -44,6 +47,7 @@ public class AuxiliaryAlertGroupInfo {
 
   /**
    * Returns auxiliary recipients to be added to the group alert.
+   *
    * @return auxiliary recipients to be added to the group alert.
    */
   public String getAuxiliaryRecipients() {
@@ -51,8 +55,10 @@ public class AuxiliaryAlertGroupInfo {
   }
 
   /**
-   * Sets auxiliary recipients to be added to the group alert. The recipients should be complete email address and
+   * Sets auxiliary recipients to be added to the group alert. The recipients should be complete
+   * email address and
    * are separated by commas.
+   *
    * @param auxiliaryRecipients the auxiliary recipients to be added to the group alert.
    */
   public void setAuxiliaryRecipients(String auxiliaryRecipients) {
@@ -61,6 +67,7 @@ public class AuxiliaryAlertGroupInfo {
 
   /**
    * Returns the string to be added to the alert's subject.
+   *
    * @return the string to be added to the alert's subject.
    */
   public String getGroupTag() {
@@ -69,6 +76,7 @@ public class AuxiliaryAlertGroupInfo {
 
   /**
    * Sets the string to be added to the alert's subject.
+   *
    * @param groupTag the string to be added to the alert's subject.
    */
   public void setGroupTag(String groupTag) {

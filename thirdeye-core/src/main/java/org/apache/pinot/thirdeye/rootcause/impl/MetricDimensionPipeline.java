@@ -27,7 +27,6 @@ import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 
-
 /**
  * The MetricDimensionPipeline extracts filters of input metrics as DimensionEntities.
  */
@@ -50,7 +49,8 @@ public class MetricDimensionPipeline extends Pipeline {
    * @param inputNames input pipeline names
    * @param ignore configuration properties (ignore)
    */
-  public MetricDimensionPipeline(String outputName, Set<String> inputNames, Map<String, Object> ignore) {
+  public MetricDimensionPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> ignore) {
     super(outputName, inputNames);
   }
 
@@ -61,7 +61,9 @@ public class MetricDimensionPipeline extends Pipeline {
 
     for (MetricEntity metric : metrics) {
       for (Map.Entry<String, String> entry : metric.getFilters().entries()) {
-        output.add(DimensionEntity.fromDimension(metric.getScore(), entry.getKey(), entry.getValue(), DimensionEntity.TYPE_GENERATED));
+        output.add(DimensionEntity
+            .fromDimension(metric.getScore(), entry.getKey(), entry.getValue(),
+                DimensionEntity.TYPE_GENERATED));
       }
     }
 

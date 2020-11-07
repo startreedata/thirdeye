@@ -22,8 +22,8 @@ package org.apache.pinot.thirdeye.detection.onboard;
 
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 
-
 public class YamlOnboardingTaskInfo extends DetectionPipelineTaskInfo {
+
   private long tuningWindowStart;
   private long tuningWindowEnd;
 

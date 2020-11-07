@@ -48,7 +48,9 @@ import org.joda.time.Interval;
     DetectionTag.RULE_DETECTION}, description = "Simple threshold rule algorithm with (optional) upper and lower bounds on a metric value.", presentation = {
     @PresentationOption(name = "absolute value", template = "is lower than ${min} or higher than ${max}")}, params = {
     @Param(name = "min", placeholder = "value"), @Param(name = "max", placeholder = "value")})
-public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetectorSpec>, BaselineProvider<ThresholdRuleDetectorSpec> {
+public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetectorSpec>,
+    BaselineProvider<ThresholdRuleDetectorSpec> {
+
   private final String COL_TOO_HIGH = "tooHigh";
   private final String COL_TOO_LOW = "tooLow";
   private final String COL_ANOMALY = "anomaly";
@@ -63,7 +65,8 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
   public DetectionResult runDetection(Interval window, String metricUrn) {
     MetricEntity me = MetricEntity.fromURN(metricUrn);
     Long endTime = window.getEndMillis();
-    MetricSlice slice = MetricSlice.from(me.getId(), window.getStartMillis(), endTime, me.getFilters(), timeGranularity);
+    MetricSlice slice = MetricSlice
+        .from(me.getId(), window.getStartMillis(), endTime, me.getFilters(), timeGranularity);
 
     InputData data = this.dataFetcher.fetchData(
         new InputDataSpec().withTimeseriesSlices(Collections.singletonList(slice))
@@ -87,7 +90,8 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     df.mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
     DatasetConfigDTO datasetConfig = data.getDatasetForMetricId().get(me.getId());
     List<MergedAnomalyResultDTO> anomalies = DetectionUtils.makeAnomalies(slice, df, COL_ANOMALY,
-        DetectionUtils.getMonitoringGranularityPeriod(monitoringGranularity, datasetConfig), datasetConfig);
+        DetectionUtils.getMonitoringGranularityPeriod(monitoringGranularity, datasetConfig),
+        datasetConfig);
     DataFrame baselineWithBoundaries = constructBaselineAndBoundaries(df);
 
     return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(baselineWithBoundaries));
@@ -96,7 +100,8 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
   @Override
   public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
     InputData data =
-        this.dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(Collections.singletonList(slice)));
+        this.dataFetcher
+            .fetchData(new InputDataSpec().withTimeseriesSlices(Collections.singletonList(slice)));
     DataFrame df = data.getTimeseries().get(slice);
     return TimeSeries.fromDataFrame(constructBaselineAndBoundaries(df));
   }
@@ -110,12 +115,14 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     if (!Double.isNaN(this.min)) {
       df.addSeries(DataFrame.COL_LOWER_BOUND, DoubleSeries.fillValues(df.size(), this.min));
       // set baseline value as the lower bound when actual value across below the mark
-      df.mapInPlace(DoubleSeries.MAX, DataFrame.COL_VALUE, DataFrame.COL_LOWER_BOUND, DataFrame.COL_VALUE);
+      df.mapInPlace(DoubleSeries.MAX, DataFrame.COL_VALUE, DataFrame.COL_LOWER_BOUND,
+          DataFrame.COL_VALUE);
     }
     if (!Double.isNaN(this.max)) {
       df.addSeries(DataFrame.COL_UPPER_BOUND, DoubleSeries.fillValues(df.size(), this.max));
       // set baseline value as the upper bound when actual value across above the mark
-      df.mapInPlace(DoubleSeries.MIN, DataFrame.COL_VALUE, DataFrame.COL_UPPER_BOUND, DataFrame.COL_VALUE);
+      df.mapInPlace(DoubleSeries.MIN, DataFrame.COL_VALUE, DataFrame.COL_UPPER_BOUND,
+          DataFrame.COL_VALUE);
     }
     return df;
   }

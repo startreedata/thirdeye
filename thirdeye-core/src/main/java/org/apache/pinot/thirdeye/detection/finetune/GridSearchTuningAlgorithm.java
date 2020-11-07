@@ -54,8 +54,8 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class GridSearchTuningAlgorithm implements TuningAlgorithm {
+
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Logger LOG = LoggerFactory.getLogger(GridSearchTuningAlgorithm.class);
   private final String jsonProperties;
@@ -63,18 +63,18 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
   private final DetectionPipelineLoader loader;
   private final DataProvider provider;
   private final MergedAnomalyResultManager anomalyDAO;
-  private Map<AlertDTO, Double> scores;
-  private Map<AlertDTO, DetectionPipelineResult> results;
-  private ScoreFunction scoreFunction;
+  private final Map<AlertDTO, Double> scores;
+  private final Map<AlertDTO, DetectionPipelineResult> results;
+  private final ScoreFunction scoreFunction;
 
   /**
    * Instantiates a new Grid search tuning algorithm.
    *
    * @param jsonProperties the json properties for detection config
    * @param parameters the parameters to tune. LinkedHashMap from json path to values to try
-   *
    */
-  public GridSearchTuningAlgorithm(String jsonProperties, LinkedHashMap<String, List<Number>> parameters) {
+  public GridSearchTuningAlgorithm(String jsonProperties,
+      LinkedHashMap<String, List<Number>> parameters) {
     this.jsonProperties = jsonProperties;
     this.parameters = parameters;
     this.loader = new DetectionPipelineLoader();
@@ -108,23 +108,26 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
   @Override
   public void fit(AnomalySlice slice, long configId) throws Exception {
     slice = slice.withDetectionId(configId);
-    Collection<MergedAnomalyResultDTO> testAnomalies = this.provider.fetchAnomalies(Collections.singletonList(slice)).get(slice);
+    Collection<MergedAnomalyResultDTO> testAnomalies = this.provider
+        .fetchAnomalies(Collections.singletonList(slice)).get(slice);
     fit(slice, new HashMap<String, Number>(), testAnomalies);
   }
 
   /**
    * Fit into a time range and evaluate the best config recursively.
-   * */
+   */
   private void fit(AnomalySlice slice, Map<String, Number> currentParameters,
       Collection<MergedAnomalyResultDTO> testAnomalies) throws Exception {
     if (currentParameters.size() == this.parameters.size()) {
       AlertDTO config = makeConfigFromParameters(currentParameters);
-      DetectionPipeline pipeline = this.loader.from(this.provider, config, slice.getStart(), slice.getEnd());
+      DetectionPipeline pipeline = this.loader
+          .from(this.provider, config, slice.getStart(), slice.getEnd());
       DetectionPipelineResult result = pipeline.run();
       this.results.put(config, result);
       // calculate score
       this.scores.put(config, this.scoreFunction.calculateScore(result, testAnomalies));
-      LOG.info("Score for detection config {} is {}", OBJECT_MAPPER.writeValueAsString(config), this.scores.get(config));
+      LOG.info("Score for detection config {} is {}", OBJECT_MAPPER.writeValueAsString(config),
+          this.scores.get(config));
       return;
     }
     String path = Iterables.get(this.parameters.keySet(), currentParameters.size());
@@ -136,7 +139,8 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
     }
   }
 
-  private AlertDTO makeConfigFromParameters(Map<String, Number> currentParameters) throws IOException {
+  private AlertDTO makeConfigFromParameters(Map<String, Number> currentParameters)
+      throws IOException {
     DocumentContext jsonContext = JsonPath.parse(this.jsonProperties);
     // Replace parameters using json path
     for (Map.Entry<String, Number> entry : currentParameters.entrySet()) {
@@ -172,7 +176,8 @@ public class GridSearchTuningAlgorithm implements TuningAlgorithm {
     }
     if (bestConfig != null) {
       try {
-        LOG.info("Best detection config found is {} with score {}", OBJECT_MAPPER.writeValueAsString(bestConfig), this.scores.get(bestConfig));
+        LOG.info("Best detection config found is {} with score {}",
+            OBJECT_MAPPER.writeValueAsString(bestConfig), this.scores.get(bestConfig));
       } catch (JsonProcessingException e) {
         LOG.error("error processing json config", e);
       }

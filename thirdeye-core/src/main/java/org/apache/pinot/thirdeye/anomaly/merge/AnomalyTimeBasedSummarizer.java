@@ -32,13 +32,12 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 /**
  * Given list of {@link AnomalyResult} and merge parameters, this utility performs time based merge
  */
 @Deprecated
 public abstract class AnomalyTimeBasedSummarizer {
+
   private final static Logger LOG = LoggerFactory.getLogger(AnomalyTimeBasedSummarizer.class);
 
   private AnomalyTimeBasedSummarizer() {
@@ -46,19 +45,20 @@ public abstract class AnomalyTimeBasedSummarizer {
   }
 
   /**
-   * @param anomalies   : list of raw anomalies to be merged with last mergedAnomaly
-   * @param mergeConfig : the configurations for merging, i.e. maxMergedDurationMillis, sequentialAllowedGap, mergeablePropertyKeys
-   * @return
+   * @param anomalies : list of raw anomalies to be merged with last mergedAnomaly
+   * @param mergeConfig : the configurations for merging, i.e. maxMergedDurationMillis,
+   *     sequentialAllowedGap, mergeablePropertyKeys
    */
-  public static List<MergedAnomalyResultDTO> mergeAnomalies(List<AnomalyResult> anomalies, AnomalyMergeConfig mergeConfig) {
+  public static List<MergedAnomalyResultDTO> mergeAnomalies(List<AnomalyResult> anomalies,
+      AnomalyMergeConfig mergeConfig) {
     return mergeAnomalies(null, anomalies, mergeConfig);
   }
 
   /**
    * @param mergedAnomaly : last merged anomaly
-   * @param anomalies     : list of raw anomalies to be merged with last mergedAnomaly
-   * @param mergeConfig   : the configurations needed for time based merging: i.e. maxMergedDurationMillis, sequentialAllowedGap, mergeablePropertyKeys
-   * @return
+   * @param anomalies : list of raw anomalies to be merged with last mergedAnomaly
+   * @param mergeConfig : the configurations needed for time based merging: i.e.
+   *     maxMergedDurationMillis, sequentialAllowedGap, mergeablePropertyKeys
    */
   public static List<MergedAnomalyResultDTO> mergeAnomalies(MergedAnomalyResultDTO mergedAnomaly,
       List<AnomalyResult> anomalies, AnomalyMergeConfig mergeConfig) {
@@ -90,7 +90,8 @@ public abstract class AnomalyTimeBasedSummarizer {
 
     for (int i = 0; i < anomalies.size(); i++) {
       AnomalyResult currentResult = anomalies.get(i);
-      LOG.info("Current anomaly start =[{}], end = [{}].", currentResult.getStartTime(), currentResult.getEndTime());
+      LOG.info("Current anomaly start =[{}], end = [{}].", currentResult.getStartTime(),
+          currentResult.getEndTime());
       if (mergedAnomaly == null || currentResult.getEndTime() < mergedAnomaly.getStartTime()) {
         mergedAnomaly = new MergedAnomalyResultDTO(currentResult);
         mergedAnomaly.setChildIds(new HashSet<>());
@@ -103,8 +104,9 @@ public abstract class AnomalyTimeBasedSummarizer {
         // should not merge the two and split from here
         if ((applySequentialGapBasedSplit
             && (currentResult.getStartTime() - mergedAnomaly.getEndTime()) > sequentialAllowedGap)
-            || ( applyMaxDurationBasedSplit
-            && (currentResult.getEndTime() - mergedAnomaly.getStartTime()) > maxMergedDurationMillis)
+            || (applyMaxDurationBasedSplit
+            && (currentResult.getEndTime() - mergedAnomaly.getStartTime())
+            > maxMergedDurationMillis)
             || (!isEqualOnMergeableKeys(mergedAnomaly, currAnomaly, mergeablePropertyKeys))) {
 
           // Split here
@@ -130,8 +132,10 @@ public abstract class AnomalyTimeBasedSummarizer {
     }
 
     if (mergedAnomaly != null) {
-      LOG.info("merging [{}] raw anomalies, latest merged anomaly start =[{}], end = [{}], merged anomalies size [{}]",
-          anomalies.size(), mergedAnomaly.getStartTime(), mergedAnomaly.getEndTime(), mergedAnomalies.size());
+      LOG.info(
+          "merging [{}] raw anomalies, latest merged anomaly start =[{}], end = [{}], merged anomalies size [{}]",
+          anomalies.size(), mergedAnomaly.getStartTime(), mergedAnomaly.getEndTime(),
+          mergedAnomalies.size());
     } else {
       LOG.info("merging [{}] raw anomalies", anomalies.size());
     }
@@ -140,20 +144,25 @@ public abstract class AnomalyTimeBasedSummarizer {
   }
 
   /**
-   * Given property keys from anomaly function, comparing if two anomalies have same property on the mergeable keys when doing anomaly detection
-   * If key set is empty, or both properties for the two anomalies are empty or if all of the values on mergeable keys are equal on anomalies return true
+   * Given property keys from anomaly function, comparing if two anomalies have same property on the
+   * mergeable keys when doing anomaly detection
+   * If key set is empty, or both properties for the two anomalies are empty or if all of the values
+   * on mergeable keys are equal on anomalies return true
    * Otherwise return false
+   *
    * @param anomaly1 The first anomaly result
    * @param anomaly2 The second anomaly result
-   * @param mergeableKeys keys that passed by AnomalyMergeConfig, which is defined by Anomaly Detection Function
+   * @param mergeableKeys keys that passed by AnomalyMergeConfig, which is defined by Anomaly
+   *     Detection Function
    * @return true if two anomalies are equal on mergeable keys, otherwise return false
    */
-  private static boolean isEqualOnMergeableKeys(MergedAnomalyResultDTO anomaly1, MergedAnomalyResultDTO anomaly2, List<String> mergeableKeys){
+  private static boolean isEqualOnMergeableKeys(MergedAnomalyResultDTO anomaly1,
+      MergedAnomalyResultDTO anomaly2, List<String> mergeableKeys) {
     Map<String, String> prop1 = anomaly1.getProperties();
     Map<String, String> prop2 = anomaly2.getProperties();
     // degenerate case
-    if(mergeableKeys.size() == 0 ||
-        (MapUtils.isEmpty(prop1) && MapUtils.isEmpty(prop2))){
+    if (mergeableKeys.size() == 0 ||
+        (MapUtils.isEmpty(prop1) && MapUtils.isEmpty(prop2))) {
       return true;
     }
     // If both of anomalies have mergeable keys and the contents are equal, they are mergeable;
@@ -161,7 +170,9 @@ public abstract class AnomalyTimeBasedSummarizer {
     for (String key : mergeableKeys) {
       // If both prop1 and prop2 do not contain key, the mergeable keys are not properly defined or the anomalies are not generated by the anomaly function
       if (!prop1.containsKey(key) && !prop2.containsKey(key)) {
-        LOG.warn("Mergeable key: {} does not exist in properties! The mergeable keys are not properly defined or the anomalies are not generated by the anomaly function", key);
+        LOG.warn(
+            "Mergeable key: {} does not exist in properties! The mergeable keys are not properly defined or the anomalies are not generated by the anomaly function",
+            key);
       }
       // If prop1 and prop2 have different value on key, return false
       if (!ObjectUtils.equals(prop1.get(key), prop2.get(key))) {

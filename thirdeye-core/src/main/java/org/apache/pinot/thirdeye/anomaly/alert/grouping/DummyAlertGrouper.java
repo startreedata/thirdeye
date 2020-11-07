@@ -27,13 +27,15 @@ import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 /**
- * Returns a group that contains all input anomalies. Additionally, this class always returns empty auxiliary email
+ * Returns a group that contains all input anomalies. Additionally, this class always returns empty
+ * auxiliary email
  * recipients.
  */
 public class DummyAlertGrouper extends BaseAlertGrouper {
 
   @Override
-  public Map<DimensionMap, GroupedAnomalyResultsDTO> group(List<MergedAnomalyResultDTO> anomalyResults) {
+  public Map<DimensionMap, GroupedAnomalyResultsDTO> group(
+      List<MergedAnomalyResultDTO> anomalyResults) {
     Map<DimensionMap, GroupedAnomalyResultsDTO> groupMap = new HashMap<>();
     GroupedAnomalyResultsDTO groupedAnomalyResults = new GroupedAnomalyResultsDTO();
     groupedAnomalyResults.setAnomalyResults(anomalyResults);

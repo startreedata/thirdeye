@@ -31,14 +31,14 @@ import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Implementation of an aggregator that handles the same entity being returned from multiple
  * pipelines by selecting the entity with the highest score. It optionally truncates the
  * number of returned entities to the top k by score.
  */
 public class MaxAggregationPipeline extends Pipeline {
-  private static Logger LOG = LoggerFactory.getLogger(MaxAggregationPipeline.class);
+
+  private static final Logger LOG = LoggerFactory.getLogger(MaxAggregationPipeline.class);
 
   private final static String PROP_K = "k";
   private final static int PROP_K_DEFAULT = -1;
@@ -64,13 +64,15 @@ public class MaxAggregationPipeline extends Pipeline {
    * @param inputNames input pipeline names
    * @param properties configuration properties ({@code PROP_K})
    */
-  public MaxAggregationPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public MaxAggregationPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
     this.k = MapUtils.getIntValue(properties, PROP_K, PROP_K_DEFAULT);
   }
 
   @Override
   public PipelineResult run(PipelineContext context) {
-    return new PipelineResult(context, EntityUtils.topk(new MaxScoreSet<>(context.filter(Entity.class)), this.k));
+    return new PipelineResult(context,
+        EntityUtils.topk(new MaxScoreSet<>(context.filter(Entity.class)), this.k));
   }
 }

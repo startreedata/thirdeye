@@ -27,8 +27,8 @@ import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.SessionBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
-
 public class SessionManagerImpl extends AbstractManagerImpl<SessionDTO> implements SessionManager {
+
   @Inject
   public SessionManagerImpl(GenericPojoDao genericPojoDao) {
     super(SessionDTO.class, SessionBean.class, genericPojoDao);

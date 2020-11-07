@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class RootcauseSessionIndex extends AbstractIndexEntity {
+
   private String name;
   private String owner;
   private Long previousId;

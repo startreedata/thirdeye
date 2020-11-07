@@ -37,17 +37,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Threshold-based severity labeler, which labels anomalies with severity based on deviation from baseline and duration
- * of the anomalies. It tries to label anomalies from highest to lowest if deviation or duration exceeds the threshold
+ * Threshold-based severity labeler, which labels anomalies with severity based on deviation from
+ * baseline and duration
+ * of the anomalies. It tries to label anomalies from highest to lowest if deviation or duration
+ * exceeds the threshold
  */
 @Components(title = "ThresholdSeverityLabeler", type = "THRESHOLD_SEVERITY_LABELER",
     tags = {DetectionTag.LABELER}, description = "An threshold-based labeler for anomaly severity")
 public class ThresholdSeverityLabeler implements Labeler<SeverityThresholdLabelerSpec> {
+
   private final static Logger LOG = LoggerFactory.getLogger(ThresholdSeverityLabeler.class);
   // severity map ordered by priority from top to bottom
   private TreeMap<AnomalySeverity, Threshold> severityMap;
 
   public static class Threshold {
+
     public double change;
     public long duration;
 
@@ -63,7 +67,8 @@ public class ThresholdSeverityLabeler implements Labeler<SeverityThresholdLabele
   }
 
   @Override
-  public Map<MergedAnomalyResultDTO, AnomalySeverity> label(List<MergedAnomalyResultDTO> anomalies) {
+  public Map<MergedAnomalyResultDTO, AnomalySeverity> label(
+      List<MergedAnomalyResultDTO> anomalies) {
     Map<MergedAnomalyResultDTO, AnomalySeverity> res = new HashMap<>();
     for (MergedAnomalyResultDTO anomaly : anomalies) {
       double currVal = anomaly.getAvgCurrentVal();
@@ -99,7 +104,8 @@ public class ThresholdSeverityLabeler implements Labeler<SeverityThresholdLabele
           try {
             threshold.duration = (Long) spec.getSeverity().get(key).get(DURATION_KEY);
           } catch (ClassCastException e) {
-            threshold.duration = ((Integer) spec.getSeverity().get(key).get(DURATION_KEY)).longValue();
+            threshold.duration = ((Integer) spec.getSeverity().get(key).get(DURATION_KEY))
+                .longValue();
           }
         }
         this.severityMap.put(severity, threshold);

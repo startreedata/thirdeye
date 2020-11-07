@@ -54,7 +54,6 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The MetricAnalysisPipeline ranks metrics based on the degree of anomalous behavior during
  * the anomaly period. It scores anomalous behavior with user-configured strategies.
@@ -65,6 +64,7 @@ import org.slf4j.LoggerFactory;
  * @see MetricCorrelationRankingPipeline
  */
 public class MetricAnalysisPipeline extends Pipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetricAnalysisPipeline.class);
 
   private static final long TIMEOUT = 1200000;
@@ -101,7 +101,9 @@ public class MetricAnalysisPipeline extends Pipeline {
    * @param metricDAO metric config DAO
    * @param datasetDAO datset config DAO
    */
-  public MetricAnalysisPipeline(String outputName, Set<String> inputNames, ScoringStrategyFactory strategyFactory, TimeGranularity granularity, QueryCache cache, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
+  public MetricAnalysisPipeline(String outputName, Set<String> inputNames,
+      ScoringStrategyFactory strategyFactory, TimeGranularity granularity, QueryCache cache,
+      MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
     super(outputName, inputNames);
     this.cache = cache;
     this.metricDAO = metricDAO;
@@ -117,14 +119,16 @@ public class MetricAnalysisPipeline extends Pipeline {
    * @param inputNames input pipeline names
    * @param properties configuration properties ({@code PROP_STRATEGY})
    */
-  public MetricAnalysisPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public MetricAnalysisPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
     this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
     this.strategyFactory = parseStrategyFactory(
         MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
-    this.granularity = TimeGranularity.fromString(MapUtils.getString(properties, PROP_GRANULARITY, PROP_GRANULARITY_DEFAULT));
+    this.granularity = TimeGranularity
+        .fromString(MapUtils.getString(properties, PROP_GRANULARITY, PROP_GRANULARITY_DEFAULT));
   }
 
   @Override
@@ -157,7 +161,7 @@ public class MetricAnalysisPipeline extends Pipeline {
     LOG.info("Requesting {} time series", requestList.size());
     List<ThirdEyeRequest> thirdeyeRequests = new ArrayList<>();
     Map<String, TimeSeriesRequestContainer> requests = new HashMap<>();
-    for(TimeSeriesRequestContainer rc : requestList) {
+    for (TimeSeriesRequestContainer rc : requestList) {
       final ThirdEyeRequest req = rc.getRequest();
       requests.put(req.getRequestReference(), rc);
       thirdeyeRequests.add(req);
@@ -168,14 +172,15 @@ public class MetricAnalysisPipeline extends Pipeline {
     // fetch responses and calculate derived metrics
     int i = 0;
     Map<String, DataFrame> responses = new HashMap<>();
-    for(Future<ThirdEyeResponse> future : futures) {
+    for (Future<ThirdEyeResponse> future : futures) {
       ThirdEyeResponse response;
       try {
         response = future.get(TIMEOUT, TimeUnit.MILLISECONDS);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       } catch (Exception e) {
-        LOG.warn("Error executing request '{}'. Skipping.", requestList.get(i).getRequest().getRequestReference(), e);
+        LOG.warn("Error executing request '{}'. Skipping.",
+            requestList.get(i).getRequest().getRequestReference(), e);
         continue;
       } finally {
         i++;
@@ -197,9 +202,9 @@ public class MetricAnalysisPipeline extends Pipeline {
 
     // score metrics
     Set<MetricEntity> output = new HashSet<>();
-    for(MetricEntity me : metrics) {
+    for (MetricEntity me : metrics) {
       try {
-        if(!responses.containsKey(me.getUrn())) {
+        if (!responses.containsKey(me.getUrn())) {
           LOG.warn("Did not receive response for '{}'. Skipping.", me.getUrn());
           continue;
         }
@@ -211,8 +216,10 @@ public class MetricAnalysisPipeline extends Pipeline {
         }
 
         LOG.info("Preparing training and test data for metric '{}'", me.getUrn());
-        DataFrame trainingBaseline = extractTimeRange(timeseries, trainingBaselineStart, trainingBaselineEnd);
-        DataFrame trainingCurrent = extractTimeRange(timeseries, trainingCurrentStart, trainingCurrentEnd);
+        DataFrame trainingBaseline = extractTimeRange(timeseries, trainingBaselineStart,
+            trainingBaselineEnd);
+        DataFrame trainingCurrent = extractTimeRange(timeseries, trainingCurrentStart,
+            trainingCurrentEnd);
         DataFrame testBaseline = extractTimeRange(timeseries, testBaselineStart, testBaselineEnd);
         DataFrame testCurrent = extractTimeRange(timeseries, testCurrentStart, testCurrentEnd);
 
@@ -232,7 +239,6 @@ public class MetricAnalysisPipeline extends Pipeline {
         related.add(baselineRange);
 
         output.add(me.withScore(score).withRelated(related));
-
       } catch (Exception e) {
         LOG.warn("Error processing '{}'. Skipping", me.getUrn(), e);
       }
@@ -249,18 +255,19 @@ public class MetricAnalysisPipeline extends Pipeline {
     }
 
     final LongSeries timestamps = data.getLongs(COL_TIME);
-    final long granularity = timestamps.subtract(timestamps.shift(1)).dropNull().head(1).longValue();
+    final long granularity = timestamps.subtract(timestamps.shift(1)).dropNull().head(1)
+        .longValue();
     if ((start / granularity) == (end / granularity)) {
       // not crossing bucket boundary, return nearest lower timestamp
       return data.filterEquals(COL_TIME, (start / granularity) * granularity).dropNull();
     }
 
     return data.filter(new Series.LongConditional() {
-          @Override
-          public boolean apply(long... values) {
-            return values[0] >= start && values[0] < end;
-          }
-        }, COL_TIME).dropNull();
+      @Override
+      public boolean apply(long... values) {
+        return values[0] >= start && values[0] < end;
+      }
+    }, COL_TIME).dropNull();
   }
 
   private DataFrame diffTimeseries(DataFrame current, DataFrame baseline) {
@@ -275,11 +282,13 @@ public class MetricAnalysisPipeline extends Pipeline {
         .addSeries(COL_BASELINE, baseline.getDoubles(COL_VALUE))
         .setIndex(COL_TIME);
     DataFrame joined = offsetCurrent.joinInner(offsetBaseline);
-    return joined.addSeries(COL_VALUE, joined.getDoubles(COL_CURRENT).subtract(joined.get(COL_BASELINE)))
+    return joined
+        .addSeries(COL_VALUE, joined.getDoubles(COL_CURRENT).subtract(joined.get(COL_BASELINE)))
         .dropSeries(COL_CURRENT, COL_BASELINE);
   }
 
-  private Collection<Future<ThirdEyeResponse>> submitRequests(List<ThirdEyeRequest> thirdeyeRequests) {
+  private Collection<Future<ThirdEyeResponse>> submitRequests(
+      List<ThirdEyeRequest> thirdeyeRequests) {
     try {
       return this.cache.getQueryResultsAsync(thirdeyeRequests).values();
     } catch (Exception e) {
@@ -287,16 +296,18 @@ public class MetricAnalysisPipeline extends Pipeline {
     }
   }
 
-  private List<TimeSeriesRequestContainer> makeRequests(Collection<MetricEntity> metrics, long start, long end, Multimap<String, String> filters) {
+  private List<TimeSeriesRequestContainer> makeRequests(Collection<MetricEntity> metrics,
+      long start, long end, Multimap<String, String> filters) {
     List<TimeSeriesRequestContainer> requests = new ArrayList<>();
-    for(MetricEntity me : metrics) {
+    for (MetricEntity me : metrics) {
       Multimap<String, String> jointFilters = ArrayListMultimap.create();
       jointFilters.putAll(filters);
       jointFilters.putAll(me.getFilters());
 
       MetricSlice slice = MetricSlice.from(me.getId(), start, end, jointFilters, this.granularity);
       try {
-        requests.add(DataFrameUtils.makeTimeSeriesRequestAligned(slice, me.getUrn(), this.metricDAO, this.datasetDAO));
+        requests.add(DataFrameUtils
+            .makeTimeSeriesRequestAligned(slice, me.getUrn(), this.metricDAO, this.datasetDAO));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request for '%s'. Skipping.", me.getUrn()), ex);
       }
@@ -305,7 +316,7 @@ public class MetricAnalysisPipeline extends Pipeline {
   }
 
   private static ScoringStrategyFactory parseStrategyFactory(String strategy) {
-    switch(strategy) {
+    switch (strategy) {
       case STRATEGY_THRESHOLD:
         return new ThresholdStrategyFactory(0.90, 0.95, 0.975, 0.99, 1.00);
       default:
@@ -314,14 +325,17 @@ public class MetricAnalysisPipeline extends Pipeline {
   }
 
   private interface ScoringStrategyFactory {
+
     ScoringStrategy fit(DataFrame training);
   }
 
   private interface ScoringStrategy {
+
     double apply(DataFrame data);
   }
 
   private static class ThresholdStrategyFactory implements ScoringStrategyFactory {
+
     final double[] quantiles;
 
     ThresholdStrategyFactory(double... quantiles) {
@@ -333,13 +347,15 @@ public class MetricAnalysisPipeline extends Pipeline {
       DoubleSeries train = training.getDoubles(COL_VALUE);
       double[] thresholds = new double[this.quantiles.length];
       for (int i = 0; i < thresholds.length; i++) {
-        thresholds[i] = train.abs().quantile(this.quantiles[i]).fillNull(Double.POSITIVE_INFINITY).doubleValue();
+        thresholds[i] = train.abs().quantile(this.quantiles[i]).fillNull(Double.POSITIVE_INFINITY)
+            .doubleValue();
       }
       return new ThresholdStrategy(thresholds);
     }
   }
 
   private static class ThresholdStrategy implements ScoringStrategy {
+
     final double[] thresholds;
 
     ThresholdStrategy(double... thresholds) {

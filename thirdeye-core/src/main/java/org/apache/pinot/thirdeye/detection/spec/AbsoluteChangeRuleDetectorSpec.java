@@ -21,13 +21,14 @@ package org.apache.pinot.thirdeye.detection.spec;
 
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 
-
 public class AbsoluteChangeRuleDetectorSpec extends AbstractSpec {
+
   private double absoluteChange = Double.NaN;
   private String offset = "wo1w";
   private String timezone = DEFAULT_TIMEZONE;
   private String pattern = "UP_OR_DOWN";
-  private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString(); // use native granularity by default
+  private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY
+      .toAggregationGranularityString(); // use native granularity by default
 
   public String getMonitoringGranularity() {
     return monitoringGranularity;

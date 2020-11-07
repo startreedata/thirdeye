@@ -22,11 +22,11 @@ package org.apache.pinot.thirdeye.datasource.loader;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 
-
 /**
  * Loader for metric series based on slice and an (optinal) granularity. Must be thread safe.
  */
 public interface TimeSeriesLoader {
+
   String COL_TIME = DataFrame.COL_TIME;
   String COL_VALUE = DataFrame.COL_VALUE;
 

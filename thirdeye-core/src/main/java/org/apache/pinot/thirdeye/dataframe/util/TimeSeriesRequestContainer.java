@@ -25,13 +25,14 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
-
 public class TimeSeriesRequestContainer extends RequestContainer {
+
   final DateTime start;
   final DateTime end;
   final Period interval;
 
-  public TimeSeriesRequestContainer(ThirdEyeRequest request, List<MetricExpression> expressions, DateTime start,
+  public TimeSeriesRequestContainer(ThirdEyeRequest request, List<MetricExpression> expressions,
+      DateTime start,
       DateTime end, Period interval) {
     super(request, expressions);
     this.start = start;

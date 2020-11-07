@@ -51,11 +51,11 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Ths class is responsible for running the data quality tasks
  */
 public class DataQualityPipelineTaskRunner implements TaskRunner {
+
   private static final Logger LOG = LoggerFactory.getLogger(DataQualityPipelineTaskRunner.class);
   private final AlertManager detectionDAO;
   private final MergedAnomalyResultManager anomalyDAO;
@@ -90,7 +90,8 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
         AnomaliesCacheBuilder.getInstance());
   }
 
-  public DataQualityPipelineTaskRunner(AlertManager detectionDAO, MergedAnomalyResultManager anomalyDAO,
+  public DataQualityPipelineTaskRunner(AlertManager detectionDAO,
+      MergedAnomalyResultManager anomalyDAO,
       EvaluationManager evaluationDAO, DetectionPipelineLoader loader, DataProvider provider) {
     this.detectionDAO = detectionDAO;
     this.anomalyDAO = anomalyDAO;
@@ -107,14 +108,17 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
       DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
       AlertDTO config = this.detectionDAO.findById(info.getConfigId());
       if (config == null) {
-        throw new IllegalArgumentException(String.format("Could not resolve config id %d", info.getConfigId()));
+        throw new IllegalArgumentException(
+            String.format("Could not resolve config id %d", info.getConfigId()));
       }
 
-      LOG.info("Start data quality check for config {} between {} and {}", config.getId(), info.getStart(), info.getEnd());
-      Map<String, Object> props =  config.getProperties();
+      LOG.info("Start data quality check for config {} between {} and {}", config.getId(),
+          info.getStart(), info.getEnd());
+      Map<String, Object> props = config.getProperties();
       // A small hack to reuse the properties field to run the data quality pipeline; this is reverted after the run.
       config.setProperties(config.getDataQualityProperties());
-      DetectionPipeline pipeline = this.loader.from(this.provider, config, info.getStart(), info.getEnd());
+      DetectionPipeline pipeline = this.loader
+          .from(this.provider, config, info.getStart(), info.getEnd());
       DetectionPipelineResult result = pipeline.run();
       // revert the properties field back to detection properties
       config.setProperties(props);
@@ -128,10 +132,11 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
       }
 
       ThirdeyeMetricsUtil.dataQualityTaskSuccessCounter.inc();
-      LOG.info("End data quality check for config {} between {} and {}. Detected {} anomalies.", config.getId(),
+      LOG.info("End data quality check for config {} between {} and {}. Detected {} anomalies.",
+          config.getId(),
           info.getStart(), info.getEnd(), result.getAnomalies());
       return Collections.emptyList();
-    } catch(Exception e) {
+    } catch (Exception e) {
       ThirdeyeMetricsUtil.dataQualityTaskExceptionCounter.inc();
       throw e;
     }

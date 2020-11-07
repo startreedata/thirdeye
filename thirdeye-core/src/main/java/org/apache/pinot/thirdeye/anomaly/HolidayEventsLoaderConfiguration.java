@@ -22,19 +22,25 @@ package org.apache.pinot.thirdeye.anomaly;
 import java.util.Collections;
 import java.util.List;
 
-
 /**
  * The type Holiday events loader configuration.
  */
 public class HolidayEventsLoaderConfiguration {
 
-  /** Specify the time range used to calculate the upper bound for an holiday's start time. In milliseconds */
+  /**
+   * Specify the time range used to calculate the upper bound for an holiday's start time. In
+   * milliseconds
+   */
   private long holidayLoadRange;
 
-  /** The list of calendar to fetch holidays from */
+  /**
+   * The list of calendar to fetch holidays from
+   */
   private List<String> calendars = Collections.emptyList();
 
-  /** Run frequency of holiday events loader (Days) */
+  /**
+   * Run frequency of holiday events loader (Days)
+   */
   private int runFrequency;
 
   /**
@@ -74,7 +80,6 @@ public class HolidayEventsLoaderConfiguration {
   }
 
   /**
-
    * Gets calendars.
    *
    * @return the calendars

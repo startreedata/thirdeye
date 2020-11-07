@@ -37,7 +37,6 @@ public abstract class JobContext {
   private String jobName;
   private long jobExecutionId;
 
-
   public long getJobExecutionId() {
     return jobExecutionId;
   }
@@ -93,5 +92,4 @@ public abstract class JobContext {
   public void setMetricConfigDAO(MetricConfigManager metricConfigDAO) {
     this.metricConfigDAO = metricConfigDAO;
   }
-
 }

@@ -41,12 +41,13 @@ import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * The default model maintenance flow. If the model is tunable, this flow will run the configured model evaluators for
+ * The default model maintenance flow. If the model is tunable, this flow will run the configured
+ * model evaluators for
  * the detection config and automatically re-tunes the model.
  */
 public class ModelRetuneFlow implements ModelMaintenanceFlow {
+
   private static final int DEFAULT_TUNING_WINDOW_DAYS = 28;
   private static final Logger LOG = LoggerFactory.getLogger(ModelRetuneFlow.class);
 
@@ -59,19 +60,24 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
   }
 
   public AlertDTO maintain(AlertDTO config, Instant timestamp) {
-    Preconditions.checkArgument(!Objects.isNull(config.getComponents()) && !config.getComponents().isEmpty(), "Components not initialized");
+    Preconditions
+        .checkArgument(!Objects.isNull(config.getComponents()) && !config.getComponents().isEmpty(),
+            "Components not initialized");
     if (isTunable(config)) {
       // if the pipeline is tunable, get the model evaluators
-      Collection<? extends ModelEvaluator<? extends AbstractSpec>> modelEvaluators = getModelEvaluators(config);
+      Collection<? extends ModelEvaluator<? extends AbstractSpec>> modelEvaluators = getModelEvaluators(
+          config);
       // check the status for model evaluators
       for (ModelEvaluator<? extends AbstractSpec> modelEvaluator : modelEvaluators) {
         // if returns bad model status, trigger model tuning
         if (modelEvaluator.evaluateModel(timestamp).getStatus().equals(ModelStatus.BAD)) {
-          LOG.info("Status for detection pipeline {} is {}, re-tuning", config.getId(), ModelStatus.BAD.toString());
+          LOG.info("Status for detection pipeline {} is {}, re-tuning", config.getId(),
+              ModelStatus.BAD.toString());
           detectionRetuneCounter.inc();
           DetectionConfigTuner detectionConfigTuner = new DetectionConfigTuner(config, provider);
-          config = detectionConfigTuner.tune(timestamp.toDateTime().minusDays(DEFAULT_TUNING_WINDOW_DAYS).getMillis(),
-              timestamp.getMillis());
+          config = detectionConfigTuner
+              .tune(timestamp.toDateTime().minusDays(DEFAULT_TUNING_WINDOW_DAYS).getMillis(),
+                  timestamp.getMillis());
           config.setLastTuningTimestamp(timestamp.getMillis());
           break;
         }
@@ -83,7 +89,8 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
   private Collection<? extends ModelEvaluator<? extends AbstractSpec>> getModelEvaluators(
       AlertDTO config) {
     // get the model evaluator in the detection config
-    Collection<? extends ModelEvaluator<? extends AbstractSpec>> modelEvaluators = config.getComponents()
+    Collection<? extends ModelEvaluator<? extends AbstractSpec>> modelEvaluators = config
+        .getComponents()
         .values()
         .stream()
         .filter(component -> component instanceof ModelEvaluator)
@@ -109,6 +116,7 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
 
   /**
    * If the detection config contains a tunable component
+   *
    * @param configDTO the detection config
    * @return True if the detection config is contains tunable component
    */

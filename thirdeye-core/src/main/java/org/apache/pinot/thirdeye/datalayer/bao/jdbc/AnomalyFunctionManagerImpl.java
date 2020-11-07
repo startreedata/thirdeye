@@ -35,10 +35,10 @@ import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.AnomalyFunctionBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
-
 @Singleton
 public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunctionDTO>
     implements AnomalyFunctionManager {
+
   private static final String FIND_BY_NAME_LIKE = " WHERE functionName like :functionName";
   private static final String FIND_BY_NAME_EQUALS = " WHERE functionName = :functionName";
 
@@ -61,6 +61,7 @@ public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunct
 
   /**
    * Get the list of anomaly functions under the given application
+   *
    * @param application name of the application
    * @return return the list of anomaly functions under the application
    */
@@ -111,7 +112,8 @@ public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunct
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("functionName", name);
     List<AnomalyFunctionBean> list =
-        genericPojoDao.executeParameterizedSQL(FIND_BY_NAME_LIKE, parameterMap, AnomalyFunctionBean.class);
+        genericPojoDao
+            .executeParameterizedSQL(FIND_BY_NAME_LIKE, parameterMap, AnomalyFunctionBean.class);
     List<AnomalyFunctionDTO> result = new ArrayList<>();
     for (AnomalyFunctionBean bean : list) {
       result.add(MODEL_MAPPER.map(bean, AnomalyFunctionDTO.class));
@@ -124,11 +126,12 @@ public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunct
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("functionName", name);
     List<AnomalyFunctionBean> list =
-        genericPojoDao.executeParameterizedSQL(FIND_BY_NAME_EQUALS, parameterMap, AnomalyFunctionBean.class);
+        genericPojoDao
+            .executeParameterizedSQL(FIND_BY_NAME_EQUALS, parameterMap, AnomalyFunctionBean.class);
     List<AnomalyFunctionDTO> result = new ArrayList<>();
     for (AnomalyFunctionBean bean : list) {
       result.add(MODEL_MAPPER.map(bean, AnomalyFunctionDTO.class));
     }
-    return result.isEmpty()? null : result.get(0);
+    return result.isEmpty() ? null : result.get(0);
   }
 }

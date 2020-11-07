@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class DetectionConfigIndex extends AbstractIndexEntity {
+
   String name;
   boolean active;
   String createdBy;

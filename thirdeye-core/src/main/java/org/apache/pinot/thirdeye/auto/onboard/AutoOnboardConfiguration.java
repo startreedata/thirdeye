@@ -33,6 +33,4 @@ public class AutoOnboardConfiguration {
   public void setRunFrequency(TimeGranularity runFrequency) {
     this.runFrequency = runFrequency;
   }
-
-
 }

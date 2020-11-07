@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
+
   private static final Logger LOG = LoggerFactory.getLogger(DefaultTimeSeriesLoader.class);
 
   private final MetricConfigManager metricDAO;
@@ -59,13 +60,13 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
    *
    * @param slice metric slice to fetch
    * @return DataFrame with timestamps and metric values
-   * @throws Exception
    */
   @Override
   public DataFrame load(MetricSlice slice) throws Exception {
     LOG.info("Loading time series for '{}'", slice);
 
-    TimeSeriesRequestContainer rc = DataFrameUtils.makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO);
+    TimeSeriesRequestContainer rc = DataFrameUtils
+        .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO);
     ThirdEyeResponse response;
     if (CacheConfig.getInstance().useCentralizedCache()) {
       response = this.timeSeriesCache.fetchTimeSeries(rc.getRequest());

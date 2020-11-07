@@ -47,7 +47,6 @@ import org.apache.pinot.thirdeye.detection.wrapper.EntityAnomalyMergeWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 
-
 /**
  * This class is responsible for translating the detection properties
  */
@@ -55,7 +54,8 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
 
   private static final Set<String> MOVING_WINDOW_DETECTOR_TYPES = ImmutableSet.of("ALGORITHM");
 
-  public DetectionPropertiesBuilder(DetectionMetricAttributeHolder metricAttributesMap, DataProvider provider) {
+  public DetectionPropertiesBuilder(DetectionMetricAttributeHolder metricAttributesMap,
+      DataProvider provider) {
     super(metricAttributesMap, provider);
   }
 
@@ -93,7 +93,8 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
       final List<Map<String, Object>> ruleYamls,
       final List<Map<String, Object>> grouperYamls) {
 
-    String metricUrn = MetricEntity.fromMetric(dimensionFiltersMap, metricConfigDTO.getId()).getUrn();
+    String metricUrn = MetricEntity.fromMetric(dimensionFiltersMap, metricConfigDTO.getId())
+        .getUrn();
 
     // Translate all the rules
     List<Map<String, Object>> nestedPipelines = new ArrayList<>();
@@ -112,7 +113,8 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
         // wrap detection properties around with filter properties if a filter is configured
         List<Map<String, Object>> filterNestedProperties = detectionProperties;
         for (Map<String, Object> filterProperties : filterYamls) {
-          filterNestedProperties = buildFilterWrapperProperties(metricUrn, AnomalyFilterWrapper.class.getName(), filterProperties,
+          filterNestedProperties = buildFilterWrapperProperties(metricUrn,
+              AnomalyFilterWrapper.class.getName(), filterProperties,
               filterNestedProperties);
         }
         if (labelerYamls.isEmpty()) {
@@ -121,7 +123,8 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
         } else {
           // wrap filter properties around with labeler properties if a labeler is configured
           nestedPipelines.add(
-              buildLabelerWrapperProperties(metricUrn, AnomalyLabelerWrapper.class.getName(), labelerYamls.get(0),
+              buildLabelerWrapperProperties(metricUrn, AnomalyLabelerWrapper.class.getName(),
+                  labelerYamls.get(0),
                   filterNestedProperties));
         }
       }
@@ -136,7 +139,9 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
         containsDimensionExploration);
     Map<String, Object> properties = buildWrapperProperties(
         ChildKeepingMergeWrapper.class.getName(),
-        Collections.singletonList(buildWrapperProperties(DimensionWrapper.class.getName(), nestedPipelines, dimensionWrapperProperties)),
+        Collections.singletonList(
+            buildWrapperProperties(DimensionWrapper.class.getName(), nestedPipelines,
+                dimensionWrapperProperties)),
         mergerProperties);
 
     // Wrap with metric level grouper, restricting to only 1 grouper
@@ -157,13 +162,16 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
   }
 
   @Override
-  public Map<String, Object> buildCompositeAlertProperties(Map<String, Object> compositeAlertConfigMap) {
+  public Map<String, Object> buildCompositeAlertProperties(
+      Map<String, Object> compositeAlertConfigMap) {
     // Recursively translate all the sub-alerts
-    List<Map<String, Object>> subDetectionYamls = ConfigUtils.getList(compositeAlertConfigMap.get(PROP_ALERTS));
+    List<Map<String, Object>> subDetectionYamls = ConfigUtils
+        .getList(compositeAlertConfigMap.get(PROP_ALERTS));
     List<Map<String, Object>> nestedPropertiesList = new ArrayList<>();
     for (Map<String, Object> subDetectionYaml : subDetectionYamls) {
       Map<String, Object> subProps;
-      if (subDetectionYaml.containsKey(PROP_TYPE) && subDetectionYaml.get(PROP_TYPE).equals(COMPOSITE_ALERT)) {
+      if (subDetectionYaml.containsKey(PROP_TYPE) && subDetectionYaml.get(PROP_TYPE)
+          .equals(COMPOSITE_ALERT)) {
         subProps = buildCompositeAlertProperties(subDetectionYaml);
       } else {
         subProps = buildMetricAlertProperties(subDetectionYaml);
@@ -175,16 +183,21 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
     return compositePropertyBuilderHelper(nestedPropertiesList, compositeAlertConfigMap);
   }
 
-  private List<Map<String, Object>> buildListOfMergeWrapperProperties(String subEntityName, String metricUrn,
-      List<Map<String, Object>> yamlConfigs, Map<String, Object> mergerProperties, TimeGranularity datasetTimegranularity) {
+  private List<Map<String, Object>> buildListOfMergeWrapperProperties(String subEntityName,
+      String metricUrn,
+      List<Map<String, Object>> yamlConfigs, Map<String, Object> mergerProperties,
+      TimeGranularity datasetTimegranularity) {
     List<Map<String, Object>> properties = new ArrayList<>();
     for (Map<String, Object> yamlConfig : yamlConfigs) {
-      properties.add(buildMergeWrapperProperties(subEntityName, metricUrn, yamlConfig, mergerProperties, datasetTimegranularity));
+      properties.add(
+          buildMergeWrapperProperties(subEntityName, metricUrn, yamlConfig, mergerProperties,
+              datasetTimegranularity));
     }
     return properties;
   }
 
-  private Map<String, Object> buildMergeWrapperProperties(String subEntityName, String metricUrn, Map<String, Object> yamlConfig,
+  private Map<String, Object> buildMergeWrapperProperties(String subEntityName, String metricUrn,
+      Map<String, Object> yamlConfig,
       Map<String, Object> mergerProperties, TimeGranularity datasetTimegranularity) {
     String detectorType = MapUtils.getString(yamlConfig, PROP_TYPE);
     String name = MapUtils.getString(yamlConfig, PROP_NAME);
@@ -193,7 +206,8 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
     nestedProperties.put(PROP_SUB_ENTITY_NAME, subEntityName);
     String detectorRefKey = makeComponentRefKey(detectorType, name);
 
-    fillInDetectorWrapperProperties(nestedProperties, yamlConfig, detectorType, datasetTimegranularity);
+    fillInDetectorWrapperProperties(nestedProperties, yamlConfig, detectorType,
+        datasetTimegranularity);
 
     buildComponentSpec(metricUrn, yamlConfig, detectorRefKey);
 
@@ -216,12 +230,13 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
   }
 
   // fill in window size and unit if detector requires this
-  private static void fillInDetectorWrapperProperties(Map<String, Object> properties, Map<String, Object> yamlConfig, String detectorType, TimeGranularity datasetTimegranularity) {
+  private static void fillInDetectorWrapperProperties(Map<String, Object> properties,
+      Map<String, Object> yamlConfig, String detectorType, TimeGranularity datasetTimegranularity) {
     // set default bucketPeriod
     properties.put(PROP_BUCKET_PERIOD, datasetTimegranularity.toPeriod().toString());
 
     // override bucketPeriod now since it is needed by detection window
-    if (yamlConfig.containsKey(PROP_BUCKET_PERIOD)){
+    if (yamlConfig.containsKey(PROP_BUCKET_PERIOD)) {
       properties.put(PROP_BUCKET_PERIOD, MapUtils.getString(yamlConfig, PROP_BUCKET_PERIOD));
     }
 
@@ -241,19 +256,22 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
       properties.put(PROP_WINDOW_DELAY, MapUtils.getString(yamlConfig, PROP_WINDOW_DELAY));
     }
     if (yamlConfig.containsKey(PROP_WINDOW_DELAY_UNIT)) {
-      properties.put(PROP_WINDOW_DELAY_UNIT, MapUtils.getString(yamlConfig, PROP_WINDOW_DELAY_UNIT));
+      properties
+          .put(PROP_WINDOW_DELAY_UNIT, MapUtils.getString(yamlConfig, PROP_WINDOW_DELAY_UNIT));
     }
-    if (yamlConfig.containsKey(PROP_TIMEZONE)){
+    if (yamlConfig.containsKey(PROP_TIMEZONE)) {
       properties.put(PROP_TIMEZONE, MapUtils.getString(yamlConfig, PROP_TIMEZONE));
     }
     if (yamlConfig.containsKey(PROP_CACHE_PERIOD_LOOKBACK)) {
-      properties.put(PROP_CACHE_PERIOD_LOOKBACK, MapUtils.getString(yamlConfig, PROP_CACHE_PERIOD_LOOKBACK));
+      properties.put(PROP_CACHE_PERIOD_LOOKBACK,
+          MapUtils.getString(yamlConfig, PROP_CACHE_PERIOD_LOOKBACK));
     }
   }
 
   // Set the default detection window if it is not specified.
   // Here instead of using data granularity we use the detection period to set the default window size.
-  private static void setDefaultDetectionWindow(Map<String, Object> properties, String detectorType) {
+  private static void setDefaultDetectionWindow(Map<String, Object> properties,
+      String detectorType) {
     if (MOVING_WINDOW_DETECTOR_TYPES.contains(detectorType)) {
       properties.put(PROP_MOVING_WINDOW_DETECTION, true);
       org.joda.time.Period detectionPeriod =

@@ -27,6 +27,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * Abstract superclass for entities with an id of type long.
  */
 public abstract class AbstractEntity {
+
   protected Long id;
 
   protected Timestamp createTime;
@@ -35,7 +36,8 @@ public abstract class AbstractEntity {
 
   protected int version;
 
-  protected AbstractEntity() {}
+  protected AbstractEntity() {
+  }
 
   protected AbstractEntity(Long id) {
     this.id = id;
@@ -83,10 +85,7 @@ public abstract class AbstractEntity {
     }
     AbstractEntity entity = (AbstractEntity) o;
 
-    if (id != null ? !id.equals(entity.id) : entity.id != null) {
-      return false;
-    }
-    return true;
+    return id != null ? id.equals(entity.id) : entity.id == null;
   }
 
   @Override

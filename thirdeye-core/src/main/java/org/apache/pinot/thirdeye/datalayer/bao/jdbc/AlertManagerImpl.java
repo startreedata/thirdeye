@@ -29,7 +29,6 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
 
-
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     AlertManager {
@@ -68,7 +67,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     return id;
   }
 
-  DetectionConfigBean convertDetectionConfigDTO2Bean(AlertDTO alertDTO){
+  DetectionConfigBean convertDetectionConfigDTO2Bean(AlertDTO alertDTO) {
     alertDTO.setComponents(Collections.emptyMap());
     DetectionConfigBean bean = convertDTO2Bean(alertDTO, DetectionConfigBean.class);
     return bean;
@@ -77,6 +76,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   @Override
   public List<AlertDTO> findAllActive() {
     List<AlertDTO> detectionConfigs = findAll();
-    return detectionConfigs.stream().filter(DetectionConfigBean::isActive).collect(Collectors.toList());
+    return detectionConfigs.stream().filter(DetectionConfigBean::isActive)
+        .collect(Collectors.toList());
   }
 }

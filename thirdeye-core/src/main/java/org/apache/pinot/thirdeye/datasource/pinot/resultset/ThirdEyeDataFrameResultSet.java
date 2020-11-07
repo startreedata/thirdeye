@@ -31,13 +31,16 @@ import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 
 /**
- * An unified container that store Select, Aggregation, and Group-By {@link ResultSet} in a data frame.
+ * An unified container that store Select, Aggregation, and Group-By {@link ResultSet} in a data
+ * frame.
  */
 public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
-  private ThirdEyeResultSetMetaData thirdEyeResultSetMetaData;
-  private DataFrame dataFrame;
 
-  public ThirdEyeDataFrameResultSet(ThirdEyeResultSetMetaData thirdEyeResultSetMetaData, DataFrame dataFrame) {
+  private final ThirdEyeResultSetMetaData thirdEyeResultSetMetaData;
+  private final DataFrame dataFrame;
+
+  public ThirdEyeDataFrameResultSet(ThirdEyeResultSetMetaData thirdEyeResultSetMetaData,
+      DataFrame dataFrame) {
     Preconditions.checkState(isMetaDataAndDataHaveSameColumns(thirdEyeResultSetMetaData, dataFrame),
         "Meta data and data's columns do not match.");
 
@@ -45,7 +48,8 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
     this.dataFrame = dataFrame;
   }
 
-  private boolean isMetaDataAndDataHaveSameColumns(ThirdEyeResultSetMetaData thirdEyeResultSetMetaData, DataFrame dataFrame) {
+  private boolean isMetaDataAndDataHaveSameColumns(
+      ThirdEyeResultSetMetaData thirdEyeResultSetMetaData, DataFrame dataFrame) {
     Set<String> metaDataAllColumns = new HashSet<>(thirdEyeResultSetMetaData.getAllColumnNames());
     return metaDataAllColumns.equals(dataFrame.getSeries().keySet());
   }
@@ -62,14 +66,17 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
 
   @Override
   public String getColumnName(int columnIdx) {
-    Preconditions.checkPositionIndexes(0, columnIdx, thirdEyeResultSetMetaData.getMetricColumnNames().size() - 1);
+    Preconditions.checkPositionIndexes(0, columnIdx,
+        thirdEyeResultSetMetaData.getMetricColumnNames().size() - 1);
     return thirdEyeResultSetMetaData.getMetricColumnNames().get(columnIdx);
   }
 
   @Override
   public String getString(int rowIdx, int columnIdx) {
-    Preconditions.checkPositionIndexes(0, columnIdx, thirdEyeResultSetMetaData.getMetricColumnNames().size() - 1);
-    return dataFrame.get(thirdEyeResultSetMetaData.getMetricColumnNames().get(columnIdx)).getString(rowIdx);
+    Preconditions.checkPositionIndexes(0, columnIdx,
+        thirdEyeResultSetMetaData.getMetricColumnNames().size() - 1);
+    return dataFrame.get(thirdEyeResultSetMetaData.getMetricColumnNames().get(columnIdx))
+        .getString(rowIdx);
   }
 
   @Override
@@ -86,7 +93,8 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
   @Override
   public String getGroupKeyColumnValue(int rowIdx, int columnIdx) {
     Preconditions.checkPositionIndexes(0, columnIdx, getGroupKeyLength() - 1);
-    return dataFrame.get(thirdEyeResultSetMetaData.getGroupKeyColumnNames().get(columnIdx)).getString(rowIdx);
+    return dataFrame.get(thirdEyeResultSetMetaData.getGroupKeyColumnNames().get(columnIdx))
+        .getString(rowIdx);
   }
 
   /**
@@ -99,15 +107,17 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
    * @param timeSpec timeSpec of the query
    * @return an unified {@link ThirdEyeDataFrameResultSet}
    */
-  public static ThirdEyeDataFrameResultSet fromSQLResultSet(java.sql.ResultSet resultSet, String metric,
-      List<String> groupByKeys, TimeGranularity aggGranularity, TimeSpec timeSpec) throws Exception {
+  public static ThirdEyeDataFrameResultSet fromSQLResultSet(java.sql.ResultSet resultSet,
+      String metric,
+      List<String> groupByKeys, TimeGranularity aggGranularity, TimeSpec timeSpec)
+      throws Exception {
 
     List<String> groupKeyColumnNames = new ArrayList<>();
     if (aggGranularity != null && !groupByKeys.contains(timeSpec.getColumnName())) {
       groupKeyColumnNames.add(0, DataFrame.COL_TIME);
     }
 
-    for (String groupByKey: groupByKeys) {
+    for (String groupByKey : groupByKeys) {
       groupKeyColumnNames.add(groupByKey);
     }
 
@@ -130,7 +140,8 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
     int groupByColumnCount = groupKeyColumnNames.size();
     int totalColumnCount = groupByColumnCount + metricColumnCount;
 
-    outer: while (resultSet.next()) {
+    outer:
+    while (resultSet.next()) {
       String[] columnsOfTheRow = new String[totalColumnCount];
       // GroupBy column value(i.e., dimension values)
       for (int groupByColumnIdx = 1; groupByColumnIdx <= groupByColumnCount; groupByColumnIdx++) {
@@ -170,7 +181,6 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
    * Constructs a {@link ThirdEyeDataFrameResultSet} from any Pinot's {@link ResultSet}.
    *
    * @param resultSet A result set from Pinot.
-   *
    * @return an unified {@link ThirdEyeDataFrameResultSet}.
    */
   public static ThirdEyeDataFrameResultSet fromPinotResultSet(ResultSet resultSet) {
@@ -253,8 +263,9 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
       return false;
     }
     ThirdEyeDataFrameResultSet that = (ThirdEyeDataFrameResultSet) o;
-    return Objects.equals(thirdEyeResultSetMetaData, that.thirdEyeResultSetMetaData) && Objects.equals(dataFrame,
-        that.dataFrame);
+    return Objects.equals(thirdEyeResultSetMetaData, that.thirdEyeResultSetMetaData) && Objects
+        .equals(dataFrame,
+            that.dataFrame);
   }
 
   @Override

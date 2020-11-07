@@ -23,6 +23,7 @@ package org.apache.pinot.thirdeye.tracking;
  * Data source request performance log entry
  */
 final class RequestLogEntry {
+
   final String datasource;
   final String dataset;
   final String metric;
@@ -32,7 +33,8 @@ final class RequestLogEntry {
   final long end;
   final Exception exception;
 
-  public RequestLogEntry(String datasource, String dataset, String metric, String principal, boolean success, long start, long end,
+  public RequestLogEntry(String datasource, String dataset, String metric, String principal,
+      boolean success, long start, long end,
       Exception exception) {
     this.datasource = datasource;
     this.dataset = dataset;

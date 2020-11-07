@@ -47,9 +47,9 @@ import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Cube { // the cube (Ca|Cb)
+
   private static final Logger LOG = LoggerFactory.getLogger(Cube.class);
 
   private static final int DEFAULT_DEPTH = 3;
@@ -70,7 +70,7 @@ public class Cube { // the cube (Ca|Cb)
 
   // The actual data is stored in levels
   @JsonProperty("hierarchicalRows")
-  private List<List<Row>> hierarchicalRows = new ArrayList<>();
+  private final List<List<Row>> hierarchicalRows = new ArrayList<>();
 
   // The logical nodes of the hierarchy among the actual data
   @JsonIgnore
@@ -96,7 +96,7 @@ public class Cube { // the cube (Ca|Cb)
     return dimensions;
   }
 
-  private CostFunction costFunction;
+  private final CostFunction costFunction;
 
   public Cube(CostFunction costFunction) {
     this.costFunction = costFunction;
@@ -120,26 +120,31 @@ public class Cube { // the cube (Ca|Cb)
   }
 
   /**
-   * Automatically orders of the given dimensions depending on their error cost and builds the subcube of data according
+   * Automatically orders of the given dimensions depending on their error cost and builds the
+   * subcube of data according
    * to that order.
    *
    * @param olapClient the client to retrieve the data.
    * @param dimensions the dimensions to be ordered.
    * @param dataFilter the filter to be applied on the incoming data.
    * @param depth the number of the top dimensions to be considered in the subcube.
-   * @param hierarchy the hierarchy among the given dimensions, whose order will be honors before dimensions' cost.
+   * @param hierarchy the hierarchy among the given dimensions, whose order will be honors
+   *     before dimensions' cost.
    */
   public void buildWithAutoDimensionOrder(CubeClient olapClient,
-      Dimensions dimensions, Multimap<String, String> dataFilter, int depth, List<List<String>> hierarchy)
+      Dimensions dimensions, Multimap<String, String> dataFilter, int depth,
+      List<List<String>> hierarchy)
       throws Exception {
     long tStart = System.nanoTime();
     try {
-      Preconditions.checkArgument((dimensions != null && dimensions.size() != 0), "Dimensions cannot be empty.");
+      Preconditions.checkArgument((dimensions != null && dimensions.size() != 0),
+          "Dimensions cannot be empty.");
       Preconditions.checkNotNull(hierarchy, "hierarchy cannot be null.");
 
       initializeBasicInfo(olapClient, dataFilter);
       Dimensions shrankDimensions = CubeUtils.shrinkDimensionsByFilterSets(dimensions, dataFilter);
-      costSet = computeOneDimensionCost(olapClient, baselineTotal, currentTotal, baselineTotalSize, currentTotalSize,
+      costSet = computeOneDimensionCost(olapClient, baselineTotal, currentTotal, baselineTotalSize,
+          currentTotalSize,
           shrankDimensions, dataFilter);
       sortedDimensionCosts = calculateSortedDimensionCost(costSet);
       this.dimensions = sortDimensions(sortedDimensionCosts, depth, hierarchy);
@@ -147,11 +152,9 @@ public class Cube { // the cube (Ca|Cb)
       LOG.info("Auto-dimension order: " + this.dimensions);
 
       buildSubCube(olapClient, this.dimensions, dataFilter);
-
     } catch (Exception e) {
       ThirdeyeMetricsUtil.cubeExceptionCounter.inc();
       throw e;
-
     } finally {
       ThirdeyeMetricsUtil.cubeCallCounter.inc();
       ThirdeyeMetricsUtil.cubeDurationCounter.inc(System.nanoTime() - tStart);
@@ -187,13 +190,16 @@ public class Cube { // the cube (Ca|Cb)
    * @param dimensions the given dimension order.
    * @param dataFilter the data filter to applied on the data cube.
    */
-  private void buildSubCube(CubeClient olapClient, Dimensions dimensions, Multimap<String, String> dataFilter)
+  private void buildSubCube(CubeClient olapClient, Dimensions dimensions,
+      Multimap<String, String> dataFilter)
       throws Exception {
-    Preconditions.checkArgument((dimensions != null && dimensions.size() != 0), "Dimensions cannot be empty.");
+    Preconditions.checkArgument((dimensions != null && dimensions.size() != 0),
+        "Dimensions cannot be empty.");
     if (this.dimensions == null) { // which means buildWithAutoDimensionOrder is not triggered
       initializeBasicInfo(olapClient, dataFilter);
       this.dimensions = dimensions;
-      costSet = computeOneDimensionCost(olapClient, baselineTotal, currentTotal, baselineTotalSize, currentTotalSize,
+      costSet = computeOneDimensionCost(olapClient, baselineTotal, currentTotal, baselineTotalSize,
+          currentTotalSize,
           dimensions, dataFilter);
     }
 
@@ -221,6 +227,7 @@ public class Cube { // the cube (Ca|Cb)
 
   /**
    * Calculate the change changeRatio of the top aggregated values.
+   *
    * @throws Exception An exception is thrown if OLAP database cannot be connected.
    */
   private void initializeBasicInfo(CubeClient olapClient, Multimap<String, String> filterSets)
@@ -229,7 +236,7 @@ public class Cube { // the cube (Ca|Cb)
     Row topAggValues = olapClient.getTopAggregatedValues(filterSets);
     CubeNode node = topAggValues.toNode();
 
-    baselineTotal =  node.getBaselineValue();
+    baselineTotal = node.getBaselineValue();
     currentTotal = node.getCurrentValue();
 
     baselineTotalSize = node.getBaselineSize();
@@ -240,6 +247,7 @@ public class Cube { // the cube (Ca|Cb)
    * Sort the rows in the post-order of their hierarchical relationship
    */
   static class RowDimensionValuesComparator implements Comparator<Row> {
+
     @Override
     public int compare(Row r1, Row r2) {
       return r1.getDimensionValues().compareTo(r2.getDimensionValues());
@@ -247,14 +255,15 @@ public class Cube { // the cube (Ca|Cb)
   }
 
   /**
-   * Establishes the hierarchical relationship between the aggregated data (parent) and detailed data (children).
+   * Establishes the hierarchical relationship between the aggregated data (parent) and detailed
+   * data (children).
    *
    * @param dataRows the actual data.
    * @param dimensions the dimension names of the actual data.
-   *
    * @return CubeNode that contains the hierarchical relationship.
    */
-  public static List<List<CubeNode>> dataRowToCubeNode(List<List<Row>> dataRows, Dimensions dimensions) {
+  public static List<List<CubeNode>> dataRowToCubeNode(List<List<Row>> dataRows,
+      Dimensions dimensions) {
 
     List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
     HashMap<String, CubeNode> curParent = new HashMap<>();
@@ -299,15 +308,18 @@ public class Cube { // the cube (Ca|Cb)
     return hierarchicalNodes;
   }
 
-  private List<DimNameValueCostEntry> computeOneDimensionCost(CubeClient olapClient, double topBaselineValue,
+  private List<DimNameValueCostEntry> computeOneDimensionCost(CubeClient olapClient,
+      double topBaselineValue,
       double topCurrentValue, double topBaselineSize, double topCurrentSize, Dimensions dimensions,
       Multimap<String, String> filterSets) throws Exception {
 
     double topRatio = topCurrentValue / topBaselineValue;
-    LOG.info("topBaselineValue:{}, topCurrentValue:{}, changeRatio:{}", topBaselineValue, topCurrentValue, topRatio);
+    LOG.info("topBaselineValue:{}, topCurrentValue:{}, changeRatio:{}", topBaselineValue,
+        topCurrentValue, topRatio);
 
     List<DimNameValueCostEntry> costSet = new ArrayList<>();
-    List<List<Row>> wowValuesOfDimensions = olapClient.getAggregatedValuesOfDimension(dimensions, filterSets);
+    List<List<Row>> wowValuesOfDimensions = olapClient
+        .getAggregatedValuesOfDimension(dimensions, filterSets);
     for (int i = 0; i < dimensions.size(); ++i) {
       String dimensionName = dimensions.get(i);
       List<Row> wowValuesOfOneDimension = wowValuesOfDimensions.get(i);
@@ -315,20 +327,26 @@ public class Cube { // the cube (Ca|Cb)
         CubeNode wowNode = wowValues.toNode();
         String dimensionValue = wowNode.getDimensionValues().get(0);
         double contributionFactor =
-            (wowNode.getBaselineSize() + wowNode.getCurrentSize()) / (topBaselineSize + topCurrentSize);
-        double cost = costFunction.computeCost(topRatio, wowNode.getBaselineValue(), wowNode.getCurrentValue(),
-            wowNode.getBaselineSize(), wowNode.getCurrentSize(), topBaselineValue, topCurrentValue, topBaselineSize,
-            topCurrentSize);
+            (wowNode.getBaselineSize() + wowNode.getCurrentSize()) / (topBaselineSize
+                + topCurrentSize);
+        double cost = costFunction
+            .computeCost(topRatio, wowNode.getBaselineValue(), wowNode.getCurrentValue(),
+                wowNode.getBaselineSize(), wowNode.getCurrentSize(), topBaselineValue,
+                topCurrentValue, topBaselineSize,
+                topCurrentSize);
 
-        costSet.add(new DimNameValueCostEntry(dimensionName, dimensionValue, wowNode.getBaselineValue(),
-            wowNode.getCurrentValue(), wowNode.changeRatio(), wowNode.getCurrentValue() - wowNode.getBaselineValue(),
-            wowNode.getBaselineSize(), wowNode.getCurrentSize(), contributionFactor, cost));
+        costSet.add(
+            new DimNameValueCostEntry(dimensionName, dimensionValue, wowNode.getBaselineValue(),
+                wowNode.getCurrentValue(), wowNode.changeRatio(),
+                wowNode.getCurrentValue() - wowNode.getBaselineValue(),
+                wowNode.getBaselineSize(), wowNode.getCurrentSize(), contributionFactor, cost));
       }
     }
 
     costSet.sort(Collections.reverseOrder());
     LOG.info("Top {} nodes (depth=1):", TOP_COST_ENTRIES_TO_LOG);
-    for (DimNameValueCostEntry entry : costSet.subList(0, Math.min(costSet.size(), TOP_COST_ENTRIES_TO_LOG))) {
+    for (DimNameValueCostEntry entry : costSet
+        .subList(0, Math.min(costSet.size(), TOP_COST_ENTRIES_TO_LOG))) {
       LOG.info("\t{}", entry);
     }
 
@@ -336,8 +354,9 @@ public class Cube { // the cube (Ca|Cb)
   }
 
   public static class DimensionCost {
-    private String dimensinoName;
-    private double cost;
+
+    private final String dimensinoName;
+    private final double cost;
 
     public DimensionCost(String dimensinoName, double cost) {
       this.dimensinoName = Preconditions.checkNotNull(dimensinoName);
@@ -361,7 +380,8 @@ public class Cube { // the cube (Ca|Cb)
         return false;
       }
       DimensionCost that = (DimensionCost) o;
-      return Double.compare(that.cost, cost) == 0 && Objects.equals(dimensinoName, that.dimensinoName);
+      return Double.compare(that.cost, cost) == 0 && Objects
+          .equals(dimensinoName, that.dimensinoName);
     }
 
     @Override
@@ -371,6 +391,7 @@ public class Cube { // the cube (Ca|Cb)
   }
 
   private static class HierarchicalDimensionCost {
+
     List<String> dimensionNames;
     double cost;
 
@@ -384,7 +405,6 @@ public class Cube { // the cube (Ca|Cb)
    * Calculates the cost of each level-1 dimension and sorts them by their cost.
    *
    * @param costSet the cost of level-1 dimension values.
-   *
    * @return A list of dimension names to their cost that are sorted by their costs.
    */
   static List<DimensionCost> calculateSortedDimensionCost(List<DimNameValueCostEntry> costSet) {
@@ -400,7 +420,8 @@ public class Cube { // the cube (Ca|Cb)
     // Sort dimensions by their cost
     List<DimensionCost> dimensionCosts = new ArrayList<>(dimNameToCost.size());
     for (Map.Entry<String, Double> dimNameToCostEntry : dimNameToCost.entrySet()) {
-      dimensionCosts.add(new DimensionCost(dimNameToCostEntry.getKey(), dimNameToCostEntry.getValue()));
+      dimensionCosts
+          .add(new DimensionCost(dimNameToCostEntry.getKey(), dimNameToCostEntry.getValue()));
     }
     dimensionCosts.sort(new Comparator<DimensionCost>() {
       @Override
@@ -412,12 +433,14 @@ public class Cube { // the cube (Ca|Cb)
     return dimensionCosts;
   }
 
-
   /**
-   * Sort dimensions according to their cost, which is the sum of the error for aggregating all its children rows.
+   * Sort dimensions according to their cost, which is the sum of the error for aggregating all its
+   * children rows.
    * Dimensions with larger error is ordered in the front of the list.
-   * The order among the dimensions that belong to the same hierarchical group will be maintained. An example of
-   * a hierarchical group is {continent, country}. The cost of a group is the average of member costs.
+   * The order among the dimensions that belong to the same hierarchical group will be maintained.
+   * An example of
+   * a hierarchical group is {continent, country}. The cost of a group is the average of member
+   * costs.
    */
   static Dimensions sortDimensions(List<DimensionCost> sortedDimensionCosts, int depth,
       List<List<String>> suggestedHierarchies) {
@@ -444,19 +467,21 @@ public class Cube { // the cube (Ca|Cb)
   }
 
   /**
-   * Given a list of dimension to be sorted and a list of hierarchy, returns a list of hierarchical dimensions.
+   * Given a list of dimension to be sorted and a list of hierarchy, returns a list of hierarchical
+   * dimensions.
    * Example:
-   *   dimensionsToBeOrdered = ["country", "continent", "page"]
-   *   suggestedHierarchies = [["continent", "country", "postcode"], ["pageGroup", "page"]]
+   * dimensionsToBeOrdered = ["country", "continent", "page"]
+   * suggestedHierarchies = [["continent", "country", "postcode"], ["pageGroup", "page"]]
    *
-   * Returns: [["continent", "country"], ["page"]] (Note: the order of the two group could be arbitrary.)
+   * Returns: [["continent", "country"], ["page"]] (Note: the order of the two group could be
+   * arbitrary.)
    *
    * @param dimensionsToBeOrdered the dimensions to be considered during auto-dimension.
    * @param suggestedHierarchies the hierarchy among the dimensions.
-   *
    * @return a list of hierarchical dimensions.
    */
-  private static List<HierarchicalDimensionCost> getInitialHierarchicalDimensionList(List<String> dimensionsToBeOrdered,
+  private static List<HierarchicalDimensionCost> getInitialHierarchicalDimensionList(
+      List<String> dimensionsToBeOrdered,
       List<List<String>> suggestedHierarchies) {
 
     List<HierarchicalDimensionCost> hierarchicalDimensionCosts = new ArrayList<>();
@@ -480,20 +505,23 @@ public class Cube { // the cube (Ca|Cb)
     }
 
     for (String remainDimension : availableDimensionKeySet) {
-      hierarchicalDimensionCosts.add(new HierarchicalDimensionCost(Collections.singletonList(remainDimension), 0));
+      hierarchicalDimensionCosts
+          .add(new HierarchicalDimensionCost(Collections.singletonList(remainDimension), 0));
     }
 
     return hierarchicalDimensionCosts;
   }
 
   /**
-   * Sort the hierarchical dimension by their group cost, which is the average of the costs of the dimensions in the
+   * Sort the hierarchical dimension by their group cost, which is the average of the costs of the
+   * dimensions in the
    * same group.
    *
    * @param hierarchicalDimensionCosts the list of hierarchical dimensions to be sorted.
    * @param sortedDimensionCosts the cost of every level-1 dimension.
    */
-  private static void sortHierarchicalDimensions(List<HierarchicalDimensionCost> hierarchicalDimensionCosts,
+  private static void sortHierarchicalDimensions(
+      List<HierarchicalDimensionCost> hierarchicalDimensionCosts,
       List<DimensionCost> sortedDimensionCosts) {
     Map<String, HierarchicalDimensionCost> hierarchicalDimensionCostTable = new HashMap<>();
     for (HierarchicalDimensionCost hierarchicalDimensionCost : hierarchicalDimensionCosts) {
@@ -535,7 +563,8 @@ public class Cube { // the cube (Ca|Cb)
   }
 
   /**
-   * Reestablishes the hierarchy between aggregated and detailed rows after the cube is read from a Json string.
+   * Reestablishes the hierarchy between aggregated and detailed rows after the cube is read from a
+   * Json string.
    */
   private void rebuildHierarchy() {
     this.hierarchicalNodes = dataRowToCubeNode(hierarchicalRows, dimensions);

@@ -29,8 +29,10 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class AnomalyDetectionUtils {
+
   /**
    * Returns the given bucket size and bucket unit to the bucket size in milliseconds.
+   *
    * @param bucketSize the number of the units.
    * @param bucketUnit the unit for computing the bucket size in milliseconds.
    * @return the bucket size in milliseconds.
@@ -39,13 +41,14 @@ public class AnomalyDetectionUtils {
     return bucketUnit.toMillis(bucketSize);
   }
 
-  private static Splitter SEMICOLON_SPLITTER = Splitter.on(";").omitEmptyStrings();
-  private static Splitter EQUALS_SPLITTER = Splitter.on("=").omitEmptyStrings();
-  private static Joiner SEMICOLON = Joiner.on(";");
-  private static Joiner EQUALS = Joiner.on("=");
+  private static final Splitter SEMICOLON_SPLITTER = Splitter.on(";").omitEmptyStrings();
+  private static final Splitter EQUALS_SPLITTER = Splitter.on("=").omitEmptyStrings();
+  private static final Joiner SEMICOLON = Joiner.on(";");
+  private static final Joiner EQUALS = Joiner.on("=");
 
   /**
    * Utility class to encode properties to string in format key1=value1;key2=value2
+   *
    * @param props : the property to be encoded
    * @return String of encoded property
    */
@@ -59,12 +62,12 @@ public class AnomalyDetectionUtils {
 
   /**
    * Decode properties string which is encoded by encodeCompactedProperties to into a Hashmap
+   *
    * @param propStr: property string which is encoded using encodeCompactedProperties
-   * @return
    */
   public static Map<String, String> decodeCompactedPropertyStringToMap(String propStr) {
     Map<String, String> props = new HashMap<>();
-    if(propStr != null) {
+    if (propStr != null) {
       for (String part : SEMICOLON_SPLITTER.split(propStr)) {
         List<String> kvPair = EQUALS_SPLITTER.splitToList(part);
         props.put(kvPair.get(0), kvPair.get(1));
@@ -72,5 +75,4 @@ public class AnomalyDetectionUtils {
     }
     return props;
   }
-
 }

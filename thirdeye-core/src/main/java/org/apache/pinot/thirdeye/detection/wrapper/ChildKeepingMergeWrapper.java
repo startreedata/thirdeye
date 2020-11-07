@@ -37,24 +37,29 @@ import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 
-
 /**
- * The Child keeping Merge Wrapper. Merge anomalies and the anomalies before merging in the merged anomaly children set.
- * Useful when merging anomalies from different source, e.g, different algorithms/rules, this merger allows tracing back to anomalies before merging.
- * Will not merge anomalies if potential merged anomaly is beyond max duration. Will be able to fill in current and baseline value if configured.
+ * The Child keeping Merge Wrapper. Merge anomalies and the anomalies before merging in the merged
+ * anomaly children set.
+ * Useful when merging anomalies from different source, e.g, different algorithms/rules, this merger
+ * allows tracing back to anomalies before merging.
+ * Will not merge anomalies if potential merged anomaly is beyond max duration. Will be able to fill
+ * in current and baseline value if configured.
  * Merge anomalies regardless of anomaly merge key.
  */
 public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
+
   private static final String PROP_GROUP_KEY = "groupKey";
   private static final String PROP_PATTERN_KEY = "pattern";
 
-  public ChildKeepingMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) {
+  public ChildKeepingMergeWrapper(DataProvider provider, AlertDTO config, long startTime,
+      long endTime) {
     super(provider, config, startTime, endTime);
   }
 
   @Override
   // retrieve the anomalies that are detected by multiple detectors
-  protected List<MergedAnomalyResultDTO> retrieveAnomaliesFromDatabase(List<MergedAnomalyResultDTO> generated) {
+  protected List<MergedAnomalyResultDTO> retrieveAnomaliesFromDatabase(
+      List<MergedAnomalyResultDTO> generated) {
     AnomalySlice effectiveSlice = this.slice.withDetectionId(this.config.getId())
         .withStart(this.getStartTime(generated) - this.maxGap - 1)
         .withEnd(this.getEndTime(generated) + this.maxGap + 1);
@@ -74,7 +79,8 @@ public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
     Map<Long, MergedAnomalyResultDTO> existingParentAnomalies = new HashMap<>();
     for (MergedAnomalyResultDTO anomaly : input) {
       if (anomaly.getId() != null && !anomaly.getChildren().isEmpty()) {
-        existingParentAnomalies.put(anomaly.getId(), copyAnomalyInfo(anomaly, new MergedAnomalyResultDTO()));
+        existingParentAnomalies
+            .put(anomaly.getId(), copyAnomalyInfo(anomaly, new MergedAnomalyResultDTO()));
       }
     }
 
@@ -96,11 +102,13 @@ public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
       String patternKey = "";
       if (anomaly.getProperties().containsKey(PROP_PATTERN_KEY)) {
         patternKey = anomaly.getProperties().get(PROP_PATTERN_KEY);
-      } else if (!Double.isNaN(anomaly.getAvgBaselineVal()) && !Double.isNaN(anomaly.getAvgCurrentVal())) {
+      } else if (!Double.isNaN(anomaly.getAvgBaselineVal()) && !Double
+          .isNaN(anomaly.getAvgCurrentVal())) {
         patternKey = (anomaly.getAvgCurrentVal() > anomaly.getAvgBaselineVal()) ? "UP" : "DOWN";
       }
       MergeWrapper.AnomalyKey key =
-          new MergeWrapper.AnomalyKey(anomaly.getMetric(), anomaly.getCollection(), anomaly.getDimensions(),
+          new MergeWrapper.AnomalyKey(anomaly.getMetric(), anomaly.getCollection(),
+              anomaly.getDimensions(),
               StringUtils.join(Arrays.asList(groupKey, patternKey), ","), "", anomaly.getType());
       MergedAnomalyResultDTO parent = parents.get(key);
 
@@ -138,8 +146,10 @@ public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
     // Refill current and baseline values for qualified parent anomalies
     // Ignore filling baselines for exiting parent anomalies and grouped anomalies
     Collection<MergedAnomalyResultDTO> parentAnomalies = Collections2.filter(output,
-        mergedAnomaly -> mergedAnomaly != null && !mergedAnomaly.getChildren().isEmpty() && !isExistingAnomaly(
-            existingParentAnomalies, mergedAnomaly) && !StringUtils.isBlank(mergedAnomaly.getMetricUrn()));
+        mergedAnomaly -> mergedAnomaly != null && !mergedAnomaly.getChildren().isEmpty()
+            && !isExistingAnomaly(
+            existingParentAnomalies, mergedAnomaly) && !StringUtils
+            .isBlank(mergedAnomaly.getMetricUrn()));
     super.fillCurrentAndBaselineValue(new ArrayList<>(parentAnomalies));
     return output;
   }

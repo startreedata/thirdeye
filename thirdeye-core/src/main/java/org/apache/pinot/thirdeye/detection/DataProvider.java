@@ -36,7 +36,6 @@ import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.detection.spi.model.EvaluationSlice;
 import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
 
-
 /**
  * Centralized data source for anomaly detection algorithms. All data used by any
  * algorithm <b>MUST</b> be obtained through this interface to maintain loose coupling.
@@ -45,17 +44,17 @@ import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
  * through one of the existing methods.
  */
 public interface DataProvider {
+
   /**
    * Returns a map of granular timeseries (keyed by slice) for a given set of slices.
    * The format of the DataFrame follows the standard convention of DataFrameUtils.
    *
    * Note: The slices are treated left inclusive and right exclusive
    *
-   * @see MetricSlice
-   * @see org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils
-   *
    * @param slices metric slices
    * @return map of timeseries (keyed by slice)
+   * @see MetricSlice
+   * @see org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils
    */
   Map<MetricSlice, DataFrame> fetchTimeseries(Collection<MetricSlice> slices);
 
@@ -64,68 +63,62 @@ public interface DataProvider {
    * grouped by the given dimensions.
    * The format of the DataFrame follows the standard convention of DataFrameUtils.
    *
-   * @see MetricSlice
-   * @see org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils
-   *
    * @param slices metric slices
    * @param dimensions dimensions to group by
    * @param limit max number of records to return ordered by metric value
-   *                 no limitation if it is a non-positive number
+   *     no limitation if it is a non-positive number
    * @return map of aggregation values (keyed by slice)
+   * @see MetricSlice
+   * @see org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils
    */
-  Map<MetricSlice, DataFrame> fetchAggregates(Collection<MetricSlice> slices, List<String> dimensions, int limit);
+  Map<MetricSlice, DataFrame> fetchAggregates(Collection<MetricSlice> slices,
+      List<String> dimensions, int limit);
 
   /**
    * Returns a multimap of anomalies (keyed by slice) for a given set of slices.
    *
-   * @see MergedAnomalyResultDTO
-   * @see AnomalySlice
-   *
    * @param slices anomaly slice
    * @return multimap of anomalies (keyed by slice)
+   * @see MergedAnomalyResultDTO
+   * @see AnomalySlice
    */
   Multimap<AnomalySlice, MergedAnomalyResultDTO> fetchAnomalies(Collection<AnomalySlice> slices);
 
   /**
    * Returns a multimap of events (keyed by slice) for a given set of slices.
    *
-   * @see EventDTO
-   * @see EventSlice
-   *
    * @param slices event slice
    * @return multimap of events (keyed by slice)
+   * @see EventDTO
+   * @see EventSlice
    */
   Multimap<EventSlice, EventDTO> fetchEvents(Collection<EventSlice> slices);
 
   /**
    * Returns a map of metric configs (keyed by id) for a given set of ids.
    *
-   * @see MetricConfigDTO
-   *
    * @param ids metric config ids
    * @return map of metric configs (keyed by id)
+   * @see MetricConfigDTO
    */
   Map<Long, MetricConfigDTO> fetchMetrics(Collection<Long> ids);
-
 
   /**
    * Returns a map of dataset configs (keyed by id) for a given set of dataset names.
    *
-   * @see DatasetConfigDTO
-   *
    * @param datasetNames dataset config names
    * @return map of dataset configs (keyed by dataset name)
+   * @see DatasetConfigDTO
    */
   Map<String, DatasetConfigDTO> fetchDatasets(Collection<String> datasetNames);
 
   /**
    * Returns a metricConfigDTO for a given metric name.
    *
-   * @see MetricConfigDTO
-   *
    * @param metricName metric name
    * @param datasetName dataset name
    * @return map of dataset configs (keyed by dataset name)
+   * @see MetricConfigDTO
    */
   MetricConfigDTO fetchMetric(String metricName, String datasetName);
 
@@ -139,20 +132,20 @@ public interface DataProvider {
    * @param start detection window start time
    * @param end detection window end time
    * @return detection pipeline instance
-   * @throws Exception
    */
   DetectionPipeline loadPipeline(AlertDTO config, long start, long end) throws Exception;
 
   /**
-   * Returns a multimap of evaluations (keyed by the evaluations slice) for a given set of evaluations slices.
-   *
-   * @see Evaluation
+   * Returns a multimap of evaluations (keyed by the evaluations slice) for a given set of
+   * evaluations slices.
    *
    * @param evaluationSlices the evaluation slices
    * @param configId configId
    * @return a multimap of evaluations (keyed by the evaluations slice)
+   * @see Evaluation
    */
-  Multimap<EvaluationSlice, EvaluationDTO> fetchEvaluations(Collection<EvaluationSlice> evaluationSlices, long configId);
+  Multimap<EvaluationSlice, EvaluationDTO> fetchEvaluations(
+      Collection<EvaluationSlice> evaluationSlices, long configId);
 
   default List<DatasetConfigDTO> fetchDatasetByDisplayName(String datasetDisplayName) {
     throw new NotImplementedException("the method is not implemented");

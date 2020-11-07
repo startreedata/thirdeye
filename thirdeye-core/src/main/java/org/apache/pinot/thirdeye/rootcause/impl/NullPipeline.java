@@ -26,12 +26,12 @@ import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 
-
 /**
  * NullPipeline serves as a dummy implementation or sink that emits as output any received inputs.
  * Can be used to construct an validate a DAG without a full implementation of component pipelines.
  */
 public class NullPipeline extends Pipeline {
+
   /**
    * Constructor for dependency injection
    *

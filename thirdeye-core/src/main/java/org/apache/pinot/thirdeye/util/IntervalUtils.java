@@ -27,16 +27,16 @@ import java.util.Stack;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.joda.time.Interval;
 
-
 public class IntervalUtils {
+
   /**
-   * This method is designed to merge a list of intervals to a list of intervals with no overlap in between
-   * @param intervals
-   * @return
-   * a list of intervals with no overlap in between
+   * This method is designed to merge a list of intervals to a list of intervals with no overlap in
+   * between
+   *
+   * @return a list of intervals with no overlap in between
    */
-  public static List<Interval> mergeIntervals (List<Interval> intervals) {
-    if(intervals == null || intervals.size() == 0) {
+  public static List<Interval> mergeIntervals(List<Interval> intervals) {
+    if (intervals == null || intervals.size() == 0) {
       return intervals;
     }
     // Sort Intervals
@@ -51,18 +51,17 @@ public class IntervalUtils {
     Stack<Interval> intervalStack = new Stack<>();
     intervalStack.push(intervals.get(0));
 
-    for(int i = 1; i < intervals.size(); i++) {
+    for (int i = 1; i < intervals.size(); i++) {
       Interval top = intervalStack.peek();
       Interval target = intervals.get(i);
 
-      if(top.overlap(target) == null && (top.getEnd() != target.getStart())) {
+      if (top.overlap(target) == null && (top.getEnd() != target.getStart())) {
         intervalStack.push(target);
-      }
-      else if(top.equals(target)) {
+      } else if (top.equals(target)) {
         continue;
-      }
-      else {
-        Interval newTop = new Interval(Math.min(top.getStart().getMillis(), target.getStart().getMillis()),
+      } else {
+        Interval newTop = new Interval(
+            Math.min(top.getStart().getMillis(), target.getStart().getMillis()),
             Math.max(top.getEnd().getMillis(), target.getEnd().getMillis()));
         intervalStack.pop();
         intervalStack.push(newTop);
@@ -74,18 +73,17 @@ public class IntervalUtils {
 
   /**
    * Merge intervals for each dimension map
-   * @param anomalyIntervals
    */
   public static void mergeIntervals(Map<DimensionMap, List<Interval>> anomalyIntervals) {
-    for(DimensionMap dimension : anomalyIntervals.keySet()) {
-      anomalyIntervals.put(dimension ,mergeIntervals(anomalyIntervals.get(dimension)));
+    for (DimensionMap dimension : anomalyIntervals.keySet()) {
+      anomalyIntervals.put(dimension, mergeIntervals(anomalyIntervals.get(dimension)));
     }
   }
 
   /**
    * turns a list of intervals into a string.
    * Ex. [1-5, 6-6, 9-15] -> "{1-5, 6, 9-15}"
-   * @param intervals
+   *
    * @return string form of interval list
    */
   public static String getIntervalRangesAsString(List<Interval> intervals) {

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class MetricConfigIndex extends AbstractIndexEntity {
+
   String name;
   String alias;
   String dataset;

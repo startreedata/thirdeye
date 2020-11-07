@@ -37,7 +37,6 @@ import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Pipeline for identifying relevant metrics based on dataset
  * association. The pipeline first fetches metric entities from the context and then
@@ -45,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * any metric entities in the search context. All found metrics are scored equally.
  */
 public class MetricDatasetPipeline extends Pipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetricDatasetPipeline.class);
 
   private enum MappingDirection {
@@ -56,7 +56,8 @@ public class MetricDatasetPipeline extends Pipeline {
   private static final double PROP_COEFFICIENT_DEFAULT = 1.0;
 
   private static final String PROP_DIRECTION = "direction";
-  private static final String PROP_DIRECTION_DEFAULT = MappingDirection.METRIC_TO_DATASET.toString();
+  private static final String PROP_DIRECTION_DEFAULT = MappingDirection.METRIC_TO_DATASET
+      .toString();
 
   public static final String META_METRIC_COUNT = "__COUNT";
 
@@ -76,7 +77,8 @@ public class MetricDatasetPipeline extends Pipeline {
    * @param metricDAO metric config DAO
    * @param datasetDAO dataset config DAO
    */
-  public MetricDatasetPipeline(String outputName, Set<String> inputNames, double coefficient, MappingDirection direction, MetricConfigManager metricDAO,
+  public MetricDatasetPipeline(String outputName, Set<String> inputNames, double coefficient,
+      MappingDirection direction, MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
@@ -90,14 +92,18 @@ public class MetricDatasetPipeline extends Pipeline {
    *
    * @param outputName pipeline output name
    * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_COEFFICIENT}, {@code PROP_DIRECTION})
+   * @param properties configuration properties ({@code PROP_COEFFICIENT}, {@code
+   *     PROP_DIRECTION})
    */
-  public MetricDatasetPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public MetricDatasetPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.coefficient = MapUtils.getDoubleValue(properties, PROP_COEFFICIENT, PROP_COEFFICIENT_DEFAULT);
-    this.direction = MappingDirection.valueOf(MapUtils.getString(properties, PROP_DIRECTION, PROP_DIRECTION_DEFAULT));
+    this.coefficient = MapUtils
+        .getDoubleValue(properties, PROP_COEFFICIENT, PROP_COEFFICIENT_DEFAULT);
+    this.direction = MappingDirection
+        .valueOf(MapUtils.getString(properties, PROP_DIRECTION, PROP_DIRECTION_DEFAULT));
   }
 
   @Override
@@ -106,7 +112,6 @@ public class MetricDatasetPipeline extends Pipeline {
       // metric to dataset
       Set<MetricEntity> metrics = context.filter(MetricEntity.class);
       return new PipelineResult(context, metrics2datasets(metrics));
-
     } else {
       // dataset to metric
       Set<DatasetEntity> datasets = context.filter(DatasetEntity.class);
@@ -116,9 +121,9 @@ public class MetricDatasetPipeline extends Pipeline {
 
   private Set<MetricEntity> datasets2metrics(Iterable<DatasetEntity> datasets) {
     Set<MetricEntity> entities = new MaxScoreSet<>();
-    for(DatasetEntity de : datasets) {
+    for (DatasetEntity de : datasets) {
       DatasetConfigDTO dataset = datasetDAO.findByDataset(de.getName());
-      if(dataset == null) {
+      if (dataset == null) {
         LOG.warn("Could not find dataset '{}'", de.getName());
         continue;
       }
@@ -127,8 +132,9 @@ public class MetricDatasetPipeline extends Pipeline {
       dtos = removeInactive(dtos);
       dtos = removeMeta(dtos);
 
-      for(MetricConfigDTO dto : dtos) {
-        entities.add(MetricEntity.fromMetric(de.getScore() * coefficient, Collections.singleton(de), dto.getId()));
+      for (MetricConfigDTO dto : dtos) {
+        entities.add(MetricEntity
+            .fromMetric(de.getScore() * coefficient, Collections.singleton(de), dto.getId()));
       }
     }
 
@@ -137,44 +143,49 @@ public class MetricDatasetPipeline extends Pipeline {
 
   private Set<DatasetEntity> metrics2datasets(Iterable<MetricEntity> metrics) {
     Set<DatasetEntity> entities = new MaxScoreSet<>();
-    for(MetricEntity me : metrics) {
+    for (MetricEntity me : metrics) {
       MetricConfigDTO metricDTO = this.metricDAO.findById(me.getId());
-      entities.add(DatasetEntity.fromName(me.getScore() * coefficient, Collections.singleton(me), metricDTO.getDataset()));
+      entities.add(DatasetEntity.fromName(me.getScore() * coefficient, Collections.singleton(me),
+          metricDTO.getDataset()));
     }
     return entities;
   }
 
   static Collection<MetricConfigDTO> removeMeta(Iterable<MetricConfigDTO> dtos) {
     Collection<MetricConfigDTO> out = new ArrayList<>();
-    for(MetricConfigDTO dto : dtos) {
-      if(dto.getName().endsWith(META_METRIC_COUNT))
+    for (MetricConfigDTO dto : dtos) {
+      if (dto.getName().endsWith(META_METRIC_COUNT)) {
         continue;
+      }
       out.add(dto);
     }
     return out;
   }
 
-  static Collection<MetricConfigDTO> removeExisting(Iterable<MetricConfigDTO> dtos, Iterable<MetricEntity> existing) {
+  static Collection<MetricConfigDTO> removeExisting(Iterable<MetricConfigDTO> dtos,
+      Iterable<MetricEntity> existing) {
     Collection<MetricConfigDTO> out = new ArrayList<>();
-    for(MetricConfigDTO dto : dtos) {
-      if(!findExisting(dto, existing))
+    for (MetricConfigDTO dto : dtos) {
+      if (!findExisting(dto, existing)) {
         out.add(dto);
+      }
     }
     return out;
   }
 
   static Collection<MetricConfigDTO> removeInactive(Iterable<MetricConfigDTO> dtos) {
     Collection<MetricConfigDTO> out = new ArrayList<>();
-    for(MetricConfigDTO dto : dtos) {
-      if(dto.isActive())
+    for (MetricConfigDTO dto : dtos) {
+      if (dto.isActive()) {
         out.add(dto);
+      }
     }
     return out;
   }
 
   static boolean findExisting(MetricConfigDTO dto, Iterable<MetricEntity> existing) {
-    for(MetricEntity me : existing) {
-      if(me.getId() == dto.getId()) {
+    for (MetricEntity me : existing) {
+      if (me.getId() == dto.getId()) {
         return true;
       }
     }

@@ -27,6 +27,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.joda.time.DateTime;
 
 public class TimeSeriesRow implements Comparable<TimeSeriesRow> {
+
   private final long start;
   private final long end;
   private final List<String> dimensionNames;
@@ -96,22 +97,31 @@ public class TimeSeriesRow implements Comparable<TimeSeriesRow> {
   public int compareTo(TimeSeriesRow o) {
 
     int startDiff = ObjectUtils.compare(this.start, o.start);
-    if (startDiff != 0)
+    if (startDiff != 0) {
       return startDiff;
+    }
 
     int dimensionNameDiff = compareListOfComparable(this.dimensionNames, o.dimensionNames);
-    if (dimensionNameDiff != 0)
+    if (dimensionNameDiff != 0) {
       return dimensionNameDiff;
+    }
     int dimensionValueDiff = compareListOfComparable(this.dimensionValues, o.dimensionValues);
-    if (dimensionValueDiff != 0)
+    if (dimensionValueDiff != 0) {
       return dimensionValueDiff;
+    }
     return compareListOfComparable(this.metrics, o.metrics);
   }
 
   private static <E extends Comparable<E>> int compareListOfComparable(List<E> a, List<E> b) {
-    if (a == null && b == null) return 0;
-    if (a == null) return -1;
-    if (b == null) return 1;
+    if (a == null && b == null) {
+      return 0;
+    }
+    if (a == null) {
+      return -1;
+    }
+    if (b == null) {
+      return 1;
+    }
 
     int sizeA = a.size();
     int sizeB = b.size();
@@ -131,6 +141,7 @@ public class TimeSeriesRow implements Comparable<TimeSeriesRow> {
   }
 
   static class Builder {
+
     private DateTime start;
     private DateTime end;
     private List<String> dimensionNames = Collections.singletonList("all");
@@ -175,6 +186,7 @@ public class TimeSeriesRow implements Comparable<TimeSeriesRow> {
   }
 
   public static class TimeSeriesMetric implements Comparable<TimeSeriesMetric> {
+
     private final String metricName;
     private final Double value;
 
@@ -211,6 +223,5 @@ public class TimeSeriesRow implements Comparable<TimeSeriesRow> {
     public Double getValue() {
       return value;
     }
-
   }
 }

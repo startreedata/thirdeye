@@ -29,7 +29,6 @@ import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 
-
 /**
  * Interface for ThirdEye's scheduling components
  */

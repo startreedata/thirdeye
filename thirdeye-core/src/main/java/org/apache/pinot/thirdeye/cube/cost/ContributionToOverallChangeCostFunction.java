@@ -24,6 +24,7 @@ import com.google.common.base.Strings;
 import java.util.Map;
 
 public class ContributionToOverallChangeCostFunction implements CostFunction {
+
   public static final String CONTRIBUTION_PERCENTAGE_THRESHOLD_PARAM = "pctThreshold";
   private double contributionPercentageThreshold = 3d;
 
@@ -47,11 +48,13 @@ public class ContributionToOverallChangeCostFunction implements CostFunction {
   }
 
   @Override
-  public double computeCost(double parentChangeRatio, double baselineValue, double currentValue, double baselineSize,
+  public double computeCost(double parentChangeRatio, double baselineValue, double currentValue,
+      double baselineSize,
       double currentSize, double topBaselineValue, double topCurrentValue, double topBaselineSize,
       double topCurrentSize) {
 
-    double contributionToOverallChange = (currentValue - baselineValue) / (topCurrentValue - topBaselineValue);
+    double contributionToOverallChange =
+        (currentValue - baselineValue) / (topCurrentValue - topBaselineValue);
     double percentageContribution = (((baselineValue) / topBaselineValue) * 100);
     if (Double.compare(percentageContribution, contributionPercentageThreshold) < 0) {
       return 0d;

@@ -53,12 +53,12 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Performs data sla checks for the window and generates DATA_SLA anomalies.
  *
  * Data SLA is verified based on the following information.
- * a. The dataset refresh timestamp updated by the event based data availability pipeline (if applicable).
+ * a. The dataset refresh timestamp updated by the event based data availability pipeline (if
+ * applicable).
  * b. Otherwise, we will query the data source and run sla checks.
  */
 @Components(title = "Data Sla Quality Checker",
@@ -71,7 +71,9 @@ import org.slf4j.LoggerFactory;
     params = {
         @Param(name = "sla", placeholder = "value")
     })
-public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityCheckerSpec>, BaselineProvider<DataSlaQualityCheckerSpec> {
+public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityCheckerSpec>,
+    BaselineProvider<DataSlaQualityCheckerSpec> {
+
   private static final Logger LOG = LoggerFactory.getLogger(DataSlaQualityChecker.class);
 
   private String sla;
@@ -106,11 +108,14 @@ public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityChec
 
     try {
       long datasetLastRefreshTime = fetchLatestDatasetRefreshTime(data, me, window);
-      long datasetLastRefreshTimeRoundUp = alignToUpperBoundary(datasetLastRefreshTime, datasetConfig);
-      MetricSlice slice = MetricSlice.from(me.getId(), datasetLastRefreshTimeRoundUp, expectedDatasetRefreshTime);
+      long datasetLastRefreshTimeRoundUp = alignToUpperBoundary(datasetLastRefreshTime,
+          datasetConfig);
+      MetricSlice slice = MetricSlice
+          .from(me.getId(), datasetLastRefreshTimeRoundUp, expectedDatasetRefreshTime);
 
       if (isSLAViolated(datasetLastRefreshTimeRoundUp, expectedDatasetRefreshTime)) {
-        anomalies.add(createDataSLAAnomaly(slice, datasetConfig, datasetLastRefreshTime, datasetLastRefreshTimeRoundUp));
+        anomalies.add(createDataSLAAnomaly(slice, datasetConfig, datasetLastRefreshTime,
+            datasetLastRefreshTimeRoundUp));
       }
     } catch (Exception e) {
       LOG.error(String.format("Failed to run sla check on metric URN %s", me.getUrn()), e);
@@ -129,7 +134,8 @@ public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityChec
     long endTime = window.getEnd().getMillis();
     // Note that we only measure the overall dataset availability. Filters are not considered as the
     // data availability events fire at the dataset level.
-    MetricSlice metricSlice = MetricSlice.from(me.getId(), startTime, endTime, ArrayListMultimap.create());
+    MetricSlice metricSlice = MetricSlice
+        .from(me.getId(), startTime, endTime, ArrayListMultimap.create());
 
     // Fetch dataset refresh time based on the data availability events
     DatasetConfigDTO datasetConfig = data.getDatasetForMetricId().get(me.getId());
@@ -140,12 +146,14 @@ public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityChec
     }
 
     // If the data availability event indicates no data or partial data, we will confirm with the data source.
-    if (eventBasedRefreshTime < startTime || isPartialData(eventBasedRefreshTime, endTime, datasetConfig)) {
+    if (eventBasedRefreshTime < startTime || isPartialData(eventBasedRefreshTime, endTime,
+        datasetConfig)) {
       // Double check with data source. This can happen if,
       // 1. This dataset/source doesn't not support data trigger/availability events
       // 2. The data trigger event didn't arrive due to some upstream issue.
       DataFrame dataFrame = this.dataFetcher.fetchData(new InputDataSpec()
-          .withTimeseriesSlices(Collections.singletonList(metricSlice))).getTimeseries().get(metricSlice);
+          .withTimeseriesSlices(Collections.singletonList(metricSlice))).getTimeseries()
+          .get(metricSlice);
       if (dataFrame != null && !dataFrame.isEmpty()) {
         // Fetches the latest timestamp from the source. This value is already in epoch (UTC).
         return dataFrame.getDoubles("timestamp").max().longValue();
@@ -160,9 +168,12 @@ public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityChec
    * Or more specifically if we have at least 1 data-point missing in the sla detection window.
    *
    * For example:
-   * Assume that the data is delayed and our current sla detection window is [1st Feb to 3rd Feb). During this scan,
-   * let's say data for 1st Feb arrives. Now, we have a situation where partial data is present. In other words, in the
-   * current sla detection window [1st to 3rd Feb) we have data for 1st Feb but data for 2nd Feb is missing.
+   * Assume that the data is delayed and our current sla detection window is [1st Feb to 3rd Feb).
+   * During this scan,
+   * let's say data for 1st Feb arrives. Now, we have a situation where partial data is present. In
+   * other words, in the
+   * current sla detection window [1st to 3rd Feb) we have data for 1st Feb but data for 2nd Feb is
+   * missing.
    *
    * Based on this information, we can smartly decide if we need to query the data source or not.
    */
@@ -200,11 +211,14 @@ public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityChec
    * Creates a DATA_SLA anomaly from ceiling(start) to ceiling(end) for the detection id.
    * If existing DATA_SLA anomalies are present, then it will be merged accordingly.
    *
-   * @param datasetLastRefreshTime the timestamp corresponding to the last record in the data (UTC)
-   * @param datasetLastRefreshTimeRoundUp the timestamp rounded off to the upper granular bucket. See
+   * @param datasetLastRefreshTime the timestamp corresponding to the last record in the data
+   *     (UTC)
+   * @param datasetLastRefreshTimeRoundUp the timestamp rounded off to the upper granular
+   *     bucket. See
    * @{link #alignToUpperBoundary}
    */
-  private MergedAnomalyResultDTO createDataSLAAnomaly(MetricSlice slice, DatasetConfigDTO datasetConfig,
+  private MergedAnomalyResultDTO createDataSLAAnomaly(MetricSlice slice,
+      DatasetConfigDTO datasetConfig,
       long datasetLastRefreshTime, long datasetLastRefreshTimeRoundUp) {
     MergedAnomalyResultDTO anomaly = DetectionUtils.makeAnomaly(slice.getStart(), slice.getEnd());
     anomaly.setCollection(datasetConfig.getName());

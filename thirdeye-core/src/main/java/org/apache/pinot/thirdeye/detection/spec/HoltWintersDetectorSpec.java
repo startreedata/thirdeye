@@ -21,8 +21,7 @@ package org.apache.pinot.thirdeye.detection.spec;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.detection.Pattern;
 
-
-public class HoltWintersDetectorSpec  extends AbstractSpec  {
+public class HoltWintersDetectorSpec extends AbstractSpec {
 
   private double alpha = -1;
   private double beta = -1;
@@ -31,7 +30,8 @@ public class HoltWintersDetectorSpec  extends AbstractSpec  {
   private double sensitivity = 5;
   private Pattern pattern = Pattern.UP_OR_DOWN;
   private boolean smoothing = true;
-  private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString(); // use native granularity by default
+  private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY
+      .toAggregationGranularityString(); // use native granularity by default
   private String weekStart = "WEDNESDAY";
 
   public boolean getSmoothing() {

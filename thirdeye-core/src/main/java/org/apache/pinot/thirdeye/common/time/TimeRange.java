@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 public class TimeRange implements Comparable<TimeRange>, Serializable {
+
   private static final long serialVersionUID = -403250971215465050L;
 
   private Long start;

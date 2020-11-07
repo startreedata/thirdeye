@@ -51,13 +51,13 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 
-
 /**
  * The type CSV third eye data source, which can make CSV file the data source of ThirdEye.
  * Can be used for testing purposes. The CSV file must have a column called 'timestamp', which is
  * the timestamp of the time series.
  */
 public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
+
   /**
    * The constant COL_TIMESTAMP. The name of the time stamp column.
    */
@@ -87,7 +87,8 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
    * @param metricNameMap the metric name map
    * @return the CSVThirdEyeDataSource
    */
-  public static CSVThirdEyeDataSource fromDataFrame(Map<String, DataFrame> dataSets, Map<Long, String> metricNameMap) {
+  public static CSVThirdEyeDataSource fromDataFrame(Map<String, DataFrame> dataSets,
+      Map<Long, String> metricNameMap) {
     return new CSVThirdEyeDataSource(dataSets, metricNameMap);
   }
 
@@ -99,7 +100,8 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
    * @return the CSVThirdEyeDataSource
    * @throws Exception the exception
    */
-  public static CSVThirdEyeDataSource fromUrl(Map<String, URL> dataSets, Map<Long, String> metricNameMap)
+  public static CSVThirdEyeDataSource fromUrl(Map<String, URL> dataSets,
+      Map<Long, String> metricNameMap)
       throws Exception {
     Map<String, DataFrame> dataframes = new HashMap<>();
     for (Map.Entry<String, URL> source : dataSets.entrySet()) {
@@ -132,7 +134,8 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   public CSVThirdEyeDataSource(Map<String, Object> properties) throws Exception {
     Map<String, DataFrame> dataframes = new HashMap<>();
     for (Map.Entry<String, Object> property : properties.entrySet()) {
-      try (InputStreamReader reader = new InputStreamReader(makeUrlFromPath(property.getValue().toString()).openStream())) {
+      try (InputStreamReader reader = new InputStreamReader(
+          makeUrlFromPath(property.getValue().toString()).openStream())) {
         dataframes.put(property.getKey(), DataFrame.fromCsv(reader));
       }
     }
@@ -144,6 +147,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
 
   /**
    * Return the name of CSVThirdEyeDataSource.
+   *
    * @return the name of this CSVThirdEyeDataSource
    */
   @Override
@@ -156,6 +160,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
    * Supports filter operation using time stamp and dimensions.
    * Supports group by time stamp and dimensions.
    * Only supports SUM as the aggregation function for now.
+   *
    * @return a ThirdEyeResponse that contains the result of executing the request.
    */
   @Override
@@ -167,7 +172,8 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
 
       final MetricAggFunction aggFunction = function.getFunctionName();
       if (aggFunction != MetricAggFunction.SUM) {
-        throw new IllegalArgumentException(String.format("Aggregation function '%s' not supported yet.", aggFunction));
+        throw new IllegalArgumentException(
+            String.format("Aggregation function '%s' not supported yet.", aggFunction));
       }
 
       DataFrame data = dataSets.get(function.getDataset());
@@ -215,7 +221,8 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
         if (request.getGroupByTimeGranularity() != null) {
           // group by both time granularity and column
           List<DataFrame.Tuple> tuples =
-              dataFrameGrouping.aggregate(aggregationExps).getSeries().get("key").getObjects().toListTyped();
+              dataFrameGrouping.aggregate(aggregationExps).getSeries().get("key").getObjects()
+                  .toListTyped();
           for (final DataFrame.Tuple key : tuples) {
             DataFrame filteredData = data.filter(new Series.StringConditional() {
               @Override
@@ -238,7 +245,6 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
             }
           }
           df.renameSeries(inputName, outputName);
-
         } else {
           // group by columns only
           df = dataFrameGrouping.aggregate(aggregationExps);
@@ -272,9 +278,11 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
     }
 
     // TODO handle non-dataset granularity gracefully
-    TimeSpec timeSpec = new TimeSpec("timestamp", new TimeGranularity(1, TimeUnit.HOURS), TimeSpec.SINCE_EPOCH_FORMAT);
+    TimeSpec timeSpec = new TimeSpec("timestamp", new TimeGranularity(1, TimeUnit.HOURS),
+        TimeSpec.SINCE_EPOCH_FORMAT);
     if (request.getGroupByTimeGranularity() != null) {
-      timeSpec = new TimeSpec("timestamp", request.getGroupByTimeGranularity(), TimeSpec.SINCE_EPOCH_FORMAT);
+      timeSpec = new TimeSpec("timestamp", request.getGroupByTimeGranularity(),
+          TimeSpec.SINCE_EPOCH_FORMAT);
     }
 
     return new CSVThirdEyeResponse(request, timeSpec, df);
@@ -319,6 +327,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   private interface TranslateDelegator {
+
     /**
      * translate a metric id to metric name
      *
@@ -329,6 +338,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   private static class DAOTranslator implements TranslateDelegator {
+
     /**
      * The translator that maps metric id to metric name based on a configDTO.
      */
@@ -381,12 +391,13 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
    * @return StringConditional
    */
   private Series.StringConditional makeFilter(Collection<String> values) {
-    final Set<String> exclusions = new HashSet<>(Collections2.filter(values, new Predicate<String>() {
-      @Override
-      public boolean apply(@Nullable String s) {
-        return s != null && s.startsWith("!");
-      }
-    }));
+    final Set<String> exclusions = new HashSet<>(
+        Collections2.filter(values, new Predicate<String>() {
+          @Override
+          public boolean apply(@Nullable String s) {
+            return s != null && s.startsWith("!");
+          }
+        }));
 
     final Set<String> inclusions = new HashSet<>(values);
     inclusions.removeAll(exclusions);
@@ -394,7 +405,8 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
     return new Series.StringConditional() {
       @Override
       public boolean apply(String... values) {
-        return (inclusions.isEmpty() || inclusions.contains(values[0])) && !exclusions.contains("!" + values[0]);
+        return (inclusions.isEmpty() || inclusions.contains(values[0])) && !exclusions
+            .contains("!" + values[0]);
       }
     };
   }

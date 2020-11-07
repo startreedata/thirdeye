@@ -42,19 +42,21 @@ import org.slf4j.LoggerFactory;
 
 //Heavily based off TimeOnTime equivalent
 public class UITimeSeriesResponseParser extends BaseTimeSeriesResponseParser {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(UITimeSeriesResponseParser.class);
   private final boolean doRollUp = true; // roll up small metric to OTHER dimensions
 
   /**
-   * Returns the parsed ThirdEye response that has GroupBy in space dimension. In addition, the combinations of space
+   * Returns the parsed ThirdEye response that has GroupBy in space dimension. In addition, the
+   * combinations of space
    * dimension that have small contributions will be rolled up to a new dimension called OTHER.
    *
    * @param response the ThirdEye response from any data source.
-   *
    * @return the parsed ThirdEye response to rows of TimeSeriesRow.
    */
   protected List<TimeSeriesRow> parseGroupByTimeDimensionResponse(ThirdEyeResponse response) {
-    Map<String, ThirdEyeResponseRow> responseMap = ResponseParserUtils.createResponseMapByTimeAndDimension(response);
+    Map<String, ThirdEyeResponseRow> responseMap = ResponseParserUtils
+        .createResponseMapByTimeAndDimension(response);
     List<Range<DateTime>> ranges = getTimeRanges(response.getRequest());
     int numTimeBuckets = ranges.size();
     List<MetricFunction> metricFunctions = response.getMetricFunctions();
@@ -112,14 +114,16 @@ public class UITimeSeriesResponseParser extends BaseTimeSeriesResponseParser {
     // else, we add the metric values to the OTHER row
     for (List<String> dimensionValues : dimensionValuesList) {
       List<TimeSeriesRow> thresholdRows =
-          buildTimeSeriesRows(responseMap, ranges, numTimeBuckets, dimensionNameList, dimensionValues,
+          buildTimeSeriesRows(responseMap, ranges, numTimeBuckets, dimensionNameList,
+              dimensionValues,
               metricFunctions);
 
       boolean passedThreshold = false;
       if (doRollUp) {
         // check if rows pass threshold
         for (int timeBucketId = 0; timeBucketId < numTimeBuckets; timeBucketId++) {
-          if (checkMetricSums(thresholdRows.get(timeBucketId), metricSums.get(timeBucketId), metricThresholds)) {
+          if (checkMetricSums(thresholdRows.get(timeBucketId), metricSums.get(timeBucketId),
+              metricThresholds)) {
             passedThreshold = true;
             break;
           }

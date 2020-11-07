@@ -26,11 +26,11 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 
-
 /**
  * Stores the ratio metric that is returned from DB.
  */
 public class RatioRow extends BaseRow {
+
   protected double baselineNumeratorValue;
   protected double currentNumeratorValue;
   protected double baselineDenominatorValue;
@@ -60,8 +60,10 @@ public class RatioRow extends BaseRow {
    * @param currentNumeratorValue the current numerator of this ratio row.
    * @param currentDenominatorValue the current denominator of this ratio row.
    */
-  public RatioRow(Dimensions dimensions, DimensionValues dimensionValues, double baselineNumeratorValue,
-      double baselineDenominatorValue, double currentNumeratorValue, double currentDenominatorValue) {
+  public RatioRow(Dimensions dimensions, DimensionValues dimensionValues,
+      double baselineNumeratorValue,
+      double baselineDenominatorValue, double currentNumeratorValue,
+      double currentDenominatorValue) {
     super(dimensions, dimensionValues);
     this.baselineNumeratorValue = baselineNumeratorValue;
     this.baselineDenominatorValue = baselineDenominatorValue;
@@ -171,7 +173,8 @@ public class RatioRow extends BaseRow {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(super.hashCode(), baselineNumeratorValue, currentNumeratorValue, baselineDenominatorValue,
+    return Objects.hashCode(super.hashCode(), baselineNumeratorValue, currentNumeratorValue,
+        baselineDenominatorValue,
         currentDenominatorValue);
   }
 

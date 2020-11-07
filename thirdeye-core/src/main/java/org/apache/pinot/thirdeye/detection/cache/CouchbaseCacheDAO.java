@@ -40,7 +40,6 @@ import org.apache.pinot.thirdeye.util.CacheUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * DAO class used to fetch data from Couchbase.
  */
@@ -69,7 +68,8 @@ public class CouchbaseCacheDAO implements CacheDAO {
    * Initialize connection to Couchbase and open bucket where data is stored.
    */
   private void createDataStoreConnection() {
-    CacheDataSource dataSource = CacheConfig.getInstance().getCentralizedCacheSettings().getDataSourceConfig();
+    CacheDataSource dataSource = CacheConfig.getInstance().getCentralizedCacheSettings()
+        .getDataSourceConfig();
     Map<String, Object> config = dataSource.getConfig();
     List<String> hosts = ConfigUtils.getList(config.get(HOSTS));
 
@@ -90,7 +90,8 @@ public class CouchbaseCacheDAO implements CacheDAO {
       cluster.authenticate(CertAuthenticator.INSTANCE);
     } else {
       cluster = CouchbaseCluster.create(hosts);
-      cluster.authenticate(MapUtils.getString(config, AUTH_USERNAME), MapUtils.getString(config, AUTH_PASSWORD));
+      cluster.authenticate(MapUtils.getString(config, AUTH_USERNAME),
+          MapUtils.getString(config, AUTH_PASSWORD));
     }
 
     this.bucket = cluster.openBucket(CacheUtils.getBucketName());
@@ -100,26 +101,28 @@ public class CouchbaseCacheDAO implements CacheDAO {
    * Fetches time-series data from cache. Formats it into a list of TimeSeriesDataPoints before
    * returning. The raw results will look something like this:
    * {
-   *   {
-   *     "time": 1000,
-   *     "123456": "30.0"
-   *   },
-   *   {
-   *     "time": 2000,
-   *     "123456": "893.0"
-   *   },
-   *   {
-   *     "time": 3000,
-   *     "123456": "900.6"
-   *   }
+   * {
+   * "time": 1000,
+   * "123456": "30.0"
+   * },
+   * {
+   * "time": 2000,
+   * "123456": "893.0"
+   * },
+   * {
+   * "time": 3000,
+   * "123456": "900.6"
    * }
+   * }
+   *
    * @param request ThirdEyeCacheRequest. Wrapper for ThirdEyeRequest.
    * @return list of TimeSeriesDataPoint
    * @throws Exception if query threw an error
    */
 
   // NOTE: this will be slow unless indexes are created on "time" and "metricId".
-  public ThirdEyeCacheResponse tryFetchExistingTimeSeries(ThirdEyeCacheRequest request) throws Exception {
+  public ThirdEyeCacheResponse tryFetchExistingTimeSeries(ThirdEyeCacheRequest request)
+      throws Exception {
     String bucketName = CacheUtils.getBucketName();
     String dimensionKey = request.getDimensionKey();
 
@@ -129,7 +132,9 @@ public class CouchbaseCacheDAO implements CacheDAO {
         .put(CacheConstants.METRIC_ID, request.getMetricId())
         .put(CacheConstants.DIMENSION_KEY, request.getDimensionKey())
         .put(CacheConstants.START, request.getStartTimeInclusive())
-        .put(CacheConstants.END, request.getEndTimeExclusive() - request.getRequest().getGroupByTimeGranularity().toMillis());
+        .put(CacheConstants.END,
+            request.getEndTimeExclusive() - request.getRequest().getGroupByTimeGranularity()
+                .toMillis());
 
     String query = CacheUtils.buildQuery(parameters);
 
@@ -138,7 +143,8 @@ public class CouchbaseCacheDAO implements CacheDAO {
     ThirdeyeMetricsUtil.couchbaseCallCounter.inc();
 
     if (!queryResult.finalSuccess()) {
-      LOG.error("cache error occurred for window startTime = {} to endTime = {}", request.getStartTimeInclusive(), request.getEndTimeExclusive());
+      LOG.error("cache error occurred for window startTime = {} to endTime = {}",
+          request.getStartTimeInclusive(), request.getEndTimeExclusive());
 
       for (JsonObject error : queryResult.errors()) {
         LOG.error(error.getString("msg"));
@@ -153,7 +159,9 @@ public class CouchbaseCacheDAO implements CacheDAO {
     for (N1qlQueryRow row : queryResult) {
       long timestamp = row.value().getLong(CacheConstants.TIMESTAMP);
       Double dataValue = row.value().getDouble(dimensionKey);
-      timeSeriesRows.add(new TimeSeriesDataPoint(request.getMetricUrn(), timestamp, request.getMetricId(), String.valueOf(dataValue)));
+      timeSeriesRows.add(
+          new TimeSeriesDataPoint(request.getMetricUrn(), timestamp, request.getMetricId(),
+              String.valueOf(dataValue)));
     }
 
     return new ThirdEyeCacheResponse(request, timeSeriesRows);
@@ -164,22 +172,25 @@ public class CouchbaseCacheDAO implements CacheDAO {
    * exists within Couchbase and the data value for the metricURN already exists in the cache,
    * we don't do anything. An example document generated and inserted for this might look like:
    * {
-   *   "timestamp": 123456700000
-   *   "metricId": 123456,
-   *   "61427020": "3.0",
-   *   "83958352": "59.6",
-   *   "98648743": "0.0"
+   * "timestamp": 123456700000
+   * "metricId": 123456,
+   * "61427020": "3.0",
+   * "83958352": "59.6",
+   * "98648743": "0.0"
    * }
+   *
    * @param point data point
    */
   public void insertTimeSeriesDataPoint(TimeSeriesDataPoint point) {
 
-    JsonDocument doc = bucket.getAndTouch(point.getDocumentKey(), CacheConfig.getInstance().getCentralizedCacheSettings().getTTL());
+    JsonDocument doc = bucket.getAndTouch(point.getDocumentKey(),
+        CacheConfig.getInstance().getCentralizedCacheSettings().getTTL());
     ThirdeyeMetricsUtil.couchbaseCallCounter.inc();
 
     if (doc == null) {
       JsonObject documentBody = CacheUtils.buildDocumentStructure(point);
-      doc = JsonDocument.create(point.getDocumentKey(), CacheConfig.getInstance().getCentralizedCacheSettings().getTTL(), documentBody);
+      doc = JsonDocument.create(point.getDocumentKey(),
+          CacheConfig.getInstance().getCentralizedCacheSettings().getTTL(), documentBody);
     } else {
       JsonObject dimensions = doc.content();
       if (dimensions.containsKey(point.getMetricUrnHash())) {

@@ -54,17 +54,19 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
-
 /**
  * Console interface for performing root cause search using a sample pipeline configuration.
  * The user can specify the TimeRange and Baseline entities, as well as arbitrary URNs to
- * populate the search context with. The console interface allows one-off or interactive REPL execution modes.
+ * populate the search context with. The console interface allows one-off or interactive REPL
+ * execution modes.
  *
- * <br/><b>Example:</b> {@code java -cp target/thirdeye-dashboard-1.0-SNAPSHOT.jar org.apache.pinot.thirdeye.rootcause.impl.RCAFrameworkRunner
- * --config-dir local-configs/ --window-size 28 --baseline-offset 28 --entities thirdeye:metric:pageViews,thirdeye:metric:logins}
- *
+ * <br/><b>Example:</b> {@code java -cp target/thirdeye-dashboard-1.0-SNAPSHOT.jar
+ * org.apache.pinot.thirdeye.rootcause.impl.RCAFrameworkRunner
+ * --config-dir local-configs/ --window-size 28 --baseline-offset 28 --entities
+ * thirdeye:metric:pageViews,thirdeye:metric:logins}
  */
 public class RCAFrameworkRunner {
+
   private static final String CLI_THIRDEYE_CONFIG = "thirdeye-config";
   private static final String CLI_WINDOW_SIZE = "window-size";
   private static final String CLI_BASELINE_OFFSET = "baseline-offset";
@@ -86,13 +88,18 @@ public class RCAFrameworkRunner {
     addReqOption(options, null, CLI_ROOTCAUSE_CONFIG, true, "RootCause framework config file path");
     addReqOption(options, null, CLI_FRAMEWORK, true, "framework name in RCA configuration.");
 
-    options.addOption(null, CLI_WINDOW_SIZE, true, "window size for search window (in days, defaults to '7')");
-    options.addOption(null, CLI_BASELINE_OFFSET, true, "baseline offset (in days, from start of window)");
+    options.addOption(null, CLI_WINDOW_SIZE, true,
+        "window size for search window (in days, defaults to '7')");
+    options.addOption(null, CLI_BASELINE_OFFSET, true,
+        "baseline offset (in days, from start of window)");
     options.addOption(null, CLI_ENTITIES, true, "search context metric entities");
-    options.addOption(null, CLI_TIME_START, true, "start time of the search window (ISO 8601, e.g. '20170701T150000Z')");
-    options.addOption(null, CLI_TIME_END, true, "end time of the search window (ISO 8601, e.g. '20170831T030000Z', defaults to now)");
-    options.addOption(null, CLI_INTERACTIVE, false, "enters interacive REPL mode (specified entities will be added automatically)");
-    options.addOption("v",  CLI_VERBOSE, false, "verbose output mode (set RCA log level to DEBUG)");
+    options.addOption(null, CLI_TIME_START, true,
+        "start time of the search window (ISO 8601, e.g. '20170701T150000Z')");
+    options.addOption(null, CLI_TIME_END, true,
+        "end time of the search window (ISO 8601, e.g. '20170831T030000Z', defaults to now)");
+    options.addOption(null, CLI_INTERACTIVE, false,
+        "enters interacive REPL mode (specified entities will be added automatically)");
+    options.addOption("v", CLI_VERBOSE, false, "verbose output mode (set RCA log level to DEBUG)");
 
     Parser parser = new BasicParser();
     CommandLine cmd = null;
@@ -104,8 +111,9 @@ public class RCAFrameworkRunner {
       System.exit(1);
     }
 
-    if(cmd.hasOption(CLI_WINDOW_SIZE) && cmd.hasOption(CLI_TIME_START)) {
-      System.out.println(String.format("--%s and --%s mutually exclusive", CLI_WINDOW_SIZE, CLI_TIME_START));
+    if (cmd.hasOption(CLI_WINDOW_SIZE) && cmd.hasOption(CLI_TIME_START)) {
+      System.out.println(
+          String.format("--%s and --%s mutually exclusive", CLI_WINDOW_SIZE, CLI_TIME_START));
       System.exit(1);
     }
 
@@ -125,7 +133,8 @@ public class RCAFrameworkRunner {
     // Framework setup
     // ************************************************************************
     File rcaConfig = new File(cmd.getOptionValue(CLI_ROOTCAUSE_CONFIG));
-    List<Pipeline> pipelines = RCAFrameworkLoader.getPipelinesFromConfig(rcaConfig, cmd.getOptionValue(CLI_FRAMEWORK));
+    List<Pipeline> pipelines = RCAFrameworkLoader
+        .getPipelinesFromConfig(rcaConfig, cmd.getOptionValue(CLI_FRAMEWORK));
 
     // Executor
     ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -140,18 +149,22 @@ public class RCAFrameworkRunner {
     // time range and baseline
     long now = System.currentTimeMillis();
     long windowEnd = now;
-    if(cmd.hasOption(CLI_TIME_END))
+    if (cmd.hasOption(CLI_TIME_END)) {
       windowEnd = ISO8601.parseDateTime(cmd.getOptionValue(CLI_TIME_END)).getMillis();
+    }
 
     long windowSize = 7 * DAY_IN_MS;
-    if(cmd.hasOption(CLI_TIME_START))
-      windowSize = windowEnd - ISO8601.parseDateTime(cmd.getOptionValue(CLI_TIME_START)).getMillis();
-    else if(cmd.hasOption(CLI_WINDOW_SIZE))
+    if (cmd.hasOption(CLI_TIME_START)) {
+      windowSize =
+          windowEnd - ISO8601.parseDateTime(cmd.getOptionValue(CLI_TIME_START)).getMillis();
+    } else if (cmd.hasOption(CLI_WINDOW_SIZE)) {
       windowSize = Long.parseLong(cmd.getOptionValue(CLI_WINDOW_SIZE)) * DAY_IN_MS;
+    }
 
     long baselineOffset = 0;
-    if(cmd.hasOption(CLI_BASELINE_OFFSET))
+    if (cmd.hasOption(CLI_BASELINE_OFFSET)) {
       baselineOffset = Long.parseLong(cmd.getOptionValue(CLI_BASELINE_OFFSET)) * DAY_IN_MS;
+    }
 
     long windowStart = windowEnd - windowSize;
 
@@ -164,14 +177,20 @@ public class RCAFrameworkRunner {
     long displayStart = windowStart - displayOffset;
     long displayEnd = windowStart + windowSize + displayOffset;
 
-    System.out.println(String.format("Using current time range '%d' (%s) to '%d' (%s)", windowStart, ISO8601.print(windowStart), windowEnd, ISO8601.print(windowEnd)));
-    System.out.println(String.format("Using baseline time range '%d' (%s) to '%d' (%s)", baselineStart, ISO8601.print(baselineStart), baselineEnd, ISO8601.print(baselineEnd)));
+    System.out.println(String.format("Using current time range '%d' (%s) to '%d' (%s)", windowStart,
+        ISO8601.print(windowStart), windowEnd, ISO8601.print(windowEnd)));
+    System.out.println(String
+        .format("Using baseline time range '%d' (%s) to '%d' (%s)", baselineStart,
+            ISO8601.print(baselineStart), baselineEnd, ISO8601.print(baselineEnd)));
 
-    entities.add(TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANOMALY, windowStart, windowEnd));
-    entities.add(TimeRangeEntity.fromRange(0.8, TimeRangeEntity.TYPE_BASELINE, baselineStart, baselineEnd));
-    entities.add(TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANALYSIS, displayStart, displayEnd));
+    entities
+        .add(TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANOMALY, windowStart, windowEnd));
+    entities.add(
+        TimeRangeEntity.fromRange(0.8, TimeRangeEntity.TYPE_BASELINE, baselineStart, baselineEnd));
+    entities.add(
+        TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANALYSIS, displayStart, displayEnd));
 
-    if(cmd.hasOption(CLI_ENTITIES)) {
+    if (cmd.hasOption(CLI_ENTITIES)) {
       entities.addAll(parseURNSequence(cmd.getOptionValue(CLI_ENTITIES), 1.0));
     }
 
@@ -184,7 +203,6 @@ public class RCAFrameworkRunner {
       } catch (InterruptedIOException ignore) {
         // left blank, exit
       }
-
     } else {
       runFramework(framework, entities);
     }
@@ -202,7 +220,7 @@ public class RCAFrameworkRunner {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
     String line;
-    while((line = br.readLine()) != null) {
+    while ((line = br.readLine()) != null) {
       Set<Entity> entities = new HashSet<>();
       entities.addAll(baseEntities);
       entities.addAll(parseURNSequence(line, 1.0));
@@ -215,7 +233,7 @@ public class RCAFrameworkRunner {
 
   private static void runFramework(RCAFramework framework, Set<Entity> entities) {
     System.out.println("*** Search context:");
-    for(Entity e : entities) {
+    for (Entity e : entities) {
       System.out.println(formatEntity(e));
     }
 
@@ -232,26 +250,27 @@ public class RCAFrameworkRunner {
     List<Entity> results = new ArrayList<>(result.getResults());
     Collections.sort(results, Entity.HIGHEST_SCORE_FIRST);
 
-    for(Entity e : results) {
+    for (Entity e : results) {
       System.out.println(formatEntity(e));
     }
 
     System.out.println("*** Grouped results:");
     Map<String, Collection<Entity>> grouped = topKPerType(results, 5);
-    for(Map.Entry<String, Collection<Entity>> entry : grouped.entrySet()) {
+    for (Map.Entry<String, Collection<Entity>> entry : grouped.entrySet()) {
       System.out.println(entry.getKey());
-      for(Entity e : entry.getValue()) {
+      for (Entity e : entry.getValue()) {
         System.out.println(formatEntity(e));
       }
     }
   }
 
   private static Collection<Entity> parseURNSequence(String urns, double score) {
-    if(urns.isEmpty())
+    if (urns.isEmpty()) {
       return Collections.emptySet();
+    }
     Set<Entity> entities = new HashSet<>();
     String[] parts = urns.split(",");
-    for(String part : parts) {
+    for (String part : parts) {
       entities.add(EntityUtils.parseURN(part, score));
     }
     return entities;
@@ -266,15 +285,17 @@ public class RCAFrameworkRunner {
    */
   private static Map<String, Collection<Entity>> topKPerType(Collection<Entity> entities, int k) {
     Map<String, Collection<Entity>> map = new HashMap<>();
-    for(Entity e : entities) {
+    for (Entity e : entities) {
       String prefix = extractPrefix(e);
 
-      if(!map.containsKey(prefix))
+      if (!map.containsKey(prefix)) {
         map.put(prefix, new ArrayList<Entity>());
+      }
 
       Collection<Entity> current = map.get(prefix);
-      if(current.size() < k)
+      if (current.size() < k) {
         current.add(e);
+      }
     }
 
     return map;
@@ -289,10 +310,10 @@ public class RCAFrameworkRunner {
     return parts[0] + ":" + parts[1] + ":";
   }
 
-  private static void addReqOption(Options options, String opt, String longOpt, boolean hasArg, String description) {
+  private static void addReqOption(Options options, String opt, String longOpt, boolean hasArg,
+      String description) {
     Option optConfig = new Option(opt, longOpt, hasArg, description);
     optConfig.setRequired(true);
     options.addOption(optConfig);
   }
-
 }

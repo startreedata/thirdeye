@@ -32,15 +32,16 @@ import org.apache.pinot.thirdeye.cube.summary.SummaryResponse;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-
 /**
- * A portal class that is used to trigger the multi-dimensional summary algorithm and to get the summary response on
+ * A portal class that is used to trigger the multi-dimensional summary algorithm and to get the
+ * summary response on
  * an additive metric.
  */
 public class MultiDimensionalSummary {
-  private AdditiveDBClient dbClient;
-  private CostFunction costFunction;
-  private DateTimeZone dateTimeZone;
+
+  private final AdditiveDBClient dbClient;
+  private final CostFunction costFunction;
+  private final DateTimeZone dateTimeZone;
 
   public MultiDimensionalSummary(AdditiveDBClient dbClient, CostFunction costFunction,
       DateTimeZone dateTimeZone) {
@@ -61,27 +62,33 @@ public class MultiDimensionalSummary {
    * @param currentEndExclusive the end time of the current data cube, exclusive.
    * @param baselineStartInclusive the start of the baseline data cube, inclusive.
    * @param baselineEndExclusive the end of the baseline data cube, exclusive.
-   * @param dimensions the dimensions to be considered in the summary. If the variable depth is zero, then the order
-   *                   of the dimension is used; otherwise, this method will determine the order of the dimensions
-   *                   depending on their cost. After the order is determined, the first 'depth' dimensions are used
-   *                   the generated the summary.
+   * @param dimensions the dimensions to be considered in the summary. If the variable depth is
+   *     zero, then the order
+   *     of the dimension is used; otherwise, this method will determine the order of the
+   *     dimensions
+   *     depending on their cost. After the order is determined, the first 'depth' dimensions are
+   *     used
+   *     the generated the summary.
    * @param dataFilters the filter to be applied on the data cube.
    * @param summarySize the number of entries to be put in the summary.
    * @param depth the number of dimensions to be drilled down when analyzing the summary.
-   * @param hierarchies the hierarchy among the dimensions. The order will always be honored when determining the order
-   *                    of dimensions.
+   * @param hierarchies the hierarchy among the dimensions. The order will always be honored
+   *     when determining the order
+   *     of dimensions.
    * @param doOneSideError if the summary should only consider one side error.
-   *
    * @return the multi-dimensional summary of an additive metric.
    */
   public SummaryResponse buildSummary(String dataset, String metric, long currentStartInclusive,
-      long currentEndExclusive, long baselineStartInclusive, long baselineEndExclusive, Dimensions dimensions,
-      Multimap<String, String> dataFilters, int summarySize, int depth, List<List<String>> hierarchies,
+      long currentEndExclusive, long baselineStartInclusive, long baselineEndExclusive,
+      Dimensions dimensions,
+      Multimap<String, String> dataFilters, int summarySize, int depth,
+      List<List<String>> hierarchies,
       boolean doOneSideError) throws Exception {
     // Check arguments
     List<String> metrics = new ArrayList<>();
     metrics.add(metric);
-    SummaryUtils.checkArguments(dataset, metrics, currentStartInclusive, currentEndExclusive, baselineStartInclusive,
+    SummaryUtils.checkArguments(dataset, metrics, currentStartInclusive, currentEndExclusive,
+        baselineStartInclusive,
         baselineEndExclusive, dimensions, dataFilters, summarySize, depth, hierarchies);
 
     dbClient.setDataset(dataset);

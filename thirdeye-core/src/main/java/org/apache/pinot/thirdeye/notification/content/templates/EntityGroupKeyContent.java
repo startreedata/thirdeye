@@ -64,7 +64,8 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
   static final String PROP_GROUP_KEY = "groupKey";
 
   private AlertManager configDAO = null;
-  private final Multimap<String, AnomalyReportEntity> entityToAnomaliesMap = ArrayListMultimap.create();
+  private final Multimap<String, AnomalyReportEntity> entityToAnomaliesMap = ArrayListMultimap
+      .create();
   private final Multimap<String, AnomalyReportEntity> entityToSortedAnomaliesMap = ArrayListMultimap
       .create();
   private final Set<Long> visitedAnomaliesSet = new HashSet<>();

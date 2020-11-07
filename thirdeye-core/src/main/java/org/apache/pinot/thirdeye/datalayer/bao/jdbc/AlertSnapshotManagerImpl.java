@@ -25,7 +25,6 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertSnapshotBean;
 
-
 public class AlertSnapshotManagerImpl extends AbstractManagerImpl<AlertSnapshotDTO>
     implements AlertSnapshotManager {
 

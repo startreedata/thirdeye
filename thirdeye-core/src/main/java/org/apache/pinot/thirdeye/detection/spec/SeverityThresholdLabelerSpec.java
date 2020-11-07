@@ -22,9 +22,9 @@ package org.apache.pinot.thirdeye.detection.spec;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SeverityThresholdLabelerSpec  extends AbstractSpec{
+public class SeverityThresholdLabelerSpec extends AbstractSpec {
+
   public static final String CHANGE_KEY = "change";
   public static final String DURATION_KEY = "duration";
 

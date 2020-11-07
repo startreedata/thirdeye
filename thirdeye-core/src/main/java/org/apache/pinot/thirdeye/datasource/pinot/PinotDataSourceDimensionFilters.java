@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
  * This class helps return dimension filters for a dataset from the Pinot data source
  */
 public class PinotDataSourceDimensionFilters {
+
   private static final Logger LOG = LoggerFactory.getLogger(PinotDataSourceDimensionFilters.class);
   private static final ExecutorService executorService = Executors.newCachedThreadPool();
   private static final int TIME_OUT_SIZE = 60;
@@ -60,7 +61,7 @@ public class PinotDataSourceDimensionFilters {
   /**
    * This method gets the dimension filters for the given dataset from the pinot data source,
    * and returns them as map of dimension name to values
-   * @param dataset
+   *
    * @return dimension filters map
    */
   public Map<String, List<String>> getDimensionFilters(String dataset) {
@@ -80,43 +81,52 @@ public class PinotDataSourceDimensionFilters {
       List<String> dimensions = Utils.getSortedDimensionNames(dataset);
       filters = getFilters(dataset, dimensions, startDateTime, endDateTime);
     } catch (Exception e) {
-      LOG.error("Error while fetching dimension values in filter drop down for collection: {}", dataset, e);
+      LOG.error("Error while fetching dimension values in filter drop down for collection: {}",
+          dataset, e);
     }
     return filters;
   }
 
-  private Map<String, List<String>> getFilters(String dataset, List<String> dimensions, DateTime start, DateTime end) {
+  private Map<String, List<String>> getFilters(String dataset, List<String> dimensions,
+      DateTime start, DateTime end) {
     DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(dataset);
     MetricFunction metricFunction =
         new MetricFunction(MetricAggFunction.COUNT, "*", null, dataset, null, datasetConfig);
     List<ThirdEyeRequest> requests =
-        generateFilterRequests(metricFunction, dimensions, start, end, datasetConfig.getDataSource());
+        generateFilterRequests(metricFunction, dimensions, start, end,
+            datasetConfig.getDataSource());
 
     Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();
     for (final ThirdEyeRequest request : requests) {
-      Future<ThirdEyeResponse> responseFuture = executorService.submit(new Callable<ThirdEyeResponse>() {
-        @Override
-        public ThirdEyeResponse call() throws Exception {
-          return pinotThirdEyeDataSource.execute(request);
-        }
-      });
+      Future<ThirdEyeResponse> responseFuture = executorService
+          .submit(new Callable<ThirdEyeResponse>() {
+            @Override
+            public ThirdEyeResponse call() throws Exception {
+              return pinotThirdEyeDataSource.execute(request);
+            }
+          });
       responseFuturesMap.put(request, responseFuture);
     }
 
     Map<String, List<String>> result = new HashMap<>();
-    for (Map.Entry<ThirdEyeRequest, Future<ThirdEyeResponse>> entry : responseFuturesMap.entrySet()) {
+    for (Map.Entry<ThirdEyeRequest, Future<ThirdEyeResponse>> entry : responseFuturesMap
+        .entrySet()) {
       ThirdEyeRequest request = entry.getKey();
       String dimension = request.getGroupBy().get(0);
       ThirdEyeResponse thirdEyeResponse = null;
       try {
         thirdEyeResponse = entry.getValue().get(TIME_OUT_SIZE, TIME_OUT_UNIT);
       } catch (ExecutionException e) {
-        LOG.error("Execution error when getting filter for Dataset '{}' in Dimension '{}'.", dataset, dimension, e);
+        LOG.error("Execution error when getting filter for Dataset '{}' in Dimension '{}'.",
+            dataset, dimension, e);
       } catch (InterruptedException e) {
-        LOG.warn("Execution is interrupted when getting filter for Dataset '{}' in Dimension '{}'.", dataset, dimension, e);
+        LOG.warn("Execution is interrupted when getting filter for Dataset '{}' in Dimension '{}'.",
+            dataset, dimension, e);
         break;
       } catch (TimeoutException e) {
-        LOG.warn("Time out when getting filter for Dataset '{}' in Dimension '{}'. Time limit: {} {}", dataset, dimension,
+        LOG.warn(
+            "Time out when getting filter for Dataset '{}' in Dimension '{}'. Time limit: {} {}",
+            dataset, dimension,
             TIME_OUT_SIZE, TIME_OUT_UNIT);
       }
       if (thirdEyeResponse != null) {
@@ -139,7 +149,7 @@ public class PinotDataSourceDimensionFilters {
         Collections.sort(values);
         result.put(dimension, values);
       } else {
-        result.put(dimension, Collections.<String>emptyList());
+        result.put(dimension, Collections.emptyList());
       }
     }
 
@@ -149,7 +159,8 @@ public class PinotDataSourceDimensionFilters {
     return result;
   }
 
-  private static List<ThirdEyeRequest> generateFilterRequests(MetricFunction metricFunction, List<String> dimensions,
+  private static List<ThirdEyeRequest> generateFilterRequests(MetricFunction metricFunction,
+      List<String> dimensions,
       DateTime start, DateTime end, String dataSource) {
 
     List<ThirdEyeRequest> requests = new ArrayList<>();

@@ -37,8 +37,9 @@ import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+public class ThirdEyeLdapAuthenticator implements
+    Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> {
 
-public class ThirdEyeLdapAuthenticator implements Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> {
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeLdapAuthenticator.class);
 
   private static final String LDAP_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
@@ -48,7 +49,8 @@ public class ThirdEyeLdapAuthenticator implements Authenticator<ThirdEyeCredenti
   private final SessionManager sessionDAO;
   private String ldapContextFactory;
 
-  public ThirdEyeLdapAuthenticator(List<String> domainSuffix, String ldapUrl, SessionManager sessionDAO) {
+  public ThirdEyeLdapAuthenticator(List<String> domainSuffix, String ldapUrl,
+      SessionManager sessionDAO) {
     this.domainSuffix = domainSuffix;
     this.ldapUrl = ldapUrl;
     this.sessionDAO = sessionDAO;
@@ -62,7 +64,7 @@ public class ThirdEyeLdapAuthenticator implements Authenticator<ThirdEyeCredenti
   /**
    * Attempt ldap authentication with the following steps:
    * 1. If user's name contains domain name or the system doesn't have any given domain names,
-   *    then use the username as is.
+   * then use the username as is.
    * 2. Else, try out all combinations of username and the given domain names of the system.
    */
   private Optional<ThirdEyePrincipal> ldapAuthenticate(String username, String password) {
@@ -107,15 +109,17 @@ public class ThirdEyeLdapAuthenticator implements Authenticator<ThirdEyeCredenti
   }
 
   /**
-   *  {@inheritDoc}
+   * {@inheritDoc}
    */
   @Override
-  public Optional<ThirdEyePrincipal> authenticate(ThirdEyeCredentials credentials) throws AuthenticationException {
+  public Optional<ThirdEyePrincipal> authenticate(ThirdEyeCredentials credentials)
+      throws AuthenticationException {
     try {
       if (StringUtils.isNotBlank(credentials.getToken())) {
         SessionDTO sessionDTO = this.sessionDAO.findBySessionKey(credentials.getToken());
         if (sessionDTO != null && System.currentTimeMillis() < sessionDTO.getExpirationTime()) {
-          return Optional.of(new ThirdEyePrincipal(credentials.getPrincipal(), credentials.getToken()));
+          return Optional
+              .of(new ThirdEyePrincipal(credentials.getPrincipal(), credentials.getToken()));
         }
       }
 
@@ -134,11 +138,11 @@ public class ThirdEyeLdapAuthenticator implements Authenticator<ThirdEyeCredenti
   }
 
   /**
-   * Tries to authenticate with the given authentication environment and store the result to the given container of
+   * Tries to authenticate with the given authentication environment and store the result to the
+   * given container of
    * authentication results.
    *
    * @param authEnv the table that contains the authentication information.
-   *
    * @return authenticationResults the container for the result.
    */
   private AuthenticationResult authenticate(Hashtable<String, String> authEnv) {
@@ -147,11 +151,13 @@ public class ThirdEyeLdapAuthenticator implements Authenticator<ThirdEyeCredenti
       new InitialDirContext(authEnv).close();
       authenticationResult.setAuthenticated(true);
       authenticationResult.setMessage(
-          String.format("Successfully authenticated '%s' with LDAP", authEnv.get(Context.SECURITY_PRINCIPAL)));
+          String.format("Successfully authenticated '%s' with LDAP",
+              authEnv.get(Context.SECURITY_PRINCIPAL)));
     } catch (NamingException e) {
       authenticationResult.setAuthenticated(false);
       authenticationResult.setMessage(
-          String.format("Failed to authenticate '%s' with LDAP: %s", authEnv.get(Context.SECURITY_PRINCIPAL),
+          String.format("Failed to authenticate '%s' with LDAP: %s",
+              authEnv.get(Context.SECURITY_PRINCIPAL),
               e.getMessage()));
     }
     return authenticationResult;
@@ -161,6 +167,7 @@ public class ThirdEyeLdapAuthenticator implements Authenticator<ThirdEyeCredenti
    * The authentication result of one authentication try.
    */
   private class AuthenticationResult {
+
     private boolean isAuthenticated = false;
     private String message = "";
 
@@ -195,11 +202,13 @@ public class ThirdEyeLdapAuthenticator implements Authenticator<ThirdEyeCredenti
    * The container that holds multiple authentication results.
    */
   private class AuthenticationResults {
+
     private boolean isAuthenticated = false;
-    private List<String> messages = new ArrayList<>();
+    private final List<String> messages = new ArrayList<>();
 
     /**
-     * Sets the authentication status to the given result and append the message to the message queue.
+     * Sets the authentication status to the given result and append the message to the message
+     * queue.
      *
      * @param authenticationResult the authentication result to be appended to this container.
      */

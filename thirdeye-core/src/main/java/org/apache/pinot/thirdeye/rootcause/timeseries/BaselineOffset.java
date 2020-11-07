@@ -30,6 +30,7 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
  * Synthetic baseline from a single, given offset
  */
 public class BaselineOffset implements Baseline {
+
   private final long offset;
 
   private BaselineOffset(long offset) {
@@ -65,7 +66,8 @@ public class BaselineOffset implements Baseline {
 
     long offset = dataSlice.getStart() - slice.getStart();
     if (offset != this.offset) {
-      throw new IllegalArgumentException(String.format("Found slice with invalid offset %d", offset));
+      throw new IllegalArgumentException(
+          String.format("Found slice with invalid offset %d", offset));
     }
 
     DataFrame output = new DataFrame(input);

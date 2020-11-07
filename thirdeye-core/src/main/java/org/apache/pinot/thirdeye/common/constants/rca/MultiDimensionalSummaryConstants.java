@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.common.constants.rca;
 
-
 public class MultiDimensionalSummaryConstants {
 
   // Cube algorithm parameters
@@ -30,5 +29,4 @@ public class MultiDimensionalSummaryConstants {
   public static final String CUBE_ORDER_TYPE = "orderType";
   public static final String CUBE_EXCLUDED_DIMENSIONS = "excludedDimensions";
   public static final String CUBE_MANUAL_ORDER = "manualOrder";
-
 }

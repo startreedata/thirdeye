@@ -33,14 +33,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SummaryResponseTree {
+
   private static final Logger LOG = LoggerFactory.getLogger(SummaryResponseTree.class);
 
   @JsonProperty("dimensions")
-  private List<String> dimensions = new ArrayList<>();
-  private List<CubeNode> hierarchicalNodes = new ArrayList<>();
+  private final List<String> dimensions = new ArrayList<>();
+  private final List<CubeNode> hierarchicalNodes = new ArrayList<>();
 
-
-  public static List<CubeNode> sortResponseTree(List<CubeNode> nodes, int levelCount, CostFunction costFunction) {
+  public static List<CubeNode> sortResponseTree(List<CubeNode> nodes, int levelCount,
+      CostFunction costFunction) {
     SummaryResponseTree responseTree = new SummaryResponseTree();
 
     // Build the header
@@ -89,7 +90,8 @@ public class SummaryResponseTree {
     }
 
     // Sort the children of each node by their cost
-    sortChildNodes(treeNodes.get(0), topBaselineValue, topCurrentValue, topBaselineSize, topCurrentSize, costFunction);
+    sortChildNodes(treeNodes.get(0), topBaselineValue, topCurrentValue, topBaselineSize,
+        topCurrentSize, costFunction);
 
     // Put the nodes to a flattened array
     insertChildNodes(treeNodes.get(0), responseTree.hierarchicalNodes);
@@ -97,7 +99,8 @@ public class SummaryResponseTree {
     return responseTree.hierarchicalNodes;
   }
 
-  private static void insertChildNodes(SummaryResponseTreeNode node, List<CubeNode> hierarchicalNodes) {
+  private static void insertChildNodes(SummaryResponseTreeNode node,
+      List<CubeNode> hierarchicalNodes) {
     if (node.cubeNode != null) {
       hierarchicalNodes.add(node.cubeNode);
     }
@@ -110,34 +113,46 @@ public class SummaryResponseTree {
    * A recursive function to sort response tree.
    */
   private static void sortChildNodes(SummaryResponseTreeNode node, double topBaselineValue,
-      double topCurrentValue, double topBaselineSize, double topCurrentSize, CostFunction costFunction) {
-    if (node.children.size() == 0) return;
+      double topCurrentValue, double topBaselineSize, double topCurrentSize,
+      CostFunction costFunction) {
+    if (node.children.size() == 0) {
+      return;
+    }
     for (SummaryResponseTreeNode child : node.children) {
-      sortChildNodes(child, topBaselineValue, topCurrentValue, topBaselineSize, topCurrentSize, costFunction);
+      sortChildNodes(child, topBaselineValue, topCurrentValue, topBaselineSize, topCurrentSize,
+          costFunction);
     }
     double ratio = node.currentChangeRatio();
     for (SummaryResponseTreeNode child : node.children) {
-      computeCost(child, ratio, topBaselineValue, topCurrentValue, topBaselineSize, topCurrentSize, costFunction);
+      computeCost(child, ratio, topBaselineValue, topCurrentValue, topBaselineSize, topCurrentSize,
+          costFunction);
     }
     node.children.sort(Collections.reverseOrder(new SummaryResponseTreeNodeCostComparator()));
   }
 
-  private static void computeCost(SummaryResponseTreeNode node, double targetChangeRatio, double topBaselineValue,
-      double topCurrentValue, double topBaselineSize, double topCurrentSize, CostFunction costFunction) {
+  private static void computeCost(SummaryResponseTreeNode node, double targetChangeRatio,
+      double topBaselineValue,
+      double topCurrentValue, double topBaselineSize, double topCurrentSize,
+      CostFunction costFunction) {
     if (node.cubeNode != null) {
-      double nodeCost = costFunction.computeCost(targetChangeRatio, node.getBaselineValue(), node.getCurrentValue(),
-          node.getBaselineSize(), node.getCurrentSize(), topBaselineValue, topCurrentValue, topBaselineSize,
-          topCurrentSize);
+      double nodeCost = costFunction
+          .computeCost(targetChangeRatio, node.getBaselineValue(), node.getCurrentValue(),
+              node.getBaselineSize(), node.getCurrentSize(), topBaselineValue, topCurrentValue,
+              topBaselineSize,
+              topCurrentSize);
       node.cubeNode.setCost(nodeCost);
       node.subTreeCost = nodeCost;
     }
     for (SummaryResponseTreeNode child : node.children) {
-      computeCost(child, targetChangeRatio, topBaselineValue, topCurrentValue, topBaselineSize, topCurrentSize, costFunction);
+      computeCost(child, targetChangeRatio, topBaselineValue, topCurrentValue, topBaselineSize,
+          topCurrentSize, costFunction);
       node.subTreeCost += child.subTreeCost;
     }
   }
 
-  public static class SummaryResponseTreeNodeCostComparator implements Comparator<SummaryResponseTreeNode> {
+  public static class SummaryResponseTreeNodeCostComparator implements
+      Comparator<SummaryResponseTreeNode> {
+
     @Override
     public int compare(SummaryResponseTreeNode o1, SummaryResponseTreeNode o2) {
       return Double.compare(o1.subTreeCost, o2.subTreeCost);
@@ -145,6 +160,7 @@ public class SummaryResponseTree {
   }
 
   public static class SummaryResponseTreeNode {
+
     CubeNode cubeNode; // If it is null, this node is a dummy node.
     double subTreeCost;
     int level;
@@ -210,7 +226,7 @@ public class SummaryResponseTree {
       for (targetLevel = 0; targetLevel < getLevel(); ++targetLevel) {
         if (otherIte.hasNext()) {
           String otherDimensionValue = otherIte.next();
-          if ( !getDimensionValues().get(targetLevel).equals(otherDimensionValue) ) {
+          if (!getDimensionValues().get(targetLevel).equals(otherDimensionValue)) {
             break;
           } // else continue
         } else {
@@ -224,7 +240,8 @@ public class SummaryResponseTree {
       while (true) {
         if (node.getLevel() == targetLevel) {
           return node;
-        } if (node.getLevel() < targetLevel) {
+        }
+        if (node.getLevel() < targetLevel) {
           // current node becomes the missing common parent and move itself to a new node
           SummaryResponseTreeNode newChildNode = new SummaryResponseTreeNode();
           swapContent(preNode, newChildNode);

@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.anomaly.monitor;
 
-
 import org.apache.pinot.thirdeye.anomaly.job.JobContext;
 
 public class MonitorJobContext extends JobContext {
@@ -33,6 +32,4 @@ public class MonitorJobContext extends JobContext {
   public void setMonitorConfiguration(MonitorConfiguration monitorConfiguration) {
     this.monitorConfiguration = monitorConfiguration;
   }
-
-
 }

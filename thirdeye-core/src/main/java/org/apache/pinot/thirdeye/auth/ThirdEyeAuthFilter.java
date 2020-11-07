@@ -35,8 +35,8 @@ import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class ThirdEyeAuthFilter extends AuthFilter<ThirdEyeCredentials, ThirdEyePrincipal> {
+
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeAuthFilter.class);
   public static final String AUTH_TOKEN_NAME = "te_auth";
 
@@ -46,7 +46,8 @@ public class ThirdEyeAuthFilter extends AuthFilter<ThirdEyeCredentials, ThirdEye
   private final SessionManager sessionDAO;
   private Set<String> administrators;
 
-  public ThirdEyeAuthFilter(Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> authenticator, Set<String> allowedPaths, List<String> administrators, SessionManager sessionDAO) {
+  public ThirdEyeAuthFilter(Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> authenticator,
+      Set<String> allowedPaths, List<String> administrators, SessionManager sessionDAO) {
     this.authenticator = authenticator;
     this.allowedPaths = allowedPaths;
     this.sessionDAO = sessionDAO;
@@ -87,12 +88,15 @@ public class ThirdEyeAuthFilter extends AuthFilter<ThirdEyeCredentials, ThirdEye
         }
       }
 
-      throw new WebApplicationException("Unable to validate credentials", Response.Status.UNAUTHORIZED);
+      throw new WebApplicationException("Unable to validate credentials",
+          Response.Status.UNAUTHORIZED);
     } else {
-      if (this.administrators != null && uriPath.equals("thirdeye-admin") && (principal.getName() == null
-          || !this.administrators.contains(principal.getName().split("@")[0]))) {
+      if (this.administrators != null && uriPath.equals("thirdeye-admin") && (
+          principal.getName() == null
+              || !this.administrators.contains(principal.getName().split("@")[0]))) {
         LOG.info("Unauthorized admin access: {}", principal.getName());
-        throw new WebApplicationException("Unauthorized admin access", Response.Status.UNAUTHORIZED);
+        throw new WebApplicationException("Unauthorized admin access",
+            Response.Status.UNAUTHORIZED);
       }
     }
 
@@ -120,8 +124,10 @@ public class ThirdEyeAuthFilter extends AuthFilter<ThirdEyeCredentials, ThirdEye
         if (sessionDTO != null && System.currentTimeMillis() < sessionDTO.getExpirationTime()) {
           // session exist in database and has not expired
 
-          final ThirdEyePrincipal principal = new ThirdEyePrincipal(sessionDTO.getPrincipal(), sessionKey);
-          LOG.info("Found valid session {} for user {}", sessionDTO.getSessionKey(), sessionDTO.getPrincipal());
+          final ThirdEyePrincipal principal = new ThirdEyePrincipal(sessionDTO.getPrincipal(),
+              sessionKey);
+          LOG.info("Found valid session {} for user {}", sessionDTO.getSessionKey(),
+              sessionDTO.getPrincipal());
           return principal;
         }
       }

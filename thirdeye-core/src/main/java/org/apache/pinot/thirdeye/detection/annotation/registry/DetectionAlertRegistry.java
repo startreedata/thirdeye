@@ -34,11 +34,11 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The detection alert registry.
  */
 public class DetectionAlertRegistry {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertRegistry.class);
 
   // Alert Scheme type to Alert Scheme class name
@@ -60,7 +60,7 @@ public class DetectionAlertRegistry {
     return INSTANCE;
   }
 
-  private DetectionAlertRegistry () {
+  private DetectionAlertRegistry() {
     init();
   }
 
@@ -122,10 +122,12 @@ public class DetectionAlertRegistry {
 
   /**
    * Look up the class name for a given alert filter
+   *
    * @param type the type used in the YAML configs
    */
   public String lookupAlertFilters(String type) {
-    Preconditions.checkArgument(ALERT_FILTER_MAP.containsKey(type.toUpperCase()), type + " not found in registry");
+    Preconditions.checkArgument(ALERT_FILTER_MAP.containsKey(type.toUpperCase()),
+        type + " not found in registry");
     return ALERT_FILTER_MAP.get(type.toUpperCase());
   }
 
@@ -133,7 +135,8 @@ public class DetectionAlertRegistry {
    * Look up the {@link #ALERT_SCHEME_MAP} for the Alert scheme class name from the type
    */
   public String lookupAlertSchemes(String schemeType) {
-    Preconditions.checkArgument(ALERT_SCHEME_MAP.containsKey(schemeType.toUpperCase()), schemeType + " not found in registry");
+    Preconditions.checkArgument(ALERT_SCHEME_MAP.containsKey(schemeType.toUpperCase()),
+        schemeType + " not found in registry");
     return ALERT_SCHEME_MAP.get(schemeType.toUpperCase());
   }
 
@@ -141,7 +144,8 @@ public class DetectionAlertRegistry {
    * Look up the {@link #ALERT_SUPPRESSOR_MAP} for the Alert suppressor class name from the type
    */
   public String lookupAlertSuppressors(String suppressorType) {
-    Preconditions.checkArgument(ALERT_SUPPRESSOR_MAP.containsKey(suppressorType.toUpperCase()), suppressorType + " not found in registry");
+    Preconditions.checkArgument(ALERT_SUPPRESSOR_MAP.containsKey(suppressorType.toUpperCase()),
+        suppressorType + " not found in registry");
     return ALERT_SUPPRESSOR_MAP.get(suppressorType.toUpperCase());
   }
 }

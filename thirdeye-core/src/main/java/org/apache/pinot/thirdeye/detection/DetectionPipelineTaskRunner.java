@@ -50,8 +50,8 @@ import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class DetectionPipelineTaskRunner implements TaskRunner {
+
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
   private final AlertManager detectionDAO;
   private final MergedAnomalyResultManager anomalyDAO;
@@ -104,7 +104,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
    * @param loader pipeline loader
    * @param provider pipeline data provider
    */
-  public DetectionPipelineTaskRunner(AlertManager detectionDAO, MergedAnomalyResultManager anomalyDAO,
+  public DetectionPipelineTaskRunner(AlertManager detectionDAO,
+      MergedAnomalyResultManager anomalyDAO,
       EvaluationManager evaluationDAO, DetectionPipelineLoader loader, DataProvider provider) {
     this.detectionDAO = detectionDAO;
     this.anomalyDAO = anomalyDAO;
@@ -135,16 +136,19 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
         config = this.detectionDAO.findById(info.configId);
 
         if (config == null) {
-          throw new IllegalArgumentException(String.format("Could not resolve config id %d", info.configId));
+          throw new IllegalArgumentException(
+              String.format("Could not resolve config id %d", info.configId));
         }
       }
 
-      LOG.info("Start detection for config {} between {} and {}", config.getId(), info.start, info.end);
+      LOG.info("Start detection for config {} between {} and {}", config.getId(), info.start,
+          info.end);
       DetectionPipeline pipeline = this.loader.from(this.provider, config, info.start, info.end);
       DetectionPipelineResult result = pipeline.run();
 
       if (result.getLastTimestamp() < 0) {
-        LOG.info("No detection ran for config {} between {} and {}", config.getId(), info.start, info.end);
+        LOG.info("No detection ran for config {} between {} and {}", config.getId(), info.start,
+            info.end);
         return Collections.emptyList();
       }
 
@@ -178,10 +182,11 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       }
 
       ThirdeyeMetricsUtil.detectionTaskSuccessCounter.inc();
-      LOG.info("End detection for config {} between {} and {}. Detected {} anomalies.", config.getId(), info.start,
+      LOG.info("End detection for config {} between {} and {}. Detected {} anomalies.",
+          config.getId(), info.start,
           info.end, result.getAnomalies());
       return Collections.emptyList();
-    } catch(Exception e) {
+    } catch (Exception e) {
       ThirdeyeMetricsUtil.detectionTaskExceptionCounter.inc();
       throw e;
     }

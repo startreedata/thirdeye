@@ -36,11 +36,12 @@ public class DatasetMaxDataTimeCacheLoader extends CacheLoader<String, Long> {
   private static final Logger LOGGER = LoggerFactory.getLogger(DatasetMaxDataTimeCacheLoader.class);
 
   private final QueryCache queryCache;
-  private DatasetConfigManager datasetConfigDAO;
+  private final DatasetConfigManager datasetConfigDAO;
 
   private final ExecutorService reloadExecutor = Executors.newSingleThreadExecutor();
 
-  public DatasetMaxDataTimeCacheLoader(QueryCache queryCache, DatasetConfigManager datasetConfigDAO) {
+  public DatasetMaxDataTimeCacheLoader(QueryCache queryCache,
+      DatasetConfigManager datasetConfigDAO) {
     this.queryCache = queryCache;
     this.datasetConfigDAO = datasetConfigDAO;
   }
@@ -48,6 +49,7 @@ public class DatasetMaxDataTimeCacheLoader extends CacheLoader<String, Long> {
   /**
    * Fetches the max date time in millis for this dataset from the right data source
    * {@inheritDoc}
+   *
    * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
    */
   @Override
@@ -59,12 +61,13 @@ public class DatasetMaxDataTimeCacheLoader extends CacheLoader<String, Long> {
     try {
       ThirdEyeDataSource dataSource = queryCache.getDataSource(dataSourceName);
       if (dataSource == null) {
-       LOGGER.warn("dataSource [{}] found null in the query cache", dataSourceName);
+        LOGGER.warn("dataSource [{}] found null in the query cache", dataSourceName);
       } else {
         maxTime = dataSource.getMaxDataTime(dataset);
       }
     } catch (Exception e) {
-      LOGGER.error("Exception in getting max date time for {} from data source {}", dataset, dataSourceName, e);
+      LOGGER.error("Exception in getting max date time for {} from data source {}", dataset,
+          dataSourceName, e);
     }
     if (maxTime <= 0) {
       maxTime = System.currentTimeMillis();
@@ -75,7 +78,8 @@ public class DatasetMaxDataTimeCacheLoader extends CacheLoader<String, Long> {
   @Override
   public ListenableFuture<Long> reload(final String dataset, Long preMaxDataTime) {
     ListenableFutureTask<Long> reloadTask = ListenableFutureTask.create(new Callable<Long>() {
-      @Override public Long call() throws Exception {
+      @Override
+      public Long call() throws Exception {
         return DatasetMaxDataTimeCacheLoader.this.load(dataset);
       }
     });
@@ -83,6 +87,4 @@ public class DatasetMaxDataTimeCacheLoader extends CacheLoader<String, Long> {
     LOGGER.info("Passively refreshing max data time of collection: {}", dataset);
     return reloadTask;
   }
-
-
 }

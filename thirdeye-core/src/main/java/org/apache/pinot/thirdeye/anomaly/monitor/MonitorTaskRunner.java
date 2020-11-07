@@ -60,7 +60,7 @@ public class MonitorTaskRunner implements TaskRunner {
   private static final long MAX_FAILED_DISABLE_DAYS = 30;
   private ThirdEyeAnomalyConfiguration thirdeyeConfig;
 
-  private DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
+  private final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
   @Override
   public List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) {

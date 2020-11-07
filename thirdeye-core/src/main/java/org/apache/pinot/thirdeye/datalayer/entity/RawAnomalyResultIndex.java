@@ -21,8 +21,8 @@ package org.apache.pinot.thirdeye.datalayer.entity;
 
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 
-
 public class RawAnomalyResultIndex extends AbstractIndexEntity {
+
   long functionId;
   long anomalyFeedbackId;
   long jobId;

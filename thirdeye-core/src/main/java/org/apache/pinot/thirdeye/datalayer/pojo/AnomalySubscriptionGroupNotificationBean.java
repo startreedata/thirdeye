@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AnomalySubscriptionGroupNotificationBean extends AbstractBean {
+
   private Long anomalyId;
   private Long detectionConfigId;
   private List<Long> notifiedSubscriptionGroupIds = new ArrayList<>();
@@ -65,7 +65,8 @@ public class AnomalySubscriptionGroupNotificationBean extends AbstractBean {
       return false;
     }
     AnomalySubscriptionGroupNotificationBean that = (AnomalySubscriptionGroupNotificationBean) o;
-    return Objects.equals(anomalyId, that.anomalyId) && Objects.equals(detectionConfigId, that.detectionConfigId)
+    return Objects.equals(anomalyId, that.anomalyId) && Objects
+        .equals(detectionConfigId, that.detectionConfigId)
         && Objects.equals(notifiedSubscriptionGroupIds, that.notifiedSubscriptionGroupIds);
   }
 
@@ -76,7 +77,9 @@ public class AnomalySubscriptionGroupNotificationBean extends AbstractBean {
 
   @Override
   public String toString() {
-    return "AnomalySubscriptionGroupNotificationBean{" + "anomalyId=" + anomalyId + ", detectionConfigId="
-        + detectionConfigId + ", notifiedSubscriptionGroupIds=" + notifiedSubscriptionGroupIds + '}';
+    return "AnomalySubscriptionGroupNotificationBean{" + "anomalyId=" + anomalyId
+        + ", detectionConfigId="
+        + detectionConfigId + ", notifiedSubscriptionGroupIds=" + notifiedSubscriptionGroupIds
+        + '}';
   }
 }

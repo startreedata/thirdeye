@@ -29,14 +29,14 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Days;
 
-
 /**
  * Not to be confused with {@link TimeRange}. This class handles splitting time windows into
  * appropriate {@link Range} objects.
  */
 public class TimeRangeUtils {
 
-  public static List<Range<DateTime>> computeTimeRanges(TimeGranularity granularity, DateTime start, DateTime end) {
+  public static List<Range<DateTime>> computeTimeRanges(TimeGranularity granularity, DateTime start,
+      DateTime end) {
     List<Range<DateTime>> timeranges = new ArrayList<>();
     if (granularity == null) {
       timeranges.add(Range.closedOpen(start, end));
@@ -57,23 +57,23 @@ public class TimeRangeUtils {
   public static DateTime increment(DateTime input, TimeGranularity granularity) {
     DateTime output;
     switch (granularity.getUnit()) {
-    case DAYS:
-      output = input.plusDays(granularity.getSize());
-      break;
-    case HOURS:
-      output = input.plusHours(granularity.getSize());
-      break;
-    case MILLISECONDS:
-      output = input.plusMillis(granularity.getSize());
-      break;
-    case MINUTES:
-      output = input.plusMinutes(granularity.getSize());
-      break;
-    case SECONDS:
-      output = input.plusSeconds(granularity.getSize());
-      break;
-    default:
-      throw new IllegalArgumentException("Timegranularity:" + granularity + " not supported");
+      case DAYS:
+        output = input.plusDays(granularity.getSize());
+        break;
+      case HOURS:
+        output = input.plusHours(granularity.getSize());
+        break;
+      case MILLISECONDS:
+        output = input.plusMillis(granularity.getSize());
+        break;
+      case MINUTES:
+        output = input.plusMinutes(granularity.getSize());
+        break;
+      case SECONDS:
+        output = input.plusSeconds(granularity.getSize());
+        break;
+      default:
+        throw new IllegalArgumentException("Timegranularity:" + granularity + " not supported");
     }
     return output;
   }
@@ -102,16 +102,17 @@ public class TimeRangeUtils {
    * @param current the current time
    * @return the bucket index of current time
    */
-  public static int computeBucketIndex(TimeGranularity granularity, DateTime start, DateTime current) {
+  public static int computeBucketIndex(TimeGranularity granularity, DateTime start,
+      DateTime current) {
     int index = -1;
     switch (granularity.getUnit()) {
-    case DAYS:
-      Days d = Days.daysBetween(start, current);
-      index = d.getDays() / granularity.getSize();
-      break;
-    default:
-      long interval = granularity.toMillis();
-      index = (int) ((current.getMillis() - start.getMillis()) / interval);
+      case DAYS:
+        Days d = Days.daysBetween(start, current);
+        index = d.getDays() / granularity.getSize();
+        break;
+      default:
+        long interval = granularity.toMillis();
+        index = (int) ((current.getMillis() - start.getMillis()) / interval);
     }
     return index;
   }
@@ -126,8 +127,10 @@ public class TimeRangeUtils {
 
     DateTime currentStart = new DateTime(1479024000000L, utc);
     DateTime currentEnd = new DateTime(1479283200000L, utc);
-    List<Range<DateTime>> currentTimeRanges = TimeRangeUtils.computeTimeRanges(granularity, currentStart, currentEnd);
-    List<Range<DateTime>> baselineTimeRanges = TimeRangeUtils.computeTimeRanges(granularity, baselineStart, baselineEnd);
+    List<Range<DateTime>> currentTimeRanges = TimeRangeUtils
+        .computeTimeRanges(granularity, currentStart, currentEnd);
+    List<Range<DateTime>> baselineTimeRanges = TimeRangeUtils
+        .computeTimeRanges(granularity, baselineStart, baselineEnd);
     System.out.println(currentTimeRanges);
     System.out.println(baselineTimeRanges);
 
@@ -142,6 +145,5 @@ public class TimeRangeUtils {
     baselineTimeRanges = TimeRangeUtils.computeTimeRanges(granularity, baselineStart, baselineEnd);
     System.out.println(currentTimeRanges);
     System.out.println(baselineTimeRanges);
-
   }
 }

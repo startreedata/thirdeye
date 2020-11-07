@@ -22,22 +22,27 @@ package org.apache.pinot.thirdeye.detector.metric.transfer;
 /**
  * Scaling factor to rescale the metric within a time window
  * For any ts within tht timeWindow the value will be modified as
- *   value' <- value * scalingFactor
+ * value' <- value * scalingFactor
  */
 public class ScalingFactor {
 
   public static final String SCALING_FACTOR = "scalingFactor";
 
-  /** The time range of the scaling window */
+  /**
+   * The time range of the scaling window
+   */
   private final long windowStart; // inclusive
   private final long windowEnd; // exclusive
 
-  /** Scaling factor during the scaling window */
+  /**
+   * Scaling factor during the scaling window
+   */
   private final double scalingFactor;
 
   /**
    * Construct a scaling factor with the given window start, inclusive, and window end,
    * exclusive, and scaling factor.
+   *
    * @param windowStart the start time of the window, inclusive
    * @param windowEnd the end time of the window, exclusive
    * @param scalingFactor the scaling factor

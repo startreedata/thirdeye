@@ -33,24 +33,25 @@ import org.slf4j.LoggerFactory;
  * This class contains helper classes to load/transform datasources from file
  */
 public class DataSourcesLoader {
- private static final Logger LOG = LoggerFactory.getLogger(DataSourcesLoader.class);
- private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
- /**
-  * Returns datasources config from yml file
-  *
-  * @param dataSourcesUrl URL to data sources config
-  * @return DataSources
-  */
- public DataSources fromDataSourcesUrl(URL dataSourcesUrl) {
-   DataSources dataSources = null;
-   try {
-     dataSources = OBJECT_MAPPER.readValue(dataSourcesUrl, DataSources.class);
-   } catch (IOException e) {
-     LOG.error("Exception in reading data sources file {}", dataSourcesUrl, e);
-   }
-   return dataSources;
- }
+  private static final Logger LOG = LoggerFactory.getLogger(DataSourcesLoader.class);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
+
+  /**
+   * Returns datasources config from yml file
+   *
+   * @param dataSourcesUrl URL to data sources config
+   * @return DataSources
+   */
+  public DataSources fromDataSourcesUrl(URL dataSourcesUrl) {
+    DataSources dataSources = null;
+    try {
+      dataSources = OBJECT_MAPPER.readValue(dataSourcesUrl, DataSources.class);
+    } catch (IOException e) {
+      LOG.error("Exception in reading data sources file {}", dataSourcesUrl, e);
+    }
+    return dataSources;
+  }
 
   /**
    * Returns datasource name to datasource map
@@ -67,15 +68,14 @@ public class DataSourcesLoader {
             .newInstance(properties);
         // use class simple name as key, this enforces that there cannot be more than one data source of the same type
         String name = thirdeyeDataSource.getName();
-       if (dataSourceMap.containsKey(name)) {
-         throw new IllegalStateException("Data source " + name + " already exists.");
-       }
-       dataSourceMap.put(name, thirdeyeDataSource);
-     } catch (Exception e) {
-       LOG.error("Exception in creating thirdeye data source {}", className, e);
-     }
-   }
-   return dataSourceMap;
- }
-
+        if (dataSourceMap.containsKey(name)) {
+          throw new IllegalStateException("Data source " + name + " already exists.");
+        }
+        dataSourceMap.put(name, thirdeyeDataSource);
+      } catch (Exception e) {
+        LOG.error("Exception in creating thirdeye data source {}", className, e);
+      }
+    }
+    return dataSourceMap;
+  }
 }

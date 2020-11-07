@@ -53,7 +53,7 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
   @Override
   @Transactional
   public List<JobDTO> findByStatus(JobStatus status) {
-    return super.findByParams(ImmutableMap.<String, Object>of("status", status.toString()));
+    return super.findByParams(ImmutableMap.of("status", status.toString()));
   }
 
   @Override
@@ -67,7 +67,8 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
 
   @Override
   @Transactional
-  public void updateJobStatusAndEndTime(List<JobDTO> jobsToUpdate, JobStatus newStatus, long newEndTime) {
+  public void updateJobStatusAndEndTime(List<JobDTO> jobsToUpdate, JobStatus newStatus,
+      long newEndTime) {
     Preconditions.checkNotNull(newStatus);
     if (CollectionUtils.isNotEmpty(jobsToUpdate)) {
       for (JobDTO jobDTO : jobsToUpdate) {
@@ -90,9 +91,10 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
 
   @Override
   public List<JobDTO> findNRecentJobs(int n) {
-    String parameterizedSQL = "order by scheduleStartTime desc limit "+n;
+    String parameterizedSQL = "order by scheduleStartTime desc limit " + n;
     HashMap<String, Object> parameterMap = new HashMap<>();
-    List<JobBean> list = genericPojoDao.executeParameterizedSQL(parameterizedSQL, parameterMap, JobBean.class);
+    List<JobBean> list = genericPojoDao
+        .executeParameterizedSQL(parameterizedSQL, parameterMap, JobBean.class);
     return convertBeanListToDTOList(list);
   }
 
@@ -107,7 +109,8 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
   }
 
   @Override
-  public List<JobDTO> findRecentScheduledJobByTypeAndConfigId(TaskConstants.TaskType taskType, long configId,
+  public List<JobDTO> findRecentScheduledJobByTypeAndConfigId(TaskConstants.TaskType taskType,
+      long configId,
       long minScheduledTime) {
     HashMap<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("type", taskType);
@@ -115,7 +118,8 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
     parameterMap.put("status", JobStatus.FAILED);
     parameterMap.put("scheduleStartTime", minScheduledTime);
     List<JobBean> list = genericPojoDao
-        .executeParameterizedSQL(FIND_RECENT_SCHEDULED_JOB_BY_TYPE_AND_CONFIG_ID, parameterMap, JobBean.class);
+        .executeParameterizedSQL(FIND_RECENT_SCHEDULED_JOB_BY_TYPE_AND_CONFIG_ID, parameterMap,
+            JobBean.class);
 
     if (CollectionUtils.isNotEmpty(list)) {
       // Sort by scheduleStartTime; most recent scheduled job at the beginning

@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.model.download.ModelDownloaderConfiguration;
 
-
 public class ThirdEyeConfiguration extends Configuration {
 
   /**
@@ -82,7 +81,9 @@ public class ThirdEyeConfiguration extends Configuration {
       URL rootUrl = new URL(String.format("file:%s/", this.rootDir));
       return new URL(rootUrl, path);
     } catch (MalformedURLException e) {
-      throw new IllegalArgumentException(String.format("Could not parse relative path for rootDir '%s' and dataSources/cacheConfig '%s'", this.rootDir, path));
+      throw new IllegalArgumentException(String
+          .format("Could not parse relative path for rootDir '%s' and dataSources/cacheConfig '%s'",
+              this.rootDir, path));
     }
   }
 
@@ -98,7 +99,9 @@ public class ThirdEyeConfiguration extends Configuration {
     return getSourceAsUrl(this.cacheDataSource);
   }
 
-  public void setCacheDataSource(String cacheDataSource) { this.cacheDataSource = cacheDataSource; }
+  public void setCacheDataSource(String cacheDataSource) {
+    this.cacheDataSource = cacheDataSource;
+  }
 
   public String getRootDir() {
     return rootDir;
@@ -126,7 +129,7 @@ public class ThirdEyeConfiguration extends Configuration {
     return getRootDir() + "/detector-config/anomaly-functions/alertFilter.properties";
   }
 
-  public String getCalendarApiKeyPath(){
+  public String getCalendarApiKeyPath() {
     return getRootDir() + "/holiday-loader-key.json";
   }
 

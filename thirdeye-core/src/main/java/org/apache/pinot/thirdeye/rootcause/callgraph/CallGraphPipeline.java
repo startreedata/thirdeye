@@ -54,13 +54,13 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * CallGraphPipeline explores callgraph datsets based on a provided input filter. It compares
  * graph edges based on the change in average latency between anomaly and baseline time ranges,
  * delivering the top increasing edges as a result.
  */
 public class CallGraphPipeline extends Pipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(CallGraphPipeline.class);
 
   private static final String COL_TIME = DataFrame.COL_TIME;
@@ -116,7 +116,8 @@ public class CallGraphPipeline extends Pipeline {
   private final double cutoffFraction;
 
   public CallGraphPipeline(String outputName, Set<String> inputNames, MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, QueryCache cache, String dataset, String metricCount, String metricLatency,
+      DatasetConfigManager datasetDAO, QueryCache cache, String dataset, String metricCount,
+      String metricLatency,
       Set<String> includeDimensions, Set<String> excludeDimensions, int k, double cutoffFraction) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
@@ -131,25 +132,30 @@ public class CallGraphPipeline extends Pipeline {
     this.cutoffFraction = cutoffFraction;
   }
 
-  public CallGraphPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public CallGraphPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
     this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
     this.dataset = MapUtils.getString(properties, PROP_DATASET, PROP_DATASET_DEFAULT);
     this.metricCount = MapUtils.getString(properties, PROP_METRIC_COUNT, PROP_METRIC_COUNT_DEFAULT);
-    this.metricLatency = MapUtils.getString(properties, PROP_METRIC_LATENCY, PROP_METRIC_LATENCY_DEFAULT);
+    this.metricLatency = MapUtils
+        .getString(properties, PROP_METRIC_LATENCY, PROP_METRIC_LATENCY_DEFAULT);
     this.k = MapUtils.getIntValue(properties, PROP_K, PROP_K_DEFAULT);
-    this.cutoffFraction = MapUtils.getDoubleValue(properties, PROP_CUTOFF_FRACTION, PROP_CUTOFF_FRACTION_DEFAULT);
+    this.cutoffFraction = MapUtils
+        .getDoubleValue(properties, PROP_CUTOFF_FRACTION, PROP_CUTOFF_FRACTION_DEFAULT);
 
     if (properties.containsKey(PROP_INCLUDE_DIMENSIONS)) {
-      this.includeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_INCLUDE_DIMENSIONS));
+      this.includeDimensions = new HashSet<>(
+          (Collection<String>) properties.get(PROP_INCLUDE_DIMENSIONS));
     } else {
       this.includeDimensions = new HashSet<>();
     }
 
     if (properties.containsKey(PROP_EXCLUDE_DIMENSIONS)) {
-      this.excludeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
+      this.excludeDimensions = new HashSet<>(
+          (Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
     } else {
       this.excludeDimensions = new HashSet<>();
     }
@@ -157,7 +163,8 @@ public class CallGraphPipeline extends Pipeline {
 
   @Override
   public PipelineResult run(PipelineContext pipelineContext) {
-    Set<DimensionsEntity> dimensions = filterDimensions(pipelineContext.filter(DimensionsEntity.class));
+    Set<DimensionsEntity> dimensions = filterDimensions(
+        pipelineContext.filter(DimensionsEntity.class));
 
     TimeRangeEntity anomaly = TimeRangeEntity.getTimeRangeAnomaly(pipelineContext);
     TimeRangeEntity baseline = TimeRangeEntity.getTimeRangeBaseline(pipelineContext);
@@ -170,7 +177,8 @@ public class CallGraphPipeline extends Pipeline {
       throw new IllegalArgumentException("Must provide exactly one DimensionsEntity");
     }
 
-    Multimap<String, String> filters = ArrayListMultimap.create(dimensions.iterator().next().getDimensions());
+    Multimap<String, String> filters = ArrayListMultimap
+        .create(dimensions.iterator().next().getDimensions());
     filters.put(this.metricCount, ">0");
     filters.put(this.metricLatency, ">0");
 
@@ -180,35 +188,49 @@ public class CallGraphPipeline extends Pipeline {
     LOG.info("Exploring dimensions '{}'", explore);
 
     // data slices
-    MetricSlice sliceCurrCount = MetricSlice.from(metricCount.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
-    MetricSlice sliceCurrLatency = MetricSlice.from(metricLatency.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
-    MetricSlice sliceBaseCount = MetricSlice.from(metricCount.getId(), baseline.getStart(), baseline.getEnd(), filters);
-    MetricSlice sliceBaseLatency = MetricSlice.from(metricLatency.getId(), baseline.getStart(), baseline.getEnd(), filters);
+    MetricSlice sliceCurrCount = MetricSlice
+        .from(metricCount.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
+    MetricSlice sliceCurrLatency = MetricSlice
+        .from(metricLatency.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
+    MetricSlice sliceBaseCount = MetricSlice
+        .from(metricCount.getId(), baseline.getStart(), baseline.getEnd(), filters);
+    MetricSlice sliceBaseLatency = MetricSlice
+        .from(metricLatency.getId(), baseline.getStart(), baseline.getEnd(), filters);
 
     // fetch data
     try {
       // prepare requests
       RequestContainer rcCurrCount = DataFrameUtils
-          .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", this.metricDAO, this.datasetDAO);
+          .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", this.metricDAO,
+              this.datasetDAO);
       RequestContainer rcCurrLatency = DataFrameUtils
-          .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", this.metricDAO, this.datasetDAO);
+          .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", this.metricDAO,
+              this.datasetDAO);
       RequestContainer rcBaseCount = DataFrameUtils
-          .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", this.metricDAO, this.datasetDAO);
+          .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", this.metricDAO,
+              this.datasetDAO);
       RequestContainer rcBaseLatency = DataFrameUtils
-          .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", this.metricDAO, this.datasetDAO);
+          .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", this.metricDAO,
+              this.datasetDAO);
 
       // send requests
-      Future<ThirdEyeResponse> resCurrCount = this.cache.getQueryResultAsync(rcCurrCount.getRequest());
-      Future<ThirdEyeResponse> resCurrLatency = this.cache.getQueryResultAsync(rcCurrLatency.getRequest());
-      Future<ThirdEyeResponse> resBaseCount = this.cache.getQueryResultAsync(rcBaseCount.getRequest());
-      Future<ThirdEyeResponse> resBaseLatency = this.cache.getQueryResultAsync(rcBaseLatency.getRequest());
+      Future<ThirdEyeResponse> resCurrCount = this.cache
+          .getQueryResultAsync(rcCurrCount.getRequest());
+      Future<ThirdEyeResponse> resCurrLatency = this.cache
+          .getQueryResultAsync(rcCurrLatency.getRequest());
+      Future<ThirdEyeResponse> resBaseCount = this.cache
+          .getQueryResultAsync(rcBaseCount.getRequest());
+      Future<ThirdEyeResponse> resBaseLatency = this.cache
+          .getQueryResultAsync(rcBaseLatency.getRequest());
 
       // fetch responses
       final long timeoutTimestamp = System.currentTimeMillis() + TIMEOUT;
       DataFrame dfCurrCount = getResponse(resCurrCount, rcCurrCount, explore, timeoutTimestamp);
-      DataFrame dfCurrLatency = getResponse(resCurrLatency, rcCurrLatency, explore, timeoutTimestamp);
+      DataFrame dfCurrLatency = getResponse(resCurrLatency, rcCurrLatency, explore,
+          timeoutTimestamp);
       DataFrame dfBaseCount = getResponse(resBaseCount, rcBaseCount, explore, timeoutTimestamp);
-      DataFrame dfBaseLatency = getResponse(resBaseLatency, rcBaseLatency, explore, timeoutTimestamp);
+      DataFrame dfBaseLatency = getResponse(resBaseLatency, rcBaseLatency, explore,
+          timeoutTimestamp);
 
       // prepare data
       DataFrame dfCurr = alignResults(dfCurrCount, dfCurrLatency).sortedBy(COL_COUNT);
@@ -216,9 +238,12 @@ public class CallGraphPipeline extends Pipeline {
       LOG.info("Got {} rows for current, {} rows for baseline", dfCurr.size(), dfBase.size());
 
       // cutoffs
-      final long currCutoffCount = (long) (dfCurr.getLongs(COL_COUNT).max().doubleValue() * this.cutoffFraction);
-      final long baseCutoffCount = (long) (dfBase.getLongs(COL_COUNT).max().doubleValue() * this.cutoffFraction);
-      LOG.info("Cutoff for traffic count is {} for current, {} for baseline", currCutoffCount, baseCutoffCount);
+      final long currCutoffCount = (long) (dfCurr.getLongs(COL_COUNT).max().doubleValue()
+          * this.cutoffFraction);
+      final long baseCutoffCount = (long) (dfBase.getLongs(COL_COUNT).max().doubleValue()
+          * this.cutoffFraction);
+      LOG.info("Cutoff for traffic count is {} for current, {} for baseline", currCutoffCount,
+          baseCutoffCount);
 
       // join and filter
       DataFrame data = dfCurr
@@ -245,9 +270,12 @@ public class CallGraphPipeline extends Pipeline {
           .dropNull();
 
       // derived data
-      data.addSeries(COL_DIFF_COUNT, data.getDoubles(COL_CURR_COUNT).subtract(data.getDoubles(COL_BASE_COUNT)));
-      data.addSeries(COL_DIFF_LATENCY, data.getDoubles(COL_CURR_LATENCY).subtract(data.getDoubles(COL_BASE_LATENCY)));
-      data.addSeries(COL_DIFF_AVERAGE, data.getDoubles(COL_CURR_AVERAGE).subtract(data.getDoubles(COL_BASE_AVERAGE)));
+      data.addSeries(COL_DIFF_COUNT,
+          data.getDoubles(COL_CURR_COUNT).subtract(data.getDoubles(COL_BASE_COUNT)));
+      data.addSeries(COL_DIFF_LATENCY,
+          data.getDoubles(COL_CURR_LATENCY).subtract(data.getDoubles(COL_BASE_LATENCY)));
+      data.addSeries(COL_DIFF_AVERAGE,
+          data.getDoubles(COL_CURR_AVERAGE).subtract(data.getDoubles(COL_BASE_AVERAGE)));
 
       // scoring
       data.addSeries(COL_SCORE, data.getDoubles(COL_DIFF_AVERAGE).normalize());
@@ -263,31 +291,31 @@ public class CallGraphPipeline extends Pipeline {
 
       Set<CallGraphEntity> output = new MaxScoreSet<>();
       for (int i = 0; i < topk.size(); i++) {
-        output.add(CallGraphEntity.fromEdge(topk.getDouble(COL_SCORE, i), related, topk.slice(i, i + 1)));
+        output.add(
+            CallGraphEntity.fromEdge(topk.getDouble(COL_SCORE, i), related, topk.slice(i, i + 1)));
       }
 
       return new PipelineResult(pipelineContext, output);
-
     } catch (Exception e) {
       throw new IllegalStateException("Could not process data", e);
-
     }
   }
 
   /**
-   * Filters DimensionsEntites based on the include and exclude dimension sets configured in the pipeline config.
-   *
-   * @see CallGraphPipeline#filterDimensions(Set, Set, Set)
+   * Filters DimensionsEntites based on the include and exclude dimension sets configured in the
+   * pipeline config.
    *
    * @param dimensions set of DimensionsEntities
    * @return set of filtered DimensionsEntities
+   * @see CallGraphPipeline#filterDimensions(Set, Set, Set)
    */
   private Set<DimensionsEntity> filterDimensions(Set<DimensionsEntity> dimensions) {
     return filterDimensions(dimensions, this.includeDimensions, this.excludeDimensions);
   }
 
   /**
-   * Returns the set of dimensoins to explore for a given dataset under the constraint of include and exclude dimensions.
+   * Returns the set of dimensoins to explore for a given dataset under the constraint of include
+   * and exclude dimensions.
    *
    * @param dataset dataset dto
    * @return set of dimensions to explore
@@ -297,7 +325,6 @@ public class CallGraphPipeline extends Pipeline {
 
     if (this.includeDimensions.isEmpty()) {
       dimensions.addAll(dataset.getDimensions());
-
     } else {
       dimensions.addAll(this.includeDimensions);
     }
@@ -318,7 +345,8 @@ public class CallGraphPipeline extends Pipeline {
   private MetricConfigDTO getMetric(String dataset, String metric) {
     MetricConfigDTO metricDTO = this.metricDAO.findByMetricAndDataset(metric, dataset);
     if (metricDTO == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric '%s::%s'", dataset, metric));
+      throw new IllegalArgumentException(
+          String.format("Could not resolve metric '%s::%s'", dataset, metric));
     }
     return metricDTO;
   }
@@ -346,14 +374,14 @@ public class CallGraphPipeline extends Pipeline {
    * @param exclude dimensions to exclude
    * @return set of filtered DimensionsEntities
    */
-  private static Set<DimensionsEntity> filterDimensions(Set<DimensionsEntity> dimensionsEntities, Set<String> include, Set<String> exclude) {
+  private static Set<DimensionsEntity> filterDimensions(Set<DimensionsEntity> dimensionsEntities,
+      Set<String> include, Set<String> exclude) {
     Set<DimensionsEntity> output = new HashSet<>();
     for (DimensionsEntity de : dimensionsEntities) {
       Multimap<String, String> dimensions = ArrayListMultimap.create();
 
       if (include.isEmpty()) {
         dimensions.putAll(de.getDimensions());
-
       } else {
         for (String name : include) {
           dimensions.putAll(name, de.getDimensions().get(name));
@@ -389,11 +417,13 @@ public class CallGraphPipeline extends Pipeline {
    * @param dimensions dimensions to serve as index
    * @param timeoutTimestamp timestamp for ultimate timeout
    * @return response as formatted dataframe
-   * @throws Exception
    */
-  private static DataFrame getResponse(Future<ThirdEyeResponse> response, RequestContainer container,
+  private static DataFrame getResponse(Future<ThirdEyeResponse> response,
+      RequestContainer container,
       List<String> dimensions, long timeoutTimestamp) throws Exception {
-    return DataFrameUtils.evaluateResponse(response.get(makeTimeout(timeoutTimestamp), TimeUnit.MILLISECONDS), container)
+    return DataFrameUtils
+        .evaluateResponse(response.get(makeTimeout(timeoutTimestamp), TimeUnit.MILLISECONDS),
+            container)
         .dropSeries(COL_TIME)
         .setIndex(dimensions);
   }
@@ -415,5 +445,4 @@ public class CallGraphPipeline extends Pipeline {
           }
         }, COL_AVERAGE, COL_LATENCY, COL_COUNT);
   }
-
 }

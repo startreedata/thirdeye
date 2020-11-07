@@ -21,9 +21,9 @@ package org.apache.pinot.thirdeye.detection.spec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ThresholdRuleFilterSpec extends AbstractSpec {
+
   private double minValueHourly = Double.NaN;
   private double minValueDaily = Double.NaN;
   private double maxValueHourly = Double.NaN;

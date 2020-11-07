@@ -29,23 +29,27 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 
-
 public class CubeUtils {
-  private static double epsilon = 0.0001;
+
+  private static final double epsilon = 0.0001;
 
   /**
-   * Removes dimensions from the given list of dimensions, which has single values in the filter set. Only dimensions
-   * with one value is removed from the given dimensions because setting a filter one dimension names with one dimension
-   * value (e.g., "country=US") implies that the final data cube does not contain other dimension values. Thus, the
-   * summary algorithm could simply ignore that dimension (because the cube does not have any other values to compare
+   * Removes dimensions from the given list of dimensions, which has single values in the filter
+   * set. Only dimensions
+   * with one value is removed from the given dimensions because setting a filter one dimension
+   * names with one dimension
+   * value (e.g., "country=US") implies that the final data cube does not contain other dimension
+   * values. Thus, the
+   * summary algorithm could simply ignore that dimension (because the cube does not have any other
+   * values to compare
    * with in that dimension).
    *
    * @param dimensions the list of dimensions to be modified.
    * @param filterSets the filter to be applied on the data cube.
-   *
    * @return the list of dimensions that should be used for retrieving the data for summary algorithm.
    */
-  public static Dimensions shrinkDimensionsByFilterSets(Dimensions dimensions, Multimap<String, String> filterSets) {
+  public static Dimensions shrinkDimensionsByFilterSets(Dimensions dimensions,
+      Multimap<String, String> filterSets) {
     Set<String> dimensionsToRemove = new HashSet<>();
     for (Map.Entry<String, Collection<String>> filterSetEntry : filterSets.asMap().entrySet()) {
       if (filterSetEntry.getValue().size() == 1) {
@@ -55,10 +59,11 @@ public class CubeUtils {
     return removeDimensions(dimensions, dimensionsToRemove);
   }
 
-  private static Dimensions removeDimensions(Dimensions dimensions, Collection<String> dimensionsToRemove) {
+  private static Dimensions removeDimensions(Dimensions dimensions,
+      Collection<String> dimensionsToRemove) {
     List<String> dimensionsToRetain = new ArrayList<>();
     for (String dimensionName : dimensions.names()) {
-      if(!dimensionsToRemove.contains(dimensionName)){
+      if (!dimensionsToRemove.contains(dimensionName)) {
         dimensionsToRetain.add(dimensionName);
       }
     }
@@ -67,7 +72,8 @@ public class CubeUtils {
 
   /**
    * Return the results of a minus b. If the result is very close to zero, then zero is returned.
-   * This method is use to prevent the precision issue of double from inducing -0.00000000000000001, which is
+   * This method is use to prevent the precision issue of double from inducing -0.00000000000000001,
+   * which is
    * actually zero.
    *
    * @param a a double value.
@@ -89,19 +95,22 @@ public class CubeUtils {
    * @param baselineValue the baseline value of a node.
    * @param currentValue the current value of a node.
    * @param ratio the (parent) ratio to be flipped.
-   *
-   * @return the ratio that has the same direction as the change direction of baseline and current value.
+   * @return the ratio that has the same direction as the change direction of baseline and current
+   *     value.
    */
-  public static double ensureChangeRatioDirection(double baselineValue, double currentValue, double ratio) {
+  public static double ensureChangeRatioDirection(double baselineValue, double currentValue,
+      double ratio) {
     // case: value goes down but parent's value goes up
-    if (DoubleMath.fuzzyCompare(baselineValue, currentValue, epsilon) > 0 && DoubleMath.fuzzyCompare(ratio, 1, epsilon) > 0) {
+    if (DoubleMath.fuzzyCompare(baselineValue, currentValue, epsilon) > 0
+        && DoubleMath.fuzzyCompare(ratio, 1, epsilon) > 0) {
       if (Double.compare(ratio, 2) >= 0) {
         ratio = 2d - (ratio - ((long) ratio - 1));
       } else {
         ratio = 2d - ratio;
       }
       // case: value goes up but parent's value goes down
-    } else if (DoubleMath.fuzzyCompare(baselineValue, currentValue, epsilon) < 0 && DoubleMath.fuzzyCompare(ratio, 1, epsilon) < 0) {
+    } else if (DoubleMath.fuzzyCompare(baselineValue, currentValue, epsilon) < 0
+        && DoubleMath.fuzzyCompare(ratio, 1, epsilon) < 0) {
       ratio = 2d - ratio;
     }
     // return the original ratio for other cases.

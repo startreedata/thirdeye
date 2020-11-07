@@ -48,13 +48,13 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * DetectionPipeline forms the root of the detection class hierarchy. It represents a wireframe
  * for implementing (intermittently stateful) executable pipelines on top of it.
  */
 public abstract class DetectionPipeline {
-  private static String PROP_CLASS_NAME = "className";
+
+  private static final String PROP_CLASS_NAME = "className";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipeline.class);
 
   protected final DataProvider provider;
@@ -62,7 +62,8 @@ public abstract class DetectionPipeline {
   protected final long startTime;
   protected final long endTime;
 
-  protected DetectionPipeline(DataProvider provider, AlertDTO config, long startTime, long endTime) {
+  protected DetectionPipeline(DataProvider provider, AlertDTO config, long startTime,
+      long endTime) {
     this.provider = provider;
     this.config = config;
     this.startTime = startTime;
@@ -74,7 +75,6 @@ public abstract class DetectionPipeline {
    * Returns a detection result for the time range between {@code startTime} and {@code endTime}.
    *
    * @return detection result
-   * @throws Exception
    */
   public abstract DetectionPipelineResult run() throws Exception;
 
@@ -88,16 +88,18 @@ public abstract class DetectionPipeline {
     if (componentSpecs != null) {
       for (String componentKey : componentSpecs.keySet()) {
         Map<String, Object> componentSpec = ConfigUtils.getMap(componentSpecs.get(componentKey));
-        if (!instancesMap.containsKey(componentKey)){
+        if (!instancesMap.containsKey(componentKey)) {
           instancesMap.put(componentKey, createComponent(componentSpec));
         }
       }
 
       for (String componentKey : componentSpecs.keySet()) {
         Map<String, Object> componentSpec = ConfigUtils.getMap(componentSpecs.get(componentKey));
-        for (Map.Entry<String, Object> entry : componentSpec.entrySet()){
-          if (entry.getValue() != null && DetectionUtils.isReferenceName(entry.getValue().toString())) {
-            componentSpec.put(entry.getKey(), instancesMap.get(DetectionUtils.getComponentKey(entry.getValue().toString())));
+        for (Map.Entry<String, Object> entry : componentSpec.entrySet()) {
+          if (entry.getValue() != null && DetectionUtils
+              .isReferenceName(entry.getValue().toString())) {
+            componentSpec.put(entry.getKey(),
+                instancesMap.get(DetectionUtils.getComponentKey(entry.getValue().toString())));
           }
         }
         // Initialize the components
@@ -113,7 +115,8 @@ public abstract class DetectionPipeline {
       Class<BaseComponent> clazz = (Class<BaseComponent>) Class.forName(className);
       return clazz.newInstance();
     } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to create component for " + className, e.getCause());
+      throw new IllegalArgumentException("Failed to create component for " + className,
+          e.getCause());
     }
   }
 
@@ -136,9 +139,11 @@ public abstract class DetectionPipeline {
    * @return anomaly template
    */
   protected final MergedAnomalyResultDTO makeAnomaly(MetricSlice slice) {
-    Map<Long, MetricConfigDTO> metrics = this.provider.fetchMetrics(Collections.singleton(slice.getMetricId()));
+    Map<Long, MetricConfigDTO> metrics = this.provider
+        .fetchMetrics(Collections.singleton(slice.getMetricId()));
     if (!metrics.containsKey(slice.getMetricId())) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id %d", slice.getMetricId()));
+      throw new IllegalArgumentException(
+          String.format("Could not resolve metric id %d", slice.getMetricId()));
     }
 
     MetricConfigDTO metric = metrics.get(slice.getMetricId());
@@ -172,28 +177,31 @@ public abstract class DetectionPipeline {
    * Helper for creating a list of anomalies from a boolean series. Injects properties via
    * {@code makeAnomaly(MetricSlice, MetricConfigDTO)}.
    *
-   * @see DetectionPipeline#makeAnomaly(MetricSlice, MetricConfigDTO)
-   *
    * @param slice metric slice
    * @param df time series with COL_TIME and at least one boolean value series
    * @param seriesName name of the value series
    * @return list of anomalies
+   * @see DetectionPipeline#makeAnomaly(MetricSlice, MetricConfigDTO)
    */
-  protected final List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice, DataFrame df, String seriesName) {
+  protected final List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice, DataFrame df,
+      String seriesName) {
     if (df.isEmpty()) {
       return Collections.emptyList();
     }
 
-    df = df.filter(df.getLongs(DataFrame.COL_TIME).between(slice.getStart(), slice.getEnd())).dropNull(
-        DataFrame.COL_TIME);
+    df = df.filter(df.getLongs(DataFrame.COL_TIME).between(slice.getStart(), slice.getEnd()))
+        .dropNull(
+            DataFrame.COL_TIME);
 
     if (df.isEmpty()) {
       return Collections.emptyList();
     }
 
-    Map<Long, MetricConfigDTO> metrics = this.provider.fetchMetrics(Collections.singleton(slice.getMetricId()));
+    Map<Long, MetricConfigDTO> metrics = this.provider
+        .fetchMetrics(Collections.singleton(slice.getMetricId()));
     if (!metrics.containsKey(slice.getMetricId())) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id %d", slice.getMetricId()));
+      throw new IllegalArgumentException(
+          String.format("Could not resolve metric id %d", slice.getMetricId()));
     }
 
     MetricConfigDTO metric = metrics.get(slice.getMetricId());
@@ -212,7 +220,6 @@ public abstract class DetectionPipeline {
           anomalies.add(makeAnomaly(slice.withStart(start).withEnd(end), metric));
         }
         lastStart = -1;
-
       } else {
         // start of a run
         if (lastStart < 0) {
@@ -227,7 +234,8 @@ public abstract class DetectionPipeline {
       long end = start + 1;
 
       // guess-timate of next time series timestamp
-      DatasetConfigDTO dataset = this.provider.fetchDatasets(Collections.singleton(metric.getDataset())).get(metric.getDataset());
+      DatasetConfigDTO dataset = this.provider
+          .fetchDatasets(Collections.singleton(metric.getDataset())).get(metric.getDataset());
       if (dataset != null) {
         Period period = dataset.bucketTimeGranularity().toPeriod();
         DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
@@ -248,13 +256,14 @@ public abstract class DetectionPipeline {
 
   /**
    * Helper to initialize and run the next level wrapper
+   *
    * @param nestedProps nested properties
    * @return intermediate result of a detection pipeline
-   * @throws Exception
    */
   protected DetectionPipelineResult runNested(
       Map<String, Object> nestedProps, final long startTime, final long endTime) throws Exception {
-    Preconditions.checkArgument(nestedProps.containsKey(PROP_CLASS_NAME), "Nested missing " + PROP_CLASS_NAME);
+    Preconditions.checkArgument(nestedProps.containsKey(PROP_CLASS_NAME),
+        "Nested missing " + PROP_CLASS_NAME);
     Map<String, Object> properties = new HashMap<>(nestedProps);
     AlertDTO nestedConfig = new AlertDTO();
     nestedConfig.setId(this.config.getId());

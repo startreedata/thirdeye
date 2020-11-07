@@ -27,13 +27,14 @@ import org.apache.pinot.client.TextTable;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.detection.cache.CacheConstants;
 
-
 public class RelationalThirdEyeResponse extends BaseThirdEyeResponse {
-  private final Map<MetricFunction, Integer> metricFuncToIdMapping;
-  private List<ThirdEyeResponseRow> responseRows;
-  private List<String[]> rows;
 
-  public RelationalThirdEyeResponse(ThirdEyeRequest request, List<String[]> rows, TimeSpec dataTimeSpec) {
+  private final Map<MetricFunction, Integer> metricFuncToIdMapping;
+  private final List<ThirdEyeResponseRow> responseRows;
+  private final List<String[]> rows;
+
+  public RelationalThirdEyeResponse(ThirdEyeRequest request, List<String[]> rows,
+      TimeSpec dataTimeSpec) {
     super(request, dataTimeSpec);
     this.rows = rows;
     this.responseRows = new ArrayList<>(rows.size());

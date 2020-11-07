@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class ConfigIndex extends AbstractIndexEntity {
+
   private String namespace;
   private String name;
 

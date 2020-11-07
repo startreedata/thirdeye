@@ -30,7 +30,6 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
 
-
 /**
  * Provides basic implementation for hierarchical cube nodes.
  *
@@ -38,6 +37,7 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
  * @param <R> the Row class of the inherited cube node.
  */
 public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implements CubeNode<N> {
+
   protected int level;
   protected int index;
   protected double cost;
@@ -46,7 +46,8 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
   protected List<N> children = new ArrayList<>();
 
   /**
-   * Constructs a CubeNode with the given data, i.e., a Row. The level, index, cost will be set to 0; parent will
+   * Constructs a CubeNode with the given data, i.e., a Row. The level, index, cost will be set to
+   * 0; parent will
    * be set to null.
    *
    * @param data the data of this cube node.
@@ -70,7 +71,8 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
     Preconditions.checkArgument((level != 0 && parent != null) || (level == 0 && parent == null));
     this.parent = parent;
     if (parent != null) { // non root node
-      Dimensions parentDimension = new Dimensions(parent.getDimensions().namesToDepth(parent.getLevel()));
+      Dimensions parentDimension = new Dimensions(
+          parent.getDimensions().namesToDepth(parent.getLevel()));
       Dimensions childDimension = new Dimensions(data.getDimensions().namesToDepth(level));
       Preconditions.checkState(parentDimension.isParentOf(childDimension),
           "Current node is not a child node of the given parent node. Current and parent dimensions: ",
@@ -80,8 +82,9 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
       // The reason is that the parent values will dynamically be updated whenever a child is extracted. In addition,
       // large children are unlikely to be interfered by small children. Therefore, evaluating large children before
       // small children can increase the stability of this algorithm.
-      parent.children.sort( (Object o1, Object o2) ->
-          (int) ((((CubeNode)o2).getBaselineSize() + ((CubeNode)o2).getCurrentSize()) - (((CubeNode)o1).getBaselineSize() + ((CubeNode)o1).getCurrentSize()))
+      parent.children.sort((Object o1, Object o2) ->
+          (int) ((((CubeNode) o2).getBaselineSize() + ((CubeNode) o2).getCurrentSize()) - (
+              ((CubeNode) o1).getBaselineSize() + ((CubeNode) o1).getCurrentSize()))
       );
     }
   }
@@ -129,7 +132,8 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
   }
 
   /**
-   * Returns the change ratio of the node if it is a finite number; otherwise, returns an alternative ratio as follows:
+   * Returns the change ratio of the node if it is a finite number; otherwise, returns an
+   * alternative ratio as follows:
    * 1. If originalChangeRatio is a finite number, return it;
    * 2. otherwise, get the ratio from its parent.
    * 3. If none is available, return 1.0.
@@ -145,7 +149,8 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
         return CubeUtils.ensureChangeRatioDirection(getBaselineValue(), getCurrentValue(), ratio);
       } else {
         if (parent != null) {
-          return CubeUtils.ensureChangeRatioDirection(getBaselineValue(), getCurrentValue(), parent.bootStrapChangeRatio());
+          return CubeUtils.ensureChangeRatioDirection(getBaselineValue(), getCurrentValue(),
+              parent.bootStrapChangeRatio());
         } else {
           return 1.;
         }
@@ -172,7 +177,8 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
       return false;
     }
     BaseCubeNode<?, ?> that = (BaseCubeNode<?, ?>) o;
-    return level == that.level && index == that.index && Double.compare(that.cost, cost) == 0 && Objects.equal(data,
+    return level == that.level && index == that.index && Double.compare(that.cost, cost) == 0
+        && Objects.equal(data,
         that.data);
   }
 

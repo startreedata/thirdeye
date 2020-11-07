@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class EventIndex extends AbstractIndexEntity {
+
   String name;
   String eventType;
   long startTime;

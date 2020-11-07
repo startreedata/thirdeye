@@ -43,13 +43,13 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * This class focuses on tuning the detection config for the provided tuning window
  *
  * This wraps and calls the appropriate tunable implementation
  */
 public class DetectionConfigTuner {
+
   protected static final Logger LOG = LoggerFactory.getLogger(DetectionConfigTuner.class);
 
   private static final String PROP_CLASS_NAME = "className";
@@ -75,7 +75,8 @@ public class DetectionConfigTuner {
    * @param startTime start time of the tuning window
    * @param endTime end time of the tuning window
    */
-  private Map<String, Object> getTunedSpecs(Map<String, Object> componentProps, long startTime, long endTime)
+  private Map<String, Object> getTunedSpecs(Map<String, Object> componentProps, long startTime,
+      long endTime)
       throws Exception {
     Map<String, Object> tunedSpec = new HashMap<>();
 
@@ -90,15 +91,18 @@ public class DetectionConfigTuner {
     Preconditions.checkNotNull(componentProps.get(PROP_METRIC_URN));
     String metricUrn = componentProps.get(PROP_METRIC_URN).toString();
     MetricEntity metricEntity = MetricEntity.fromURN(metricUrn);
-    Map<Long, MetricConfigDTO> metricConfigMap = dataProvider.fetchMetrics(Collections.singleton(metricEntity.getId()));
+    Map<Long, MetricConfigDTO> metricConfigMap = dataProvider
+        .fetchMetrics(Collections.singleton(metricEntity.getId()));
     Preconditions.checkArgument(metricConfigMap.size() == 1, "Unable to find the metric to tune");
 
     MetricConfigDTO metricConfig = metricConfigMap.values().iterator().next();
-    DatasetConfigDTO datasetConfig = dataProvider.fetchDatasets(Collections.singletonList(metricConfig.getDataset()))
+    DatasetConfigDTO datasetConfig = dataProvider
+        .fetchDatasets(Collections.singletonList(metricConfig.getDataset()))
         .get(metricConfig.getDataset());
-    DateTimeZone timezone = DateTimeZone.forID(datasetConfig.getTimezone() == null ? DEFAULT_TIMEZONE : datasetConfig.getTimezone());
+    DateTimeZone timezone = DateTimeZone.forID(
+        datasetConfig.getTimezone() == null ? DEFAULT_TIMEZONE : datasetConfig.getTimezone());
     DateTime start = new DateTime(startTime, timezone).withTimeAtStartOfDay();
-    DateTime end =  new DateTime(endTime, timezone).withTimeAtStartOfDay();
+    DateTime end = new DateTime(endTime, timezone).withTimeAtStartOfDay();
     Interval window = new Interval(start, end);
 
     // TODO: if dimension drill down applied, pass in the metric urn of top dimension
@@ -107,7 +111,8 @@ public class DetectionConfigTuner {
     return tunedSpec;
   }
 
-  private Tunable instantiateTunable(String componentClassName, Map<String, Object> yamlParams, InputDataFetcher dataFetcher)
+  private Tunable instantiateTunable(String componentClassName, Map<String, Object> yamlParams,
+      InputDataFetcher dataFetcher)
       throws Exception {
     String tunableClassName = DETECTION_REGISTRY.lookupTunable(componentClassName);
     Class clazz = Class.forName(tunableClassName);
@@ -119,7 +124,8 @@ public class DetectionConfigTuner {
   }
 
   /**
-   * Scans through all the tunable components and injects tuned model params into the detection config
+   * Scans through all the tunable components and injects tuned model params into the detection
+   * config
    */
   public AlertDTO tune(long tuningWindowStart, long tuningWindowEnd) {
     Map<String, Object> tunedComponentSpecs = new HashMap<>();
@@ -137,7 +143,8 @@ public class DetectionConfigTuner {
       String type = DetectionUtils.getComponentType(componentKey);
       if (DETECTION_REGISTRY.isTunable(componentClassName)) {
         try {
-          tunedComponentProps.putAll(getTunedSpecs(existingComponentProps, tuningWindowStart, tuningWindowEnd));
+          tunedComponentProps
+              .putAll(getTunedSpecs(existingComponentProps, tuningWindowStart, tuningWindowEnd));
         } catch (Exception e) {
           LOG.error("Tuning failed for component " + type, e);
         }

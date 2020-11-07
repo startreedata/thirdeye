@@ -45,9 +45,9 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 @Singleton
 public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements TaskManager {
+
   private static final String FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC =
       " WHERE status = :status order by startTime asc limit 10";
 
@@ -55,10 +55,10 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
       " WHERE status = :status order by startTime desc limit 10";
 
   private static final String FIND_BY_STATUS_AND_TYPE_ORDER_BY_CREATE_TIME_ASC =
-          " WHERE status = :status and type = :type order by startTime asc limit 10";
+      " WHERE status = :status and type = :type order by startTime asc limit 10";
 
   private static final String FIND_BY_STATUS_AND_TYPE_ORDER_BY_CREATE_TIME_DESC =
-          " WHERE status = :status and type = :type order by startTime desc limit 10";
+      " WHERE status = :status and type = :type order by startTime desc limit 10";
 
   private static final String FIND_BY_STATUS_AND_TYPE_NOT_IN_ORDER_BY_CREATE_TIME_ASC =
       " WHERE status = :status and type != :type order by startTime asc limit 10";
@@ -88,11 +88,10 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
       update(entity);
       return entity.getId();
     }
-    TaskBean bean = (TaskBean) convertDTO2Bean(entity, TaskBean.class);
+    TaskBean bean = convertDTO2Bean(entity, TaskBean.class);
     Long id = genericPojoDao.put(bean);
     entity.setId(id);
     return id;
-
   }
 
   @Override
@@ -109,7 +108,8 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
     parameterMap.put("name", name);
     String queryClause = (asc) ? FIND_BY_NAME_ORDER_BY_CREATE_TIME_ASC + fetchSize
         : FIND_BY_NAME_ORDER_BY_CREATE_TIME_DESC + fetchSize;
-    List<TaskBean>  list = genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskBean.class);
+    List<TaskBean> list = genericPojoDao
+        .executeParameterizedSQL(queryClause, parameterMap, TaskBean.class);
     List<TaskDTO> result = new ArrayList<>();
     for (TaskBean bean : list) {
       result.add(MODEL_MAPPER.map(bean, TaskDTO.class));
@@ -118,11 +118,13 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   }
 
   @Override
-  public List<TaskDTO> findByStatusOrderByCreateTime(TaskStatus status, int fetchSize, boolean asc) {
+  public List<TaskDTO> findByStatusOrderByCreateTime(TaskStatus status, int fetchSize,
+      boolean asc) {
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("status", status.toString());
     List<TaskBean> list;
-    String queryClause = (asc) ? FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC : FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC;
+    String queryClause =
+        (asc) ? FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC : FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC;
     list = genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskBean.class);
     List<TaskDTO> result = new ArrayList<>();
     for (TaskBean bean : list) {
@@ -132,13 +134,14 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   }
 
   @Override
-  public List<TaskDTO> findByStatusAndTypeOrderByCreateTime(TaskStatus status, TaskConstants.TaskType type, int fetchSize, boolean asc) {
+  public List<TaskDTO> findByStatusAndTypeOrderByCreateTime(TaskStatus status,
+      TaskConstants.TaskType type, int fetchSize, boolean asc) {
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("status", status.toString());
     parameterMap.put("type", type.toString());
     List<TaskBean> list;
     String queryClause = (asc) ? FIND_BY_STATUS_AND_TYPE_ORDER_BY_CREATE_TIME_ASC
-            : FIND_BY_STATUS_AND_TYPE_ORDER_BY_CREATE_TIME_DESC;
+        : FIND_BY_STATUS_AND_TYPE_ORDER_BY_CREATE_TIME_DESC;
     list = genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskBean.class);
     List<TaskDTO> result = new ArrayList<>();
     for (TaskBean bean : list) {
@@ -235,7 +238,8 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
       TaskConstants.TaskType type, int days) {
     DateTime activeDate = new DateTime().minusDays(days);
     Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
-    Predicate statusPredicate = Predicate.IN("status", statuses.stream().map(Enum::toString).toArray());
+    Predicate statusPredicate = Predicate
+        .IN("status", statuses.stream().map(Enum::toString).toArray());
     Predicate typePredicate = Predicate.EQ("type", type.toString());
     Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
     return findByPredicate(Predicate.AND(statusPredicate, typePredicate, timestampPredicate));
@@ -250,7 +254,8 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
     Predicate statusPredicate = Predicate.EQ("status", TaskStatus.RUNNING.toString());
     Predicate daysTimestampPredicate = Predicate.GE("createTime", activeTimestamp);
     Predicate timeoutTimestampPredicate = Predicate.LT("updateTime", timeoutTimestamp);
-    return findByPredicate(Predicate.AND(statusPredicate, daysTimestampPredicate, timeoutTimestampPredicate));
+    return findByPredicate(
+        Predicate.AND(statusPredicate, daysTimestampPredicate, timeoutTimestampPredicate));
   }
 
   @Override
@@ -266,7 +271,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
     // ensure each resource is closed at the end of the statement
     try (Connection connection = this.genericPojoDao.getConnection();
         PreparedStatement statement = connection.prepareStatement(COUNT_WAITING_TASKS);
-        ResultSet rs = statement.executeQuery()){
+        ResultSet rs = statement.executeQuery()) {
       rs.next();
       return rs.getInt(1);
     } catch (Exception e) {

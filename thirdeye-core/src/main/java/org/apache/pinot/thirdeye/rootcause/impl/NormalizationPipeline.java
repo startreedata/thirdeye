@@ -27,12 +27,12 @@ import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 
-
 /**
  * NormalizationPipeline normalizes entity scores to a [0.0,1.0] interval based on observed
  * minimum and maximum scores.
  */
 public class NormalizationPipeline extends Pipeline {
+
   /**
    * Constructor for dependency injection
    *
@@ -50,7 +50,8 @@ public class NormalizationPipeline extends Pipeline {
    * @param inputNames input pipeline names
    * @param ignore configuration properties (none)
    */
-  public NormalizationPipeline(String outputName, Set<String> inputNames, Map<String, Object> ignore) {
+  public NormalizationPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> ignore) {
     super(outputName, inputNames);
   }
 

@@ -28,7 +28,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.ConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.ConfigBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
-
 @Singleton
 public class ConfigManagerImpl extends AbstractManagerImpl<ConfigDTO> implements ConfigManager {
 

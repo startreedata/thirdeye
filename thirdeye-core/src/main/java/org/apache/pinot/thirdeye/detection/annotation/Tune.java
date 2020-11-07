@@ -26,14 +26,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Tune annotation
- * Components with this annotation will registered it's tunable and then this tunable could be called by yaml converter to generate the component spec.
+ * Components with this annotation will registered it's tunable and then this tunable could be
+ * called by yaml converter to generate the component spec.
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface Tune {
+
   @JsonProperty String tunable() default "";
 }

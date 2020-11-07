@@ -21,8 +21,8 @@ package org.apache.pinot.thirdeye.auth;
 
 import java.util.Objects;
 
-
 public class ThirdEyeCredentials {
+
   String principal;
   String password;
   String token;

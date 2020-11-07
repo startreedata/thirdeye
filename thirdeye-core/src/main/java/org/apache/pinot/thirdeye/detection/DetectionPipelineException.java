@@ -4,6 +4,7 @@ package org.apache.pinot.thirdeye.detection;
  * The exception to be thrown in detection pipelines.
  */
 public class DetectionPipelineException extends Exception {
+
   public DetectionPipelineException(Throwable cause) {
     super(cause);
   }

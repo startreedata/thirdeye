@@ -22,7 +22,8 @@ package org.apache.pinot.thirdeye.cube.data.cube;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
-public class DimNameValueCostEntry implements Comparable<DimNameValueCostEntry>{
+public class DimNameValueCostEntry implements Comparable<DimNameValueCostEntry> {
+
   private String dimName;
   private String dimValue;
   private double baselineValue;
@@ -34,8 +35,10 @@ public class DimNameValueCostEntry implements Comparable<DimNameValueCostEntry>{
   private double sizeFactor;
   private double cost;
 
-  public DimNameValueCostEntry(String dimensionName, String dimensionValue, double baselineValue, double currentValue,
-      double changeRatio, double changeDiff, double baselineSize, double currentSize, double sizeFactor, double cost) {
+  public DimNameValueCostEntry(String dimensionName, String dimensionValue, double baselineValue,
+      double currentValue,
+      double changeRatio, double changeDiff, double baselineSize, double currentSize,
+      double sizeFactor, double cost) {
     Preconditions.checkNotNull(dimensionName, "dimension name cannot be null.");
     Preconditions.checkNotNull(dimensionValue, "dimension value cannot be null.");
 

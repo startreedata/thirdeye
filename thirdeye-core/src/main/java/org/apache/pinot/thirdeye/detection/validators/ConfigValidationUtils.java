@@ -25,7 +25,6 @@ import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import java.util.Iterator;
 
-
 /**
  * Holds utility methods related to ThirdEye user config validation
  */
@@ -49,7 +48,8 @@ public class ConfigValidationUtils {
   /**
    * Similar to @{link Preconditions.checkArgument} but throws a {@link ConfigValidationException}
    */
-  public static void checkArgument(boolean expression, Object errorMessage) throws ConfigValidationException {
+  public static void checkArgument(boolean expression, Object errorMessage)
+      throws ConfigValidationException {
     if (!expression) {
       throw new ConfigValidationException(String.valueOf(errorMessage));
     }

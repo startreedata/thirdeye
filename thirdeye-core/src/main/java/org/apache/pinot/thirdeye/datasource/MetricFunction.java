@@ -40,7 +40,8 @@ public class MetricFunction implements Comparable<MetricFunction> {
 
   public MetricFunction(@JsonProperty("functionName") MetricAggFunction functionName,
       @JsonProperty("metricName") String metricName, @JsonProperty("metricId") Long metricId,
-      @JsonProperty("dataset") String dataset, @JsonProperty("metricConfig") MetricConfigDTO metricConfig,
+      @JsonProperty("dataset") String dataset,
+      @JsonProperty("metricConfig") MetricConfigDTO metricConfig,
       @JsonProperty("datasetConfig") DatasetConfigDTO datasetConfig) {
     this.functionName = functionName;
     this.metricName = metricName;
@@ -58,7 +59,7 @@ public class MetricFunction implements Comparable<MetricFunction> {
   public String toString() {
     // TODO this is hardcoded for pinot's return column name, but there's no binding contract that
     // clients need to return response objects with these keys.
-   return format(functionName.name(), metricName);
+    return format(functionName.name(), metricName);
   }
 
   @Override
@@ -130,7 +131,4 @@ public class MetricFunction implements Comparable<MetricFunction> {
   public void setDatasetConfig(DatasetConfigDTO datasetConfig) {
     this.datasetConfig = datasetConfig;
   }
-
-
-
 }

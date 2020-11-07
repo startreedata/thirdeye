@@ -24,11 +24,11 @@ import java.util.List;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 
-
 /**
  * Defines the operations that are used by the cube algorithm.
  *
- * @param <N> the class of the actual cube node. For example, ratio cube algorithm will use RatioCubeNode.
+ * @param <N> the class of the actual cube node. For example, ratio cube algorithm will use
+ *     RatioCubeNode.
  */
 public interface CubeNode<N extends CubeNode> {
 
@@ -168,7 +168,8 @@ public interface CubeNode<N extends CubeNode> {
   List<N> getChildren();
 
   /**
-   * Returns the changeRatio that is calculated by the aggregate current and aggregate baseline values of all children node.
+   * Returns the changeRatio that is calculated by the aggregate current and aggregate baseline
+   * values of all children node.
    *
    * @return aggregated current value of all children / aggregated baseline value of all children;
    */
@@ -176,18 +177,22 @@ public interface CubeNode<N extends CubeNode> {
 
   /**
    * Returns the changeRatio that is calculated by currentValue and baselineValue.
+   *
    * @return currentValue / baselineValue;
    */
   double changeRatio();
 
   /**
-   * Returns the change ratio of the node if it is a finite number; otherwise, provide an alternative change ratio.
+   * Returns the change ratio of the node if it is a finite number; otherwise, provide an
+   * alternative change ratio.
+   *
    * @see BaseCubeNode for the basic implementation.
    */
   double bootStrapChangeRatio();
 
   /**
-   * Returns the current changeRatio of this node is increased or decreased, i.e., returns true if changeRatio of the node >= 1.0.
+   * Returns the current changeRatio of this node is increased or decreased, i.e., returns true if
+   * changeRatio of the node >= 1.0.
    * If the current changeRatio is NAN, then the changeRatio of the aggregated values is used.
    *
    * Precondition: the aggregated baseline and current values cannot both be zero.
@@ -195,11 +200,11 @@ public interface CubeNode<N extends CubeNode> {
   boolean side();
 
   /**
-   * Returns if the data of current node equals to the data of other node. The parent and children nodes are not
+   * Returns if the data of current node equals to the data of other node. The parent and children
+   * nodes are not
    * compared due to the cyclic references between parent and children nodes.
    *
    * @param o the other node.
-   *
    * @return true if the data of current node equals to the data of other node.
    */
   @Override

@@ -43,11 +43,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader {
-  private static final Logger LOG = LoggerFactory.getLogger(PinotControllerResponseCacheLoader.class);
+
+  private static final Logger LOG = LoggerFactory
+      .getLogger(PinotControllerResponseCacheLoader.class);
 
   private static final long CONNECTION_TIMEOUT = 60000;
 
   private static int MAX_CONNECTIONS;
+
   static {
     try {
       MAX_CONNECTIONS = Integer.parseInt(System.getProperty("max_pinot_connections", "25"));
@@ -55,6 +58,7 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
       MAX_CONNECTIONS = 25;
     }
   }
+
   private Connection[] connections;
 
   private static final String BROKER_PREFIX = "Broker_";
@@ -62,19 +66,22 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   private final AtomicInteger activeConnections = new AtomicInteger();
 
   /**
-   * Constructs a empty {@link PinotControllerResponseCacheLoader}. Please use init() to setup the connection of the
+   * Constructs a empty {@link PinotControllerResponseCacheLoader}. Please use init() to setup the
+   * connection of the
    * constructed cache loader.
    */
-  public PinotControllerResponseCacheLoader() { }
+  public PinotControllerResponseCacheLoader() {
+  }
 
   /**
    * Constructs a {@link PinotControllerResponseCacheLoader} using the given data source config.
    *
-   * @param pinotThirdEyeDataSourceConfig the data source config that provides controller's information.
-   *
+   * @param pinotThirdEyeDataSourceConfig the data source config that provides controller's
+   *     information.
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
-  public PinotControllerResponseCacheLoader(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig)
+  public PinotControllerResponseCacheLoader(
+      PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig)
       throws Exception {
     this.init(pinotThirdEyeDataSourceConfig);
   }
@@ -83,19 +90,19 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
    * Initializes the cache loader using the given property map.
    *
    * @param properties the property map that provides controller's information.
-   *
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
   public void init(Map<String, Object> properties) throws Exception {
-    PinotThirdEyeDataSourceConfig dataSourceConfig = PinotThirdEyeDataSourceConfig.createFromProperties(properties);
+    PinotThirdEyeDataSourceConfig dataSourceConfig = PinotThirdEyeDataSourceConfig
+        .createFromProperties(properties);
     this.init(dataSourceConfig);
   }
 
   /**
    * Initializes the cache loader using the given data source config.
    *
-   * @param pinotThirdEyeDataSourceConfig the data source config that provides controller's information.
-   *
+   * @param pinotThirdEyeDataSourceConfig the data source config that provides controller's
+   *     information.
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
   private void init(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
@@ -112,7 +119,8 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
       for (int i = 0; i < thirdeyeBrokerList.size(); i++) {
         String instanceName = thirdeyeBrokerList.get(i);
         InstanceConfig instanceConfig =
-            helixAdmin.getInstanceConfig(pinotThirdEyeDataSourceConfig.getClusterName(), instanceName);
+            helixAdmin
+                .getInstanceConfig(pinotThirdEyeDataSourceConfig.getClusterName(), instanceName);
         thirdeyeBrokers[i] = instanceConfig.getHostName().replaceAll(BROKER_PREFIX, "") + ":"
             + instanceConfig.getPort();
       }
@@ -121,7 +129,8 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
     } else {
       this.connections = fromZookeeper(pinotThirdEyeDataSourceConfig);
       LOG.info("Created PinotControllerResponseCacheLoader with controller {}:{}",
-          pinotThirdEyeDataSourceConfig.getControllerHost(), pinotThirdEyeDataSourceConfig.getControllerPort());
+          pinotThirdEyeDataSourceConfig.getControllerHost(),
+          pinotThirdEyeDataSourceConfig.getControllerPort());
     }
   }
 
@@ -134,12 +143,14 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
           int activeConnections = this.activeConnections.incrementAndGet();
 
           long start = System.currentTimeMillis();
-          ResultSetGroup resultSetGroup = connection.execute(pinotQuery.getTableName(), pinotQuery.getQuery());
+          ResultSetGroup resultSetGroup = connection
+              .execute(pinotQuery.getTableName(), pinotQuery.getQuery());
           if (LOG.isDebugEnabled()) {
             LOG.debug("Query:{}  response:{}", pinotQuery.getQuery(), format(resultSetGroup));
           }
           long end = System.currentTimeMillis();
-          LOG.info("Query:{}  took:{} ms  connections:{}", pinotQuery.getQuery(), (end - start), activeConnections);
+          LOG.info("Query:{}  took:{} ms  connections:{}", pinotQuery.getQuery(), (end - start),
+              activeConnections);
 
           return ThirdEyeResultSetGroup.fromPinotResultSetGroup(resultSetGroup);
         }
@@ -169,30 +180,31 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
 
   private static Connection[] fromHostList(final String[] thirdeyeBrokers) throws Exception {
     Callable<Connection> callable = new Callable<Connection>() {
-        @Override
-        public Connection call() throws Exception {
-          return ConnectionFactory.fromHostList(thirdeyeBrokers);
-        }
-      };
+      @Override
+      public Connection call() throws Exception {
+        return ConnectionFactory.fromHostList(thirdeyeBrokers);
+      }
+    };
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
 
-  private static Connection[] fromZookeeper(final PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
+  private static Connection[] fromZookeeper(
+      final PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
     Callable<Connection> callable = new Callable<Connection>() {
-        @Override
-        public Connection call() throws Exception {
-          return ConnectionFactory.fromZookeeper(
-              pinotThirdEyeDataSourceConfig.getZookeeperUrl()
-                  + "/" + pinotThirdEyeDataSourceConfig.getClusterName());
-        }
-      };
+      @Override
+      public Connection call() throws Exception {
+        return ConnectionFactory.fromZookeeper(
+            pinotThirdEyeDataSourceConfig.getZookeeperUrl()
+                + "/" + pinotThirdEyeDataSourceConfig.getClusterName());
+      }
+    };
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
 
   private static <T> Collection<Future<T>> executeReplicated(Callable<T> callable, int n) {
     ExecutorService executor = Executors.newCachedThreadPool();
     Collection<Future<T>> futures = new ArrayList<>();
-    for(int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
       futures.add(executor.submit(callable));
     }
     executor.shutdown();
@@ -202,7 +214,7 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   private static Connection[] fromFutures(Collection<Future<Connection>> futures) throws Exception {
     Connection[] connections = new Connection[futures.size()];
     int i = 0;
-    for(Future<Connection> f : futures) {
+    for (Future<Connection> f : futures) {
       connections[i++] = f.get(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
     }
     return connections;

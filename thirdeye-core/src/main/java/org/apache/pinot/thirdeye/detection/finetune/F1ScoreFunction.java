@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 
-
 /**
  * The F1 score function based on counting anomaly.
  */
@@ -35,7 +34,8 @@ public class F1ScoreFunction implements ScoreFunction {
    * Calculate F1 score of the result against the anomalies.
    */
   @Override
-  public double calculateScore(DetectionPipelineResult result, Collection<MergedAnomalyResultDTO> anomalies) {
+  public double calculateScore(DetectionPipelineResult result,
+      Collection<MergedAnomalyResultDTO> anomalies) {
     List<MergedAnomalyResultDTO> trueTestAnomalies = new ArrayList<>();
     int labeledAnomalies = 0;
 
@@ -65,7 +65,10 @@ public class F1ScoreFunction implements ScoreFunction {
   }
 
   private boolean isOverlap(MergedAnomalyResultDTO anomaly, MergedAnomalyResultDTO testAnomaly) {
-    return (anomaly.getStartTime() > testAnomaly.getStartTime() && anomaly.getStartTime() < testAnomaly.getEndTime())
-        || (anomaly.getEndTime() > testAnomaly.getStartTime() && anomaly.getEndTime() < testAnomaly.getEndTime());
+    return
+        (anomaly.getStartTime() > testAnomaly.getStartTime() && anomaly.getStartTime() < testAnomaly
+            .getEndTime())
+            || (anomaly.getEndTime() > testAnomaly.getStartTime()
+            && anomaly.getEndTime() < testAnomaly.getEndTime());
   }
 }

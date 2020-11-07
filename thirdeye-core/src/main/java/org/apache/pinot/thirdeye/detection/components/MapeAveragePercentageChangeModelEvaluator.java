@@ -38,13 +38,16 @@ import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelStatus;
 import org.joda.time.Instant;
 
-
 /**
- *  Monitor the recent mean MAPE in last 7 days, and compare that with the mean MAPE for the last 30 days.
- *  If the percentage change dropped to a certain threshold for a metric urn, return a bad model status to trigger
- *  auto configuration.
+ * Monitor the recent mean MAPE in last 7 days, and compare that with the mean MAPE for the last 30
+ * days.
+ * If the percentage change dropped to a certain threshold for a metric urn, return a bad model
+ * status to trigger
+ * auto configuration.
  */
-public class MapeAveragePercentageChangeModelEvaluator implements ModelEvaluator<MapeAveragePercentageChangeModelEvaluatorSpec> {
+public class MapeAveragePercentageChangeModelEvaluator implements
+    ModelEvaluator<MapeAveragePercentageChangeModelEvaluatorSpec> {
+
   private static final int MAPE_LOOK_BACK_DAYS_RECENT = 7;
   private static final int MAPE_LOOK_BACK_DAYS_BASELINE = 30;
 
@@ -54,17 +57,21 @@ public class MapeAveragePercentageChangeModelEvaluator implements ModelEvaluator
   @Override
   public ModelEvaluationResult evaluateModel(Instant evaluationTimeStamp) {
     EvaluationSlice evaluationSlice =
-        new EvaluationSlice().withStartTime(evaluationTimeStamp.toDateTime().minusDays(MAPE_LOOK_BACK_DAYS_BASELINE).getMillis())
+        new EvaluationSlice().withStartTime(
+            evaluationTimeStamp.toDateTime().minusDays(MAPE_LOOK_BACK_DAYS_BASELINE).getMillis())
             .withEndTime(evaluationTimeStamp.getMillis());
     // fetch evaluations
     Collection<EvaluationDTO> evaluations =
-        this.dataFetcher.fetchData(new InputDataSpec().withEvaluationSlices(Collections.singleton(evaluationSlice)))
+        this.dataFetcher.fetchData(
+            new InputDataSpec().withEvaluationSlices(Collections.singleton(evaluationSlice)))
             .getEvaluations()
             .get(evaluationSlice);
 
-    Collection<EvaluationDTO> recentEvaluations = getEvaluationsWithinDays(evaluations, evaluationTimeStamp,
+    Collection<EvaluationDTO> recentEvaluations = getEvaluationsWithinDays(evaluations,
+        evaluationTimeStamp,
         MAPE_LOOK_BACK_DAYS_RECENT);
-    Collection<EvaluationDTO> baselineEvaluations = getEvaluationsWithinDays(evaluations, evaluationTimeStamp,
+    Collection<EvaluationDTO> baselineEvaluations = getEvaluationsWithinDays(evaluations,
+        evaluationTimeStamp,
         MAPE_LOOK_BACK_DAYS_BASELINE);
 
     if (recentEvaluations.isEmpty() || recentEvaluations.containsAll(baselineEvaluations)) {
@@ -73,17 +80,21 @@ public class MapeAveragePercentageChangeModelEvaluator implements ModelEvaluator
     }
 
     // calculate past 7 day mean MAPE for each metric urn and rules
-    Map<String, Double> recentMeanMapeForMetricUrnsAndRules = getMeanMapeForEachMetricUrnAndRule(recentEvaluations);
+    Map<String, Double> recentMeanMapeForMetricUrnsAndRules = getMeanMapeForEachMetricUrnAndRule(
+        recentEvaluations);
 
     // calculate past 30 day mean MAPE for each metric urn and rules
-    Map<String, Double> baselineMeanMapeForMetricUrnsAndRules = getMeanMapeForEachMetricUrnAndRule(baselineEvaluations);
+    Map<String, Double> baselineMeanMapeForMetricUrnsAndRules = getMeanMapeForEachMetricUrnAndRule(
+        baselineEvaluations);
 
     // evaluate for each metric urn
-    Map<String, Boolean> evaluationResultForMetricUrnsAndRules = recentMeanMapeForMetricUrnsAndRules.entrySet()
+    Map<String, Boolean> evaluationResultForMetricUrnsAndRules = recentMeanMapeForMetricUrnsAndRules
+        .entrySet()
         .stream()
         .collect(Collectors.toMap(Map.Entry::getKey,
             // compare the MAPE percentage change to threshold
-            recentMeanMape -> recentMeanMape.getValue() / baselineMeanMapeForMetricUrnsAndRules.get(recentMeanMape.getKey()) - 1 <= threshold));
+            recentMeanMape -> recentMeanMape.getValue() / baselineMeanMapeForMetricUrnsAndRules
+                .get(recentMeanMape.getKey()) - 1 <= threshold));
 
     if (evaluationResultForMetricUrnsAndRules.values().stream().allMatch(result -> result)) {
       // if all metric urn's status is good, return overall good status
@@ -94,6 +105,7 @@ public class MapeAveragePercentageChangeModelEvaluator implements ModelEvaluator
 
   /**
    * Filter the evaluations to return only the past number days.
+   *
    * @param evaluations evaluations
    * @param evaluationTimeStamp the time stamp for evaluations
    * @param days look back number of days
@@ -103,23 +115,30 @@ public class MapeAveragePercentageChangeModelEvaluator implements ModelEvaluator
       Instant evaluationTimeStamp, int days) {
     return evaluations.stream()
         .filter(eval -> Objects.nonNull(eval.getMape()))
-        .filter(eval -> evaluationTimeStamp.toDateTime().minusDays(days).getMillis() < eval.getStartTime())
+        .filter(eval -> evaluationTimeStamp.toDateTime().minusDays(days).getMillis() < eval
+            .getStartTime())
         .collect(Collectors.toSet());
   }
 
   /**
-   * calculate the mean MAPE for each metric urn based on the available evaluations over the past number of days
+   * calculate the mean MAPE for each metric urn based on the available evaluations over the past
+   * number of days
+   *
    * @param evaluations the available evaluations
    * @return the mean MAPE keyed by metric urns
    */
-  private Map<String, Double> getMeanMapeForEachMetricUrnAndRule(Collection<EvaluationDTO> evaluations) {
+  private Map<String, Double> getMeanMapeForEachMetricUrnAndRule(
+      Collection<EvaluationDTO> evaluations) {
     return
         evaluations.stream().collect(
-            Collectors.groupingBy(e -> String.format("%s:%s", e.getMetricUrn(), e.getDetectorName()), Collectors.averagingDouble(EvaluationBean::getMape)));
+            Collectors
+                .groupingBy(e -> String.format("%s:%s", e.getMetricUrn(), e.getDetectorName()),
+                    Collectors.averagingDouble(EvaluationBean::getMape)));
   }
 
   @Override
-  public void init(MapeAveragePercentageChangeModelEvaluatorSpec spec, InputDataFetcher dataFetcher) {
+  public void init(MapeAveragePercentageChangeModelEvaluatorSpec spec,
+      InputDataFetcher dataFetcher) {
     this.dataFetcher = dataFetcher;
     this.threshold = spec.getThreshold();
   }

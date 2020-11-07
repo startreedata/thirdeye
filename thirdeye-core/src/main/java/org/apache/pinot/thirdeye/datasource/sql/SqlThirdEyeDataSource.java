@@ -47,8 +47,8 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
   private static final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = DeprecatedInjectorUtil
       .getInstance(ThirdEyeCacheRegistry.class);
   protected LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> sqlResponseCache;
-  private SqlResponseCacheLoader sqlResponseCacheLoader;
-  private String name;
+  private final SqlResponseCacheLoader sqlResponseCacheLoader;
+  private final String name;
 
   public SqlThirdEyeDataSource(Map<String, Object> properties) throws Exception {
     sqlResponseCacheLoader = new SqlResponseCacheLoader(properties);
@@ -80,15 +80,18 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
         sourceName = tableComponents[0];
         String dbName = tableComponents[1];
 
-        String sqlQuery = SqlUtils.getSql(request, metricFunction, request.getFilterSet(), dataTimeSpec, sourceName);
-        ThirdEyeResultSetGroup thirdEyeResultSetGroup = executeSQL(new SqlQuery(sqlQuery, sourceName, dbName,
-            metricFunction.getMetricName(), request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec));
+        String sqlQuery = SqlUtils
+            .getSql(request, metricFunction, request.getFilterSet(), dataTimeSpec, sourceName);
+        ThirdEyeResultSetGroup thirdEyeResultSetGroup = executeSQL(
+            new SqlQuery(sqlQuery, sourceName, dbName,
+                metricFunction.getMetricName(), request.getGroupBy(),
+                request.getGroupByTimeGranularity(), dataTimeSpec));
 
         metricFunctionToResultSetList.put(metricFunction, thirdEyeResultSetGroup.getResultSets());
-
       }
-      List<String[]> resultRows = ThirdEyeResultSetUtils.parseResultSets(request, metricFunctionToResultSetList,
-          sourceName);
+      List<String[]> resultRows = ThirdEyeResultSetUtils
+          .parseResultSets(request, metricFunctionToResultSetList,
+              sourceName);
 
       return new RelationalThirdEyeResponse(request, resultRows, timeSpec);
     } catch (Exception e) {
@@ -101,7 +104,6 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
    *
    * @param SQLQuery the query that is specifically constructed for Presto.
    * @return the corresponding ThirdEyeResultSet to the given Presto query.
-   *
    */
   private ThirdEyeResultSetGroup executeSQL(SqlQuery SQLQuery) throws Exception {
     ThirdEyeResultSetGroup thirdEyeResultSetGroup;

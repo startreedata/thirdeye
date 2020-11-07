@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class AnomalyFunctionIndex extends AbstractIndexEntity {
+
   String functionName;
   boolean active;
   long metricId;

@@ -31,11 +31,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This filter check if the given grouped anomaly has a size exceeds a certain threshold. The threshold could be
- * overridden for different groups; for example, users could specify that the default threshold 3 and it overridden to
+ * This filter check if the given grouped anomaly has a size exceeds a certain threshold. The
+ * threshold could be
+ * overridden for different groups; for example, users could specify that the default threshold 3
+ * and it overridden to
  * 4 when group name (dimension name) is "country".
  */
 public class SizeSeverityAlertGroupFilter extends BaseAlertGroupFilter {
+
   private static final Logger LOG = LoggerFactory.getLogger(SizeSeverityAlertGroupFilter.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -46,7 +49,7 @@ public class SizeSeverityAlertGroupFilter extends BaseAlertGroupFilter {
   private static final int DEFAULT_THRESHOLD = 3;
 
   private int threshold = 3;
-  private Map<Set<String>, Integer> overrideThreshold = new HashMap<>();
+  private final Map<Set<String>, Integer> overrideThreshold = new HashMap<>();
 
   // Getters is limited in package level for testing purpose
   int getThreshold() {
@@ -71,8 +74,10 @@ public class SizeSeverityAlertGroupFilter extends BaseAlertGroupFilter {
     if (props.containsKey(OVERRIDE_THRESHOLD_KEY)) {
       String overrideJsonPayLoad = props.get(OVERRIDE_THRESHOLD_KEY);
       try {
-        Map<String, Integer> rawOverrideThresholdMap = OBJECT_MAPPER.readValue(overrideJsonPayLoad, HashMap.class);
-        for (Map.Entry<String, Integer> overrideThresholdEntry : rawOverrideThresholdMap.entrySet()) {
+        Map<String, Integer> rawOverrideThresholdMap = OBJECT_MAPPER
+            .readValue(overrideJsonPayLoad, HashMap.class);
+        for (Map.Entry<String, Integer> overrideThresholdEntry : rawOverrideThresholdMap
+            .entrySet()) {
           String[] dimensionNames = overrideThresholdEntry.getKey().split(",");
           Set<String> dimensionNameSet = new HashSet<>();
           for (String dimensionName : dimensionNames) {
@@ -82,7 +87,8 @@ public class SizeSeverityAlertGroupFilter extends BaseAlertGroupFilter {
           overrideThreshold.put(dimensionNameSet, threshold);
         }
       } catch (IOException e) {
-        LOG.error("Failed to reconstruct override threshold mappings from this json string: {}", overrideJsonPayLoad);
+        LOG.error("Failed to reconstruct override threshold mappings from this json string: {}",
+            overrideJsonPayLoad);
       }
     }
   }

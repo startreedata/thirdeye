@@ -34,9 +34,10 @@ import org.apache.pinot.thirdeye.datalayer.pojo.AbstractBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.RootcauseSessionBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
-
 @Singleton
-public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSessionDTO> implements RootcauseSessionManager {
+public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSessionDTO> implements
+    RootcauseSessionManager {
+
   private static final String FIND_BY_LIKE_TEMPLATE = "WHERE %s";
   private static final String FIND_BY_LIKE_JOINER = " AND ";
   private static final String FIND_BY_LIKE_VALUE = "%%%s%%";
@@ -66,17 +67,20 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSe
 
   @Override
   public List<RootcauseSessionDTO> findByAnomalyRange(long start, long end) {
-    return findByPredicate(Predicate.AND(Predicate.GT("anomalyRangeEnd", start), Predicate.LT("anomalyRangeStart", end)));
+    return findByPredicate(Predicate
+        .AND(Predicate.GT("anomalyRangeEnd", start), Predicate.LT("anomalyRangeStart", end)));
   }
 
   @Override
   public List<RootcauseSessionDTO> findByCreatedRange(long start, long end) {
-    return findByPredicate(Predicate.AND(Predicate.GE("created", start), Predicate.LT("created", end)));
+    return findByPredicate(
+        Predicate.AND(Predicate.GE("created", start), Predicate.LT("created", end)));
   }
 
   @Override
   public List<RootcauseSessionDTO> findByUpdatedRange(long start, long end) {
-    return findByPredicate(Predicate.AND(Predicate.GE("updated", start), Predicate.LT("updated", end)));
+    return findByPredicate(
+        Predicate.AND(Predicate.GE("updated", start), Predicate.LT("updated", end)));
   }
 
   @Override
@@ -90,10 +94,12 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSe
   }
 
   private List<RootcauseSessionDTO> findByLike(Set<String> fragments, String template, String key) {
-    return findByLike(fragments, template, key, RootcauseSessionDTO.class, RootcauseSessionBean.class);
+    return findByLike(fragments, template, key, RootcauseSessionDTO.class,
+        RootcauseSessionBean.class);
   }
 
-  private <B extends AbstractBean, D> List<D> findByLike(Set<String> fragments, String template, String key,
+  private <B extends AbstractBean, D> List<D> findByLike(Set<String> fragments, String template,
+      String key,
       Class<D> dtoClass, Class<B> beanClass) {
     List<String> conditions = new ArrayList<>();
     Map<String, Object> params = new HashMap<>();
@@ -105,7 +111,8 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSe
       i++;
     }
 
-    String query = String.format(FIND_BY_LIKE_TEMPLATE, StringUtils.join(conditions, FIND_BY_LIKE_JOINER));
+    String query = String
+        .format(FIND_BY_LIKE_TEMPLATE, StringUtils.join(conditions, FIND_BY_LIKE_JOINER));
 
     List<B> beans = genericPojoDao.executeParameterizedSQL(query, params, beanClass);
 

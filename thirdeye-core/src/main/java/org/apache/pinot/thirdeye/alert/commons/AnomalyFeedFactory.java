@@ -22,12 +22,12 @@ package org.apache.pinot.thirdeye.alert.commons;
 import org.apache.pinot.thirdeye.alert.feed.AnomalyFeed;
 import org.apache.pinot.thirdeye.common.BaseFactory;
 
-
 public class AnomalyFeedFactory extends BaseFactory<AnomalyFeed> {
+
   public static final String PACKAGE_PATH = "org.apache.pinot.thirdeye.alert.feed";
 
   public static AnomalyFeed fromClassName(String className)
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException{
+      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     String classPath = PACKAGE_PATH + "." + className;
     return (new BaseFactory<AnomalyFeed>()).getInstance(classPath);
   }

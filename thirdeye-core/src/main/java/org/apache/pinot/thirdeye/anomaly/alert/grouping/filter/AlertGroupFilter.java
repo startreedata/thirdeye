@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
 
 // TODO: Unify merged and grouped anomaly. Afterwards, unify their alert filter.
+
 /**
  * A filter for determining if a given grouped anomaly is qualified for sending an alert.
  */
@@ -39,7 +40,6 @@ public interface AlertGroupFilter {
    * Returns if the given grouped anomaly is qualified for passing through the filter.
    *
    * @param groupedAnomaly the given grouped anomaly.
-   *
    * @return true if the given grouped anomaly passes through the filter.
    */
   boolean isQualified(GroupedAnomalyResultsDTO groupedAnomaly);

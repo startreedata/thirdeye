@@ -36,8 +36,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
-
 public class AlertUtils {
+
   private AlertUtils() {
     //left blank
   }
@@ -54,7 +54,8 @@ public class AlertUtils {
   }
 
   /**
-   * Helper to convert a collection of email strings into {@code InternetAddress} instances, filtering
+   * Helper to convert a collection of email strings into {@code InternetAddress} instances,
+   * filtering
    * out invalid addresses and nulls.
    *
    * @param emailCollection collection of email address strings
@@ -83,7 +84,8 @@ public class AlertUtils {
         });
   }
 
-  private static long getLastTimeStamp(Collection<MergedAnomalyResultDTO> anomalies, long startTime) {
+  private static long getLastTimeStamp(Collection<MergedAnomalyResultDTO> anomalies,
+      long startTime) {
     long lastTimeStamp = startTime;
     for (MergedAnomalyResultDTO anomaly : anomalies) {
       lastTimeStamp = Math.max(anomaly.getCreatedTime(), lastTimeStamp);
@@ -92,18 +94,19 @@ public class AlertUtils {
   }
 
   public static Map<Long, Long> makeVectorClock(Collection<MergedAnomalyResultDTO> anomalies) {
-    Multimap<Long, MergedAnomalyResultDTO> grouped = Multimaps.index(anomalies, new Function<MergedAnomalyResultDTO, Long>() {
-      @Nullable
-      @Override
-      public Long apply(@Nullable MergedAnomalyResultDTO mergedAnomalyResultDTO) {
-        // Return functionId to support alerting of legacy anomalies
-        if (mergedAnomalyResultDTO.getDetectionConfigId() == null) {
-          return mergedAnomalyResultDTO.getFunctionId();
-        }
+    Multimap<Long, MergedAnomalyResultDTO> grouped = Multimaps
+        .index(anomalies, new Function<MergedAnomalyResultDTO, Long>() {
+          @Nullable
+          @Override
+          public Long apply(@Nullable MergedAnomalyResultDTO mergedAnomalyResultDTO) {
+            // Return functionId to support alerting of legacy anomalies
+            if (mergedAnomalyResultDTO.getDetectionConfigId() == null) {
+              return mergedAnomalyResultDTO.getFunctionId();
+            }
 
-        return mergedAnomalyResultDTO.getDetectionConfigId();
-      }
-    });
+            return mergedAnomalyResultDTO.getDetectionConfigId();
+          }
+        });
     Map<Long, Long> detection2max = new HashMap<>();
     for (Map.Entry<Long, Collection<MergedAnomalyResultDTO>> entry : grouped.asMap().entrySet()) {
       detection2max.put(entry.getKey(), getLastTimeStamp(entry.getValue(), -1));
@@ -129,5 +132,4 @@ public class AlertUtils {
 
     return result;
   }
-
 }

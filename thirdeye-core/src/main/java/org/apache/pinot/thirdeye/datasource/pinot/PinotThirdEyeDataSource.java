@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
+
   private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
   private static final String PINOT = "Pinot";
   private String name;
@@ -70,21 +71,24 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   protected PinotDataSourceDimensionFilters pinotDataSourceDimensionFilters;
 
   /**
-   * Construct a Pinot data source, which connects to a Pinot controller, using {@link PinotThirdEyeDataSourceConfig}.
+   * Construct a Pinot data source, which connects to a Pinot controller, using {@link
+   * PinotThirdEyeDataSourceConfig}.
    *
-   * @param pinotThirdEyeDataSourceConfig the configuration that provides the information of the Pinot controller.
-   *
+   * @param pinotThirdEyeDataSourceConfig the configuration that provides the information of the
+   *     Pinot controller.
    * @throws Exception when failed to connect to the controller.
    */
-  public PinotThirdEyeDataSource(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
-    PinotResponseCacheLoader pinotResponseCacheLoader = new PinotControllerResponseCacheLoader(pinotThirdEyeDataSourceConfig);
+  public PinotThirdEyeDataSource(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig)
+      throws Exception {
+    PinotResponseCacheLoader pinotResponseCacheLoader = new PinotControllerResponseCacheLoader(
+        pinotThirdEyeDataSourceConfig);
     pinotResponseCache = ThirdEyeUtils.buildResponseCache(pinotResponseCacheLoader);
 
     pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
     pinotDataSourceDimensionFilters = new PinotDataSourceDimensionFilters(this);
-    name = pinotThirdEyeDataSourceConfig.getName() != null ? pinotThirdEyeDataSourceConfig.getName() : PinotThirdEyeDataSource.class.getSimpleName();
+    name = pinotThirdEyeDataSourceConfig.getName() != null ? pinotThirdEyeDataSourceConfig.getName()
+        : PinotThirdEyeDataSource.class.getSimpleName();
   }
-
 
   /**
    * This constructor is invoked by Java Reflection for initialize a ThirdEyeDataSource.
@@ -104,12 +108,12 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   /**
-   * Constructs a PinotResponseCacheLoader from the given property map and initialize the loader with that map.
+   * Constructs a PinotResponseCacheLoader from the given property map and initialize the loader
+   * with that map.
    *
-   * @param properties the property map of the cache loader, which contains the class path of the cache loader.
-   *
+   * @param properties the property map of the cache loader, which contains the class path of
+   *     the cache loader.
    * @return a constructed PinotResponseCacheLoader.
-   *
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
   static PinotResponseCacheLoader getCacheLoaderInstance(Map<String, Object> properties)
@@ -130,7 +134,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     }
     LOG.info("Initiating cache loader: {}", aClass.getName());
     Constructor<?> constructor = aClass.getConstructor();
-    PinotResponseCacheLoader pinotResponseCacheLoader = (PinotResponseCacheLoader) constructor.newInstance();
+    PinotResponseCacheLoader pinotResponseCacheLoader = (PinotResponseCacheLoader) constructor
+        .newInstance();
     return pinotResponseCacheLoader;
   }
 
@@ -141,7 +146,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public RelationalThirdEyeResponse execute(ThirdEyeRequest request) throws Exception {
-    Preconditions.checkNotNull(this.pinotResponseCache, "{} doesn't connect to Pinot or cache is not initialized.",
+    Preconditions.checkNotNull(this.pinotResponseCache,
+        "{} doesn't connect to Pinot or cache is not initialized.",
         getName());
 
     long tStart = System.nanoTime();
@@ -163,7 +169,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         // the results are usually meta-data and should be shown regardless the filter setting.
         if (!datasetConfig.isAdditive() && !"*".equals(metricFunction.getMetricName())) {
           decoratedFilterSet =
-              generateFilterSetWithPreAggregatedDimensionValue(request.getFilterSet(), request.getGroupBy(),
+              generateFilterSetWithPreAggregatedDimensionValue(request.getFilterSet(),
+                  request.getGroupBy(),
                   datasetConfig.getDimensions(), datasetConfig.getDimensionsHaveNoPreAggregation(),
                   datasetConfig.getPreAggregatedKeyword());
         }
@@ -171,8 +178,9 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         String pql;
         MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
         if (metricConfig != null && metricConfig.isDimensionAsMetric()) {
-          pql = PqlUtils.getDimensionAsMetricPql(request, metricFunction, decoratedFilterSet, dataTimeSpec,
-              datasetConfig);
+          pql = PqlUtils
+              .getDimensionAsMetricPql(request, metricFunction, decoratedFilterSet, dataTimeSpec,
+                  datasetConfig);
         } else {
           pql = PqlUtils.getPql(request, metricFunction, decoratedFilterSet, dataTimeSpec);
         }
@@ -183,12 +191,14 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
           resultSetGroup = this.executePQL(new PinotQuery(pql, dataset));
           if (metricConfig != null) {
             ThirdeyeMetricsUtil.getRequestLog()
-                .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(), tStartFunction, System.nanoTime());
+                .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
+                    tStartFunction, System.nanoTime());
           }
         } catch (Exception e) {
           if (metricConfig != null) {
             ThirdeyeMetricsUtil.getRequestLog()
-                .failure(this.getName(), metricConfig.getDataset(), metricConfig.getName(), tStartFunction, System.nanoTime(), e);
+                .failure(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
+                    tStartFunction, System.nanoTime(), e);
           }
           throw e;
         }
@@ -196,14 +206,13 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         metricFunctionToResultSetList.put(metricFunction, resultSetGroup.getResultSets());
       }
 
-      List<String[]> resultRows = ThirdEyeResultSetUtils.parseResultSets(request, metricFunctionToResultSetList,
-          PINOT);
+      List<String[]> resultRows = ThirdEyeResultSetUtils
+          .parseResultSets(request, metricFunctionToResultSetList,
+              PINOT);
       return new RelationalThirdEyeResponse(request, resultRows, timeSpec);
-
     } catch (Exception e) {
       ThirdeyeMetricsUtil.pinotExceptionCounter.inc();
       throw e;
-
     } finally {
       ThirdeyeMetricsUtil.pinotCallCounter.inc();
       ThirdeyeMetricsUtil.pinotDurationCounter.inc(System.nanoTime() - tStart);
@@ -211,26 +220,35 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   /**
-   * Definition of Pre-Aggregated Data: the data that has been pre-aggregated or pre-calculated and should not be
-   * applied with any aggregation function during grouping by. Usually, this kind of data exists in non-additive
-   * dataset. For such data, we assume that there exists a dimension value named "all", which could be overridden
+   * Definition of Pre-Aggregated Data: the data that has been pre-aggregated or pre-calculated and
+   * should not be
+   * applied with any aggregation function during grouping by. Usually, this kind of data exists in
+   * non-additive
+   * dataset. For such data, we assume that there exists a dimension value named "all", which could
+   * be overridden
    * in dataset configuration, that stores the pre-aggregated value.
    *
-   * By default, when a query does not specify any value on pre-aggregated dimension, Pinot aggregates all values
-   * at that dimension, which is an undesirable behavior for non-additive data. Therefore, this method modifies the
-   * request's dimension filters such that the filter could pick out the "all" value for that dimension. Example:
-   * Suppose that we have a dataset with 3 pre-aggregated dimensions: country, pageName, and osName, and the pre-
-   * aggregated keyword is 'all'. Further assume that the original request's filter = {'country'='US, IN'} and
+   * By default, when a query does not specify any value on pre-aggregated dimension, Pinot
+   * aggregates all values
+   * at that dimension, which is an undesirable behavior for non-additive data. Therefore, this
+   * method modifies the
+   * request's dimension filters such that the filter could pick out the "all" value for that
+   * dimension. Example:
+   * Suppose that we have a dataset with 3 pre-aggregated dimensions: country, pageName, and osName,
+   * and the pre-
+   * aggregated keyword is 'all'. Further assume that the original request's filter =
+   * {'country'='US, IN'} and
    * GroupBy dimension = pageName, then the decorated request has the new filter =
-   * {'country'='US, IN', 'osName' = 'all'}. Note that 'pageName' = 'all' is not in the filter set because it is
+   * {'country'='US, IN', 'osName' = 'all'}. Note that 'pageName' = 'all' is not in the filter set
+   * because it is
    * a GroupBy dimension, which will not be aggregated.
    *
    * @param filterSet the original filterSet, which will NOT be modified.
-   *
    * @return a decorated filter set for the queries to the pre-aggregated dataset.
    */
   public static Multimap<String, String> generateFilterSetWithPreAggregatedDimensionValue(
-      Multimap<String, String> filterSet, List<String> groupByDimensions, List<String> allDimensions,
+      Multimap<String, String> filterSet, List<String> groupByDimensions,
+      List<String> allDimensions,
       List<String> dimensionsHaveNoPreAggregation, String preAggregatedKeyword) {
 
     Set<String> preAggregatedDimensionNames = new HashSet<>(allDimensions);
@@ -272,12 +290,13 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    *
    * @param pinotQuery the query that is specifically constructed for Pinot.
    * @return the corresponding ResultSetGroup to the given Pinot query.
-   *
-   * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from Pinot.
+   * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
+   *     Pinot.
    */
   public ThirdEyeResultSetGroup executePQL(PinotQuery pinotQuery) throws ExecutionException {
     Preconditions
-        .checkNotNull(this.pinotResponseCache, "{} doesn't connect to Pinot or cache is not initialized.", getName());
+        .checkNotNull(this.pinotResponseCache,
+            "{} doesn't connect to Pinot or cache is not initialized.", getName());
 
     try {
       return this.pinotResponseCache.get(pinotQuery);
@@ -292,12 +311,13 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    *
    * @param pinotQuery the query that is specifically constructed for Pinot.
    * @return the corresponding ResultSetGroup to the given Pinot query.
-   *
-   * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from Pinot.
+   * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
+   *     Pinot.
    */
   public ThirdEyeResultSetGroup refreshPQL(PinotQuery pinotQuery) throws ExecutionException {
     Preconditions
-        .checkNotNull(this.pinotResponseCache, "{} doesn't connect to Pinot or cache is not initialized.", getName());
+        .checkNotNull(this.pinotResponseCache,
+            "{} doesn't connect to Pinot or cache is not initialized.", getName());
 
     try {
       pinotResponseCache.refresh(pinotQuery);
@@ -338,7 +358,9 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     controllerClient.close();
   }
 
-  /** TESTING ONLY - WE SHOULD NOT BE USING THIS. */
+  /**
+   * TESTING ONLY - WE SHOULD NOT BE USING THIS.
+   */
   @Deprecated
   private HttpHost controllerHost;
   @Deprecated
@@ -354,12 +376,15 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Deprecated
-  public static PinotThirdEyeDataSource fromZookeeper(String controllerHost, int controllerPort, String zkUrl) {
+  public static PinotThirdEyeDataSource fromZookeeper(String controllerHost, int controllerPort,
+      String zkUrl) {
     ZkClient zkClient = new ZkClient(zkUrl);
     zkClient.setZkSerializer(new ZNRecordSerializer());
     zkClient.waitUntilConnected(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-    PinotThirdEyeDataSource pinotThirdEyeDataSource = new PinotThirdEyeDataSource(controllerHost, controllerPort);
-    LOG.info("Created PinotThirdEyeDataSource to zookeeper: {} controller: {}:{}", zkUrl, controllerHost, controllerPort);
+    PinotThirdEyeDataSource pinotThirdEyeDataSource = new PinotThirdEyeDataSource(controllerHost,
+        controllerPort);
+    LOG.info("Created PinotThirdEyeDataSource to zookeeper: {} controller: {}:{}", zkUrl,
+        controllerHost, controllerPort);
     return pinotThirdEyeDataSource;
   }
 

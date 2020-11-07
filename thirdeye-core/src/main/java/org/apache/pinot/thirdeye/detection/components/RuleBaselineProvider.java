@@ -37,6 +37,7 @@ import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
     type = "RULE_BASELINE"
 )
 public class RuleBaselineProvider implements BaselineProvider<RuleBaselineProviderSpec> {
+
   private Baseline baseline;
   private String timezone;
   private String offset;
@@ -47,7 +48,8 @@ public class RuleBaselineProvider implements BaselineProvider<RuleBaselineProvid
     return TimeSeries.fromDataFrame(buildBaselines(slice, this.baseline, this.dataFetcher));
   }
 
-  static DataFrame buildBaselines(MetricSlice slice, Baseline baseline, InputDataFetcher dataFetcher) {
+  static DataFrame buildBaselines(MetricSlice slice, Baseline baseline,
+      InputDataFetcher dataFetcher) {
     List<MetricSlice> slices = new ArrayList<>(baseline.scatter(slice));
     InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices));
     return baseline.gather(slice, data.getTimeseries());

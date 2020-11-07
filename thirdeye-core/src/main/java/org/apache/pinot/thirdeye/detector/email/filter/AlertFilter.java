@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
-
 public interface AlertFilter {
+
   List<String> getPropertyNames();
 
   void setParameters(Map<String, String> props);

@@ -45,7 +45,6 @@ import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * MetricMappingPipeline maps metrics to related metrics via dataset and entity mappings.
  * Also translates dimension filters between related metric entities if possible.<br />
@@ -54,6 +53,7 @@ import org.slf4j.LoggerFactory;
  * Performs 2nd degree search for metric > dataset > related dataset > related metric
  */
 public class MetricMappingPipeline extends Pipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetricMappingPipeline.class);
 
   private static final String MAPPING_DIMENSIONS = "DIMENSION_TO_DIMENSION";
@@ -74,7 +74,9 @@ public class MetricMappingPipeline extends Pipeline {
   /**
    * Constructor for dependency injection
    */
-  public MetricMappingPipeline(String outputName, Set<String> inputNames, boolean includeFilters, Set<String> excludeMetrics, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO, EntityToEntityMappingManager mappingDAO) {
+  public MetricMappingPipeline(String outputName, Set<String> inputNames, boolean includeFilters,
+      Set<String> excludeMetrics, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
+      EntityToEntityMappingManager mappingDAO) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
@@ -88,17 +90,21 @@ public class MetricMappingPipeline extends Pipeline {
    *
    * @param outputName pipeline output name
    * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_INCLUDE_FILTERS}, {@code PROP_EXCLUDE_METRICS})
+   * @param properties configuration properties ({@code PROP_INCLUDE_FILTERS}, {@code
+   *     PROP_EXCLUDE_METRICS})
    */
-  public MetricMappingPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public MetricMappingPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
     this.mappingDAO = DAORegistry.getInstance().getEntityToEntityMappingDAO();
-    this.includeFilters = MapUtils.getBooleanValue(properties, PROP_INCLUDE_FILTERS, PROP_INCLUDE_FILTERS_DEFAULT);
+    this.includeFilters = MapUtils
+        .getBooleanValue(properties, PROP_INCLUDE_FILTERS, PROP_INCLUDE_FILTERS_DEFAULT);
 
     if (properties.containsKey(PROP_EXCLUDE_METRICS)) {
-      this.excludeMetrics = new HashSet<>((Collection<String>) properties.get(PROP_EXCLUDE_METRICS));
+      this.excludeMetrics = new HashSet<>(
+          (Collection<String>) properties.get(PROP_EXCLUDE_METRICS));
     } else {
       this.excludeMetrics = PROP_EXCLUDE_METRICS_DEFAULT;
     }
@@ -118,7 +124,8 @@ public class MetricMappingPipeline extends Pipeline {
 
       DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
       if (dataset == null) {
-        LOG.warn("Could not resolve metric id {} dataset '{}'. Skipping.", me.getId(), metric.getDataset());
+        LOG.warn("Could not resolve metric id {} dataset '{}'. Skipping.", me.getId(),
+            metric.getDataset());
         continue;
       }
 
@@ -139,7 +146,8 @@ public class MetricMappingPipeline extends Pipeline {
       datasets.add(de);
 
       // from metric
-      List<EntityToEntityMappingDTO> fromMetric = this.mappingDAO.findByFromURN(me.withoutFilters().getUrn());
+      List<EntityToEntityMappingDTO> fromMetric = this.mappingDAO
+          .findByFromURN(me.withoutFilters().getUrn());
       for (EntityToEntityMappingDTO mapping : fromMetric) {
         String urn = mapping.getToURN();
 
@@ -164,14 +172,16 @@ public class MetricMappingPipeline extends Pipeline {
 
         // dataset-related datasets
         if (DatasetEntity.TYPE.isType(urn)) {
-          DatasetEntity relatedDataset = DatasetEntity.fromURN(urn, de.getScore() * mapping.getScore());
+          DatasetEntity relatedDataset = DatasetEntity
+              .fromURN(urn, de.getScore() * mapping.getScore());
           datasets.add(relatedDataset);
         }
       }
 
       // from related datasets (and dataset)
       for (DatasetEntity relatedDataset : datasets) {
-        List<MetricConfigDTO> nativeMetrics = pruneMetrics(this.metricDAO.findByDataset(relatedDataset.getName()));
+        List<MetricConfigDTO> nativeMetrics = pruneMetrics(
+            this.metricDAO.findByDataset(relatedDataset.getName()));
 
         // related-dataset-native metrics
         for (MetricConfigDTO nativeMetric : nativeMetrics) {
@@ -181,10 +191,12 @@ public class MetricMappingPipeline extends Pipeline {
 
         // related-dataset-related metrics
         // NOTE: potentially expensive 2nd degree search
-        List<EntityToEntityMappingDTO> relatedMetrics = this.mappingDAO.findByFromURN(relatedDataset.getUrn());
+        List<EntityToEntityMappingDTO> relatedMetrics = this.mappingDAO
+            .findByFromURN(relatedDataset.getUrn());
         for (EntityToEntityMappingDTO relatedMetric : relatedMetrics) {
           if (MetricEntity.TYPE.isType(relatedMetric.getToURN())) {
-            MetricEntity m = MetricEntity.fromURN(relatedMetric.getToURN(), relatedDataset.getScore() * relatedMetric.getScore());
+            MetricEntity m = MetricEntity.fromURN(relatedMetric.getToURN(),
+                relatedDataset.getScore() * relatedMetric.getScore());
             metrics.add(m.withFilters(pruneFilters(filters, m.getId())));
           }
         }
@@ -211,7 +223,8 @@ public class MetricMappingPipeline extends Pipeline {
 
     DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
     if (dataset == null) {
-      LOG.warn("Could not resolve dataset '{}' for metric id {} while pruning filters", metric.getDataset(), metricId);
+      LOG.warn("Could not resolve dataset '{}' for metric id {} while pruning filters",
+          metric.getDataset(), metricId);
       return ArrayListMultimap.create();
     }
 
@@ -264,18 +277,21 @@ public class MetricMappingPipeline extends Pipeline {
 
     for (EntityToEntityMappingDTO mapping : mappings) {
       for (Map.Entry<String, String> entry : filters.entries()) {
-        DimensionEntity dimension = DimensionEntity.fromDimension(1.0, entry.getKey(), entry.getValue(), DimensionEntity.TYPE_GENERATED);
+        DimensionEntity dimension = DimensionEntity
+            .fromDimension(1.0, entry.getKey(), entry.getValue(), DimensionEntity.TYPE_GENERATED);
 
         // apply mappings both ways
         if (dimension.getUrn().startsWith(mapping.getFromURN())) {
-          String newUrn = mapping.getToURN() + dimension.getUrn().substring(mapping.getFromURN().length());
+          String newUrn =
+              mapping.getToURN() + dimension.getUrn().substring(mapping.getFromURN().length());
           DimensionEntity newDimension = DimensionEntity.fromURN(newUrn, 1.0);
 
           output.put(newDimension.getName(), newDimension.getValue());
         }
 
         if (dimension.getUrn().startsWith(mapping.getToURN())) {
-          String newUrn = mapping.getFromURN() + dimension.getUrn().substring(mapping.getToURN().length());
+          String newUrn =
+              mapping.getFromURN() + dimension.getUrn().substring(mapping.getToURN().length());
           DimensionEntity newDimension = DimensionEntity.fromURN(newUrn, 1.0);
 
           output.put(newDimension.getName(), newDimension.getValue());

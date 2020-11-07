@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.util;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import java.io.IOException;
@@ -30,9 +29,8 @@ public class CustomDateDeserializer extends JsonDeserializer<DateTime> {
 
   @Override
   public DateTime deserialize(JsonParser jsonparser, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     String date = jsonparser.getText();
     return DateTime.parse(date);
   }
-
 }

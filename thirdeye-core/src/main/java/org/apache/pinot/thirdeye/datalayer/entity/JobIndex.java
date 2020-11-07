@@ -22,13 +22,13 @@ package org.apache.pinot.thirdeye.datalayer.entity;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 
 public class JobIndex extends AbstractIndexEntity {
+
   String name;
   String status;
   TaskConstants.TaskType type;
   long configId;
   long scheduleStartTime;
   long scheduleEndTime;
-
 
   public long getScheduleStartTime() {
     return scheduleStartTime;
@@ -69,8 +69,6 @@ public class JobIndex extends AbstractIndexEntity {
   public void setName(String name) {
     this.name = name;
   }
-
-
 
   public String getStatus() {
     return status;

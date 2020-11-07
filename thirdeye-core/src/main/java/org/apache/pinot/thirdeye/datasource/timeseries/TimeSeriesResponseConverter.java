@@ -43,6 +43,7 @@ import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesM
  * {@link #toMap(TimeSeriesResponse, List)}
  */
 public class TimeSeriesResponseConverter {
+
   private static final TimeSeriesResponseConverter instance = new TimeSeriesResponseConverter();
 
   private TimeSeriesResponseConverter() {
@@ -99,6 +100,7 @@ public class TimeSeriesResponseConverter {
   }
 
   private static class DimensionKeyGenerator {
+
     private final String[] baseKey;
     private final DimensionKey baseDimensionKey;
     private final Map<String, Integer> dimensionIndexMap = new HashMap<>();

@@ -28,7 +28,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 
-
 /**
  * Merges the entity anomaly in the anomaly hierarchy with the corresponding entity anomaly in DB
  * referred to by the {@value #PROP_DETECTOR_COMPONENT_NAME}
@@ -37,7 +36,7 @@ import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
  * 1. Merges the duration of the anomaly
  * 2. Keeping the properties of old, it concatenates by overriding the properties of new in old
  * 3. Keeping the child anomalies of old, it concatenates by overriding the children of new based
- *    on anomaly ID
+ * on anomaly ID
  *
  * We "concatenate by overriding" because the grouping logic and scores computed in the new anomaly
  * already take into account the complete anomaly duration including the historical period. Note
@@ -45,31 +44,37 @@ import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
  * {@link BaselineFillingMergeWrapper} and then passed to the grouper.
  *
  * TODO:
- * Splitting an entity anomaly is not supported at this stage. Avoid setting MAX_DURATION for this merger.
+ * Splitting an entity anomaly is not supported at this stage. Avoid setting MAX_DURATION for this
+ * merger.
  */
 public class EntityAnomalyMergeWrapper extends BaselineFillingMergeWrapper {
 
-  public EntityAnomalyMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) {
+  public EntityAnomalyMergeWrapper(DataProvider provider, AlertDTO config, long startTime,
+      long endTime) {
     super(provider, config, startTime, endTime);
   }
 
   @Override
-  protected List<MergedAnomalyResultDTO> retrieveAnomaliesFromDatabase(List<MergedAnomalyResultDTO> generated) {
+  protected List<MergedAnomalyResultDTO> retrieveAnomaliesFromDatabase(
+      List<MergedAnomalyResultDTO> generated) {
     AnomalySlice effectiveSlice = this.slice
         .withDetectionId(this.config.getId())
         .withStart(this.getStartTime(generated) - this.maxGap - 1)
         .withEnd(this.getEndTime(generated) + this.maxGap + 1)
         .withDetectionCompNames(this.getDetectionCompNames(generated));
 
-    Collection<MergedAnomalyResultDTO> anomalies = this.provider.fetchAnomalies(Collections.singleton(effectiveSlice)).get(effectiveSlice);
+    Collection<MergedAnomalyResultDTO> anomalies = this.provider
+        .fetchAnomalies(Collections.singleton(effectiveSlice)).get(effectiveSlice);
 
     for (MergedAnomalyResultDTO anomaly : anomalies) {
-      if(anomaly.getId() != null) this.existingAnomalies.put(anomaly.getId(), copyAnomalyInfo(anomaly, new MergedAnomalyResultDTO()));
+      if (anomaly.getId() != null) {
+        this.existingAnomalies
+            .put(anomaly.getId(), copyAnomalyInfo(anomaly, new MergedAnomalyResultDTO()));
+      }
     }
 
     return new ArrayList<>(anomalies);
   }
-
 
   @Override
   protected List<MergedAnomalyResultDTO> merge(Collection<MergedAnomalyResultDTO> anomalies) {

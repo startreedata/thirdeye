@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class TaskIndex extends AbstractIndexEntity {
+
   String name;
   String status;
   String type;

@@ -26,12 +26,12 @@ import com.google.common.math.DoubleMath;
 import org.apache.pinot.thirdeye.cube.data.cube.CubeUtils;
 import org.apache.pinot.thirdeye.cube.data.node.BaseCubeNode;
 
-
 /**
  * A CubeNode for ratio metrics such as "observed over expected ratio".
  */
 public class RatioCubeNode extends BaseCubeNode<RatioCubeNode, RatioRow> {
-  private static double epsilon = 0.0001;
+
+  private static final double epsilon = 0.0001;
 
   private double baselineNumeratorValue;
   private double currentNumeratorValue;
@@ -71,10 +71,14 @@ public class RatioCubeNode extends BaseCubeNode<RatioCubeNode, RatioRow> {
 
   @Override
   public void removeNodeValues(RatioCubeNode node) {
-    baselineNumeratorValue = CubeUtils.doubleMinus(baselineNumeratorValue, node.baselineNumeratorValue);
-    currentNumeratorValue = CubeUtils.doubleMinus(currentNumeratorValue, node.currentNumeratorValue);
-    baselineDenominatorValue = CubeUtils.doubleMinus(baselineDenominatorValue, node.baselineDenominatorValue);
-    currentDenominatorValue = CubeUtils.doubleMinus(currentDenominatorValue, node.currentDenominatorValue);
+    baselineNumeratorValue = CubeUtils
+        .doubleMinus(baselineNumeratorValue, node.baselineNumeratorValue);
+    currentNumeratorValue = CubeUtils
+        .doubleMinus(currentNumeratorValue, node.currentNumeratorValue);
+    baselineDenominatorValue = CubeUtils
+        .doubleMinus(baselineDenominatorValue, node.baselineDenominatorValue);
+    currentDenominatorValue = CubeUtils
+        .doubleMinus(currentDenominatorValue, node.currentDenominatorValue);
     Preconditions.checkArgument(!(DoubleMath.fuzzyCompare(baselineNumeratorValue, 0, epsilon) < 0
         || DoubleMath.fuzzyCompare(currentNumeratorValue, 0, epsilon) < 0
         || DoubleMath.fuzzyCompare(baselineDenominatorValue, 0, epsilon) < 0
@@ -117,7 +121,6 @@ public class RatioCubeNode extends BaseCubeNode<RatioCubeNode, RatioRow> {
    *
    * @param numerator the numerator.
    * @param denominator the denominator.
-   *
    * @return the value of the given numerator and denominator.
    */
   private double calculateValue(double numerator, double denominator) {
@@ -153,24 +156,28 @@ public class RatioCubeNode extends BaseCubeNode<RatioCubeNode, RatioRow> {
 
   @Override
   public double originalChangeRatio() {
-    return (data.getCurrentNumeratorValue() / data.getCurrentDenominatorValue()) / (data.getBaselineNumeratorValue() / data.getBaselineDenominatorValue());
+    return (data.getCurrentNumeratorValue() / data.getCurrentDenominatorValue()) / (
+        data.getBaselineNumeratorValue() / data.getBaselineDenominatorValue());
   }
 
   @Override
   public double changeRatio() {
-    return (currentNumeratorValue / currentDenominatorValue) / (baselineNumeratorValue / baselineDenominatorValue);
+    return (currentNumeratorValue / currentDenominatorValue) / (baselineNumeratorValue
+        / baselineDenominatorValue);
   }
 
   @Override
   public boolean side() {
     double currentValue = getCurrentValue();
     double baselineValue = getBaselineValue();
-    if (!DoubleMath.fuzzyEquals(currentValue, 0, epsilon) && !DoubleMath.fuzzyEquals(baselineValue, 0, epsilon)) {
+    if (!DoubleMath.fuzzyEquals(currentValue, 0, epsilon) && !DoubleMath
+        .fuzzyEquals(baselineValue, 0, epsilon)) {
       // The most common case is located first in order to reduce performance impact
       return DoubleMath.fuzzyCompare(currentValue, baselineValue, epsilon) >= 0;
     } else {
       if (parent != null) {
-        if (DoubleMath.fuzzyEquals(currentValue, 0, epsilon) && DoubleMath.fuzzyEquals(baselineValue, 0, epsilon)) {
+        if (DoubleMath.fuzzyEquals(currentValue, 0, epsilon) && DoubleMath
+            .fuzzyEquals(baselineValue, 0, epsilon)) {
           return parent.side();
         } else if (DoubleMath.fuzzyEquals(currentValue, 0, epsilon)) {
           return DoubleMath.fuzzyCompare(baselineValue, parent.getBaselineValue(), epsilon) < 0;
@@ -239,17 +246,19 @@ public class RatioCubeNode extends BaseCubeNode<RatioCubeNode, RatioRow> {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(super.hashCode(), baselineNumeratorValue, currentNumeratorValue, baselineDenominatorValue,
+    return Objects.hashCode(super.hashCode(), baselineNumeratorValue, currentNumeratorValue,
+        baselineDenominatorValue,
         currentDenominatorValue);
   }
 
   /**
-   * ToString that handles if the given cube node is null, i.e., a root cube node. Moreover, it does not invoke
+   * ToString that handles if the given cube node is null, i.e., a root cube node. Moreover, it does
+   * not invoke
    * parent's toString() to prevent multiple calls of toString to their parents.
    *
    * @param node the node to be converted to string.
-   *
-   * @return a simple string representation of a parent cube node, which does not toString its parent node recursively.
+   * @return a simple string representation of a parent cube node, which does not toString its
+   *     parent node recursively.
    */
   private String toStringAsParent(RatioCubeNode node) {
     if (node == null) {

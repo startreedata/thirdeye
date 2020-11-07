@@ -34,8 +34,10 @@ import org.slf4j.LoggerFactory;
  * A grouper that groups anomalies by each of the specified dimensions individually.
  *
  * An usage example:
- * Assume that we have four anomalies, whose dimensions are enclosed in brackets: a1={D1=G1, D2=H1}, a2={D1=G1, D2=H2},
- * a3={D1=G2, D2=H1}, and a4={D1=G2, D2=H2}. If we group by these dimensions: "D1,D2", then this grouper returns these
+ * Assume that we have four anomalies, whose dimensions are enclosed in brackets: a1={D1=G1, D2=H1},
+ * a2={D1=G1, D2=H2},
+ * a3={D1=G2, D2=H1}, and a4={D1=G2, D2=H2}. If we group by these dimensions: "D1,D2", then this
+ * grouper returns these
  * groups:
  *
  * groupKey={D1=G1} : a1, a2
@@ -44,7 +46,9 @@ import org.slf4j.LoggerFactory;
  * groupKey={D2=H2} : a2, a4
  */
 public class HorizontalDimensionalAlertGrouper extends BaseAlertGrouper {
-  private static final Logger LOG = LoggerFactory.getLogger(HorizontalDimensionalAlertGrouper.class);
+
+  private static final Logger LOG = LoggerFactory
+      .getLogger(HorizontalDimensionalAlertGrouper.class);
   // Used when the user does not specify any dimensions to group by
   private static final DummyAlertGrouper DUMMY_ALERT_GROUPER = new DummyAlertGrouper();
 
@@ -52,7 +56,7 @@ public class HorizontalDimensionalAlertGrouper extends BaseAlertGrouper {
   public static final String GROUP_BY_SEPARATOR = ",";
 
   // The dimension names to group the anomalies (e.g., country, page_name)
-  private List<String> groupByDimensions = new ArrayList<>();
+  private final List<String> groupByDimensions = new ArrayList<>();
 
   @Override
   public void setParameters(Map<String, String> props) {
@@ -67,7 +71,8 @@ public class HorizontalDimensionalAlertGrouper extends BaseAlertGrouper {
   }
 
   @Override
-  public Map<DimensionMap, GroupedAnomalyResultsDTO> group(List<MergedAnomalyResultDTO> anomalyResults) {
+  public Map<DimensionMap, GroupedAnomalyResultsDTO> group(
+      List<MergedAnomalyResultDTO> anomalyResults) {
     if (CollectionUtils.isEmpty(groupByDimensions)) {
       return DUMMY_ALERT_GROUPER.group(anomalyResults);
     } else {
@@ -75,7 +80,8 @@ public class HorizontalDimensionalAlertGrouper extends BaseAlertGrouper {
       for (String groupByDimension : groupByDimensions) {
         for (MergedAnomalyResultDTO anomalyResult : anomalyResults) {
           DimensionMap anomalyDimensionMap = anomalyResult.getDimensions();
-          DimensionMap alertGroupKey = this.constructGroupKey(anomalyDimensionMap, groupByDimension);
+          DimensionMap alertGroupKey = this
+              .constructGroupKey(anomalyDimensionMap, groupByDimension);
           if (groupedAnomaliesMap.containsKey(alertGroupKey)) {
             GroupedAnomalyResultsDTO groupedAnomalyResults = groupedAnomaliesMap.get(alertGroupKey);
             groupedAnomalyResults.getAnomalyResults().add(anomalyResult);
@@ -86,7 +92,7 @@ public class HorizontalDimensionalAlertGrouper extends BaseAlertGrouper {
           }
         }
       }
-     return groupedAnomaliesMap;
+      return groupedAnomaliesMap;
     }
   }
 

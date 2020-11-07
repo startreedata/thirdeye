@@ -38,11 +38,11 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Scans mock configs and creates metrics for MockThirdEyeDataSource
  */
 public class AutoOnboardMockDataSource extends AutoOnboard {
+
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardMockDataSource.class);
 
   private final MetricConfigManager metricDAO;
@@ -58,7 +58,8 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
     super(metadataSourceConfig);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name", MockThirdEyeDataSource.class.getSimpleName());
+    this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
+        MockThirdEyeDataSource.class.getSimpleName());
   }
 
   @Override
@@ -75,10 +76,12 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
     for (String datasetName : sortedDatasets) {
       Map<String, Object> dataset = (Map<String, Object>) datasets.get(datasetName);
 
-      List<String> sortedDimensions = new ArrayList<>((Collection<String>) dataset.get("dimensions"));
+      List<String> sortedDimensions = new ArrayList<>(
+          (Collection<String>) dataset.get("dimensions"));
       Collections.sort(sortedDimensions);
 
-      Period granularity = ConfigUtils.parsePeriod(MapUtils.getString(dataset, "granularity", "1hour"));
+      Period granularity = ConfigUtils
+          .parsePeriod(MapUtils.getString(dataset, "granularity", "1hour"));
 
       DatasetConfigDTO datasetConfig = new DatasetConfigDTO();
       datasetConfig.setDataset(datasetName);
@@ -90,7 +93,8 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
 
       datasetConfigs.add(datasetConfig);
 
-      List<String> sortedMetrics = new ArrayList<>(((Map<String, Object>) dataset.get("metrics")).keySet());
+      List<String> sortedMetrics = new ArrayList<>(
+          ((Map<String, Object>) dataset.get("metrics")).keySet());
       Collections.sort(sortedMetrics);
 
       for (String metricName : sortedMetrics) {
@@ -107,7 +111,8 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
 
     // NOTE: save in order as mock datasource expects metric ids first
     for (MetricConfigDTO metricConfig : metricConfigs) {
-      if (this.metricDAO.findByMetricAndDataset(metricConfig.getName(), metricConfig.getDataset()) == null) {
+      if (this.metricDAO.findByMetricAndDataset(metricConfig.getName(), metricConfig.getDataset())
+          == null) {
         Long id = this.metricDAO.save(metricConfig);
         if (id != null) {
           LOG.info("Created metric '{}' with id {}", metricConfig.getAlias(), id);
@@ -133,6 +138,4 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
   public void runAdhoc() {
     this.run();
   }
-
-
 }

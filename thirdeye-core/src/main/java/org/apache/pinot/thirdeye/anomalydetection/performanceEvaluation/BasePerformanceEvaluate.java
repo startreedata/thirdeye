@@ -27,17 +27,16 @@ import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.joda.time.Interval;
 
-
 public abstract class BasePerformanceEvaluate implements PerformanceEvaluate {
+
   /**
    * convert merge anomalies to a dimension-intervals map
-   * @param mergedAnomalyResultDTOList
-   * @return
    */
-  public Map<DimensionMap, List<Interval>> mergedAnomalyResultsToIntervalMap (List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList) {
+  public Map<DimensionMap, List<Interval>> mergedAnomalyResultsToIntervalMap(
+      List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList) {
     Map<DimensionMap, List<Interval>> anomalyIntervals = new HashMap<>();
-    for(MergedAnomalyResultDTO mergedAnomaly : mergedAnomalyResultDTOList) {
-      if(!anomalyIntervals.containsKey(mergedAnomaly.getDimensions())) {
+    for (MergedAnomalyResultDTO mergedAnomaly : mergedAnomalyResultDTOList) {
+      if (!anomalyIntervals.containsKey(mergedAnomaly.getDimensions())) {
         anomalyIntervals.put(mergedAnomaly.getDimensions(), new ArrayList<Interval>());
       }
       anomalyIntervals.get(mergedAnomaly.getDimensions()).add(
@@ -48,12 +47,11 @@ public abstract class BasePerformanceEvaluate implements PerformanceEvaluate {
 
   /**
    * convert merge anomalies to interval list without considering the dimension
-   * @param mergedAnomalyResultDTOList
-   * @return
    */
-  public List<Interval> mergedAnomalyResultsToIntervals (List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList) {
+  public List<Interval> mergedAnomalyResultsToIntervals(
+      List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList) {
     List<Interval> anomalyIntervals = new ArrayList<>();
-    for(MergedAnomalyResultDTO mergedAnomaly : mergedAnomalyResultDTOList) {
+    for (MergedAnomalyResultDTO mergedAnomaly : mergedAnomalyResultDTOList) {
       anomalyIntervals.add(new Interval(mergedAnomaly.getStartTime(), mergedAnomaly.getEndTime()));
     }
     return anomalyIntervals;

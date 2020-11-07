@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
-
 public class DummyAlertFilter extends BaseAlertFilter {
+
   @Override
   public List<String> getPropertyNames() {
     return Collections.EMPTY_LIST;

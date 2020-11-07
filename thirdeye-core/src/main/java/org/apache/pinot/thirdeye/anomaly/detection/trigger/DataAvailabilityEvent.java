@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.anomaly.detection.trigger;
 
 public interface DataAvailabilityEvent {
+
   enum Status {
     FINISHED,  // data load finished
     FAILED,  // data load failed

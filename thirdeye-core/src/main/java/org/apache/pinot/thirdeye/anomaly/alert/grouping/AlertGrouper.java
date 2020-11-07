@@ -26,6 +26,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 public interface AlertGrouper {
+
   /**
    * Sets the properties of this grouper.
    *
@@ -34,7 +35,8 @@ public interface AlertGrouper {
   void setParameters(Map<String, String> props);
 
   /**
-   * Given a list of anomaly results, this method returns groups of anomaly results such that each group should be
+   * Given a list of anomaly results, this method returns groups of anomaly results such that each
+   * group should be
    * sent in the same alert.
    *
    * @return groups of anomaly results.

@@ -74,7 +74,8 @@ public class OnboardDatasetMetricManagerImpl extends AbstractManagerImpl<Onboard
   }
 
   @Override
-  public List<OnboardDatasetMetricDTO> findByMetricAndOnboarded(String metricName, boolean onboarded) {
+  public List<OnboardDatasetMetricDTO> findByMetricAndOnboarded(String metricName,
+      boolean onboarded) {
     Predicate metricNamePredicate = Predicate.EQ("metricName", metricName);
     Predicate onboardedPredicate = Predicate.EQ("onboarded", onboarded);
     Predicate predicate = Predicate.AND(metricNamePredicate, onboardedPredicate);
@@ -96,9 +97,8 @@ public class OnboardDatasetMetricManagerImpl extends AbstractManagerImpl<Onboard
     Predicate datasetNamePredicate = Predicate.EQ("datasetName", datasetName);
     Predicate dataSourcePredicate = Predicate.EQ("dataSource", dataSource);
     Predicate onboardedPredicate = Predicate.EQ("onboarded", onboarded);
-    Predicate predicate = Predicate.AND(datasetNamePredicate, dataSourcePredicate, onboardedPredicate);
+    Predicate predicate = Predicate
+        .AND(datasetNamePredicate, dataSourcePredicate, onboardedPredicate);
     return findByPredicate(predicate);
   }
-
-
 }

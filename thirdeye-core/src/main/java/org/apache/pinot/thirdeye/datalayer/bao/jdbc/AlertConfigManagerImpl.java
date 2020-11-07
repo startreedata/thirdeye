@@ -33,6 +33,7 @@ import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 @Singleton
 public class AlertConfigManagerImpl extends AbstractManagerImpl<AlertConfigDTO>
     implements AlertConfigManager {
+
   private static final String FIND_BY_NAME_LIKE = " WHERE name like :name";
   private static final String FIND_BY_NAME_EQUALS = " WHERE name = :name";
   private static final String FIND_BY_APPLICATION_LIKE = " WHERE application like :application";
@@ -54,7 +55,8 @@ public class AlertConfigManagerImpl extends AbstractManagerImpl<AlertConfigDTO>
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("name", name);
     List<AlertConfigBean> list =
-        genericPojoDao.executeParameterizedSQL(FIND_BY_NAME_LIKE, parameterMap, AlertConfigBean.class);
+        genericPojoDao
+            .executeParameterizedSQL(FIND_BY_NAME_LIKE, parameterMap, AlertConfigBean.class);
     List<AlertConfigDTO> result = new ArrayList<>();
     for (AlertConfigBean bean : list) {
       result.add(MODEL_MAPPER.map(bean, AlertConfigDTO.class));
@@ -67,12 +69,13 @@ public class AlertConfigManagerImpl extends AbstractManagerImpl<AlertConfigDTO>
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("name", name);
     List<AlertConfigBean> list =
-        genericPojoDao.executeParameterizedSQL(FIND_BY_NAME_EQUALS, parameterMap, AlertConfigBean.class);
+        genericPojoDao
+            .executeParameterizedSQL(FIND_BY_NAME_EQUALS, parameterMap, AlertConfigBean.class);
     List<AlertConfigDTO> result = new ArrayList<>();
     for (AlertConfigBean bean : list) {
       result.add(MODEL_MAPPER.map(bean, AlertConfigDTO.class));
     }
-    return result.isEmpty()? null : result.get(0);
+    return result.isEmpty() ? null : result.get(0);
   }
 
   @Override
@@ -80,7 +83,8 @@ public class AlertConfigManagerImpl extends AbstractManagerImpl<AlertConfigDTO>
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("application", application);
     List<AlertConfigBean> list =
-        genericPojoDao.executeParameterizedSQL(FIND_BY_APPLICATION_LIKE, parameterMap, AlertConfigBean.class);
+        genericPojoDao
+            .executeParameterizedSQL(FIND_BY_APPLICATION_LIKE, parameterMap, AlertConfigBean.class);
     List<AlertConfigDTO> result = new ArrayList<>();
     for (AlertConfigBean bean : list) {
       result.add(MODEL_MAPPER.map(bean, AlertConfigDTO.class));
@@ -93,11 +97,11 @@ public class AlertConfigManagerImpl extends AbstractManagerImpl<AlertConfigDTO>
     List<AlertConfigBean> list = genericPojoDao.getAll(AlertConfigBean.class);
     List<AlertConfigDTO> result = new ArrayList<>();
     for (AlertConfigBean bean : list) {
-      if (bean.getEmailConfig() != null && bean.getEmailConfig().getFunctionIds().contains(functionId)) {
+      if (bean.getEmailConfig() != null && bean.getEmailConfig().getFunctionIds()
+          .contains(functionId)) {
         result.add(MODEL_MAPPER.map(bean, AlertConfigDTO.class));
       }
     }
     return result;
   }
-
 }

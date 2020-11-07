@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class SitewideImpactRuleAnomalyFilterSpec extends AbstractSpec {
+
   private String timezone = DEFAULT_TIMEZONE;
   private double threshold = Double.NaN;
   private String offset;

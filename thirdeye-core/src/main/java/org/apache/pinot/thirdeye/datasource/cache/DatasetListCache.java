@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class DatasetListCache {
 
   private List<String> datasetListRef;
-  private DatasetConfigManager datasetConfigDAO;
+  private final DatasetConfigManager datasetConfigDAO;
   private static final Logger LOG = LoggerFactory.getLogger(DatasetListCache.class);
 
   private final Object updateLock = new Object();

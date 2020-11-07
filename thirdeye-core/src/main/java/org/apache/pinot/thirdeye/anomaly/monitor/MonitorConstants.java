@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 
 public class MonitorConstants {
+
   public enum MonitorType {
     UPDATE,
     EXPIRE
@@ -33,5 +34,4 @@ public class MonitorConstants {
   public static int DEFAULT_DETECTION_STATUS_RETENTION_DAYS = 7;
   public static int DEFAULT_RAW_ANOMALY_RETENTION_DAYS = 30;
   public static TimeGranularity DEFAULT_MONITOR_FREQUENCY = new TimeGranularity(1, TimeUnit.DAYS);
-
 }

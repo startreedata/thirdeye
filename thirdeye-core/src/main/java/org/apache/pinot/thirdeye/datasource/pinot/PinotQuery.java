@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.datasource.pinot;
 
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 
-
 public class PinotQuery extends RelationalQuery {
 
   private String tableName;

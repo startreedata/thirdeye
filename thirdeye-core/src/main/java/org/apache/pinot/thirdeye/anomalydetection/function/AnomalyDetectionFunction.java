@@ -33,6 +33,7 @@ import org.joda.time.Interval;
  * time series from various metric and dimensions.
  */
 public interface AnomalyDetectionFunction {
+
   /**
    * Initializes this function with its configuration, call before analyze
    */
@@ -49,10 +50,10 @@ public interface AnomalyDetectionFunction {
    *
    * @param monitoringWindowStartTime inclusive
    * @param monitoringWindowEndTime exclusive
-   *
    * @return intervals of time series that are used by this anomaly function
    */
-  List<Interval> getTimeSeriesIntervals(long monitoringWindowStartTime, long monitoringWindowEndTime);
+  List<Interval> getTimeSeriesIntervals(long monitoringWindowStartTime,
+      long monitoringWindowEndTime);
 
   /**
    * The anomaly detection is executed in the following flow:
@@ -62,8 +63,6 @@ public interface AnomalyDetectionFunction {
    * which is computed by the prediction model.
    *
    * @return a list of raw anomalies
-   *
-   * @throws Exception
    */
   List<AnomalyResult> analyze(AnomalyDetectionContext anomalyDetectionContext) throws Exception;
 
@@ -72,14 +71,13 @@ public interface AnomalyDetectionFunction {
    *
    * @param anomalyDetectionContext context that provide time series data
    * @param anomalyToUpdated the anomaly to be updated
-   *
-   * @throws Exception
    */
   void updateMergedAnomalyInfo(AnomalyDetectionContext anomalyDetectionContext,
       MergedAnomalyResultDTO anomalyToUpdated) throws Exception;
 
   /**
    * Returns the time series that are located in the given time window.
+   *
    * @param anomalyDetectionContext context that provide time series data
    * @param bucketMillis bucket size in millis
    * @param metric the target metric name
@@ -88,6 +86,8 @@ public interface AnomalyDetectionFunction {
    * @param knownAnomalies known anomalies
    * @return the time series that are located in the given time window.
    */
-  AnomalyTimelinesView getTimeSeriesView(AnomalyDetectionContext anomalyDetectionContext, long bucketMillis,
-      String metric, long viewWindowStartTime, long viewWindowEndTime, List<MergedAnomalyResultDTO> knownAnomalies);
+  AnomalyTimelinesView getTimeSeriesView(AnomalyDetectionContext anomalyDetectionContext,
+      long bucketMillis,
+      String metric, long viewWindowStartTime, long viewWindowEndTime,
+      List<MergedAnomalyResultDTO> knownAnomalies);
 }

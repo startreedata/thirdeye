@@ -21,8 +21,8 @@ package org.apache.pinot.thirdeye.datalayer.entity;
 
 import org.apache.pinot.thirdeye.datalayer.pojo.SessionBean;
 
-
 public class SessionIndex extends AbstractIndexEntity {
+
   String sessionKey;
   SessionBean.PrincipalType principalType;
 

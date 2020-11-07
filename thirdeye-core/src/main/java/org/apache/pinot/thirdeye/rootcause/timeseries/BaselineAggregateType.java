@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.rootcause.timeseries;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.Series;
 
-
 /**
  * Aggregation types supported by BaselineAggregate.
  *

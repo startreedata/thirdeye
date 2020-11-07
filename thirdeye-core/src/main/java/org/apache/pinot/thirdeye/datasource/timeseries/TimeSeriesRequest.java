@@ -29,6 +29,7 @@ import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.joda.time.DateTime;
 
 public class TimeSeriesRequest {
+
   private String collectionName;
   private List<MetricExpression> metricExpressions;
   /**
@@ -58,7 +59,9 @@ public class TimeSeriesRequest {
   public TimeSeriesRequest() {
   }
 
-  /** TODO use builder pattern? */
+  /**
+   * TODO use builder pattern?
+   */
   public TimeSeriesRequest(TimeSeriesRequest timeSeriesRequest) {
     this.collectionName = timeSeriesRequest.collectionName;
     if (timeSeriesRequest.metricExpressions != null) {
@@ -121,12 +124,16 @@ public class TimeSeriesRequest {
     this.filterClause = filterClause;
   }
 
-  /** Get start time, inclusive. */
+  /**
+   * Get start time, inclusive.
+   */
   public DateTime getStart() {
     return start;
   }
 
-  /** Set start time, inclusive. */
+  /**
+   * Set start time, inclusive.
+   */
   public void setStart(DateTime start) {
     this.start = start;
   }
@@ -162,5 +169,4 @@ public class TimeSeriesRequest {
         .add("filterSet", filterSet).add("filterClause", filterClause).add("start", start)
         .add("end", end).add("aggregationTimeGranularity", aggregationTimeGranularity).toString();
   }
-
 }

@@ -26,6 +26,7 @@ import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
 
 public class JsonResponseUtil {
+
   static ObjectMapper MAPPER = new ObjectMapper();
 
   public static ObjectNode buildSuccessResponseJSON(String message) {

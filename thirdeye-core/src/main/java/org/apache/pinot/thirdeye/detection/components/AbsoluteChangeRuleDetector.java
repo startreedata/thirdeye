@@ -64,7 +64,8 @@ import org.joda.time.Interval;
         @Param(name = "pattern", allowableValues = {"up", "down"})
     })
 public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChangeRuleDetectorSpec>,
-                                                   BaselineProvider<AbsoluteChangeRuleDetectorSpec> {
+    BaselineProvider<AbsoluteChangeRuleDetectorSpec> {
+
   private double absoluteChange;
   private InputDataFetcher dataFetcher;
   private Baseline baseline;
@@ -81,11 +82,14 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
   @Override
   public DetectionResult runDetection(Interval window, String metricUrn) {
     MetricEntity me = MetricEntity.fromURN(metricUrn);
-    MetricSlice slice = MetricSlice.from(me.getId(), window.getStartMillis(), window.getEndMillis(), me.getFilters(), timeGranularity);
+    MetricSlice slice = MetricSlice
+        .from(me.getId(), window.getStartMillis(), window.getEndMillis(), me.getFilters(),
+            timeGranularity);
     List<MetricSlice> slices = new ArrayList<>(this.baseline.scatter(slice));
     slices.add(slice);
-    InputData data = this.dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices).withMetricIdsForDataset(
-        Collections.singletonList(slice.getMetricId())));
+    InputData data = this.dataFetcher
+        .fetchData(new InputDataSpec().withTimeseriesSlices(slices).withMetricIdsForDataset(
+            Collections.singletonList(slice.getMetricId())));
     DataFrame dfCurr = data.getTimeseries().get(slice).renameSeries(DataFrame.COL_VALUE, COL_CURR);
     DataFrame dfBase = this.baseline.gather(slice, data.getTimeseries());
 
@@ -98,10 +102,11 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     // absolute change
     if (!Double.isNaN(this.absoluteChange)) {
       // consistent with pattern
-      if (pattern.equals(Pattern.UP_OR_DOWN) ) {
+      if (pattern.equals(Pattern.UP_OR_DOWN)) {
         df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
       } else {
-        df.addSeries(COL_PATTERN, this.pattern.equals(Pattern.UP) ? df.getDoubles(COL_DIFF).gt(0) : df.getDoubles(COL_DIFF).lt(0));
+        df.addSeries(COL_PATTERN, this.pattern.equals(Pattern.UP) ? df.getDoubles(COL_DIFF).gt(0)
+            : df.getDoubles(COL_DIFF).lt(0));
       }
       df.addSeries(COL_DIFF_VIOLATION, df.getDoubles(COL_DIFF).abs().gte(this.absoluteChange));
       df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
@@ -110,7 +115,8 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     // make anomalies
     DatasetConfigDTO datasetConfig = data.getDatasetForMetricId().get(me.getId());
     List<MergedAnomalyResultDTO> anomalies = DetectionUtils.makeAnomalies(slice, df, COL_ANOMALY,
-        DetectionUtils.getMonitoringGranularityPeriod(monitoringGranularity, datasetConfig), datasetConfig);
+        DetectionUtils.getMonitoringGranularityPeriod(monitoringGranularity, datasetConfig),
+        datasetConfig);
     DataFrame baselineWithBoundaries = constructAbsoluteChangeBoundaries(df);
     return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(baselineWithBoundaries));
   }
@@ -148,7 +154,8 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     dfBase.addSeries(colBound, map((DoubleFunction) values -> values[0] + change, dfBase.getDoubles(
         DataFrame.COL_VALUE)));
   }
-    @Override
+
+  @Override
   public void init(AbsoluteChangeRuleDetectorSpec spec, InputDataFetcher dataFetcher) {
     this.absoluteChange = spec.getAbsoluteChange();
     this.dataFetcher = dataFetcher;
@@ -163,6 +170,5 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     } else {
       this.timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
     }
-
   }
 }

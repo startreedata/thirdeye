@@ -129,10 +129,10 @@ public class Row {
     public Row build() {
       return row;
     }
-
   }
 
   public static class Metric {
+
     String metricName;
     Double baselineValue;
     Double currentValue;
@@ -156,5 +156,4 @@ public class Row {
       this.currentValue = currentValue;
     }
   }
-
 }

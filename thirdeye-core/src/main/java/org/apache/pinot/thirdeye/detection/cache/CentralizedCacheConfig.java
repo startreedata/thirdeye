@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.detection.cache;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * settings for centralized caches
  */
@@ -49,21 +48,47 @@ public class CentralizedCacheConfig {
   private Map<String, CacheDataSource> cacheDataSources = new HashMap<>();
 
   // left blank
-  public CentralizedCacheConfig() {}
+  public CentralizedCacheConfig() {
+  }
 
-  public int getTTL() { return ttl; }
-  public int getMaxParallelInserts() { return maxParallelInserts; }
-  public String getCacheDataStoreName() { return cacheDataStoreName; }
-  public Map<String, CacheDataSource> getCacheDataSources() { return cacheDataSources; }
+  public int getTTL() {
+    return ttl;
+  }
+
+  public int getMaxParallelInserts() {
+    return maxParallelInserts;
+  }
+
+  public String getCacheDataStoreName() {
+    return cacheDataStoreName;
+  }
+
+  public Map<String, CacheDataSource> getCacheDataSources() {
+    return cacheDataSources;
+  }
 
   /**
    * shorthand to get the config for the single data source specified in the config file
+   *
    * @return CacheDataSource with auth info
    */
-  public CacheDataSource getDataSourceConfig() { return cacheDataSources.get(cacheDataStoreName); }
+  public CacheDataSource getDataSourceConfig() {
+    return cacheDataSources.get(cacheDataStoreName);
+  }
 
-  public void setTTL(int ttl) { this.ttl = ttl; }
-  public void setMaxParallelInserts(int maxParallelInserts) { this.maxParallelInserts = maxParallelInserts; }
-  public void setCacheDataStoreName(String cacheDataStoreName) { this.cacheDataStoreName = cacheDataStoreName;  }
-  public void setCacheDataSources(Map<String, CacheDataSource> cacheDataSources) { this.cacheDataSources = cacheDataSources; }
+  public void setTTL(int ttl) {
+    this.ttl = ttl;
+  }
+
+  public void setMaxParallelInserts(int maxParallelInserts) {
+    this.maxParallelInserts = maxParallelInserts;
+  }
+
+  public void setCacheDataStoreName(String cacheDataStoreName) {
+    this.cacheDataStoreName = cacheDataStoreName;
+  }
+
+  public void setCacheDataSources(Map<String, CacheDataSource> cacheDataSources) {
+    this.cacheDataSources = cacheDataSources;
+  }
 }

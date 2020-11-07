@@ -34,10 +34,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AnomalyDetectionTimeSeriesResponseParser extends BaseTimeSeriesResponseParser {
-  private static final Logger LOG = LoggerFactory.getLogger(AnomalyDetectionTimeSeriesResponseParser.class);
+
+  private static final Logger LOG = LoggerFactory
+      .getLogger(AnomalyDetectionTimeSeriesResponseParser.class);
 
   protected List<TimeSeriesRow> parseGroupByTimeDimensionResponse(ThirdEyeResponse response) {
-    Map<String, ThirdEyeResponseRow> responseMap = ResponseParserUtils.createResponseMapByTimeAndDimension(response);
+    Map<String, ThirdEyeResponseRow> responseMap = ResponseParserUtils
+        .createResponseMapByTimeAndDimension(response);
     List<Range<DateTime>> ranges = getTimeRanges(response.getRequest());
     int numTimeBuckets = ranges.size();
     List<MetricFunction> metricFunctions = response.getMetricFunctions();
@@ -62,7 +65,8 @@ public class AnomalyDetectionTimeSeriesResponseParser extends BaseTimeSeriesResp
     // Construct and add time series rows
     for (List<String> dimensionValues : dimensionValuesList) {
       List<TimeSeriesRow> timeSeriesRows =
-          buildTimeSeriesRows(responseMap, ranges, numTimeBuckets, dimensionNameList, dimensionValues,
+          buildTimeSeriesRows(responseMap, ranges, numTimeBuckets, dimensionNameList,
+              dimensionValues,
               metricFunctions);
 
       rows.addAll(timeSeriesRows);

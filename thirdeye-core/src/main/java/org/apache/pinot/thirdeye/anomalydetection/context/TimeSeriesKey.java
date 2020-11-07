@@ -24,6 +24,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 
 public class TimeSeriesKey {
+
   private String metricName = "";
   private DimensionMap dimensionMap = new DimensionMap();
 

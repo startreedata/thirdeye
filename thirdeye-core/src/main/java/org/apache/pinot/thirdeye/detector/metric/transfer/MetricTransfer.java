@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MetricTransfer {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetricTransfer.class);
   private static final Double NULL_DOUBLE = Double.NaN;
   private static final boolean DEBUG = true;
@@ -63,10 +64,13 @@ public class MetricTransfer {
       scaledValues = new ArrayList<>();
     }
 
-    int seasonalSize = Integer.parseInt(properties.getProperty(SEASONAL_SIZE, DEFAULT_SEASONAL_SIZE));
-    TimeUnit seasonalUnit = TimeUnit.valueOf(properties.getProperty(SEASONAL_UNIT, DEFAULT_SEASONAL_UNIT));
+    int seasonalSize = Integer
+        .parseInt(properties.getProperty(SEASONAL_SIZE, DEFAULT_SEASONAL_SIZE));
+    TimeUnit seasonalUnit = TimeUnit
+        .valueOf(properties.getProperty(SEASONAL_UNIT, DEFAULT_SEASONAL_UNIT));
     long seasonalMillis = seasonalUnit.toMillis(seasonalSize);
-    int baselineSeasonalPeriod = Integer.parseInt(properties.getProperty(BASELINE_SEASONAL_PERIOD, DEFAULT_BASELINE_SEASONAL_PERIOD));
+    int baselineSeasonalPeriod = Integer.parseInt(
+        properties.getProperty(BASELINE_SEASONAL_PERIOD, DEFAULT_BASELINE_SEASONAL_PERIOD));
 
     // The scaling model works as follows:
     // 1. If the time range of scaling factor overlaps with current time series, then the scaling
@@ -84,11 +88,13 @@ public class MetricTransfer {
     //     values.
     Set<Long> timeWindowSet = metricsToModify.getTimeWindowSet();
     for (long ts : timeWindowSet) {
-      for (ScalingFactor sf: scalingFactorList) {
+      for (ScalingFactor sf : scalingFactorList) {
         if (sf.isInTimeWindow(ts)) {
-          if (ts < windowStartTime) { // the timestamp belongs to a baseline time series and will be removed.
+          if (ts
+              < windowStartTime) { // the timestamp belongs to a baseline time series and will be removed.
             if (DEBUG) {
-              double originalValue = metricsToModify.getOrDefault(ts, metricName, NULL_DOUBLE).doubleValue();
+              double originalValue = metricsToModify.getOrDefault(ts, metricName, NULL_DOUBLE)
+                  .doubleValue();
               scaledValues.add(new ScaledValue(ts, originalValue, NULL_DOUBLE));
             }
             metricsToModify.set(ts, metricName, NULL_DOUBLE);
@@ -96,7 +102,8 @@ public class MetricTransfer {
             for (int i = 1; i <= baselineSeasonalPeriod; ++i) {
               long baseTs = ts - i * seasonalMillis;
               if (timeWindowSet.contains(baseTs)) {
-                double originalValue = metricsToModify.getOrDefault(baseTs, metricName, NULL_DOUBLE).doubleValue();
+                double originalValue = metricsToModify.getOrDefault(baseTs, metricName, NULL_DOUBLE)
+                    .doubleValue();
                 double scaledValue;
                 // If original or scaled value is an empty value, then remove the timestamp from
                 if (Double.compare(originalValue, NULL_DOUBLE) == 0
@@ -136,6 +143,7 @@ public class MetricTransfer {
    * transformed time series.
    */
   private static class ScaledValue implements Comparable<ScaledValue> {
+
     long timestamp;
     double originalValue;
     double scaledValue;

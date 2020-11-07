@@ -27,11 +27,11 @@ import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 
-
 /**
  * Baseline that always returns an empty set of data
  */
 public class BaselineNone implements Baseline {
+
   @Override
   public List<MetricSlice> scatter(MetricSlice slice) {
     return Collections.emptyList();

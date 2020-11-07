@@ -23,11 +23,11 @@ package org.apache.pinot.thirdeye.dashboard.resources.v2.alerts;
 import java.util.Collections;
 import java.util.List;
 
-
 /**
  * The type Alert search filter.
  */
 public class AlertSearchFilter {
+
   private final List<String> applications;
   private final List<String> subscriptionGroups;
   private final List<String> createdBy;
@@ -63,8 +63,10 @@ public class AlertSearchFilter {
    * @param datasets the datasets
    * @param active the active
    */
-  public AlertSearchFilter(List<String> applications, List<String> subscriptionGroups, List<String> names,
-      List<String> createdBy, List<String> subscribedBy, List<String> ruleTypes, List<String> metrics, List<String> datasets, Boolean active) {
+  public AlertSearchFilter(List<String> applications, List<String> subscriptionGroups,
+      List<String> names,
+      List<String> createdBy, List<String> subscribedBy, List<String> ruleTypes,
+      List<String> metrics, List<String> datasets, Boolean active) {
     this.applications = applications;
     this.subscriptionGroups = subscriptionGroups;
     this.names = names;
@@ -164,7 +166,8 @@ public class AlertSearchFilter {
    */
   public boolean isEmpty() {
     return this.applications.isEmpty() && this.subscriptionGroups.isEmpty() && this.names.isEmpty()
-        && this.createdBy.isEmpty() && this.subscribedBy.isEmpty() && this.ruleTypes.isEmpty() && this.metrics.isEmpty() && this.datasets.isEmpty()
+        && this.createdBy.isEmpty() && this.subscribedBy.isEmpty() && this.ruleTypes.isEmpty()
+        && this.metrics.isEmpty() && this.datasets.isEmpty()
         && active == null;
   }
 }

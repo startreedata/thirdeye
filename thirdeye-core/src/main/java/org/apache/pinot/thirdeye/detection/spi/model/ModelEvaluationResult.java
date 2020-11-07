@@ -26,6 +26,7 @@ package org.apache.pinot.thirdeye.detection.spi.model;
  * The model valuation result
  */
 public class ModelEvaluationResult {
+
   // the overall model status
   private final ModelStatus status;
 

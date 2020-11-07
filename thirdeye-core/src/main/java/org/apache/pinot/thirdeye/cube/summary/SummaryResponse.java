@@ -35,11 +35,11 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 
-
 public class SummaryResponse {
+
   private final static int MAX_GAINER_LOSER_COUNT = 5;
   private final static NumberFormat DOUBLE_FORMATTER = new DecimalFormat("#0.0000");
-  static final  String INFINITE = "";
+  static final String INFINITE = "";
 
   static final String ALL = "(ALL)";
   static final String NOT_ALL = "(ALL)-";
@@ -71,21 +71,22 @@ public class SummaryResponse {
   private double globalRatio = 1d;
 
   @JsonProperty("dimensions")
-  private List<String> dimensions = new ArrayList<>();
+  private final List<String> dimensions = new ArrayList<>();
 
   @JsonProperty("responseRows")
-  private List<SummaryResponseRow> responseRows = new ArrayList<>();
+  private final List<SummaryResponseRow> responseRows = new ArrayList<>();
 
   @JsonProperty("gainer")
-  private List<SummaryGainerLoserResponseRow> gainer = new ArrayList<>();
+  private final List<SummaryGainerLoserResponseRow> gainer = new ArrayList<>();
 
   @JsonProperty("loser")
-  private List<SummaryGainerLoserResponseRow> loser = new ArrayList<>();
+  private final List<SummaryGainerLoserResponseRow> loser = new ArrayList<>();
 
   @JsonProperty("dimensionCosts")
   private List<Cube.DimensionCost> dimensionCosts = new ArrayList<>();
 
-  public SummaryResponse(double baselineTotal, double currentTotal, double baselineTotalSize, double currentTotalSize) {
+  public SummaryResponse(double baselineTotal, double currentTotal, double baselineTotalSize,
+      double currentTotalSize) {
     this.baselineTotal = baselineTotal;
     this.currentTotal = currentTotal;
     this.baselineTotalSize = baselineTotalSize;
@@ -181,12 +182,14 @@ public class SummaryResponse {
     row.contributionChange =
         computeContributionChange(row.baselineValue, row.currentValue, baselineTotal, currentTotal);
     row.contributionToOverallChange =
-        computeContributionToOverallChange(row.baselineValue, row.currentValue, baselineTotal, currentTotal);
+        computeContributionToOverallChange(row.baselineValue, row.currentValue, baselineTotal,
+            currentTotal);
     row.cost = DOUBLE_FORMATTER.format(roundUp(costEntry.getCost()));
     return row;
   }
 
-  public void buildDiffSummary(List<CubeNode> nodes, int targetLevelCount, CostFunction costFunction) {
+  public void buildDiffSummary(List<CubeNode> nodes, int targetLevelCount,
+      CostFunction costFunction) {
     // If all nodes have a lower level count than targetLevelCount, then it is not necessary to print the summary with
     // height higher than the available level.
     int maxNodeLevelCount = 0;
@@ -231,7 +234,7 @@ public class SummaryResponse {
         NameTag parentNameTag = nameTags.get(parent);
         if (parentNameTag != null) {
           // Set parent's name tag from ALL to NOT_ALL String.
-          int notAllLevel = node.getLevel()-levelDiff;
+          int notAllLevel = node.getLevel() - levelDiff;
           parentNameTag.setNotAll(notAllLevel);
           // After that, set the names after NOT_ALL to empty, e.g., [home page, (ALL)-, ""]
           for (int i = notAllLevel + 1; i < targetLevelCount; ++i) {
@@ -255,9 +258,11 @@ public class SummaryResponse {
       row.sizeFactor =
           (node.getBaselineSize() + node.getCurrentSize()) / (baselineTotalSize + currentTotalSize);
       row.contributionChange =
-          computeContributionChange(row.baselineValue, row.currentValue, baselineTotal, currentTotal);
+          computeContributionChange(row.baselineValue, row.currentValue, baselineTotal,
+              currentTotal);
       row.contributionToOverallChange =
-          computeContributionToOverallChange(row.baselineValue, row.currentValue, baselineTotal, currentTotal);
+          computeContributionToOverallChange(row.baselineValue, row.currentValue, baselineTotal,
+              currentTotal);
       row.cost = node.getCost();
       // Add other dimension values if this node is (ALL)-
       StringBuilder sb = new StringBuilder();
@@ -286,7 +291,8 @@ public class SummaryResponse {
     }
   }
 
-  private static String computeContributionChange(double baseline, double current, double baselineTotal,
+  private static String computeContributionChange(double baseline, double current,
+      double baselineTotal,
       double currentTotal) {
     if (currentTotal != 0d && baselineTotal != 0d) {
       double contributionChange = ((current / currentTotal) - (baseline / baselineTotal)) * 100d;
@@ -296,10 +302,12 @@ public class SummaryResponse {
     }
   }
 
-  private static String computeContributionToOverallChange(double baseline, double current, double baselineTotal,
+  private static String computeContributionToOverallChange(double baseline, double current,
+      double baselineTotal,
       double currentTotal) {
     if (baselineTotal != 0d) {
-      double contributionToOverallChange = ((current - baseline) / Math.abs(currentTotal - baselineTotal)) * 100d;
+      double contributionToOverallChange =
+          ((current - baseline) / Math.abs(currentTotal - baselineTotal)) * 100d;
       return DOUBLE_FORMATTER.format(roundUp(contributionToOverallChange)) + "%";
     } else {
       return INFINITE;
@@ -320,7 +328,8 @@ public class SummaryResponse {
   }
 
   private static class NameTag {
-    private List<String> names;
+
+    private final List<String> names;
 
     NameTag(int levelCount) {
       names = new ArrayList<>(levelCount);

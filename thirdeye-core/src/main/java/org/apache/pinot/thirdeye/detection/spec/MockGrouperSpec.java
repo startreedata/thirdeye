@@ -18,9 +18,9 @@ package org.apache.pinot.thirdeye.detection.spec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MockGrouperSpec extends AbstractSpec {
+
   private double mockParam = Double.NaN;
 
   public double getMockParam() {

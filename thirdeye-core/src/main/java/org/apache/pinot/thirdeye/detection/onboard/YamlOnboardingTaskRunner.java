@@ -51,20 +51,19 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The task runner to run yaml onboarding task after a new detection is set up
  * It will replay the detection pipeline and the re-tune the pipeline.
  * Because for some pipeline component, tuning is depend on replay result
  */
 public class YamlOnboardingTaskRunner implements TaskRunner {
+
   private static final Logger LOG = LoggerFactory.getLogger(YamlOnboardingTaskRunner.class);
   private final AlertManager detectionDAO;
   private final MergedAnomalyResultManager anomalyDAO;
   private final EvaluationManager evaluationDAO;
   private final DetectionPipelineLoader loader;
   private final DataProvider provider;
-
 
   public YamlOnboardingTaskRunner() {
     this.loader = new DetectionPipelineLoader();
@@ -95,10 +94,12 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
     // replay the detection pipeline
     AlertDTO config = this.detectionDAO.findById(info.getConfigId());
     if (config == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve config id %d", info.getConfigId()));
+      throw new IllegalArgumentException(
+          String.format("Could not resolve config id %d", info.getConfigId()));
     }
 
-    DetectionPipeline pipeline = this.loader.from(this.provider, config, info.getStart(), info.getEnd());
+    DetectionPipeline pipeline = this.loader
+        .from(this.provider, config, info.getStart(), info.getEnd());
     DetectionPipelineResult result = pipeline.run();
 
     if (result.getLastTimestamp() < 0) {
@@ -118,7 +119,8 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
 
     // re-tune the detection pipeline because tuning is depend on replay result. e.g. algorithm-based alert filter
     DetectionConfigTuner detectionConfigTuner = new DetectionConfigTuner(config, provider);
-    AlertDTO tunedConfig = detectionConfigTuner.tune(info.getTuningWindowStart(), info.getTuningWindowEnd());
+    AlertDTO tunedConfig = detectionConfigTuner
+        .tune(info.getTuningWindowStart(), info.getTuningWindowEnd());
     this.detectionDAO.save(tunedConfig);
 
     LOG.info("Yaml detection onboarding task for id {} completed", info.getConfigId());

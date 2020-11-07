@@ -42,11 +42,11 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Wrapper class that is responsible for running the @{link DataSlaQualityChecker}
  */
 public class DataSlaWrapper extends DetectionPipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(DataSlaWrapper.class);
 
   private static final String PROP_METRIC_URN = "metricUrn";
@@ -68,23 +68,28 @@ public class DataSlaWrapper extends DetectionPipeline {
     this.entityName = MapUtils.getString(config.getProperties(), PROP_SUB_ENTITY_NAME);
 
     Preconditions.checkArgument(this.config.getProperties().containsKey(PROP_QUALITY_CHECK));
-    this.qualityCheckerKey = DetectionUtils.getComponentKey(MapUtils.getString(config.getProperties(), PROP_QUALITY_CHECK));
+    this.qualityCheckerKey = DetectionUtils
+        .getComponentKey(MapUtils.getString(config.getProperties(), PROP_QUALITY_CHECK));
     Preconditions.checkArgument(this.config.getComponents().containsKey(this.qualityCheckerKey));
     this.qualityChecker = (AnomalyDetector) this.config.getComponents().get(this.qualityCheckerKey);
 
     this.metricUrn = MapUtils.getString(config.getProperties(), PROP_METRIC_URN);
     this.metricEntity = MetricEntity.fromURN(this.metricUrn);
-    this.metric = provider.fetchMetrics(Collections.singleton(this.metricEntity.getId())).get(this.metricEntity.getId());
+    this.metric = provider.fetchMetrics(Collections.singleton(this.metricEntity.getId()))
+        .get(this.metricEntity.getId());
 
-    MetricConfigDTO metricConfigDTO = this.provider.fetchMetrics(Collections.singletonList(this.metricEntity.getId())).get(this.metricEntity.getId());
-    this.dataset = this.provider.fetchDatasets(Collections.singletonList(metricConfigDTO.getDataset()))
+    MetricConfigDTO metricConfigDTO = this.provider
+        .fetchMetrics(Collections.singletonList(this.metricEntity.getId()))
+        .get(this.metricEntity.getId());
+    this.dataset = this.provider
+        .fetchDatasets(Collections.singletonList(metricConfigDTO.getDataset()))
         .get(metricConfigDTO.getDataset());
   }
 
   @Override
   public DetectionPipelineResult run() throws Exception {
     LOG.info("Check data sla for config {} between {} and {}", config.getId(), startTime, endTime);
-    Interval window =  new Interval(startTime, endTime, DateTimeZone.forID(dataset.getTimezone()));
+    Interval window = new Interval(startTime, endTime, DateTimeZone.forID(dataset.getTimezone()));
     DetectionResult detectionResult = qualityChecker.runDetection(window, this.metricUrn);
     List<MergedAnomalyResultDTO> anomalies = new ArrayList<>(detectionResult.getAnomalies());
 

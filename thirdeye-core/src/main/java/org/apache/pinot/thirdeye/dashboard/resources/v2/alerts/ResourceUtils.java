@@ -46,7 +46,6 @@ import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class ResourceUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(ResourceUtils.class);
@@ -66,11 +65,12 @@ public class ResourceUtils {
    * @return list of params
    */
   public static List<String> parseListParams(List<String> params) {
-    if (params == null){
+    if (params == null) {
       return Collections.emptyList();
     }
-    if (params.size() != 1)
+    if (params.size() != 1) {
       return params;
+    }
     return Arrays.asList(params.get(0).split(","));
   }
 
@@ -84,7 +84,7 @@ public class ResourceUtils {
    * @return list of params
    */
   public static List<Long> parseListParamsLong(List<String> params) {
-    if (params == null){
+    if (params == null) {
       return Collections.emptyList();
     }
 
@@ -107,12 +107,15 @@ public class ResourceUtils {
    * @param datasetDAO dataset config dao
    * @return filter multimap
    */
-  public static SetMultimap<String, String> getAnomalyFilters(MergedAnomalyResultDTO anomaly, DatasetConfigManager datasetDAO) {
+  public static SetMultimap<String, String> getAnomalyFilters(MergedAnomalyResultDTO anomaly,
+      DatasetConfigManager datasetDAO) {
     SetMultimap<String, String> filters = TreeMultimap.create();
 
     DatasetConfigDTO dataset = datasetDAO.findByDataset(anomaly.getCollection());
     if (dataset == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve dataset '%s' for anomaly id %d", anomaly.getCollection(), anomaly.getId()));
+      throw new IllegalArgumentException(String
+          .format("Could not resolve dataset '%s' for anomaly id %d", anomaly.getCollection(),
+              anomaly.getId()));
     }
 
     AnomalyFunctionDTO function = anomaly.getFunction();
@@ -167,7 +170,8 @@ public class ResourceUtils {
    * @param datasetDAO dataset config dao
    * @return map of external urls, keyed by link label
    */
-  public static Map<String, String> getExternalURLs(MergedAnomalyResultDTO mergedAnomaly, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
+  public static Map<String, String> getExternalURLs(MergedAnomalyResultDTO mergedAnomaly,
+      MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
     String metric = mergedAnomaly.getMetric();
     String dataset = mergedAnomaly.getCollection();
 
@@ -198,7 +202,8 @@ public class ResourceUtils {
     }
 
     Map<String, String> output = new HashMap<>();
-    Map<String, String> externalLinkTimeGranularity = metricConfigDTO.getExtSourceLinkTimeGranularity();
+    Map<String, String> externalLinkTimeGranularity = metricConfigDTO
+        .getExtSourceLinkTimeGranularity();
     for (Map.Entry<String, String> externalLinkEntry : urlTemplates.entrySet()) {
       String sourceName = externalLinkEntry.getKey();
       String urlTemplate = externalLinkEntry.getValue();
@@ -207,7 +212,8 @@ public class ResourceUtils {
         continue;
       }
 
-      putExternalLinkTimeContext(mergedAnomaly.getStartTime(), mergedAnomaly.getEndTime(), sourceName, context, externalLinkTimeGranularity);
+      putExternalLinkTimeContext(mergedAnomaly.getStartTime(), mergedAnomaly.getEndTime(),
+          sourceName, context, externalLinkTimeGranularity);
 
       StrSubstitutor strSubstitutor = new StrSubstitutor(context);
       String result = strSubstitutor.replace(urlTemplate);
@@ -231,15 +237,19 @@ public class ResourceUtils {
    * @param datasetDAO dataset config dao
    * @return map of external urls, keyed by link label
    */
-  public static Map<String, String> getExternalURLs(MetricSlice slice, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
+  public static Map<String, String> getExternalURLs(MetricSlice slice,
+      MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
     MetricConfigDTO metricConfigDTO = metricDAO.findById(slice.getMetricId());
     if (metricConfigDTO == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id %d", slice.getMetricId()));
+      throw new IllegalArgumentException(
+          String.format("Could not resolve metric id %d", slice.getMetricId()));
     }
 
     DatasetConfigDTO datasetConfigDTO = datasetDAO.findByDataset(metricConfigDTO.getDataset());
     if (datasetConfigDTO == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve dataset '%s' for metric id %d", metricConfigDTO.getDatasetConfig(), slice.getMetricId()));
+      throw new IllegalArgumentException(String
+          .format("Could not resolve dataset '%s' for metric id %d",
+              metricConfigDTO.getDatasetConfig(), slice.getMetricId()));
     }
 
     Map<String, String> urlTemplates = metricConfigDTO.getExtSourceLinkInfo();
@@ -256,7 +266,8 @@ public class ResourceUtils {
     }
 
     Map<String, String> output = new HashMap<>();
-    Map<String, String> externalLinkTimeGranularity = metricConfigDTO.getExtSourceLinkTimeGranularity();
+    Map<String, String> externalLinkTimeGranularity = metricConfigDTO
+        .getExtSourceLinkTimeGranularity();
     for (Map.Entry<String, String> externalLinkEntry : urlTemplates.entrySet()) {
       String sourceName = externalLinkEntry.getKey();
       String urlTemplate = externalLinkEntry.getValue();
@@ -265,7 +276,8 @@ public class ResourceUtils {
         continue;
       }
 
-      putExternalLinkTimeContext(slice.getStart(), slice.getEnd(), sourceName, context, externalLinkTimeGranularity);
+      putExternalLinkTimeContext(slice.getStart(), slice.getEnd(), sourceName, context,
+          externalLinkTimeGranularity);
 
       StrSubstitutor strSubstitutor = new StrSubstitutor(context);
       String result = strSubstitutor.replace(urlTemplate);
@@ -281,7 +293,8 @@ public class ResourceUtils {
     return output;
   }
 
-  private static void populatePreAggregation(DatasetConfigDTO datasetConfigDTO, Map<String, String> context) {
+  private static void populatePreAggregation(DatasetConfigDTO datasetConfigDTO,
+      Map<String, String> context) {
     // populate pre-aggregated keyword
     if (!datasetConfigDTO.getPreAggregatedKeyword().isEmpty()) {
       for (String dimName : datasetConfigDTO.getDimensions()) {
@@ -302,13 +315,16 @@ public class ResourceUtils {
       String value = URLEncoder.encode(entry.getValue().toLowerCase(), "UTF-8");
       context.put(key, value);
     } catch (UnsupportedEncodingException e) {
-      LOG.warn("Unable to encode this dimension pair {}:{} for external links.", entry.getKey(), entry.getValue());
+      LOG.warn("Unable to encode this dimension pair {}:{} for external links.", entry.getKey(),
+          entry.getValue());
     }
   }
 
   /**
-   * The default time granularity of ThirdEye is MILLISECONDS; however, it could be different for external links. This
-   * method updates the start and end time according to external link's time granularity. If a link's granularity is
+   * The default time granularity of ThirdEye is MILLISECONDS; however, it could be different for
+   * external links. This
+   * method updates the start and end time according to external link's time granularity. If a
+   * link's granularity is
    * not given, then the default granularity (MILLISECONDS) is used.
    *
    * @param startTime the start time in milliseconds/
@@ -319,11 +335,14 @@ public class ResourceUtils {
    */
   private static void putExternalLinkTimeContext(long startTime, long endTime, String linkName,
       Map<String, String> context, Map<String, String> externalLinkTimeGranularity) {
-    if (MapUtils.isNotEmpty(externalLinkTimeGranularity) && externalLinkTimeGranularity.containsKey(linkName)) {
+    if (MapUtils.isNotEmpty(externalLinkTimeGranularity) && externalLinkTimeGranularity
+        .containsKey(linkName)) {
       String timeGranularityString = externalLinkTimeGranularity.get(linkName);
       TimeGranularity timeGranularity = TimeGranularity.fromString(timeGranularityString);
-      context.put(MetricConfigBean.URL_TEMPLATE_START_TIME, String.valueOf(timeGranularity.convertToUnit(startTime)));
-      context.put(MetricConfigBean.URL_TEMPLATE_END_TIME, String.valueOf(timeGranularity.convertToUnit(endTime)));
+      context.put(MetricConfigBean.URL_TEMPLATE_START_TIME,
+          String.valueOf(timeGranularity.convertToUnit(startTime)));
+      context.put(MetricConfigBean.URL_TEMPLATE_END_TIME,
+          String.valueOf(timeGranularity.convertToUnit(endTime)));
     } else { // put start and end time as is
       context.put(MetricConfigBean.URL_TEMPLATE_START_TIME, String.valueOf(startTime));
       context.put(MetricConfigBean.URL_TEMPLATE_END_TIME, String.valueOf(endTime));
@@ -366,11 +385,13 @@ public class ResourceUtils {
         return AnomalyClassificationType.FALSE_POSITIVE;
     }
 
-    throw new IllegalStateException(String.format("Could not classify feedback status of anomaly id %d", anomaly.getId()));
+    throw new IllegalStateException(
+        String.format("Could not classify feedback status of anomaly id %d", anomaly.getId()));
   }
 
   /**
    * For a list of objects, return the paginated results
+   *
    * @param list the list of objects
    * @param offset the start pos
    * @param limit the maximum number of objects returned
@@ -384,5 +405,4 @@ public class ResourceUtils {
     }
     return list.subList(offset, Math.min(offset + limit, list.size()));
   }
-
 }

@@ -87,44 +87,54 @@ public class MultiDimensionalSummaryCLITool {
     options.addOption(metricName);
 
     Option dimensions =
-        Option.builder("dim").longOpt("dimensions").desc("dimension names that are separated by comma").hasArg()
+        Option.builder("dim").longOpt("dimensions")
+            .desc("dimension names that are separated by comma").hasArg()
             .argName("LIST").build();
     options.addOption(dimensions);
 
     Option excludedDimensions =
-        Option.builder("notDim").longOpt(CUBE_EXCLUDED_DIMENSIONS).desc("dimension names to be excluded").hasArg()
+        Option.builder("notDim").longOpt(CUBE_EXCLUDED_DIMENSIONS)
+            .desc("dimension names to be excluded").hasArg()
             .argName("LIST").build();
     options.addOption(excludedDimensions);
 
     Option filters =
-        Option.builder("filters").desc("filter to apply on the data cube (a map of list in Json format)").hasArg().argName("JSON").build();
+        Option.builder("filters")
+            .desc("filter to apply on the data cube (a map of list in Json format)").hasArg()
+            .argName("JSON").build();
     options.addOption(filters);
 
     Option currentStart =
-        Option.builder("cstart").longOpt(CURRENT_START).desc("current start time inclusive").hasArg().argName("MILLIS")
+        Option.builder("cstart").longOpt(CURRENT_START).desc("current start time inclusive")
+            .hasArg().argName("MILLIS")
             .required().build();
     options.addOption(currentStart);
 
     Option currentEnd =
-        Option.builder("cend").longOpt(CURRENT_END).desc("current end time exclusive").hasArg().argName("MILLIS")
+        Option.builder("cend").longOpt(CURRENT_END).desc("current end time exclusive").hasArg()
+            .argName("MILLIS")
             .required().build();
     options.addOption(currentEnd);
 
     Option baselineStart =
-        Option.builder("bstart").longOpt(BASELINE_START).desc("baseline start time inclusive").hasArg()
+        Option.builder("bstart").longOpt(BASELINE_START).desc("baseline start time inclusive")
+            .hasArg()
             .argName("MILLIS").required().build();
     options.addOption(baselineStart);
 
     Option baselineEnd =
-        Option.builder("bend").longOpt(BASELINE_END).desc("baseline end time exclusive").hasArg().argName("MILLIS")
+        Option.builder("bend").longOpt(BASELINE_END).desc("baseline end time exclusive").hasArg()
+            .argName("MILLIS")
             .required().build();
     options.addOption(baselineEnd);
 
     Option size =
-        Option.builder("size").longOpt(CUBE_SUMMARY_SIZE).desc("size of summary").hasArg().argName("NUMBER").build();
+        Option.builder("size").longOpt(CUBE_SUMMARY_SIZE).desc("size of summary").hasArg()
+            .argName("NUMBER").build();
     options.addOption(size);
 
-    Option depth = Option.builder(CUBE_DEPTH).desc("number of top dimensions").hasArg().argName("NUMBER").build();
+    Option depth = Option.builder(CUBE_DEPTH).desc("number of top dimensions").hasArg()
+        .argName("NUMBER").build();
     options.addOption(depth);
 
     Option hierarchies = Option.builder("h").longOpt(CUBE_DIM_HIERARCHIES)
@@ -132,14 +142,17 @@ public class MultiDimensionalSummaryCLITool {
         .build();
     options.addOption(hierarchies);
 
-    Option oneSideError = Option.builder(CUBE_ONE_SIDE_ERROR).desc("enable one side error summary").build();
+    Option oneSideError = Option.builder(CUBE_ONE_SIDE_ERROR).desc("enable one side error summary")
+        .build();
     options.addOption(oneSideError);
 
-    Option manualOrder = Option.builder(CUBE_MANUAL_ORDER).desc("use manual dimension order").build();
+    Option manualOrder = Option.builder(CUBE_MANUAL_ORDER).desc("use manual dimension order")
+        .build();
     options.addOption(manualOrder);
 
     Option dateTimeZone =
-        Option.builder(TIME_ZONE).desc("time zone id in Joda library").hasArg().argName("ID").build();
+        Option.builder(TIME_ZONE).desc("time zone id in Joda library").hasArg().argName("ID")
+            .build();
     options.addOption(dateTimeZone);
 
     Option costFunctionClass = Option.builder("cost").longOpt("costFunction").desc(
@@ -154,10 +167,9 @@ public class MultiDimensionalSummaryCLITool {
    * Removes noisy dimensions.
    *
    * @param dimensions the original dimensions.
-   *
    * @return the original dimensions minus noisy dimensions, which are predefined.
    *
-   * TODO: Replace with an user configurable method
+   *     TODO: Replace with an user configurable method
    */
   public static Dimensions sanitizeDimensions(Dimensions dimensions) {
     List<String> allDimensionNames = dimensions.names();
@@ -166,7 +178,7 @@ public class MultiDimensionalSummaryCLITool {
     dimensionsToRemove.add("colo");
     dimensionsToRemove.add("fabric");
     for (String dimensionName : allDimensionNames) {
-      if(dimensionName.contains(TOP_K_POSTFIX)) {
+      if (dimensionName.contains(TOP_K_POSTFIX)) {
         String rawDimensionName = dimensionName.replaceAll(TOP_K_POSTFIX, "");
         dimensionsToRemove.add(rawDimensionName.toLowerCase());
       }
@@ -174,10 +186,11 @@ public class MultiDimensionalSummaryCLITool {
     return removeDimensions(dimensions, dimensionsToRemove);
   }
 
-  public static Dimensions removeDimensions(Dimensions dimensions, Collection<String> dimensionsToRemove) {
+  public static Dimensions removeDimensions(Dimensions dimensions,
+      Collection<String> dimensionsToRemove) {
     List<String> dimensionsToRetain = new ArrayList<>();
     for (String dimensionName : dimensions.names()) {
-      if(!dimensionsToRemove.contains(dimensionName.trim())){
+      if (!dimensionsToRemove.contains(dimensionName.trim())) {
         dimensionsToRetain.add(dimensionName);
       }
     }
@@ -186,27 +199,31 @@ public class MultiDimensionalSummaryCLITool {
 
   public static CostFunction initiateCostFunction(String paramString)
       throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
-             InvocationTargetException, InstantiationException {
+      InvocationTargetException, InstantiationException {
     HashMap<String, String> params = objectMapper.readValue(paramString, HashMap.class);
 
     String className = params.get("className");
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(className), "Class name of cost function cannot be empty.");
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(className),
+        "Class name of cost function cannot be empty.");
 
     Class<CostFunction> clazz = (Class<CostFunction>) Class.forName(className);
     Constructor<CostFunction> constructor = clazz.getConstructor(Map.class);
-    return constructor.newInstance(new Object[] { params });
+    return constructor.newInstance(params);
   }
 
   public static void main(String[] args) throws Exception {
     Options options = buildOptions();
     if (args.length == 0) {
       HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp(MultiDimensionalSummary.class.getSimpleName() + " thirdeye-configs-path [options]", options);
+      formatter.printHelp(
+          MultiDimensionalSummary.class.getSimpleName() + " thirdeye-configs-path [options]",
+          options);
     } else {
       CommandLineParser parser = new DefaultParser();
       CommandLine commandLine = parser.parse(options, args);
       List<String> argList = commandLine.getArgList();
-      Preconditions.checkArgument(argList.size() > 0, "Please provide config directory as parameter");
+      Preconditions
+          .checkArgument(argList.size() > 0, "Please provide config directory as parameter");
 
       // Get parameters from command line arguments
       String dataset = commandLine.getOptionValue("dataset");
@@ -236,7 +253,8 @@ public class MultiDimensionalSummaryCLITool {
       } else {
         costFunction = new BalancedCostFunction();
       }
-      LOG.info("Using cost function '{}' for summary algorithm.", costFunction.getClass().getSimpleName());
+      LOG.info("Using cost function '{}' for summary algorithm.",
+          costFunction.getClass().getSimpleName());
       Preconditions.checkNotNull(costFunction);
 
       // Initialize ThirdEye's environment
@@ -251,18 +269,22 @@ public class MultiDimensionalSummaryCLITool {
         dimensions = new Dimensions(Arrays.asList(dimensionString.trim().split(",")));
       }
       if (!Strings.isNullOrEmpty(excludedDimensionString)) {
-        List<String> dimensionsToBeRemoved = Arrays.asList(excludedDimensionString.trim().split(","));
+        List<String> dimensionsToBeRemoved = Arrays
+            .asList(excludedDimensionString.trim().split(","));
         dimensions = removeDimensions(dimensions, dimensionsToBeRemoved);
       }
 
       Multimap<String, String> dataFilter = ThirdEyeUtils.convertToMultiMap(filterJson);
-      List<List<String>> hierarchies = objectMapper.readValue(hierarchiesJson, new TypeReference<List<List<String>>>() {
-      });
+      List<List<String>> hierarchies = objectMapper
+          .readValue(hierarchiesJson, new TypeReference<List<List<String>>>() {
+          });
 
       // Trigger summary algorithm
-      MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(cubeDbClient, costFunction, timeZone);
+      MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(cubeDbClient, costFunction,
+          timeZone);
       SummaryResponse summaryResponse = mdSummary
-          .buildSummary(dataset, metricName, currentStart, currentEnd, baselineStart, baselineEnd, dimensions,
+          .buildSummary(dataset, metricName, currentStart, currentEnd, baselineStart, baselineEnd,
+              dimensions,
               dataFilter, summarySize, depth, hierarchies, oneSideError);
 
       // Log summary result

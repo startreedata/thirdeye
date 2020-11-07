@@ -27,8 +27,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 
-
 public class DPArray {
+
   double targetRatio;
   List<DPSlot> slots;
   int size;
@@ -84,11 +84,13 @@ public class DPArray {
         sb.append('\n');
       }
       return sb.toString();
-    } else
+    } else {
       return "";
+    }
   }
 
   public static class DPSlot {
+
     double cost;
     Set<CubeNode> ans = new HashSet<>();
 

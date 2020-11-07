@@ -57,13 +57,16 @@ import org.jfree.data.xy.XYDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Creates JFreeChart images from Thirdeye Data. */
+/**
+ * Creates JFreeChart images from Thirdeye Data.
+ */
 public class AnomalyGraphGenerator {
+
   private static final AnomalyGraphGenerator INSTANCE = new AnomalyGraphGenerator();
 
   private static final int NUM_X_TICKS = 12;
   private static final Color TRANSPARENT_GRAY = new Color(128, 128, 128, 50); // default grays are
-                                                                              // too opaque
+  // too opaque
   private static final String CURRENT_LABEL = "Current";
   private static final String BASELINE_LABEL = "Last Week"; // TODO make w/w configurable.
   private static final int DEFAULT_CHART_HEIGHT = 480;
@@ -80,7 +83,6 @@ public class AnomalyGraphGenerator {
 
   /**
    * Creates a new graph generator.
-   * @throws Exception
    */
   private AnomalyGraphGenerator() {
   }
@@ -111,7 +113,7 @@ public class AnomalyGraphGenerator {
 
     // create the chart...
     final JFreeChart chart = ChartFactory.createTimeSeriesChart(null, // no chart title for email
-                                                                      // image
+        // image
         "Date (" + DEFAULT_TIME_ZONE.getID() + ")", // x axis label
         metric, // y axis label
         dataset, // data
@@ -136,7 +138,7 @@ public class AnomalyGraphGenerator {
     // http://www.java2s.com/Code/Java/Chart/JFreeChartLineChartDemo5showingtheuseofacustomdrawingsupplier.htm
     // set baseline to be dashed
     renderer.setSeriesStroke(1,
-        new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] {
+        new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[]{
             2.0f, 6.0f
         }, 0.0f));
     plot.setRenderer(renderer);
@@ -154,7 +156,6 @@ public class AnomalyGraphGenerator {
     }
 
     return chart;
-
   }
 
   /**
@@ -185,7 +186,8 @@ public class AnomalyGraphGenerator {
   /**
    * Merges overlapping anomalies and creates JFreeChart Markers for each merged point or interval.
    */
-  private List<Marker> getAnomalyIntervals(Map<MergedAnomalyResultDTO, String> anomaliesWithLabels) {
+  private List<Marker> getAnomalyIntervals(
+      Map<MergedAnomalyResultDTO, String> anomaliesWithLabels) {
     TreeMap<MergedAnomalyResultDTO, String> chronologicalAnomaliesWithLabels =
         new TreeMap<>(new Comparator<MergedAnomalyResultDTO>() {
           @Override
@@ -203,7 +205,8 @@ public class AnomalyGraphGenerator {
     Long intervalEnd = null;
     // StringBuilder labelBuilder = new StringBuilder();
     List<Marker> anomalyMarkers = new ArrayList<>();
-    for (Entry<MergedAnomalyResultDTO, String> entry : chronologicalAnomaliesWithLabels.entrySet()) {
+    for (Entry<MergedAnomalyResultDTO, String> entry : chronologicalAnomaliesWithLabels
+        .entrySet()) {
       MergedAnomalyResultDTO anomalyResult = entry.getKey();
       // String label = entry.getValue();
       Long anomalyStart = anomalyResult.getStartTime();
@@ -214,13 +217,12 @@ public class AnomalyGraphGenerator {
         if (intervalStart != null) {
           // create a new marker if this isn't the first element/initialization
           Marker anomalyMarker = createGraphMarker(intervalStart, intervalEnd, null);// ,
-                                                                                     // labelBuilder.toString());
+          // labelBuilder.toString());
           // labelBuilder.setLength(0);
           anomalyMarkers.add(anomalyMarker);
         }
         intervalStart = anomalyStart;
         intervalEnd = anomalyEnd;
-
       } else {
         intervalEnd = Math.max(intervalEnd, anomalyEnd);
       }
@@ -231,7 +233,8 @@ public class AnomalyGraphGenerator {
     }
     // add the last marker
     if (intervalStart != null) {
-      Marker anomalyMarker = createGraphMarker(intervalStart, intervalEnd, null);// labelBuilder.toString());
+      Marker anomalyMarker = createGraphMarker(intervalStart, intervalEnd,
+          null);// labelBuilder.toString());
       anomalyMarkers.add(anomalyMarker);
     }
 
@@ -251,9 +254,6 @@ public class AnomalyGraphGenerator {
   /**
    * Returns either a value marker (point) or a interval marker (range) depending on provided
    * inputs. By default values are gray or transparent gray.
-   * @param intervalStart
-   * @param intervalEnd
-   * @return
    */
   private Marker createGraphMarker(Long intervalStart, Long intervalEnd, String label) {
     Marker anomalyMarker;
@@ -275,24 +275,24 @@ public class AnomalyGraphGenerator {
   private SimpleDateFormat getDateFormat(final TimeGranularity timeGranularity) {
     String format;
     switch (timeGranularity.getUnit()) {
-    case DAYS:
-      format = "MM/dd";
-      break;
-    case HOURS:
-      format = "MM/dd-HH'H'";
-      break;
-    case MILLISECONDS:
-      format = "HH:mm:ss:SSS";
-      break;
-    case MINUTES:
-      format = "HH:mm";
-      break;
-    case SECONDS:
-      format = "HH:mm:ss";
-      break;
-    default:
-      throw new IllegalArgumentException(
-          "Unsupported time unit granularity: " + timeGranularity.getUnit());
+      case DAYS:
+        format = "MM/dd";
+        break;
+      case HOURS:
+        format = "MM/dd-HH'H'";
+        break;
+      case MILLISECONDS:
+        format = "HH:mm:ss:SSS";
+        break;
+      case MINUTES:
+        format = "HH:mm";
+        break;
+      case SECONDS:
+        format = "HH:mm:ss";
+        break;
+      default:
+        throw new IllegalArgumentException(
+            "Unsupported time unit granularity: " + timeGranularity.getUnit());
     }
     SimpleDateFormat dateFormat = new SimpleDateFormat(format);
     dateFormat.setTimeZone(DEFAULT_TIME_ZONE);
@@ -305,24 +305,24 @@ public class AnomalyGraphGenerator {
     int tickSize = (int) Math.ceil(windowBuckets / (double) NUM_X_TICKS);
     DateTickUnitType unitType;
     switch (timeGranularity.getUnit()) {
-    case DAYS:
-      unitType = DateTickUnitType.DAY;
-      break;
-    case HOURS:
-      unitType = DateTickUnitType.HOUR;
-      break;
-    case MILLISECONDS:
-      unitType = DateTickUnitType.MILLISECOND;
-      break;
-    case MINUTES:
-      unitType = DateTickUnitType.MINUTE;
-      break;
-    case SECONDS:
-      unitType = DateTickUnitType.SECOND;
-      break;
-    default:
-      throw new IllegalArgumentException(
-          "Unsupported time unit granularity: " + timeGranularity.getUnit());
+      case DAYS:
+        unitType = DateTickUnitType.DAY;
+        break;
+      case HOURS:
+        unitType = DateTickUnitType.HOUR;
+        break;
+      case MILLISECONDS:
+        unitType = DateTickUnitType.MILLISECOND;
+        break;
+      case MINUTES:
+        unitType = DateTickUnitType.MINUTE;
+        break;
+      case SECONDS:
+        unitType = DateTickUnitType.SECOND;
+        break;
+      default:
+        throw new IllegalArgumentException(
+            "Unsupported time unit granularity: " + timeGranularity.getUnit());
     }
     return new DateTickUnit(unitType, tickSize);
   }
@@ -332,5 +332,4 @@ public class AnomalyGraphGenerator {
     LOG.info("Writing to file: {}", file.getAbsolutePath());
     ChartUtilities.saveChartAsPNG(file, chart, DEFAULT_CHART_WIDTH, DEFAULT_CHART_HEIGHT);
   }
-
 }

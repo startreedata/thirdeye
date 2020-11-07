@@ -34,11 +34,11 @@ import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 
-
 /**
  * The Legacy dimension wrapper. Do dimension exploration for existing anomaly functions.
  */
 public class LegacyDimensionWrapper extends DimensionWrapper {
+
   private static final String PROP_METRIC_URN = "metricUrn";
   private static final String PROP_LOOKBACK = "lookback";
   private static final String PROP_CLASS_NAME = "className";
@@ -62,12 +62,15 @@ public class LegacyDimensionWrapper extends DimensionWrapper {
    * @param endTime the end time
    * @throws Exception the exception
    */
-  public LegacyDimensionWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) throws Exception {
+  public LegacyDimensionWrapper(DataProvider provider, AlertDTO config, long startTime,
+      long endTime) throws Exception {
     super(provider, augmentConfig(config), startTime, endTime);
 
-    this.anomalyFunctionClassName = MapUtils.getString(config.getProperties(), PROP_ANOMALY_FUNCTION_CLASS);
+    this.anomalyFunctionClassName = MapUtils
+        .getString(config.getProperties(), PROP_ANOMALY_FUNCTION_CLASS);
     this.anomalyFunctionSpecs = ConfigUtils.getMap(config.getProperties().get(PROP_SPEC));
-    this.anomalyFunction = (BaseAnomalyFunction) Class.forName(this.anomalyFunctionClassName).newInstance();
+    this.anomalyFunction = (BaseAnomalyFunction) Class.forName(this.anomalyFunctionClassName)
+        .newInstance();
 
     String specs = OBJECT_MAPPER.writeValueAsString(this.anomalyFunctionSpecs);
     this.anomalyFunction.init(OBJECT_MAPPER.readValue(specs, AnomalyFunctionDTO.class));
@@ -76,7 +79,8 @@ public class LegacyDimensionWrapper extends DimensionWrapper {
     }
 
     if (this.nestedProperties.isEmpty()) {
-      this.nestedProperties.add(Collections.singletonMap(PROP_CLASS_NAME, (Object) LegacyAnomalyFunctionAlgorithm.class.getName()));
+      this.nestedProperties.add(Collections
+          .singletonMap(PROP_CLASS_NAME, LegacyAnomalyFunctionAlgorithm.class.getName()));
     }
   }
 
@@ -104,7 +108,7 @@ public class LegacyDimensionWrapper extends DimensionWrapper {
       long metricId = MapUtils.getLongValue(spec, SPEC_METRIC_ID);
       Multimap<String, String> filters = ThirdEyeSpiUtils
           .getFilterSet(MapUtils.getString(spec, SPEC_FILTERS));
-      properties.put(PROP_METRIC_URN,MetricEntity.fromMetric(1.0, metricId, filters).getUrn());
+      properties.put(PROP_METRIC_URN, MetricEntity.fromMetric(1.0, metricId, filters).getUrn());
     }
 
     if (!properties.containsKey(PROP_LOOKBACK)) {

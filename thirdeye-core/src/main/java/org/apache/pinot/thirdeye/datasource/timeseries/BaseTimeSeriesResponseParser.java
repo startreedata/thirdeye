@@ -37,12 +37,13 @@ import org.joda.time.DateTime;
 public abstract class BaseTimeSeriesResponseParser implements TimeSeriesResponseParser {
 
   /**
-   * Parse the given ThirdEye response for UI, in which the missing data might be inserted with zeros and an OTHER
-   * dimension is created in order to roll up entries with small contributions for alleviating congested UI.
+   * Parse the given ThirdEye response for UI, in which the missing data might be inserted with
+   * zeros and an OTHER
+   * dimension is created in order to roll up entries with small contributions for alleviating
+   * congested UI.
    * This method is thread safe.
    *
    * @param response the ThirdEye response to be parsed.
-   *
    * @return The parsed time series rows.
    */
   public List<TimeSeriesRow> parseResponse(ThirdEyeResponse response) {
@@ -59,7 +60,8 @@ public abstract class BaseTimeSeriesResponseParser implements TimeSeriesResponse
   }
 
   protected List<TimeSeriesRow> parseGroupByTimeResponse(ThirdEyeResponse response) {
-    Map<String, ThirdEyeResponseRow> responseMap = ResponseParserUtils.createResponseMapByTime(response);
+    Map<String, ThirdEyeResponseRow> responseMap = ResponseParserUtils
+        .createResponseMapByTime(response);
     List<Range<DateTime>> ranges = getTimeRanges(response.getRequest());
     int numTimeBuckets = ranges.size();
     List<MetricFunction> metricFunctions = response.getMetricFunctions();
@@ -83,12 +85,14 @@ public abstract class BaseTimeSeriesResponseParser implements TimeSeriesResponse
     return rows;
   }
 
-  protected abstract List<TimeSeriesRow> parseGroupByTimeDimensionResponse(ThirdEyeResponse response);
+  protected abstract List<TimeSeriesRow> parseGroupByTimeDimensionResponse(
+      ThirdEyeResponse response);
 
   /* Helper functions */
 
   protected List<TimeSeriesRow> buildTimeSeriesRows(Map<String, ThirdEyeResponseRow> responseMap,
-      List<Range<DateTime>> ranges, int numTimeBuckets, List<String> dimensionNames, List<String> dimensionValues,
+      List<Range<DateTime>> ranges, int numTimeBuckets, List<String> dimensionNames,
+      List<String> dimensionValues,
       List<MetricFunction> metricFunctions) {
 
     List<TimeSeriesRow> thresholdRows = new ArrayList<>();
@@ -97,7 +101,8 @@ public abstract class BaseTimeSeriesResponseParser implements TimeSeriesResponse
       Range<DateTime> timeRange = ranges.get(timeBucketId);
 
       // compute the time|dimension key
-      String timeDimensionValue = ResponseParserUtils.computeTimeDimensionValues(timeBucketId, dimensionValues);
+      String timeDimensionValue = ResponseParserUtils
+          .computeTimeDimensionValues(timeBucketId, dimensionValues);
 
       ThirdEyeResponseRow responseRow = responseMap.get(timeDimensionValue);
 

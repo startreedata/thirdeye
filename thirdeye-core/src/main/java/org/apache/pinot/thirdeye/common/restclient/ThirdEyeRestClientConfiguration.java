@@ -21,8 +21,8 @@ package org.apache.pinot.thirdeye.common.restclient;
 
 import java.util.Optional;
 
-
 public class ThirdEyeRestClientConfiguration {
+
   private String adminUser;
   private String sessionKey;
   private static final String DEFAULT_THIRDEYE_SERVICE_NAME = "thirdeye";

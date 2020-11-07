@@ -28,10 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MonitorJobScheduler {
+
   private static final Logger LOG = LoggerFactory.getLogger(MonitorJobScheduler.class);
-  private ScheduledExecutorService scheduledExecutorService;
-  private TaskManager anomalyTaskDAO;
-  private MonitorConfiguration monitorConfiguration;
+  private final ScheduledExecutorService scheduledExecutorService;
+  private final TaskManager anomalyTaskDAO;
+  private final MonitorConfiguration monitorConfiguration;
   private MonitorJobRunner monitorJobRunner;
   private MonitorJobContext monitorJobContext;
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
@@ -52,8 +53,9 @@ public class MonitorJobScheduler {
 
     monitorJobRunner = new MonitorJobRunner(monitorJobContext);
     scheduledExecutorService
-      .scheduleWithFixedDelay(monitorJobRunner, 0, monitorConfiguration.getMonitorFrequency().getSize(),
-          monitorConfiguration.getMonitorFrequency().getUnit());
+        .scheduleWithFixedDelay(monitorJobRunner, 0,
+            monitorConfiguration.getMonitorFrequency().getSize(),
+            monitorConfiguration.getMonitorFrequency().getUnit());
   }
 
   public void shutdown() {

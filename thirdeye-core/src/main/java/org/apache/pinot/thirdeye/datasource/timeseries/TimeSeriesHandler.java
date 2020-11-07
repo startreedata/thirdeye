@@ -46,12 +46,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TimeSeriesHandler {
+
   private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesHandler.class);
   private static final TimeSeriesResponseParser DEFAULT_TIMESERIES_RESPONSE_PARSER = new UITimeSeriesResponseParser();
 
   private final QueryCache queryCache;
   private ExecutorService executorService;
-
 
   public TimeSeriesHandler(QueryCache queryCache) {
     this.queryCache = queryCache;
@@ -62,9 +62,7 @@ public class TimeSeriesHandler {
    * UITimeSeriesResponseParser}.)
    *
    * @param timeSeriesRequest the request to retrieve time series.
-   *
    * @return the time series for the given request.
-   *
    * @throws Exception Any exception that is thrown during the retrieval.
    */
   public TimeSeriesResponse handle(TimeSeriesRequest timeSeriesRequest) throws Exception {
@@ -75,9 +73,7 @@ public class TimeSeriesHandler {
    * Handles the given time series request using the given time series parser.
    *
    * @param timeSeriesRequest the request to retrieve time series.
-   *
    * @return the time series for the given request.
-   *
    * @throws Exception Any exception that is thrown during the retrieval.
    */
   public TimeSeriesResponse handle(TimeSeriesRequest timeSeriesRequest,
@@ -87,7 +83,8 @@ public class TimeSeriesHandler {
     DateTime end = timeSeriesRequest.getEnd();
     if (timeSeriesRequest.isEndDateInclusive()) {
       // ThirdEyeRequest is exclusive endpoint, so increment by one bucket
-      TimeGranularity aggregationTimeGranularity = timeSeriesRequest.getAggregationTimeGranularity();
+      TimeGranularity aggregationTimeGranularity = timeSeriesRequest
+          .getAggregationTimeGranularity();
       end = end.plus(aggregationTimeGranularity.toMillis());
     }
     // Create request
@@ -143,15 +140,17 @@ public class TimeSeriesHandler {
   }
 
   /**
-   * An asynchrous method for handling the time series request. This method initializes executor service (if necessary)
-   * and invokes the synchronous method -- handle() -- in the backend. After invoking this method, users could invoke
+   * An asynchrous method for handling the time series request. This method initializes executor
+   * service (if necessary)
+   * and invokes the synchronous method -- handle() -- in the backend. After invoking this method,
+   * users could invoke
    * shutdownAsyncHandler() to shutdown the executor service if it is no longer needed.
    *
    * @param timeSeriesRequest the request to retrieve time series.
    * @param timeSeriesResponseParser the parser to be used to parse the result from data source
-   *
-   * @return a future object of time series response for the give request. Returns null if it fails to handle the
-   * request.
+   * @return a future object of time series response for the give request. Returns null if it fails
+   *     to handle the
+   *     request.
    */
   public Future<TimeSeriesResponse> asyncHandle(final TimeSeriesRequest timeSeriesRequest,
       final TimeSeriesResponseParser timeSeriesResponseParser) {
@@ -160,16 +159,17 @@ public class TimeSeriesHandler {
       startAsyncHandler();
     }
 
-    Future<TimeSeriesResponse> responseFuture = executorService.submit(new Callable<TimeSeriesResponse>() {
-      public TimeSeriesResponse call () {
-        try {
-          return TimeSeriesHandler.this.handle(timeSeriesRequest, timeSeriesResponseParser);
-        } catch (Exception e) {
-          LOG.warn("Failed to retrieve time series of the request: {}", timeSeriesRequest);
-        }
-        return null;
-      }
-    });
+    Future<TimeSeriesResponse> responseFuture = executorService
+        .submit(new Callable<TimeSeriesResponse>() {
+          public TimeSeriesResponse call() {
+            try {
+              return TimeSeriesHandler.this.handle(timeSeriesRequest, timeSeriesResponseParser);
+            } catch (Exception e) {
+              LOG.warn("Failed to retrieve time series of the request: {}", timeSeriesRequest);
+            }
+            return null;
+          }
+        });
 
     return responseFuture;
   }
@@ -202,8 +202,8 @@ public class TimeSeriesHandler {
     List<MetricFunction> metricFunctionsFromExpressions =
         Utils.computeMetricFunctionsFromExpressions(metricExpressions);
     requestBuilder.setMetricFunctions(metricFunctionsFromExpressions);
-    requestBuilder.setDataSource(ThirdEyeUtils.getDataSourceFromMetricFunctions(metricFunctionsFromExpressions));
+    requestBuilder.setDataSource(
+        ThirdEyeUtils.getDataSourceFromMetricFunctions(metricFunctionsFromExpressions));
     return requestBuilder.build(requestReference);
   }
-
 }

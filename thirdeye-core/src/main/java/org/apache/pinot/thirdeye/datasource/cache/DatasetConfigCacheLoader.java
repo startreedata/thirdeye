@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class DatasetConfigCacheLoader extends CacheLoader<String, DatasetConfigDTO> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DatasetConfigCacheLoader.class);
-  private DatasetConfigManager datasetConfigDAO;
+  private final DatasetConfigManager datasetConfigDAO;
 
   public DatasetConfigCacheLoader(DatasetConfigManager datasetConfigDAO) {
     this.datasetConfigDAO = datasetConfigDAO;
@@ -40,5 +40,4 @@ public class DatasetConfigCacheLoader extends CacheLoader<String, DatasetConfigD
     DatasetConfigDTO datasetConfig = datasetConfigDAO.findByDataset(collection);
     return datasetConfig;
   }
-
 }

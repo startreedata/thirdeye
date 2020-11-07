@@ -26,7 +26,6 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 
-
 public class SqlDataset {
 
   @JsonProperty
@@ -34,18 +33,17 @@ public class SqlDataset {
   @JsonProperty
   private String timeColumn;
   @JsonProperty
-  private List<String> dimensions = new ArrayList<>();
+  private final List<String> dimensions = new ArrayList<>();
   @JsonProperty
   private Map<String, MetricAggFunction> metrics;
   @JsonProperty
-  private String granularity = "1DAYS";
+  private final String granularity = "1DAYS";
   @JsonProperty
-  private String timezone = TimeSpec.DEFAULT_TIMEZONE;
+  private final String timezone = TimeSpec.DEFAULT_TIMEZONE;
   @JsonProperty
-  private String dataFile = "";
+  private final String dataFile = "";
   @JsonProperty
-  private String timeFormat = "EPOCH";
-
+  private final String timeFormat = "EPOCH";
 
   public String getTimeColumn() {
     return timeColumn;
@@ -81,8 +79,10 @@ public class SqlDataset {
 
   @Override
   public String toString() {
-    return "SqlDataset{" + "tableName='" + tableName + '\'' + ", timeColumn='" + timeColumn + '\'' + ", dimensions="
-        + dimensions + ", metrics=" + metrics + ", granularity='" + granularity + '\'' + ", timezone='" + timezone
+    return "SqlDataset{" + "tableName='" + tableName + '\'' + ", timeColumn='" + timeColumn + '\''
+        + ", dimensions="
+        + dimensions + ", metrics=" + metrics + ", granularity='" + granularity + '\''
+        + ", timezone='" + timezone
         + '\'' + ", timeFormat='" + timeFormat + '\'' + '}' + ", dataFile='" + dataFile + '\'';
   }
 }

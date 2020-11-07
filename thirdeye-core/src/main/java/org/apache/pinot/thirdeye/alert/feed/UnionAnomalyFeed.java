@@ -47,7 +47,6 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class UnionAnomalyFeed implements AnomalyFeed {
 
   public static final TimeGranularity EXPIRE_TIME = TimeGranularity.fromString("7_DAYS");
@@ -56,12 +55,12 @@ public class UnionAnomalyFeed implements AnomalyFeed {
   private AlertSnapshotManager alertSnapshotDAO;
   private AlertFilterFactory alertFilterFactory;
 
-  private List<AnomalyFetcher> anomalyFetchers;
-  private List<AlertFilter> alertCandidatesFilters;
+  private final List<AnomalyFetcher> anomalyFetchers;
+  private final List<AlertFilter> alertCandidatesFilters;
   private AlertSnapshotDTO alertSnapshot;
-  private DateTime alertTime;
+  private final DateTime alertTime;
 
-  public UnionAnomalyFeed(){
+  public UnionAnomalyFeed() {
     this.anomalyFetchers = new ArrayList<>();
     this.alertCandidatesFilters = new ArrayList<>();
     this.alertTime = DateTime.now();
@@ -98,7 +97,7 @@ public class UnionAnomalyFeed implements AnomalyFeed {
       anomalyFetchers.add(anomalyFetcher);
     }
 
-    for(Map<String, String> alertFilterSpec : alertFilterSpecs) {
+    for (Map<String, String> alertFilterSpec : alertFilterSpecs) {
       alertCandidatesFilters.add(alertFilterFactory.fromSpec(alertFilterSpec));
     }
   }
@@ -116,9 +115,10 @@ public class UnionAnomalyFeed implements AnomalyFeed {
     }
 
     List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>(mergedAnomalyResultSet);
-    mergedAnomalyResults = AlertFilterHelper.applyFiltrationRule(mergedAnomalyResults, alertFilterFactory);
+    mergedAnomalyResults = AlertFilterHelper
+        .applyFiltrationRule(mergedAnomalyResults, alertFilterFactory);
 
-    for(AlertFilter alertFilter : alertCandidatesFilters) {
+    for (AlertFilter alertFilter : alertCandidatesFilters) {
       Iterator<MergedAnomalyResultDTO> mergedAnomalyIterator = mergedAnomalyResults.iterator();
       while (mergedAnomalyIterator.hasNext()) {
         MergedAnomalyResultDTO mergedAnomalyResult = mergedAnomalyIterator.next();
@@ -142,7 +142,8 @@ public class UnionAnomalyFeed implements AnomalyFeed {
   }
 
   public void updateSnapshot(DateTime alertTime, List<MergedAnomalyResultDTO> alertedAnomalies) {
-    MergedAnomalyResultManager mergedAnomalyResultDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
+    MergedAnomalyResultManager mergedAnomalyResultDAO = DAORegistry.getInstance()
+        .getMergedAnomalyResultDAO();
     // Set the lastNotifyTime to current time if there is alerted anomalies
     if (alertedAnomalies.size() > 0) {
       alertSnapshot.setLastNotifyTime(alertTime.getMillis());
@@ -153,7 +154,8 @@ public class UnionAnomalyFeed implements AnomalyFeed {
     for (MergedAnomalyResultDTO anomaly : alertedAnomalies) {
       String snapshotKey = BaseAnomalyFetcher.getSnapshotKey(anomaly);
       AnomalyNotifiedStatus lastNotifyStatus = alertSnapshot.getLatestStatus(snapshot, snapshotKey);
-      AnomalyNotifiedStatus statusToBeUpdated = new AnomalyNotifiedStatus(alertTime.getMillis(), anomaly.getWeight());
+      AnomalyNotifiedStatus statusToBeUpdated = new AnomalyNotifiedStatus(alertTime.getMillis(),
+          anomaly.getWeight());
       if (lastNotifyStatus.getLastNotifyTime() > anomaly.getStartTime()) {
         // anomaly is a continuing issue, and the status should be appended to the end of snapshot
         snapshot.put(snapshotKey, statusToBeUpdated);

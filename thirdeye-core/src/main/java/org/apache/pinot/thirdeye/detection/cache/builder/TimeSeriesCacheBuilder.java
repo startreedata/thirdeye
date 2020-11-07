@@ -45,10 +45,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *  A fetcher for fetching time-series from cache/datasource.
- *  The cache holds time-series information per Metric Slices
+ * A fetcher for fetching time-series from cache/datasource.
+ * The cache holds time-series information per Metric Slices
  */
 public class TimeSeriesCacheBuilder {
+
   private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesCacheBuilder.class);
 
   private static final long TIMEOUT = 60000;
@@ -99,7 +100,9 @@ public class TimeSeriesCacheBuilder {
         .maximumWeight(cacheSize)
         // Estimate that most detection tasks will complete within 15 minutes
         .expireAfterWrite(15, TimeUnit.MINUTES)
-        .weigher((Weigher<MetricSlice, DataFrame>) (slice, dataFrame) -> dataFrame.size() * (Long.BYTES + Double.BYTES))
+        .weigher(
+            (Weigher<MetricSlice, DataFrame>) (slice, dataFrame) -> dataFrame.size() * (Long.BYTES
+                + Double.BYTES))
         .build(new CacheLoader<MetricSlice, DataFrame>() {
           // load single slice
           @Override
@@ -115,7 +118,8 @@ public class TimeSeriesCacheBuilder {
         });
   }
 
-  public Map<MetricSlice, DataFrame> fetchSlices(Collection<MetricSlice> slices) throws ExecutionException {
+  public Map<MetricSlice, DataFrame> fetchSlices(Collection<MetricSlice> slices)
+      throws ExecutionException {
     if (CacheConfig.getInstance().useInMemoryCache()) {
       return this.cache.getAll(slices);
     } else {
@@ -141,7 +145,8 @@ public class TimeSeriesCacheBuilder {
             // current slice potentially contained in cache
             if (entry.getKey().containSlice(slice)) {
               DataFrame df = entry.getValue()
-                  .filter(entry.getValue().getLongs(DataFrame.COL_TIME).between(slice.getStart(), slice.getEnd()))
+                  .filter(entry.getValue().getLongs(DataFrame.COL_TIME)
+                      .between(slice.getStart(), slice.getEnd()))
                   .dropNull(DataFrame.COL_TIME);
               // double check if it is cache hit
               if (df.getLongs(DataFrame.COL_TIME).size() > 0) {
@@ -157,17 +162,20 @@ public class TimeSeriesCacheBuilder {
       Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
       for (final MetricSlice slice : slices) {
         if (!output.containsKey(slice)) {
-          futures.put(slice, this.executor.submit(() -> TimeSeriesCacheBuilder.this.timeseriesLoader.load(slice)));
+          futures.put(slice,
+              this.executor.submit(() -> TimeSeriesCacheBuilder.this.timeseriesLoader.load(slice)));
         }
       }
       //LOG.info("Fetching {} slices of timeseries, {} cache hit, {} cache miss", slices.size(), output.size(), futures.size());
       final long deadline = System.currentTimeMillis() + TIMEOUT;
       for (MetricSlice slice : slices) {
         if (!output.containsKey(slice)) {
-          output.put(slice, futures.get(slice).get(DetectionUtils.makeTimeout(deadline), TimeUnit.MILLISECONDS));
+          output.put(slice,
+              futures.get(slice).get(DetectionUtils.makeTimeout(deadline), TimeUnit.MILLISECONDS));
         }
       }
-      LOG.info("Fetching {} slices used {} milliseconds", slices.size(), System.currentTimeMillis() - ts);
+      LOG.info("Fetching {} slices used {} milliseconds", slices.size(),
+          System.currentTimeMillis() - ts);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

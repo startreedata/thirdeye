@@ -30,14 +30,12 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class EmailUtils {
+
   private static final Logger LOG = LoggerFactory.getLogger(EmailUtils.class);
 
   /**
    * Check if given email is a valid email
-   * @param email
-   * @return
    */
   public static boolean isValidEmailAddress(String email) {
     try {
@@ -52,8 +50,8 @@ public class EmailUtils {
 
   /**
    * Parse and return a set of valid email addresses
+   *
    * @param emails comma separated list of emails
-   * @return
    */
   public static Set<String> getValidEmailAddresses(String emails) {
     Set<String> validEmailAddresses = new HashSet<>();
@@ -72,7 +70,8 @@ public class EmailUtils {
       }
     }
     if (invalidEmailAddresses.size() > 0) {
-      LOG.warn("Found invalid email addresses, please verify the email addresses: {}", invalidEmailAddresses);
+      LOG.warn("Found invalid email addresses, please verify the email addresses: {}",
+          invalidEmailAddresses);
     }
     return validEmailAddresses;
   }

@@ -32,21 +32,28 @@ import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
 
 /**
- * The Data Quality Merge Wrapper. This merge wrapper is specifically designed keeping the sla anomalies in mind.
- * We might need to revisit this when more data quality rules are added. Fundamentally, the data sla anomalies are never
- * merged as we want to keep re-notifying users if the sla is missed after every detection. This merger will ensure no
- * duplicate sla anomalies are created if the detection runs more frequently and will serve as a placeholder for future
+ * The Data Quality Merge Wrapper. This merge wrapper is specifically designed keeping the sla
+ * anomalies in mind.
+ * We might need to revisit this when more data quality rules are added. Fundamentally, the data sla
+ * anomalies are never
+ * merged as we want to keep re-notifying users if the sla is missed after every detection. This
+ * merger will ensure no
+ * duplicate sla anomalies are created if the detection runs more frequently and will serve as a
+ * placeholder for future
  * merging logic.
  */
 public class DataQualityMergeWrapper extends MergeWrapper {
+
   private static final String PROP_GROUP_KEY = "groupKey";
 
-  public DataQualityMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) {
+  public DataQualityMergeWrapper(DataProvider provider, AlertDTO config, long startTime,
+      long endTime) {
     super(provider, config, startTime, endTime);
   }
 
   @Override
-  protected List<MergedAnomalyResultDTO> retrieveAnomaliesFromDatabase(List<MergedAnomalyResultDTO> generated) {
+  protected List<MergedAnomalyResultDTO> retrieveAnomaliesFromDatabase(
+      List<MergedAnomalyResultDTO> generated) {
     List<MergedAnomalyResultDTO> retrieved = super.retrieveAnomaliesFromDatabase(generated);
 
     return new ArrayList<>(Collections2.filter(retrieved,
@@ -72,7 +79,8 @@ public class DataQualityMergeWrapper extends MergeWrapper {
       if (anomaly.getProperties().containsKey(PROP_GROUP_KEY)) {
         groupKey = anomaly.getProperties().get(PROP_GROUP_KEY);
       }
-      AnomalyKey key = new AnomalyKey(anomaly.getMetric(), anomaly.getCollection(), anomaly.getDimensions(), groupKey,
+      AnomalyKey key = new AnomalyKey(anomaly.getMetric(), anomaly.getCollection(),
+          anomaly.getDimensions(), groupKey,
           "", anomaly.getType());
 
       MergedAnomalyResultDTO parent = parents.get(key);

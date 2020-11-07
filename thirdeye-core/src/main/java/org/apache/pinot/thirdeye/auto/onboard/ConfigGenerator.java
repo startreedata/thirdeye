@@ -45,17 +45,20 @@ public class ConfigGenerator {
   private static final String NON_ADDITIVE = "non_additive";
   private static final String PINOT_PRE_AGGREGATED_KEYWORD = "*";
 
-  public static void setDateTimeSpecs(DatasetConfigDTO datasetConfigDTO, DateTimeFieldSpec dateTimeFieldSpec) {
+  public static void setDateTimeSpecs(DatasetConfigDTO datasetConfigDTO,
+      DateTimeFieldSpec dateTimeFieldSpec) {
     Preconditions.checkNotNull(dateTimeFieldSpec);
     DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
     String timeFormatStr = formatSpec.getTimeFormat().equals(TimeFormat.SIMPLE_DATE_FORMAT) ? String
         .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT.toString(), formatSpec.getSDFPattern())
         : TimeFormat.EPOCH.toString();
-    setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec.getName(), timeFormatStr, formatSpec.getColumnSize(),
+    setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec.getName(), timeFormatStr,
+        formatSpec.getColumnSize(),
         formatSpec.getColumnUnit());
   }
 
-  public static void setDateTimeSpecs(DatasetConfigDTO datasetConfigDTO, String timeColumnName, String timeFormatStr,
+  public static void setDateTimeSpecs(DatasetConfigDTO datasetConfigDTO, String timeColumnName,
+      String timeFormatStr,
       int columnSize, TimeUnit columnUnit) {
     datasetConfigDTO.setTimeColumn(timeColumnName);
     datasetConfigDTO.setTimeDuration(columnSize);
@@ -64,7 +67,8 @@ public class ConfigGenerator {
     datasetConfigDTO.setExpectedDelay(getExpectedDelayFromTimeunit(columnUnit));
     datasetConfigDTO.setTimezone(PDT_TIMEZONE);
     // set the data granularity of epoch timestamp dataset to minute-level
-    if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO.getTimeUnit()
+    if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO
+        .getTimeUnit()
         .equals(TimeUnit.MILLISECONDS) && (datasetConfigDTO.getNonAdditiveBucketSize() == null
         || datasetConfigDTO.getNonAdditiveBucketUnit() == null)) {
       datasetConfigDTO.setNonAdditiveBucketUnit(TimeUnit.MINUTES);
@@ -72,7 +76,8 @@ public class ConfigGenerator {
     }
   }
 
-  public static DatasetConfigDTO generateDatasetConfig(String dataset, Schema schema, String timeColumnName,
+  public static DatasetConfigDTO generateDatasetConfig(String dataset, Schema schema,
+      String timeColumnName,
       Map<String, String> customConfigs, String dataSourceName) {
     List<String> dimensions = schema.getDimensionNames();
     DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(timeColumnName);
@@ -86,7 +91,6 @@ public class ConfigGenerator {
     checkNonAdditive(datasetConfigDTO);
     return datasetConfigDTO;
   }
-
 
   private static TimeGranularity getExpectedDelayFromTimeunit(TimeUnit timeUnit) {
     TimeGranularity expectedDelay = null;
@@ -106,7 +110,9 @@ public class ConfigGenerator {
   }
 
   /**
-   * Check if the dataset is non-additive. If it is, set the additive flag to false and set the pre-aggregated keyword.
+   * Check if the dataset is non-additive. If it is, set the additive flag to false and set the
+   * pre-aggregated keyword.
+   *
    * @param dataset the dataset DTO to check
    */
   static void checkNonAdditive(DatasetConfigDTO dataset) {
@@ -116,7 +122,8 @@ public class ConfigGenerator {
     }
   }
 
-  public static MetricConfigDTO generateMetricConfig(MetricFieldSpec metricFieldSpec, String dataset) {
+  public static MetricConfigDTO generateMetricConfig(MetricFieldSpec metricFieldSpec,
+      String dataset) {
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
     String metric = metricFieldSpec.getName();
     metricConfigDTO.setName(metric);
@@ -135,7 +142,6 @@ public class ConfigGenerator {
     return metricConfigDTO;
   }
 
-
   public static List<Long> getMetricIdsFromMetricConfigs(List<MetricConfigDTO> metricConfigs) {
     List<Long> metricIds = new ArrayList<>();
     for (MetricConfigDTO metricConfig : metricConfigs) {
@@ -143,5 +149,4 @@ public class ConfigGenerator {
     }
     return metricIds;
   }
-
 }

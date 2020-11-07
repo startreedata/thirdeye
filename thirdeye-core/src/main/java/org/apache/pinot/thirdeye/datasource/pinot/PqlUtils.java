@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
  * Util class for generated PQL queries (pinot).
  */
 public class PqlUtils {
+
   private static final Joiner AND = Joiner.on(" AND ");
   private static final Joiner COMMA = Joiner.on(", ");
 
@@ -79,27 +80,27 @@ public class PqlUtils {
   private static final int DEFAULT_TOP = 100000;
   private static final String PERCENTILE_TDIGEST_PREFIX = "percentileTDigest";
 
-
   /**
    * Returns sql to calculate the sum of all raw metrics required for <tt>request</tt>, grouped by
    * time within the requested date range. </br>
    * Due to the summation, all metric column values can be assumed to be doubles.
-   * @throws ExecutionException
    */
   public static String getPql(ThirdEyeRequest request, MetricFunction metricFunction,
       Multimap<String, String> filterSet, TimeSpec dataTimeSpec) throws ExecutionException {
     // TODO handle request.getFilterClause()
 
-    return getPql(metricFunction, request.getStartTimeInclusive(), request.getEndTimeExclusive(), filterSet,
-        request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec, request.getLimit());
+    return getPql(metricFunction, request.getStartTimeInclusive(), request.getEndTimeExclusive(),
+        filterSet,
+        request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec,
+        request.getLimit());
   }
-
 
   private static String getPql(MetricFunction metricFunction, DateTime startTime,
       DateTime endTimeExclusive, Multimap<String, String> filterSet, List<String> groupBy,
       TimeGranularity timeGranularity, TimeSpec dataTimeSpec, int limit) throws ExecutionException {
 
-    MetricConfigDTO metricConfig = ThirdEyeUtils.getMetricConfigFromId(metricFunction.getMetricId());
+    MetricConfigDTO metricConfig = ThirdEyeUtils
+        .getMetricConfigFromId(metricFunction.getMetricId());
     String dataset = metricFunction.getDataset();
 
     StringBuilder sb = new StringBuilder();
@@ -127,7 +128,8 @@ public class PqlUtils {
     return sb.toString();
   }
 
-  private static String getSelectionClause(MetricConfigDTO metricConfig, MetricFunction metricFunction) {
+  private static String getSelectionClause(MetricConfigDTO metricConfig,
+      MetricFunction metricFunction) {
     StringBuilder builder = new StringBuilder();
     String metricName = null;
     if (metricFunction.getMetricName().equals("*")) {
@@ -135,21 +137,19 @@ public class PqlUtils {
     } else {
       metricName = metricConfig.getName();
     }
-    builder.append(convertAggFunction(metricFunction.getFunctionName())).append("(").append(metricName).append(")");
+    builder.append(convertAggFunction(metricFunction.getFunctionName())).append("(")
+        .append(metricName).append(")");
     return builder.toString();
   }
-
 
   /**
    * Returns pqls to handle tables where metric names are a single dimension column,
    * and the metric values are all in a single value column
-   * @param request
-   * @param dataTimeSpec
-   * @return
-   * @throws Exception
    */
-  public static String getDimensionAsMetricPql(ThirdEyeRequest request, MetricFunction metricFunction,
-      Multimap<String, String> filterSet, TimeSpec dataTimeSpec, DatasetConfigDTO datasetConfig) throws Exception {
+  public static String getDimensionAsMetricPql(ThirdEyeRequest request,
+      MetricFunction metricFunction,
+      Multimap<String, String> filterSet, TimeSpec dataTimeSpec, DatasetConfigDTO datasetConfig)
+      throws Exception {
 
     // select sum(metric_values_column) from collection
     // where time_clause and metric_names_column=metric_name
@@ -165,7 +165,8 @@ public class PqlUtils {
         metricProperties.get(DimensionAsMetricProperties.METRIC_NAMES_COLUMNS.toString());
     String metricValuesColumn =
         metricProperties.get(DimensionAsMetricProperties.METRIC_VALUES_COLUMN.toString());
-    if (StringUtils.isBlank(metricNames) || StringUtils.isBlank(metricNamesColumns) || StringUtils.isBlank(metricValuesColumn)) {
+    if (StringUtils.isBlank(metricNames) || StringUtils.isBlank(metricNamesColumns) || StringUtils
+        .isBlank(metricValuesColumn)) {
       throw new RuntimeException("Metric properties must have properties " + Arrays
           .toString(DimensionAsMetricProperties.values()));
     }
@@ -186,23 +187,25 @@ public class PqlUtils {
     return dimensionAsMetricPql;
   }
 
-
   private static String getDimensionAsMetricPql(MetricFunction metricFunction, DateTime startTime,
       DateTime endTimeExclusive, Multimap<String, String> filterSet, List<String> groupBy,
-      TimeGranularity timeGranularity, TimeSpec dataTimeSpec, List<String> metricNames, List<String> metricNamesColumns,
+      TimeGranularity timeGranularity, TimeSpec dataTimeSpec, List<String> metricNames,
+      List<String> metricNamesColumns,
       String metricValuesColumn, int limit)
-          throws ExecutionException {
+      throws ExecutionException {
 
     MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
     String dataset = metricFunction.getDataset();
 
     StringBuilder sb = new StringBuilder();
-    String selectionClause = getDimensionAsMetricSelectionClause(metricFunction, metricValuesColumn);
+    String selectionClause = getDimensionAsMetricSelectionClause(metricFunction,
+        metricValuesColumn);
     sb.append("SELECT ").append(selectionClause).append(" FROM ").append(dataset);
     String betweenClause = getBetweenClause(startTime, endTimeExclusive, dataTimeSpec, dataset);
     sb.append(" WHERE ").append(betweenClause);
 
-    String metricWhereClause = getMetricWhereClause(metricConfig, metricFunction, metricNames, metricNamesColumns);
+    String metricWhereClause = getMetricWhereClause(metricConfig, metricFunction, metricNames,
+        metricNamesColumns);
     sb.append(metricWhereClause);
 
     String dimensionWhereClause = getDimensionWhereClause(filterSet);
@@ -223,8 +226,8 @@ public class PqlUtils {
     return sb.toString();
   }
 
-
-  private static String getMetricWhereClause(MetricConfigDTO metricConfig, MetricFunction metricFunction,
+  private static String getMetricWhereClause(MetricConfigDTO metricConfig,
+      MetricFunction metricFunction,
       List<String> metricNames, List<String> metricNamesColumns) {
     StringBuilder builder = new StringBuilder();
     if (!metricFunction.getMetricName().equals("*")) {
@@ -238,8 +241,8 @@ public class PqlUtils {
     return builder.toString();
   }
 
-
-  private static String getDimensionAsMetricSelectionClause(MetricFunction metricFunction, String metricValueColumn) {
+  private static String getDimensionAsMetricSelectionClause(MetricFunction metricFunction,
+      String metricValueColumn) {
     StringBuilder builder = new StringBuilder();
     String metricName = metricValueColumn;
     if (metricFunction.getMetricName().equals("*")) {
@@ -249,7 +252,8 @@ public class PqlUtils {
     return builder.toString();
   }
 
-  static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeSpec, String dataset)
+  static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeSpec,
+      String dataset)
       throws ExecutionException {
     TimeGranularity dataGranularity = timeSpec.getDataGranularity();
     long dataGranularityMillis = dataGranularity.toMillis();
@@ -274,7 +278,8 @@ public class PqlUtils {
     // this is crazy. epoch rounds up, but timeFormat down
     // we maintain this behavior for backward compatibility.
 
-    DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(timeFormat).withZone(Utils.getDataTimeZone(dataset));
+    DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(timeFormat)
+        .withZone(Utils.getDataTimeZone(dataset));
     String startUnits = inputDataDateTimeFormatter.print(start);
     String endUnits = inputDataDateTimeFormatter.print(endExclusive);
 
@@ -331,13 +336,17 @@ public class PqlUtils {
         components.add(makeComponentGrouped(key, OPERATOR_EQUALS, equals));
       }
       if (!notEquals.isEmpty()) {
-        components.add(makeComponentGrouped(key, OPERATOR_NOT_EQUALS, tokenize(PREFIX_NOT_EQUALS, notEquals)));
+        components.add(
+            makeComponentGrouped(key, OPERATOR_NOT_EQUALS, tokenize(PREFIX_NOT_EQUALS, notEquals)));
       }
-      components.addAll(makeComponents(key, OPERATOR_GREATER_THAN, tokenize(PREFIX_GREATER_THAN, greaterThan)));
-      components.addAll(makeComponents(key, OPERATOR_GREATER_THAN_EQUALS, tokenize(PREFIX_GREATER_THAN_EQUALS, greaterThanEquals)));
-      components.addAll(makeComponents(key, OPERATOR_LESS_THAN, tokenize(PREFIX_LESS_THAN, lessThen)));
-      components.addAll(makeComponents(key, OPERATOR_LESS_THAN_EQUALS, tokenize(PREFIX_LESS_THAN_EQUALS, lessThanEquals)));
-
+      components.addAll(
+          makeComponents(key, OPERATOR_GREATER_THAN, tokenize(PREFIX_GREATER_THAN, greaterThan)));
+      components.addAll(makeComponents(key, OPERATOR_GREATER_THAN_EQUALS,
+          tokenize(PREFIX_GREATER_THAN_EQUALS, greaterThanEquals)));
+      components
+          .addAll(makeComponents(key, OPERATOR_LESS_THAN, tokenize(PREFIX_LESS_THAN, lessThen)));
+      components.addAll(makeComponents(key, OPERATOR_LESS_THAN_EQUALS,
+          tokenize(PREFIX_LESS_THAN_EQUALS, lessThanEquals)));
     }
 
     if (components.isEmpty()) {
@@ -349,10 +358,14 @@ public class PqlUtils {
     return AND.join(components);
   }
 
-  private static String convertEpochToMinuteAggGranularity(String timeColumnName, TimeSpec timeSpec) {
-    String groupByTimeColumnName = String.format("dateTimeConvert(%s,'%d:%s:%s','%d:%s:%s','1:MINUTES')", timeColumnName,
-        timeSpec.getDataGranularity().getSize(), timeSpec.getDataGranularity().getUnit(), timeSpec.getFormat(),
-        timeSpec.getDataGranularity().getSize(), timeSpec.getDataGranularity().getUnit(), timeSpec.getFormat());
+  private static String convertEpochToMinuteAggGranularity(String timeColumnName,
+      TimeSpec timeSpec) {
+    String groupByTimeColumnName = String
+        .format("dateTimeConvert(%s,'%d:%s:%s','%d:%s:%s','1:MINUTES')", timeColumnName,
+            timeSpec.getDataGranularity().getSize(), timeSpec.getDataGranularity().getUnit(),
+            timeSpec.getFormat(),
+            timeSpec.getDataGranularity().getSize(), timeSpec.getDataGranularity().getUnit(),
+            timeSpec.getFormat());
     return groupByTimeColumnName;
   }
 
@@ -397,24 +410,27 @@ public class PqlUtils {
     if (!StringUtils.isNumeric(value)) {
       quoteChar = "\"";
       if (value.contains(quoteChar)) {
-        quoteChar = "\'";
+        quoteChar = "'";
       }
       if (value.contains(quoteChar)) {
-        throw new IllegalArgumentException(String.format("Could not find quote char for expression: %s", value));
+        throw new IllegalArgumentException(
+            String.format("Could not find quote char for expression: %s", value));
       }
     }
     return String.format("%s%s%s", quoteChar, value, quoteChar);
   }
 
   /**
-   * Convert the name of the MetricAggFunction to the name expected by Pinot. See PQL Documentation for details.
+   * Convert the name of the MetricAggFunction to the name expected by Pinot. See PQL Documentation
+   * for details.
    *
    * @param aggFunction function enum to convert
    * @return a valid pinot function name
    */
   public static String convertAggFunction(MetricAggFunction aggFunction) {
     if (aggFunction.isPercentile()) {
-      return aggFunction.name().replaceFirst(MetricAggFunction.PERCENTILE_PREFIX, PERCENTILE_TDIGEST_PREFIX);
+      return aggFunction.name()
+          .replaceFirst(MetricAggFunction.PERCENTILE_PREFIX, PERCENTILE_TDIGEST_PREFIX);
     }
     return aggFunction.name();
   }
@@ -427,7 +443,8 @@ public class PqlUtils {
    * @param values values
    * @return grouped component
    */
-  private static String makeComponentGrouped(String key, String operator, Collection<String> values) {
+  private static String makeComponentGrouped(String key, String operator,
+      Collection<String> values) {
     List<String> quoted = new ArrayList<>();
     for (String value : values) {
       quoted.add(quote(value));
@@ -444,7 +461,8 @@ public class PqlUtils {
    * @param values collection of values
    * @return set of components
    */
-  private static Set<String> makeComponents(String key, String operator, Collection<String> values) {
+  private static Set<String> makeComponents(String key, String operator,
+      Collection<String> values) {
     Set<String> output = new HashSet<>();
     for (String value : values) {
       output.add(makeComponent(key, operator, value));
@@ -457,7 +475,7 @@ public class PqlUtils {
    *
    * @param key key
    * @param value raw value
-   * @param operator  operator
+   * @param operator operator
    * @return pair of prefix, value
    */
   private static String makeComponent(String key, String operator, String value) {
@@ -488,7 +506,8 @@ public class PqlUtils {
    */
   private static String tokenize(String prefix, String value) {
     if (!value.startsWith(prefix)) {
-      throw new IllegalArgumentException(String.format("Expected value with prefix '%s' but got '%s", prefix, value));
+      throw new IllegalArgumentException(
+          String.format("Expected value with prefix '%s' but got '%s", prefix, value));
     }
     return value.substring(prefix.length());
   }

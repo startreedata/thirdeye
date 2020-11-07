@@ -22,11 +22,11 @@ package org.apache.pinot.thirdeye.anomaly.detection.trigger.utils;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  * Configuration class for DataAvailabilityListener.
  */
 public class DataAvailabilitySchedulingConfiguration {
+
   private String consumerClass;
   private String kafkaBootstrapServers;
   private String kafkaTopic;

@@ -32,55 +32,52 @@ import org.apache.pinot.thirdeye.util.AnomalyOffset;
 import org.joda.time.DateTime;
 
 public interface AnomalyFunction {
-  /** Initializes this function with its configuration, call before analyze */
+
+  /**
+   * Initializes this function with its configuration, call before analyze
+   */
   void init(AnomalyFunctionDTO spec) throws Exception;
 
-  /** Returns the specification for this function instance */
+  /**
+   * Returns the specification for this function instance
+   */
   AnomalyFunctionDTO getSpec();
 
   /**
-   * Returns the time ranges of data that is used by this anomaly function. This method is useful when multiple time
+   * Returns the time ranges of data that is used by this anomaly function. This method is useful
+   * when multiple time
    * intervals are needed for fetching current vs baseline data
    *
    * @param monitoringWindowStartTime inclusive
    * @param monitoringWindowEndTime exclusive
-   *
    * @return the time ranges of data that is used by this anomaly function
    */
-  List<Pair<Long, Long>> getDataRangeIntervals(Long monitoringWindowStartTime, Long monitoringWindowEndTime);
+  List<Pair<Long, Long>> getDataRangeIntervals(Long monitoringWindowStartTime,
+      Long monitoringWindowEndTime);
 
   /**
    * Analyzes a metric time series and returns any anomalous points / intervals.
-   * @param exploredDimensions
-   *          Pairs of dimension value and name corresponding to timeSeries.
-   * @param timeSeries
-   *          The metric time series data.
-   * @param windowStart
-   *          The beginning of the range corresponding to timeSeries.
-   * @param windowEnd
-   *          The end of the range corresponding to timeSeries.
-   * @param knownAnomalies
-   *          Any known anomalies in the time range.
-   * @return
-   *         A list of anomalies that were not previously known.
+   *
+   * @param exploredDimensions Pairs of dimension value and name corresponding to timeSeries.
+   * @param timeSeries The metric time series data.
+   * @param windowStart The beginning of the range corresponding to timeSeries.
+   * @param windowEnd The end of the range corresponding to timeSeries.
+   * @param knownAnomalies Any known anomalies in the time range.
+   * @return A list of anomalies that were not previously known.
    */
   List<AnomalyResult> analyze(DimensionMap exploredDimensions, MetricTimeSeries timeSeries,
       DateTime windowStart, DateTime windowEnd, List<MergedAnomalyResultDTO> knownAnomalies)
       throws Exception;
+
   /**
    * Analyzes a metric time series before windowStart and returns any anomalous points / intervals.
-   * @param exploredDimensions
-   *          Pairs of dimension value and name corresponding to timeSeries.
-   * @param timeSeries
-   *          The metric time series data.
-   * @param windowStart
-   *          The beginning of the range corresponding to timeSeries.
-   * @param windowEnd
-   *          The end of the range corresponding to timeSeries.
-   * @param knownAnomalies
-   *          Any known anomalies in the time range.
-   * @return
-   *         A list of anomalies that were not previously known.
+   *
+   * @param exploredDimensions Pairs of dimension value and name corresponding to timeSeries.
+   * @param timeSeries The metric time series data.
+   * @param windowStart The beginning of the range corresponding to timeSeries.
+   * @param windowEnd The end of the range corresponding to timeSeries.
+   * @param knownAnomalies Any known anomalies in the time range.
+   * @return A list of anomalies that were not previously known.
    */
 
   List<AnomalyResult> offlineAnalyze(DimensionMap exploredDimensions, MetricTimeSeries timeSeries,
@@ -88,17 +85,13 @@ public interface AnomalyFunction {
       throws Exception;
 
   /**
-   * Computes the score and severity according to the current and baseline of the given timeSeries and stores the
+   * Computes the score and severity according to the current and baseline of the given timeSeries
+   * and stores the
    * information to the merged anomaly. The start and end time of the time series is provided
    *
-   * @param anomalyToUpdated
-   *          the merged anomaly to be updated.
-   * @param timeSeries
-   *          The metric time series data.
-   * @param knownAnomalies
-   *          Any known anomalies in the time range.
-   * @return
-   *         A list of anomalies that were not previously known.
+   * @param anomalyToUpdated the merged anomaly to be updated.
+   * @param timeSeries The metric time series data.
+   * @param knownAnomalies Any known anomalies in the time range.
    * @return the severity according to the current and baseline of the given timeSeries
    */
   void updateMergedAnomalyInfo(MergedAnomalyResultDTO anomalyToUpdated, MetricTimeSeries timeSeries,
@@ -136,7 +129,6 @@ public interface AnomalyFunction {
       List<MergedAnomalyResultDTO> knownAnomalies);
 
   /**
-   *
    * @return List of property keys applied in case of specific anomaly function
    */
   String[] getPropertyKeys();
@@ -149,14 +141,12 @@ public interface AnomalyFunction {
    * The data we need to fetch may not follow a simple rule
    * such as, "fetch x number of days before and after for this granularity".
    * We have come to see that this data to fetch, might depend on which function is fetching it,
-   * as some functions are designed to already fetch all data they need, and no offset needs to be supplied.
+   * as some functions are designed to already fetch all data they need, and no offset needs to be
+   * supplied.
    * Hence it is best that the function makes the decision of how much data to fetch.
    *
    * To summarize, this method will allow us to decide the offset for an anomaly region,
    * and append appropriate padding before and after the anomaly region, while FETCHING DATA FOR IT
-   *
-   * @param datasetConfig
-   * @return
    */
   AnomalyOffset getAnomalyWindowOffset(DatasetConfigDTO datasetConfig);
 
@@ -164,14 +154,14 @@ public interface AnomalyFunction {
    * This method is added to support the viewing of anomalies on the dashboard.
    * When displaying anomalies, we first fetch the data for the baseline and current.
    * Some functions fetch more historical data than just the anomaly window provided.
-   * But when displaying, we should display only some of it, typically some padding before and after the anomaly region
+   * But when displaying, we should display only some of it, typically some padding before and after
+   * the anomaly region
    * This is again logic which is specific to the function requesting it.
-   * Hence it is best that the function makes the decision of how much of the fetched data it wants to actually display.
+   * Hence it is best that the function makes the decision of how much of the fetched data it wants
+   * to actually display.
    *
    * To summarize, this method will allow us to decide the offset for an anomaly region,
    * and append appropriate padding before and after the anomaly region, while VIEWING IT
-   * @param datasetConfig
-   * @return
    */
   AnomalyOffset getViewWindowOffset(DatasetConfigDTO datasetConfig);
 }

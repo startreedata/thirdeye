@@ -29,8 +29,8 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class AlertScreenshotHelper {
+
   private static final Logger LOG = LoggerFactory.getLogger(AlertScreenshotHelper.class);
 
   private static final String TEMP_PATH = "/tmp/graph";
@@ -38,14 +38,18 @@ public class AlertScreenshotHelper {
   private static final String GRAPH_SCREENSHOT_GENERATOR_SCRIPT = "/getGraphPnj.js";
   private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
-  public static String takeGraphScreenShot(final String anomalyId, final ThirdEyeConfiguration configuration) throws JobExecutionException {
-    return takeGraphScreenShot(anomalyId, configuration.getDashboardHost(), configuration.getRootDir(),
+  public static String takeGraphScreenShot(final String anomalyId,
+      final ThirdEyeConfiguration configuration) throws JobExecutionException {
+    return takeGraphScreenShot(anomalyId, configuration.getDashboardHost(),
+        configuration.getRootDir(),
         configuration.getPhantomJsPath());
   }
 
-  public static String takeGraphScreenShot(final String anomalyId, final String dashboardHost, final String rootDir,
+  public static String takeGraphScreenShot(final String anomalyId, final String dashboardHost,
+      final String rootDir,
       final String phantomJsPath) {
-    Callable<String> callable = () -> takeScreenshot(anomalyId, dashboardHost, rootDir, phantomJsPath);
+    Callable<String> callable = () -> takeScreenshot(anomalyId, dashboardHost, rootDir,
+        phantomJsPath);
     Future<String> task = executorService.submit(callable);
     String result = null;
     try {
@@ -57,15 +61,17 @@ public class AlertScreenshotHelper {
     return result;
   }
 
-  private static String takeScreenshot(String anomalyId, String dashboardHost, String rootDir, String phantomJsPath) throws Exception {
+  private static String takeScreenshot(String anomalyId, String dashboardHost, String rootDir,
+      String phantomJsPath) throws Exception {
     String imgRoute = dashboardHost + "/app/#/screenshot/" + anomalyId;
     LOG.info("imgRoute {}", imgRoute);
     String phantomScript = rootDir + GRAPH_SCREENSHOT_GENERATOR_SCRIPT;
     LOG.info("Phantom JS script {}", phantomScript);
     String imgPath = TEMP_PATH + anomalyId + SCREENSHOT_FILE_SUFFIX;
     LOG.info("imgPath {}", imgPath);
-    Process proc = Runtime.getRuntime().exec(new String[]{phantomJsPath, "phantomjs", "--ssl-protocol=any", "--ignore-ssl-errors=true",
-        phantomScript, imgRoute, imgPath});
+    Process proc = Runtime.getRuntime().exec(
+        new String[]{phantomJsPath, "phantomjs", "--ssl-protocol=any", "--ignore-ssl-errors=true",
+            phantomScript, imgRoute, imgPath});
     LOG.info("Waiting for phantomjs...");
     boolean isComplete = proc.waitFor(2, TimeUnit.MINUTES);
     LOG.info("phantomjs complete status after waiting: {}", isComplete);

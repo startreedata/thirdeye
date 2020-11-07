@@ -38,12 +38,13 @@ import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * The AnomalyContextPipeline resolves an anomaly entity to a rootcause search context that can serve as input to a typical RCA framework.
+ * The AnomalyContextPipeline resolves an anomaly entity to a rootcause search context that can
+ * serve as input to a typical RCA framework.
  * Populates time ranges, metric urn, and dimension filters.
  */
 public class AnomalyContextPipeline extends Pipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyContextPipeline.class);
 
   private static final String PROP_BASELINE_OFFSET = "baselineOffset";
@@ -68,7 +69,9 @@ public class AnomalyContextPipeline extends Pipeline {
    * @param baselineOffset baseline range offset
    * @param analysisWindow analysis range window up to end of anomaly
    */
-  public AnomalyContextPipeline(String outputName, Set<String> inputNames, MergedAnomalyResultManager anomalyDAO, MetricConfigManager metricDAO, long baselineOffset, long analysisWindow) {
+  public AnomalyContextPipeline(String outputName, Set<String> inputNames,
+      MergedAnomalyResultManager anomalyDAO, MetricConfigManager metricDAO, long baselineOffset,
+      long analysisWindow) {
     super(outputName, inputNames);
     this.anomalyDAO = anomalyDAO;
     this.metricDAO = metricDAO;
@@ -81,14 +84,18 @@ public class AnomalyContextPipeline extends Pipeline {
    *
    * @param outputName pipeline output name
    * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_BASELINE_OFFSET}, {@code PROP_ANALYSIS_WINDOW})
+   * @param properties configuration properties ({@code PROP_BASELINE_OFFSET}, {@code
+   *     PROP_ANALYSIS_WINDOW})
    */
-  public AnomalyContextPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public AnomalyContextPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    this.baselineOffset = MapUtils.getLongValue(properties, PROP_BASELINE_OFFSET, PROP_BASELINE_OFFSET_DEFAULT);
-    this.analysisWindow = MapUtils.getLongValue(properties, PROP_ANALYSIS_WINDOW, PROP_ANALYSIS_WINDOW_DEFAULT);
+    this.baselineOffset = MapUtils
+        .getLongValue(properties, PROP_BASELINE_OFFSET, PROP_BASELINE_OFFSET_DEFAULT);
+    this.analysisWindow = MapUtils
+        .getLongValue(properties, PROP_ANALYSIS_WINDOW, PROP_ANALYSIS_WINDOW_DEFAULT);
   }
 
   @Override
@@ -124,8 +131,11 @@ public class AnomalyContextPipeline extends Pipeline {
 
       // time ranges
       output.add(TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANOMALY, start, end));
-      output.add(TimeRangeEntity.fromRange(0.8, TimeRangeEntity.TYPE_BASELINE, start - this.baselineOffset, end - this.baselineOffset));
-      output.add(TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANALYSIS, end - this.analysisWindow, end));
+      output.add(TimeRangeEntity
+          .fromRange(0.8, TimeRangeEntity.TYPE_BASELINE, start - this.baselineOffset,
+              end - this.baselineOffset));
+      output.add(TimeRangeEntity
+          .fromRange(1.0, TimeRangeEntity.TYPE_ANALYSIS, end - this.analysisWindow, end));
 
       // filters
       Multimap<String, String> filters = TreeMultimap.create();
@@ -133,12 +143,12 @@ public class AnomalyContextPipeline extends Pipeline {
         filters.put(entry.getKey(), entry.getValue());
 
         // TODO deprecate dimension entity?
-        output.add(DimensionEntity.fromDimension(1.0, entry.getKey(), entry.getValue(), DimensionEntity.TYPE_PROVIDED));
+        output.add(DimensionEntity
+            .fromDimension(1.0, entry.getKey(), entry.getValue(), DimensionEntity.TYPE_PROVIDED));
       }
 
       // metric
       output.add(MetricEntity.fromMetric(1.0, metricId, filters));
-
     }
 
     return new PipelineResult(context, output);

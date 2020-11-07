@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.cube.data.node;
 import java.util.List;
 import org.apache.commons.lang3.ObjectUtils;
 
-
 public class CubeNodeUtils {
 
   /**
@@ -30,14 +29,14 @@ public class CubeNodeUtils {
    *
    * @param node1 the root node of the first hierarchical tree.
    * @param node2 the root node of the second hierarchical tree.
-   *
    * @return true if both hierarchical tree are the same.
    */
   public static boolean equalHierarchy(CubeNode node1, CubeNode node2) {
     return equalHierarchy(node1, null, node2, null);
   }
 
-  public static boolean equalHierarchy(CubeNode node1, CubeNode node1Parent, CubeNode node2, CubeNode node2Parent) {
+  public static boolean equalHierarchy(CubeNode node1, CubeNode node1Parent, CubeNode node2,
+      CubeNode node2Parent) {
     if (!ObjectUtils.equals(node1, node2)) { // Return false if data of the nodes are different.
       return false;
     } else { // Check hierarchy if the two given nodes have the same data value.
@@ -67,5 +66,4 @@ public class CubeNodeUtils {
       return true;
     }
   }
-
 }

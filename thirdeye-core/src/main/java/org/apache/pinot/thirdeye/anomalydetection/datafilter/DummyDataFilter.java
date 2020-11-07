@@ -24,6 +24,7 @@ import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 
 public class DummyDataFilter extends BaseDataFilter {
+
   @Override
   public void setParameters(Map<String, String> props) {
   }
@@ -34,7 +35,8 @@ public class DummyDataFilter extends BaseDataFilter {
   }
 
   @Override
-  public boolean isQualified(MetricTimeSeries metricTimeSeries, DimensionMap dimensionMap, long windowStart,
+  public boolean isQualified(MetricTimeSeries metricTimeSeries, DimensionMap dimensionMap,
+      long windowStart,
       long windowEnd) {
     return true;
   }

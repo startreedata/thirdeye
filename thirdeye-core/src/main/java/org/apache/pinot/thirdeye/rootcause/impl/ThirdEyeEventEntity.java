@@ -24,12 +24,12 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 
-
 public class ThirdEyeEventEntity extends EventEntity {
 
   private final EventDTO dto;
 
-  private ThirdEyeEventEntity(String urn, double score, List<? extends Entity> related, long id, EventDTO dto, String eventType) {
+  private ThirdEyeEventEntity(String urn, double score, List<? extends Entity> related, long id,
+      EventDTO dto, String eventType) {
     super(urn, score, related, eventType, id);
     this.dto = dto;
   }
@@ -40,21 +40,25 @@ public class ThirdEyeEventEntity extends EventEntity {
 
   @Override
   public ThirdEyeEventEntity withScore(double score) {
-    return new ThirdEyeEventEntity(this.getUrn(), score, this.getRelated(), this.getId(), this.dto, getEventType());
+    return new ThirdEyeEventEntity(this.getUrn(), score, this.getRelated(), this.getId(), this.dto,
+        getEventType());
   }
 
   @Override
   public ThirdEyeEventEntity withRelated(List<? extends Entity> related) {
-    return new ThirdEyeEventEntity(this.getUrn(), this.getScore(), related, this.getId(), this.dto, getEventType());
+    return new ThirdEyeEventEntity(this.getUrn(), this.getScore(), related, this.getId(), this.dto,
+        getEventType());
   }
 
   public static ThirdEyeEventEntity fromDTO(double score, EventDTO dto, String eventType) {
     EntityType type = new EntityType(EventEntity.TYPE.getPrefix() + eventType + ":");
     String urn = type.formatURN(dto.getId());
-    return new ThirdEyeEventEntity(urn, score, new ArrayList<Entity>(), dto.getId(), dto, eventType);
+    return new ThirdEyeEventEntity(urn, score, new ArrayList<Entity>(), dto.getId(), dto,
+        eventType);
   }
 
-  public static ThirdEyeEventEntity fromDTO(double score, List<? extends Entity> related, EventDTO dto, String eventType) {
+  public static ThirdEyeEventEntity fromDTO(double score, List<? extends Entity> related,
+      EventDTO dto, String eventType) {
     EntityType type = new EntityType(EventEntity.TYPE.getPrefix() + eventType + ":");
     String urn = type.formatURN(dto.getId());
     return new ThirdEyeEventEntity(urn, score, related, dto.getId(), dto, eventType);

@@ -21,12 +21,12 @@ package org.apache.pinot.thirdeye.auto.onboard;
 
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 
-
 /**
  * This is the abstract parent class for all auto-onboard metadata services for various datasources
  */
 public abstract class AutoOnboard {
-  private MetadataSourceConfig metadataSourceConfig;
+
+  private final MetadataSourceConfig metadataSourceConfig;
 
   public AutoOnboard(MetadataSourceConfig metadataSourceConfig) {
     this.metadataSourceConfig = metadataSourceConfig;
@@ -37,7 +37,8 @@ public abstract class AutoOnboard {
   }
 
   /**
-   * Method which contains implementation of what needs to be done as part of onboarding for this data source
+   * Method which contains implementation of what needs to be done as part of onboarding for this
+   * data source
    */
   public abstract void run();
 

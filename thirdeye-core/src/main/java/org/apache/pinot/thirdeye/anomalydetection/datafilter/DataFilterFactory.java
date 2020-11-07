@@ -25,6 +25,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class DataFilterFactory {
+
   public static final String FILTER_TYPE_KEY = "type";
   private static final DataFilter DUMMY_DATA_FILTER = new DummyDataFilter();
 

@@ -24,11 +24,11 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.apache.pinot.thirdeye.cube.data.node.BaseCubeNode;
 
-
 /**
  * A CubeNode for additive metrics such as page view count.
  */
 public class AdditiveCubeNode extends BaseCubeNode<AdditiveCubeNode, AdditiveRow> {
+
   private double baselineValue;
   private double currentValue;
 
@@ -149,12 +149,13 @@ public class AdditiveCubeNode extends BaseCubeNode<AdditiveCubeNode, AdditiveRow
   }
 
   /**
-   * ToString that handles if the given cube node is null, i.e., a root cube node. Moreover, it does not invoke
+   * ToString that handles if the given cube node is null, i.e., a root cube node. Moreover, it does
+   * not invoke
    * parent's toString() to prevent multiple calls of toString to their parents.
    *
    * @param node the node to be converted to string.
-   *
-   * @return a simple string representation of a parent cube node, which does not toString its parent node recursively.
+   * @return a simple string representation of a parent cube node, which does not toString its
+   *     parent node recursively.
    */
   private String toStringAsParent(AdditiveCubeNode node) {
     if (node == null) {

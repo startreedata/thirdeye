@@ -19,6 +19,6 @@
 
 package org.apache.pinot.thirdeye.datalayer.entity;
 
-public class AlertSnapshotIndex extends AbstractIndexEntity{
+public class AlertSnapshotIndex extends AbstractIndexEntity {
 
 }

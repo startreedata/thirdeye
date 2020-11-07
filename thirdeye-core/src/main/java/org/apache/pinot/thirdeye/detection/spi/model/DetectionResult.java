@@ -25,12 +25,12 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
-
 /**
  * The detection result. Contains a list of anomalies detected and time series
  * (which can include time stamps, predicted baseline, current value, upper/lower bounds)
  */
 public class DetectionResult {
+
   private final List<MergedAnomalyResultDTO> anomalies;
   private final TimeSeries timeseries;
 
@@ -49,6 +49,7 @@ public class DetectionResult {
 
   /**
    * Create a empty detection result
+   *
    * @return the empty detection result
    */
   public static DetectionResult empty() {
@@ -57,6 +58,7 @@ public class DetectionResult {
 
   /**
    * Create a detection result from a list of anomalies
+   *
    * @param anomalies the list of anomalies generated
    * @return the detection result contains the list of anomalies
    */
@@ -66,11 +68,14 @@ public class DetectionResult {
 
   /**
    * Create a detection result from a list of anomalies and time series
+   *
    * @param anomalies the list of anomalies generated
-   * @param timeSeries the time series which including the current, predicted baseline and optionally upper and lower bounds
+   * @param timeSeries the time series which including the current, predicted baseline and
+   *     optionally upper and lower bounds
    * @return the detection result contains the list of anomalies and the time series
    */
-  public static DetectionResult from(List<MergedAnomalyResultDTO> anomalies, TimeSeries timeSeries) {
+  public static DetectionResult from(List<MergedAnomalyResultDTO> anomalies,
+      TimeSeries timeSeries) {
     return new DetectionResult(anomalies, timeSeries);
   }
 

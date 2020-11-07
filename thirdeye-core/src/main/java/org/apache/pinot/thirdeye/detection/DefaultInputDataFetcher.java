@@ -38,14 +38,14 @@ import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
 import org.apache.pinot.thirdeye.detection.spi.model.InputData;
 import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
 
-
 /**
  * Input data fetcher.
  * For components to fetch the input data it need.
  */
 public class DefaultInputDataFetcher implements InputDataFetcher {
-  private DataProvider provider;
-  private long configId;
+
+  private final DataProvider provider;
+  private final long configId;
 
   public DefaultInputDataFetcher(DataProvider provider, long configId) {
     this.provider = provider;
@@ -56,25 +56,34 @@ public class DefaultInputDataFetcher implements InputDataFetcher {
    * Fetch data for input data spec
    */
   public InputData fetchData(InputDataSpec inputDataSpec) {
-    Map<MetricSlice, DataFrame> timeseries = provider.fetchTimeseries(inputDataSpec.getTimeseriesSlices());
-    Map<MetricSlice, DataFrame> aggregates = provider.fetchAggregates(inputDataSpec.getAggregateSlices(), Collections.<String>emptyList(), -1);
+    Map<MetricSlice, DataFrame> timeseries = provider
+        .fetchTimeseries(inputDataSpec.getTimeseriesSlices());
+    Map<MetricSlice, DataFrame> aggregates = provider
+        .fetchAggregates(inputDataSpec.getAggregateSlices(), Collections.emptyList(), -1);
 
     Collection<AnomalySlice> slicesWithConfigId = new HashSet<>();
     for (AnomalySlice slice : inputDataSpec.getAnomalySlices()) {
       slicesWithConfigId.add(slice.withDetectionId(configId));
     }
-    Multimap<AnomalySlice, MergedAnomalyResultDTO> existingAnomalies = provider.fetchAnomalies(slicesWithConfigId);
+    Multimap<AnomalySlice, MergedAnomalyResultDTO> existingAnomalies = provider
+        .fetchAnomalies(slicesWithConfigId);
 
     Multimap<EventSlice, EventDTO> events = provider.fetchEvents(inputDataSpec.getEventSlices());
     Map<Long, MetricConfigDTO> metrics = provider.fetchMetrics(inputDataSpec.getMetricIds());
-    Map<String, DatasetConfigDTO> datasets = provider.fetchDatasets(inputDataSpec.getDatasetNames());
-    Multimap<EvaluationSlice, EvaluationDTO> evaluations = provider.fetchEvaluations(inputDataSpec.getEvaluationSlices(), configId);
-    Map<Long, DatasetConfigDTO> datasetForMetricId = fetchDatasetForMetricId(inputDataSpec.getMetricIdsForDatasets());
-    Map<InputDataSpec.MetricAndDatasetName, MetricConfigDTO> metricForMetricAndDatasetName = fetchMetricForDatasetAndMetricNames(inputDataSpec.getMetricAndDatasetNames());
-    return new InputData(inputDataSpec, timeseries, aggregates, existingAnomalies, events, metrics, datasets, evaluations, datasetForMetricId, metricForMetricAndDatasetName);
+    Map<String, DatasetConfigDTO> datasets = provider
+        .fetchDatasets(inputDataSpec.getDatasetNames());
+    Multimap<EvaluationSlice, EvaluationDTO> evaluations = provider
+        .fetchEvaluations(inputDataSpec.getEvaluationSlices(), configId);
+    Map<Long, DatasetConfigDTO> datasetForMetricId = fetchDatasetForMetricId(
+        inputDataSpec.getMetricIdsForDatasets());
+    Map<InputDataSpec.MetricAndDatasetName, MetricConfigDTO> metricForMetricAndDatasetName = fetchMetricForDatasetAndMetricNames(
+        inputDataSpec.getMetricAndDatasetNames());
+    return new InputData(inputDataSpec, timeseries, aggregates, existingAnomalies, events, metrics,
+        datasets, evaluations, datasetForMetricId, metricForMetricAndDatasetName);
   }
 
-  private Map<InputDataSpec.MetricAndDatasetName, MetricConfigDTO> fetchMetricForDatasetAndMetricNames(Collection<InputDataSpec.MetricAndDatasetName> metricNameAndDatasetNames){
+  private Map<InputDataSpec.MetricAndDatasetName, MetricConfigDTO> fetchMetricForDatasetAndMetricNames(
+      Collection<InputDataSpec.MetricAndDatasetName> metricNameAndDatasetNames) {
     Map<InputDataSpec.MetricAndDatasetName, MetricConfigDTO> result = new HashMap<>();
     for (InputDataSpec.MetricAndDatasetName pair : metricNameAndDatasetNames) {
       result.put(pair, this.provider.fetchMetric(pair.getMetricName(), pair.getDatasetName()));
@@ -82,18 +91,18 @@ public class DefaultInputDataFetcher implements InputDataFetcher {
     return result;
   }
 
-  private Map<Long, DatasetConfigDTO> fetchDatasetForMetricId(Collection<Long> metricIdsForDatasets) {
+  private Map<Long, DatasetConfigDTO> fetchDatasetForMetricId(
+      Collection<Long> metricIdsForDatasets) {
     Map<Long, MetricConfigDTO> metrics = provider.fetchMetrics(metricIdsForDatasets);
     Map<Long, String> metricIdToDataSet = new HashMap<>();
-    for (Map.Entry<Long, MetricConfigDTO> entry : metrics.entrySet()){
+    for (Map.Entry<Long, MetricConfigDTO> entry : metrics.entrySet()) {
       metricIdToDataSet.put(entry.getKey(), entry.getValue().getDataset());
     }
     Map<String, DatasetConfigDTO> datasets = provider.fetchDatasets(metricIdToDataSet.values());
     Map<Long, DatasetConfigDTO> result = new HashMap<>();
-    for (Map.Entry<Long, MetricConfigDTO> entry : metrics.entrySet()){
+    for (Map.Entry<Long, MetricConfigDTO> entry : metrics.entrySet()) {
       result.put(entry.getKey(), datasets.get(entry.getValue().getDataset()));
     }
     return result;
   }
-
 }

@@ -23,16 +23,18 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Map;
 
-
 /**
- * This cost function consider change difference, change changeRatio, and node size (contribution percentage of a node).
- * More for details: {@link CostFunction#computeCost(double, double, double, double, double, double, double, double, double)}.
+ * This cost function consider change difference, change changeRatio, and node size (contribution
+ * percentage of a node).
+ * More for details: {@link CostFunction#computeCost(double, double, double, double, double, double,
+ * double, double, double)}.
  */
 public class BalancedCostFunction implements CostFunction {
+
   public static final String CHANGE_CONTRIBUTION_THRESHOLD_PARAM = "threshold";
   // The threshold to the contribution to overall changes in percentage
   private double changeContributionThreshold = 3d;
-  private double epsilon = 0.00001;
+  private final double epsilon = 0.00001;
 
   public BalancedCostFunction() {
   }
@@ -54,28 +56,26 @@ public class BalancedCostFunction implements CostFunction {
   }
 
   /**
-   * Returns the cost that consider change difference, change changeRatio, and node size (contribution percentage of a node).
+   * Returns the cost that consider change difference, change changeRatio, and node size
+   * (contribution percentage of a node).
    *
    * In brief, this function uses this formula to compute the cost:
-   *   change difference * log(contribution percentage * change changeRatio)
+   * change difference * log(contribution percentage * change changeRatio)
    *
-   * In addition, if a node's contribution to overall changes is smaller than the threshold, which is defined when
+   * In addition, if a node's contribution to overall changes is smaller than the threshold, which
+   * is defined when
    * constructing this class, then the cost is always zero.
    *
    * @param parentChangeRatio the changeRatio between baseline and current value of parent node.
    * @param baselineValue the baseline value of the current node.
    * @param currentValue the current value of the current node.
-   * @param baselineSize
-   * @param currentSize
    * @param topBaselineValue the baseline value of the top node.
    * @param topCurrentValue the current value of the top node.
-   *
-   * @param topBaselineSize
-   * @param topCurrentSize
    * @return the cost that consider change difference, change changeRatio, and node size.
    */
   @Override
-  public double computeCost(double parentChangeRatio, double baselineValue, double currentValue, double baselineSize,
+  public double computeCost(double parentChangeRatio, double baselineValue, double currentValue,
+      double baselineSize,
       double currentSize, double topBaselineValue, double topCurrentValue, double topBaselineSize,
       double topCurrentSize) {
 
@@ -93,13 +93,18 @@ public class BalancedCostFunction implements CostFunction {
     if (Double.compare(contribution, 1) > 0 || Double.compare(contribution, 0) < 0) {
       System.out.println("Here");
     }
-    Preconditions.checkState(Double.compare(contribution, 0) >= 0, "Contribution {} is smaller than 0.", contribution);
-    Preconditions.checkState(Double.compare(contribution, 1) <= 0, "Contribution {} is larger than 1", contribution);
+    Preconditions
+        .checkState(Double.compare(contribution, 0) >= 0, "Contribution {} is smaller than 0.",
+            contribution);
+    Preconditions
+        .checkState(Double.compare(contribution, 1) <= 0, "Contribution {} is larger than 1",
+            contribution);
     // The cost function considers change difference, change changeRatio, and node size (i.e., contribution)
     return fillEmptyValuesAndGetError(baselineValue, currentValue, parentChangeRatio, contribution);
   }
 
-  private static double error(double baselineValue, double currentValue, double parentRatio, double contribution) {
+  private static double error(double baselineValue, double currentValue, double parentRatio,
+      double contribution) {
     double expectedBaselineValue = parentRatio * baselineValue;
     double expectedRatio = currentValue / expectedBaselineValue;
     double weightedExpectedRatio = (expectedRatio - 1) * contribution + 1;
@@ -128,9 +133,11 @@ public class BalancedCostFunction implements CostFunction {
 
   /**
    * Auto fill in baselineValue and currentValue using parentRatio when one of them is zero.
-   * If baselineValue and currentValue both are zero or parentRatio is not finite, this function returns 0.
+   * If baselineValue and currentValue both are zero or parentRatio is not finite, this function
+   * returns 0.
    */
-  private static double fillEmptyValuesAndGetError(double baselineValue, double currentValue, double parentRatio,
+  private static double fillEmptyValuesAndGetError(double baselineValue, double currentValue,
+      double parentRatio,
       double contribution) {
     if (Double.compare(0., parentRatio) == 0 || Double.isNaN(parentRatio)) {
       parentRatio = 1d;

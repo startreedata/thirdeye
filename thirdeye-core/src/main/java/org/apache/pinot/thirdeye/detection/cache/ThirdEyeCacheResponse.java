@@ -30,7 +30,6 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Class used to represent the response from fetch request to centralized cache.
  */
@@ -40,11 +39,12 @@ public class ThirdEyeCacheResponse {
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeCacheResponse.class);
 
   private final ThirdEyeCacheRequest request;
-  private List<TimeSeriesDataPoint> timeSeriesRows;
+  private final List<TimeSeriesDataPoint> timeSeriesRows;
   private long firstTimestamp;
   private long lastTimestamp;
 
-  public ThirdEyeCacheResponse(ThirdEyeCacheRequest request, List<TimeSeriesDataPoint> timeSeriesRows) {
+  public ThirdEyeCacheResponse(ThirdEyeCacheRequest request,
+      List<TimeSeriesDataPoint> timeSeriesRows) {
     this.request = request;
     this.timeSeriesRows = timeSeriesRows;
     this.initializeFirstAndLastTimestamps();
@@ -66,23 +66,41 @@ public class ThirdEyeCacheResponse {
     }
   }
 
-  public ThirdEyeCacheRequest getCacheRequest() { return request; }
-  public List<TimeSeriesDataPoint> getTimeSeriesRows() { return timeSeriesRows; }
+  public ThirdEyeCacheRequest getCacheRequest() {
+    return request;
+  }
 
-  public int getNumRows() { return timeSeriesRows.size(); }
-  public boolean hasNoRows() { return timeSeriesRows.isEmpty(); }
-  public long getFirstTimestamp() { return firstTimestamp; }
-  public long getLastTimestamp() { return lastTimestamp; }
+  public List<TimeSeriesDataPoint> getTimeSeriesRows() {
+    return timeSeriesRows;
+  }
+
+  public int getNumRows() {
+    return timeSeriesRows.size();
+  }
+
+  public boolean hasNoRows() {
+    return timeSeriesRows.isEmpty();
+  }
+
+  public long getFirstTimestamp() {
+    return firstTimestamp;
+  }
+
+  public long getLastTimestamp() {
+    return lastTimestamp;
+  }
 
   public void setFirstTimestamp(long timestamp) {
     this.firstTimestamp = timestamp;
   }
+
   public void setLastTimestamp(long timestamp) {
     this.lastTimestamp = timestamp;
   }
 
   /**
    * Checks if cache response is missing any data
+   *
    * @param sliceStart original requested start time
    * @param sliceEnd original requested end time
    * @return whether data fetched from cache is missing any data for the original request
@@ -95,7 +113,7 @@ public class ThirdEyeCacheResponse {
 
   /**
    * Checks if cache response is missing data from the start of the time series.
-   * @param sliceStart
+   *
    * @return true or false
    */
   public boolean isMissingStartSlice(long sliceStart) {
@@ -108,7 +126,7 @@ public class ThirdEyeCacheResponse {
 
   /**
    * Checks if cache response is missing data from the end of the time series.
-   * @param sliceEnd
+   *
    * @return true or false
    */
   public boolean isMissingEndSlice(long sliceEnd) {
@@ -149,8 +167,10 @@ public class ThirdEyeCacheResponse {
 
       // we will need to evaluate whether this is generating too many logs.
       if (missingPeriods.size() > 0) {
-        LOG.info("cached time-series for metricUrn {} was missing data for {} time slice(s) in the middle: {}",
-            request.getMetricUrn(), missingPeriods.size(), IntervalUtils.getIntervalRangesAsString(missingPeriods));
+        LOG.info(
+            "cached time-series for metricUrn {} was missing data for {} time slice(s) in the middle: {}",
+            request.getMetricUrn(), missingPeriods.size(),
+            IntervalUtils.getIntervalRangesAsString(missingPeriods));
       }
     }
   }
@@ -161,13 +181,15 @@ public class ThirdEyeCacheResponse {
    * requested data was found in the cache, and need to merge in the new slice that
    * we fetched from the data source to "complete" the time-series. Also updates
    * the first and last timestamps if needed.
+   *
    * @param slice response object from fetching from data source
    */
 
   public void mergeSliceIntoRows(ThirdEyeResponse slice) {
 
     for (MetricFunction metric : slice.getMetricFunctions()) {
-      String metricUrn = MetricEntity.fromMetric(slice.getRequest().getFilterSet().asMap(), metric.getMetricId()).getUrn();
+      String metricUrn = MetricEntity
+          .fromMetric(slice.getRequest().getFilterSet().asMap(), metric.getMetricId()).getUrn();
       for (int i = 0; i < slice.getNumRowsFor(metric); i++) {
         Map<String, String> row = slice.getRow(metric, i);
         long timestamp = Long.valueOf(row.get(CacheConstants.TIMESTAMP));
@@ -179,7 +201,8 @@ public class ThirdEyeCacheResponse {
           this.setLastTimestamp(timestamp);
         }
 
-        timeSeriesRows.add(new TimeSeriesDataPoint(metricUrn, timestamp, metric.getMetricId(), row.get(metric.toString())));
+        timeSeriesRows.add(new TimeSeriesDataPoint(metricUrn, timestamp, metric.getMetricId(),
+            row.get(metric.toString())));
       }
     }
   }

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection.spec;
 
 public class AbsoluteChangeRuleAnomalyFilterSpec extends AbstractSpec {
+
   private String timezone = DEFAULT_TIMEZONE;
   private double threshold = Double.NaN;
   private String offset;

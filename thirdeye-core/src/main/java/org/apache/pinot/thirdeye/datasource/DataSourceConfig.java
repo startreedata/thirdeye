@@ -72,5 +72,4 @@ public class DataSourceConfig {
   public String toString() {
     return ToStringBuilder.reflectionToString(this);
   }
-
 }

@@ -39,7 +39,7 @@ public class TimeSeries implements MetricTimeSeries {
   /**
    * Timestamps to values. Timestamps are sorted.
    */
-  private NavigableMap<Long, Double> timeSeries = new TreeMap<>();
+  private final NavigableMap<Long, Double> timeSeries = new TreeMap<>();
 
   /**
    * The max (exclusive) and min (inclusive) timestamp of this time series.
@@ -74,7 +74,6 @@ public class TimeSeries implements MetricTimeSeries {
    * Returns data value of the specified timestamp
    *
    * @param timestamp the specified timestamp
-   *
    * @return data value of the specified timestamp
    */
   public Double get(long timestamp) {
@@ -85,7 +84,7 @@ public class TimeSeries implements MetricTimeSeries {
    * Sets the data value of the specified timestamp.
    *
    * @param timestamp the specified timestamp.
-   * @param value     the data value of the specified timestamp.
+   * @param value the data value of the specified timestamp.
    */
   public void set(long timestamp, double value) {
     timeSeries.put(timestamp, value);
@@ -103,7 +102,6 @@ public class TimeSeries implements MetricTimeSeries {
    * Returns true if the specified timestamp exists
    *
    * @param timestamp the specified timestamp
-   *
    * @return true if the specified timestamp exists
    */
   @Override

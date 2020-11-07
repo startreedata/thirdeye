@@ -21,11 +21,9 @@ package org.apache.pinot.thirdeye.anomaly.utils;
 
 import java.io.IOException;
 import org.apache.http.HttpHost;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.pinot.thirdeye.anomalydetection.performanceEvaluation.PerformanceEvaluationMethod;
-
 
 /**
  * Utility classes for calling detector endpoints to execute/schedule jobs
@@ -47,43 +45,47 @@ public class DetectionResourceHttpUtils extends AbstractResourceHttpUtils {
     addAuthenticationCookie(authToken);
   }
 
-  public String enableAnomalyFunction(String id) throws ClientProtocolException, IOException {
+  public String enableAnomalyFunction(String id) throws IOException {
     HttpPost req = new HttpPost(DETECTION_JOB_ENDPOINT + id);
     return callJobEndpoint(req);
   }
 
-  public String disableAnomalyFunction(String id) throws ClientProtocolException, IOException {
+  public String disableAnomalyFunction(String id) throws IOException {
     HttpDelete req = new HttpDelete(DETECTION_JOB_ENDPOINT + id);
     return callJobEndpoint(req);
   }
 
   public String runAdhocAnomalyFunction(String id, String startTimeIso, String endTimeIso)
-      throws ClientProtocolException, IOException {
+      throws IOException {
     HttpPost req = new HttpPost(
         DETECTION_JOB_ENDPOINT + id + ADHOC + "?start=" + startTimeIso + "&end=" + endTimeIso);
     return callJobEndpoint(req);
   }
 
-  public String runBackfillAnomalyFunction(String id, String startTimeIso, String endTimeIso, boolean forceBackfill)
-      throws ClientProtocolException, IOException {
+  public String runBackfillAnomalyFunction(String id, String startTimeIso, String endTimeIso,
+      boolean forceBackfill)
+      throws IOException {
     HttpPost req = new HttpPost(
-        DETECTION_JOB_ENDPOINT + id + BACKFILL + "?start=" + startTimeIso + "&end=" + endTimeIso + "&force=" + forceBackfill);
+        DETECTION_JOB_ENDPOINT + id + BACKFILL + "?start=" + startTimeIso + "&end=" + endTimeIso
+            + "&force=" + forceBackfill);
     return callJobEndpoint(req);
   }
 
-  public String runAutoTune(Long functionId, String startTimeIso, String endTimeIso, String autoTuneType, String holidayStarts, String holidayEnds) throws Exception {
+  public String runAutoTune(Long functionId, String startTimeIso, String endTimeIso,
+      String autoTuneType, String holidayStarts, String holidayEnds) throws Exception {
     HttpPost req = new HttpPost(
         DETECTION_JOB_ENDPOINT + AUTOTUNE_FILTER + functionId
             + "?start=" + startTimeIso
-        + "&end=" + endTimeIso
-        + "&autoTuneType=" + autoTuneType
-        + "&holidayStarts=" + holidayStarts
-        + "&holidayEnds=" + holidayEnds
+            + "&end=" + endTimeIso
+            + "&autoTuneType=" + autoTuneType
+            + "&holidayStarts=" + holidayStarts
+            + "&holidayEnds=" + holidayEnds
     );
     return callJobEndpoint(req);
   }
 
-  public String getEvalStatsAlertFilter(Long functionId, String startTimeIso, String endTimeIso, String holidayStarts, String holidayEnds) throws Exception{
+  public String getEvalStatsAlertFilter(Long functionId, String startTimeIso, String endTimeIso,
+      String holidayStarts, String holidayEnds) throws Exception {
     HttpPost req = new HttpPost(
         DETECTION_JOB_ENDPOINT + EVAL_FILTER + functionId
             + "?start=" + startTimeIso
@@ -94,29 +96,32 @@ public class DetectionResourceHttpUtils extends AbstractResourceHttpUtils {
     return callJobEndpoint(req);
   }
 
-  public String evalAutoTune(long autotuneId, String startTimeIso, String endTimeIso, String holidayStarts, String holidayEnds) throws Exception{
+  public String evalAutoTune(long autotuneId, String startTimeIso, String endTimeIso,
+      String holidayStarts, String holidayEnds) throws Exception {
     HttpPost req = new HttpPost(
         DETECTION_JOB_ENDPOINT + EVAL_AUTOTUNE + autotuneId
-        + "?start=" + startTimeIso
-        + "&end=" + endTimeIso
-        + "&holidayStarts=" + holidayStarts
-        + "&holidayEnds=" + holidayEnds
+            + "?start=" + startTimeIso
+            + "&end=" + endTimeIso
+            + "&holidayStarts=" + holidayStarts
+            + "&holidayEnds=" + holidayEnds
     );
     return callJobEndpoint(req);
   }
 
-  public String checkHasLabels(long functionId, String startTimeIso, String endTimeIso, String holidayStarts, String holidayEnds) throws IOException {
+  public String checkHasLabels(long functionId, String startTimeIso, String endTimeIso,
+      String holidayStarts, String holidayEnds) throws IOException {
     HttpPost req = new HttpPost(
         DETECTION_JOB_ENDPOINT + CHECK_HAS_LABELS + functionId
-        + "?start=" + startTimeIso
-        + "&end=" + endTimeIso
-        + "&holidayStarts=" + holidayStarts
-        + "&holidayEnds=" + holidayEnds
+            + "?start=" + startTimeIso
+            + "&end=" + endTimeIso
+            + "&holidayStarts=" + holidayStarts
+            + "&holidayEnds=" + holidayEnds
     );
     return callJobEndpoint(req);
   }
 
-  public String initAutoTune(Long functionId, String startTimeIso, String endTimeIso, String autoTuneType, int nExpected, String holidayStarts, String holidayEnds)
+  public String initAutoTune(Long functionId, String startTimeIso, String endTimeIso,
+      String autoTuneType, int nExpected, String holidayStarts, String holidayEnds)
       throws IOException {
     HttpPost req = new HttpPost(
         DETECTION_JOB_ENDPOINT + INIT_AUTOTUNE + functionId
@@ -130,13 +135,16 @@ public class DetectionResourceHttpUtils extends AbstractResourceHttpUtils {
     return callJobEndpoint(req);
   }
 
-  public String runFunctionReplay(Long id, String startTimeISO, String endTimeISO, String tuningParameters,
+  public String runFunctionReplay(Long id, String startTimeISO, String endTimeISO,
+      String tuningParameters,
       PerformanceEvaluationMethod evaluationMethod, double goal, boolean speedup)
-      throws ClientProtocolException, IOException {
+      throws IOException {
     HttpPost req = new HttpPost(
-        DETECTION_JOB_ENDPOINT + REPLAY_FUNCTION + id + "?start=" + startTimeISO + "&end=" + endTimeISO
-            + "&tune=" + tuningParameters + "&goal=" + goal + "&evalMethod=" + evaluationMethod.name()
-            + "&speedup=" + Boolean.toString(speedup));
+        DETECTION_JOB_ENDPOINT + REPLAY_FUNCTION + id + "?start=" + startTimeISO + "&end="
+            + endTimeISO
+            + "&tune=" + tuningParameters + "&goal=" + goal + "&evalMethod=" + evaluationMethod
+            .name()
+            + "&speedup=" + speedup);
     return callJobEndpoint(req);
   }
 }

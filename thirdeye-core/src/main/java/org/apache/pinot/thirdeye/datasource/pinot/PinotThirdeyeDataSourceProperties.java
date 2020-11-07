@@ -38,6 +38,5 @@ public enum PinotThirdeyeDataSourceProperties {
   public String getValue() {
     return value;
   }
-
 }
 

@@ -26,8 +26,8 @@ import com.yammer.metrics.reporting.JmxReporter;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.tracking.RequestLog;
 
-
 public class ThirdeyeMetricsUtil {
+
   private static final MetricsRegistry metricsRegistry = new MetricsRegistry();
   private static final JmxReporter jmxReporter = new JmxReporter(metricsRegistry);
   private static final RequestLog requestLog = new RequestLog(1000000);
@@ -198,10 +198,10 @@ public class ThirdeyeMetricsUtil {
       metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "jiraAlertsNumCommentsCounter");
 
   public static final Counter onlineTaskCounter =
-          metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "onlineTaskCounter");
+      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "onlineTaskCounter");
 
   public static final Counter onlineTaskDurationCounter =
-          metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "onlineTaskDurationCounter");
+      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "onlineTaskDurationCounter");
 
   public static MetricsRegistry getMetricsRegistry() {
     return metricsRegistry;

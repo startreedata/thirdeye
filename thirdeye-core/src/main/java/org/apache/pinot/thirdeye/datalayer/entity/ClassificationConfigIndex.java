@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class ClassificationConfigIndex extends AbstractIndexEntity {
+
   String name;
   boolean active;
 

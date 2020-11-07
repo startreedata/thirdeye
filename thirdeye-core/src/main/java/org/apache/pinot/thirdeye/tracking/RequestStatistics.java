@@ -21,11 +21,11 @@ package org.apache.pinot.thirdeye.tracking;
 
 import java.util.Map;
 
-
 /**
  * Statistics container for data source request performance log
  */
 public final class RequestStatistics {
+
   Map<String, Long> requestsPerDatasource;
   Map<String, Long> requestsPerDataset;
   Map<String, Long> requestsPerMetric;

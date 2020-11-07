@@ -18,7 +18,8 @@ import org.apache.pinot.thirdeye.datasource.sql.SqlUtils;
 @Singleton
 public class SqlDataSourceResource {
 
-  public SqlDataSourceResource() {}
+  public SqlDataSourceResource() {
+  }
 
   @GET
   @Path("/databases")
@@ -31,7 +32,6 @@ public class SqlDataSourceResource {
    * POST endpoint that get payload in JSON and onboard the Presto dataset and metrics
    *
    * @param payload Payload in JSON
-   *
    * @return Response contains status code 200 or 400
    */
   @POST
@@ -44,7 +44,6 @@ public class SqlDataSourceResource {
       SqlDataset dataset = mapper.readValue(payload, SqlDataset.class);
       SqlUtils.onBoardSqlDataset(dataset);
       return Response.ok().build();
-
     } catch (Exception e) {
       System.out.println(e.getMessage());
       return Response

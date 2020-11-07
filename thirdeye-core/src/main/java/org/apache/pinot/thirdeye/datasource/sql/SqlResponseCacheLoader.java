@@ -52,9 +52,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is a CacheLoader which issue queries to Presto or MySQL
- * It contains connection pools(DataSource) for each Presto or MySQL database configured in data-sources-configs
+ * It contains connection pools(DataSource) for each Presto or MySQL database configured in
+ * data-sources-configs
  */
 public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResultSetGroup> {
+
   private static final Logger LOG = LoggerFactory.getLogger(SqlResponseCacheLoader.class);
 
   private static final String PRESTO = "Presto";
@@ -72,15 +74,15 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
   public static final String DRIVER = "driver";
   public static final int ABANDONED_TIMEOUT = 60000;
 
-  private Map<String, DataSource> prestoDBNameToDataSourceMap = new HashMap<>();
-  private Map<String, DataSource> mysqlDBNameToDataSourceMap = new HashMap<>();
-  private Map<String, DataSource> verticaDBNameToDataSourceMap = new HashMap<>();
-  private Map<String, DataSource> BigQueryDBNameToDataSourceMap = new HashMap<>();
+  private final Map<String, DataSource> prestoDBNameToDataSourceMap = new HashMap<>();
+  private final Map<String, DataSource> mysqlDBNameToDataSourceMap = new HashMap<>();
+  private final Map<String, DataSource> verticaDBNameToDataSourceMap = new HashMap<>();
+  private final Map<String, DataSource> BigQueryDBNameToDataSourceMap = new HashMap<>();
 
-  private static Map<String, String> prestoDBNameToURLMap = new HashMap<>();
-  private static Map<String, String> mysqlDBNameToURLMap = new HashMap<>();
-  private static Map<String, String> verticaDBNameToURLMap = new HashMap<>();
-  private static Map<String, String> BigQueryDBNameToURLMap = new HashMap<>();
+  private static final Map<String, String> prestoDBNameToURLMap = new HashMap<>();
+  private static final Map<String, String> mysqlDBNameToURLMap = new HashMap<>();
+  private static final Map<String, String> verticaDBNameToURLMap = new HashMap<>();
+  private static final Map<String, String> BigQueryDBNameToURLMap = new HashMap<>();
 
   private static String h2Url;
   DataSource h2DataSource;
@@ -90,12 +92,12 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     // Init Presto datasources
     if (properties.containsKey(PRESTO)) {
       List<Map<String, Object>> prestoMapList = ConfigUtils.getList(properties.get(PRESTO));
-      for (Map<String, Object> objMap: prestoMapList) {
-        Map<String, String> dbNameToURLMap = (Map)objMap.get(DB);
-        String prestoUser = (String)objMap.get(USER);
+      for (Map<String, Object> objMap : prestoMapList) {
+        Map<String, String> dbNameToURLMap = (Map) objMap.get(DB);
+        String prestoUser = (String) objMap.get(USER);
         String prestoPassword = getPassword(objMap);
 
-        for (Map.Entry<String, String> entry: dbNameToURLMap.entrySet()) {
+        for (Map.Entry<String, String> entry : dbNameToURLMap.entrySet()) {
           DataSource dataSource = new DataSource();
           dataSource.setInitialSize(INIT_CONNECTIONS);
           dataSource.setMaxActive(MAX_CONNECTIONS);
@@ -116,12 +118,12 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     // Init MySQL datasources
     if (properties.containsKey(MYSQL)) {
       List<Map<String, Object>> mysqlMapList = ConfigUtils.getList(properties.get(MYSQL));
-      for (Map<String, Object> objMap: mysqlMapList) {
-        Map<String, String> dbNameToURLMap = (Map)objMap.get(DB);
-        String mysqlUser = (String)objMap.get(USER);
+      for (Map<String, Object> objMap : mysqlMapList) {
+        Map<String, String> dbNameToURLMap = (Map) objMap.get(DB);
+        String mysqlUser = (String) objMap.get(USER);
         String mysqlPassword = getPassword(objMap);
 
-        for (Map.Entry<String, String> entry: dbNameToURLMap.entrySet()) {
+        for (Map.Entry<String, String> entry : dbNameToURLMap.entrySet()) {
           DataSource dataSource = new DataSource();
           dataSource.setInitialSize(INIT_CONNECTIONS);
           dataSource.setMaxActive(MAX_CONNECTIONS);
@@ -142,13 +144,13 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     // Init Vertica datasources
     if (properties.containsKey(VERTICA)) {
       List<Map<String, Object>> verticaMapList = ConfigUtils.getList(properties.get(VERTICA));
-      for (Map<String, Object> objMap: verticaMapList) {
-        Map<String, String> dbNameToURLMap = (Map)objMap.get(DB);
-        String verticaUser = (String)objMap.get(USER);
+      for (Map<String, Object> objMap : verticaMapList) {
+        Map<String, String> dbNameToURLMap = (Map) objMap.get(DB);
+        String verticaUser = (String) objMap.get(USER);
         String verticaPassword = getPassword(objMap);
-        String verticaDriver = (String)objMap.get(DRIVER);
+        String verticaDriver = (String) objMap.get(DRIVER);
 
-        for (Map.Entry<String, String> entry: dbNameToURLMap.entrySet()) {
+        for (Map.Entry<String, String> entry : dbNameToURLMap.entrySet()) {
           DataSource dataSource = new DataSource();
           dataSource.setInitialSize(INIT_CONNECTIONS);
           dataSource.setMaxActive(MAX_CONNECTIONS);
@@ -170,12 +172,12 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     // Init BigQuery datasources
     if (properties.containsKey(BIGQUERY)) {
       List<Map<String, Object>> bigQueryMapList = ConfigUtils.getList(properties.get(BIGQUERY));
-      for (Map<String, Object> objMap: bigQueryMapList) {
+      for (Map<String, Object> objMap : bigQueryMapList) {
         System.out.println(bigQueryMapList.toString());
-        Map<String, String> dbNameToURLMap = (Map)objMap.get(DB);
-        String bigQueryDriver = (String)objMap.get(DRIVER);
+        Map<String, String> dbNameToURLMap = (Map) objMap.get(DB);
+        String bigQueryDriver = (String) objMap.get(DRIVER);
 
-        for (Map.Entry<String, String> entry: dbNameToURLMap.entrySet()) {
+        for (Map.Entry<String, String> entry : dbNameToURLMap.entrySet()) {
           DataSource dataSource = new DataSource();
           dataSource.setInitialSize(INIT_CONNECTIONS);
           dataSource.setMaxActive(MAX_CONNECTIONS);
@@ -222,10 +224,12 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
 
             List<String> metrics = new ArrayList<>(dataset.getMetrics().keySet());
 
-            SqlUtils.createTableOverride(h2DataSource, tableName, dataset.getTimeColumn(), metrics, dataset.getDimensions());
+            SqlUtils.createTableOverride(h2DataSource, tableName, dataset.getTimeColumn(), metrics,
+                dataset.getDimensions());
             SqlUtils.onBoardSqlDataset(dataset);
 
-            DateTimeFormatter fmt = DateTimeFormat.forPattern(dataset.getTimeFormat()).withZone(DateTimeZone.forID(dataset.getTimezone()));
+            DateTimeFormatter fmt = DateTimeFormat.forPattern(dataset.getTimeFormat())
+                .withZone(DateTimeZone.forID(dataset.getTimezone()));
 
             if (dataset.getDataFile().length() > 0) {
               String thirdEyeConfigDir = System.getProperty("dw.rootDir");
@@ -259,7 +263,7 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
   /**
    * This method gets the dimension filters for the given dataset from the presto data source,
    * and returns them as map of dimension name to values
-   * @param dataset
+   *
    * @return dimension filters map
    */
   public Map<String, List<String>> getDimensionFilters(String dataset) throws Exception {
@@ -272,17 +276,17 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
 
     Map<String, List<String>> dimensionFilters = new HashMap<>();
 
-    for (String dimension: datasetConfig.getDimensions()) {
+    for (String dimension : datasetConfig.getDimensions()) {
       dimensionFilters.put(dimension, new ArrayList<>());
       try (Connection conn = dataSource.getConnection();
           Statement stmt = conn.createStatement();
-          ResultSet rs = stmt.executeQuery(SqlUtils.getDimensionFiltersSQL(dimension, tableName, sourceName));) {
+          ResultSet rs = stmt
+              .executeQuery(SqlUtils.getDimensionFiltersSQL(dimension, tableName, sourceName))) {
         while (rs.next()) {
           dimensionFilters.get(dimension).add(rs.getString(1));
         }
-      }
-      catch (Exception e) {
-          throw e;
+      } catch (Exception e) {
+        throw e;
       }
     }
     return dimensionFilters;
@@ -290,7 +294,7 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
 
   /**
    * Returns the max time in millis for dataset in presto
-   * @param dataset
+   *
    * @return max date time in millis
    */
   public long getMaxDataTime(String dataset) throws Exception {
@@ -306,7 +310,8 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
 
     try (Connection conn = dataSource.getConnection();
         Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(SqlUtils.getMaxDataTimeSQL(timeSpec.getColumnName(), tableName, sourceName))) {
+        ResultSet rs = stmt.executeQuery(
+            SqlUtils.getMaxDataTimeSQL(timeSpec.getColumnName(), tableName, sourceName))) {
       if (rs.next()) {
         String maxTimeString = rs.getString(1);
         if (maxTimeString.indexOf('.') >= 0) {
@@ -316,7 +321,8 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
         String timeFormat = timeSpec.getFormat();
 
         if (StringUtils.isBlank(timeFormat) || TimeSpec.SINCE_EPOCH_FORMAT.equals(timeFormat)) {
-          maxTime = timeSpec.getDataGranularity().toMillis(Long.valueOf(maxTimeString) - 1, timeZone);
+          maxTime = timeSpec.getDataGranularity()
+              .toMillis(Long.valueOf(maxTimeString) - 1, timeZone);
         } else {
           DateTimeFormatter inputDataDateTimeFormatter =
               DateTimeFormat.forPattern(timeFormat).withZone(timeZone);
@@ -353,7 +359,8 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(sqlQuery)) {
 
-      ThirdEyeResultSet resultSet =  fromSQLResultSet(rs, SQLQuery.getMetric(), SQLQuery.getGroupByKeys(), SQLQuery.getGranularity(),
+      ThirdEyeResultSet resultSet = fromSQLResultSet(rs, SQLQuery.getMetric(),
+          SQLQuery.getGroupByKeys(), SQLQuery.getGranularity(),
           SQLQuery.getTimeSpec());
 
       List<ThirdEyeResultSet> thirdEyeResultSets = new ArrayList<>();
@@ -367,10 +374,11 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
   /**
    * Return a DB name to URLs map
    *
-   * @return a map: key is datasource name and value is a map with key is database name and value is the url
+   * @return a map: key is datasource name and value is a map with key is database name and value is
+   *     the url
    */
-  public static Map<String, Map<String,String>> getDBNameToURLMap() {
-    Map<String, Map<String,String>> dbNameToURLMap = new LinkedHashMap<>();
+  public static Map<String, Map<String, String>> getDBNameToURLMap() {
+    Map<String, Map<String, String>> dbNameToURLMap = new LinkedHashMap<>();
     dbNameToURLMap.put(PRESTO, prestoDBNameToURLMap);
     dbNameToURLMap.put(MYSQL, mysqlDBNameToURLMap);
     dbNameToURLMap.put(VERTICA, verticaDBNameToURLMap);
@@ -382,8 +390,6 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
 
     return dbNameToURLMap;
   }
-
-
 
   /**
    * Helper method that return a DataSource object corresponding to the dataset

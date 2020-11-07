@@ -88,12 +88,14 @@ public class MonitorTaskInfo implements TaskInfo {
     return completedJobRetentionDays == that.completedJobRetentionDays
         && defaultRetentionDays == that.defaultRetentionDays
         && detectionStatusRetentionDays == that.detectionStatusRetentionDays
-        && rawAnomalyRetentionDays == that.rawAnomalyRetentionDays && monitorType == that.monitorType;
+        && rawAnomalyRetentionDays == that.rawAnomalyRetentionDays
+        && monitorType == that.monitorType;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(monitorType, completedJobRetentionDays, defaultRetentionDays, detectionStatusRetentionDays,
+    return Objects.hash(monitorType, completedJobRetentionDays, defaultRetentionDays,
+        detectionStatusRetentionDays,
         rawAnomalyRetentionDays);
   }
 

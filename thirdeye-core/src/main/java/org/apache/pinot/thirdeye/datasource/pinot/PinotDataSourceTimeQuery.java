@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * This class contains methods to return max date time for datasets in pinot
  */
 public class PinotDataSourceTimeQuery {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(PinotDataSourceTimeQuery.class);
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
@@ -54,7 +55,7 @@ public class PinotDataSourceTimeQuery {
 
   /**
    * Returns the max time in millis for dataset in pinot
-   * @param dataset
+   *
    * @return max date time in millis
    */
   public long getMaxDateTime(String dataset) {
@@ -67,6 +68,7 @@ public class PinotDataSourceTimeQuery {
 
   /**
    * Returns the earliest time in millis for a dataset in pinot
+   *
    * @param dataset name of the dataset
    * @return min (earliest) date time in millis. Returns 0 if dataset is not found
    */
@@ -83,9 +85,11 @@ public class PinotDataSourceTimeQuery {
 
       long cutoffTime = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
       String timeClause = PqlUtils
-          .getBetweenClause(new DateTime(0, DateTimeZone.UTC), new DateTime(cutoffTime, DateTimeZone.UTC), timeSpec, dataset);
+          .getBetweenClause(new DateTime(0, DateTimeZone.UTC),
+              new DateTime(cutoffTime, DateTimeZone.UTC), timeSpec, dataset);
 
-      String maxTimePql = String.format(TIME_QUERY_TEMPLATE, functionName, timeSpec.getColumnName(), dataset, timeClause);
+      String maxTimePql = String
+          .format(TIME_QUERY_TEMPLATE, functionName, timeSpec.getColumnName(), dataset, timeClause);
       PinotQuery maxTimePinotQuery = new PinotQuery(maxTimePql, dataset);
 
       ThirdEyeResultSetGroup resultSetGroup;
@@ -94,14 +98,19 @@ public class PinotDataSourceTimeQuery {
         pinotThirdEyeDataSource.refreshPQL(maxTimePinotQuery);
         resultSetGroup = pinotThirdEyeDataSource.executePQL(maxTimePinotQuery);
         ThirdeyeMetricsUtil
-            .getRequestLog().success(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(), tStart, System.nanoTime());
+            .getRequestLog()
+            .success(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
+                tStart, System.nanoTime());
       } catch (ExecutionException e) {
-        ThirdeyeMetricsUtil.getRequestLog().failure(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(), tStart, System.nanoTime(), e);
+        ThirdeyeMetricsUtil.getRequestLog()
+            .failure(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
+                tStart, System.nanoTime(), e);
         throw e;
       }
 
       if (resultSetGroup.size() == 0 || resultSetGroup.get(0).getRowCount() == 0) {
-        LOGGER.error("Failed to get latest max time for dataset {} with PQL: {}", dataset, maxTimePinotQuery.getQuery());
+        LOGGER.error("Failed to get latest max time for dataset {} with PQL: {}", dataset,
+            maxTimePinotQuery.getQuery());
       } else {
         DateTimeZone timeZone = Utils.getDataTimeZone(dataset);
 
@@ -113,7 +122,8 @@ public class PinotDataSourceTimeQuery {
         } else {
           DateTimeFormatter inputDataDateTimeFormatter =
               DateTimeFormat.forPattern(timeFormat).withZone(timeZone);
-          DateTime endDateTime = DateTime.parse(String.valueOf(endTime), inputDataDateTimeFormatter);
+          DateTime endDateTime = DateTime
+              .parse(String.valueOf(endTime), inputDataDateTimeFormatter);
           Period oneBucket = datasetConfig.bucketTimeGranularity().toPeriod();
           maxTime = endDateTime.plus(oneBucket).getMillis() - 1;
         }

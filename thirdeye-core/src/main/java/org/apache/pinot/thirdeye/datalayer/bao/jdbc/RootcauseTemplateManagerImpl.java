@@ -29,8 +29,10 @@ import org.apache.pinot.thirdeye.datalayer.pojo.RootcauseTemplateBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
 @Singleton
-public class RootcauseTemplateManagerImpl extends AbstractManagerImpl<RootcauseTemplateDTO> implements
-                                                                                            RootcauseTemplateManager {
+public class RootcauseTemplateManagerImpl extends
+    AbstractManagerImpl<RootcauseTemplateDTO> implements
+    RootcauseTemplateManager {
+
   @Inject
   public RootcauseTemplateManagerImpl(GenericPojoDao genericPojoDao) {
     super(RootcauseTemplateDTO.class, RootcauseTemplateBean.class, genericPojoDao);

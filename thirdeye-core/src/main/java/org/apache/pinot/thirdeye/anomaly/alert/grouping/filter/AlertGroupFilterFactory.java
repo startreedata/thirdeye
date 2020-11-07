@@ -25,6 +25,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class AlertGroupFilterFactory {
+
   public static final String GROUP_FILTER_TYPE_KEY = "type";
   private static final AlertGroupFilter DUMMY_ALERT_GROUP_FILTER = new DummyAlertGroupFilter();
 
@@ -56,12 +57,12 @@ public class AlertGroupFilterFactory {
     }
 
     switch (filterType) {
-    case DUMMY: // speed optimization for most use cases
-      return DUMMY_ALERT_GROUP_FILTER;
-    case SIZE_SEVERITY:
-      return new SizeSeverityAlertGroupFilter();
-    default:
-      return DUMMY_ALERT_GROUP_FILTER;
+      case DUMMY: // speed optimization for most use cases
+        return DUMMY_ALERT_GROUP_FILTER;
+      case SIZE_SEVERITY:
+        return new SizeSeverityAlertGroupFilter();
+      default:
+        return DUMMY_ALERT_GROUP_FILTER;
     }
   }
 }

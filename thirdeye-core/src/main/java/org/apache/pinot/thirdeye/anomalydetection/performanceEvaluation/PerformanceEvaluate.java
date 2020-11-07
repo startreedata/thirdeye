@@ -20,5 +20,6 @@
 package org.apache.pinot.thirdeye.anomalydetection.performanceEvaluation;
 
 public interface PerformanceEvaluate {
-  public double evaluate();
+
+  double evaluate();
 }

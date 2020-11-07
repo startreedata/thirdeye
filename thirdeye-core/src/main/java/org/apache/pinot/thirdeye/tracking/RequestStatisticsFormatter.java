@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-
 public class RequestStatisticsFormatter {
+
   private static final int TOP_K = 20;
 
   private static final Comparator<Map.Entry<String, Long>> COMP_LONG = new Comparator<Map.Entry<String, Long>>() {
@@ -66,27 +66,43 @@ public class RequestStatisticsFormatter {
 
     builder.append('\n');
     builder.append("Average duration (in millis):\n");
-    builder.append(String.format(FORMAT_DURATION, "total", stats.durationTotal / (double) stats.requestsTotal / 1E6));
+    builder.append(String.format(FORMAT_DURATION, "total",
+        stats.durationTotal / (double) stats.requestsTotal / 1E6));
     builder.append(String.format("datasource (%d):\n", stats.durationPerDatasource.size()));
-    builder.append(format(durationInMs(stats.durationPerDatasource, stats.requestsPerDatasource), COMP_DOUBLE, FORMAT_DURATION));
+    builder.append(
+        format(durationInMs(stats.durationPerDatasource, stats.requestsPerDatasource), COMP_DOUBLE,
+            FORMAT_DURATION));
     builder.append(String.format("dataset (%d):\n", stats.durationPerDataset.size()));
-    builder.append(format(durationInMs(stats.durationPerDataset, stats.requestsPerDataset), COMP_DOUBLE, FORMAT_DURATION));
+    builder.append(
+        format(durationInMs(stats.durationPerDataset, stats.requestsPerDataset), COMP_DOUBLE,
+            FORMAT_DURATION));
     builder.append(String.format("metric (%d):\n", stats.durationPerMetric.size()));
-    builder.append(format(durationInMs(stats.durationPerMetric, stats.requestsPerMetric), COMP_DOUBLE, FORMAT_DURATION));
+    builder.append(
+        format(durationInMs(stats.durationPerMetric, stats.requestsPerMetric), COMP_DOUBLE,
+            FORMAT_DURATION));
     builder.append(String.format("principal (%d):\n", stats.durationPerPrincipal.size()));
-    builder.append(format(durationInMs(stats.durationPerPrincipal, stats.requestsPerPrincipal), COMP_DOUBLE, FORMAT_DURATION));
+    builder.append(
+        format(durationInMs(stats.durationPerPrincipal, stats.requestsPerPrincipal), COMP_DOUBLE,
+            FORMAT_DURATION));
 
     builder.append('\n');
     builder.append("Failure rate:\n");
-    builder.append(String.format(FORMAT_RATE, "total", stats.failureTotal / (double) stats.requestsTotal));
+    builder.append(
+        String.format(FORMAT_RATE, "total", stats.failureTotal / (double) stats.requestsTotal));
     builder.append(String.format("datasource (%d):\n", stats.failurePerDatasource.size()));
-    builder.append(format(divide(stats.failurePerDatasource, stats.requestsPerDatasource), COMP_DOUBLE, FORMAT_RATE));
+    builder.append(
+        format(divide(stats.failurePerDatasource, stats.requestsPerDatasource), COMP_DOUBLE,
+            FORMAT_RATE));
     builder.append(String.format("dataset (%d):\n", stats.failurePerDataset.size()));
-    builder.append(format(divide(stats.failurePerDataset, stats.requestsPerDataset), COMP_DOUBLE, FORMAT_RATE));
+    builder.append(format(divide(stats.failurePerDataset, stats.requestsPerDataset), COMP_DOUBLE,
+        FORMAT_RATE));
     builder.append(String.format("metric (%d):\n", stats.failurePerMetric.size()));
-    builder.append(format(divide(stats.failurePerMetric, stats.requestsPerMetric), COMP_DOUBLE, FORMAT_RATE));
+    builder.append(
+        format(divide(stats.failurePerMetric, stats.requestsPerMetric), COMP_DOUBLE, FORMAT_RATE));
     builder.append(String.format("principal (%d):\n", stats.failurePerPrincipal.size()));
-    builder.append(format(divide(stats.failurePerPrincipal, stats.requestsPerPrincipal), COMP_DOUBLE, FORMAT_RATE));
+    builder.append(
+        format(divide(stats.failurePerPrincipal, stats.requestsPerPrincipal), COMP_DOUBLE,
+            FORMAT_RATE));
 
     return builder.toString();
   }
@@ -97,7 +113,8 @@ public class RequestStatisticsFormatter {
     return entries.subList(0, Math.min(entries.size(), TOP_K));
   }
 
-  private <K, V> String format(Map<K, V> map, Comparator<Map.Entry<K, V>> comparator, String format) {
+  private <K, V> String format(Map<K, V> map, Comparator<Map.Entry<K, V>> comparator,
+      String format) {
     StringBuilder builder = new StringBuilder();
     for (Map.Entry<K, V> entry : topk(map, comparator)) {
       String key = Objects.toString(entry.getKey());

@@ -52,7 +52,8 @@ public class DetectionStatusManagerImpl extends AbstractManagerImpl<DetectionSta
   }
 
   @Override
-  public List<DetectionStatusDTO> findAllInTimeRangeForFunctionAndDetectionRun(long startTime, long endTime,
+  public List<DetectionStatusDTO> findAllInTimeRangeForFunctionAndDetectionRun(long startTime,
+      long endTime,
       long functionId, boolean detectionRun) {
     Predicate predicate = Predicate.AND(
         Predicate.EQ("functionId", functionId),

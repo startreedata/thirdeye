@@ -34,7 +34,6 @@ import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 
-
 /**
  * The F1 score function based on time bucket counting.
  */
@@ -44,7 +43,8 @@ public class TimeBucketF1ScoreFunction implements ScoreFunction {
   private static final double beta = 3;
 
   @Override
-  public double calculateScore(DetectionPipelineResult detectionResult, Collection<MergedAnomalyResultDTO> testAnomalies) {
+  public double calculateScore(DetectionPipelineResult detectionResult,
+      Collection<MergedAnomalyResultDTO> testAnomalies) {
     List<MergedAnomalyResultDTO> anomalyResults = detectionResult.getAnomalies();
 
     Collection<MergedAnomalyResultDTO> allLabeledAnomalies =
@@ -61,19 +61,21 @@ public class TimeBucketF1ScoreFunction implements ScoreFunction {
 
     // TODO: make this O(NlogN) solution to minimize space consumption if necessary
 
-    Multimap<DimensionMap, MergedAnomalyResultDTO> groupedLabeled = Multimaps.index(allLabeledAnomalies, new Function<MergedAnomalyResultDTO, DimensionMap>() {
-      @Override
-      public DimensionMap apply(MergedAnomalyResultDTO mergedAnomalyResultDTO) {
-        return mergedAnomalyResultDTO.getDimensions();
-      }
-    });
+    Multimap<DimensionMap, MergedAnomalyResultDTO> groupedLabeled = Multimaps
+        .index(allLabeledAnomalies, new Function<MergedAnomalyResultDTO, DimensionMap>() {
+          @Override
+          public DimensionMap apply(MergedAnomalyResultDTO mergedAnomalyResultDTO) {
+            return mergedAnomalyResultDTO.getDimensions();
+          }
+        });
 
-    Multimap<DimensionMap, MergedAnomalyResultDTO> groupedResults = Multimaps.index(anomalyResults, new Function<MergedAnomalyResultDTO, DimensionMap>() {
-      @Override
-      public DimensionMap apply(MergedAnomalyResultDTO mergedAnomalyResultDTO) {
-        return mergedAnomalyResultDTO.getDimensions();
-      }
-    });
+    Multimap<DimensionMap, MergedAnomalyResultDTO> groupedResults = Multimaps
+        .index(anomalyResults, new Function<MergedAnomalyResultDTO, DimensionMap>() {
+          @Override
+          public DimensionMap apply(MergedAnomalyResultDTO mergedAnomalyResultDTO) {
+            return mergedAnomalyResultDTO.getDimensions();
+          }
+        });
 
     for (DimensionMap key : groupedLabeled.keySet()) {
       Set<Long> resultAnomalyTimes = new HashSet<>();
@@ -85,9 +87,11 @@ public class TimeBucketF1ScoreFunction implements ScoreFunction {
 
       for (MergedAnomalyResultDTO labeledAnomaly : groupedLabeled.get(key)) {
         if (labeledAnomaly.getFeedback().getFeedbackType().isAnomaly()) {
-          totalLabeledTrueAnomaliesTime += (labeledAnomaly.getEndTime() - labeledAnomaly.getStartTime());
+          totalLabeledTrueAnomaliesTime += (labeledAnomaly.getEndTime() - labeledAnomaly
+              .getStartTime());
         }
-        for (long time = labeledAnomaly.getStartTime(); time < labeledAnomaly.getEndTime(); time += BUCKET_SIZE) {
+        for (long time = labeledAnomaly.getStartTime(); time < labeledAnomaly.getEndTime();
+            time += BUCKET_SIZE) {
           if (resultAnomalyTimes.contains(time / BUCKET_SIZE)) {
             totalOverlappedTime += BUCKET_SIZE;
             if (labeledAnomaly.getFeedback().getFeedbackType().isAnomaly()) {

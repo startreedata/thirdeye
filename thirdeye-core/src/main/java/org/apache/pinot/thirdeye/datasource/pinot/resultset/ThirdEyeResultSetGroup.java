@@ -28,13 +28,16 @@ import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
 
 /**
- * The ThirdEye's own {@link ResultSetGroup} for storing multiple {@link ThirdEyeResultSet} (i.e., an equivalent class
+ * The ThirdEye's own {@link ResultSetGroup} for storing multiple {@link ThirdEyeResultSet} (i.e.,
+ * an equivalent class
  * to Pinot's {@link ResultSet}).
  */
 public class ThirdEyeResultSetGroup {
+
   private ImmutableList<ThirdEyeResultSet> resultSets = ImmutableList.of();
 
-  public ThirdEyeResultSetGroup() { }
+  public ThirdEyeResultSetGroup() {
+  }
 
   public ThirdEyeResultSetGroup(List<ThirdEyeResultSet> resultSets) {
     this.setResultSets(resultSets);
@@ -64,7 +67,6 @@ public class ThirdEyeResultSetGroup {
    * Constructs a ThirdEyeResultSetGroup from Pinot's {@link ResultSetGroup}.
    *
    * @param resultSetGroup a {@link ResultSetGroup} from Pinot.
-   *
    * @return a converted {@link ThirdEyeResultSetGroup}.
    */
   public static ThirdEyeResultSetGroup fromPinotResultSetGroup(ResultSetGroup resultSetGroup) {
@@ -75,7 +77,8 @@ public class ThirdEyeResultSetGroup {
     // Convert Pinot's ResultSet to ThirdEyeResultSet
     List<ThirdEyeResultSet> thirdEyeResultSets = new ArrayList<>();
     for (ResultSet resultSet : resultSets) {
-      ThirdEyeResultSet thirdEyeResultSet = ThirdEyeDataFrameResultSet.fromPinotResultSet(resultSet);
+      ThirdEyeResultSet thirdEyeResultSet = ThirdEyeDataFrameResultSet
+          .fromPinotResultSet(resultSet);
       thirdEyeResultSets.add(thirdEyeResultSet);
     }
 

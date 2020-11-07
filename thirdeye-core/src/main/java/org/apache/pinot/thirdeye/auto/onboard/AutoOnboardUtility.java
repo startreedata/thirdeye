@@ -34,8 +34,8 @@ import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class AutoOnboardUtility {
+
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardUtility.class);
 
   private static final String DEFAULT_ALERT_GROUP_PREFIX = "auto_onboard_dataset_";
@@ -46,10 +46,12 @@ public class AutoOnboardUtility {
 
     DataSources dataSources = new DataSourcesLoader().fromDataSourcesUrl(dataSourcesUrl);
     if (dataSources == null) {
-      throw new IllegalStateException("Could not create data sources config from path " + dataSourcesUrl);
+      throw new IllegalStateException(
+          "Could not create data sources config from path " + dataSourcesUrl);
     }
     for (DataSourceConfig dataSourceConfig : dataSources.getDataSourceConfigs()) {
-      List<MetadataSourceConfig> metadataSourceConfigs = dataSourceConfig.getMetadataSourceConfigs();
+      List<MetadataSourceConfig> metadataSourceConfigs = dataSourceConfig
+          .getMetadataSourceConfigs();
       if (metadataSourceConfigs != null) {
         for (MetadataSourceConfig metadataSourceConfig : metadataSourceConfigs) {
           String metadataSourceClassName = metadataSourceConfig.getClassName();
@@ -57,11 +59,14 @@ public class AutoOnboardUtility {
           metadataSourceConfig.getProperties().putAll(dataSourceConfig.getProperties());
           if (StringUtils.isNotBlank(metadataSourceClassName)) {
             try {
-              Constructor<?> constructor = Class.forName(metadataSourceClassName).getConstructor(MetadataSourceConfig.class);
-              AutoOnboard autoOnboardConstructor = (AutoOnboard) constructor.newInstance(metadataSourceConfig);
+              Constructor<?> constructor = Class.forName(metadataSourceClassName)
+                  .getConstructor(MetadataSourceConfig.class);
+              AutoOnboard autoOnboardConstructor = (AutoOnboard) constructor
+                  .newInstance(metadataSourceConfig);
               String datasourceClassName = dataSourceConfig.getClassName();
               String dataSource =
-                  datasourceClassName.substring(datasourceClassName.lastIndexOf(".") + 1, datasourceClassName.length());
+                  datasourceClassName.substring(datasourceClassName.lastIndexOf(".") + 1
+                  );
 
               if (dataSourceToOnboardMap.containsKey(dataSource)) {
                 dataSourceToOnboardMap.get(dataSource).add(autoOnboardConstructor);
@@ -71,7 +76,8 @@ public class AutoOnboardUtility {
                 dataSourceToOnboardMap.put(dataSource, autoOnboardServices);
               }
             } catch (Exception e) {
-              LOG.error("Exception in creating metadata constructor {}", metadataSourceClassName, e);
+              LOG.error("Exception in creating metadata constructor {}", metadataSourceClassName,
+                  e);
             }
           }
         }
@@ -83,6 +89,7 @@ public class AutoOnboardUtility {
 
   public static String getAutoAlertGroupName(String dataset) {
     return DEFAULT_ALERT_GROUP_PREFIX
-        + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, dataset) + DEFAULT_ALERT_GROUP_SUFFIX;
+        + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, dataset)
+        + DEFAULT_ALERT_GROUP_SUFFIX;
   }
 }

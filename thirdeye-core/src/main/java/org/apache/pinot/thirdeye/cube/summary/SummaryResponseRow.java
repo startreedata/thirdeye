@@ -24,11 +24,11 @@ import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-
 /**
  * A POJO for front-end representation.
  */
 public class SummaryResponseRow extends BaseResponseRow {
+
   public List<String> names;
   public String otherDimensionValues;
   public double cost;

@@ -56,7 +56,6 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Pipeline for identifying relevant dimensions by performing
  * contribution analysis. The pipeline first fetches the Current and Baseline entities and
@@ -69,6 +68,7 @@ import org.slf4j.LoggerFactory;
  * @see DimensionAnalysisPipeline
  */
 public class MetricBreakdownPipeline extends Pipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetricBreakdownPipeline.class);
 
   public static final String COL_CONTRIB = "contribution";
@@ -113,10 +113,13 @@ public class MetricBreakdownPipeline extends Pipeline {
    * @param includeDimensions dimensions to break down on (all if empty)
    * @param excludeDimensions dimensions not to break down on
    * @param k number of top-ranking elements to emit
-   * @param ignoreScore flag to include all breakdowns, even if score is zero (only set if ignoring wanted)
+   * @param ignoreScore flag to include all breakdowns, even if score is zero (only set if
+   *     ignoring wanted)
    */
-  public MetricBreakdownPipeline(String outputName, Set<String> inputNames, MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, QueryCache cache, ExecutorService executor, Set<String> includeDimensions,
+  public MetricBreakdownPipeline(String outputName, Set<String> inputNames,
+      MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO, QueryCache cache, ExecutorService executor,
+      Set<String> includeDimensions,
       Set<String> excludeDimensions, int k, boolean ignoreScore) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
@@ -131,11 +134,13 @@ public class MetricBreakdownPipeline extends Pipeline {
 
   /**
    * Alternate constructor for use by RCAFrameworkLoader
+   *
    * @param outputName pipeline output name
    * @param inputNames input pipeline names
    * @param properties configuration properties ({@code PROP_K}, {@code PROP_PARALLELISM})
    */
-  public MetricBreakdownPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public MetricBreakdownPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
@@ -145,13 +150,15 @@ public class MetricBreakdownPipeline extends Pipeline {
     this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
 
     if (properties.containsKey(PROP_INCLUDE_DIMENSIONS)) {
-      this.includeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_INCLUDE_DIMENSIONS));
+      this.includeDimensions = new HashSet<>(
+          (Collection<String>) properties.get(PROP_INCLUDE_DIMENSIONS));
     } else {
       this.includeDimensions = new HashSet<>();
     }
 
     if (properties.containsKey(PROP_EXCLUDE_DIMENSIONS)) {
-      this.excludeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
+      this.excludeDimensions = new HashSet<>(
+          (Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
     } else {
       this.excludeDimensions = new HashSet<>();
     }
@@ -174,18 +181,21 @@ public class MetricBreakdownPipeline extends Pipeline {
 
     for (MetricEntity me : metricsEntities) {
       try {
-        final MetricSlice sliceCurrent = MetricSlice.from(me.getId(), anomaly.getStart(), anomaly.getEnd(), me.getFilters());
-        final MetricSlice sliceBaseline = MetricSlice.from(me.getId(), baseline.getStart(), baseline.getEnd(), me.getFilters());
+        final MetricSlice sliceCurrent = MetricSlice
+            .from(me.getId(), anomaly.getStart(), anomaly.getEnd(), me.getFilters());
+        final MetricSlice sliceBaseline = MetricSlice
+            .from(me.getId(), baseline.getStart(), baseline.getEnd(), me.getFilters());
 
         DataFrame dfScores = getDimensionScores(sliceCurrent, sliceBaseline);
 
-        for (int i=0; i<dfScores.size(); i++) {
+        for (int i = 0; i < dfScores.size(); i++) {
           String name = dfScores.getString(COL_DIM_NAME, i);
           String value = dfScores.getString(COL_DIM_VALUE, i);
           double score = dfScores.getDouble(COL_SCORE, i);
 
-          if (!this.ignoreScore && score <= 0)
+          if (!this.ignoreScore && score <= 0) {
             continue;
+          }
 
           Multimap<String, String> newFilters = TreeMultimap.create(me.getFilters());
           newFilters.put(name, value);
@@ -202,7 +212,9 @@ public class MetricBreakdownPipeline extends Pipeline {
 
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
-    RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO, this.datasetDAO);
+    RequestContainer rc = DataFrameUtils
+        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO,
+            this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc);
@@ -215,7 +227,8 @@ public class MetricBreakdownPipeline extends Pipeline {
     return out;
   }
 
-  private DataFrame getContributionDelta(MetricSlice current, MetricSlice baseline, String dimension) throws Exception {
+  private DataFrame getContributionDelta(MetricSlice current, MetricSlice baseline,
+      String dimension) throws Exception {
     DataFrame curr = getContribution(current, dimension);
     DataFrame base = getContribution(baseline, dimension);
 
@@ -244,7 +257,8 @@ public class MetricBreakdownPipeline extends Pipeline {
     return df;
   }
 
-  private Future<DataFrame> getContributionDeltaPackedAsync(final MetricSlice current, final MetricSlice baseline, final String dimension) throws Exception {
+  private Future<DataFrame> getContributionDeltaPackedAsync(final MetricSlice current,
+      final MetricSlice baseline, final String dimension) throws Exception {
     return this.executor.submit(new Callable<DataFrame>() {
       @Override
       public DataFrame call() throws Exception {
@@ -259,16 +273,19 @@ public class MetricBreakdownPipeline extends Pipeline {
     }
 
     MetricConfigDTO metric = this.metricDAO.findById(current.getMetricId());
-    if(metric == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id '%d'", current.getMetricId()));
+    if (metric == null) {
+      throw new IllegalArgumentException(
+          String.format("Could not resolve metric id '%d'", current.getMetricId()));
     }
 
     DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
-    if(dataset == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(), metric.getId()));
+    if (dataset == null) {
+      throw new IllegalArgumentException(String
+          .format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(),
+              metric.getId()));
     }
 
-    if(!dataset.isAdditive()) {
+    if (!dataset.isAdditive()) {
       LOG.warn("Contribution analysis on non-additive dataset");
 
       // TODO read additive from metric property when available
@@ -276,7 +293,7 @@ public class MetricBreakdownPipeline extends Pipeline {
     }
 
     Collection<Future<DataFrame>> futures = new ArrayList<>();
-    for(String dimension : dataset.getDimensions()) {
+    for (String dimension : dataset.getDimensions()) {
       if (this.excludeDimensions.contains(dimension)) {
         continue;
       }
@@ -288,7 +305,7 @@ public class MetricBreakdownPipeline extends Pipeline {
 
     final long timeout = System.currentTimeMillis() + TIMEOUT;
     Collection<DataFrame> contributors = new ArrayList<>();
-    for(Future<DataFrame> future : futures) {
+    for (Future<DataFrame> future : futures) {
       final long timeLeft = Math.max(timeout - System.currentTimeMillis(), 0);
       contributors.add(future.get(timeLeft, TimeUnit.MILLISECONDS));
     }

@@ -36,7 +36,6 @@ import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Container class for configuring and executing a root cause search with multiple pipelines.
  * The framework is instantiated with multiple (named) pipelines and a result aggregator. The run()
@@ -56,6 +55,7 @@ import org.slf4j.LoggerFactory;
  *                   \-> pipeline.run() /
  */
 public class RCAFramework {
+
   private static final Logger LOG = LoggerFactory.getLogger(RCAFramework.class);
 
   public static final String INPUT = "INPUT";
@@ -68,20 +68,28 @@ public class RCAFramework {
   public RCAFramework(Collection<Pipeline> pipelines, ExecutorService executor) {
     this.executor = executor;
 
-    if(!isValidDAG(pipelines))
-      throw new IllegalArgumentException(String.format("Invalid DAG. '%s' not reachable output name '%s'", OUTPUT, INPUT));
+    if (!isValidDAG(pipelines)) {
+      throw new IllegalArgumentException(
+          String.format("Invalid DAG. '%s' not reachable output name '%s'", OUTPUT, INPUT));
+    }
 
     this.pipelines = new HashMap<>();
-    for(Pipeline p : pipelines) {
-      if(INPUT.equals(p.getOutputName()))
-        throw new IllegalArgumentException(String.format("Must not contain a pipeline with output name '%s'", INPUT));
-      if(this.pipelines.containsKey(p.getOutputName()))
-        throw new IllegalArgumentException(String.format("Already contains pipeline with output name '%s'", p.getOutputName()));
+    for (Pipeline p : pipelines) {
+      if (INPUT.equals(p.getOutputName())) {
+        throw new IllegalArgumentException(
+            String.format("Must not contain a pipeline with output name '%s'", INPUT));
+      }
+      if (this.pipelines.containsKey(p.getOutputName())) {
+        throw new IllegalArgumentException(
+            String.format("Already contains pipeline with output name '%s'", p.getOutputName()));
+      }
       this.pipelines.put(p.getOutputName(), p);
     }
 
-    if(!this.pipelines.containsKey(OUTPUT))
-      throw new IllegalArgumentException(String.format("Must contain a pipeline with output name '%s'", OUTPUT));
+    if (!this.pipelines.containsKey(OUTPUT)) {
+      throw new IllegalArgumentException(
+          String.format("Must contain a pipeline with output name '%s'", OUTPUT));
+    }
   }
 
   /**
@@ -95,7 +103,7 @@ public class RCAFramework {
     long tStart = System.nanoTime();
     try {
       Map<String, Pipeline> pipelines = new HashMap<>(this.pipelines);
-      pipelines.put(INPUT, new StaticPipeline(INPUT, Collections.<String>emptySet(), input));
+      pipelines.put(INPUT, new StaticPipeline(INPUT, Collections.emptySet(), input));
 
       LOG.info("Constructing flow for input '{}'", input);
       Map<String, Future<PipelineResult>> flow = constructDAG(pipelines);
@@ -111,11 +119,9 @@ public class RCAFramework {
       }
 
       return new RCAFrameworkExecutionResult(results.get(OUTPUT).getEntities(), results);
-
     } catch (Exception e) {
       ThirdeyeMetricsUtil.rcaFrameworkExceptionCounter.inc();
       throw e;
-
     } finally {
       ThirdeyeMetricsUtil.rcaFrameworkCallCounter.inc();
       ThirdeyeMetricsUtil.rcaFrameworkDurationCounter.inc(System.nanoTime() - tStart);
@@ -131,8 +137,9 @@ public class RCAFramework {
       }
     });
 
-    for(Entity e : entities) {
-      LOG.debug("{} [{}] {}", Math.round(e.getScore() * 1000) / 1000.0, e.getClass().getSimpleName(), e.getUrn());
+    for (Entity e : entities) {
+      LOG.debug("{} [{}] {}", Math.round(e.getScore() * 1000) / 1000.0,
+          e.getClass().getSimpleName(), e.getUrn());
     }
   }
 
@@ -141,11 +148,12 @@ public class RCAFramework {
     visited.add(INPUT);
 
     int prevSize = 0;
-    while(prevSize < visited.size()) {
+    while (prevSize < visited.size()) {
       prevSize = visited.size();
       for (Pipeline p : pipelines) {
-        if (visited.containsAll(p.getInputNames()))
+        if (visited.containsAll(p.getInputNames())) {
           visited.add(p.getOutputName());
+        }
       }
     }
 
@@ -156,16 +164,18 @@ public class RCAFramework {
     // TODO purge pipelines not on critical path
     Map<String, Future<PipelineResult>> tasks = new LinkedHashMap<>();
     Pipeline input = pipelines.get(INPUT);
-    PipelineCallable inputCallable = new PipelineCallable(Collections.<String, Future<PipelineResult>>emptyMap(), input);
+    PipelineCallable inputCallable = new PipelineCallable(
+        Collections.emptyMap(), input);
     tasks.put(INPUT, this.executor.submit(inputCallable));
 
     int prevSize = 0;
-    while(prevSize < tasks.size()) {
+    while (prevSize < tasks.size()) {
       prevSize = tasks.size();
-      for(Pipeline p : pipelines.values()) {
-        if(!tasks.containsKey(p.getOutputName()) && tasks.keySet().containsAll(p.getInputNames())) {
+      for (Pipeline p : pipelines.values()) {
+        if (!tasks.containsKey(p.getOutputName()) && tasks.keySet()
+            .containsAll(p.getInputNames())) {
           Map<String, Future<PipelineResult>> dependencies = new HashMap<>();
-          for(String inputName : p.getInputNames()) {
+          for (String inputName : p.getInputNames()) {
             dependencies.put(inputName, tasks.get(inputName));
           }
 

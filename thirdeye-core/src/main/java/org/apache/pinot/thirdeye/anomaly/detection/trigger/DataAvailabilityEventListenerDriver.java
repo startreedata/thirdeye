@@ -34,26 +34,30 @@ import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DatasetTriggerI
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * This class is to start DataAvailabilityEventListener based on configuration.
  */
 public class DataAvailabilityEventListenerDriver {
-  private static final Logger LOG = LoggerFactory.getLogger(DataAvailabilityEventListenerDriver.class);
-  private ExecutorService executorService;
-  private DataAvailabilitySchedulingConfiguration config;
-  private Properties consumerProps;
-  private List<DataAvailabilityEventListener> listeners;
 
-  public DataAvailabilityEventListenerDriver(DataAvailabilitySchedulingConfiguration config) throws IOException {
+  private static final Logger LOG = LoggerFactory
+      .getLogger(DataAvailabilityEventListenerDriver.class);
+  private final ExecutorService executorService;
+  private final DataAvailabilitySchedulingConfiguration config;
+  private final Properties consumerProps;
+  private final List<DataAvailabilityEventListener> listeners;
+
+  public DataAvailabilityEventListenerDriver(DataAvailabilitySchedulingConfiguration config)
+      throws IOException {
     String rootDir = System.getProperty("dw.rootDir");
     this.config = config;
     this.executorService = Executors.newFixedThreadPool(this.config.getNumParallelConsumer(),
         new ThreadFactoryBuilder().setNameFormat("data-avail-event-consumer-%d").build());
     this.consumerProps = new Properties();
-    this.consumerProps.load(new FileInputStream(rootDir + "/" + this.config.getKafkaConsumerPropPath()));
+    this.consumerProps
+        .load(new FileInputStream(rootDir + "/" + this.config.getKafkaConsumerPropPath()));
     this.listeners = new ArrayList<>();
-    DatasetTriggerInfoRepo.init(config.getDatasetWhitelistUpdateFreqInMin(), config.getDataSourceWhitelist());
+    DatasetTriggerInfoRepo
+        .init(config.getDatasetWhitelistUpdateFreqInMin(), config.getDataSourceWhitelist());
   }
 
   public void start() {
@@ -89,13 +93,15 @@ public class DataAvailabilityEventListenerDriver {
 
   private List<DataAvailabilityEventFilter> loadFilters() {
     List<DataAvailabilityEventFilter> filters = new ArrayList<>(config.getFilterClassList().size());
-    for (String filterClassName :  config.getFilterClassList()) {
+    for (String filterClassName : config.getFilterClassList()) {
       try {
-        DataAvailabilityEventFilter filter = (DataAvailabilityEventFilter) Class.forName(filterClassName).newInstance();
+        DataAvailabilityEventFilter filter = (DataAvailabilityEventFilter) Class
+            .forName(filterClassName).newInstance();
         filters.add(filter);
         LOG.info("Loaded event filter: {}", filterClassName);
       } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-        throw new IllegalArgumentException("Failed to initialize trigger event filter.", e.getCause());
+        throw new IllegalArgumentException("Failed to initialize trigger event filter.",
+            e.getCause());
       }
     }
     return filters;

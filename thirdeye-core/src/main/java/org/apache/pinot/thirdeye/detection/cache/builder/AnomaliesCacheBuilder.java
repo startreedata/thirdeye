@@ -45,12 +45,12 @@ import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- *  Essentially a fetcher for fetching anomalies from cache/datasource.
- *  The cache holds anomalies information per Anomaly Slices
+ * Essentially a fetcher for fetching anomalies from cache/datasource.
+ * The cache holds anomalies information per Anomaly Slices
  */
 public class AnomaliesCacheBuilder {
+
   private static final Logger LOG = LoggerFactory.getLogger(AnomaliesCacheBuilder.class);
 
   private static final String PROP_DETECTION_CONFIG_ID = "detectionConfigId";
@@ -102,13 +102,15 @@ public class AnomaliesCacheBuilder {
           }
 
           @Override
-          public Map<AnomalySlice, Collection<MergedAnomalyResultDTO>> loadAll(Iterable<? extends AnomalySlice> slices) {
+          public Map<AnomalySlice, Collection<MergedAnomalyResultDTO>> loadAll(
+              Iterable<? extends AnomalySlice> slices) {
             return loadAnomalies(Lists.newArrayList(slices));
           }
         });
   }
 
-  public Collection<MergedAnomalyResultDTO> fetchSlice(AnomalySlice slice) throws ExecutionException {
+  public Collection<MergedAnomalyResultDTO> fetchSlice(AnomalySlice slice)
+      throws ExecutionException {
     if (CacheConfig.getInstance().useInMemoryCache()) {
       return this.cache.get(slice);
     } else {
@@ -116,7 +118,8 @@ public class AnomaliesCacheBuilder {
     }
   }
 
-  private Map<AnomalySlice, Collection<MergedAnomalyResultDTO>> loadAnomalies(Collection<AnomalySlice> slices) {
+  private Map<AnomalySlice, Collection<MergedAnomalyResultDTO>> loadAnomalies(
+      Collection<AnomalySlice> slices) {
     Map<AnomalySlice, Collection<MergedAnomalyResultDTO>> output = new HashMap<>();
     try {
       long ts = System.currentTimeMillis();
@@ -124,7 +127,8 @@ public class AnomaliesCacheBuilder {
       // if the anomalies are already in cache, return directly
       if (CacheConfig.getInstance().useInMemoryCache()) {
         for (AnomalySlice slice : slices) {
-          for (Map.Entry<AnomalySlice, Collection<MergedAnomalyResultDTO>> entry : this.cache.asMap().entrySet()) {
+          for (Map.Entry<AnomalySlice, Collection<MergedAnomalyResultDTO>> entry : this.cache
+              .asMap().entrySet()) {
             // if the anomaly slice is already in cache, return directly. Otherwise fetch from data source.
             if (entry.getKey().containSlice(slice)) {
               output.computeIfAbsent(slice, k -> new ArrayList<>());
@@ -144,17 +148,20 @@ public class AnomaliesCacheBuilder {
       for (AnomalySlice slice : slices) {
         if (!output.containsKey(slice)) {
           futures.put(slice, this.executor.submit(() -> {
-            List<Predicate> predicates = DetectionUtils.buildPredicatesOnTime(slice.getStart(), slice.getEnd());
+            List<Predicate> predicates = DetectionUtils
+                .buildPredicatesOnTime(slice.getStart(), slice.getEnd());
 
             if (slice.getDetectionId() >= 0) {
               predicates.add(Predicate.EQ(PROP_DETECTION_CONFIG_ID, slice.getDetectionId()));
             }
 
             if (predicates.isEmpty()) {
-              throw new IllegalArgumentException("Must provide at least one of start, end, or " + PROP_DETECTION_CONFIG_ID);
+              throw new IllegalArgumentException(
+                  "Must provide at least one of start, end, or " + PROP_DETECTION_CONFIG_ID);
             }
 
-            Collection<MergedAnomalyResultDTO> anomalies = anomalyDAO.findByPredicate(DetectionUtils.AND(predicates));
+            Collection<MergedAnomalyResultDTO> anomalies = anomalyDAO
+                .findByPredicate(DetectionUtils.AND(predicates));
             anomalies.removeIf(anomaly -> !slice.match(anomaly));
 
             return anomalies;
@@ -169,12 +176,14 @@ public class AnomaliesCacheBuilder {
       }
 
       int anomalies = output.values().stream().mapToInt(Collection::size).sum();
-      LOG.info("Fetched {} anomalies, from {} slices, took {} milliseconds, {} slices hit cache, {} slices missed cache",
-          anomalies, slices.size(), System.currentTimeMillis() - ts, (slices.size() - futures.size()), futures.size());
+      LOG.info(
+          "Fetched {} anomalies, from {} slices, took {} milliseconds, {} slices hit cache, {} slices missed cache",
+          anomalies, slices.size(), System.currentTimeMillis() - ts,
+          (slices.size() - futures.size()), futures.size());
     } catch (TimeoutException e) {
       LOG.error("Timeout when fetching anomalies so assuming the result is empty.", e);
       for (AnomalySlice slice : slices) {
-          output.put(slice, Collections.emptyList());
+        output.put(slice, Collections.emptyList());
       }
     } catch (Exception e) {
       throw new RuntimeException(e);

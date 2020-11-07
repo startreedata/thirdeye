@@ -23,6 +23,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class EvaluationIndex extends AbstractIndexEntity {
+
   private long detectionConfigId;
   private long startTime;
   private long endTime;

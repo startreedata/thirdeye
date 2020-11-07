@@ -36,27 +36,27 @@ import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class Summary {
+
   private static final Logger LOG = LoggerFactory.getLogger(Summary.class);
   static final NodeDimensionValuesComparator NODE_COMPARATOR = new NodeDimensionValuesComparator();
 
-  private Cube cube;
-  private int maxLevelCount;
+  private final Cube cube;
+  private final int maxLevelCount;
   private int levelCount;
   private List<DPArray> dpArrays;
 
-  private double globalBaselineValue;
-  private double globalCurrentValue;
-  private double globalBaselineSize;
-  private double globalCurrentSize;
+  private final double globalBaselineValue;
+  private final double globalCurrentValue;
+  private final double globalBaselineSize;
+  private final double globalCurrentSize;
 
-  private CostFunction costFunction;
-  private RowInserter basicRowInserter;
+  private final CostFunction costFunction;
+  private final RowInserter basicRowInserter;
   private RowInserter oneSideErrorRowInserter;
   private RowInserter leafRowInserter;
-  private List<DimNameValueCostEntry> costSet;
-  private List<Cube.DimensionCost> sortedDimensionCosts;
+  private final List<DimNameValueCostEntry> costSet;
+  private final List<Cube.DimensionCost> sortedDimensionCosts;
 
   public Summary(Cube cube, CostFunction costFunction) {
     this.cube = cube;
@@ -87,8 +87,11 @@ public class Summary {
     return computeSummary(answerSize, false, levelCount);
   }
 
-  public SummaryResponse computeSummary(int answerSize, boolean doOneSideError, int userLevelCount) {
-    if (answerSize <= 0) answerSize = 1;
+  public SummaryResponse computeSummary(int answerSize, boolean doOneSideError,
+      int userLevelCount) {
+    if (answerSize <= 0) {
+      answerSize = 1;
+    }
     if (userLevelCount <= 0 || userLevelCount > this.maxLevelCount) {
       userLevelCount = this.maxLevelCount;
     }
@@ -101,15 +104,19 @@ public class Summary {
     CubeNode root = cube.getRoot();
     if (doOneSideError) {
       oneSideErrorRowInserter =
-          new OneSideErrorRowInserter(basicRowInserter, Double.compare(1., root.bootStrapChangeRatio()) <= 0);
+          new OneSideErrorRowInserter(basicRowInserter,
+              Double.compare(1., root.bootStrapChangeRatio()) <= 0);
       // If this cube contains only one dimension, one side error is calculated starting at leaf (detailed) level;
       // otherwise, a row at different side is removed through internal nodes.
-      if (this.levelCount == 1) leafRowInserter = oneSideErrorRowInserter;
+      if (this.levelCount == 1) {
+        leafRowInserter = oneSideErrorRowInserter;
+      }
     }
     computeChildDPArray(root);
     List<CubeNode> answer = new ArrayList<>(dpArrays.get(0).getAnswer());
     SummaryResponse response =
-        new SummaryResponse(cube.getBaselineTotal(), cube.getCurrentTotal(), cube.getBaselineTotalSize(),
+        new SummaryResponse(cube.getBaselineTotal(), cube.getCurrentTotal(),
+            cube.getBaselineTotalSize(),
             cube.getCurrentTotalSize());
     response.buildDiffSummary(answer, this.levelCount, costFunction);
     response.buildGainerLoserGroup(costSet);
@@ -119,7 +126,8 @@ public class Summary {
   }
 
   /**
-   * Check correctness of the sum of wow values. The check changes the wow values, so it should only be invoked after
+   * Check correctness of the sum of wow values. The check changes the wow values, so it should only
+   * be invoked after
    * SummaryResponse is generated.
    */
   public void testCorrectnessOfWowValues() {
@@ -127,7 +135,9 @@ public class Summary {
     nodeList.sort(NODE_COMPARATOR); // Process lower level nodes first
     for (CubeNode node : nodeList) {
       CubeNode parent = findAncestor(node, null, dpArrays.get(0).getAnswer());
-      if (parent != null) parent.addNodeValues(node);
+      if (parent != null) {
+        parent.addNodeValues(node);
+      }
     }
     for (CubeNode node : nodeList) {
       if (Double.compare(node.getBaselineValue(), node.getOriginalBaselineValue()) != 0
@@ -140,6 +150,7 @@ public class Summary {
   }
 
   static class NodeDimensionValuesComparator implements Comparator<CubeNode> {
+
     @Override
     public int compare(CubeNode n1, CubeNode n2) {
       return n1.getDimensionValues().compareTo(n2.getDimensionValues());
@@ -147,7 +158,8 @@ public class Summary {
   }
 
   /**
-   * Build the summary recursively. The parentTargetRatio for the root node can be any arbitrary value.
+   * Build the summary recursively. The parentTargetRatio for the root node can be any arbitrary
+   * value.
    * The calculated answer for each invocation is put at dpArrays[node.level].
    * So, the final answer is located at dpArray[0].
    */
@@ -209,10 +221,12 @@ public class Summary {
       double targetRatio = parent.bootStrapChangeRatio();
       recomputeCostAndRemoveSmallNodes(node, dpArray, targetRatio);
       dpArray.targetRatio = targetRatio;
-      if ( !nodeIsThinnedOut(node) ) {
+      if (!nodeIsThinnedOut(node)) {
         // dpArray actually takes (dpArray.size-1) nodes as the answer, so we set its size to 2
         // in order to insert the aggregated node to the answer.
-        if (dpArray.size() == 1) dpArray.setShrinkSize(2);
+        if (dpArray.size() == 1) {
+          dpArray.setShrinkSize(2);
+        }
         Set<CubeNode> removedNode = new HashSet<>(dpArray.getAnswer());
         basicRowInserter.insertRowToDPArray(dpArray, node, targetRatio);
         // The following block is trying to achieve removedNode.removeAll(dpArray.getAnswer());
@@ -233,24 +247,30 @@ public class Summary {
   // TODO: Need a better definition for "a node is thinned out by its children."
   // We also need to look into the case where parent node is much smaller than its children.
   private static boolean nodeIsThinnedOut(CubeNode node) {
-    return Double.compare(0., node.getBaselineSize()) == 0 && Double.compare(0., node.getCurrentSize()) == 0;
+    return Double.compare(0., node.getBaselineSize()) == 0
+        && Double.compare(0., node.getCurrentSize()) == 0;
   }
 
-  private static void rollbackInsertions(CubeNode node, Set<CubeNode> answer, List<CubeNode> removedNodes) {
+  private static void rollbackInsertions(CubeNode node, Set<CubeNode> answer,
+      List<CubeNode> removedNodes) {
     removedNodes.sort(NODE_COMPARATOR); // Rollback from top to bottom nodes
     Collections.reverse(removedNodes);
     Set<CubeNode> targetSet = new HashSet<>(answer);
     targetSet.addAll(removedNodes);
     for (CubeNode removedNode : removedNodes) {
       CubeNode parents = findAncestor(removedNode, node, targetSet);
-      if (parents != null) parents.removeNodeValues(removedNode);
+      if (parents != null) {
+        parents.removeNodeValues(removedNode);
+      }
     }
     node.resetValues();
   }
 
   /**
-   * Merge the answers of the two given DPArrays. The merged answer is put in the DPArray at the left hand side.
-   * After merging, the baseline and current values of the removed nodes (rows) will be add back to those of their
+   * Merge the answers of the two given DPArrays. The merged answer is put in the DPArray at the
+   * left hand side.
+   * After merging, the baseline and current values of the removed nodes (rows) will be add back to
+   * those of their
    * parent node.
    */
   private Set<CubeNode> mergeDPArray(CubeNode parentNode, DPArray parentArray, DPArray childArray) {
@@ -271,19 +291,24 @@ public class Summary {
   }
 
   /**
-   * Recompute the baseline value and current value the node. The change is induced by the chosen nodes in
+   * Recompute the baseline value and current value the node. The change is induced by the chosen
+   * nodes in
    * the answer. Note that the current node may be in the answer.
    */
   private static void updateWowValues(CubeNode node, Set<CubeNode> answer) {
     node.resetValues();
     for (CubeNode child : answer) {
-      if (child == node) continue;
+      if (child == node) {
+        continue;
+      }
       node.removeNodeValues(child);
     }
   }
 
   /**
-   * Update an internal node's baseline and current values if any of the nodes in its subtree is removed.
+   * Update an internal node's baseline and current values if any of the nodes in its subtree is
+   * removed.
+   *
    * @param node The internal node to be updated.
    * @param answer The new answer.
    * @param removedNodes The nodes removed from the subtree of node.
@@ -294,12 +319,15 @@ public class Summary {
     removedNodesList.sort(NODE_COMPARATOR); // Process lower level nodes first
     for (CubeNode removedNode : removedNodesList) {
       CubeNode parents = findAncestor(removedNode, node, answer);
-      if (parents != null) parents.addNodeValues(removedNode);
+      if (parents != null) {
+        parents.addNodeValues(removedNode);
+      }
     }
   }
 
   /**
-   * Find a node's ancestor between the given node and ceiling that is contained in the target set of CubeNode.
+   * Find a node's ancestor between the given node and ceiling that is contained in the target set
+   * of CubeNode.
    * Returns null if no ancestor exists in the target set.
    */
   private static CubeNode findAncestor(CubeNode node, CubeNode ceiling, Set<CubeNode> targets) {
@@ -314,7 +342,8 @@ public class Summary {
   /**
    * Recompute costs of the nodes in a DPArray using bootStrapChangeRatio for calculating the cost.
    */
-  private void recomputeCostAndRemoveSmallNodes(CubeNode parentNode, DPArray dp, double targetRatio) {
+  private void recomputeCostAndRemoveSmallNodes(CubeNode parentNode, DPArray dp,
+      double targetRatio) {
     Set<CubeNode> removedNodes = new HashSet<>(dp.getAnswer());
     List<CubeNode> ans = new ArrayList<>(dp.getAnswer());
     ans.sort(NODE_COMPARATOR);
@@ -333,10 +362,12 @@ public class Summary {
   }
 
   /**
-   * If the node's parent is also in the DPArray, then it's parent's current changeRatio is used as the target changeRatio for
+   * If the node's parent is also in the DPArray, then it's parent's current changeRatio is used as
+   * the target changeRatio for
    * calculating the cost of the node; otherwise, bootStrapChangeRatio is used.
    */
-  private void insertRowWithAdaptiveRatioNoOneSideError(DPArray dp, CubeNode node, double targetRatio) {
+  private void insertRowWithAdaptiveRatioNoOneSideError(DPArray dp, CubeNode node,
+      double targetRatio) {
     if (dp.getAnswer().contains(node.getParent())) {
       // For one side error if node's parent is included in the solution, then its cost will be calculated normally.
       basicRowInserter.insertRowToDPArray(dp, node, node.getParent().bootStrapChangeRatio());
@@ -346,7 +377,8 @@ public class Summary {
   }
 
   /**
-   * If the node's parent is also in the DPArray, then it's parent's current changeRatio is used as the target changeRatio for
+   * If the node's parent is also in the DPArray, then it's parent's current changeRatio is used as
+   * the target changeRatio for
    * calculating the cost of the node; otherwise, bootStrapChangeRatio is used.
    */
   private void insertRowWithAdaptiveRatio(DPArray dp, CubeNode node, double targetRatio) {
@@ -359,10 +391,12 @@ public class Summary {
   }
 
   private interface RowInserter {
+
     void insertRowToDPArray(DPArray dp, CubeNode node, double targetRatio);
   }
 
   private class BasicRowInserter implements RowInserter {
+
     private final CostFunction costFunction;
 
     public BasicRowInserter(CostFunction costFunction) {
@@ -375,8 +409,9 @@ public class Summary {
       double currentValue = node.getCurrentValue();
       double baselineSize = node.getBaselineSize();
       double currentSize = node.getCurrentSize();
-      double cost = costFunction.computeCost(targetRatio, baselineValue, currentValue, baselineSize, currentSize,
-          globalBaselineValue, globalCurrentValue, globalBaselineSize, globalCurrentSize);
+      double cost = costFunction
+          .computeCost(targetRatio, baselineValue, currentValue, baselineSize, currentSize,
+              globalBaselineValue, globalCurrentValue, globalBaselineSize, globalCurrentSize);
 
       for (int n = dp.size() - 1; n > 0; --n) {
         double val1 = dp.slotAt(n - 1).cost;
@@ -394,9 +429,11 @@ public class Summary {
   }
 
   /**
-   * A wrapper class over BasicRowInserter. This class provide the calculation for one side error summary.
+   * A wrapper class over BasicRowInserter. This class provide the calculation for one side error
+   * summary.
    */
   private static class OneSideErrorRowInserter implements RowInserter {
+
     final RowInserter basicRowInserter;
     final boolean side;
 
@@ -406,18 +443,20 @@ public class Summary {
     }
 
     @Override
-    public void insertRowToDPArray(DPArray dp, CubeNode node, double targetRatio)  {
+    public void insertRowToDPArray(DPArray dp, CubeNode node, double targetRatio) {
       // If the row has the same change trend with the top row, then it is inserted.
-      if ( side == node.side() ) {
+      if (side == node.side()) {
         basicRowInserter.insertRowToDPArray(dp, node, targetRatio);
       } else { // Otherwise, it is inserted only there exists an intermediate parent besides root node
         CubeNode parent = findAncestor(node, null, dp.getAnswer());
-        if (parent != null && parent.side() == side) basicRowInserter.insertRowToDPArray(dp, node, targetRatio);
+        if (parent != null && parent.side() == side) {
+          basicRowInserter.insertRowToDPArray(dp, node, targetRatio);
+        }
       }
     }
   }
 
-  public static void main (String[] argc) {
+  public static void main(String[] argc) {
     String oFileName = "Cube.json";
     int answerSize = 10;
     boolean doOneSideError = true;
@@ -434,7 +473,8 @@ public class Summary {
     }
     Summary summary = new Summary(cube, new BalancedCostFunction());
     try {
-      SummaryResponse response = summary.computeSummary(answerSize, doOneSideError, maxDimensionSize);
+      SummaryResponse response = summary
+          .computeSummary(answerSize, doOneSideError, maxDimensionSize);
       System.out.print("JSon String: ");
       System.out.println(new ObjectMapper().writeValueAsString(response));
       System.out.println("Object String: ");

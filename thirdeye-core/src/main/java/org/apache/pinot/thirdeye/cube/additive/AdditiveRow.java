@@ -26,11 +26,11 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 
-
 /**
  * Stores the additive metric that is returned from DB.
  */
 public class AdditiveRow extends BaseRow {
+
   protected double baselineValue;
   protected double currentValue;
 
@@ -52,7 +52,8 @@ public class AdditiveRow extends BaseRow {
    * @param baselineValue the baseline value of this additive metric.
    * @param currentValue the current value of this additive metric.
    */
-  public AdditiveRow(Dimensions dimensions, DimensionValues dimensionValues, double baselineValue, double currentValue) {
+  public AdditiveRow(Dimensions dimensions, DimensionValues dimensionValues, double baselineValue,
+      double currentValue) {
     super(dimensions, dimensionValues);
     this.baselineValue = baselineValue;
     this.currentValue = currentValue;
@@ -87,6 +88,7 @@ public class AdditiveRow extends BaseRow {
 
   /**
    * Sets the current value of this additive row.
+   *
    * @param currentValue the current value of this additive row.
    */
   public void setCurrentValue(double currentValue) {
@@ -114,12 +116,14 @@ public class AdditiveRow extends BaseRow {
     AdditiveRow row = (AdditiveRow) o;
     return Double.compare(row.getBaselineValue(), getBaselineValue()) == 0
         && Double.compare(row.getCurrentValue(), getCurrentValue()) == 0 && Objects
-        .equals(getDimensions(), row.getDimensions()) && Objects.equals(getDimensionValues(), row.getDimensionValues());
+        .equals(getDimensions(), row.getDimensions()) && Objects
+        .equals(getDimensionValues(), row.getDimensionValues());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getDimensions(), getDimensionValues(), getBaselineValue(), getCurrentValue());
+    return Objects
+        .hash(getDimensions(), getDimensionValues(), getBaselineValue(), getCurrentValue());
   }
 
   @Override

@@ -49,12 +49,14 @@ import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * Baseline filling merger. This merger's merging behavior is the same as MergeWrapper. But add the capability
- * of filling baseline & current values and inject detector, metric urn. Each detector has a separate baseline filling merge wrapper
+ * Baseline filling merger. This merger's merging behavior is the same as MergeWrapper. But add the
+ * capability
+ * of filling baseline & current values and inject detector, metric urn. Each detector has a
+ * separate baseline filling merge wrapper
  */
 public class BaselineFillingMergeWrapper extends MergeWrapper {
+
   private static final Logger LOG = LoggerFactory.getLogger(BaselineFillingMergeWrapper.class);
 
   private static final String PROP_BASELINE_PROVIDER = "baselineValueProvider";
@@ -71,51 +73,58 @@ public class BaselineFillingMergeWrapper extends MergeWrapper {
   private String metricUrn;
   protected final Map<Long, MergedAnomalyResultDTO> existingAnomalies; // from id to anomalies
 
-  public BaselineFillingMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime)
-  {
+  public BaselineFillingMergeWrapper(DataProvider provider, AlertDTO config, long startTime,
+      long endTime) {
     super(provider, config, startTime, endTime);
 
     if (config.getProperties().containsKey(PROP_BASELINE_PROVIDER)) {
-      this.baselineProviderComponentName = DetectionUtils.getComponentKey(MapUtils.getString(config.getProperties(), PROP_BASELINE_PROVIDER));
-      Preconditions.checkArgument(this.config.getComponents().containsKey(this.baselineProviderComponentName));
-      this.baselineValueProvider = (BaselineProvider) this.config.getComponents().get(this.baselineProviderComponentName);
+      this.baselineProviderComponentName = DetectionUtils
+          .getComponentKey(MapUtils.getString(config.getProperties(), PROP_BASELINE_PROVIDER));
+      Preconditions.checkArgument(
+          this.config.getComponents().containsKey(this.baselineProviderComponentName));
+      this.baselineValueProvider = (BaselineProvider) this.config.getComponents()
+          .get(this.baselineProviderComponentName);
     } else {
       // default baseline provider, use wo1w
       this.baselineValueProvider = new RuleBaselineProvider();
       this.baselineProviderComponentName = DEFAULT_WOW_BASELINE_PROVIDER_NAME;
       RuleBaselineProviderSpec spec = new RuleBaselineProviderSpec();
       spec.setOffset("wo1w");
-      InputDataFetcher dataFetcher = new DefaultInputDataFetcher(this.provider, this.config.getId());
+      InputDataFetcher dataFetcher = new DefaultInputDataFetcher(this.provider,
+          this.config.getId());
       this.baselineValueProvider.init(spec, dataFetcher);
     }
 
     if (config.getProperties().containsKey(PROP_CURRENT_PROVIDER)) {
-      String detectorReferenceKey = DetectionUtils.getComponentKey(MapUtils.getString(config.getProperties(), PROP_CURRENT_PROVIDER));
+      String detectorReferenceKey = DetectionUtils
+          .getComponentKey(MapUtils.getString(config.getProperties(), PROP_CURRENT_PROVIDER));
       Preconditions.checkArgument(this.config.getComponents().containsKey(detectorReferenceKey));
-      this.currentValueProvider = (BaselineProvider) this.config.getComponents().get(detectorReferenceKey);
+      this.currentValueProvider = (BaselineProvider) this.config.getComponents()
+          .get(detectorReferenceKey);
     } else {
       // default current provider
       this.currentValueProvider = new RuleBaselineProvider();
       RuleBaselineProviderSpec spec = new RuleBaselineProviderSpec();
       spec.setOffset("current");
-      InputDataFetcher dataFetcher = new DefaultInputDataFetcher(this.provider, this.config.getId());
+      InputDataFetcher dataFetcher = new DefaultInputDataFetcher(this.provider,
+          this.config.getId());
       this.currentValueProvider.init(spec, dataFetcher);
     }
 
     // inject detector to nested property if possible
     String detectorComponentRefKey = MapUtils.getString(config.getProperties(), PROP_DETECTOR);
-    if (detectorComponentRefKey != null){
+    if (detectorComponentRefKey != null) {
       this.detectorComponentName = DetectionUtils.getComponentKey(detectorComponentRefKey);
-      for (Map<String, Object> properties : this.nestedProperties){
+      for (Map<String, Object> properties : this.nestedProperties) {
         properties.put(PROP_DETECTOR, detectorComponentRefKey);
       }
     }
 
     // inject metricUrn to nested property if possible
     String nestedUrn = MapUtils.getString(config.getProperties(), PROP_METRIC_URN);
-    if (nestedUrn != null){
+    if (nestedUrn != null) {
       this.metricUrn = nestedUrn;
-      for (Map<String, Object> properties : this.nestedProperties){
+      for (Map<String, Object> properties : this.nestedProperties) {
         properties.put(PROP_METRIC_URN, nestedUrn);
       }
     }
@@ -129,7 +138,8 @@ public class BaselineFillingMergeWrapper extends MergeWrapper {
     // Refill current and baseline values for qualified parent anomalies
     // Ignore filling baselines for exiting parent anomalies and grouped anomalies
     Collection<MergedAnomalyResultDTO> parentAnomalies = Collections2.filter(mergedAnomalies,
-        mergedAnomaly -> mergedAnomaly != null && !isExistingAnomaly(this.existingAnomalies, mergedAnomaly)
+        mergedAnomaly -> mergedAnomaly != null && !isExistingAnomaly(this.existingAnomalies,
+            mergedAnomaly)
             && !StringUtils.isBlank(mergedAnomaly.getMetricUrn()));
     this.fillCurrentAndBaselineValue(new ArrayList<>(parentAnomalies));
 
@@ -137,52 +147,66 @@ public class BaselineFillingMergeWrapper extends MergeWrapper {
   }
 
   @Override
-  protected List<MergedAnomalyResultDTO> retrieveAnomaliesFromDatabase(List<MergedAnomalyResultDTO> generated) {
+  protected List<MergedAnomalyResultDTO> retrieveAnomaliesFromDatabase(
+      List<MergedAnomalyResultDTO> generated) {
     List<MergedAnomalyResultDTO> retrieved = super.retrieveAnomaliesFromDatabase(generated);
 
     Collection<MergedAnomalyResultDTO> anomalies =
         Collections2.filter(retrieved,
-                mergedAnomaly -> mergedAnomaly != null &&
+            mergedAnomaly -> mergedAnomaly != null &&
                 !mergedAnomaly.isChild() &&
-                mergedAnomaly.getAnomalyResultSource().equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) &&
-                    // merge if only the anomaly generated by the same detector
-                this.detectorComponentName.equals(mergedAnomaly.getProperties().getOrDefault(PROP_DETECTOR_COMPONENT_NAME, "")) &&
-                    // merge if only the anomaly is in the same dimension
+                mergedAnomaly.getAnomalyResultSource()
+                    .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) &&
+                // merge if only the anomaly generated by the same detector
+                this.detectorComponentName.equals(
+                    mergedAnomaly.getProperties().getOrDefault(PROP_DETECTOR_COMPONENT_NAME, "")) &&
+                // merge if only the anomaly is in the same dimension
                 this.metricUrn.equals(mergedAnomaly.getMetricUrn())
         );
     for (MergedAnomalyResultDTO anomaly : anomalies) {
-      if(anomaly.getId() != null) this.existingAnomalies.put(anomaly.getId(), copyAnomalyInfo(anomaly, new MergedAnomalyResultDTO()));
+      if (anomaly.getId() != null) {
+        this.existingAnomalies
+            .put(anomaly.getId(), copyAnomalyInfo(anomaly, new MergedAnomalyResultDTO()));
+      }
     }
     return new ArrayList<>(anomalies);
   }
 
   /**
    * Fill in current and baseline value for the anomalies
+   *
    * @param mergedAnomalies anomalies
    * @return anomalies with current and baseline value filled
    */
-  List<MergedAnomalyResultDTO> fillCurrentAndBaselineValue(List<MergedAnomalyResultDTO> mergedAnomalies) {
+  List<MergedAnomalyResultDTO> fillCurrentAndBaselineValue(
+      List<MergedAnomalyResultDTO> mergedAnomalies) {
     for (MergedAnomalyResultDTO anomaly : mergedAnomalies) {
       try {
         String metricUrn = anomaly.getMetricUrn();
         MetricEntity me = MetricEntity.fromURN(metricUrn);
         long metricId = me.getId();
-        MetricConfigDTO metricConfigDTO = this.provider.fetchMetrics(Collections.singletonList(metricId)).get(metricId);
+        MetricConfigDTO metricConfigDTO = this.provider
+            .fetchMetrics(Collections.singletonList(metricId)).get(metricId);
         // aggregation function
         Series.DoubleFunction aggregationFunction = DoubleSeries.MEAN;
 
         try {
           aggregationFunction =
-              BaselineAggregateType.valueOf(metricConfigDTO.getDefaultAggFunction().name()).getFunction();
+              BaselineAggregateType.valueOf(metricConfigDTO.getDefaultAggFunction().name())
+                  .getFunction();
         } catch (Exception e) {
           LOG.warn("cannot get aggregation function for metric, using average", metricId);
         }
 
-        final MetricSlice slice = MetricSlice.from(metricId, anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
-        anomaly.setAvgCurrentVal(this.currentValueProvider.computePredictedAggregates(slice, aggregationFunction));
+        final MetricSlice slice = MetricSlice
+            .from(metricId, anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
+        anomaly.setAvgCurrentVal(
+            this.currentValueProvider.computePredictedAggregates(slice, aggregationFunction));
         if (this.baselineValueProvider != null) {
-          anomaly.setAvgBaselineVal(this.baselineValueProvider.computePredictedAggregates(slice, aggregationFunction));
-          anomaly.getProperties().put(PROP_BASELINE_PROVIDER_COMPONENT_NAME, this.baselineProviderComponentName);
+          anomaly.setAvgBaselineVal(
+              this.baselineValueProvider.computePredictedAggregates(slice, aggregationFunction));
+          anomaly.getProperties()
+              .put(PROP_BASELINE_PROVIDER_COMPONENT_NAME, this.baselineProviderComponentName);
           anomaly.setWeight(calculateWeight(anomaly));
         }
       } catch (Exception e) {
@@ -194,12 +218,14 @@ public class BaselineFillingMergeWrapper extends MergeWrapper {
   }
 
   // check if an anomaly is a existing anomaly and the duration is not modified
-  protected boolean isExistingAnomaly(Map<Long, MergedAnomalyResultDTO> existingAnomalies, MergedAnomalyResultDTO anomaly) {
+  protected boolean isExistingAnomaly(Map<Long, MergedAnomalyResultDTO> existingAnomalies,
+      MergedAnomalyResultDTO anomaly) {
     if (!existingAnomalies.containsKey(anomaly.getId())) {
       return false;
     }
     MergedAnomalyResultDTO previousAnomaly = existingAnomalies.get(anomaly.getId());
-    return anomaly.getStartTime() == previousAnomaly.getStartTime() && anomaly.getEndTime() == previousAnomaly.getEndTime();
+    return anomaly.getStartTime() == previousAnomaly.getStartTime()
+        && anomaly.getEndTime() == previousAnomaly.getEndTime();
   }
 
   private double calculateWeight(MergedAnomalyResultDTO anomaly) {

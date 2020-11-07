@@ -23,5 +23,6 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 
 public interface TimeSeriesResponseParser {
+
   List<TimeSeriesRow> parseResponse(ThirdEyeResponse response);
 }

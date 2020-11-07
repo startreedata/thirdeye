@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class DetectionAlertConfigIndex extends AbstractIndexEntity {
+
   String name;
   String application;
 

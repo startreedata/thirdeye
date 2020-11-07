@@ -28,7 +28,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
-
 public class ApplicationManagerImpl extends AbstractManagerImpl<ApplicationDTO>
     implements ApplicationManager {
 

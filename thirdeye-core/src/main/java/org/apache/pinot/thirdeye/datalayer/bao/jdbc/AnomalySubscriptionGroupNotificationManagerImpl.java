@@ -26,13 +26,14 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AnomalySubscriptionGroupNotificationBean;
 
-
 public class AnomalySubscriptionGroupNotificationManagerImpl
     extends AbstractManagerImpl<AnomalySubscriptionGroupNotificationDTO>
     implements AnomalySubscriptionGroupNotificationManager {
+
   @Inject
   public AnomalySubscriptionGroupNotificationManagerImpl(GenericPojoDao genericPojoDao) {
-    super(AnomalySubscriptionGroupNotificationDTO.class, AnomalySubscriptionGroupNotificationBean.class,
+    super(AnomalySubscriptionGroupNotificationDTO.class,
+        AnomalySubscriptionGroupNotificationBean.class,
         genericPojoDao);
   }
 }

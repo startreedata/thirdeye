@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class RootcauseTemplateIndex extends AbstractIndexEntity {
+
   private String name;
   private String owner;
   private String application;

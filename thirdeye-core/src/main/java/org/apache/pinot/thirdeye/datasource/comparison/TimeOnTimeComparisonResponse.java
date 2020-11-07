@@ -63,6 +63,7 @@ public class TimeOnTimeComparisonResponse {
   }
 
   static class Builder {
+
     List<Row> rows = new ArrayList<>();
 
     public void add(Row row) {

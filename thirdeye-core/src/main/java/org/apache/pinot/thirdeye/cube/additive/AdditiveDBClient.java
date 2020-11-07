@@ -30,13 +30,14 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 
-
 /**
- * This class generates query requests to the backend database and retrieve the additive metric for summary algorithm.
+ * This class generates query requests to the backend database and retrieve the additive metric for
+ * summary algorithm.
  *
  * @see org.apache.pinot.thirdeye.cube.data.dbclient.BaseCubePinotClient
  */
 public class AdditiveDBClient extends BaseCubePinotClient<AdditiveRow> {
+
   private String metric;
 
   /**
@@ -61,8 +62,10 @@ public class AdditiveDBClient extends BaseCubePinotClient<AdditiveRow> {
   protected List<CubeSpec> getCubeSpecs() {
     List<CubeSpec> cubeSpecs = new ArrayList<>();
 
-    cubeSpecs.add(new CubeSpec(CubeTag.Baseline, metric, baselineStartInclusive, baselineEndExclusive));
-    cubeSpecs.add(new CubeSpec(CubeTag.Current, metric, currentStartInclusive, currentEndExclusive));
+    cubeSpecs
+        .add(new CubeSpec(CubeTag.Baseline, metric, baselineStartInclusive, baselineEndExclusive));
+    cubeSpecs
+        .add(new CubeSpec(CubeTag.Current, metric, currentStartInclusive, currentEndExclusive));
 
     return cubeSpecs;
   }

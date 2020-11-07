@@ -43,14 +43,15 @@ import org.slf4j.LoggerFactory;
  * it can be used for event-driven scheduling.
  */
 public class DatasetTriggerInfoRepo {
+
   private static final Logger LOG = LoggerFactory.getLogger(DatasetTriggerInfoRepo.class);
   private static DatasetTriggerInfoRepo _instance = null;
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private static Set<String> dataSourceWhitelist = new HashSet<>();
   private static int refreshFreqInMin = 30;
-  private Map<String, Long> datasetRefreshTimeMap;
-  private ScheduledThreadPoolExecutor executorService;
-  private AlertManager detectionConfigDAO;
+  private final Map<String, Long> datasetRefreshTimeMap;
+  private final ScheduledThreadPoolExecutor executorService;
+  private final AlertManager detectionConfigDAO;
 
   private DatasetTriggerInfoRepo() {
     this.detectionConfigDAO = DAO_REGISTRY.getDetectionConfigManager();
@@ -124,5 +125,4 @@ public class DatasetTriggerInfoRepo {
     }
     LOG.info("Finished updating the list of dataset with size: " + datasetRefreshTimeMap.size());
   }
-
 }

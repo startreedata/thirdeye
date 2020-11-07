@@ -32,18 +32,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This factory instantiates the implementation (class) of AlertGroupAuxiliaryInfoProvider from two sources: 1. The
- * classes that are specified from a configuration file. 2. The classes in ThirdEye open source project. Given
- * the type of recipient provider, this class tries the first type of classes using Java reflection; if it fails,
+ * This factory instantiates the implementation (class) of AlertGroupAuxiliaryInfoProvider from two
+ * sources: 1. The
+ * classes that are specified from a configuration file. 2. The classes in ThirdEye open source
+ * project. Given
+ * the type of recipient provider, this class tries the first type of classes using Java reflection;
+ * if it fails,
  * then it looks for the internal classes.
  *
  * The configuration file to external classes is formatted in the following form:
- *   SHORT_TYPE_NAME1=the.full.class.name1
- *   SHORT_TYPE_NAME2=the.full.class.name2
- *   ...
+ * SHORT_TYPE_NAME1=the.full.class.name1
+ * SHORT_TYPE_NAME2=the.full.class.name2
+ * ...
  */
 public class AlertGroupRecipientProviderFactory {
-  private static final Logger LOG = LoggerFactory.getLogger(AlertGroupRecipientProviderFactory.class);
+
+  private static final Logger LOG = LoggerFactory
+      .getLogger(AlertGroupRecipientProviderFactory.class);
   private static final AlertGroupAuxiliaryInfoProvider DUMMY_ALERT_GROUP_RECIPIENT_PROVIDER =
       new DummyAlertGroupAuxiliaryInfoProvider();
   public static final String GROUP_RECIPIENT_PROVIDER_TYPE_KEY = "type";
@@ -51,12 +56,15 @@ public class AlertGroupRecipientProviderFactory {
   private final Properties props = new Properties();
 
   /**
-   * The default constructor that instantiates a factory that does not have the configuration file to external classes.
+   * The default constructor that instantiates a factory that does not have the configuration file
+   * to external classes.
    */
-  public AlertGroupRecipientProviderFactory() { }
+  public AlertGroupRecipientProviderFactory() {
+  }
 
   /**
-   * The constructor that instantiates a factory that has the configuration file to external classes. The configuration
+   * The constructor that instantiates a factory that has the configuration file to external
+   * classes. The configuration
    * file is given by its path.
    */
   public AlertGroupRecipientProviderFactory(String alertGroupRecipientProviderConfigPath) {
@@ -71,7 +79,8 @@ public class AlertGroupRecipientProviderFactory {
   }
 
   /**
-   * The constructor that instantiates a factory that has the configuration file to external classes. The configuration
+   * The constructor that instantiates a factory that has the configuration file to external
+   * classes. The configuration
    * file is given as an input stream.
    */
   public AlertGroupRecipientProviderFactory(InputStream input) {
@@ -94,14 +103,16 @@ public class AlertGroupRecipientProviderFactory {
   }
 
   /**
-   * Given a spec, which is a map of string to a string, of the recipient provider, returns a recipient provider
-   * instance. The implementation of the instance could be located in an external package or ThirdEye project.
+   * Given a spec, which is a map of string to a string, of the recipient provider, returns a
+   * recipient provider
+   * instance. The implementation of the instance could be located in an external package or
+   * ThirdEye project.
    *
-   * If the type of provider exists in both the external package and ThirdEye project, then the implementation from
+   * If the type of provider exists in both the external package and ThirdEye project, then the
+   * implementation from
    * external package will be used.
    *
    * @param spec a map of string to a string.
-   *
    * @return a recipient provider instance.
    */
   public AlertGroupAuxiliaryInfoProvider fromSpec(Map<String, String> spec) {
@@ -113,10 +124,11 @@ public class AlertGroupRecipientProviderFactory {
     if (spec.containsKey(GROUP_RECIPIENT_PROVIDER_TYPE_KEY)) {
       String recipientProviderType = spec.get(GROUP_RECIPIENT_PROVIDER_TYPE_KEY);
       // We first check if the implementation (class) of this provider comes from external packages
-      if(props.containsKey(recipientProviderType.toUpperCase())) {
+      if (props.containsKey(recipientProviderType.toUpperCase())) {
         String className = props.getProperty(recipientProviderType.toUpperCase());
         try {
-          recipientProvider = (AlertGroupAuxiliaryInfoProvider) Class.forName(className).newInstance();
+          recipientProvider = (AlertGroupAuxiliaryInfoProvider) Class.forName(className)
+              .newInstance();
         } catch (Exception e) {
           LOG.warn(e.getMessage());
         }
@@ -134,10 +146,10 @@ public class AlertGroupRecipientProviderFactory {
   }
 
   /**
-   * The methods returns the instance of recipient provider whose implementation is located in ThirdEye project.
+   * The methods returns the instance of recipient provider whose implementation is located in
+   * ThirdEye project.
    *
    * @param type the type name of the provider.
-   *
    * @return a instance of recipient provider.
    */
   private static AlertGroupAuxiliaryInfoProvider fromStringType(String type) {
@@ -154,12 +166,12 @@ public class AlertGroupRecipientProviderFactory {
     }
 
     switch (providerType) {
-    case DUMMY: // speed optimization for most use cases
-      return DUMMY_ALERT_GROUP_RECIPIENT_PROVIDER;
-    case DIMENSIONAL:
-      return new DimensionalAlertGroupAuxiliaryRecipientProvider();
-    default:
-      return DUMMY_ALERT_GROUP_RECIPIENT_PROVIDER;
+      case DUMMY: // speed optimization for most use cases
+        return DUMMY_ALERT_GROUP_RECIPIENT_PROVIDER;
+      case DIMENSIONAL:
+        return new DimensionalAlertGroupAuxiliaryRecipientProvider();
+      default:
+        return DUMMY_ALERT_GROUP_RECIPIENT_PROVIDER;
     }
   }
 }

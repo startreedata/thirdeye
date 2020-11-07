@@ -40,10 +40,10 @@ public class MonitorJobRunner implements JobRunner {
   private static final Logger LOG = LoggerFactory.getLogger(MonitorJobRunner.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private JobManager jobDAO;
-  private TaskManager taskDAO;
-  private TaskGenerator taskGenerator;
-  private MonitorJobContext monitorJobContext;
+  private final JobManager jobDAO;
+  private final TaskManager taskDAO;
+  private final TaskGenerator taskGenerator;
+  private final MonitorJobContext monitorJobContext;
 
   public MonitorJobRunner(MonitorJobContext monitorJobContext) {
     this.monitorJobContext = monitorJobContext;
@@ -89,7 +89,6 @@ public class MonitorJobRunner implements JobRunner {
     return jobExecutionId;
   }
 
-
   public List<Long> createTasks() {
     List<Long> taskIds = new ArrayList<>();
     try {
@@ -118,8 +117,5 @@ public class MonitorJobRunner implements JobRunner {
       LOG.error("Exception in creating anomaly tasks", e);
     }
     return taskIds;
-
   }
-
-
 }

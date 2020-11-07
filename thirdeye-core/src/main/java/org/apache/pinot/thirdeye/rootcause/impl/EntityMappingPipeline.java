@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO handle MetricEntity tail
+
 /**
  * The EntityMappingPipeline is a generic implementation for emitting Entities based on
  * association with incoming Entities. For example, it may be used to generate "similar" metrics
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * <br/><b>NOTE:</b> An entity may map to multiple different entities
  */
 public class EntityMappingPipeline extends Pipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(EntityMappingPipeline.class);
 
   public static final String PROP_DIRECTION_REGULAR = "REGULAR";
@@ -94,7 +96,10 @@ public class EntityMappingPipeline extends Pipeline {
    * @param direction apply mappings given direction
    * @param iterations number of iterations of transitive hull expansion
    */
-  public EntityMappingPipeline(String outputName, Set<String> inputNames, EntityToEntityMappingManager entityDAO, Set<String> inputFilters, Set<String> outputFilters, boolean isRewriter, boolean matchPrefix, boolean isCollector, String direction, int iterations) {
+  public EntityMappingPipeline(String outputName, Set<String> inputNames,
+      EntityToEntityMappingManager entityDAO, Set<String> inputFilters, Set<String> outputFilters,
+      boolean isRewriter, boolean matchPrefix, boolean isCollector, String direction,
+      int iterations) {
     super(outputName, inputNames);
     this.entityDAO = entityDAO;
     this.inputFilters = inputFilters;
@@ -111,19 +116,25 @@ public class EntityMappingPipeline extends Pipeline {
    *
    * @param outputName pipeline output name
    * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_MAPPING_TYPE}, {@code PROP_IS_REWRITER=false}, {@code PROP_MATCH_PREFIX=false}, {@code PROP_IS_COLLECTOR=false}, {@code PROP_DIRECTION=REGULAR}, {@code PROP_ITERATIONS=1})
+   * @param properties configuration properties ({@code PROP_MAPPING_TYPE}, {@code
+   *     PROP_IS_REWRITER=false}, {@code PROP_MATCH_PREFIX=false}, {@code PROP_IS_COLLECTOR=false},
+   *     {@code PROP_DIRECTION=REGULAR}, {@code PROP_ITERATIONS=1})
    */
-  public EntityMappingPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) throws IOException {
+  public EntityMappingPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) throws IOException {
     super(outputName, inputNames);
 
     this.entityDAO = DAORegistry.getInstance().getEntityToEntityMappingDAO();
     this.isRewriter = MapUtils.getBoolean(properties, PROP_IS_REWRITER, PROP_IS_REWRITER_DEFAULT);
-    this.matchPrefix = MapUtils.getBoolean(properties, PROP_MATCH_PREFIX, PROP_MATCH_PREFIX_DEFAULT);
-    this.isCollector = MapUtils.getBoolean(properties, PROP_IS_COLLECTOR, PROP_IS_COLLECTOR_DEFAULT);
+    this.matchPrefix = MapUtils
+        .getBoolean(properties, PROP_MATCH_PREFIX, PROP_MATCH_PREFIX_DEFAULT);
+    this.isCollector = MapUtils
+        .getBoolean(properties, PROP_IS_COLLECTOR, PROP_IS_COLLECTOR_DEFAULT);
     this.direction = MapUtils.getString(properties, PROP_DIRECTION, PROP_DIRECTION_DEFAULT);
     this.iterations = MapUtils.getInteger(properties, PROP_ITERATIONS, PROP_ITERATIONS_DEFAULT);
 
-    if (!Arrays.asList(PROP_DIRECTION_REGULAR, PROP_DIRECTION_REVERSE, PROP_DIRECTION_BOTH).contains(this.direction)) {
+    if (!Arrays.asList(PROP_DIRECTION_REGULAR, PROP_DIRECTION_REVERSE, PROP_DIRECTION_BOTH)
+        .contains(this.direction)) {
       throw new IllegalArgumentException(String.format("Unknown direction '%s'", this.direction));
     }
 
@@ -144,38 +155,41 @@ public class EntityMappingPipeline extends Pipeline {
   public PipelineResult run(PipelineContext context) {
     Set<Entity> entities = context.filter(Entity.class);
 
-    final Map<String, Set<EntityToEntityMappingDTO>> mappings = toMap(this.filterMappings(this.getMappings()));
+    final Map<String, Set<EntityToEntityMappingDTO>> mappings = toMap(
+        this.filterMappings(this.getMappings()));
 
     // perform entity urn mapping
     final int inputSize = entities.size();
     entities = mapEntities(entities, mappings);
     LOG.info("Mapped {} entities to {} entities in iteration {}", inputSize, entities.size(), 1);
 
-    for(int i=1; i<this.iterations; i++) {
+    for (int i = 1; i < this.iterations; i++) {
       Set<Entity> result = mapEntities(entities, mappings);
 
       final int originalSize = entities.size();
-      if(this.isCollector) {
+      if (this.isCollector) {
         entities.addAll(result);
       } else {
         entities = result;
       }
 
-      LOG.info("Mapped {} entities to {} entities in iteration {}", originalSize, entities.size(), i + 1);
+      LOG.info("Mapped {} entities to {} entities in iteration {}", originalSize, entities.size(),
+          i + 1);
     }
 
     // consolidate entity scores, use max
     return new PipelineResult(context, new MaxScoreSet<>(entities));
   }
 
-  private Set<Entity> mapEntities(Set<Entity> entities, Map<String, Set<EntityToEntityMappingDTO>> mappings) {
+  private Set<Entity> mapEntities(Set<Entity> entities,
+      Map<String, Set<EntityToEntityMappingDTO>> mappings) {
     Set<Entity> output = new HashSet<>();
-    for(Entity entity : entities) {
+    for (Entity entity : entities) {
       try {
         Set<Entity> newEntities = replace(entity, mappings);
 
-        if(LOG.isDebugEnabled()) {
-          for(Entity ne : newEntities) {
+        if (LOG.isDebugEnabled()) {
+          for (Entity ne : newEntities) {
             LOG.debug("Mapping {} [{}] {} to {} [{}] {}",
                 entity.getScore(), entity.getClass().getSimpleName(), entity.getUrn(),
                 ne.getScore(), ne.getClass().getSimpleName(), ne.getUrn());
@@ -194,45 +208,54 @@ public class EntityMappingPipeline extends Pipeline {
     return this.matchPrefix ? replacePrefix(entity, mappings) : replaceFull(entity, mappings);
   }
 
-  private Set<Entity> replacePrefix(Entity entity, Map<String, Set<EntityToEntityMappingDTO>> mappings) {
+  private Set<Entity> replacePrefix(Entity entity,
+      Map<String, Set<EntityToEntityMappingDTO>> mappings) {
     List<EntityToEntityMappingDTO> matches = findPrefix(entity, mappings);
-    if(matches == null || matches.isEmpty())
+    if (matches == null || matches.isEmpty()) {
       return handleNoMapping(entity);
+    }
 
     Set<Entity> entities = new HashSet<>();
-    for(EntityToEntityMappingDTO match : matches) {
+    for (EntityToEntityMappingDTO match : matches) {
       String postfix = entity.getUrn().substring(match.getFromURN().length());
       String toURN = match.getToURN() + postfix;
-      entities.add(EntityUtils.parseURN(toURN, entity.getScore() * match.getScore()).withRelated(Collections.singletonList(entity)));
+      entities.add(EntityUtils.parseURN(toURN, entity.getScore() * match.getScore())
+          .withRelated(Collections.singletonList(entity)));
     }
 
     return entities;
   }
 
-  private Set<Entity> replaceFull(Entity entity, Map<String, Set<EntityToEntityMappingDTO>> mappings) {
+  private Set<Entity> replaceFull(Entity entity,
+      Map<String, Set<EntityToEntityMappingDTO>> mappings) {
     Set<EntityToEntityMappingDTO> matches = mappings.get(entity.getUrn());
-    if(matches == null || matches.isEmpty())
+    if (matches == null || matches.isEmpty()) {
       return handleNoMapping(entity);
+    }
 
     Set<Entity> entities = new HashSet<>();
-    for(EntityToEntityMappingDTO match : matches) {
-      entities.add(EntityUtils.parseURN(match.getToURN(), entity.getScore() * match.getScore()).withRelated(Collections.singletonList(entity)));
+    for (EntityToEntityMappingDTO match : matches) {
+      entities.add(EntityUtils.parseURN(match.getToURN(), entity.getScore() * match.getScore())
+          .withRelated(Collections.singletonList(entity)));
     }
 
     return entities;
   }
 
   private Set<Entity> handleNoMapping(Entity e) {
-    if(this.isRewriter)
+    if (this.isRewriter) {
       return Collections.singleton(e);
+    }
     return Collections.emptySet();
   }
 
-  private List<EntityToEntityMappingDTO> findPrefix(Entity entity, Map<String, Set<EntityToEntityMappingDTO>> mappings) {
+  private List<EntityToEntityMappingDTO> findPrefix(Entity entity,
+      Map<String, Set<EntityToEntityMappingDTO>> mappings) {
     List<EntityToEntityMappingDTO> matches = new ArrayList<>();
-    for(Map.Entry<String, Set<EntityToEntityMappingDTO>> mapping : mappings.entrySet()) {
-      if(entity.getUrn().startsWith(mapping.getKey()))
+    for (Map.Entry<String, Set<EntityToEntityMappingDTO>> mapping : mappings.entrySet()) {
+      if (entity.getUrn().startsWith(mapping.getKey())) {
         matches.addAll(mapping.getValue());
+      }
     }
     return matches;
   }
@@ -264,7 +287,8 @@ public class EntityMappingPipeline extends Pipeline {
   }
 
   /**
-   * Applies input filters with {@code OR} semantics. If the set of filters in empty, passes by default.
+   * Applies input filters with {@code OR} semantics. If the set of filters in empty, passes by
+   * default.
    *
    * @param mapping entity mapping
    * @return {@code true} if a filter matches or the set of filters is empty, otherwise {@code false}
@@ -282,7 +306,8 @@ public class EntityMappingPipeline extends Pipeline {
   }
 
   /**
-   * Applies output filters with {@code OR} semantics. If the set of filters in empty, passes by default.
+   * Applies output filters with {@code OR} semantics. If the set of filters in empty, passes by
+   * default.
    *
    * @param mapping entity mapping
    * @return {@code true} if a filter matches or the set of filters is empty, otherwise {@code false}
@@ -299,18 +324,21 @@ public class EntityMappingPipeline extends Pipeline {
     return false;
   }
 
-  private static Map<String, Set<EntityToEntityMappingDTO>> toMap(Iterable<EntityToEntityMappingDTO> mappings) {
+  private static Map<String, Set<EntityToEntityMappingDTO>> toMap(
+      Iterable<EntityToEntityMappingDTO> mappings) {
     Map<String, Set<EntityToEntityMappingDTO>> map = new HashMap<>();
-    for(EntityToEntityMappingDTO dto : mappings) {
+    for (EntityToEntityMappingDTO dto : mappings) {
       String key = dto.getFromURN();
-      if(!map.containsKey(key))
+      if (!map.containsKey(key)) {
         map.put(key, new HashSet<EntityToEntityMappingDTO>());
+      }
       map.get(key).add(dto);
     }
     return map;
   }
 
-  private static List<EntityToEntityMappingDTO> reverseDirection(Iterable<EntityToEntityMappingDTO> mappings) {
+  private static List<EntityToEntityMappingDTO> reverseDirection(
+      Iterable<EntityToEntityMappingDTO> mappings) {
     List<EntityToEntityMappingDTO> output = new ArrayList<>();
     for (EntityToEntityMappingDTO m : mappings) {
       EntityToEntityMappingDTO n = new EntityToEntityMappingDTO();

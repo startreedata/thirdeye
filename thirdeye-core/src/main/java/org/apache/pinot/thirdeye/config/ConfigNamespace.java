@@ -26,7 +26,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.ConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 
-
 /**
  * ConfigNamespace provides safe access to ConfigBean properties by enforcing a fixed namespace.
  * It provides basic get, put, list, and delete functionality.  Use ConfigNamespace to store
@@ -35,6 +34,7 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
  * new bean class.
  */
 public class ConfigNamespace {
+
   private final String namespace;
   private final ConfigManager configDAO;
 
@@ -71,7 +71,8 @@ public class ConfigNamespace {
   public <T> T get(String name) {
     ConfigDTO result = this.configDAO.findByNamespaceName(this.namespace, name);
     if (result == null) {
-      throw new IllegalArgumentException(String.format("Could not retrieve '%s':'%s'", this.namespace, name));
+      throw new IllegalArgumentException(
+          String.format("Could not retrieve '%s':'%s'", this.namespace, name));
     }
     return (T) result.getValue();
   }
@@ -106,7 +107,8 @@ public class ConfigNamespace {
     this.configDAO.deleteByNamespaceName(this.namespace, name);
 
     if (this.configDAO.save(config) == null) {
-      throw new RuntimeException(String.format("Could not store '%s':'%s' = '%s'", this.namespace, name, value.toString()));
+      throw new RuntimeException(String
+          .format("Could not store '%s':'%s' = '%s'", this.namespace, name, value.toString()));
     }
   }
 

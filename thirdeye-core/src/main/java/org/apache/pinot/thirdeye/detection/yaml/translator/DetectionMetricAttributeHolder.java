@@ -32,7 +32,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 
-
 /**
  * A data holder to store the processed information per metric
  */
@@ -68,11 +67,13 @@ public class DetectionMetricAttributeHolder {
     DatasetConfigDTO datasetConfig = fetchDatasetConfigDTO(this.dataProvider, datasetName);
     datasetConfigs.add(datasetConfig);
 
-    MetricConfigDTO metricConfig = this.dataProvider.fetchMetric(metricName, datasetConfig.getDataset());
+    MetricConfigDTO metricConfig = this.dataProvider
+        .fetchMetric(metricName, datasetConfig.getDataset());
 
     cron = cron == null ? buildCron(datasetConfig.bucketTimeGranularity()) : cron;
 
-    metricAttributesMap.put(metricAliasKey, new DetectionMetricProperties(cron, metricConfig, datasetConfig));
+    metricAttributesMap
+        .put(metricAliasKey, new DetectionMetricProperties(cron, metricConfig, datasetConfig));
 
     return metricAliasKey;
   }
@@ -122,5 +123,4 @@ public class DetectionMetricAttributeHolder {
   public Map<String, Object> getAllComponents() {
     return components;
   }
-
 }

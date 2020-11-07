@@ -26,12 +26,12 @@ import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class RequestStatisticsLogger implements Runnable {
+
   private static final Logger LOG = LoggerFactory.getLogger(RequestStatisticsLogger.class);
 
-  private ScheduledExecutorService scheduledExecutorService;
-  private TimeGranularity runFrequency;
+  private final ScheduledExecutorService scheduledExecutorService;
+  private final TimeGranularity runFrequency;
 
   public RequestStatisticsLogger(TimeGranularity runFrequency) {
     this.runFrequency = runFrequency;

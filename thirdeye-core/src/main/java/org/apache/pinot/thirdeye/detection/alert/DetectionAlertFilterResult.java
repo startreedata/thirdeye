@@ -28,15 +28,15 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
-
 /**
  * The Detection alert filter result.
  */
 public class DetectionAlertFilterResult {
+
   /**
    * The Result.
    */
-  private Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result;
+  private final Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result;
 
   /**
    * Instantiates a new Detection alert filter result.
@@ -50,7 +50,8 @@ public class DetectionAlertFilterResult {
    *
    * @param result the result
    */
-  public DetectionAlertFilterResult(Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result) {
+  public DetectionAlertFilterResult(
+      Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result) {
     Preconditions.checkNotNull(result);
     this.result = result;
   }
@@ -84,7 +85,8 @@ public class DetectionAlertFilterResult {
    * @param anomalies the anomalies
    * @return the detection alert filter result
    */
-  public DetectionAlertFilterResult addMapping(DetectionAlertFilterNotification alertProp, Set<MergedAnomalyResultDTO> anomalies) {
+  public DetectionAlertFilterResult addMapping(DetectionAlertFilterNotification alertProp,
+      Set<MergedAnomalyResultDTO> anomalies) {
     if (!this.result.containsKey(alertProp)) {
       this.result.put(alertProp, new HashSet<MergedAnomalyResultDTO>());
     }

@@ -31,13 +31,13 @@ import org.apache.pinot.thirdeye.detection.annotation.PresentationOption;
 import org.apache.pinot.thirdeye.detection.spec.MockGrouperSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.Grouper;
 
-
 /**
  * A sample mock grouper to test the Grouper Interface
  */
 @Components(title = "MockGrouper", type = "MOCK_GROUPER",
     tags = {DetectionTag.GROUPER}, description = "A mock grouper for testing.",
-    presentation = {@PresentationOption(name = "group param value", template = "group by ${mockParam}")},
+    presentation = {
+        @PresentationOption(name = "group param value", template = "group by ${mockParam}")},
     params = {@Param(name = "mockParam", placeholder = "value")})
 public class MockGrouper implements Grouper<MockGrouperSpec> {
 
@@ -52,12 +52,14 @@ public class MockGrouper implements Grouper<MockGrouperSpec> {
     // A sample code for testing the grouper interface.
     List<MergedAnomalyResultDTO> groupedAnomalies = new ArrayList<>();
     for (MergedAnomalyResultDTO anomaly : anomalies) {
-      if (anomaly != null && anomaly.getDimensions() != null && anomaly.getDimensions().get(mockDimKey) != null)
-      if (anomaly.getDimensions().get(mockDimKey).equals(mockDimValue)) {
-        Map<String, String> properties = new HashMap<>();
-        properties.put("TEST_KEY", "TEST_VALUE");
-        anomaly.setProperties(properties);
-        groupedAnomalies.add(anomaly);
+      if (anomaly != null && anomaly.getDimensions() != null
+          && anomaly.getDimensions().get(mockDimKey) != null) {
+        if (anomaly.getDimensions().get(mockDimKey).equals(mockDimValue)) {
+          Map<String, String> properties = new HashMap<>();
+          properties.put("TEST_KEY", "TEST_VALUE");
+          anomaly.setProperties(properties);
+          groupedAnomalies.add(anomaly);
+        }
       }
     }
 

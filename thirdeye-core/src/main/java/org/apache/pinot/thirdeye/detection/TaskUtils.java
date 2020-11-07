@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * Holds utility functions related to ThirdEye Tasks
  */
 public class TaskUtils {
+
   private static final Logger LOG = LoggerFactory.getLogger(TaskUtils.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -57,15 +58,17 @@ public class TaskUtils {
     return taskDTO;
   }
 
-  public static boolean checkTaskAlreadyRun(String jobName, DetectionPipelineTaskInfo taskInfo, long timeout) {
+  public static boolean checkTaskAlreadyRun(String jobName, DetectionPipelineTaskInfo taskInfo,
+      long timeout) {
     // check if a task for this detection pipeline is already scheduled
-    List<TaskDTO> scheduledTasks = DAORegistry.getInstance().getTaskDAO().findByPredicate(Predicate.AND(
-        Predicate.EQ("name", jobName),
-        Predicate.OR(
-            Predicate.EQ("status", TaskConstants.TaskStatus.RUNNING.toString()),
-            Predicate.EQ("status", TaskConstants.TaskStatus.WAITING.toString()))
-        )
-    );
+    List<TaskDTO> scheduledTasks = DAORegistry.getInstance().getTaskDAO()
+        .findByPredicate(Predicate.AND(
+            Predicate.EQ("name", jobName),
+            Predicate.OR(
+                Predicate.EQ("status", TaskConstants.TaskStatus.RUNNING.toString()),
+                Predicate.EQ("status", TaskConstants.TaskStatus.WAITING.toString()))
+            )
+        );
 
     List<DetectionPipelineTaskInfo> scheduledTaskInfos = scheduledTasks.stream().map(taskDTO -> {
       try {
@@ -75,7 +78,8 @@ public class TaskUtils {
       }
     }).collect(Collectors.toList());
     Optional<DetectionPipelineTaskInfo> latestScheduledTask = scheduledTaskInfos.stream()
-        .reduce((taskInfo1, taskInfo2) -> taskInfo1.getEnd() > taskInfo2.getEnd() ? taskInfo1 : taskInfo2);
+        .reduce((taskInfo1, taskInfo2) -> taskInfo1.getEnd() > taskInfo2.getEnd() ? taskInfo1
+            : taskInfo2);
     return latestScheduledTask.isPresent()
         && taskInfo.getEnd() - latestScheduledTask.get().getEnd() < timeout;
   }
@@ -94,9 +98,11 @@ public class TaskUtils {
     return buildTaskInfoFromDetectionConfig(configDTO, System.currentTimeMillis());
   }
 
-  public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO configDTO, long end) {
+  public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO configDTO,
+      long end) {
     long delay = getDetectionExpectedDelay(configDTO);
-    long start = Math.max(configDTO.getLastTimestamp(), end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
+    long start = Math.max(configDTO.getLastTimestamp(),
+        end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
     return new DetectionPipelineTaskInfo(configDTO.getId(), start, end);
   }
 
@@ -111,12 +117,14 @@ public class TaskUtils {
   /**
    * Creates a generic task and saves it.
    */
-  public static long createTask(TaskConstants.TaskType taskType, DetectionPipelineTaskInfo taskInfo) {
+  public static long createTask(TaskConstants.TaskType taskType,
+      DetectionPipelineTaskInfo taskInfo) {
     String taskInfoJson = null;
     try {
       taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
     } catch (JsonProcessingException e) {
-      LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString", taskInfo, e);
+      LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString", taskInfo,
+          e);
     }
 
     TaskDTO taskDTO = TaskUtils.buildTask(taskInfo.getConfigId(), taskInfoJson, taskType);

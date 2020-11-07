@@ -35,6 +35,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 
 public abstract class AbstractManagerImpl<E extends AbstractDTO> implements AbstractManager<E> {
+
   protected static final ModelMapper MODEL_MAPPER = new ModelMapper();
 
   static {

@@ -25,6 +25,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class AlertGrouperFactory {
+
   public static final String GROUPER_TYPE_KEY = "type";
   private static final AlertGrouper DUMMY_ALERT_GROUPER = new DummyAlertGrouper();
 
@@ -56,14 +57,14 @@ public class AlertGrouperFactory {
     }
 
     switch (filterType) {
-    case DUMMY: // speed optimization for most use cases
-      return DUMMY_ALERT_GROUPER;
-    case DIMENSIONAL:
-      return new DimensionalAlertGrouper();
-    case HORIZONTAL_DIMENSIONAL:
-      return new HorizontalDimensionalAlertGrouper();
-    default:
-      return DUMMY_ALERT_GROUPER;
+      case DUMMY: // speed optimization for most use cases
+        return DUMMY_ALERT_GROUPER;
+      case DIMENSIONAL:
+        return new DimensionalAlertGrouper();
+      case HORIZONTAL_DIMENSIONAL:
+        return new HorizontalDimensionalAlertGrouper();
+      default:
+        return DUMMY_ALERT_GROUPER;
     }
   }
 }

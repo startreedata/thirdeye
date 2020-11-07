@@ -34,12 +34,13 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * Request object containing all information for a {@link ThirdEyeDataSource} to retrieve data. Request
+ * Request object containing all information for a {@link ThirdEyeDataSource} to retrieve data.
+ * Request
  * objects can be constructed via {@link ThirdEyeRequestBuilder}.
  */
 public class ThirdEyeRequest {
+
   private final List<MetricFunction> metricFunctions;
   private final DateTime startTime;
   private final DateTime endTime;
@@ -130,30 +131,40 @@ public class ThirdEyeRequest {
       return false;
     }
     ThirdEyeRequest that = (ThirdEyeRequest) o;
-    return Objects.equals(metricFunctions, that.metricFunctions) && Objects.equals(startTime, that.startTime) && Objects
-        .equals(endTime, that.endTime) && Objects.equals(filterSet, that.filterSet) && Objects.equals(filterClause,
-        that.filterClause) && Objects.equals(groupByDimensions, that.groupByDimensions) && Objects.equals(
-        groupByTimeGranularity, that.groupByTimeGranularity) && Objects.equals(metricNames, that.metricNames) && Objects
-        .equals(dataSource, that.dataSource) && Objects.equals(requestReference, that.requestReference) &&
+    return Objects.equals(metricFunctions, that.metricFunctions) && Objects
+        .equals(startTime, that.startTime) && Objects
+        .equals(endTime, that.endTime) && Objects.equals(filterSet, that.filterSet) && Objects
+        .equals(filterClause,
+            that.filterClause) && Objects.equals(groupByDimensions, that.groupByDimensions)
+        && Objects.equals(
+        groupByTimeGranularity, that.groupByTimeGranularity) && Objects
+        .equals(metricNames, that.metricNames) && Objects
+        .equals(dataSource, that.dataSource) && Objects
+        .equals(requestReference, that.requestReference) &&
         Objects.equals(requestReference, that.requestReference);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(metricFunctions, startTime, endTime, filterSet, filterClause, groupByDimensions,
-        groupByTimeGranularity, metricNames, dataSource, requestReference, limit);
+    return Objects
+        .hash(metricFunctions, startTime, endTime, filterSet, filterClause, groupByDimensions,
+            groupByTimeGranularity, metricNames, dataSource, requestReference, limit);
   }
 
   @Override
   public String toString() {
-    return "ThirdEyeRequest{" + "metricFunctions=" + metricFunctions + ", startTime=" + startTime + ", endTime="
-        + endTime + ", filterSet=" + filterSet + ", filterClause='" + filterClause + '\'' + ", groupByDimensions="
-        + groupByDimensions + ", groupByTimeGranularity=" + groupByTimeGranularity + ", metricNames=" + metricNames
+    return "ThirdEyeRequest{" + "metricFunctions=" + metricFunctions + ", startTime=" + startTime
+        + ", endTime="
+        + endTime + ", filterSet=" + filterSet + ", filterClause='" + filterClause + '\''
+        + ", groupByDimensions="
+        + groupByDimensions + ", groupByTimeGranularity=" + groupByTimeGranularity
+        + ", metricNames=" + metricNames
         + ", dataSource='" + dataSource + '\'' + ", requestReference='" + requestReference + '\'' +
         ", limit='" + limit + '\'' + '}';
   }
 
   public static class ThirdEyeRequestBuilder {
+
     private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeRequestBuilder.class);
 
     private List<MetricFunction> metricFunctions;
@@ -221,19 +232,25 @@ public class ThirdEyeRequest {
       return this;
     }
 
-    /** Removes any existing groupings and adds the provided names. */
+    /**
+     * Removes any existing groupings and adds the provided names.
+     */
     public ThirdEyeRequestBuilder setGroupBy(Collection<String> names) {
       this.groupBy.clear();
       addGroupBy(names);
       return this;
     }
 
-    /** See {@link #setGroupBy(Collection)} */
+    /**
+     * See {@link #setGroupBy(Collection)}
+     */
     public ThirdEyeRequestBuilder setGroupBy(String... names) {
       return setGroupBy(Arrays.asList(names));
     }
 
-    /** Adds the provided names to the existing groupings. */
+    /**
+     * Adds the provided names to the existing groupings.
+     */
     public ThirdEyeRequestBuilder addGroupBy(Collection<String> names) {
       if (names != null) {
         for (String name : names) {
@@ -245,7 +262,9 @@ public class ThirdEyeRequest {
       return this;
     }
 
-    /** See {@link ThirdEyeRequestBuilder#addGroupBy(Collection)} */
+    /**
+     * See {@link ThirdEyeRequestBuilder#addGroupBy(Collection)}
+     */
     public ThirdEyeRequestBuilder addGroupBy(String... names) {
       return addGroupBy(Arrays.asList(names));
     }
@@ -259,7 +278,6 @@ public class ThirdEyeRequest {
       this.metricFunctions = metricFunctions;
       return this;
     }
-
 
     public ThirdEyeRequestBuilder setDataSource(String dataSource) {
       this.dataSource = dataSource;

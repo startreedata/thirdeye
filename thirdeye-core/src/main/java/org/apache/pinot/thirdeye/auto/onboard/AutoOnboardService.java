@@ -34,30 +34,33 @@ import org.slf4j.LoggerFactory;
  * This service runs periodically and runs auto load for each data source
  */
 public class AutoOnboardService implements Runnable {
+
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardService.class);
 
-  private ScheduledExecutorService scheduledExecutorService;
+  private final ScheduledExecutorService scheduledExecutorService;
 
-  private List<AutoOnboard> autoOnboardServices = new ArrayList<>();
-  private TimeGranularity runFrequency;
+  private final List<AutoOnboard> autoOnboardServices = new ArrayList<>();
+  private final TimeGranularity runFrequency;
 
   /**
-   * Reads data sources configs and instantiates the constructors for auto load of all data sources, if availble
-   * @param config
+   * Reads data sources configs and instantiates the constructors for auto load of all data sources,
+   * if availble
    */
   public AutoOnboardService(ThirdEyeAnomalyConfiguration config) {
     this.runFrequency = config.getAutoOnboardConfiguration().getRunFrequency();
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
-    Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility.getDataSourceToAutoOnboardMap(
-        config.getDataSourcesAsUrl());
+    Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
+        .getDataSourceToAutoOnboardMap(
+            config.getDataSourcesAsUrl());
     for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {
       autoOnboardServices.addAll(autoOnboards);
     }
   }
 
   public void start() {
-    scheduledExecutorService.scheduleAtFixedRate(this, 0, runFrequency.getSize(), runFrequency.getUnit());
+    scheduledExecutorService
+        .scheduleAtFixedRate(this, 0, runFrequency.getSize(), runFrequency.getUnit());
   }
 
   public void shutdown() {
@@ -72,7 +75,8 @@ public class AutoOnboardService implements Runnable {
       try {
         autoOnboard.run();
       } catch (Throwable t) {
-        LOG.error("Uncaught exception is detected while running AutoOnboard for {}", autoOnboard.getClass().getSimpleName());
+        LOG.error("Uncaught exception is detected while running AutoOnboard for {}",
+            autoOnboard.getClass().getSimpleName());
         t.printStackTrace();
       }
     }

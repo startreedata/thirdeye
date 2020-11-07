@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
  * The Legacy anomaly function algorithm. This can run existing anomaly functions.
  */
 public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(LegacyAnomalyFunctionAlgorithm.class);
   private static final String PROP_ANOMALY_FUNCTION_CLASS = "anomalyFunctionClassName";
   private static final String PROP_SPEC = "specs";
@@ -82,21 +83,26 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
    * @param endTime the end time
    * @throws Exception the exception
    */
-  public LegacyAnomalyFunctionAlgorithm(DataProvider provider, AlertDTO config, long startTime, long endTime) throws Exception {
+  public LegacyAnomalyFunctionAlgorithm(DataProvider provider, AlertDTO config, long startTime,
+      long endTime) throws Exception {
     super(provider, config, startTime, endTime);
     // TODO: Round start and end time stamps
     Preconditions.checkArgument(config.getProperties().containsKey(PROP_ANOMALY_FUNCTION_CLASS));
-    String anomalyFunctionClassName = MapUtils.getString(config.getProperties(), PROP_ANOMALY_FUNCTION_CLASS);
+    String anomalyFunctionClassName = MapUtils
+        .getString(config.getProperties(), PROP_ANOMALY_FUNCTION_CLASS);
 
-    String specs = OBJECT_MAPPER.writeValueAsString(ConfigUtils.getMap(config.getProperties().get(PROP_SPEC)));
-    this.anomalyFunction = (BaseAnomalyFunction) Class.forName(anomalyFunctionClassName).newInstance();
+    String specs = OBJECT_MAPPER
+        .writeValueAsString(ConfigUtils.getMap(config.getProperties().get(PROP_SPEC)));
+    this.anomalyFunction = (BaseAnomalyFunction) Class.forName(anomalyFunctionClassName)
+        .newInstance();
     this.anomalyFunction.init(OBJECT_MAPPER.readValue(specs, AnomalyFunctionDTO.class));
 
     this.dataFilter = DataFilterFactory.fromSpec(this.anomalyFunction.getSpec().getDataFilter());
     this.failOnError = MapUtils.getBooleanValue(config.getProperties(), PROP_FAIL_ON_ERROR, false);
 
     if (config.getProperties().containsKey(PROP_METRIC_URN)) {
-      this.metricEntity = MetricEntity.fromURN(MapUtils.getString(config.getProperties(), PROP_METRIC_URN));
+      this.metricEntity = MetricEntity
+          .fromURN(MapUtils.getString(config.getProperties(), PROP_METRIC_URN));
     } else {
       this.metricEntity = makeEntity(this.anomalyFunction.getSpec());
     }
@@ -104,7 +110,8 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
 
   @Override
   public DetectionPipelineResult run() throws Exception {
-    LOG.info("Running legacy anomaly detection for time range {} to {}", this.startTime, this.endTime);
+    LOG.info("Running legacy anomaly detection for time range {} to {}", this.startTime,
+        this.endTime);
 
     Collection<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
 
@@ -115,7 +122,8 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
             .withDetectionId(this.config.getId())
             .withStart(this.startTime)
             .withEnd(this.endTime);
-        historyMergedAnomalies = this.provider.fetchAnomalies(Collections.singletonList(slice)).get(slice);
+        historyMergedAnomalies = this.provider.fetchAnomalies(Collections.singletonList(slice))
+            .get(slice);
       } else {
         historyMergedAnomalies = Collections.emptyList();
       }
@@ -123,14 +131,19 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
       final DimensionMap dimension = getDimensionMap();
 
       final MetricConfigDTO metricConfig =
-          this.provider.fetchMetrics(Collections.singleton(this.metricEntity.getId())).get(this.metricEntity.getId());
+          this.provider.fetchMetrics(Collections.singleton(this.metricEntity.getId()))
+              .get(this.metricEntity.getId());
 
       // get time series
-      DataFrame df = DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE").build();
-      List<Pair<Long, Long>> timeIntervals = this.anomalyFunction.getDataRangeIntervals(this.startTime, this.endTime);
+      DataFrame df = DataFrame
+          .builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE").build();
+      List<Pair<Long, Long>> timeIntervals = this.anomalyFunction
+          .getDataRangeIntervals(this.startTime, this.endTime);
       for (Pair<Long, Long> startEndInterval : timeIntervals) {
-        MetricSlice slice = MetricSlice.from(this.metricEntity.getId(), startEndInterval.getFirst(), startEndInterval.getSecond(), metricEntity.getFilters());
-        DataFrame currentDf = this.provider.fetchTimeseries(Collections.singleton(slice)).get(slice);
+        MetricSlice slice = MetricSlice.from(this.metricEntity.getId(), startEndInterval.getFirst(),
+            startEndInterval.getSecond(), metricEntity.getFilters());
+        DataFrame currentDf = this.provider.fetchTimeseries(Collections.singleton(slice))
+            .get(slice);
         df = df.append(currentDf);
       }
 
@@ -144,28 +157,29 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
       }
 
       if (!this.dataFilter.isQualified(metricTimeSeries, dimension, this.startTime, this.endTime)) {
-        return new DetectionPipelineResult(Collections.<MergedAnomalyResultDTO>emptyList());
+        return new DetectionPipelineResult(Collections.emptyList());
       }
 
       List<AnomalyResult> result = this.anomalyFunction.analyze(dimension, metricTimeSeries,
-          new DateTime(this.startTime), new DateTime(this.endTime), new ArrayList<>(historyMergedAnomalies));
+          new DateTime(this.startTime), new DateTime(this.endTime),
+          new ArrayList<>(historyMergedAnomalies));
 
-      mergedAnomalyResults = Collections2.transform(result, new Function<AnomalyResult, MergedAnomalyResultDTO>() {
-        @Override
-        public MergedAnomalyResultDTO apply(AnomalyResult result) {
-          MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
-          anomaly.populateFrom(result);
-          anomaly.setFunctionId(null);
-          anomaly.setFunction(null);
-          anomaly.setDetectionConfigId(LegacyAnomalyFunctionAlgorithm.this.config.getId());
-          anomaly.setMetricUrn(metricEntity.getUrn());
-          anomaly.setMetric(metricConfig.getName());
-          anomaly.setCollection(metricConfig.getDataset());
-          anomaly.setDimensions(dimension);
-          return anomaly;
-        }
-      });
-
+      mergedAnomalyResults = Collections2
+          .transform(result, new Function<AnomalyResult, MergedAnomalyResultDTO>() {
+            @Override
+            public MergedAnomalyResultDTO apply(AnomalyResult result) {
+              MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+              anomaly.populateFrom(result);
+              anomaly.setFunctionId(null);
+              anomaly.setFunction(null);
+              anomaly.setDetectionConfigId(LegacyAnomalyFunctionAlgorithm.this.config.getId());
+              anomaly.setMetricUrn(metricEntity.getUrn());
+              anomaly.setMetric(metricConfig.getName());
+              anomaly.setCollection(metricConfig.getDataset());
+              anomaly.setDimensions(dimension);
+              return anomaly;
+            }
+          });
     } catch (Exception e) {
       if (this.failOnError) {
         throw e;
@@ -174,7 +188,8 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
       }
     }
 
-    LOG.info("Detected {} anomalies for {}", mergedAnomalyResults.size(), this.metricEntity.getUrn());
+    LOG.info("Detected {} anomalies for {}", mergedAnomalyResults.size(),
+        this.metricEntity.getUrn());
 
     return new DetectionPipelineResult(new ArrayList<>(mergedAnomalyResults));
   }

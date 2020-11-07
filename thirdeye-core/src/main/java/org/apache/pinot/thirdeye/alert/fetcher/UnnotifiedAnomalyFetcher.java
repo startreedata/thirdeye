@@ -39,38 +39,42 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class UnnotifiedAnomalyFetcher extends BaseAnomalyFetcher {
+
   private static final Logger LOG = LoggerFactory.getLogger(UnnotifiedAnomalyFetcher.class);
 
   public static final String MAXIMUM_ANOMALY_LOOK_BACK_LENGTH = "maxAnomalyLookBack";
 
   public static final String DEFAULT_MAXIMUM_ANOMALY_LOOK_BACK_LENGTH = "1_DAYS";
 
-  public UnnotifiedAnomalyFetcher(){
+  public UnnotifiedAnomalyFetcher() {
     super();
   }
 
   /**
    * Fetch the list of un-notified anomalies, whose create time is after last notify time
+   *
    * @param current the current DateTime
    * @param alertSnapShot the snapshot of the AnomalyFeed
    * @return a list of un-notified anomalies
    */
   @Override
-  public Collection<MergedAnomalyResultDTO> getAlertCandidates(DateTime current, AlertSnapshotDTO alertSnapShot) {
+  public Collection<MergedAnomalyResultDTO> getAlertCandidates(DateTime current,
+      AlertSnapshotDTO alertSnapShot) {
     if (!this.active) {
       LOG.warn("UnnotifiedAnomalyFetcher is not active for fetching anomalies");
       return Collections.emptyList();
     }
     if (StringUtils.isBlank(this.anomalyFetcherConfig.getAnomalySource()) ||
         this.anomalyFetcherConfig.getAnomalySourceType() == null) {
-      LOG.error("No entry of {} or {} in the AnomalyFetcherConfig", ANOMALY_SOURCE_TYPE, ANOMALY_SOURCE);
+      LOG.error("No entry of {} or {} in the AnomalyFetcherConfig", ANOMALY_SOURCE_TYPE,
+          ANOMALY_SOURCE);
       return Collections.emptyList();
     }
 
     Period maxAnomalyLookBack = TimeGranularity.fromString(
-        this.properties.getProperty(MAXIMUM_ANOMALY_LOOK_BACK_LENGTH, DEFAULT_MAXIMUM_ANOMALY_LOOK_BACK_LENGTH)).toPeriod();
+        this.properties.getProperty(MAXIMUM_ANOMALY_LOOK_BACK_LENGTH,
+            DEFAULT_MAXIMUM_ANOMALY_LOOK_BACK_LENGTH)).toPeriod();
 
     // Fetch anomalies who are created MAXIMUM_ANOMALY_LOOK_BACK_LENGTH ago
     AnomalySource anomalySourceType = anomalyFetcherConfig.getAnomalySourceType();
@@ -78,7 +82,8 @@ public class UnnotifiedAnomalyFetcher extends BaseAnomalyFetcher {
     Predicate predicate = Predicate.AND(anomalySourceType.getPredicate(anomalySource),
         Predicate.GE("createTime",
             new Timestamp(current.minus(maxAnomalyLookBack).getMillis())));
-    Set<MergedAnomalyResultDTO> alertCandidates = new HashSet<>(mergedAnomalyResultDAO.findByPredicate(predicate));
+    Set<MergedAnomalyResultDTO> alertCandidates = new HashSet<>(
+        mergedAnomalyResultDAO.findByPredicate(predicate));
 
     // parse snapshot to a map, getting the last notified time of given metric::dimension pair
     Multimap<String, AnomalyNotifiedStatus> snapshot = alertSnapShot.getSnapshot();
@@ -94,7 +99,8 @@ public class UnnotifiedAnomalyFetcher extends BaseAnomalyFetcher {
 
       if (snapshot.containsKey(snapshotKey)) {
         // If the mergedAnomaly's create time is before last notify time, discard
-        long lastNotifyTime = alertSnapShot.getLatestStatus(snapshot, snapshotKey).getLastNotifyTime();
+        long lastNotifyTime = alertSnapShot.getLatestStatus(snapshot, snapshotKey)
+            .getLastNotifyTime();
         if (mergedAnomaly.getCreatedTime() < lastNotifyTime) {
           iterator.remove();
         }

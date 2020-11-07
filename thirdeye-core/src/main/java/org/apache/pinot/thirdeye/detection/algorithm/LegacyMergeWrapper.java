@@ -64,9 +64,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *  The legacy merge wrapper. This runs the old anomaly function merger.
+ * The legacy merge wrapper. This runs the old anomaly function merger.
  */
 public class LegacyMergeWrapper extends DetectionPipeline {
+
   private static final String PROP_SPEC = "specs";
   private static final String PROP_NESTED = "nested";
   private static final String PROP_CLASS_NAME = "className";
@@ -85,8 +86,10 @@ public class LegacyMergeWrapper extends DetectionPipeline {
 
   static {
     DEFAULT_TIME_BASED_MERGE_CONFIG = new AnomalyMergeConfig();
-    DEFAULT_TIME_BASED_MERGE_CONFIG.setSequentialAllowedGap(TimeUnit.HOURS.toMillis(2)); // merge anomalies apart 2 hours
-    DEFAULT_TIME_BASED_MERGE_CONFIG.setMaxMergeDurationLength(TimeUnit.DAYS.toMillis(7) - 3600_000); // break anomaly longer than 6 days 23 hours
+    DEFAULT_TIME_BASED_MERGE_CONFIG
+        .setSequentialAllowedGap(TimeUnit.HOURS.toMillis(2)); // merge anomalies apart 2 hours
+    DEFAULT_TIME_BASED_MERGE_CONFIG.setMaxMergeDurationLength(
+        TimeUnit.DAYS.toMillis(7) - 3600_000); // break anomaly longer than 6 days 23 hours
     DEFAULT_TIME_BASED_MERGE_CONFIG.setMergeStrategy(AnomalyMergeStrategy.FUNCTION_DIMENSIONS);
   }
 
@@ -106,12 +109,15 @@ public class LegacyMergeWrapper extends DetectionPipeline {
    * @param endTime the end time
    * @throws Exception the exception
    */
-  public LegacyMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime) throws Exception {
+  public LegacyMergeWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime)
+      throws Exception {
     super(provider, config, startTime, endTime);
 
-    this.anomalyFunctionClassName = MapUtils.getString(config.getProperties(), PROP_ANOMALY_FUNCTION_CLASS);
+    this.anomalyFunctionClassName = MapUtils
+        .getString(config.getProperties(), PROP_ANOMALY_FUNCTION_CLASS);
     this.anomalyFunctionSpecs = ConfigUtils.getMap(config.getProperties().get(PROP_SPEC));
-    this.anomalyFunction = (BaseAnomalyFunction) Class.forName(this.anomalyFunctionClassName).newInstance();
+    this.anomalyFunction = (BaseAnomalyFunction) Class.forName(this.anomalyFunctionClassName)
+        .newInstance();
 
     String specs = OBJECT_MAPPER.writeValueAsString(this.anomalyFunctionSpecs);
     this.anomalyFunction.init(OBJECT_MAPPER.readValue(specs, AnomalyFunctionDTO.class));
@@ -130,7 +136,8 @@ public class LegacyMergeWrapper extends DetectionPipeline {
     if (config.getProperties().containsKey(PROP_NESTED)) {
       this.nestedProperties = ConfigUtils.getList(config.getProperties().get(PROP_NESTED));
     } else {
-      this.nestedProperties = new ArrayList<>(Collections.singletonList(Collections.singletonMap(PROP_CLASS_NAME, (Object) LegacyDimensionWrapper.class.getName())));
+      this.nestedProperties = new ArrayList<>(Collections.singletonList(Collections
+          .singletonMap(PROP_CLASS_NAME, LegacyDimensionWrapper.class.getName())));
     }
   }
 
@@ -157,7 +164,8 @@ public class LegacyMergeWrapper extends DetectionPipeline {
         .withEnd(this.getEndTime(generated) + this.maxGap);
 
     List<MergedAnomalyResultDTO> retrieved = new ArrayList<>();
-    retrieved.addAll(this.provider.fetchAnomalies(Collections.singleton(effectiveSlice)).get(effectiveSlice));
+    retrieved.addAll(
+        this.provider.fetchAnomalies(Collections.singleton(effectiveSlice)).get(effectiveSlice));
 
     return new DetectionPipelineResult(this.merge(generated, retrieved));
   }
@@ -174,14 +182,17 @@ public class LegacyMergeWrapper extends DetectionPipeline {
     List<MergedAnomalyResultDTO> mergedAnomalies = new ArrayList<>();
     this.mergeConfig.setMergeablePropertyKeys(this.anomalyFunction.getMergeablePropertyKeys());
 
-    Map<DimensionMap, List<MergedAnomalyResultDTO>> retrievedAnomaliesByDimension = getAnomaliesByDimension(retrieved);
-    Map<DimensionMap, List<MergedAnomalyResultDTO>> generatedAnomaliesByDimension = getAnomaliesByDimension(generated);
+    Map<DimensionMap, List<MergedAnomalyResultDTO>> retrievedAnomaliesByDimension = getAnomaliesByDimension(
+        retrieved);
+    Map<DimensionMap, List<MergedAnomalyResultDTO>> generatedAnomaliesByDimension = getAnomaliesByDimension(
+        generated);
 
     int countRetrieved = 0;
     int countGenerated = 0;
     int countMerged = 0;
 
-    for (Map.Entry<DimensionMap, List<MergedAnomalyResultDTO>> entry : generatedAnomaliesByDimension.entrySet()) {
+    for (Map.Entry<DimensionMap, List<MergedAnomalyResultDTO>> entry : generatedAnomaliesByDimension
+        .entrySet()) {
       countGenerated += entry.getValue().size();
 
       // get latest overlapped merged anomaly
@@ -194,7 +205,8 @@ public class LegacyMergeWrapper extends DetectionPipeline {
         countRetrieved += retrievedAnomalies.size();
       }
 
-      List<MergedAnomalyResultDTO> retainedAnomalies = retainNewAnomalies(entry.getValue(), retrievedAnomalies);
+      List<MergedAnomalyResultDTO> retainedAnomalies = retainNewAnomalies(entry.getValue(),
+          retrievedAnomalies);
       Collections.sort(retainedAnomalies, COMPARATOR);
 
       List<AnomalyResult> anomalyResults = new ArrayList<>();
@@ -202,7 +214,8 @@ public class LegacyMergeWrapper extends DetectionPipeline {
 
       List<MergedAnomalyResultDTO> mergedAnomalyResults;
       try {
-        mergedAnomalyResults = AnomalyTimeBasedSummarizer.mergeAnomalies(latestOverlappedMergedResult, anomalyResults, this.mergeConfig);
+        mergedAnomalyResults = AnomalyTimeBasedSummarizer
+            .mergeAnomalies(latestOverlappedMergedResult, anomalyResults, this.mergeConfig);
       } catch (Exception e) {
         LOG.warn("Could not merge anomalies for dimension '{}'. Skipping.", entry.getKey(), e);
         continue;
@@ -219,17 +232,20 @@ public class LegacyMergeWrapper extends DetectionPipeline {
           // update current and baseline estimates
           MetricTimeSeries metricTimeSeries = getMetricTimeSeries(entry.getKey());
           this.anomalyFunction.updateMergedAnomalyInfo(mergedAnomalyResult, metricTimeSeries,
-              new DateTime(mergedAnomalyResult.getStartTime()), new DateTime(mergedAnomalyResult.getEndTime()), retrievedAnomalies);
+              new DateTime(mergedAnomalyResult.getStartTime()),
+              new DateTime(mergedAnomalyResult.getEndTime()), retrievedAnomalies);
 
           // re-populate anomaly meta data after partial override from
           // AnomalyTimeBasedSummarizer and updateMergedAnomalyInfo()
-          SetMultimap<String, String> filters = HashMultimap.create(anomalyFunctionSpec.getFilterSet());
+          SetMultimap<String, String> filters = HashMultimap
+              .create(anomalyFunctionSpec.getFilterSet());
           for (Map.Entry<String, String> dim : mergedAnomalyResult.getDimensions().entrySet()) {
             filters.removeAll(dim.getKey()); // remove pre-existing filters
             filters.put(dim.getKey(), dim.getValue());
           }
 
-          mergedAnomalyResult.setMetricUrn(MetricEntity.fromMetric(1.0, anomalyFunctionSpec.getMetricId(), filters).getUrn());
+          mergedAnomalyResult.setMetricUrn(
+              MetricEntity.fromMetric(1.0, anomalyFunctionSpec.getMetricId(), filters).getUrn());
 
           mergedAnomalyResult.setFunctionId(null);
           mergedAnomalyResult.setFunction(null);
@@ -239,22 +255,26 @@ public class LegacyMergeWrapper extends DetectionPipeline {
           if (!StringUtils.isBlank(anomalyFunctionSpec.getGlobalMetric())) {
             MetricSlice slice = makeGlobalSlice(anomalyFunctionSpec, mergedAnomalyResult);
 
-            double valGlobal = this.provider.fetchAggregates(Collections.singleton(slice), Collections.<String>emptyList(), -1).get(slice).getDouble(
-                DataFrame.COL_VALUE, 0);
-            double diffLocal = mergedAnomalyResult.getAvgCurrentVal() - mergedAnomalyResult.getAvgBaselineVal();
+            double valGlobal = this.provider
+                .fetchAggregates(Collections.singleton(slice), Collections.emptyList(), -1)
+                .get(slice).getDouble(
+                    DataFrame.COL_VALUE, 0);
+            double diffLocal =
+                mergedAnomalyResult.getAvgCurrentVal() - mergedAnomalyResult.getAvgBaselineVal();
 
             mergedAnomalyResult.setImpactToGlobal(diffLocal / valGlobal);
           }
 
           mergedAnomalies.add(mergedAnomalyResult);
-
         } catch (Exception e) {
-          LOG.warn("Could not update anomaly info for anomaly '{}'. Skipping.", mergedAnomalyResult, e);
+          LOG.warn("Could not update anomaly info for anomaly '{}'. Skipping.", mergedAnomalyResult,
+              e);
         }
       }
     }
 
-    LOG.info("Merged {} anomalies from {} retrieved and {} generated", countMerged, countRetrieved, countGenerated);
+    LOG.info("Merged {} anomalies from {} retrieved and {} generated", countMerged, countRetrieved,
+        countGenerated);
 
     return mergedAnomalies;
   }
@@ -263,13 +283,20 @@ public class LegacyMergeWrapper extends DetectionPipeline {
    * Get metric time series for a dimension.
    */
   private MetricTimeSeries getMetricTimeSeries(DimensionMap dimension) {
-    MetricEntity metricEntity = MetricEntity.fromMetric(1.0, anomalyFunction.getSpec().getMetricId(), getFiltersFromDimensionMap(dimension));
-    MetricConfigDTO metricConfig = this.provider.fetchMetrics(Collections.singleton(metricEntity.getId())).get(metricEntity.getId());
+    MetricEntity metricEntity = MetricEntity
+        .fromMetric(1.0, anomalyFunction.getSpec().getMetricId(),
+            getFiltersFromDimensionMap(dimension));
+    MetricConfigDTO metricConfig = this.provider
+        .fetchMetrics(Collections.singleton(metricEntity.getId())).get(metricEntity.getId());
 
-    DataFrame df = DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE").build();
-    List<Pair<Long, Long>> timeIntervals = this.anomalyFunction.getDataRangeIntervals(this.startTime, this.endTime);
+    DataFrame df = DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE")
+        .build();
+    List<Pair<Long, Long>> timeIntervals = this.anomalyFunction
+        .getDataRangeIntervals(this.startTime, this.endTime);
     for (Pair<Long, Long> startEndInterval : timeIntervals) {
-      MetricSlice slice = MetricSlice.from(metricEntity.getId(), startEndInterval.getFirst(), startEndInterval.getSecond(), metricEntity.getFilters());
+      MetricSlice slice = MetricSlice
+          .from(metricEntity.getId(), startEndInterval.getFirst(), startEndInterval.getSecond(),
+              metricEntity.getFilters());
       DataFrame currentDf = this.provider.fetchTimeseries(Collections.singleton(slice)).get(slice);
       df = df.append(currentDf);
     }
@@ -305,7 +332,8 @@ public class LegacyMergeWrapper extends DetectionPipeline {
    * @param anomalies anomalies
    * @return map of collections of anomalies, keyed by dimensions
    */
-  private Map<DimensionMap, List<MergedAnomalyResultDTO>> getAnomaliesByDimension(Collection<MergedAnomalyResultDTO> anomalies) {
+  private Map<DimensionMap, List<MergedAnomalyResultDTO>> getAnomaliesByDimension(
+      Collection<MergedAnomalyResultDTO> anomalies) {
     Map<DimensionMap, List<MergedAnomalyResultDTO>> anomaliesByDimension = new HashMap<>();
     for (MergedAnomalyResultDTO anomaly : anomalies) {
       DimensionMap dimension = anomaly.getDimensions();
@@ -353,7 +381,8 @@ public class LegacyMergeWrapper extends DetectionPipeline {
    * @param existing persisted existing anomalies
    * @return subset of newly detected but not fully contained anomalies
    */
-  private static List<MergedAnomalyResultDTO> retainNewAnomalies(Collection<MergedAnomalyResultDTO> generated, Collection<MergedAnomalyResultDTO> existing) {
+  private static List<MergedAnomalyResultDTO> retainNewAnomalies(
+      Collection<MergedAnomalyResultDTO> generated, Collection<MergedAnomalyResultDTO> existing) {
     List<MergedAnomalyResultDTO> incoming = new ArrayList<>(generated);
 
     Iterator<MergedAnomalyResultDTO> itInc = incoming.iterator();
@@ -383,8 +412,10 @@ public class LegacyMergeWrapper extends DetectionPipeline {
       throw new IllegalArgumentException("Different local and global metrics not supported");
     }
 
-    Multimap<String, String> globalFilters = ThirdEyeSpiUtils.getFilterSet(spec.getGlobalMetricFilters());
+    Multimap<String, String> globalFilters = ThirdEyeSpiUtils
+        .getFilterSet(spec.getGlobalMetricFilters());
     MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
-    return MetricSlice.from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), globalFilters);
+    return MetricSlice
+        .from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), globalFilters);
   }
 }

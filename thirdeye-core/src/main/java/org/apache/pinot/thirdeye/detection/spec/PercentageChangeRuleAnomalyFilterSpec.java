@@ -20,9 +20,10 @@
 package org.apache.pinot.thirdeye.detection.spec;
 
 public class PercentageChangeRuleAnomalyFilterSpec extends AbstractSpec {
+
   private String timezone = DEFAULT_TIMEZONE;
   private String offset;
-  private String pattern= "UP_OR_DOWN";
+  private String pattern = "UP_OR_DOWN";
   private double threshold = 0.0; // by default set threshold to 0 to pass all anomalies
   private double upThreshold = Double.NaN;
   private double downThreshold = Double.NaN;

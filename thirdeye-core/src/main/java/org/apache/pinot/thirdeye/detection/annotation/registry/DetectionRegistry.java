@@ -36,11 +36,11 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The detection registry.
  */
 public class DetectionRegistry {
+
   // component type to component class name and annotation
   private static final Map<String, Map> REGISTRY_MAP = new HashMap<>();
   // component class name to tuner annotation
@@ -62,7 +62,7 @@ public class DetectionRegistry {
     return INSTANCE;
   }
 
-  private DetectionRegistry () {
+  private DetectionRegistry() {
     init();
   }
 
@@ -98,8 +98,10 @@ public class DetectionRegistry {
 
   public static void registerComponent(String className, String type) {
     try {
-      Class<? extends BaseComponent> clazz = (Class<? extends BaseComponent>) Class.forName(className);
-      REGISTRY_MAP.put(type, ImmutableMap.of(KEY_CLASS_NAME, className, KEY_IS_BASELINE_PROVIDER, isBaselineProvider(clazz)));
+      Class<? extends BaseComponent> clazz = (Class<? extends BaseComponent>) Class
+          .forName(className);
+      REGISTRY_MAP.put(type, ImmutableMap
+          .of(KEY_CLASS_NAME, className, KEY_IS_BASELINE_PROVIDER, isBaselineProvider(clazz)));
       LOG.info("Registered component {} {}", type, className);
     } catch (Exception e) {
       LOG.warn("Encountered exception when registering component {}", className, e);
@@ -108,9 +110,11 @@ public class DetectionRegistry {
 
   public static void registerTunableComponent(String className, String tunable, String type) {
     try {
-      Class<? extends BaseComponent> clazz = (Class<? extends BaseComponent>) Class.forName(className);
-      REGISTRY_MAP.put(type, ImmutableMap.of(KEY_CLASS_NAME, className, KEY_IS_BASELINE_PROVIDER, isBaselineProvider(clazz)));
-      Tune tune = new Tune(){
+      Class<? extends BaseComponent> clazz = (Class<? extends BaseComponent>) Class
+          .forName(className);
+      REGISTRY_MAP.put(type, ImmutableMap
+          .of(KEY_CLASS_NAME, className, KEY_IS_BASELINE_PROVIDER, isBaselineProvider(clazz)));
+      Tune tune = new Tune() {
         @Override
         public String tunable() {
           return tunable;
@@ -135,6 +139,7 @@ public class DetectionRegistry {
 
   /**
    * Look up the class name for a given component
+   *
    * @param type the type used in the YAML configs
    * @return component class name
    */
@@ -145,6 +150,7 @@ public class DetectionRegistry {
 
   /**
    * Look up the tunable class name for a component class name
+   *
    * @return tunable class name
    */
   public String lookupTunable(String type) {
@@ -154,10 +160,12 @@ public class DetectionRegistry {
 
   /**
    * Look up the yaml converter class name for a pipeline type
+   *
    * @return yaml converter class name
    */
   public String lookupYamlConverter(String pipelineType) {
-    Preconditions.checkArgument(YAML_MAP.containsKey(pipelineType), pipelineType + " not found in registry");
+    Preconditions
+        .checkArgument(YAML_MAP.containsKey(pipelineType), pipelineType + " not found in registry");
     return YAML_MAP.get(pipelineType);
   }
 
@@ -172,6 +180,7 @@ public class DetectionRegistry {
 
   /**
    * Return all component implementation annotations
+   *
    * @return List of component annotation
    */
   public List<Components> getAllAnnotation() {

@@ -37,19 +37,21 @@ import parsii.eval.Variable;
 import parsii.tokenizer.ParseException;
 
 /**
- * This class maintains the metric name, the metric expression composed of metric ids, and the aggregation function
- * The dataset is required here, because we need to know which dataset to query in cases of count(*)  and select max(time)
+ * This class maintains the metric name, the metric expression composed of metric ids, and the
+ * aggregation function
+ * The dataset is required here, because we need to know which dataset to query in cases of count(*)
+ * and select max(time)
  * For other cases, it can be derived from the metric id in the expression
  */
 public class MetricExpression {
 
-  private static String COUNT_METRIC = "__COUNT";
-  private static String COUNT_METRIC_ESCAPED = "A__COUNT";
+  private static final String COUNT_METRIC = "__COUNT";
+  private static final String COUNT_METRIC_ESCAPED = "A__COUNT";
 
-  private String expressionName;
-  private String expression;
+  private final String expressionName;
+  private final String expression;
   private MetricAggFunction aggFunction = MetricAggFunction.SUM;
-  private String dataset;
+  private final String dataset;
 
   public MetricExpression(String expression, String dataset) {
     this(expression.replaceAll("[\\s]+", ""), expression, dataset);
@@ -59,7 +61,8 @@ public class MetricExpression {
     this(expressionName, expression, MetricAggFunction.SUM, dataset);
   }
 
-  public MetricExpression(String expressionName, String expression, MetricAggFunction aggFunction, String dataset) {
+  public MetricExpression(String expressionName, String expression, MetricAggFunction aggFunction,
+      String dataset) {
     this.expressionName = expressionName;
     this.expression = expression;
     this.aggFunction = aggFunction;
@@ -70,16 +73,13 @@ public class MetricExpression {
     return expressionName;
   }
 
-
   public String getExpression() {
     return expression;
   }
 
-
   public String getDataset() {
     return dataset;
   }
-
 
   @Override
   public String toString() {
@@ -108,14 +108,16 @@ public class MetricExpression {
         if (metricToken.equals(COUNT_METRIC_ESCAPED)) {
           metricToken = COUNT_METRIC;
         } else {
-          metricId = Long.valueOf(metricToken.replace(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, ""));
+          metricId = Long
+              .valueOf(metricToken.replace(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, ""));
           metricConfig = ThirdEyeUtils.getMetricConfigFromId(metricId);
           if (metricConfig != null) {
             metricDataset = metricConfig.getDataset();
           }
         }
         metricFunctions.add(
-            new MetricFunction(aggFunction, metricToken, metricId, metricDataset, metricConfig, datasetConfig));
+            new MetricFunction(aggFunction, metricToken, metricId, metricDataset, metricConfig,
+                datasetConfig));
       }
       return metricFunctions;
     } catch (ParseException e) {
@@ -158,6 +160,5 @@ public class MetricExpression {
     metricValueContext.put("successCount", 0d);
     double result = MetricExpression.evaluateExpression(expressionString, metricValueContext);
     System.out.println(Double.isInfinite(result));
-
   }
 }

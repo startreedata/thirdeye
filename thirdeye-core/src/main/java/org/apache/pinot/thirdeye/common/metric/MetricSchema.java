@@ -28,6 +28,7 @@ import java.util.Map;
  * Wrapper class to represent the metric schema <code>
  * e.g.
  * </code>
+ *
  * @author kgopalak
  */
 public class MetricSchema {
@@ -36,7 +37,7 @@ public class MetricSchema {
 
   private final List<MetricType> types;
 
-  private int rowSize;
+  private final int rowSize;
 
   Map<String, Integer> mapping;
 

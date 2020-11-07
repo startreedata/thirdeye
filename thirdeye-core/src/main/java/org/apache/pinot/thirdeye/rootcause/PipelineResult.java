@@ -22,11 +22,12 @@ package org.apache.pinot.thirdeye.rootcause;
 import java.util.HashSet;
 import java.util.Set;
 
-
 /**
- * Container object for pipeline execution results. Holds entities with scores as set by the pipeline.
+ * Container object for pipeline execution results. Holds entities with scores as set by the
+ * pipeline.
  */
 public class PipelineResult {
+
   private final PipelineContext context;
   private final Set<Entity> entities;
 

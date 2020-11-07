@@ -46,7 +46,8 @@ public class ResponseParserUtils {
     for (int i = 0; i < numRows; i++) {
       ThirdEyeResponseRow thirdEyeResponseRow = thirdEyeResponse.getRow(i);
       String key =
-          computeTimeDimensionValues(thirdEyeResponseRow.getTimeBucketId(), thirdEyeResponseRow.getDimensions());
+          computeTimeDimensionValues(thirdEyeResponseRow.getTimeBucketId(),
+              thirdEyeResponseRow.getDimensions());
       responseMap.put(key, thirdEyeResponseRow);
     }
     return responseMap;
@@ -84,7 +85,8 @@ public class ResponseParserUtils {
     requestBuilder.setEndTimeExclusive(request.getEndTimeExclusive());
     requestBuilder.setFilterSet(request.getFilterSet());
     requestBuilder.setMetricFunctions(request.getMetricFunctions());
-    requestBuilder.setDataSource(ThirdEyeUtils.getDataSourceFromMetricFunctions(request.getMetricFunctions()));
+    requestBuilder.setDataSource(
+        ThirdEyeUtils.getDataSourceFromMetricFunctions(request.getMetricFunctions()));
     ThirdEyeRequest metricSumsRequest = requestBuilder.build("metricSums");
     try {
       ThirdEyeResponse metricSumsResponse = DeprecatedInjectorUtil
@@ -107,7 +109,8 @@ public class ResponseParserUtils {
     requestBuilder.setFilterSet(request.getFilterSet());
     requestBuilder.setGroupByTimeGranularity(request.getGroupByTimeGranularity());
     requestBuilder.setMetricFunctions(request.getMetricFunctions());
-    requestBuilder.setDataSource(ThirdEyeUtils.getDataSourceFromMetricFunctions(request.getMetricFunctions()));
+    requestBuilder.setDataSource(
+        ThirdEyeUtils.getDataSourceFromMetricFunctions(request.getMetricFunctions()));
     ThirdEyeRequest metricSumsRequest = requestBuilder.build("metricSums");
     ThirdEyeResponse metricSumsResponse = null;
     try {
@@ -135,7 +138,8 @@ public class ResponseParserUtils {
     } else if (dimensionValues.size() == 1) {
       return computeTimeDimensionValue(timeBucketId, dimensionValues.get(0));
     } else {
-      StringBuilder sb = new StringBuilder(Integer.toString(timeBucketId)).append(TIME_DIMENSION_JOINER);
+      StringBuilder sb = new StringBuilder(Integer.toString(timeBucketId))
+          .append(TIME_DIMENSION_JOINER);
       String separator = "";
       for (String dimensionValue : dimensionValues) {
         sb.append(separator).append(dimensionValue);

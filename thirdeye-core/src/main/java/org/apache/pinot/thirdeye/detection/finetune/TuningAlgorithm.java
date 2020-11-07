@@ -22,13 +22,14 @@ package org.apache.pinot.thirdeye.detection.finetune;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 
-
 /**
  * The interface Tuning algorithm.
  */
 public interface TuningAlgorithm {
+
   /**
-   * Fit the time series and anomalies between start and end time stamps, and score the detection configs.
+   * Fit the time series and anomalies between start and end time stamps, and score the detection
+   * configs.
    *
    * @param slice anomaly slice
    * @throws Exception the exception

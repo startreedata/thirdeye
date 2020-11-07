@@ -56,11 +56,11 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.yaml.snakeyaml.Yaml;
 
-
 /**
  * The detection config formatter
  */
 public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
+
   static final String ATTR_ID = "id";
   static final String ATTR_CREATED_BY = "createdBy";
   static final String ATTR_UPDATED_BY = "updatedBy";
@@ -87,7 +87,8 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
 
   private static final long DEFAULT_PRESENTING_WINDOW_SIZE_MINUTELY = TimeUnit.HOURS.toMillis(48);
   private static final long DEFAULT_PRESENTING_WINDOW_SIZE_DAILY = TimeUnit.DAYS.toMillis(30);
-  private static final TimeGranularity DEFAULT_SHOW_GRANULARITY = new TimeGranularity(1, TimeUnit.DAYS);
+  private static final TimeGranularity DEFAULT_SHOW_GRANULARITY = new TimeGranularity(1,
+      TimeUnit.DAYS);
 
   private static final String ALGORITHM_TYPE = "ALGORITHM";
   private static final String CONFIGURATION = "configuration";
@@ -133,14 +134,17 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
     synchronized (this.yaml) {
       yamlObject = ConfigUtils.getMap(this.yaml.load(config.getYaml()));
     }
-    Map<String, DatasetConfigDTO> metricUrnToDatasets = metricUrns.stream().collect(Collectors.toMap(metricUrn -> metricUrn,
-      metricUrn -> getDatasetForMetricUrn(metricUrn, metricUrnToMetricDTOs), (d1, d2) -> d1));
+    Map<String, DatasetConfigDTO> metricUrnToDatasets = metricUrns.stream()
+        .collect(Collectors.toMap(metricUrn -> metricUrn,
+            metricUrn -> getDatasetForMetricUrn(metricUrn, metricUrnToMetricDTOs), (d1, d2) -> d1));
 
     // the metric urns monitored by this detection config
     output.put(ATTR_METRIC_URNS, metricUrns);
     // get the granularity for the detection
     List<TimeGranularity> granularities = getGranularitiesForConfig(config, metricUrnToDatasets);
-    output.put(ATTR_GRANULARITY, granularities.stream().map(TimeGranularity::toAggregationGranularityString).distinct().collect(Collectors.toList()));
+    output.put(ATTR_GRANULARITY,
+        granularities.stream().map(TimeGranularity::toAggregationGranularityString).distinct()
+            .collect(Collectors.toList()));
     // the default window size of the alert details page
     output.put(ATTR_ALERT_DETAILS_WINDOW_SIZE, getAlertDetailsDefaultWindowSize(granularities));
     output.put(ATTR_METRIC, yamlObject.get(PROP_METRIC));
@@ -153,18 +157,20 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
 
   /**
    * Extract the list of metric urns in the detection config properties
+   *
    * @param properties the detection config properties
    * @return the list of metric urns
    */
   public static Set<String> extractMetricUrnsFromProperties(Map<String, Object> properties) {
     Set<String> metricUrns = new HashSet<>();
     if (properties.containsKey(PROP_METRIC_URNS_KEY)) {
-      metricUrns.add((String)properties.get(PROP_METRIC_URNS_KEY));
+      metricUrns.add((String) properties.get(PROP_METRIC_URNS_KEY));
     }
     if (properties.containsKey(PROP_NESTED_METRIC_URNS_KEY)) {
       metricUrns.addAll(ConfigUtils.getList(properties.get(PROP_NESTED_METRIC_URNS_KEY)));
     }
-    List<Map<String, Object>> nestedProperties = ConfigUtils.getList(properties.get(PROP_NESTED_PROPERTIES_KEY));
+    List<Map<String, Object>> nestedProperties = ConfigUtils
+        .getList(properties.get(PROP_NESTED_PROPERTIES_KEY));
     // extract the metric urns recursively from the nested properties
     for (Map<String, Object> nestedProperty : nestedProperties) {
       metricUrns.addAll(extractMetricUrnsFromProperties(nestedProperty));
@@ -181,16 +187,20 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
   }
 
   /**
-   * Get the display names for the datasets. Show the display name if it is available in the dataset. Otherwize, use the dataset name.
+   * Get the display names for the datasets. Show the display name if it is available in the
+   * dataset. Otherwize, use the dataset name.
+   *
    * @param metricUrnToDatasets the map of detection config keyed buy metric urn
    * @return the list of dataset names to show in UI
    */
-  private List<String> getDatasetDisplayNames(Map<String, DatasetConfigDTO> metricUrnToDatasets, Map<String, Object> yamlObject) {
+  private List<String> getDatasetDisplayNames(Map<String, DatasetConfigDTO> metricUrnToDatasets,
+      Map<String, Object> yamlObject) {
     return metricUrnToDatasets.values()
         .stream()
         .map(datasetConfigDTO -> {
           String datasetName = datasetConfigDTO.getName();
-          return StringUtils.isNotBlank(datasetName) ? datasetName : MapUtils.getString(yamlObject, PROP_DATASET);
+          return StringUtils.isNotBlank(datasetName) ? datasetName
+              : MapUtils.getString(yamlObject, PROP_DATASET);
         })
         .distinct()
         .collect(Collectors.toList());
@@ -213,13 +223,16 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
     return this.metricDAO.findById(me.getId());
   }
 
-  private List<TimeGranularity> getGranularitiesForConfig(AlertDTO config, Map<String, DatasetConfigDTO> metricUrnToDatasets) {
+  private List<TimeGranularity> getGranularitiesForConfig(AlertDTO config,
+      Map<String, DatasetConfigDTO> metricUrnToDatasets) {
     try {
       // first try to get the granularities in config properties
       List<TimeGranularity> granularities = getDetectionConfigMonitoringGranularities(config);
       // if monitoring granularities is not set, use the metric granularity to decide the default window
       if (granularities.isEmpty()) {
-        granularities = metricUrnToDatasets.keySet().stream().map(metricUrn -> metricUrnToDatasets.get(metricUrn).bucketTimeGranularity()).collect(Collectors.toList());
+        granularities = metricUrnToDatasets.keySet().stream()
+            .map(metricUrn -> metricUrnToDatasets.get(metricUrn).bucketTimeGranularity())
+            .collect(Collectors.toList());
       }
       return granularities;
     } catch (Exception e) {
@@ -230,12 +243,14 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
 
   /**
    * Generate the default window size for presenting in ThirdEye alert details page.
+   *
    * @param granularities list of granularities
    * @return the window size in milliseconds
    */
   private long getAlertDetailsDefaultWindowSize(List<TimeGranularity> granularities) {
     List<Long> windowSizes =
-        granularities.stream().map(this::getDefaultWindowSizeForGranularity).collect(Collectors.toList());
+        granularities.stream().map(this::getDefaultWindowSizeForGranularity)
+            .collect(Collectors.toList());
     // show the minimal of all window sizes for UI responsiveness
     return Collections.min(windowSizes);
   }
@@ -245,9 +260,11 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
     for (Map.Entry<String, Object> entry : config.getComponentSpecs().entrySet()) {
       Map<String, Object> specs = (Map<String, Object>) entry.getValue();
       if (entry.getKey().equals(ALGORITHM_TYPE)) {
-        extractTimeGranularitiesFromAlgorithmSpecs(specs, PROP_BUCKET_PERIOD).ifPresent(monitoringGranularities::add);
+        extractTimeGranularitiesFromAlgorithmSpecs(specs, PROP_BUCKET_PERIOD)
+            .ifPresent(monitoringGranularities::add);
       } else if (specs.containsKey(PROP_MONITORING_GRANULARITY)) {
-        monitoringGranularities.add(TimeGranularity.fromString(MapUtils.getString(specs, (PROP_MONITORING_GRANULARITY))));
+        monitoringGranularities.add(
+            TimeGranularity.fromString(MapUtils.getString(specs, (PROP_MONITORING_GRANULARITY))));
       }
     }
     return monitoringGranularities;
@@ -255,15 +272,18 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
 
   /**
    * extract the detection granularity for ALGORITHM detector types
+   *
    * @param specs the specs for the ALGORITHM detectors
    * @return the granularity
    */
-  private Optional<TimeGranularity> extractTimeGranularitiesFromAlgorithmSpecs(Map<String, Object> specs, String bucketPeriodFieldName) {
-    String bucketPeriod = String.valueOf(MapUtils.getMap(specs, CONFIGURATION).get(bucketPeriodFieldName));
+  private Optional<TimeGranularity> extractTimeGranularitiesFromAlgorithmSpecs(
+      Map<String, Object> specs, String bucketPeriodFieldName) {
+    String bucketPeriod = String
+        .valueOf(MapUtils.getMap(specs, CONFIGURATION).get(bucketPeriodFieldName));
     Period p = Period.parse(bucketPeriod);
     PeriodType periodType = p.getPeriodType();
     if (PeriodType.days().equals(periodType)) {
-      return  Optional.of(new TimeGranularity(p.getDays(), TimeUnit.DAYS));
+      return Optional.of(new TimeGranularity(p.getDays(), TimeUnit.DAYS));
     } else if (PeriodType.hours().equals(periodType)) {
       return Optional.of(new TimeGranularity(p.getHours(), TimeUnit.HOURS));
     } else if (PeriodType.minutes().equals(periodType)) {
@@ -271,7 +291,6 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
     }
     return Optional.empty();
   }
-
 
   private long getDefaultWindowSizeForGranularity(TimeGranularity granularity) {
     TimeUnit unit = granularity.getUnit();

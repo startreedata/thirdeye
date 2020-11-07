@@ -49,7 +49,9 @@ import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
  * Site-wide impact anomaly filter
  */
 @Components(type = "SITEWIDE_IMPACT_FILTER", tags = {DetectionTag.RULE_FILTER})
-public class SitewideImpactRuleAnomalyFilter implements AnomalyFilter<SitewideImpactRuleAnomalyFilterSpec> {
+public class SitewideImpactRuleAnomalyFilter implements
+    AnomalyFilter<SitewideImpactRuleAnomalyFilterSpec> {
+
   private double threshold;
   private InputDataFetcher dataFetcher;
   private Baseline baseline;
@@ -60,7 +62,8 @@ public class SitewideImpactRuleAnomalyFilter implements AnomalyFilter<SitewideIm
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
     MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
     List<MetricSlice> slices = new ArrayList<>();
-    MetricSlice currentSlice = MetricSlice.from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
+    MetricSlice currentSlice = MetricSlice
+        .from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
 
     // customize baseline offset
     MetricSlice baselineSlice = null;
@@ -73,11 +76,13 @@ public class SitewideImpactRuleAnomalyFilter implements AnomalyFilter<SitewideIm
     if (Strings.isNullOrEmpty(this.siteWideMetricUrn)) {
       // if global metric is not set
       MetricEntity siteWideEntity = MetricEntity.fromURN(anomaly.getMetricUrn());
-      siteWideSlice = MetricSlice.from(siteWideEntity.getId(), anomaly.getStartTime(), anomaly.getEndTime());
+      siteWideSlice = MetricSlice
+          .from(siteWideEntity.getId(), anomaly.getStartTime(), anomaly.getEndTime());
     } else {
       MetricEntity siteWideEntity = MetricEntity.fromURN(this.siteWideMetricUrn);
-      siteWideSlice = MetricSlice.from(siteWideEntity.getId(), anomaly.getStartTime(), anomaly.getEndTime(),
-          siteWideEntity.getFilters());
+      siteWideSlice = MetricSlice
+          .from(siteWideEntity.getId(), anomaly.getStartTime(), anomaly.getEndTime(),
+              siteWideEntity.getFilters());
     }
     slices.add(siteWideSlice);
 
@@ -86,37 +91,37 @@ public class SitewideImpactRuleAnomalyFilter implements AnomalyFilter<SitewideIm
         .getAggregates();
 
     double currentValue = anomaly.getAvgCurrentVal();
-    double baselineValue = baseline == null ? anomaly.getAvgBaselineVal() :  this.baseline.gather(currentSlice, aggregates).getDouble(
-        DataFrame.COL_VALUE, 0);
+    double baselineValue = baseline == null ? anomaly.getAvgBaselineVal()
+        : this.baseline.gather(currentSlice, aggregates).getDouble(
+            DataFrame.COL_VALUE, 0);
     double siteWideValue = getValueFromAggregates(siteWideSlice, aggregates);
 
     // if inconsistent with up/down, filter the anomaly
-    if (!pattern.equals(Pattern.UP_OR_DOWN) && (currentValue < baselineValue && pattern.equals(Pattern.UP)) || (currentValue > baselineValue && pattern.equals(Pattern.DOWN))) {
+    if (!pattern.equals(Pattern.UP_OR_DOWN) && (currentValue < baselineValue && pattern
+        .equals(Pattern.UP)) || (currentValue > baselineValue && pattern.equals(Pattern.DOWN))) {
       return false;
     }
     // if doesn't pass the threshold, filter the anomaly
-    if (siteWideValue != 0
-        && (Math.abs(currentValue - baselineValue) / siteWideValue) < this.threshold) {
-      return false;
-    }
-
-    return true;
+    return siteWideValue == 0
+        || !((Math.abs(currentValue - baselineValue) / siteWideValue) < this.threshold);
   }
 
   @Override
   public void init(SitewideImpactRuleAnomalyFilterSpec spec, InputDataFetcher dataFetcher) {
     this.dataFetcher = dataFetcher;
     this.threshold = spec.getThreshold();
-    Preconditions.checkArgument(Math.abs(this.threshold) <= 1, "Site wide impact threshold should be less or equal than 1");
+    Preconditions.checkArgument(Math.abs(this.threshold) <= 1,
+        "Site wide impact threshold should be less or equal than 1");
 
     this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
 
     // customize baseline offset
-    if (StringUtils.isNotBlank(spec.getOffset())){
+    if (StringUtils.isNotBlank(spec.getOffset())) {
       this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
     }
 
-    if (!Strings.isNullOrEmpty(spec.getSitewideCollection()) && !Strings.isNullOrEmpty(spec.getSitewideMetricName())) {
+    if (!Strings.isNullOrEmpty(spec.getSitewideCollection()) && !Strings
+        .isNullOrEmpty(spec.getSitewideMetricName())) {
       // build filters
       Map<String, Collection<String>> filterMaps = spec.getFilters();
       Multimap<String, String> filters = ArrayListMultimap.create();
@@ -128,10 +133,13 @@ public class SitewideImpactRuleAnomalyFilter implements AnomalyFilter<SitewideIm
 
       // build site wide metric Urn
       InputDataSpec.MetricAndDatasetName metricAndDatasetName =
-          new InputDataSpec.MetricAndDatasetName(spec.getSitewideMetricName(), spec.getSitewideCollection());
+          new InputDataSpec.MetricAndDatasetName(spec.getSitewideMetricName(),
+              spec.getSitewideCollection());
       InputData data = this.dataFetcher.fetchData(
-          new InputDataSpec().withMetricNamesAndDatasetNames(Collections.singletonList(metricAndDatasetName)));
-      MetricConfigDTO metricConfigDTO = data.getMetricForMetricAndDatasetNames().get(metricAndDatasetName);
+          new InputDataSpec()
+              .withMetricNamesAndDatasetNames(Collections.singletonList(metricAndDatasetName)));
+      MetricConfigDTO metricConfigDTO = data.getMetricForMetricAndDatasetNames()
+          .get(metricAndDatasetName);
       MetricEntity me = MetricEntity.fromMetric(1.0, metricConfigDTO.getId(), filters);
       this.siteWideMetricUrn = me.getUrn();
     }

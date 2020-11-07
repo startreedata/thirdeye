@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.common.constants.rca;
 
 public class RootCauseResourceConstants {
+
   public static final String METRIC_URN = "metricUrn";
   public static final String CURRENT_START = "currentStart";
   public static final String CURRENT_END = "currentEnd";

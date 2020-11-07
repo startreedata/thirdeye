@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-
 /**
  * Util class used by TriggerConditionGrouper to parse trigger condition expression.
  */
@@ -43,7 +42,8 @@ public class ExpressionParser {
   static final String OPERATOR_LEFT_BRACKET = "(";
   static final String OPERATOR_RIGHT_BRACKET = ")";
 
-  static final String[] operators = new String[] {OPERATOR_AND, OPERATOR_OR, OPERATOR_LEFT_BRACKET, OPERATOR_RIGHT_BRACKET};
+  static final String[] operators = new String[]{OPERATOR_AND, OPERATOR_OR, OPERATOR_LEFT_BRACKET,
+      OPERATOR_RIGHT_BRACKET};
 
   /**
    * Parse expression into operation tree.
@@ -76,7 +76,7 @@ public class ExpressionParser {
   private static String getOperator(String expression, int index) {
     for (String operator : operators) {
       if (expression.length() >= index + operator.length()
-          && expression.substring(index, index + operator.length()).equals(operator)) {
+          && expression.startsWith(operator, index)) {
         return operator;
       }
     }
@@ -87,7 +87,7 @@ public class ExpressionParser {
     List<String> tokens = new ArrayList<>();
     StringBuilder sb = new StringBuilder();
     int i = 0;
-    while(i < expression.length()) {
+    while (i < expression.length()) {
       String operator = getOperator(expression, i);
       if (!operator.isEmpty()) {
         if (sb.length() > 0) {

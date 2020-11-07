@@ -23,11 +23,11 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 
-
 /**
  * Wrapper for ThirdEye request with derived metric expressions
  */
 public class RequestContainer {
+
   final ThirdEyeRequest request;
   final List<MetricExpression> expressions;
 

@@ -24,27 +24,31 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
 import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
 
-
 /**
  * The baseline provider to calculate predicted baseline.
  */
 public interface BaselineProvider<T extends AbstractSpec> extends BaseComponent<T> {
+
   /**
    * Compute the baseline time series for the metric slice.
+   *
    * @return the time series contains predicted baseline.
    */
   TimeSeries computePredictedTimeSeries(MetricSlice slice);
 
   /**
    * Compute the baseline time series for the metric slice.
-   * default implementation is to call computePredictedTimeSeries and aggregate using the aggregate function
+   * default implementation is to call computePredictedTimeSeries and aggregate using the aggregate
+   * function
+   *
    * @return the predicted value.
    */
-  default Double computePredictedAggregates(MetricSlice slice, Series.DoubleFunction aggregateFunction){
+  default Double computePredictedAggregates(MetricSlice slice,
+      Series.DoubleFunction aggregateFunction) {
     try {
       TimeSeries baselineTimeSeries = this.computePredictedTimeSeries(slice);
       return baselineTimeSeries.getPredictedBaseline().aggregate(aggregateFunction).getDouble(0);
-    } catch (Exception e){
+    } catch (Exception e) {
       return Double.NaN;
     }
   }

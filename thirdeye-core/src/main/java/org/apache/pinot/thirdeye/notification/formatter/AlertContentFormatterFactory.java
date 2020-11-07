@@ -21,14 +21,13 @@ package org.apache.pinot.thirdeye.notification.formatter;
 
 import org.apache.pinot.thirdeye.common.BaseFactory;
 
-
 /**
  * Generates instances of alert content formatters
  */
 public class AlertContentFormatterFactory<T> extends BaseFactory<T> {
 
   public <T> T fromClassPath(String classPath)
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException{
+      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     return (new BaseFactory<T>()).getInstance(classPath);
   }
 }

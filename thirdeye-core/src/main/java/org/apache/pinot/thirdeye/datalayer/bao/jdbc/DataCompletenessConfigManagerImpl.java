@@ -30,8 +30,8 @@ import org.apache.pinot.thirdeye.datalayer.pojo.DataCompletenessConfigBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
 @Singleton
-public class DataCompletenessConfigManagerImpl extends AbstractManagerImpl<DataCompletenessConfigDTO> implements DataCompletenessConfigManager {
-
+public class DataCompletenessConfigManagerImpl extends
+    AbstractManagerImpl<DataCompletenessConfigDTO> implements DataCompletenessConfigManager {
 
   @Inject
   public DataCompletenessConfigManagerImpl(GenericPojoDao genericPojoDao) {
@@ -45,11 +45,14 @@ public class DataCompletenessConfigManagerImpl extends AbstractManagerImpl<DataC
   }
 
   @Override
-  public DataCompletenessConfigDTO findByDatasetAndDateSDF(String dataset, String dateToCheckInSDF) {
+  public DataCompletenessConfigDTO findByDatasetAndDateSDF(String dataset,
+      String dateToCheckInSDF) {
     Predicate predicate =
-        Predicate.AND(Predicate.EQ("dataset", dataset), Predicate.EQ("dateToCheckInSDF", dateToCheckInSDF));
+        Predicate.AND(Predicate.EQ("dataset", dataset),
+            Predicate.EQ("dateToCheckInSDF", dateToCheckInSDF));
 
-    List<DataCompletenessConfigBean> list = genericPojoDao.get(predicate, DataCompletenessConfigBean.class);
+    List<DataCompletenessConfigBean> list = genericPojoDao
+        .get(predicate, DataCompletenessConfigBean.class);
     DataCompletenessConfigDTO result = null;
     if (CollectionUtils.isNotEmpty(list)) {
       result = MODEL_MAPPER.map(list.get(0), DataCompletenessConfigDTO.class);
@@ -57,13 +60,14 @@ public class DataCompletenessConfigManagerImpl extends AbstractManagerImpl<DataC
     return result;
   }
 
-
   @Override
   public DataCompletenessConfigDTO findByDatasetAndDateMS(String dataset, Long dateToCheckInMS) {
     Predicate predicate =
-        Predicate.AND(Predicate.EQ("dataset", dataset), Predicate.EQ("dateToCheckInMS", dateToCheckInMS));
+        Predicate.AND(Predicate.EQ("dataset", dataset),
+            Predicate.EQ("dateToCheckInMS", dateToCheckInMS));
 
-    List<DataCompletenessConfigBean> list = genericPojoDao.get(predicate, DataCompletenessConfigBean.class);
+    List<DataCompletenessConfigBean> list = genericPojoDao
+        .get(predicate, DataCompletenessConfigBean.class);
     DataCompletenessConfigDTO result = null;
     if (CollectionUtils.isNotEmpty(list)) {
       result = MODEL_MAPPER.map(list.get(0), DataCompletenessConfigDTO.class);
@@ -73,22 +77,27 @@ public class DataCompletenessConfigManagerImpl extends AbstractManagerImpl<DataC
 
   @Override
   public List<DataCompletenessConfigDTO> findAllInTimeRange(long startTime, long endTime) {
-    Predicate timePredicate = Predicate.AND(Predicate.GE("dateToCheckInMS", startTime), Predicate.LT("dateToCheckInMS", endTime));
+    Predicate timePredicate = Predicate
+        .AND(Predicate.GE("dateToCheckInMS", startTime), Predicate.LT("dateToCheckInMS", endTime));
     return findByPredicate(timePredicate);
   }
 
   @Override
-  public List<DataCompletenessConfigDTO> findAllByDatasetAndInTimeRange(String dataset, long startTime, long endTime) {
-    Predicate timePredicate = Predicate.AND(Predicate.GE("dateToCheckInMS", startTime), Predicate.LT("dateToCheckInMS", endTime));
+  public List<DataCompletenessConfigDTO> findAllByDatasetAndInTimeRange(String dataset,
+      long startTime, long endTime) {
+    Predicate timePredicate = Predicate
+        .AND(Predicate.GE("dateToCheckInMS", startTime), Predicate.LT("dateToCheckInMS", endTime));
     Predicate datasetPredicate = Predicate.EQ("dataset", dataset);
     Predicate predicate = Predicate.AND(datasetPredicate, timePredicate);
     return findByPredicate(predicate);
   }
 
   @Override
-  public List<DataCompletenessConfigDTO> findAllByDatasetAndInTimeRangeAndPercentCompleteGT(String dataset,
+  public List<DataCompletenessConfigDTO> findAllByDatasetAndInTimeRangeAndPercentCompleteGT(
+      String dataset,
       long startTime, long endTime, double percentComplete) {
-    Predicate timePredicate = Predicate.AND(Predicate.GE("dateToCheckInMS", startTime), Predicate.LT("dateToCheckInMS", endTime));
+    Predicate timePredicate = Predicate
+        .AND(Predicate.GE("dateToCheckInMS", startTime), Predicate.LT("dateToCheckInMS", endTime));
     Predicate datasetPredicate = Predicate.EQ("dataset", dataset);
     Predicate percentCompletePrediate = Predicate.GT("percentComplete", percentComplete);
     Predicate predicate = Predicate.AND(datasetPredicate, timePredicate, percentCompletePrediate);
@@ -102,7 +111,8 @@ public class DataCompletenessConfigManagerImpl extends AbstractManagerImpl<DataC
   }
 
   @Override
-  public List<DataCompletenessConfigDTO> findAllByTimeOlderThanAndStatus(long time, boolean dataComplete) {
+  public List<DataCompletenessConfigDTO> findAllByTimeOlderThanAndStatus(long time,
+      boolean dataComplete) {
     Predicate datePredicate = Predicate.LT("dateToCheckInMS", time);
     Predicate dataCompletePredicate = Predicate.EQ("dataComplete", dataComplete);
     Predicate predicate = Predicate.AND(datePredicate, dataCompletePredicate);
@@ -110,9 +120,11 @@ public class DataCompletenessConfigManagerImpl extends AbstractManagerImpl<DataC
   }
 
   @Override
-  public List<DataCompletenessConfigDTO> findAllByDatasetAndInTimeRangeAndStatus(String dataset, long startTime,
+  public List<DataCompletenessConfigDTO> findAllByDatasetAndInTimeRangeAndStatus(String dataset,
+      long startTime,
       long endTime, boolean dataComplete) {
-    Predicate timePredicate = Predicate.AND(Predicate.GE("dateToCheckInMS", startTime), Predicate.LT("dateToCheckInMS", endTime));
+    Predicate timePredicate = Predicate
+        .AND(Predicate.GE("dateToCheckInMS", startTime), Predicate.LT("dateToCheckInMS", endTime));
     Predicate datasetPredicate = Predicate.EQ("dataset", dataset);
     Predicate statusPredicate = Predicate.EQ("dataComplete", dataComplete);
     Predicate finalPredicate = Predicate.AND(datasetPredicate, timePredicate, statusPredicate);

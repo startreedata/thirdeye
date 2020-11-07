@@ -22,12 +22,13 @@ package org.apache.pinot.thirdeye.cube.data.dbrow;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-
 public abstract class BaseRow implements Row {
+
   protected Dimensions dimensions;
   protected DimensionValues dimensionValues;
 
-  public BaseRow() { }
+  public BaseRow() {
+  }
 
   public BaseRow(Dimensions dimensions, DimensionValues dimensionValues) {
     this.dimensions = Preconditions.checkNotNull(dimensions);
@@ -63,7 +64,8 @@ public abstract class BaseRow implements Row {
       return false;
     }
     BaseRow baseRow = (BaseRow) o;
-    return Objects.equal(dimensions, baseRow.dimensions) && Objects.equal(dimensionValues, baseRow.dimensionValues);
+    return Objects.equal(dimensions, baseRow.dimensions) && Objects
+        .equal(dimensionValues, baseRow.dimensionValues);
   }
 
   @Override

@@ -31,8 +31,8 @@ import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class EventFilter {
+
   private static final Logger LOG = LoggerFactory.getLogger(EventFilter.class);
 
   String eventType;
@@ -91,20 +91,27 @@ public class EventFilter {
   }
 
   /**
-   * Helper method to filter out from list of events, only those events which match the filterDimensions map
-   * Each event can have a dimensions map with (key:value) = (dimension name : list of dimension values)
+   * Helper method to filter out from list of events, only those events which match the
+   * filterDimensions map
+   * Each event can have a dimensions map with (key:value) = (dimension name : list of dimension
+   * values)
    * The eventFilterDimension map contains a similar schema map.
-   * the job of this method is to only pass those events, which meet atleast one of the value filter for atleast one dimension
-   * Eg: If event has map { (country):(us), (browser):(chrome) } and event filter has map { (country_code) : (us, india)},
+   * the job of this method is to only pass those events, which meet atleast one of the value filter
+   * for atleast one dimension
+   * Eg: If event has map { (country):(us), (browser):(chrome) } and event filter has map {
+   * (country_code) : (us, india)},
    * this qualifies as a pass from the method.
-   * This method also does some basic dimension name and value transformation, such as standardizing case and removing non-alphanumeric
-   * Eventually we would have a standardization pipeline, which would rid us of the need to do any standardization in this method,
+   * This method also does some basic dimension name and value transformation, such as standardizing
+   * case and removing non-alphanumeric
+   * Eventually we would have a standardization pipeline, which would rid us of the need to do any
+   * standardization in this method,
    * and also handle more complex standardization such as US=USA,Unites States, etc
+   *
    * @param allEvents - all events, with no filtering applied
    * @param eventFilterDimensionMap - filter criteria based on dimension names and values
-   * @return
    */
-  public static List<EventDTO> applyDimensionFilter(List<EventDTO> allEvents, Map<String, List<String>> eventFilterDimensionMap) {
+  public static List<EventDTO> applyDimensionFilter(List<EventDTO> allEvents,
+      Map<String, List<String>> eventFilterDimensionMap) {
     List<EventDTO> filteredEvents = new ArrayList<>();
 
     if (CollectionUtils.isNotEmpty(allEvents)) {
@@ -125,21 +132,25 @@ public class EventFilter {
               String eventDimension = eventMapEntry.getKey();
               String eventDimensionTransformed = transformDimensionName(eventDimension);
               List<String> eventDimensionValues = eventMapEntry.getValue();
-              List<String> eventDimensionValuesTransformed = transformDimensionValues(eventDimensionValues);
+              List<String> eventDimensionValuesTransformed = transformDimensionValues(
+                  eventDimensionValues);
 
               // for each filter_dimension : dimension_values pair
-              for (Entry<String, List<String>> filterMapEntry : eventFilterDimensionMap.entrySet()) {
+              for (Entry<String, List<String>> filterMapEntry : eventFilterDimensionMap
+                  .entrySet()) {
                 // TODO: get this transformation from standardization table
                 String filterDimension = filterMapEntry.getKey();
                 String filterDimensionTransformed = transformDimensionName(filterDimension);
                 List<String> filterDimensionValues = filterMapEntry.getValue();
-                List<String> filteredDimensionValuesTransformed = transformDimensionValues(filterDimensionValues);
+                List<String> filteredDimensionValuesTransformed = transformDimensionValues(
+                    filterDimensionValues);
 
                 // if event has this dimension to filter on
                 if (eventDimensionTransformed.contains(filterDimensionTransformed) ||
                     filterDimensionTransformed.contains(eventDimensionTransformed)) {
                   // and if it matches any of the filter values, add it
-                  Set<String> eventDimensionValuesSet = new HashSet<>(eventDimensionValuesTransformed);
+                  Set<String> eventDimensionValuesSet = new HashSet<>(
+                      eventDimensionValuesTransformed);
                   eventDimensionValuesSet.retainAll(filteredDimensionValuesTransformed);
                   if (!eventDimensionValuesSet.isEmpty()) {
                     filteredEvents.add(event);
@@ -159,7 +170,8 @@ public class EventFilter {
       }
     }
 
-    LOG.info("Whitelisting complete. Returning {} fetched events after whitelist", filteredEvents.size());
+    LOG.info("Whitelisting complete. Returning {} fetched events after whitelist",
+        filteredEvents.size());
     return filteredEvents;
   }
 

@@ -39,15 +39,34 @@ public class CacheConfig {
   private static CentralizedCacheConfig centralizedCacheSettings;
 
   // left blank
-  public CacheConfig() {}
+  public CacheConfig() {
+  }
 
-  public static CacheConfig getInstance() { return INSTANCE; }
+  public static CacheConfig getInstance() {
+    return INSTANCE;
+  }
 
-  public boolean useCentralizedCache() { return useCentralizedCache; }
-  public boolean useInMemoryCache() { return useInMemoryCache; }
-  public CentralizedCacheConfig getCentralizedCacheSettings() { return centralizedCacheSettings; }
+  public boolean useCentralizedCache() {
+    return useCentralizedCache;
+  }
 
-  public void setUseCentralizedCache(boolean toggle) { useCentralizedCache = toggle; }
-  public void setUseInMemoryCache(boolean toggle) { useInMemoryCache = toggle; }
-  public void setCentralizedCacheSettings(CentralizedCacheConfig centralizedCacheConfig) { centralizedCacheSettings = centralizedCacheConfig; }
+  public boolean useInMemoryCache() {
+    return useInMemoryCache;
+  }
+
+  public CentralizedCacheConfig getCentralizedCacheSettings() {
+    return centralizedCacheSettings;
+  }
+
+  public void setUseCentralizedCache(boolean toggle) {
+    useCentralizedCache = toggle;
+  }
+
+  public void setUseInMemoryCache(boolean toggle) {
+    useInMemoryCache = toggle;
+  }
+
+  public void setCentralizedCacheSettings(CentralizedCacheConfig centralizedCacheConfig) {
+    centralizedCacheSettings = centralizedCacheConfig;
+  }
 }

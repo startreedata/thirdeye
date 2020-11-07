@@ -50,14 +50,14 @@ import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * A client to communicate with Jira
  */
 public class ThirdEyeJiraClient {
+
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeJiraClient.class);
 
-  private JiraRestClient restClient;
+  private final JiraRestClient restClient;
   private static final String JIRA_REOPEN_TRANSITION = "Reopen";
   public static final String PROP_ISSUE_TYPE = "issuetype";
   public static final String PROP_PROJECT = "project";
@@ -98,7 +98,8 @@ public class ThirdEyeJiraClient {
   /**
    * Search for all the existing jira tickets based on the filters
    */
-  public List<Issue> getIssues(String project, List<String> labels, String reporter, long lookBackMillis) {
+  public List<Issue> getIssues(String project, List<String> labels, String reporter,
+      long lookBackMillis) {
     List<Issue> issues = new ArrayList<>();
 
     StringBuilder jiraQuery = new StringBuilder();
@@ -108,7 +109,8 @@ public class ThirdEyeJiraClient {
     jiraQuery.append(" and ").append(buildQueryOnLabels(labels));
     jiraQuery.append(" and ").append(buildQueryOnCreatedBy(lookBackMillis));
 
-    Iterable<Issue> jiraIssuesIt = restClient.getSearchClient().searchJql(jiraQuery.toString()).claim().getIssues();
+    Iterable<Issue> jiraIssuesIt = restClient.getSearchClient().searchJql(jiraQuery.toString())
+        .claim().getIssues();
     jiraIssuesIt.forEach(issues::add);
 
     LOG.info("Fetched {} Jira tickets using query - {}", issues.size(), jiraQuery.toString());
@@ -140,7 +142,8 @@ public class ThirdEyeJiraClient {
    */
   public void reopenIssue(Issue issue) {
     Iterable<Transition> issueTransIt = restClient.getIssueClient().getTransitions(issue).claim();
-    LOG.debug("Supported transitions for {} are {}", issue.getKey(), Joiner.on(",").join(issueTransIt));
+    LOG.debug("Supported transitions for {} are {}", issue.getKey(),
+        Joiner.on(",").join(issueTransIt));
     Optional<Transition> openTransition = StreamSupport
         .stream(issueTransIt.spliterator(), false)
         .filter(issueTrans -> issueTrans.getName().contains(JIRA_REOPEN_TRANSITION))
@@ -152,7 +155,8 @@ public class ThirdEyeJiraClient {
           openTransition.get().getName(), issue.getStatus().getName());
       restClient.getIssueClient().transition(issue, trans).claim();
     } else {
-      LOG.warn("Unable to reopen issue {}! Cannot find a '{}' transition. Verify permissions!", issue.getKey(),
+      LOG.warn("Unable to reopen issue {}! Cannot find a '{}' transition. Verify permissions!",
+          issue.getKey(),
           JIRA_REOPEN_TRANSITION);
     }
   }
@@ -168,16 +172,18 @@ public class ThirdEyeJiraClient {
     LOG.info("Updating Jira {} with {}", issue.getKey(), issueInput.toString());
     restClient.getIssueClient().updateIssue(issue.getKey(), issueInput).claim();
     if (jiraEntity.getSnapshot() != null && jiraEntity.getSnapshot().exists()) {
-      restClient.getIssueClient().addAttachments(issue.getAttachmentsUri(), jiraEntity.getSnapshot()).claim();
+      restClient.getIssueClient()
+          .addAttachments(issue.getAttachmentsUri(), jiraEntity.getSnapshot()).claim();
     }
   }
 
   Iterable<CimProject> getProjectMetadata(JiraEntity jiraEntity) {
-    return restClient.getIssueClient().getCreateIssueMetadata(new GetCreateIssueMetadataOptionsBuilder()
-        .withProjectKeys(jiraEntity.getJiraProject())
-        .withIssueTypeIds(jiraEntity.getJiraIssueTypeId())
-        .withExpandedIssueTypesFields()
-        .build()).claim();
+    return restClient.getIssueClient()
+        .getCreateIssueMetadata(new GetCreateIssueMetadataOptionsBuilder()
+            .withProjectKeys(jiraEntity.getJiraProject())
+            .withIssueTypeIds(jiraEntity.getJiraIssueTypeId())
+            .withExpandedIssueTypesFields()
+            .build()).claim();
   }
 
   private Map<String, CimFieldInfo> getIssueRequiredCreateFields(JiraEntity jiraEntity) {
@@ -229,7 +235,8 @@ public class ThirdEyeJiraClient {
     }
 
     if (jiraEntity.getCustomFieldsMap() != null) {
-      for (Map.Entry<String, Object> customFieldEntry : jiraEntity.getCustomFieldsMap().entrySet()) {
+      for (Map.Entry<String, Object> customFieldEntry : jiraEntity.getCustomFieldsMap()
+          .entrySet()) {
         issueBuilder.setFieldValue(
             customFieldEntry.getKey(),
             ComplexIssueInputFieldValue.with("name", customFieldEntry.getValue().toString()));
@@ -242,7 +249,8 @@ public class ThirdEyeJiraClient {
 
     // For required/compulsory jira fields, we will automatically set a value from the "allowed values" list.
     // If there are no allowed values configured for that field in jira, required field won't be set by ThirdEye.
-    for (Map.Entry<String, CimFieldInfo> reqFieldToInfoMap : getIssueRequiredCreateFields(jiraEntity).entrySet()) {
+    for (Map.Entry<String, CimFieldInfo> reqFieldToInfoMap : getIssueRequiredCreateFields(
+        jiraEntity).entrySet()) {
       Iterable<Object> allowedValues = reqFieldToInfoMap.getValue().getAllowedValues();
       if (allowedValues != null && allowedValues.iterator().hasNext()) {
         if (reqFieldToInfoMap.getValue().getSchema().getType().equals("array")) {

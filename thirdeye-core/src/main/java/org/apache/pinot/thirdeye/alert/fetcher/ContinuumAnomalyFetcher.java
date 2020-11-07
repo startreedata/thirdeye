@@ -38,33 +38,37 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class ContinuumAnomalyFetcher extends BaseAnomalyFetcher {
+
   private static final Logger LOG = LoggerFactory.getLogger(ContinuumAnomalyFetcher.class);
 
   public static final String REALERT_FREQUENCY = "realertFrequency";
 
   public static final String DEFAULT_REALERT_FREQUENCY = "1_DAYS";
 
-  public ContinuumAnomalyFetcher(){
+  public ContinuumAnomalyFetcher() {
     super();
   }
 
   /**
-   * Fetch continuum anomalies whose end time is after last notify time; that is, the anomaly continues after last alert
+   * Fetch continuum anomalies whose end time is after last notify time; that is, the anomaly
+   * continues after last alert
+   *
    * @param current current DateTime
    * @param alertSnapShot the snapshot of the AnomalyFeed
    * @return a list of continuing merged anomalies
    */
   @Override
-  public Collection<MergedAnomalyResultDTO> getAlertCandidates(DateTime current, AlertSnapshotDTO alertSnapShot) {
+  public Collection<MergedAnomalyResultDTO> getAlertCandidates(DateTime current,
+      AlertSnapshotDTO alertSnapShot) {
     if (!this.active) {
       LOG.warn("ContinuumAnomalyFetcher is not active for fetching anomalies");
       return Collections.emptyList();
     }
     if (StringUtils.isBlank(this.anomalyFetcherConfig.getAnomalySource()) ||
         this.anomalyFetcherConfig.getAnomalySourceType() == null) {
-      LOG.error("No entry of {} or {} in the AnomalyFetcherConfig", ANOMALY_SOURCE_TYPE, ANOMALY_SOURCE);
+      LOG.error("No entry of {} or {} in the AnomalyFetcherConfig", ANOMALY_SOURCE_TYPE,
+          ANOMALY_SOURCE);
       return Collections.emptyList();
     }
 
@@ -77,7 +81,8 @@ public class ContinuumAnomalyFetcher extends BaseAnomalyFetcher {
     String anomalySource = anomalyFetcherConfig.getAnomalySource();
     Predicate predicate = Predicate.AND(anomalySourceType.getPredicate(anomalySource),
         Predicate.GE("endTime", lastNotifyTime));
-    Set<MergedAnomalyResultDTO> alertCandidates = new HashSet<>(mergedAnomalyResultDAO.findByPredicate(predicate));
+    Set<MergedAnomalyResultDTO> alertCandidates = new HashSet<>(
+        mergedAnomalyResultDAO.findByPredicate(predicate));
 
     Multimap<String, AnomalyNotifiedStatus> snapshot = alertSnapShot.getSnapshot();
     if (snapshot.size() == 0) {
@@ -94,10 +99,11 @@ public class ContinuumAnomalyFetcher extends BaseAnomalyFetcher {
       }
 
       String snapshotKey = BaseAnomalyFetcher.getSnapshotKey(mergedAnomaly);
-      if (snapshot.containsKey(snapshotKey)){
+      if (snapshot.containsKey(snapshotKey)) {
         // If the mergedAnomaly's start time is before last notify time and
         // the last notify time of the metric-dimension isn't REALERT_FREQUENCY ahead, discard
-        long metricLastNotifyTime = alertSnapShot.getLatestStatus(snapshot, snapshotKey).getLastNotifyTime();
+        long metricLastNotifyTime = alertSnapShot.getLatestStatus(snapshot, snapshotKey)
+            .getLastNotifyTime();
         if (mergedAnomaly.getStartTime() < metricLastNotifyTime &&
             metricLastNotifyTime < current.minus(realertFrequency).getMillis()) {
           alertCandidatesIterator.remove();

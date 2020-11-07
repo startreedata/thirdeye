@@ -26,7 +26,7 @@ import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 
 public class SqlQuery extends RelationalQuery {
 
-  private String sourceName;
+  private final String sourceName;
   private String dbName;
   private String metric;
   private List<String> groupByKeys;

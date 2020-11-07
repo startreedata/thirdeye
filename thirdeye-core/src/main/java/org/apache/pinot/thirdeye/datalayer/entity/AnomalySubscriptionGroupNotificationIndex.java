@@ -21,6 +21,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class AnomalySubscriptionGroupNotificationIndex extends AbstractIndexEntity {
+
   long anomalyId;
   long detectionConfigId;
 

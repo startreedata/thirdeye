@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class OverrideConfigIndex extends AbstractIndexEntity {
+
   long startTime;
   long endTime;
   String targetEntity;

@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.cube.data.dbrow;
 
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 
-
 public interface Row {
 
   /**
@@ -65,7 +64,6 @@ public interface Row {
    * @param level the level of this node; 0 is the top level.
    * @param index the index of this node, which is used for speeding up algorithm speed.
    * @param parent the parent of this node.
-   *
    * @return a CubeNode of this row.
    */
   CubeNode toNode(int level, int index, CubeNode parent);

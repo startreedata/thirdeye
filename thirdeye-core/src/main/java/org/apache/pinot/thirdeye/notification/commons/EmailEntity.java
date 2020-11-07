@@ -22,8 +22,8 @@ package org.apache.pinot.thirdeye.notification.commons;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
 
-
 public class EmailEntity {
+
   private String from;
   private DetectionAlertFilterRecipients to;
   private String subject;
@@ -33,7 +33,8 @@ public class EmailEntity {
 
   }
 
-  public EmailEntity(String from, DetectionAlertFilterRecipients to, String subject, HtmlEmail content) {
+  public EmailEntity(String from, DetectionAlertFilterRecipients to, String subject,
+      HtmlEmail content) {
     this.from = from;
     this.to = to;
     this.subject = subject;

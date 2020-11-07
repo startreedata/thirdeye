@@ -45,5 +45,4 @@ public interface ThirdEyeResponse {
   TimeSpec getDataTimeSpec();
 
   List<String> getGroupKeyColumns();
-
 }

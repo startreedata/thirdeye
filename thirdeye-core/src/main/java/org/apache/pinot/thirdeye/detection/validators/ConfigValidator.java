@@ -21,14 +21,16 @@ package org.apache.pinot.thirdeye.detection.validators;
 
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 
-
 /**
  * Validate a config
+ *
  * @param <T> the type of the config
  */
 public interface ConfigValidator<T extends AbstractDTO> {
+
   /**
    * Validate the configuration by mock execution
+   *
    * @param config the configuration object
    * @throws ConfigValidationException exception with error message
    */
@@ -36,6 +38,7 @@ public interface ConfigValidator<T extends AbstractDTO> {
 
   /**
    * Validate the configuration for schema and application specific constraints
+   *
    * @param config the configuration string in yaml format
    * @throws ConfigValidationException exception with error message
    */

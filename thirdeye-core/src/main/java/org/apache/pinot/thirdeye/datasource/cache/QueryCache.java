@@ -31,10 +31,12 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 
 public class QueryCache {
+
   private final ExecutorService executorService;
   private final Map<String, ThirdEyeDataSource> dataSourceMap;
 
-  public QueryCache(Map<String, ThirdEyeDataSource> dataSourceMap, ExecutorService executorService) {
+  public QueryCache(Map<String, ThirdEyeDataSource> dataSourceMap,
+      ExecutorService executorService) {
     this.executorService = executorService;
     this.dataSourceMap = dataSourceMap;
   }
@@ -49,18 +51,17 @@ public class QueryCache {
       String dataSource = request.getDataSource();
 
       return getDataSource(dataSource).execute(request);
-
     } catch (Exception e) {
       ThirdeyeMetricsUtil.datasourceExceptionCounter.inc();
       throw e;
-
     } finally {
       ThirdeyeMetricsUtil.datasourceCallCounter.inc();
       ThirdeyeMetricsUtil.datasourceDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
-  public Future<ThirdEyeResponse> getQueryResultAsync(final ThirdEyeRequest request) throws Exception {
+  public Future<ThirdEyeResponse> getQueryResultAsync(final ThirdEyeRequest request)
+      throws Exception {
     return executorService.submit(new Callable<ThirdEyeResponse>() {
       @Override
       public ThirdEyeResponse call() throws Exception {

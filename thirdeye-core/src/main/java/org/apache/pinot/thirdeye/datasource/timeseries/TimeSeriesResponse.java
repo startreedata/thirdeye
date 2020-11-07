@@ -28,6 +28,7 @@ import java.util.TreeSet;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
 
 public class TimeSeriesResponse {
+
   int numRows;
   private final Set<String> metrics = new TreeSet<>();
   private final Set<List<String>> dimensions = new HashSet<>();
@@ -65,6 +66,7 @@ public class TimeSeriesResponse {
   }
 
   public static class Builder {
+
     List<TimeSeriesRow> rows = new ArrayList<>();
 
     public void add(TimeSeriesRow row) {

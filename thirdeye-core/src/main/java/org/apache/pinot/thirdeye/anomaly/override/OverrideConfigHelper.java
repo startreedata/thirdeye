@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OverrideConfigHelper {
+
   private static final Logger LOG = LoggerFactory.getLogger(OverrideConfigHelper.class);
 
   public static final String TARGET_COLLECTION = "collection";
@@ -45,9 +46,9 @@ public class OverrideConfigHelper {
   public static final String EXCLUDED_FUNCTION_ID = "excludedFunctionId";
 
   private static final String[] TARGET_KEYS =
-      new String[] { TARGET_COLLECTION, TARGET_METRIC, TARGET_FUNCTION_ID };
+      new String[]{TARGET_COLLECTION, TARGET_METRIC, TARGET_FUNCTION_ID};
   private static final String[] EXCLUDED_KEYS =
-      new String[] { EXCLUDED_COLLECTION, EXCLUDED_METRIC, EXCLUDED_FUNCTION_ID };
+      new String[]{EXCLUDED_COLLECTION, EXCLUDED_METRIC, EXCLUDED_FUNCTION_ID};
 
   public static final String ENTITY_TIME_SERIES = "TimeSeries";
   public static final String ENTITY_ALERT_FILTER = "AlertFilter";
@@ -56,10 +57,10 @@ public class OverrideConfigHelper {
    * Check if the override configuration should be enabled for the given collection name, metric
    * name, and function id of the entity.
    *
-   * @param entityTargetLevel the map that provides the collection name, metric name, and function
-   *                          id of the entity
+   * @param entityTargetLevel the map that provides the collection name, metric name, and
+   *     function
+   *     id of the entity
    * @param configurationOverrideDTO the filter rule for the override configuration
-   *
    * @return true if this override configuration should be enabled for the given entity level
    */
   public static boolean isEnabled(Map<String, String> entityTargetLevel,
@@ -73,7 +74,8 @@ public class OverrideConfigHelper {
     // Check if the given entity should be excluded
     for (String excludedKey : EXCLUDED_KEYS) {
       List<String> elements = targetLevel.get(excludedKey);
-      if (CollectionUtils.isNotEmpty(elements) && elements.contains(entityTargetLevel.get(excludedKey))) {
+      if (CollectionUtils.isNotEmpty(elements) && elements
+          .contains(entityTargetLevel.get(excludedKey))) {
         return false;
       }
     }
@@ -93,7 +95,8 @@ public class OverrideConfigHelper {
     // Check if the override rule should be enabled for the given entity
     for (String targetKey : TARGET_KEYS) {
       List<String> elements = targetLevel.get(targetKey);
-      if (CollectionUtils.isNotEmpty(elements) && elements.contains(entityTargetLevel.get(targetKey))) {
+      if (CollectionUtils.isNotEmpty(elements) && elements
+          .contains(entityTargetLevel.get(targetKey))) {
         return true;
       }
     }
@@ -129,7 +132,7 @@ public class OverrideConfigHelper {
    *
    * @param overrideConfigDTOs the list of OverrideConfigDTO
    * @param timeSereisTargetLevel the
-   *                              filtration rule for applying OverrideConfigDTO
+   *     filtration rule for applying OverrideConfigDTO
    * @return a list of scaling factor
    */
   public static List<ScalingFactor> convertToScalingFactors(
@@ -143,7 +146,8 @@ public class OverrideConfigHelper {
         if (MapUtils.isNotEmpty(overrideConfigDTO.getOverrideProperties())) {
           try {
             double scalingFactor =
-                Double.parseDouble(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR));
+                Double.parseDouble(
+                    overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR));
             ScalingFactor sf = new ScalingFactor(startTime, endTime, scalingFactor);
             results.add(sf);
           } catch (Exception e) {
@@ -162,9 +166,9 @@ public class OverrideConfigHelper {
   /**
    * Get a list of OverrideConfigDTOs according to the given start and end time ranges.
    *
-   * @param startEndTimeRanges a list of start and end time ranges for retrieving override configs
+   * @param startEndTimeRanges a list of start and end time ranges for retrieving override
+   *     configs
    * @param overrideConfigDAO the data access object for retrieving override configs
-   *
    * @return a list of OverrideConfigDTOs
    */
   public static List<OverrideConfigDTO> getTimeSeriesOverrideConfigs(
@@ -198,9 +202,8 @@ public class OverrideConfigHelper {
    * @param metric the target metric
    * @param functionId the target function id
    * @param startEndTimeRanges the time ranges of current and baseline values
-   *
    * @return the scaling factor for the given collectoin, metric, function id, and the time
-   * ranges of current value and baseline values
+   *     ranges of current value and baseline values
    */
   public static List<ScalingFactor> getTimeSeriesScalingFactors(OverrideConfigManager
       overrideConfigDAO, String collection, String metric,

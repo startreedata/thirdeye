@@ -28,12 +28,12 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The data quality job submitted to the scheduler. This job creates data quality tasks which
  * the runners will later pick and execute.
  */
 public class DataQualityPipelineJob implements Job {
+
   private static final Logger LOG = LoggerFactory.getLogger(DataQualityPipelineJob.class);
 
   private static final long DATA_AVAILABILITY_TASK_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
@@ -43,7 +43,8 @@ public class DataQualityPipelineJob implements Job {
     DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfo(jobExecutionContext);
 
     // if a task is pending and not time out yet, don't schedule more
-    String jobName = String.format("%s_%d", TaskConstants.TaskType.DATA_QUALITY, taskInfo.getConfigId());
+    String jobName = String
+        .format("%s_%d", TaskConstants.TaskType.DATA_QUALITY, taskInfo.getConfigId());
     if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DATA_AVAILABILITY_TASK_TIMEOUT)) {
       LOG.info("Skip scheduling {} task for {} with start time {}. Task is already in the queue.",
           TaskConstants.TaskType.DATA_QUALITY, jobName, taskInfo.getStart());

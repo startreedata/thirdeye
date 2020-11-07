@@ -22,11 +22,11 @@ package org.apache.pinot.thirdeye.cube.data.dbclient;
 import com.google.common.base.Preconditions;
 import org.joda.time.DateTime;
 
-
 /**
  * The spec that specifies the metric and its time range to be retrieved from the data base.
  */
 public class CubeSpec {
+
   private CubeTag tag;
   private String metric;
   private DateTime startInclusive;
@@ -77,6 +77,7 @@ public class CubeSpec {
 
   /**
    * Sets the metric name.
+   *
    * @param metric the metric name.
    */
   public void setMetric(String metric) {
@@ -95,6 +96,7 @@ public class CubeSpec {
 
   /**
    * Sets start time of the metric, inclusive.
+   *
    * @param startInclusive start time of the metric, inclusive.
    */
   public void setStartInclusive(DateTime startInclusive) {

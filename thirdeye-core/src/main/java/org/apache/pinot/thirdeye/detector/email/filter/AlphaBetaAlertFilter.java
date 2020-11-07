@@ -28,8 +28,8 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class AlphaBetaAlertFilter extends BaseAlertFilter {
+
   private final static Logger LOG = LoggerFactory.getLogger(AlphaBetaAlertFilter.class);
 
   // These default parameters are accessed through Java reflection. Do not remove.
@@ -46,7 +46,7 @@ public class AlphaBetaAlertFilter extends BaseAlertFilter {
   private double alpha = Double.parseDouble(DEFAULT_ALPHA);
   private double beta = Double.parseDouble(DEFAULT_BETA);
   private double threshold = Double.parseDouble(DEFAULT_THRESHOLD);
-  private String type = DEFAULT_TYPE;
+  private final String type = DEFAULT_TYPE;
 
   private static final List<String> propertyNames =
       Collections.unmodifiableList(new ArrayList<>(Arrays.asList(ALPHA, BETA, THRESHOLD, TYPE)));
@@ -105,6 +105,7 @@ public class AlphaBetaAlertFilter extends BaseAlertFilter {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add(ALPHA, alpha).add(BETA, beta).add(THRESHOLD, threshold).add(TYPE, type).toString();
+    return MoreObjects.toStringHelper(this).add(ALPHA, alpha).add(BETA, beta)
+        .add(THRESHOLD, threshold).add(TYPE, type).toString();
   }
 }

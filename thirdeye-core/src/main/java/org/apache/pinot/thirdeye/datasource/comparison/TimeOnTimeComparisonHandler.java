@@ -43,6 +43,7 @@ import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 
 public class TimeOnTimeComparisonHandler {
+
   private static final String CURRENT = "current";
   private static final String BASELINE = "baseline";
   private final QueryCache queryCache;
@@ -65,8 +66,8 @@ public class TimeOnTimeComparisonHandler {
 
     if (comparisonRequest.isEndDateInclusive()) {
       // ThirdEyeRequest is exclusive endpoint, so increment end by one bucket
-      currentEnd = TimeRangeUtils.increment(currentEnd, aggregationTimeGranularity );
-      baselineEnd = TimeRangeUtils.increment(baselineEnd, aggregationTimeGranularity );
+      currentEnd = TimeRangeUtils.increment(currentEnd, aggregationTimeGranularity);
+      baselineEnd = TimeRangeUtils.increment(baselineEnd, aggregationTimeGranularity);
     }
     baselineTimeranges =
         TimeRangeUtils.computeTimeRanges(aggregationTimeGranularity, baselineStart, baselineEnd);
@@ -171,8 +172,8 @@ public class TimeOnTimeComparisonHandler {
     List<MetricFunction> metricFunctionsFromExpressions =
         Utils.computeMetricFunctionsFromExpressions(metricExpressions);
     requestBuilder.setMetricFunctions(metricFunctionsFromExpressions);
-    requestBuilder.setDataSource(ThirdEyeUtils.getDataSourceFromMetricFunctions(metricFunctionsFromExpressions));
+    requestBuilder.setDataSource(
+        ThirdEyeUtils.getDataSourceFromMetricFunctions(metricFunctionsFromExpressions));
     return requestBuilder.build(requestReference);
   }
-
 }

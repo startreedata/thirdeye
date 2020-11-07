@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.anomaly.task;
 
 public class TaskDriverConfiguration {
+
   private int noTaskDelayInMillis = 15_000; // 15 seconds
   private int taskFailureDelayInMillis = 30_000; // 30 seconds
   private int randomDelayCapInMillis = 15_000; // 15 seconds

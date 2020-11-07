@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AutoOnboardPinotMetricsUtils {
+
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardPinotMetricsUtils.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final org.codehaus.jackson.map.ObjectMapper CODEHAUS_OBJECT_MAPPER =
@@ -62,21 +63,24 @@ public class AutoOnboardPinotMetricsUtils {
   private static final String PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE = "/tables/%s/schema";
   private static final String UTF_8 = "UTF-8";
 
-  private CloseableHttpClient pinotControllerClient;
-  private HttpHost pinotControllerHost;
+  private final CloseableHttpClient pinotControllerClient;
+  private final HttpHost pinotControllerHost;
 
   public AutoOnboardPinotMetricsUtils(MetadataSourceConfig metadataSourceConfig)
       throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
     PinotThirdEyeDataSourceConfig pinotThirdeyeDataSourceConfig =
         PinotThirdEyeDataSourceConfig.createFromMetadataSourceConfig(metadataSourceConfig);
 
-    String controllerConnectionScheme = pinotThirdeyeDataSourceConfig.getControllerConnectionScheme();
+    String controllerConnectionScheme = pinotThirdeyeDataSourceConfig
+        .getControllerConnectionScheme();
     if (PinotThirdEyeDataSourceConfig.HTTPS_SCHEME.equals(controllerConnectionScheme)) {
       try {
         // Accept all SSL certificate because we assume that the Pinot broker are setup in the same internal network
-        SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new AcceptAllTrustStrategy()).build();
+        SSLContext sslContext = new SSLContextBuilder()
+            .loadTrustMaterial(null, new AcceptAllTrustStrategy()).build();
         this.pinotControllerClient =
-            HttpClients.custom().setSSLContext(sslContext).setSSLHostnameVerifier(new NoopHostnameVerifier()).build();
+            HttpClients.custom().setSSLContext(sslContext)
+                .setSSLHostnameVerifier(new NoopHostnameVerifier()).build();
       } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
         // This section shouldn't happen because we use Accept All Strategy
         LOG.error("Failed to start auto onboard for Pinot data source.");
@@ -114,12 +118,6 @@ public class AutoOnboardPinotMetricsUtils {
 
   /**
    * Fetches schema from pinot, from the tables endpoint or schema endpoint
-   *
-   * @param dataset
-   *
-   * @return
-   *
-   * @throws IOException
    */
   public Schema getSchemaFromPinot(String dataset) throws IOException {
     Schema schema = getSchemaFromPinotEndpoint(PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE, dataset);
@@ -132,9 +130,11 @@ public class AutoOnboardPinotMetricsUtils {
     return schema;
   }
 
-  private Schema getSchemaFromPinotEndpoint(String endpointTemplate, String dataset) throws IOException {
+  private Schema getSchemaFromPinotEndpoint(String endpointTemplate, String dataset)
+      throws IOException {
     Schema schema = null;
-    HttpGet schemaReq = new HttpGet(String.format(endpointTemplate, URLEncoder.encode(dataset, UTF_8)));
+    HttpGet schemaReq = new HttpGet(
+        String.format(endpointTemplate, URLEncoder.encode(dataset, UTF_8)));
     LOG.info("Retrieving schema: {}", schemaReq);
     CloseableHttpResponse schemaRes = pinotControllerClient.execute(pinotControllerHost, schemaReq);
     try {
@@ -144,7 +144,6 @@ public class AutoOnboardPinotMetricsUtils {
         InputStream schemaContent = schemaRes.getEntity().getContent();
         schema = CODEHAUS_OBJECT_MAPPER.readValue(schemaContent, Schema.class);
       }
-
     } catch (Exception e) {
       LOG.error("Exception in retrieving schema collections, skipping {}", dataset);
     } finally {
@@ -160,11 +159,8 @@ public class AutoOnboardPinotMetricsUtils {
    * Verify schema name and presence of field spec for time column
    */
   public boolean verifySchemaCorrectness(Schema schema, @Nullable String timeColumnName) {
-    if (StringUtils.isBlank(schema.getSchemaName()) || timeColumnName == null
-        || schema.getSpecForTimeColumn(timeColumnName) == null) {
-      return false;
-    }
-    return true;
+    return !StringUtils.isBlank(schema.getSchemaName()) && timeColumnName != null
+        && schema.getSpecForTimeColumn(timeColumnName) != null;
   }
 
   public JsonNode getTableConfigFromPinotEndpoint(String dataset) throws IOException {
@@ -207,8 +203,9 @@ public class AutoOnboardPinotMetricsUtils {
     Map<String, String> customConfigs = Collections.emptyMap();
     try {
       JsonNode jsonNode = tableConfigJson.get("metadata").get("customConfigs");
-      customConfigs = OBJECT_MAPPER.convertValue(jsonNode, new TypeReference<Map<String, String>>() {
-      });
+      customConfigs = OBJECT_MAPPER
+          .convertValue(jsonNode, new TypeReference<Map<String, String>>() {
+          });
     } catch (Exception e) {
       LOG.warn("Failed to get custom config from table: {}. Reason: {}", tableConfigJson, e);
     }
@@ -224,8 +221,10 @@ public class AutoOnboardPinotMetricsUtils {
    * This class accepts (i.e., ignores) all SSL certificate.
    */
   private static class AcceptAllTrustStrategy implements TrustStrategy {
+
     @Override
-    public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+    public boolean isTrusted(X509Certificate[] x509Certificates, String s)
+        throws CertificateException {
       return true;
     }
   }

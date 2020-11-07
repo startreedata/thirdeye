@@ -34,8 +34,8 @@ public class DimensionFiltersCacheLoader extends CacheLoader<String, String> {
   private static final Logger LOGGER = LoggerFactory.getLogger(DimensionFiltersCacheLoader.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private QueryCache queryCache;
-  private DatasetConfigManager datasetConfigDAO;
+  private final QueryCache queryCache;
+  private final DatasetConfigManager datasetConfigDAO;
 
   public DimensionFiltersCacheLoader(QueryCache queryCache, DatasetConfigManager datasetConfigDAO) {
     this.queryCache = queryCache;
@@ -45,6 +45,7 @@ public class DimensionFiltersCacheLoader extends CacheLoader<String, String> {
   /**
    * Fetched dimension filters for this dataset from the right data source
    * {@inheritDoc}
+   *
    * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
    */
   @Override
@@ -57,13 +58,13 @@ public class DimensionFiltersCacheLoader extends CacheLoader<String, String> {
       ThirdEyeDataSource dataSource = queryCache.getDataSource(dataSourceName);
       if (dataSource == null) {
         LOGGER.warn("datasource [{}] found null in queryCache", dataSourceName);
-      }
-      else {
+      } else {
         Map<String, List<String>> dimensionFilters = dataSource.getDimensionFilters(dataset);
         dimensionFiltersJson = OBJECT_MAPPER.writeValueAsString(dimensionFilters);
       }
     } catch (Exception e) {
-      LOGGER.error("Exception in getting dimension filters for {} from data source {}", dataset, dataSourceName, e);
+      LOGGER.error("Exception in getting dimension filters for {} from data source {}", dataset,
+          dataSourceName, e);
     }
     return dimensionFiltersJson;
   }

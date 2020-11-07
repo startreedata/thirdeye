@@ -39,11 +39,11 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * A generic Jersey Client API to perform GET and POST
  */
 public abstract class AbstractRestClient {
+
   private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -66,29 +66,35 @@ public abstract class AbstractRestClient {
   }
 
   /**
-   * Perform a GET request to the given URL, accepts a method that will parse the response as a parameter.
-   * @param <T>  the type parameter defined as the return type of the response parser method
+   * Perform a GET request to the given URL, accepts a method that will parse the response as a
+   * parameter.
+   *
+   * @param <T> the type parameter defined as the return type of the response parser method
    * @param url the http url
    */
-  public <T> T doGet(String url, MultivaluedMap<String, Object> headers, ParseResponseFunction<Response, T> responseParserFunc) throws IOException {
+  public <T> T doGet(String url, MultivaluedMap<String, Object> headers,
+      ParseResponseFunction<Response, T> responseParserFunc) throws IOException {
     long startedMillis = System.currentTimeMillis();
 
     WebTarget webTarget = this.client.target(url);
 
-    Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).headers(headers);
+    Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON)
+        .headers(headers);
     Response response = invocationBuilder.get();
 
     T result = responseParserFunc.parse(response);
     long durationMillis = System.currentTimeMillis() - startedMillis;
 
-    LOG.info(String.format("GET '%s' succeeded in '%s'ms, response code '%s', response content '%s'.", url,
-        durationMillis, response.getStatus(), result));
+    LOG.info(String
+        .format("GET '%s' succeeded in '%s'ms, response code '%s', response content '%s'.", url,
+            durationMillis, response.getStatus(), result));
 
     return result;
   }
 
   /**
    * Perform a POST request to the given URL, with a JSON or raw string as content.
+   *
    * @param url the http url
    * @param postContent the post content
    */
@@ -98,13 +104,16 @@ public abstract class AbstractRestClient {
 
     WebTarget webTarget = this.client.target(url);
 
-    Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).headers(headers);
-    Response response = invocationBuilder.post(Entity.entity(postContent, MediaType.APPLICATION_JSON));
+    Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON)
+        .headers(headers);
+    Response response = invocationBuilder
+        .post(Entity.entity(postContent, MediaType.APPLICATION_JSON));
 
     T result = responseParserFunc.parse(response);
     long durationMillis = System.currentTimeMillis() - startedMillis;
 
-    LOG.info(String.format("POST '%s' succeeded in '%s'ms, response code '%s', response content '%s'.", url,
+    LOG.info(String
+        .format("POST '%s' succeeded in '%s'ms, response code '%s', response content '%s'.", url,
             durationMillis, response.getStatus(), result));
 
     return result;
@@ -113,7 +122,8 @@ public abstract class AbstractRestClient {
   /**
    * Composes a url from the host, api and queryParameters
    */
-  protected String composeUrl(String host, String api, SortedMap<String, String> queryParameters) throws IOException {
+  protected String composeUrl(String host, String api, SortedMap<String, String> queryParameters)
+      throws IOException {
     return composeUrlGeneric(Protocol.HTTP, host, api, queryParameters);
   }
 
@@ -155,12 +165,15 @@ public abstract class AbstractRestClient {
   }
 
   /**
-   * Implementation for a single method class that can be used with doGet and doPost in order to parse a response stream
+   * Implementation for a single method class that can be used with doGet and doPost in order to
+   * parse a response stream
    * to a Map<String,Object>
    */
   public class ResponseToMap implements ParseResponseFunction<Response, Map<String, Object>> {
+
     public Map<String, Object> parse(Response response) {
-      return response.readEntity(new GenericType<HashMap<String, Object>>() { });
+      return response.readEntity(new GenericType<HashMap<String, Object>>() {
+      });
     }
   }
 }

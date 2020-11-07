@@ -42,8 +42,8 @@ public class SeverityComputationUtil {
 
   private static final ThirdEyeCacheRegistry CACHE_REGISTRY = DeprecatedInjectorUtil
       .getInstance(ThirdEyeCacheRegistry.class);
-  private String collectionName;
-  private String metricName;
+  private final String collectionName;
+  private final String metricName;
 
   public SeverityComputationUtil(String collectionName, String metricName) {
     this.collectionName = collectionName;
@@ -63,7 +63,8 @@ public class SeverityComputationUtil {
     double baselineSum = 0;
     int count = 0;
     for (Pair<DateTime, DateTime> pair : intervals) {
-      thirdEyeRequest = createThirdEyeRequest(pair.getLeft().getMillis(), pair.getRight().getMillis());
+      thirdEyeRequest = createThirdEyeRequest(pair.getLeft().getMillis(),
+          pair.getRight().getMillis());
       double sum = getSum(thirdEyeRequest);
       if (sum != 0d) {
         ++count;
@@ -107,11 +108,13 @@ public class SeverityComputationUtil {
     return thirdEyeRequest;
   }
 
-  private List<Pair<DateTime, DateTime>> getHistoryIntervals(long currentWindowStart, long currentWindowEnd,
+  private List<Pair<DateTime, DateTime>> getHistoryIntervals(long currentWindowStart,
+      long currentWindowEnd,
       long seasonalPeriod, long seasonCount) {
     List<Pair<DateTime, DateTime>> intervals = new ArrayList<>();
     for (int i = 1; i <= seasonCount; ++i) {
-      intervals.add(ImmutablePair.of(new DateTime(currentWindowStart).minus(seasonalPeriod * i), new DateTime(currentWindowEnd).minus(seasonalPeriod * i)));
+      intervals.add(ImmutablePair.of(new DateTime(currentWindowStart).minus(seasonalPeriod * i),
+          new DateTime(currentWindowEnd).minus(seasonalPeriod * i)));
     }
     return intervals;
   }

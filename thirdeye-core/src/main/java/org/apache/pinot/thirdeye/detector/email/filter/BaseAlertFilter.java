@@ -27,18 +27,21 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public abstract class BaseAlertFilter implements AlertFilter {
-  private final static Logger LOG = LoggerFactory.getLogger(BaseAlertFilter.class);
 
+  private final static Logger LOG = LoggerFactory.getLogger(BaseAlertFilter.class);
 
   /**
    * Parses the parameter setting for this filter.
    *
-   * This method goes through the parameters defined by the method AlertFilter.getPropertyNames() of each AlertFilter
-   * class and get the parameter value from the given parameter setting. If a parameter (property) is missing, then it
-   * gets the default value, which is defined within the corresponding filter class with prefix "DEFAULT_". For example,
-   * for a parameter whose field name is "Abc_Def", its default value has to have this name "DEFAULT_ABC_DEF".
+   * This method goes through the parameters defined by the method AlertFilter.getPropertyNames() of
+   * each AlertFilter
+   * class and get the parameter value from the given parameter setting. If a parameter (property)
+   * is missing, then it
+   * gets the default value, which is defined within the corresponding filter class with prefix
+   * "DEFAULT_". For example,
+   * for a parameter whose field name is "Abc_Def", its default value has to have this name
+   * "DEFAULT_ABC_DEF".
    *
    * @param parameterSetting a mapping from field name to user specified value for that field
    */
@@ -67,14 +70,16 @@ public abstract class BaseAlertFilter implements AlertFilter {
           }
           field.setAccessible(accessible);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-          LOG.error("Failed to get default value for field {} of class {}; exception: {}", "DEFAULT_" + fieldName,
+          LOG.error("Failed to get default value for field {} of class {}; exception: {}",
+              "DEFAULT_" + fieldName,
               c.getSimpleName(), e.toString());
         }
         // If failed to get the default value from Class definition, then use value 0d
         if (value == null && fieldVal == null) {
           value = 0d;
         }
-        LOG.warn("Unable to read the setting for the field {} of class {}; the value {} is used.", fieldName,
+        LOG.warn("Unable to read the setting for the field {} of class {}; the value {} is used.",
+            fieldName,
             c.getSimpleName(), value);
       }
       // Set the final value to the specified field
@@ -84,40 +89,41 @@ public abstract class BaseAlertFilter implements AlertFilter {
         field.setAccessible(true);
         if (field.getType().equals(Double.class) || field.getType().equals(double.class)) {
           field.set(this, value);
-        }
-        else if (field.getType().equals(String.class)) {
-            field.set(this, fieldVal);
-          }
-        else {
-         throw new IllegalAccessException ("Field type is neither Double or String, cannot set value!");
+        } else if (field.getType().equals(String.class)) {
+          field.set(this, fieldVal);
+        } else {
+          throw new IllegalAccessException(
+              "Field type is neither Double or String, cannot set value!");
         }
         field.setAccessible(accessible);
       } catch (NoSuchFieldException | IllegalAccessException e) {
-        LOG.warn("Failed to set the field {} for class {} exception: {}", fieldName, c.getSimpleName(), e.toString());
+        LOG.warn("Failed to set the field {} for class {} exception: {}", fieldName,
+            c.getSimpleName(), e.toString());
       }
     }
   }
 
-
-  public Properties toProperties(){
+  public Properties toProperties() {
     return new Properties();
   }
 
   /**
    * get Alert Filter Minimum Time to Detect in HOUR given severity value
+   *
    * @param severity severity of an anomaly
    * @return minimum time to detect in HOUR given severity
    */
-  public double getAlertFilterMTTD (double severity) {
+  public double getAlertFilterMTTD(double severity) {
     return 0.0;
   }
 
   /**
    * get probability score given anomalyResult based on current alert filter
+   *
    * @param anomalyResult Merged anomaly result
    * @return probability to be true anomaly
    */
-  public double getProbability (MergedAnomalyResultDTO anomalyResult) {
+  public double getProbability(MergedAnomalyResultDTO anomalyResult) {
     return Double.NaN;
   }
 }

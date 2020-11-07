@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 public class MetricSpec {
+
   private String name;
   private String alias;
   private MetricType type;

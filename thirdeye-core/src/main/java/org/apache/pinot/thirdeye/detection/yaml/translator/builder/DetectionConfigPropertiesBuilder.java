@@ -39,7 +39,6 @@ import org.apache.pinot.thirdeye.detection.wrapper.GrouperWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 
-
 /**
  * This is the root of the detection config builder. Other translators extend from this class.
  */
@@ -85,14 +84,16 @@ public abstract class DetectionConfigPropertiesBuilder {
   final DataProvider dataProvider;
   static final DetectionRegistry DETECTION_REGISTRY = DetectionRegistry.getInstance();
 
-  DetectionConfigPropertiesBuilder(DetectionMetricAttributeHolder metricAttributesMap, DataProvider dataProvider) {
+  DetectionConfigPropertiesBuilder(DetectionMetricAttributeHolder metricAttributesMap,
+      DataProvider dataProvider) {
     this.metricAttributesMap = metricAttributesMap;
     this.dataProvider = dataProvider;
   }
 
   public abstract Map<String, Object> buildMetricAlertProperties(Map<String, Object> yamlConfigMap);
 
-  public abstract Map<String, Object> buildCompositeAlertProperties(Map<String, Object> yamlConfigMap);
+  public abstract Map<String, Object> buildCompositeAlertProperties(
+      Map<String, Object> yamlConfigMap);
 
   Map<String, Object> buildDimensionWrapperProperties(
       Map<String, Collection<String>> dimensionFilters,
@@ -104,10 +105,11 @@ public abstract class DetectionConfigPropertiesBuilder {
     dimensionWrapperProperties.put(PROP_NESTED_METRIC_URNS, Collections.singletonList(metricUrn));
     if (containsDimensionExploration) {
       dimensionWrapperProperties.putAll(dimensionExploreYaml);
-      if (dimensionExploreYaml.containsKey(PROP_DIMENSION_FILTER_METRIC)){
+      if (dimensionExploreYaml.containsKey(PROP_DIMENSION_FILTER_METRIC)) {
         MetricConfigDTO dimensionExploreMetric = this.dataProvider.fetchMetric(MapUtils.getString(
             dimensionExploreYaml, PROP_DIMENSION_FILTER_METRIC), datasetName);
-        dimensionWrapperProperties.put(PROP_METRIC_URN, MetricEntity.fromMetric(dimensionFilters, dimensionExploreMetric.getId()).getUrn());
+        dimensionWrapperProperties.put(PROP_METRIC_URN,
+            MetricEntity.fromMetric(dimensionFilters, dimensionExploreMetric.getId()).getUrn());
       } else {
         dimensionWrapperProperties.put(PROP_METRIC_URN, metricUrn);
       }
@@ -115,7 +117,8 @@ public abstract class DetectionConfigPropertiesBuilder {
     return dimensionWrapperProperties;
   }
 
-  Map<String, Object> buildGroupWrapperProperties(String entityName, Map<String, Object> grouperYaml, List<Map<String, Object>> nestedProps) {
+  Map<String, Object> buildGroupWrapperProperties(String entityName,
+      Map<String, Object> grouperYaml, List<Map<String, Object>> nestedProps) {
     return buildGroupWrapperProperties(entityName, null, grouperYaml, nestedProps);
   }
 
@@ -140,7 +143,8 @@ public abstract class DetectionConfigPropertiesBuilder {
     if (yamlConfig == null || yamlConfig.isEmpty()) {
       return nestedProperties;
     }
-    Map<String, Object> wrapperProperties = buildWrapperProperties(wrapperClassName, nestedProperties);
+    Map<String, Object> wrapperProperties = buildWrapperProperties(wrapperClassName,
+        nestedProperties);
     if (wrapperProperties.isEmpty()) {
       return Collections.emptyList();
     }
@@ -154,7 +158,8 @@ public abstract class DetectionConfigPropertiesBuilder {
 
   Map<String, Object> buildLabelerWrapperProperties(String metricUrn, String wrapperClassName,
       Map<String, Object> yamlConfig, List<Map<String, Object>> nestedProperties) {
-    Map<String, Object> wrapperProperties = buildWrapperProperties(wrapperClassName, nestedProperties);
+    Map<String, Object> wrapperProperties = buildWrapperProperties(wrapperClassName,
+        nestedProperties);
     String labelerRefKey = makeComponentRefKey(
         MapUtils.getString(yamlConfig, PROP_TYPE), MapUtils.getString(yamlConfig, PROP_NAME));
     wrapperProperties.put(PROP_LABELER, labelerRefKey);
@@ -162,11 +167,12 @@ public abstract class DetectionConfigPropertiesBuilder {
     return wrapperProperties;
   }
 
-
-  void buildComponentSpec(String metricUrn, Map<String, Object> yamlConfig, String componentRefKey) {
+  void buildComponentSpec(String metricUrn, Map<String, Object> yamlConfig,
+      String componentRefKey) {
     Map<String, Object> componentSpecs = new HashMap<>();
     String componentKey = DetectionUtils.getComponentKey(componentRefKey);
-    String componentClassName = DETECTION_REGISTRY.lookup(DetectionUtils.getComponentType(componentKey));
+    String componentClassName = DETECTION_REGISTRY
+        .lookup(DetectionUtils.getComponentType(componentKey));
     componentSpecs.put(PROP_CLASS_NAME, componentClassName);
     if (metricUrn != null) {
       componentSpecs.put(PROP_METRIC_URN, metricUrn);
@@ -191,12 +197,15 @@ public abstract class DetectionConfigPropertiesBuilder {
     String subEntityName = MapUtils.getString(compositeAlertConfigMap, PROP_NAME);
 
     // Wrap the entity level grouper, only 1 grouper is supported now
-    List<Map<String, Object>> grouperProps = ConfigUtils.getList(compositeAlertConfigMap.get(PROP_GROUPER));
-    Map<String, Object> mergerProperties = ConfigUtils.getMap(compositeAlertConfigMap.get(PROP_MERGER));
+    List<Map<String, Object>> grouperProps = ConfigUtils
+        .getList(compositeAlertConfigMap.get(PROP_GROUPER));
+    Map<String, Object> mergerProperties = ConfigUtils
+        .getMap(compositeAlertConfigMap.get(PROP_MERGER));
     if (!grouperProps.isEmpty()) {
       properties = buildWrapperProperties(
           EntityAnomalyMergeWrapper.class.getName(),
-          Collections.singletonList(buildGroupWrapperProperties(subEntityName, grouperProps.get(0), nestedPropertiesList)),
+          Collections.singletonList(buildGroupWrapperProperties(subEntityName, grouperProps.get(0),
+              nestedPropertiesList)),
           mergerProperties);
       nestedPropertiesList = Collections.singletonList(properties);
     }

@@ -32,9 +32,10 @@ import org.apache.pinot.thirdeye.datalayer.pojo.RawAnomalyResultBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 @Singleton
-public class RawAnomalyResultManagerImpl extends AbstractManagerImpl<RawAnomalyResultDTO> implements RawAnomalyResultManager {
+public class RawAnomalyResultManagerImpl extends AbstractManagerImpl<RawAnomalyResultDTO> implements
+    RawAnomalyResultManager {
+
   private static final Logger LOG = LoggerFactory.getLogger(RawAnomalyResultManagerImpl.class);
 
   @Inject
@@ -49,11 +50,11 @@ public class RawAnomalyResultManagerImpl extends AbstractManagerImpl<RawAnomalyR
       return entity.getId();
     }
     RawAnomalyResultBean bean =
-        (RawAnomalyResultBean) convertDTO2Bean(entity, RawAnomalyResultBean.class);
+        convertDTO2Bean(entity, RawAnomalyResultBean.class);
     if (entity.getFeedback() != null) {
       if (entity.getFeedback().getId() == null) {
         AnomalyFeedbackBean feedbackBean =
-            (AnomalyFeedbackBean) convertDTO2Bean(entity.getFeedback(), AnomalyFeedbackBean.class);
+            convertDTO2Bean(entity.getFeedback(), AnomalyFeedbackBean.class);
         Long feedbackId = genericPojoDao.put(feedbackBean);
         entity.getFeedback().setId(feedbackId);
       }
@@ -69,11 +70,11 @@ public class RawAnomalyResultManagerImpl extends AbstractManagerImpl<RawAnomalyR
 
   public int update(RawAnomalyResultDTO entity) {
     RawAnomalyResultBean bean =
-        (RawAnomalyResultBean) convertDTO2Bean(entity, RawAnomalyResultBean.class);
+        convertDTO2Bean(entity, RawAnomalyResultBean.class);
     if (entity.getFeedback() != null) {
       if (entity.getFeedback().getId() == null) {
         AnomalyFeedbackBean feedbackBean =
-            (AnomalyFeedbackBean) convertDTO2Bean(entity.getFeedback(), AnomalyFeedbackBean.class);
+            convertDTO2Bean(entity.getFeedback(), AnomalyFeedbackBean.class);
         Long feedbackId = genericPojoDao.put(feedbackBean);
         entity.getFeedback().setId(feedbackId);
       }
@@ -96,7 +97,8 @@ public class RawAnomalyResultManagerImpl extends AbstractManagerImpl<RawAnomalyR
     }
   }
 
-  private RawAnomalyResultDTO createRawAnomalyDTOFromBean(RawAnomalyResultBean rawAnomalyResultBean) {
+  private RawAnomalyResultDTO createRawAnomalyDTOFromBean(
+      RawAnomalyResultBean rawAnomalyResultBean) {
     RawAnomalyResultDTO rawAnomalyResultDTO;
     rawAnomalyResultDTO = MODEL_MAPPER.map(rawAnomalyResultBean, RawAnomalyResultDTO.class);
     if (rawAnomalyResultBean.getFunctionId() != null) {
@@ -105,13 +107,16 @@ public class RawAnomalyResultManagerImpl extends AbstractManagerImpl<RawAnomalyR
       if (anomalyFunctionBean == null) {
         LOG.error("this anomaly function bean should not be null");
       }
-      AnomalyFunctionDTO anomalyFunctionDTO = MODEL_MAPPER.map(anomalyFunctionBean, AnomalyFunctionDTO.class);
+      AnomalyFunctionDTO anomalyFunctionDTO = MODEL_MAPPER
+          .map(anomalyFunctionBean, AnomalyFunctionDTO.class);
       rawAnomalyResultDTO.setFunction(anomalyFunctionDTO);
     }
     if (rawAnomalyResultBean.getAnomalyFeedbackId() != null) {
       AnomalyFeedbackBean anomalyFeedbackBean =
-          genericPojoDao.get(rawAnomalyResultBean.getAnomalyFeedbackId(), AnomalyFeedbackBean.class);
-      AnomalyFeedbackDTO anomalyFeedbackDTO = MODEL_MAPPER.map(anomalyFeedbackBean, AnomalyFeedbackDTO.class);
+          genericPojoDao
+              .get(rawAnomalyResultBean.getAnomalyFeedbackId(), AnomalyFeedbackBean.class);
+      AnomalyFeedbackDTO anomalyFeedbackDTO = MODEL_MAPPER
+          .map(anomalyFeedbackBean, AnomalyFeedbackDTO.class);
       rawAnomalyResultDTO.setFeedback(anomalyFeedbackDTO);
     }
     return rawAnomalyResultDTO;

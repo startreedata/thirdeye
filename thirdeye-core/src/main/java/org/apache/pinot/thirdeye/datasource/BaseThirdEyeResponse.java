@@ -25,11 +25,13 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 
 public abstract class BaseThirdEyeResponse implements ThirdEyeResponse {
+
   protected final List<MetricFunction> metricFunctions;
   protected final ThirdEyeRequest request;
   protected final TimeSpec dataTimeSpec;
   protected final List<String> groupKeyColumns;
   protected final String[] allColumnNames;
+
   public BaseThirdEyeResponse(ThirdEyeRequest request, TimeSpec dataTimeSpec) {
     this.request = request;
     this.dataTimeSpec = dataTimeSpec;
@@ -41,7 +43,7 @@ public abstract class BaseThirdEyeResponse implements ThirdEyeResponse {
     groupKeyColumns.addAll(request.getGroupBy());
     ArrayList<String> allColumnNameList = new ArrayList<>();
     allColumnNameList.addAll(request.getGroupBy());
-    for(MetricFunction function:request.getMetricFunctions()){
+    for (MetricFunction function : request.getMetricFunctions()) {
       allColumnNameList.add(function.toString());
     }
     allColumnNames = new String[allColumnNameList.size()];
@@ -88,5 +90,4 @@ public abstract class BaseThirdEyeResponse implements ThirdEyeResponse {
   public String toString() {
     return super.toString();
   }
-
 }

@@ -45,14 +45,18 @@ import org.slf4j.LoggerFactory;
 @Path("/pinot-data-source")
 @Produces(MediaType.APPLICATION_JSON)
 public class PinotDataSourceResource {
+
   private static final Logger LOG = LoggerFactory.getLogger(PinotDataSourceResource.class);
   private static final ObjectMapper OBJECT_MAPPER;
+
   static {
-    SimpleModule module = new SimpleModule("ThirdEyeResultSetSerializer", new Version(1, 0, 0, null, null, null));
+    SimpleModule module = new SimpleModule("ThirdEyeResultSetSerializer",
+        new Version(1, 0, 0, null, null, null));
     module.addSerializer(ThirdEyeResultSet.class, new ThirdEyeResultSetSerializer());
     OBJECT_MAPPER = new ObjectMapper();
     OBJECT_MAPPER.registerModule(module);
   }
+
   private static final String URL_ENCODING = "UTF-8";
 
   private PinotThirdEyeDataSource pinotDataSource;
@@ -60,11 +64,11 @@ public class PinotDataSourceResource {
   /**
    * Returns the JSON string of the ThirdEyeResultSetGroup of the given Pinot query.
    *
-   * @param pql       the given Pinot query.
+   * @param pql the given Pinot query.
    * @param tableName the table name at which the query targets.
-   *
-   * @return the JSON string of the ThirdEyeResultSetGroup of the query; the string could be the exception message if
-   * the query is not executed successfully.
+   * @return the JSON string of the ThirdEyeResultSetGroup of the query; the string could be the
+   *     exception message if
+   *     the query is not executed successfully.
    */
   @GET
   @Path("/query")

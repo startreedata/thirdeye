@@ -22,12 +22,12 @@ package org.apache.pinot.thirdeye.alert.commons;
 import org.apache.pinot.thirdeye.alert.fetcher.AnomalyFetcher;
 import org.apache.pinot.thirdeye.common.BaseFactory;
 
+public class AnomalyFetcherFactory extends BaseFactory<AnomalyFetcher> {
 
-public class AnomalyFetcherFactory extends BaseFactory<AnomalyFetcher>{
   public static final String PACKAGE_PATH = "org.apache.pinot.thirdeye.alert.fetcher";
 
   public static AnomalyFetcher fromClassName(String className)
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException{
+      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     String classPath = PACKAGE_PATH + "." + className;
     return (new BaseFactory<AnomalyFetcher>()).getInstance(classPath);
   }

@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
-
 public class SummaryGainerLoserResponseRow extends BaseResponseRow {
+
   public String dimensionName;
   public String dimensionValue;
   public String cost;

@@ -54,6 +54,7 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 
 public class DetectionUtils {
+
   private static final String PROP_BASELINE_PROVIDER_COMPONENT_NAME = "baselineProviderComponentName";
 
   private static final Comparator<MergedAnomalyResultDTO> COMPARATOR = new Comparator<MergedAnomalyResultDTO>() {
@@ -66,7 +67,7 @@ public class DetectionUtils {
   // TODO anomaly should support multimap
   public static DimensionMap toFilterMap(Multimap<String, String> filters) {
     DimensionMap map = new DimensionMap();
-    for (Map.Entry<String, Collection<String>> entry: filters.asMap().entrySet()){
+    for (Map.Entry<String, Collection<String>> entry : filters.asMap().entrySet()) {
       map.put(entry.getKey(), String.join(", ", entry.getValue()));
     }
     return map;
@@ -80,8 +81,11 @@ public class DetectionUtils {
   // Extracts the component key from the reference key
   // e.g., "$myRule:ALGORITHM" -> "myRule:ALGORITHM"
   public static String getComponentKey(String componentRefKey) {
-    if (isReferenceName(componentRefKey)) return componentRefKey.substring(1);
-    else throw new IllegalArgumentException("not a component reference key. should starts with $");
+    if (isReferenceName(componentRefKey)) {
+      return componentRefKey.substring(1);
+    } else {
+      throw new IllegalArgumentException("not a component reference key. should starts with $");
+    }
   }
 
   // Extracts the component type from the component key
@@ -90,15 +94,16 @@ public class DetectionUtils {
     if (componentKey != null && componentKey.contains(":")) {
       return componentKey.substring(componentKey.lastIndexOf(":") + 1);
     }
-    throw new IllegalArgumentException("componentKey is invalid; must be of type componentName:type");
+    throw new IllegalArgumentException(
+        "componentKey is invalid; must be of type componentName:type");
   }
 
   // get the spec class name for a component class
   public static String getSpecClassName(Class<BaseComponent> componentClass) {
-    ParameterizedType genericSuperclass = (ParameterizedType) componentClass.getGenericInterfaces()[0];
+    ParameterizedType genericSuperclass = (ParameterizedType) componentClass
+        .getGenericInterfaces()[0];
     return (genericSuperclass.getActualTypeArguments()[0].getTypeName());
   }
-
 
   /**
    * Helper for creating a list of anomalies from a boolean series.
@@ -110,7 +115,8 @@ public class DetectionUtils {
    * @param dataset dataset config for the metric
    * @return list of anomalies
    */
-  public static List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice, DataFrame df, String seriesName,
+  public static List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice, DataFrame df,
+      String seriesName,
       Period monitoringGranularityPeriod, DatasetConfigDTO dataset) {
     if (df.isEmpty()) {
       return Collections.emptyList();
@@ -130,7 +136,6 @@ public class DetectionUtils {
           anomalies.add(makeAnomaly(slice.withStart(start).withEnd(end)));
         }
         lastStart = -1;
-
       } else {
         // start of a run
         if (lastStart < 0) {
@@ -176,7 +181,7 @@ public class DetectionUtils {
     return anomaly;
   }
 
-  public static MergedAnomalyResultDTO makeAnomaly(long start, long end,  long configId) {
+  public static MergedAnomalyResultDTO makeAnomaly(long start, long end, long configId) {
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setStartTime(start);
     anomaly.setEndTime(end);
@@ -185,7 +190,8 @@ public class DetectionUtils {
     return anomaly;
   }
 
-  public static void setEntityChildMapping(MergedAnomalyResultDTO parent, MergedAnomalyResultDTO child1) {
+  public static void setEntityChildMapping(MergedAnomalyResultDTO parent,
+      MergedAnomalyResultDTO child1) {
     if (child1 != null) {
       parent.getChildren().add(child1);
       child1.setChild(true);
@@ -203,7 +209,8 @@ public class DetectionUtils {
     return entityAnomaly;
   }
 
-  public static MergedAnomalyResultDTO makeParentEntityAnomaly(MergedAnomalyResultDTO childAnomaly) {
+  public static MergedAnomalyResultDTO makeParentEntityAnomaly(
+      MergedAnomalyResultDTO childAnomaly) {
     MergedAnomalyResultDTO newEntityAnomaly = makeEntityAnomaly();
     newEntityAnomaly.setStartTime(childAnomaly.getStartTime());
     newEntityAnomaly.setEndTime(childAnomaly.getEndTime());
@@ -211,7 +218,8 @@ public class DetectionUtils {
     return newEntityAnomaly;
   }
 
-  public static List<MergedAnomalyResultDTO> mergeAndSortAnomalies(List<MergedAnomalyResultDTO> anomalyListA, List<MergedAnomalyResultDTO> anomalyListB) {
+  public static List<MergedAnomalyResultDTO> mergeAndSortAnomalies(
+      List<MergedAnomalyResultDTO> anomalyListA, List<MergedAnomalyResultDTO> anomalyListB) {
     List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
     if (anomalyListA != null) {
       anomalies.addAll(anomalyListA);
@@ -227,18 +235,21 @@ public class DetectionUtils {
 
   /**
    * Helper for consolidate last time stamps in all nested detection pipelines
+   *
    * @param nestedLastTimeStamps all nested last time stamps
    * @return the last time stamp
    */
-  public static long consolidateNestedLastTimeStamps(Collection<Long> nestedLastTimeStamps){
-    if(nestedLastTimeStamps.isEmpty()){
+  public static long consolidateNestedLastTimeStamps(Collection<Long> nestedLastTimeStamps) {
+    if (nestedLastTimeStamps.isEmpty()) {
       return -1L;
     }
     return Collections.max(nestedLastTimeStamps);
   }
 
   /**
-   * Get the predicted baseline for a anomaly in a time range. Will return wo1w if baseline provider not available.
+   * Get the predicted baseline for a anomaly in a time range. Will return wo1w if baseline provider
+   * not available.
+   *
    * @param anomaly the anomaly
    * @param config the detection config
    * @param start start time
@@ -246,11 +257,13 @@ public class DetectionUtils {
    * @param loader detection pipeline loader
    * @param provider data provider
    * @return baseline time series
-   * @throws Exception
    */
-  public static TimeSeries getBaselineTimeseries(MergedAnomalyResultDTO anomaly, Multimap<String, String> filters, Long metricId, AlertDTO config,
-      long start, long end, DetectionPipelineLoader loader, DataProvider provider) throws Exception {
-    String baselineProviderComponentName = anomaly.getProperties().get(PROP_BASELINE_PROVIDER_COMPONENT_NAME);
+  public static TimeSeries getBaselineTimeseries(MergedAnomalyResultDTO anomaly,
+      Multimap<String, String> filters, Long metricId, AlertDTO config,
+      long start, long end, DetectionPipelineLoader loader, DataProvider provider)
+      throws Exception {
+    String baselineProviderComponentName = anomaly.getProperties()
+        .get(PROP_BASELINE_PROVIDER_COMPONENT_NAME);
     BaselineProvider baselineProvider = new RuleBaselineProvider();
     TimeSeries returnTimeSeries;
 
@@ -258,7 +271,8 @@ public class DetectionUtils {
         config.getComponentSpecs().containsKey(baselineProviderComponentName)) {
       // load pipeline and init components
       loader.from(provider, config, start, end);
-      baselineProvider = (BaselineProvider) config.getComponents().get(baselineProviderComponentName);
+      baselineProvider = (BaselineProvider) config.getComponents()
+          .get(baselineProviderComponentName);
     } else {
       // use wow instead
       RuleBaselineProviderSpec spec = new RuleBaselineProviderSpec();
@@ -268,7 +282,8 @@ public class DetectionUtils {
     }
 
     try {
-      returnTimeSeries = baselineProvider.computePredictedTimeSeries(MetricSlice.from(metricId, start, end, filters));
+      returnTimeSeries = baselineProvider
+          .computePredictedTimeSeries(MetricSlice.from(metricId, start, end, filters));
     } catch (Exception e) {
       // send current if the predicted baseline can't be trained
       BaselineProvider alternateProvider = new RuleBaselineProvider();
@@ -276,7 +291,8 @@ public class DetectionUtils {
       spec.setOffset("current");
       InputDataFetcher dataFetcher = new DefaultInputDataFetcher(provider, config.getId());
       alternateProvider.init(spec, dataFetcher);
-      returnTimeSeries = alternateProvider.computePredictedTimeSeries(MetricSlice.from(metricId, start, end, filters));
+      returnTimeSeries = alternateProvider
+          .computePredictedTimeSeries(MetricSlice.from(metricId, start, end, filters));
     }
 
     return returnTimeSeries;
@@ -284,18 +300,19 @@ public class DetectionUtils {
 
   /**
    * Get the joda period for a monitoring granularity
-   * @param monitoringGranularity
    */
-  public static Period getMonitoringGranularityPeriod(String monitoringGranularity, DatasetConfigDTO datasetConfigDTO) {
-    if (monitoringGranularity.equals(MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString())) {
+  public static Period getMonitoringGranularityPeriod(String monitoringGranularity,
+      DatasetConfigDTO datasetConfigDTO) {
+    if (monitoringGranularity
+        .equals(MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString())) {
       return datasetConfigDTO.bucketTimeGranularity().toPeriod();
     }
     String[] split = monitoringGranularity.split("_");
     if (split[1].equals("MONTHS")) {
-      return new Period(0,Integer.parseInt(split[0]),0,0,0,0,0,0, PeriodType.months());
+      return new Period(0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, 0, PeriodType.months());
     }
     if (split[1].equals("WEEKS")) {
-      return new Period(0,0,Integer.parseInt(split[0]),0,0,0,0,0, PeriodType.weeks());
+      return new Period(0, 0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, PeriodType.weeks());
     }
     return TimeGranularity.fromString(monitoringGranularity).toPeriod();
   }
@@ -319,13 +336,15 @@ public class DetectionUtils {
 
   /**
    * Aggregate the time series data frame's value to specified granularity
+   *
    * @param df the data frame
    * @param origin the aggregation origin time stamp
    * @param granularityPeriod the aggregation granularity in period
    * @param aggregationFunction the metric's aggregation function
    * @return the aggregated time series data frame
    */
-  public static DataFrame aggregateByPeriod(DataFrame df, DateTime origin, Period granularityPeriod, MetricAggFunction aggregationFunction) {
+  public static DataFrame aggregateByPeriod(DataFrame df, DateTime origin, Period granularityPeriod,
+      MetricAggFunction aggregationFunction) {
     switch (aggregationFunction) {
       case SUM:
         return df.groupByPeriod(df.getLongs(DataFrame.COL_TIME), origin, granularityPeriod).sum(
@@ -334,17 +353,24 @@ public class DetectionUtils {
         return df.groupByPeriod(df.getLongs(DataFrame.COL_TIME), origin, granularityPeriod).mean(
             DataFrame.COL_TIME, DataFrame.COL_VALUE);
       default:
-        throw new NotImplementedException(String.format("The aggregate by period for %s is not supported in DataFrame.", aggregationFunction));
+        throw new NotImplementedException(String
+            .format("The aggregate by period for %s is not supported in DataFrame.",
+                aggregationFunction));
     }
   }
 
   /**
-   * Check if the aggregation result is complete or not, if not, remove it from the aggregated result.
+   * Check if the aggregation result is complete or not, if not, remove it from the aggregated
+   * result.
    *
-   * For example, say the weekStart is Monday and current data is available through Jan 8, Wednesday.
-   * the latest data time stamp will be Jan 8. The latest aggregation start time stamp should be Jan 6, Monday.
-   * In such case, the latest data point is incomplete and should be filtered. If the latest data time stamp is
-   * Jan 12, Sunday instead, the data is complete and good to use because the week's data is complete.
+   * For example, say the weekStart is Monday and current data is available through Jan 8,
+   * Wednesday.
+   * the latest data time stamp will be Jan 8. The latest aggregation start time stamp should be Jan
+   * 6, Monday.
+   * In such case, the latest data point is incomplete and should be filtered. If the latest data
+   * time stamp is
+   * Jan 12, Sunday instead, the data is complete and good to use because the week's data is
+   * complete.
    *
    * @param df the aggregated data frame to check
    * @param latestDataTimeStamp the latest data time stamp
@@ -356,8 +382,10 @@ public class DetectionUtils {
       TimeGranularity bucketTimeGranularity, Period aggregationGranularityPeriod) {
     long latestAggregationStartTimeStamp = df.getLong(DataFrame.COL_TIME, df.size() - 1);
     if (latestDataTimeStamp + bucketTimeGranularity.toMillis()
-        < latestAggregationStartTimeStamp + aggregationGranularityPeriod.toStandardDuration().getMillis()) {
-      df = df.filter(df.getLongs(DataFrame.COL_TIME).neq(latestAggregationStartTimeStamp)).dropNull();
+        < latestAggregationStartTimeStamp + aggregationGranularityPeriod.toStandardDuration()
+        .getMillis()) {
+      df = df.filter(df.getLongs(DataFrame.COL_TIME).neq(latestAggregationStartTimeStamp))
+          .dropNull();
     }
     return df;
   }
@@ -392,14 +420,17 @@ public class DetectionUtils {
   }
 
   /**
-   * Renotify the anomaly by creating or updating the record in the subscription group notification table
+   * Renotify the anomaly by creating or updating the record in the subscription group notification
+   * table
+   *
    * @param anomaly the anomaly to be notified.
    */
   public static void renotifyAnomaly(MergedAnomalyResultDTO anomaly) {
     AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationDAO =
         DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager();
     List<AnomalySubscriptionGroupNotificationDTO> subscriptionGroupNotificationDTOs =
-        anomalySubscriptionGroupNotificationDAO.findByPredicate(Predicate.EQ("anomalyId", anomaly.getId()));
+        anomalySubscriptionGroupNotificationDAO
+            .findByPredicate(Predicate.EQ("anomalyId", anomaly.getId()));
     AnomalySubscriptionGroupNotificationDTO anomalyNotificationDTO;
     if (subscriptionGroupNotificationDTOs.isEmpty()) {
       // create a new record if it is not existed yet.

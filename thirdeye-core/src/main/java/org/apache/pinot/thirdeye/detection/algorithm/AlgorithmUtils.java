@@ -33,7 +33,6 @@ import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.Series;
 import org.joda.time.Duration;
 
-
 /**
  * Utility class for cross-cutting aspects of detection algorithms such as
  * outlier and change point detection
@@ -41,6 +40,7 @@ import org.joda.time.Duration;
  * TODO implement all detection methods. all the methods!
  */
 public class AlgorithmUtils {
+
   private static final int FAST_SPLINE_ITERATIONS = 4;
   private static final long MIN_WINDOW_SIZE = TimeUnit.DAYS.toMillis(1);
 
@@ -78,10 +78,12 @@ public class AlgorithmUtils {
     for (int i = 0; i < df.size(); i++) {
       if (!value.isNull(i)) {
         int side = 0;
-        if (value.getDouble(i) > upTercile)
+        if (value.getDouble(i) > upTercile) {
           side = 1;
-        if (value.getDouble(i) < downTercile)
+        }
+        if (value.getDouble(i) < downTercile) {
           side = -1;
+        }
 
         // run side changed or last run
         if (runSide != side || i >= df.size() - 1) {
@@ -175,10 +177,12 @@ public class AlgorithmUtils {
         double val = value.getDouble(i);
 
         int side = 0;
-        if (val > upTercile)
+        if (val > upTercile) {
           side = 1;
-        if (val < downTercile)
+        }
+        if (val < downTercile) {
           side = -1;
+        }
 
         // run side changed or last run
         if (runSide != side || i >= df.size() - 1) {
@@ -206,7 +210,8 @@ public class AlgorithmUtils {
    * @param minDuration time series
    * @return change points
    */
-  public static TreeSet<Long> getChangePointsRobustMean(DataFrame df, int windowSize, Duration minDuration) {
+  public static TreeSet<Long> getChangePointsRobustMean(DataFrame df, int windowSize,
+      Duration minDuration) {
     if (df.isEmpty()) {
       return new TreeSet<>();
     }
@@ -306,8 +311,9 @@ public class AlgorithmUtils {
     return s.groupByMovingWindow(n).aggregate(new Series.DoubleFunction() {
       @Override
       public double apply(double... values) {
-        if (values.length <= 0)
+        if (values.length <= 0) {
           return DoubleSeries.NULL;
+        }
 
         double[] sorted = Arrays.copyOf(values, values.length);
         Arrays.sort(sorted);
@@ -336,7 +342,8 @@ public class AlgorithmUtils {
    * @param lookForward look forward period for segment adjustment (all if negative)
    * @return re-scaled time series
    */
-  public static DataFrame getRescaledSeries(DataFrame dfTimeseries, Collection<Long> changePoints, long lookForward) {
+  public static DataFrame getRescaledSeries(DataFrame dfTimeseries, Collection<Long> changePoints,
+      long lookForward) {
     if (dfTimeseries.isEmpty()) {
       return dfTimeseries;
     }
@@ -363,7 +370,8 @@ public class AlgorithmUtils {
     for (DataFrame segment : segments) {
       long start = segment.getLong(COL_TIME, 0);
       long cutoff = lookForward > 0 ? (start + lookForward) : Long.MAX_VALUE;
-      medians.add(segment.filter(segment.getLongs(COL_TIME).lt(cutoff)).dropNull(COL_TIME).getDoubles(COL_VALUE).median().doubleValue());
+      medians.add(segment.filter(segment.getLongs(COL_TIME).lt(cutoff)).dropNull(COL_TIME)
+          .getDoubles(COL_VALUE).median().doubleValue());
     }
 
     // rescale time series

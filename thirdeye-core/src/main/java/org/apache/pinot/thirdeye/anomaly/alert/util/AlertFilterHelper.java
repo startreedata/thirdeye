@@ -30,22 +30,17 @@ import org.apache.pinot.thirdeye.detector.email.filter.AlertFilterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 public class AlertFilterHelper {
-  private static final Logger LOG = LoggerFactory.getLogger(AlertFilterHelper.class);
 
+  private static final Logger LOG = LoggerFactory.getLogger(AlertFilterHelper.class);
 
   /**
    * Each function has a filtration rule which let alert module decide if an anomaly should be
    * included in the alert email. This method applies respective filtration rule on list of
    * anomalies.
-   *
-   * @param results
-   *
-   * @return
    */
-  public static List<MergedAnomalyResultDTO> applyFiltrationRule(List<MergedAnomalyResultDTO> results, AlertFilterFactory alertFilterFactory){
+  public static List<MergedAnomalyResultDTO> applyFiltrationRule(
+      List<MergedAnomalyResultDTO> results, AlertFilterFactory alertFilterFactory) {
     if (results.size() == 0) {
       return results;
     }
@@ -62,7 +57,8 @@ public class AlertFilterHelper {
         // Get filtration rule from anomaly function configuration
         alertFilter = alertFilterFactory.fromSpec(anomalyFunctionSpec.getAlertFilter());
         functionAlertFilter.put(functionId, alertFilter);
-        LOG.info("Using filter {} for anomaly function {} (dataset: {}, topic metric: {})", alertFilter,
+        LOG.info("Using filter {} for anomaly function {} (dataset: {}, topic metric: {})",
+            alertFilter,
             functionId, anomalyFunctionSpec.getCollection(), anomalyFunctionSpec.getTopicMetric());
       }
       if (alertFilter.isQualified(result)) {

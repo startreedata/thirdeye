@@ -33,7 +33,6 @@ import org.apache.pinot.thirdeye.detection.cache.TimeSeriesDataPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Utility methods used for fetching and writing to the centralized cache.
  */
@@ -48,12 +47,15 @@ public class CacheUtils {
   public static CRC32 hashGenerator = new CRC32();
 
   public static String getBucketName() {
-    Map<String, Object> config = CacheConfig.getInstance().getCentralizedCacheSettings().getDataSourceConfig().getConfig();
+    Map<String, Object> config = CacheConfig.getInstance().getCentralizedCacheSettings()
+        .getDataSourceConfig().getConfig();
     return MapUtils.getString(config, BUCKET_NAME);
   }
+
   /**
    * Hashes the metricURN, so that the return value can be used as a key to
    * the key-value pair in a cache document.
+   *
    * @param metricUrn metricURN string
    * @return hashed metricURN
    */
@@ -68,10 +70,11 @@ public class CacheUtils {
    * Builds the document used to store data points in the cache.
    * Example document:
    * {
-   *   "time": 123456700000
-   *   "metricId": 1351714
-   *   "71252492": "100.0"
+   * "time": 123456700000
+   * "metricId": 1351714
+   * "71252492": "100.0"
    * }
+   *
    * @param point some TimeSeriesDataPoint
    * @return JsonObject with base document.
    */
@@ -87,16 +90,18 @@ public class CacheUtils {
    * Builds the N1QL query used to fetch data from Couchbase.
    * Example query:
    * SELECT time, `71252492` FROM `te-cache-bucket`
-   *    WHERE metricId = 1351714
-   *      AND `71252492` IS NOT MISSING
-   *        AND time BETWEEN 100000000000 AND 200000000000
-   *          ORDER BY time ASC
+   * WHERE metricId = 1351714
+   * AND `71252492` IS NOT MISSING
+   * AND time BETWEEN 100000000000 AND 200000000000
+   * ORDER BY time ASC
+   *
    * @param parameters JsonObject containing the required data to build the query.
    * @return query string
    */
   public static String buildQuery(JsonObject parameters) {
-    return String.format("SELECT timestamp, `%s` FROM `%s` WHERE metricId = %d AND `%s` IS NOT MISSING AND timestamp BETWEEN %d AND %d ORDER BY time ASC",
-        parameters.getString( "dimensionKey"),
+    return String.format(
+        "SELECT timestamp, `%s` FROM `%s` WHERE metricId = %d AND `%s` IS NOT MISSING AND timestamp BETWEEN %d AND %d ORDER BY time ASC",
+        parameters.getString("dimensionKey"),
         parameters.getString("bucket"),
         parameters.getLong("metricId"),
         parameters.getString("dimensionKey"),
@@ -108,7 +113,7 @@ public class CacheUtils {
    * Convert list of strings to their proper URL hosts. For each
    * string, it will parse out the proper host for the URI.
    * Example: "http://localhost:8091" -> "localhost"
-   * @param bootstrapUris
+   *
    * @return list of hosts (as strings)
    */
   public static List<String> getBootstrapHosts(List<String> bootstrapUris) {
@@ -124,7 +129,9 @@ public class CacheUtils {
         if (host != null) {
           bootstrapHosts.add(host);
         } else {
-          LOG.warn("Received incorrectly formatted URI {}, excluding it from list of hosts to connect to...", bootstrapUri);
+          LOG.warn(
+              "Received incorrectly formatted URI {}, excluding it from list of hosts to connect to...",
+              bootstrapUri);
         }
       } catch (URISyntaxException e) {
         LOG.error("Exception while parsing host for URI {}", bootstrapUri, e);

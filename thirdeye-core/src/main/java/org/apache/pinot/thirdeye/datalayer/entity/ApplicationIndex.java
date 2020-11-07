@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 public class ApplicationIndex extends AbstractIndexEntity {
+
   String application;
   String recipients;
 
@@ -38,5 +39,4 @@ public class ApplicationIndex extends AbstractIndexEntity {
   public void setRecipients(String recipients) {
     this.recipients = recipients;
   }
-
 }

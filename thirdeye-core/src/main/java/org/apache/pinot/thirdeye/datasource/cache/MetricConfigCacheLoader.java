@@ -28,20 +28,19 @@ import org.slf4j.LoggerFactory;
 public class MetricConfigCacheLoader extends CacheLoader<MetricDataset, MetricConfigDTO> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MetricConfigCacheLoader.class);
-  private MetricConfigManager metricConfigDAO;
+  private final MetricConfigManager metricConfigDAO;
 
   public MetricConfigCacheLoader(MetricConfigManager metricConfigDAO) {
     this.metricConfigDAO = metricConfigDAO;
   }
 
-
   @Override
   public MetricConfigDTO load(MetricDataset metricDataset) {
     LOGGER.debug("Loading MetricConfigCache for metric {} of {}", metricDataset.getMetricName(),
         metricDataset.getDataset());
-    MetricConfigDTO metricConfig = metricConfigDAO.findByMetricAndDataset(metricDataset.getMetricName(),
-        metricDataset.getDataset());
+    MetricConfigDTO metricConfig = metricConfigDAO
+        .findByMetricAndDataset(metricDataset.getMetricName(),
+            metricDataset.getDataset());
     return metricConfig;
   }
-
 }

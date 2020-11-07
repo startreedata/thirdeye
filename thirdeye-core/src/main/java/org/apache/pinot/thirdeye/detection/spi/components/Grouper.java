@@ -23,13 +23,12 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
 
-
 public interface Grouper<T extends AbstractSpec> extends BaseComponent<T> {
+
   /**
    * group anomalies.
    *
    * @return list of anomalies, with grouped dimensions
    */
   List<MergedAnomalyResultDTO> group(List<MergedAnomalyResultDTO> anomalies);
-
 }

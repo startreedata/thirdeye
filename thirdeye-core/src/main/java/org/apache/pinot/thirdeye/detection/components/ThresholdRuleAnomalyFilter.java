@@ -33,13 +33,14 @@ import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.joda.time.Interval;
 
-
 /**
- * This threshold rule filter stage filters the anomalies if either the min or max thresholds do not pass.
+ * This threshold rule filter stage filters the anomalies if either the min or max thresholds do not
+ * pass.
  */
 @Components(title = "Aggregate Threshold Filter", type = "THRESHOLD_RULE_FILTER", tags = {
     DetectionTag.RULE_FILTER}, description = "Threshold rule filter. filters the anomalies if either the min or max thresholds do not satisfied.")
 public class ThresholdRuleAnomalyFilter implements AnomalyFilter<ThresholdRuleFilterSpec> {
+
   private double minValueHourly;
   private double maxValueHourly;
   private double minValueDaily;
@@ -51,7 +52,8 @@ public class ThresholdRuleAnomalyFilter implements AnomalyFilter<ThresholdRuleFi
   @Override
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
     MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
-    MetricConfigDTO metric = dataFetcher.fetchData(new InputDataSpec().withMetricIds(Collections.singleton(me.getId())))
+    MetricConfigDTO metric = dataFetcher
+        .fetchData(new InputDataSpec().withMetricIds(Collections.singleton(me.getId())))
         .getMetrics()
         .get(me.getId());
     double currentValue = anomaly.getAvgCurrentVal();
@@ -68,19 +70,19 @@ public class ThresholdRuleAnomalyFilter implements AnomalyFilter<ThresholdRuleFi
         || !Double.isNaN(this.maxValue) && currentValue > this.maxValue) {
       return false;
     }
-    if (!Double.isNaN(this.minValueHourly) && currentValue * hourlyMultiplier < this.minValueHourly) {
+    if (!Double.isNaN(this.minValueHourly)
+        && currentValue * hourlyMultiplier < this.minValueHourly) {
       return false;
     }
-    if (!Double.isNaN(this.maxValueHourly) && currentValue * hourlyMultiplier > this.maxValueHourly) {
+    if (!Double.isNaN(this.maxValueHourly)
+        && currentValue * hourlyMultiplier > this.maxValueHourly) {
       return false;
     }
     if (!Double.isNaN(this.minValueDaily) && currentValue * dailyMultiplier < this.minValueDaily) {
       return false;
     }
-    if (!Double.isNaN(this.maxValueDaily) && currentValue * dailyMultiplier > this.maxValueDaily) {
-      return false;
-    }
-    return true;
+    return Double.isNaN(this.maxValueDaily) || !(currentValue * dailyMultiplier
+        > this.maxValueDaily);
   }
 
   @Override

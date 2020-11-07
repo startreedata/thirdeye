@@ -59,7 +59,6 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Pipeline for identifying relevant dimensions by performing
  * contribution analysis. The pipeline first fetches the Current and Baseline entities and
@@ -67,10 +66,11 @@ import org.slf4j.LoggerFactory;
  * and performs contribution analysis using a {@code DimensionScorer).
  *
  * @see MetricBreakdownPipeline as a replacement that relies on MetricEntities with filters in the
- * tail of the URN
+ *     tail of the URN
  */
 @Deprecated
 public class DimensionAnalysisPipeline extends Pipeline {
+
   private static final Logger LOG = LoggerFactory.getLogger(DimensionAnalysisPipeline.class);
 
   public static final String COL_CONTRIB = "contribution";
@@ -103,7 +103,8 @@ public class DimensionAnalysisPipeline extends Pipeline {
    * @param cache query cache for running contribution analysis
    * @param executor executor service for parallel task execution
    */
-  public DimensionAnalysisPipeline(String outputName, Set<String> inputNames, MetricConfigManager metricDAO,
+  public DimensionAnalysisPipeline(String outputName, Set<String> inputNames,
+      MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO, QueryCache cache, ExecutorService executor, int k) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
@@ -120,7 +121,8 @@ public class DimensionAnalysisPipeline extends Pipeline {
    * @param inputNames input pipeline names
    * @param properties configuration properties ({@code PROP_K}, {@code PROP_PARALLELISM})
    */
-  public DimensionAnalysisPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
+  public DimensionAnalysisPipeline(String outputName, Set<String> inputNames,
+      Map<String, Object> properties) {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
@@ -141,26 +143,31 @@ public class DimensionAnalysisPipeline extends Pipeline {
     Map<Dimension, Double> scores = new HashMap<>();
     Multimap<Dimension, Entity> related = ArrayListMultimap.create();
 
-    for(MetricEntity me : metricsEntities) {
+    for (MetricEntity me : metricsEntities) {
       try {
         Multimap<String, String> metricFilters = TreeMultimap.create(); // sorted, unique
         metricFilters.putAll(filters);
         metricFilters.putAll(me.getFilters());
 
-        final MetricSlice sliceCurrent = MetricSlice.from(me.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
-        final MetricSlice sliceBaseline = MetricSlice.from(me.getId(), baseline.getStart(), baseline.getEnd(), filters);
+        final MetricSlice sliceCurrent = MetricSlice
+            .from(me.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
+        final MetricSlice sliceBaseline = MetricSlice
+            .from(me.getId(), baseline.getStart(), baseline.getEnd(), filters);
 
         DataFrame dfScores = getDimensionScores(sliceCurrent, sliceBaseline);
 
-        for(int i=0; i<dfScores.size(); i++) {
+        for (int i = 0; i < dfScores.size(); i++) {
           double score = dfScores.getDouble(COL_SCORE, i);
-          if (score <= 0)
+          if (score <= 0) {
             continue;
+          }
 
-          Dimension d = new Dimension(dfScores.getString(COL_DIM_NAME, i), dfScores.getString(COL_DIM_VALUE, i));
+          Dimension d = new Dimension(dfScores.getString(COL_DIM_NAME, i),
+              dfScores.getString(COL_DIM_VALUE, i));
 
-          if(!scores.containsKey(d))
+          if (!scores.containsKey(d)) {
             scores.put(d, 0.0d);
+          }
           scores.put(d, Math.max(scores.get(d), score * me.getScore()));
 
           related.put(d, me);
@@ -171,7 +178,7 @@ public class DimensionAnalysisPipeline extends Pipeline {
     }
 
     Set<DimensionEntity> entities = new HashSet<>();
-    for(Dimension d : scores.keySet()) {
+    for (Dimension d : scores.keySet()) {
       entities.add(d.toEntity(scores.get(d), related.get(d)));
     }
 
@@ -181,7 +188,9 @@ public class DimensionAnalysisPipeline extends Pipeline {
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
     RequestContainer
-        rc = DataFrameUtils.makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO, this.datasetDAO);
+        rc = DataFrameUtils
+        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO,
+            this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc);
@@ -194,7 +203,8 @@ public class DimensionAnalysisPipeline extends Pipeline {
     return out;
   }
 
-  private DataFrame getContributionDelta(MetricSlice current, MetricSlice baseline, String dimension) throws Exception {
+  private DataFrame getContributionDelta(MetricSlice current, MetricSlice baseline,
+      String dimension) throws Exception {
     DataFrame curr = getContribution(current, dimension);
     DataFrame base = getContribution(baseline, dimension);
 
@@ -223,7 +233,8 @@ public class DimensionAnalysisPipeline extends Pipeline {
     return df;
   }
 
-  private Future<DataFrame> getContributionDeltaPackedAsync(final MetricSlice current, final MetricSlice baseline, final String dimension) throws Exception {
+  private Future<DataFrame> getContributionDeltaPackedAsync(final MetricSlice current,
+      final MetricSlice baseline, final String dimension) throws Exception {
     return this.executor.submit(new Callable<DataFrame>() {
       @Override
       public DataFrame call() throws Exception {
@@ -238,16 +249,19 @@ public class DimensionAnalysisPipeline extends Pipeline {
     }
 
     MetricConfigDTO metric = this.metricDAO.findById(current.getMetricId());
-    if(metric == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id '%d'", current.getMetricId()));
+    if (metric == null) {
+      throw new IllegalArgumentException(
+          String.format("Could not resolve metric id '%d'", current.getMetricId()));
     }
 
     DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
-    if(dataset == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(), metric.getId()));
+    if (dataset == null) {
+      throw new IllegalArgumentException(String
+          .format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(),
+              metric.getId()));
     }
 
-    if(!dataset.isAdditive()) {
+    if (!dataset.isAdditive()) {
       LOG.warn("Contribution analysis on non-additive dataset");
 
       // TODO read additive from metric property when available
@@ -255,13 +269,13 @@ public class DimensionAnalysisPipeline extends Pipeline {
     }
 
     Collection<Future<DataFrame>> futures = new ArrayList<>();
-    for(String dimension : dataset.getDimensions()) {
+    for (String dimension : dataset.getDimensions()) {
       futures.add(getContributionDeltaPackedAsync(current, baseline, dimension));
     }
 
     final long timeout = System.currentTimeMillis() + TIMEOUT;
     Collection<DataFrame> contributors = new ArrayList<>();
-    for(Future<DataFrame> future : futures) {
+    for (Future<DataFrame> future : futures) {
       final long timeLeft = Math.max(timeout - System.currentTimeMillis(), 0);
       contributors.add(future.get(timeLeft, TimeUnit.MILLISECONDS));
     }
@@ -279,6 +293,7 @@ public class DimensionAnalysisPipeline extends Pipeline {
   }
 
   private static class Dimension {
+
     final String name;
     final String value;
 
@@ -296,7 +311,8 @@ public class DimensionAnalysisPipeline extends Pipeline {
     }
 
     public DimensionEntity toEntity(double score, Collection<Entity> related) {
-      return DimensionEntity.fromDimension(score, related, this.name, this.value, DimensionEntity.TYPE_GENERATED);
+      return DimensionEntity
+          .fromDimension(score, related, this.name, this.value, DimensionEntity.TYPE_GENERATED);
     }
 
     @Override
@@ -316,5 +332,4 @@ public class DimensionAnalysisPipeline extends Pipeline {
       return Objects.hash(name, value);
     }
   }
-
 }

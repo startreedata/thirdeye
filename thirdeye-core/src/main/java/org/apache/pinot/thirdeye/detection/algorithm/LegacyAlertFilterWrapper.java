@@ -37,12 +37,13 @@ import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detector.email.filter.BaseAlertFilter;
 import org.apache.pinot.thirdeye.detector.email.filter.DummyAlertFilter;
 
-
 /**
- * The Legacy alert filter wrapper. This wrapper runs the legacy alert filter in detection pipeline and filter out
+ * The Legacy alert filter wrapper. This wrapper runs the legacy alert filter in detection pipeline
+ * and filter out
  * the anomalies that don't pass the filter.
  */
 public class LegacyAlertFilterWrapper extends DetectionPipeline {
+
   private static final String PROP_ANOMALY_FUNCTION_CLASS = "anomalyFunctionClassName";
   private static final String PROP_LEGACY_ALERT_FILTER_CLASS_NAME = "legacyAlertFilterClassName";
   private static final String PROP_NESTED = "nested";
@@ -67,16 +68,19 @@ public class LegacyAlertFilterWrapper extends DetectionPipeline {
    * @param endTime the end time
    * @throws Exception the exception
    */
-  public LegacyAlertFilterWrapper(DataProvider provider, AlertDTO config, long startTime, long endTime)
+  public LegacyAlertFilterWrapper(DataProvider provider, AlertDTO config, long startTime,
+      long endTime)
       throws Exception {
     super(provider, config, startTime, endTime);
 
     this.anomalyFunctionSpecs = ConfigUtils.getMap(config.getProperties().get(PROP_SPEC));
 
     if (config.getProperties().containsKey(PROP_LEGACY_ALERT_FILTER_CLASS_NAME)) {
-      String className = MapUtils.getString(config.getProperties(), PROP_LEGACY_ALERT_FILTER_CLASS_NAME);
+      String className = MapUtils
+          .getString(config.getProperties(), PROP_LEGACY_ALERT_FILTER_CLASS_NAME);
       this.alertFilter = (BaseAlertFilter) Class.forName(className).newInstance();
-      this.alertFilter.setParameters(ConfigUtils.getMap(this.anomalyFunctionSpecs.get(PROP_ALERT_FILTER)));
+      this.alertFilter
+          .setParameters(ConfigUtils.getMap(this.anomalyFunctionSpecs.get(PROP_ALERT_FILTER)));
     } else {
       this.alertFilter = new DummyAlertFilter();
     }
@@ -84,10 +88,13 @@ public class LegacyAlertFilterWrapper extends DetectionPipeline {
     if (config.getProperties().containsKey(PROP_NESTED)) {
       this.nestedProperties = ConfigUtils.getList(config.getProperties().get(PROP_NESTED));
     } else {
-      this.nestedProperties = Collections.singletonList(Collections.singletonMap(PROP_CLASS_NAME, (Object) LegacyMergeWrapper.class.getName()));
+      this.nestedProperties = Collections.singletonList(
+          Collections.singletonMap(PROP_CLASS_NAME, LegacyMergeWrapper.class.getName()));
     }
 
-    this.alertFilterLookBack = ConfigUtils.parsePeriod(MapUtils.getString(config.getProperties(), PROP_ALERT_FILTER_LOOKBACK, "2week")).toStandardDuration().getMillis();
+    this.alertFilterLookBack = ConfigUtils.parsePeriod(
+        MapUtils.getString(config.getProperties(), PROP_ALERT_FILTER_LOOKBACK, "2week"))
+        .toStandardDuration().getMillis();
   }
 
   @Override
@@ -98,9 +105,11 @@ public class LegacyAlertFilterWrapper extends DetectionPipeline {
         properties.put(PROP_SPEC, this.anomalyFunctionSpecs);
       }
       if (!properties.containsKey(PROP_ANOMALY_FUNCTION_CLASS)) {
-        properties.put(PROP_ANOMALY_FUNCTION_CLASS, this.config.getProperties().get(PROP_ANOMALY_FUNCTION_CLASS));
+        properties.put(PROP_ANOMALY_FUNCTION_CLASS,
+            this.config.getProperties().get(PROP_ANOMALY_FUNCTION_CLASS));
       }
-      DetectionPipelineResult intermediate = this.runNested(properties, this.startTime - this.alertFilterLookBack, this.endTime);
+      DetectionPipelineResult intermediate = this
+          .runNested(properties, this.startTime - this.alertFilterLookBack, this.endTime);
       candidates.addAll(intermediate.getAnomalies());
     }
 
@@ -108,7 +117,8 @@ public class LegacyAlertFilterWrapper extends DetectionPipeline {
         Collections2.filter(candidates, new Predicate<MergedAnomalyResultDTO>() {
           @Override
           public boolean apply(@Nullable MergedAnomalyResultDTO mergedAnomaly) {
-            return mergedAnomaly != null && !mergedAnomaly.isChild() && alertFilter.isQualified(mergedAnomaly);
+            return mergedAnomaly != null && !mergedAnomaly.isChild() && alertFilter
+                .isQualified(mergedAnomaly);
           }
         });
 

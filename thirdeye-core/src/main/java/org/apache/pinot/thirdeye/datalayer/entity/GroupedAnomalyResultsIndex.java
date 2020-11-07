@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.datalayer.entity;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 
 public class GroupedAnomalyResultsIndex extends AbstractIndexEntity {
+
   long alertConfigId;
   DimensionMap dimensions;
   long endTime;

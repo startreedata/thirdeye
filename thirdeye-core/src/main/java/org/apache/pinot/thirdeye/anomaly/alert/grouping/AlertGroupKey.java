@@ -24,14 +24,17 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
- * Group key is wrapper class that is used to retrieve the specified group of anomalies from AlertGrouper.
+ * Group key is wrapper class that is used to retrieve the specified group of anomalies from
+ * AlertGrouper.
  *
- * @param <T> The class type of the actual entity to identify different groups. For instance, the actual key could be a
- *            DimensionMap.
+ * @param <T> The class type of the actual entity to identify different groups. For instance,
+ *     the actual key could be a
+ *     DimensionMap.
  */
 public class AlertGroupKey<T> {
-   // The default empty group key that is used to represent the rolled up group, which collects the anomalies from
-   // groups that contains only one anomaly.
+
+  // The default empty group key that is used to represent the rolled up group, which collects the anomalies from
+  // groups that contains only one anomaly.
   public static final AlertGroupKey EMPTY_KEY = new AlertGroupKey<Objects>();
 
   // The actual object to distinguish group key from each other.

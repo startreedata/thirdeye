@@ -30,6 +30,10 @@
     "scripts": {
         "start": "webpack-dev-server --config ./webpack.config.dev.js --env.development",
         "build": "webpack --config ./webpack.config.prod.js --env.production",
+        "test": "jest",
+        "test-file": "jest $file",
+        "test-watch": "jest --watch",
+        "test-coverage": "jest --coverage",
         "eslint": "eslint '**/*.{ts,tsx,js}' --config './.eslintrc.json' --ignore-path './.eslintignore' --fix",
         "stylelint": "stylelint '**/*.{css,scss}' --config './.stylelintrc.json' --ignore-path './.stylelintignore' --fix",
         "pretty": "prettier . --config './.prettierrc.json' --ignore-path './.prettierignore' --write"
@@ -52,8 +56,10 @@
     },
     "devDependencies": {
         "@svgr/webpack": "^5.4.0",
+        "@testing-library/react": "^11.1.1",
         "@types/classnames": "^2.2.10",
         "@types/codemirror": "0.0.98",
+        "@types/jest": "^26.0.15",
         "@types/js-yaml": "^3.12.5",
         "@types/react": "^16.9.46",
         "@types/react-dom": "^16.9.8",
@@ -71,6 +77,8 @@
         "fork-ts-checker-webpack-plugin": "^5.2.0",
         "html-webpack-plugin": "^4.3.0",
         "husky": "^4.3.0",
+        "jest": "^26.6.3",
+        "jest-environment-jsdom-fourteen": "^1.0.1",
         "lint-staged": "^10.5.0",
         "organize-imports-cli": "^0.8.0",
         "prettier": "^2.0.5",
@@ -80,6 +88,7 @@
         "stylelint": "^13.6.1",
         "stylelint-config-prettier": "^8.0.2",
         "stylelint-config-recommended": "^3.0.0",
+        "ts-jest": "^26.4.4",
         "ts-loader": "^8.0.2",
         "typescript": "^3.9.7",
         "url-loader": "^4.1.0",

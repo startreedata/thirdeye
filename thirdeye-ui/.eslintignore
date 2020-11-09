@@ -14,14 +14,12 @@ target/
 # TypeScript
 tsbuildinfo/
 
-# Assets
-*.svg
-*.png
-*.ico
+# Jest
+src/test-coverage/
 
 # webpack (ESLint rules don't agree with how these configs are written)
 webpack.config.dev.js
 webpack.config.prod.js
 
-# macOS
-.DS_Store
+# Jest (ESLint rules don't agree with how these configs are written)
+jest.config.js

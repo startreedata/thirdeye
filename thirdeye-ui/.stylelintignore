@@ -13,13 +13,8 @@ target/
 
 # TypeScript
 tsbuildinfo/
-*.tsx
 *.ts
+*.tsx
 
-# Assets
-*.svg
-*.png
-*.ico
-
-# macOS
-.DS_Store
+# Jest
+src/test-coverage/

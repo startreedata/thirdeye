@@ -31,7 +31,7 @@ tsbuildinfo/
 .npmrc
 .nvmrc
 
-# XML (File type not supported)
+# XML (file type not supported)
 *.xml
 
 # macOS

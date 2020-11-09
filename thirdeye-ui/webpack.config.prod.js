@@ -40,8 +40,8 @@ module.exports = {
                 exclude: /node_modules/, // Just the source code
             },
             {
-                // font files to be handled by file-loader
-                test: /\.(woff|woff2|ttf)([\?]?.*)$/,
+                // Font files to be handled by file-loader
+                test: /\.ttf$/,
                 use: [
                     {
                         loader: "file-loader",
@@ -59,17 +59,7 @@ module.exports = {
     // Module resolution
     resolve: {
         // File types to be handled
-        extensions: [
-            ".ts",
-            ".tsx",
-            ".js",
-            ".css",
-            ".scss",
-            ".svg",
-            ".woff",
-            ".woff2",
-            ".ttf",
-        ],
+        extensions: [".ts", ".tsx", ".js", ".css", ".scss", ".svg", ".ttf"],
     },
 
     // Plugins

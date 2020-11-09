@@ -58,6 +58,38 @@ Build the project and output the bundles in project root `dist`
 $ npm run build
 ```
 
+### `test`
+
+Run all tests
+
+```
+$ npm run test
+```
+
+### `test-file`
+
+Run all tests in a given test file
+
+```
+$ npm run test --file <filename>
+```
+
+### `test-watch`
+
+Run all tests related to changed files (uncommitted files)
+
+```
+$ npm run test-watch
+```
+
+### `test-coverage`
+
+Run all tests and generate coverage report in project root `src/test/coverage`
+
+```
+$ npm run test-coverage
+```
+
 ### `eslint`
 
 Run ESLint across the project except for files and directories listed in project root `.eslintignore`

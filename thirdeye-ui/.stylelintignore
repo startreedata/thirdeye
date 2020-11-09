@@ -17,4 +17,4 @@ tsbuildinfo/
 *.tsx
 
 # Jest
-src/test-coverage/
+src/test/coverage/

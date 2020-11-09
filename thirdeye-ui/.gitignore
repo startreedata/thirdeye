@@ -15,7 +15,7 @@ target/
 tsbuildinfo/
 
 # Jest
-src/test-coverage/
+src/test/coverage/
 
 # macOS
 .DS_Store

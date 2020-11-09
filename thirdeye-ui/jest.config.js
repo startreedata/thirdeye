@@ -6,7 +6,7 @@ module.exports = {
     roots: ["<rootDir>/src/app"],
 
     // Test coverage
-    coverageDirectory: "<rootDir>/src/test-coverage",
+    coverageDirectory: "<rootDir>/src/test/coverage",
     collectCoverageFrom: [
         "<rootDir>/src/app/**/*.{ts,tsx}", // All subdirectories under src/app
         "!<rootDir>/src/app/*.{ts,tsx}", // No files directly under src/app
@@ -20,4 +20,8 @@ module.exports = {
 
     // Test Environment
     testEnvironment: "jest-environment-jsdom-fourteen",
+    moduleNameMapper: {
+        "\\.svg": "<rootDir>/src/test/mocks/svgrMock.js", // Mock SVG imports
+        "\\.(css|scss)$": "identity-obj-proxy", // Mock stylesheet imports
+    },
 };

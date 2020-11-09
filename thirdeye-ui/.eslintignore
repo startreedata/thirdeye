@@ -14,12 +14,10 @@ target/
 # TypeScript
 tsbuildinfo/
 
-# Jest
-src/test-coverage/
+# Jest (ESLint rules don't agree with how these configs are written)
+jest.config.js
+src/test/
 
 # webpack (ESLint rules don't agree with how these configs are written)
 webpack.config.dev.js
 webpack.config.prod.js
-
-# Jest (ESLint rules don't agree with how these configs are written)
-jest.config.js

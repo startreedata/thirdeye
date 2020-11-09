@@ -1,0 +1,8 @@
+# Label when configuration files in ThirdEye UI project root change
+thirdeye-ui config:
+    - "thirdeye-ui/*"
+    - "thirdeye-ui/.*"
+
+# Label when source files in ThirdEye UI project change
+thirdeye-ui:
+    - "thirdeye-ui/src/**/*"

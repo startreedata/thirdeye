@@ -36,14 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
-import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityEventListenerDriver;
-import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityTaskScheduler;
-import org.apache.pinot.thirdeye.anomaly.events.HolidayEventResource;
-import org.apache.pinot.thirdeye.anomaly.events.HolidayEventsLoader;
-import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
-import org.apache.pinot.thirdeye.anomaly.monitor.MonitorJobScheduler;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriver;
-import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardService;
 import org.apache.pinot.thirdeye.common.ThirdEyeSwaggerBundle;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
@@ -56,10 +49,7 @@ import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.datasource.pinot.resources.PinotDataSourceResource;
-import org.apache.pinot.thirdeye.model.download.ModelDownloaderManager;
-import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
-import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
+import org.apache.pinot.thirdeye.scheduler.SchedulerService;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -73,17 +63,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
   private final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
   private TaskDriver taskDriver = null;
-
-  private MonitorJobScheduler monitorJobScheduler = null;
-  private DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler = null;
-  private DetectionCronScheduler detectionScheduler = null;
-  private SubscriptionCronScheduler subscriptionScheduler = null;
-  private AutoOnboardService autoOnboardService = null;
-  private HolidayEventsLoader holidayEventsLoader = null;
-  private MockEventsLoader mockEventsLoader = null;
-  private DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver = null;
-  private ModelDownloaderManager modelDownloaderManager = null;
-
+  private SchedulerService schedulerService;
   private RequestStatisticsLogger requestStatisticsLogger = null;
 
   public static void main(final String[] args) throws Exception {
@@ -138,6 +118,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
     DeprecatedInjectorUtil.setInjector(injector);
 
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
+    schedulerService = new SchedulerService(config);
 
     env.getObjectMapper().registerModule(makeMapperModule());
     env.lifecycle().manage(lifecycleManager(config, env));
@@ -161,57 +142,8 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
           taskDriver = new TaskDriver(config, true);
           taskDriver.start();
         }
+        schedulerService.start();
 
-        if (config.isMonitor()) {
-          monitorJobScheduler = new MonitorJobScheduler(config.getMonitorConfiguration());
-          monitorJobScheduler.start();
-        }
-        if (config.isAutoload()) {
-          autoOnboardService = new AutoOnboardService(config);
-          autoOnboardService.start();
-        }
-        if (config.isHolidayEventsLoader()) {
-          holidayEventsLoader =
-              new HolidayEventsLoader(config.getHolidayEventsLoaderConfiguration(),
-                  config.getCalendarApiKeyPath(),
-                  DAORegistry.getInstance().getEventDAO());
-          holidayEventsLoader.start();
-          env.jersey().register(new HolidayEventResource(holidayEventsLoader));
-        }
-        if (config.isMockEventsLoader()) {
-          mockEventsLoader = new MockEventsLoader(config.getMockEventsLoaderConfiguration(),
-              DAORegistry.getInstance().getEventDAO());
-          mockEventsLoader.run();
-        }
-        if (config.isPinotProxy()) {
-          env.jersey().register(new PinotDataSourceResource());
-        }
-        if (config.isDetectionPipeline()) {
-          detectionScheduler = new DetectionCronScheduler(
-              DAORegistry.getInstance().getDetectionConfigManager());
-          detectionScheduler.start();
-        }
-        if (config.isDetectionAlert()) {
-          subscriptionScheduler = new SubscriptionCronScheduler();
-          subscriptionScheduler.start();
-        }
-        if (config.isDataAvailabilityEventListener()) {
-          dataAvailabilityEventListenerDriver = new DataAvailabilityEventListenerDriver(
-              config.getDataAvailabilitySchedulingConfiguration());
-          dataAvailabilityEventListenerDriver.start();
-        }
-        if (config.isDataAvailabilityTaskScheduler()) {
-          dataAvailabilityTaskScheduler = new DataAvailabilityTaskScheduler(
-              config.getDataAvailabilitySchedulingConfiguration().getSchedulerDelayInSec(),
-              config.getDataAvailabilitySchedulingConfiguration().getTaskTriggerFallBackTimeInSec(),
-              config.getDataAvailabilitySchedulingConfiguration().getSchedulingWindowInSec(),
-              config.getDataAvailabilitySchedulingConfiguration().getScheduleDelayInSec());
-          dataAvailabilityTaskScheduler.start();
-        }
-        if (config.getModelDownloaderConfig() != null) {
-          modelDownloaderManager = new ModelDownloaderManager(config.getModelDownloaderConfig());
-          modelDownloaderManager.start();
-        }
         if (config.getThirdEyeRestClientConfiguration() != null) {
           ThirdEyeRestClientConfiguration restClientConfig = config
               .getThirdEyeRestClientConfiguration();
@@ -227,24 +159,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
         if (taskDriver != null) {
           taskDriver.shutdown();
         }
-        if (monitorJobScheduler != null) {
-          monitorJobScheduler.shutdown();
-        }
-        if (holidayEventsLoader != null) {
-          holidayEventsLoader.shutdown();
-        }
-        if (autoOnboardService != null) {
-          autoOnboardService.shutdown();
-        }
-        if (detectionScheduler != null) {
-          detectionScheduler.shutdown();
-        }
-        if (dataAvailabilityEventListenerDriver != null) {
-          dataAvailabilityEventListenerDriver.shutdown();
-        }
-        if (modelDownloaderManager != null) {
-          modelDownloaderManager.shutdown();
-        }
+        schedulerService.stop();
       }
     };
   }

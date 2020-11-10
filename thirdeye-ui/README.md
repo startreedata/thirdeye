@@ -75,7 +75,7 @@ $ npm run test
 Run all tests in a given test file
 
 ```
-$ npm run test --file <filename>
+$ npm run test <filename>
 ```
 
 ### `test-watch`

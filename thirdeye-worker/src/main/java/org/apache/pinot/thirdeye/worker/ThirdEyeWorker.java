@@ -183,14 +183,4 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
     final PersistenceConfig configuration = readPersistenceConfig(new File(persistenceConfig));
     return configuration.getDatabaseConfiguration();
   }
-
-  /**
-   * Empty method to allow logging implementation to be lazily initialized, so that log4j2 can be
-   * used.
-   * More details can be found: https://github.com/dropwizard/dropwizard/pull/1900
-   */
-  @Override
-  protected void bootstrapLogging() {
-
-  }
 }

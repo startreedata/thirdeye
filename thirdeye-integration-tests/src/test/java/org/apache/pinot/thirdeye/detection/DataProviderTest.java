@@ -50,8 +50,8 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
@@ -77,7 +77,7 @@ public class DataProviderTest {
   private DatasetConfigManager datasetDAO;
   private EvaluationManager evaluationDAO;
   private AlertManager detectionDAO;
-  private QueryCache queryCache;
+  private DataSourceCache dataSourceCache;
   private TimeSeriesLoader timeseriesLoader;
   private AggregationLoader aggregationLoader;
 
@@ -190,22 +190,22 @@ public class DataProviderTest {
     id2name.put(this.metricIds.get(1), "value");
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
-    this.queryCache = new QueryCache(dataSourceMap, Executors.newSingleThreadExecutor());
+    this.dataSourceCache = new DataSourceCache(dataSourceMap, Executors.newSingleThreadExecutor());
 
     ThirdEyeCacheRegistry cacheRegistry = DeprecatedInjectorUtil
         .getInstance(ThirdEyeCacheRegistry.class);
     cacheRegistry.registerMetricConfigCache(mockMetricConfigCache);
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);
-    cacheRegistry.registerQueryCache(this.queryCache);
+    cacheRegistry.registerQueryCache(this.dataSourceCache);
     cacheRegistry.registerDatasetMaxDataTimeCache(mockDatasetMaxDataTimeCache);
 
     // time series loader
     this.timeseriesLoader = new DefaultTimeSeriesLoader(this.metricDAO, this.datasetDAO,
-        this.queryCache, null);
+        this.dataSourceCache, null);
 
     // aggregation loader
     this.aggregationLoader = new DefaultAggregationLoader(this.metricDAO, this.datasetDAO,
-        this.queryCache, mockDatasetMaxDataTimeCache);
+        this.dataSourceCache, mockDatasetMaxDataTimeCache);
 
     // provider
     this.provider = new DefaultDataProvider(this.metricDAO, this.datasetDAO, this.eventDAO,

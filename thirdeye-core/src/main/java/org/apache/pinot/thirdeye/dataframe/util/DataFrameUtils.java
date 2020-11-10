@@ -44,7 +44,7 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
@@ -243,12 +243,12 @@ public class DataFrameUtils {
    * @param slice metric data slice
    * @return DataFrame with time series
    * @see DataFrameUtils#fetchTimeSeries(MetricSlice, MetricConfigManager, DatasetConfigManager,
-   *     QueryCache)
+   *     DataSourceCache)
    */
   public static DataFrame fetchTimeSeries(MetricSlice slice) throws Exception {
     MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    QueryCache cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+    DataSourceCache cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
         .getQueryCache();
     return fetchTimeSeries(slice, metricDAO, datasetDAO, cache);
   }
@@ -264,7 +264,7 @@ public class DataFrameUtils {
    * @return DataFrame with time series
    */
   public static DataFrame fetchTimeSeries(MetricSlice slice, MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, QueryCache cache) throws Exception {
+      DatasetConfigManager datasetDAO, DataSourceCache cache) throws Exception {
     String ref = String
         .format("%s-%d-%d", Thread.currentThread().getName(), slice.metricId, System.nanoTime());
     RequestContainer req = makeTimeSeriesRequest(slice, ref, metricDAO, datasetDAO);

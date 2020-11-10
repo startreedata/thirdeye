@@ -30,7 +30,7 @@ import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
 import org.joda.time.DateTime;
@@ -62,7 +62,8 @@ public class TimeSeriesTest {
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
     dataSourceMap.put(PinotThirdEyeDataSource.class.getSimpleName(), pinotThirdEyeDataSource);
 
-    QueryCache queryCache = new QueryCache(dataSourceMap, Executors.newFixedThreadPool(10));
+    DataSourceCache dataSourceCache = new DataSourceCache(dataSourceMap,
+        Executors.newFixedThreadPool(10));
     TimeSeriesRequest[] requests = new TimeSeriesRequest[]{
         generateGroupByTimeRequest(),
         // generateGroupByDimensionRequest(),
@@ -70,7 +71,7 @@ public class TimeSeriesTest {
     };
     for (TimeSeriesRequest timeSeriesRequest : requests) {
       try {
-        TimeSeriesHandler handler = new TimeSeriesHandler(queryCache);
+        TimeSeriesHandler handler = new TimeSeriesHandler(dataSourceCache);
         long start = System.currentTimeMillis();
         TimeSeriesResponse response = handler.handle(timeSeriesRequest);
         long end = System.currentTimeMillis();

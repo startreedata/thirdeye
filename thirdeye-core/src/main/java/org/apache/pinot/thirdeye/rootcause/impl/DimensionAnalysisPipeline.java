@@ -49,7 +49,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
@@ -87,7 +87,7 @@ public class DimensionAnalysisPipeline extends Pipeline {
 
   public static final long TIMEOUT = 120000;
 
-  private final QueryCache cache;
+  private final DataSourceCache cache;
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
   private final ExecutorService executor;
@@ -105,7 +105,7 @@ public class DimensionAnalysisPipeline extends Pipeline {
    */
   public DimensionAnalysisPipeline(String outputName, Set<String> inputNames,
       MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, QueryCache cache, ExecutorService executor, int k) {
+      DatasetConfigManager datasetDAO, DataSourceCache cache, ExecutorService executor, int k) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;

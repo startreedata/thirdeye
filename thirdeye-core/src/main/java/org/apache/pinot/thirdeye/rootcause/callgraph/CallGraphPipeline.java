@@ -42,7 +42,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
@@ -103,7 +103,7 @@ public class CallGraphPipeline extends Pipeline {
 
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
-  private final QueryCache cache;
+  private final DataSourceCache cache;
 
   private final String dataset;
   private final String metricCount;
@@ -116,7 +116,7 @@ public class CallGraphPipeline extends Pipeline {
   private final double cutoffFraction;
 
   public CallGraphPipeline(String outputName, Set<String> inputNames, MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, QueryCache cache, String dataset, String metricCount,
+      DatasetConfigManager datasetDAO, DataSourceCache cache, String dataset, String metricCount,
       String metricLatency,
       Set<String> includeDimensions, Set<String> excludeDimensions, int k, double cutoffFraction) {
     super(outputName, inputNames);

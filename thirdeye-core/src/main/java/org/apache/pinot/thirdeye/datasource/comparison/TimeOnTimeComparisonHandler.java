@@ -37,7 +37,7 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.comparison.Row.Metric;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
@@ -46,10 +46,10 @@ public class TimeOnTimeComparisonHandler {
 
   private static final String CURRENT = "current";
   private static final String BASELINE = "baseline";
-  private final QueryCache queryCache;
+  private final DataSourceCache dataSourceCache;
 
-  public TimeOnTimeComparisonHandler(QueryCache queryCache) {
-    this.queryCache = queryCache;
+  public TimeOnTimeComparisonHandler(DataSourceCache dataSourceCache) {
+    this.dataSourceCache = dataSourceCache;
   }
 
   public TimeOnTimeComparisonResponse handle(TimeOnTimeComparisonRequest comparisonRequest)
@@ -85,7 +85,7 @@ public class TimeOnTimeComparisonHandler {
     requests.add(baselineRequest);
     requests.add(currentRequest);
     Map<ThirdEyeRequest, Future<ThirdEyeResponse>> futureResponseMap;
-    futureResponseMap = queryCache.getQueryResultsAsync(requests);
+    futureResponseMap = dataSourceCache.getQueryResultsAsync(requests);
     ThirdEyeResponse baselineResponse = null;
     ThirdEyeResponse currentResponse = null;
     for (Entry<ThirdEyeRequest, Future<ThirdEyeResponse>> entry : futureResponseMap.entrySet()) {

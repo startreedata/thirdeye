@@ -37,7 +37,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +49,11 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
-  private final QueryCache cache;
+  private final DataSourceCache cache;
   private final LoadingCache<String, Long> maxTimeCache;
 
   public DefaultAggregationLoader(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
-      QueryCache cache, LoadingCache<String, Long> maxTimeCache) {
+      DataSourceCache cache, LoadingCache<String, Long> maxTimeCache) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.cache = cache;

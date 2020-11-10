@@ -47,7 +47,7 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
@@ -92,7 +92,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
   private static final String COL_CURRENT = "current";
   private static final String COL_BASELINE = "baseline";
 
-  private final QueryCache cache;
+  private final DataSourceCache cache;
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
   private final ScoringStrategyFactory strategyFactory;
@@ -110,7 +110,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
    * @param datasetDAO datset config DAO
    */
   public MetricAnalysisPipeline2(String outputName, Set<String> inputNames,
-      ScoringStrategyFactory strategyFactory, TimeGranularity granularity, QueryCache cache,
+      ScoringStrategyFactory strategyFactory, TimeGranularity granularity, DataSourceCache cache,
       MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
     super(outputName, inputNames);
     this.cache = cache;

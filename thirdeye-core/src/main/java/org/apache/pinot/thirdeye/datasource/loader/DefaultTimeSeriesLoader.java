@@ -28,7 +28,7 @@ import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
 import org.slf4j.Logger;
@@ -41,17 +41,17 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
 
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
-  private final QueryCache queryCache;
+  private final DataSourceCache dataSourceCache;
   private final TimeSeriesCache timeSeriesCache;
 
   @Inject
   public DefaultTimeSeriesLoader(MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO,
-      QueryCache queryCache,
+      DataSourceCache dataSourceCache,
       TimeSeriesCache cache) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
-    this.queryCache = queryCache;
+    this.dataSourceCache = dataSourceCache;
     this.timeSeriesCache = cache;
   }
 
@@ -71,7 +71,7 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
     if (CacheConfig.getInstance().useCentralizedCache()) {
       response = this.timeSeriesCache.fetchTimeSeries(rc.getRequest());
     } else {
-      response = this.queryCache.getQueryResult(rc.getRequest());
+      response = this.dataSourceCache.getQueryResult(rc.getRequest());
     }
 
     return DataFrameUtils.evaluateResponse(response, rc);

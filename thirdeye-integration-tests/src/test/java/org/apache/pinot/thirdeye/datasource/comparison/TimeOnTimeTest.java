@@ -29,7 +29,7 @@ import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.comparison.Row.Metric;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.joda.time.DateTime;
@@ -48,7 +48,8 @@ public class TimeOnTimeTest {
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
     dataSourceMap.put(PinotThirdEyeDataSource.class.getSimpleName(), pinotThirdEyeDataSource);
 
-    QueryCache queryCache = new QueryCache(dataSourceMap, Executors.newFixedThreadPool(10));
+    DataSourceCache dataSourceCache = new DataSourceCache(dataSourceMap,
+        Executors.newFixedThreadPool(10));
     // QueryCache queryCache = new QueryCache(pinotThirdEyeDataSource, Executors.newCachedThreadPool());
 
     TimeOnTimeComparisonRequest comparisonRequest;
@@ -56,7 +57,7 @@ public class TimeOnTimeTest {
     // comparisonRequest = generateGroupByDimensionRequest();
     // comparisonRequest = generateGroupByTimeAndDimension();
 
-    TimeOnTimeComparisonHandler handler = new TimeOnTimeComparisonHandler(queryCache);
+    TimeOnTimeComparisonHandler handler = new TimeOnTimeComparisonHandler(dataSourceCache);
     // long start;
     // long end;
     // // Thread.sleep(30000);

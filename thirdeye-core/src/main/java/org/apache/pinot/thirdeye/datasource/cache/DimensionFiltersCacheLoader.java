@@ -34,11 +34,12 @@ public class DimensionFiltersCacheLoader extends CacheLoader<String, String> {
   private static final Logger LOGGER = LoggerFactory.getLogger(DimensionFiltersCacheLoader.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private final QueryCache queryCache;
+  private final DataSourceCache dataSourceCache;
   private final DatasetConfigManager datasetConfigDAO;
 
-  public DimensionFiltersCacheLoader(QueryCache queryCache, DatasetConfigManager datasetConfigDAO) {
-    this.queryCache = queryCache;
+  public DimensionFiltersCacheLoader(DataSourceCache dataSourceCache,
+      DatasetConfigManager datasetConfigDAO) {
+    this.dataSourceCache = dataSourceCache;
     this.datasetConfigDAO = datasetConfigDAO;
   }
 
@@ -55,7 +56,7 @@ public class DimensionFiltersCacheLoader extends CacheLoader<String, String> {
     DatasetConfigDTO datasetConfig = datasetConfigDAO.findByDataset(dataset);
     String dataSourceName = datasetConfig.getDataSource();
     try {
-      ThirdEyeDataSource dataSource = queryCache.getDataSource(dataSourceName);
+      ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
       if (dataSource == null) {
         LOGGER.warn("datasource [{}] found null in queryCache", dataSourceName);
       } else {

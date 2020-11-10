@@ -38,7 +38,7 @@ import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -69,7 +69,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
   protected final static int TIME_OUT_VALUE = 1200;
   protected final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
 
-  protected QueryCache queryCache;
+  protected DataSourceCache dataSourceCache;
   protected String dataset = "";
   protected DateTime baselineStartInclusive = NULL_DATETIME;
   protected DateTime baselineEndExclusive = NULL_DATETIME;
@@ -79,10 +79,10 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
   /**
    * Constructs a Pinot client.
    *
-   * @param queryCache the query cached to Pinot.
+   * @param dataSourceCache the query cached to Pinot.
    */
-  public BaseCubePinotClient(QueryCache queryCache) {
-    this.queryCache = Preconditions.checkNotNull(queryCache);
+  public BaseCubePinotClient(DataSourceCache dataSourceCache) {
+    this.dataSourceCache = Preconditions.checkNotNull(dataSourceCache);
   }
 
   public void setDataset(String dataset) {
@@ -223,7 +223,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
       }
     }
 
-    Map<ThirdEyeRequest, Future<ThirdEyeResponse>> queryResponses = queryCache
+    Map<ThirdEyeRequest, Future<ThirdEyeResponse>> queryResponses = dataSourceCache
         .getQueryResultsAsync(allRequests);
 
     List<List<R>> res = new ArrayList<>();

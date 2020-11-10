@@ -38,7 +38,7 @@ import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
@@ -50,11 +50,11 @@ public class TimeSeriesHandler {
   private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesHandler.class);
   private static final TimeSeriesResponseParser DEFAULT_TIMESERIES_RESPONSE_PARSER = new UITimeSeriesResponseParser();
 
-  private final QueryCache queryCache;
+  private final DataSourceCache dataSourceCache;
   private ExecutorService executorService;
 
-  public TimeSeriesHandler(QueryCache queryCache) {
-    this.queryCache = queryCache;
+  public TimeSeriesHandler(DataSourceCache dataSourceCache) {
+    this.dataSourceCache = dataSourceCache;
   }
 
   /**
@@ -89,7 +89,7 @@ public class TimeSeriesHandler {
     }
     // Create request
     ThirdEyeRequest request = createThirdEyeRequest("timeseries", timeSeriesRequest, start, end);
-    Future<ThirdEyeResponse> responseFuture = queryCache.getQueryResultAsync(request);
+    Future<ThirdEyeResponse> responseFuture = dataSourceCache.getQueryResultAsync(request);
     // 5 minutes timeout
     ThirdEyeResponse response = responseFuture.get(5, TimeUnit.MINUTES);
     List<TimeSeriesRow> rows = timeSeriesResponseParser.parseResponse(response);

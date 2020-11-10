@@ -42,7 +42,7 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
@@ -87,7 +87,7 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
   private static final String STRATEGY_CANDIDATE_MEAN = "candidate_mean";
   private static final String STRATEGY_CANDIDATE_MAX = "candidate_max";
 
-  private final QueryCache cache;
+  private final DataSourceCache cache;
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
   private final String targetInput;
@@ -105,7 +105,8 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
    * @param datasetDAO datset config DAO
    */
   public MetricCorrelationRankingPipeline(String outputName, Set<String> inputNames,
-      String targetInput, ScoringStrategy strategy, QueryCache cache, MetricConfigManager metricDAO,
+      String targetInput, ScoringStrategy strategy, DataSourceCache cache,
+      MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO) {
     super(outputName, inputNames);
     this.targetInput = targetInput;

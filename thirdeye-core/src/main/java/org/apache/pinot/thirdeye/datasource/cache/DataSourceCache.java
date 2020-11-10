@@ -30,12 +30,12 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 
-public class QueryCache {
+public class DataSourceCache {
 
   private final ExecutorService executorService;
   private final Map<String, ThirdEyeDataSource> dataSourceMap;
 
-  public QueryCache(Map<String, ThirdEyeDataSource> dataSourceMap,
+  public DataSourceCache(Map<String, ThirdEyeDataSource> dataSourceMap,
       ExecutorService executorService) {
     this.executorService = executorService;
     this.dataSourceMap = dataSourceMap;

@@ -35,14 +35,14 @@ public class DatasetMaxDataTimeCacheLoader extends CacheLoader<String, Long> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DatasetMaxDataTimeCacheLoader.class);
 
-  private final QueryCache queryCache;
+  private final DataSourceCache dataSourceCache;
   private final DatasetConfigManager datasetConfigDAO;
 
   private final ExecutorService reloadExecutor = Executors.newSingleThreadExecutor();
 
-  public DatasetMaxDataTimeCacheLoader(QueryCache queryCache,
+  public DatasetMaxDataTimeCacheLoader(DataSourceCache dataSourceCache,
       DatasetConfigManager datasetConfigDAO) {
-    this.queryCache = queryCache;
+    this.dataSourceCache = dataSourceCache;
     this.datasetConfigDAO = datasetConfigDAO;
   }
 
@@ -59,7 +59,7 @@ public class DatasetMaxDataTimeCacheLoader extends CacheLoader<String, Long> {
     DatasetConfigDTO datasetConfig = datasetConfigDAO.findByDataset(dataset);
     String dataSourceName = datasetConfig.getDataSource();
     try {
-      ThirdEyeDataSource dataSource = queryCache.getDataSource(dataSourceName);
+      ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
       if (dataSource == null) {
         LOGGER.warn("dataSource [{}] found null in the query cache", dataSourceName);
       } else {

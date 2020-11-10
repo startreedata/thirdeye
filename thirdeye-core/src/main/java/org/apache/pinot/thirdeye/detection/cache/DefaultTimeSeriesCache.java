@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
@@ -55,15 +55,15 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
 
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
-  private final QueryCache queryCache;
+  private final DataSourceCache dataSourceCache;
   private final CacheDAO cacheDAO;
   private final ExecutorService executor;
 
   public DefaultTimeSeriesCache(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
-      QueryCache queryCache, CacheDAO cacheDAO, ExecutorService executorService) {
+      DataSourceCache dataSourceCache, CacheDAO cacheDAO, ExecutorService executorService) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
-    this.queryCache = queryCache;
+    this.dataSourceCache = dataSourceCache;
     this.cacheDAO = cacheDAO;
     this.executor = executorService;
   }
@@ -80,7 +80,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
   public ThirdEyeResponse fetchTimeSeries(ThirdEyeRequest thirdEyeRequest) throws Exception {
 
     if (!CacheConfig.getInstance().useCentralizedCache()) {
-      return this.queryCache.getQueryResult(thirdEyeRequest);
+      return this.dataSourceCache.getQueryResult(thirdEyeRequest);
     }
 
     ThirdEyeCacheResponse cacheResponse = cacheDAO
@@ -111,7 +111,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
     MetricSlice slice;
 
     if (cacheResponse.hasNoRows()) {
-      result = this.queryCache.getQueryResult(cacheResponse.getCacheRequest().getRequest());
+      result = this.dataSourceCache.getQueryResult(cacheResponse.getCacheRequest().getRequest());
       insertTimeSeriesIntoCache(result);
       cacheResponse.mergeSliceIntoRows(result);
     } else {
@@ -152,7 +152,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
   private ThirdEyeResponse fetchSliceFromSource(MetricSlice slice) throws Exception {
     TimeSeriesRequestContainer rc = DataFrameUtils
         .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO);
-    return this.queryCache.getQueryResult(rc.getRequest());
+    return this.dataSourceCache.getQueryResult(rc.getRequest());
   }
 
   /**

@@ -35,13 +35,13 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetConfigCacheLoader;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetListCache;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetMaxDataTimeCacheLoader;
 import org.apache.pinot.thirdeye.datasource.cache.DimensionFiltersCacheLoader;
 import org.apache.pinot.thirdeye.datasource.cache.MetricConfigCacheLoader;
 import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfigLoader;
 import org.apache.pinot.thirdeye.detection.cache.CacheDAO;
@@ -60,8 +60,7 @@ public class ThirdEyeCacheRegistry {
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
 
-  // TODO: Rename QueryCache to a name like DataSourceCache.
-  private QueryCache queryCache;
+  private DataSourceCache dataSourceCache;
   private TimeSeriesCache timeSeriesCache = null;
 
   // Meta-data caches
@@ -97,14 +96,14 @@ public class ThirdEyeCacheRegistry {
   private void initDataSources(final URL dataSourcesUrl) {
     try {
       // Initialize adaptors to time series databases.
-      QueryCache queryCache = buildQueryCache(dataSourcesUrl);
-      registerQueryCache(queryCache);
+      DataSourceCache dataSourceCache = buildQueryCache(dataSourcesUrl);
+      registerQueryCache(dataSourceCache);
     } catch (Exception e) {
       LOG.info("Caught exception while initializing caches", e);
     }
   }
 
-  public QueryCache buildQueryCache(final URL dataSourcesUrl) {
+  public DataSourceCache buildQueryCache(final URL dataSourcesUrl) {
     final DataSourcesLoader loader = new DataSourcesLoader();
     final DataSources dataSources = requireNonNull(
         loader.fromDataSourcesUrl(dataSourcesUrl),
@@ -113,7 +112,7 @@ public class ThirdEyeCacheRegistry {
     // Query Cache
     final Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = loader
         .getDataSourceMap(dataSources);
-    return new QueryCache(thirdEyeDataSourcesMap, Executors.newCachedThreadPool());
+    return new DataSourceCache(thirdEyeDataSourcesMap, Executors.newCachedThreadPool());
   }
 
   public TimeSeriesCache buildTimeSeriesCache(
@@ -121,7 +120,7 @@ public class ThirdEyeCacheRegistry {
       final int maxParallelInserts) {
     return new DefaultTimeSeriesCache(metricConfigManager,
         datasetConfigManager,
-        queryCache,
+        dataSourceCache,
         cacheDAO,
         Executors.newFixedThreadPool(maxParallelInserts));
   }
@@ -170,7 +169,7 @@ public class ThirdEyeCacheRegistry {
    * connected.
    */
   public void initMetaDataCaches() {
-    Preconditions.checkNotNull(queryCache,
+    Preconditions.checkNotNull(dataSourceCache,
         "Data sources are not initialized. Please invoke initDataSources() before this method.");
 
     // DatasetConfig cache
@@ -190,13 +189,13 @@ public class ThirdEyeCacheRegistry {
     // DatasetMaxDataTime Cache
     LoadingCache<String, Long> datasetMaxDataTimeCache = CacheBuilder.newBuilder()
         .expireAfterWrite(5, TimeUnit.MINUTES)
-        .build(new DatasetMaxDataTimeCacheLoader(queryCache, datasetConfigManager));
+        .build(new DatasetMaxDataTimeCacheLoader(dataSourceCache, datasetConfigManager));
     registerDatasetMaxDataTimeCache(datasetMaxDataTimeCache);
 
     // Dimension Filter cache
     LoadingCache<String, String> dimensionFiltersCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
-        .build(new DimensionFiltersCacheLoader(queryCache, datasetConfigManager));
+        .build(new DimensionFiltersCacheLoader(dataSourceCache, datasetConfigManager));
     registerDimensionFiltersCache(dimensionFiltersCache);
 
     // Dataset list
@@ -229,12 +228,12 @@ public class ThirdEyeCacheRegistry {
     this.dimensionFiltersCache = dimensionFiltersCache;
   }
 
-  public QueryCache getQueryCache() {
-    return queryCache;
+  public DataSourceCache getQueryCache() {
+    return dataSourceCache;
   }
 
-  public void registerQueryCache(QueryCache queryCache) {
-    this.queryCache = queryCache;
+  public void registerQueryCache(DataSourceCache dataSourceCache) {
+    this.dataSourceCache = dataSourceCache;
   }
 
   public TimeSeriesCache getTimeSeriesCache() {

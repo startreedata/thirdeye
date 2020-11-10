@@ -43,8 +43,8 @@ import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
-import org.apache.pinot.thirdeye.datasource.cache.QueryCache;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.mockito.Mockito;
@@ -57,7 +57,7 @@ public class TimeSeriesCacheTest {
 
   private MetricConfigManager metricDAO;
   private DatasetConfigManager datasetDAO;
-  private QueryCache queryCache;
+  private DataSourceCache dataSourceCache;
   private CouchbaseCacheDAO cacheDAO;
   private DefaultTimeSeriesCache cache;
 
@@ -93,7 +93,7 @@ public class TimeSeriesCacheTest {
   public void beforeMethod() throws Exception {
 
     // mock QueryCache so it doesn't call data source
-    this.queryCache = mock(QueryCache.class);
+    this.dataSourceCache = mock(DataSourceCache.class);
 
     // mock DAO object so that inserts put data into list
     this.cacheDAO = mock(CouchbaseCacheDAO.class);
@@ -106,7 +106,8 @@ public class TimeSeriesCacheTest {
 
     this.executor = Executors.newSingleThreadExecutor();
 
-    this.cache = new DefaultTimeSeriesCache(metricDAO, datasetDAO, queryCache, cacheDAO, executor);
+    this.cache = new DefaultTimeSeriesCache(metricDAO, datasetDAO, dataSourceCache, cacheDAO,
+        executor);
     DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
         .registerTimeSeriesCache(this.cache);
   }
@@ -142,7 +143,7 @@ public class TimeSeriesCacheTest {
 
     // mock queryCache to return full rows
     Mockito
-        .when(this.queryCache.getQueryResult(any(ThirdEyeRequest.class)))
+        .when(this.dataSourceCache.getQueryResult(any(ThirdEyeRequest.class)))
         .thenAnswer(invocation -> {
           return new RelationalThirdEyeResponse(
               (ThirdEyeRequest) invocation.getArguments()[0],
@@ -150,7 +151,7 @@ public class TimeSeriesCacheTest {
               timeSpec);
         });
 
-    ThirdEyeResponse response = this.queryCache.getQueryResult(request);
+    ThirdEyeResponse response = this.dataSourceCache.getQueryResult(request);
     verifyRowSeriesCorrectness(response);
   }
 
@@ -173,7 +174,7 @@ public class TimeSeriesCacheTest {
 
     // mock queryCache to return full rows
     Mockito
-        .when(this.queryCache.getQueryResult(any(ThirdEyeRequest.class)))
+        .when(this.dataSourceCache.getQueryResult(any(ThirdEyeRequest.class)))
         .thenAnswer(invocation -> {
           ThirdEyeRequest request = (ThirdEyeRequest) invocation.getArguments()[0];
           Assert.assertEquals(request.getStartTimeInclusive().getMillis(), 0);

@@ -13,7 +13,7 @@ module.exports = {
     // Output configuration
     output: {
         path: outputPath,
-        filename: "thirdeye-ui.js",
+        filename: "[name].js",
         publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
         pathinfo: false, // Development mode optimization
     },

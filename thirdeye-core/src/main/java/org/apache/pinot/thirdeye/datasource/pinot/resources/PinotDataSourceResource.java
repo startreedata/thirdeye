@@ -42,7 +42,6 @@ import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/pinot-data-source")
 @Produces(MediaType.APPLICATION_JSON)
 public class PinotDataSourceResource {
 

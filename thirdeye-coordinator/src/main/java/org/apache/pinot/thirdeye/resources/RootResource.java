@@ -14,10 +14,13 @@ import javax.ws.rs.core.Response;
 public class RootResource {
 
   private final ApiResource apiResource;
+  private final InternalResource internalResource;
 
   @Inject
-  public RootResource(final ApiResource apiResource) {
+  public RootResource(final ApiResource apiResource,
+      final InternalResource internalResource) {
     this.apiResource = apiResource;
+    this.internalResource = internalResource;
   }
 
   @GET
@@ -30,5 +33,10 @@ public class RootResource {
   @Path("api")
   public ApiResource getApiResource() {
     return apiResource;
+  }
+
+  @Path("internal")
+  public InternalResource getInternalResource() {
+    return internalResource;
   }
 }

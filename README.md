@@ -49,6 +49,18 @@ Detailed documentation can be found at [ThirdEye documentation](https://thirdeye
 
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.
 
+### Install the Error Prone Compiler plugin
+
+ThirdEye uses [errorprone](https://errorprone.info/) for compile type code analysis.
+
+To add the plugin, start the IDE
+ - Go to preferences and find the Plugins dialog. 
+ - Browse Repositories, choose Category: Build, and find the Error-prone plugin. 
+ - Right-click and choose “Download and install”.
+
+To enable Error Prone, choose `Settings | Compiler | Java Compiler | Use compiler: Javac with error-prone` 
+and also make sure `Settings | Compiler | Use external build` is NOT selected.
+
 ### Running ThirdEye Coordinator in debug mode
 After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeCoordinator` class. Press the `play ▶️` icon
 and choose debug. This should run the application. However, it would need the right args to start the server.

@@ -4,5 +4,5 @@ export interface StatusList {
 
 export interface Status {
     code: string;
-    msg: string;
+    message: string;
 }

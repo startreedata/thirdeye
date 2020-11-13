@@ -90,7 +90,7 @@ public class MockThirdEyeDataSourceTest {
     this.dataSource.getDimensionFilters("invalid");
   }
 
-  @Test
+  @Test(enabled = false)
   public void testDataGenerator() {
     Assert.assertEquals(this.dataSource.datasetData.size(), 2);
     Assert.assertEquals(this.dataSource.datasetData.get("business").size(), 28 * 9);
@@ -116,7 +116,7 @@ public class MockThirdEyeDataSourceTest {
     Assert.assertTrue(data.getDoubles(COL_AD_IMPRESSIONS).sum().doubleValue() > 0);
   }
 
-  @Test
+  @Test(enabled = false)
   public void testDataGeneratorDaily() {
     DataFrame data = this.dataSource.datasetData.get("business");
     Assert.assertEquals(data.getDoubles(COL_PURCHASES).count(), 28 * 9);

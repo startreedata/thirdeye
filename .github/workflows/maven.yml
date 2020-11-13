@@ -6,8 +6,10 @@ name: Java CI with Maven
 on:
   push:
     branches: [ master ]
+    paths-ignore: thirdeye-ui/**
   pull_request:
     branches: [ master ]
+    paths-ignore: thirdeye-ui/**
 
 jobs:
   build:

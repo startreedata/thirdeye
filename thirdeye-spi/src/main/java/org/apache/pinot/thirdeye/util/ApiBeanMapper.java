@@ -93,26 +93,29 @@ public abstract class ApiBeanMapper {
     }
     Map<String, AlertComponentApi> map = new HashMap<>(componentSpecs.size());
     for (Map.Entry<String, Object> e : componentSpecs.entrySet()) {
-      final String key = e.getKey();
-      final String[] splitted = key.split(":");
-      checkState(splitted.length == 2);
-
-      final String name = splitted[0];
-      final String type = splitted[1];
 
       final Map<String, Object> valueMap = (Map<String, Object>) e.getValue();
       final String metricUrn = (String) valueMap.get("metricUrn");
       valueMap.remove("metricUrn");
       valueMap.remove("className");
 
-      map.put(name, new AlertComponentApi()
-          .setType(type)
+      final AlertComponentApi alertComponentApi = toAlertComponentApi(e.getKey());
+      map.put(alertComponentApi.getName(), alertComponentApi
           .setParams(valueMap)
           .setMetric(toMetricApi(metricUrn))
       );
     }
 
     return map;
+  }
+
+  private static AlertComponentApi toAlertComponentApi(final String detectorComponentName) {
+    final String[] splitted = detectorComponentName.split(":");
+    checkState(splitted.length == 2);
+
+    return new AlertComponentApi()
+        .setName(splitted[0])
+        .setType(splitted[1]);
   }
 
   public static MetricApi toMetricApi(final String metricUrn) {
@@ -189,6 +192,22 @@ public abstract class ApiBeanMapper {
         .setSourceType(dto.getAnomalyResultSource())
         .setNotified(dto.isNotified())
         .setMessage(dto.getMessage())
+        .setMetric(toMetricApi(dto.getMetricUrn())
+            .setName(dto.getMetric())
+            .setDataset(new DatasetApi()
+                .setName(dto.getCollection())
+            )
+        )
+        .setAlert(new AlertApi()
+            .setId(dto.getDetectionConfigId())
+            .setName(optional(dto.getProperties())
+                .map(p -> p.get("subEntityName"))
+                .orElse(null))
+        )
+        .setAlertComponent(optional(dto.getProperties())
+            .map(p -> p.get("detectorComponentName"))
+            .map(ApiBeanMapper::toAlertComponentApi)
+            .orElse(null))
         ;
   }
 }

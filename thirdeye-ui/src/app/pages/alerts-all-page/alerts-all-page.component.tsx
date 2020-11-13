@@ -3,7 +3,7 @@ import AlertCard from "../../components/alerts/alert-card.component";
 import { PageContainer } from "../../components/containers/page-container.component";
 import SearchBar from "../../components/search/search.component";
 import { SideBar } from "../../components/sidebar/sidebar.component";
-import { useAllAlerts } from "../../utils/rest/alerts-rest/alerts-rest.util";
+import { useAllAlerts } from "../../rest/alert/alert.rest";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const { data: alerts, error } = useAllAlerts();

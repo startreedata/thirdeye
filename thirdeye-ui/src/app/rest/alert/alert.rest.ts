@@ -13,7 +13,7 @@ export const useAllAlerts = (): responseInterface<Alert[], Error> => {
 };
 
 export const createAlert = async (alert: Alert): Promise<Alert> => {
-    const response: AxiosResponse = await axios.post(BASE_URL_ALERTS, [alert]);
+    const response: AxiosResponse = await axios.post(BASE_URL_ALERTS, alert);
 
     return response.data[0];
 };

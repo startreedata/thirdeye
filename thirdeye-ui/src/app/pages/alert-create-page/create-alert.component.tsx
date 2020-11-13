@@ -7,8 +7,10 @@ import {
     Snackbar,
     Typography,
 } from "@material-ui/core";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
-import { Alert } from "@material-ui/lab";
+import { Alert as CustomAlert } from "@material-ui/lab";
+import yaml from "js-yaml";
 import React, { ReactElement, useState } from "react";
 import { RouteComponentProps, withRouter } from "react-router-dom";
 import { CustomBreadcrumbs } from "../../components/breadcrumbs/breadcrumbs.component";
@@ -19,8 +21,9 @@ import CommonCodeMirror from "../../components/editor/code-mirror.component";
 import { AppLoader } from "../../components/loader/app-loader.component";
 import { RouterLink } from "../../components/router-link/router-link.component";
 import { CustomStepper } from "../../components/stepper/stepper.component";
-import { DETECTION_CONFIG } from "../../mock";
-import { createAlert } from "../../utils/rest/alerts-rest/alerts-rest.util";
+import { createAlert } from "../../rest/alert/alert.rest";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import { AppRoute } from "../../utils/routes.util";
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
@@ -40,7 +43,7 @@ export const CreateAlertPage = withRouter(
         >();
         const [loading, setLoading] = useState(false);
 
-        const handleNext = (step: number): void => {
+        const handleStepChange = (step: number): void => {
             if (step > 2) {
                 handleCreateAlert();
             } else {
@@ -51,7 +54,7 @@ export const CreateAlertPage = withRouter(
         const handleCreateAlert = async (): Promise<void> => {
             setLoading(true);
             try {
-                await createAlert(detectionConfig);
+                await createAlert(yaml.safeLoad(detectionConfig) as Alert);
                 setMessage({
                     status: "success",
                     text: "Alert created successfully",
@@ -105,7 +108,6 @@ export const CreateAlertPage = withRouter(
             <PageContainer centered noPadding breadcrumbs={breadcrumbs}>
                 <AppLoader visible={loading} />
                 <CustomStepper
-                    clickable={true}
                     currentStep={activeStep}
                     steps={[
                         {
@@ -186,21 +188,31 @@ export const CreateAlertPage = withRouter(
                             ),
                         },
                     ]}
-                    onStepChange={handleNext}
+                    onStepChange={handleStepChange}
                 />
                 <Box>
+                    {activeStep !== 0 && (
+                        <Button
+                            color="primary"
+                            startIcon={<ArrowBackIcon />}
+                            style={{ marginRight: 10 }}
+                            variant="outlined"
+                            onClick={(): void =>
+                                handleStepChange(activeStep - 1)
+                            }
+                        >
+                            Prev
+                        </Button>
+                    )}
                     <Button
                         color="primary"
-                        startIcon={
-                            activeStep === 2 ? <ArrowForwardIcon /> : null
-                        }
+                        endIcon={activeStep >= 2 ? null : <ArrowForwardIcon />}
                         variant="contained"
-                        onClick={(): void => handleNext(activeStep + 1)}
+                        onClick={(): void => handleStepChange(activeStep + 1)}
                     >
-                        {activeStep === 2 ? "Finish" : "Next"}
+                        {activeStep >= 2 ? "Finish" : "Next"}
                     </Button>
                 </Box>
-
                 {
                     <Snackbar
                         autoHideDuration={3000}
@@ -208,12 +220,12 @@ export const CreateAlertPage = withRouter(
                         onClose={(): void => setMessage(undefined)}
                     >
                         {message && (
-                            <Alert
+                            <CustomAlert
                                 severity={message?.status}
                                 onClose={(): void => setMessage(undefined)}
                             >
                                 {message?.text}
-                            </Alert>
+                            </CustomAlert>
                         )}
                     </Snackbar>
                 }

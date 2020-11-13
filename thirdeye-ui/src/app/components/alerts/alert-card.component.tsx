@@ -12,7 +12,7 @@ import {
 import EditIcon from "@material-ui/icons/Edit";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import React, { ReactElement } from "react";
-import { Alert } from "../../utils/rest/alerts-rest/alerts-rest.interfaces";
+import { Alert } from "../../rest/dto/alert.interfaces";
 import { AppRoute } from "../../utils/routes.util";
 import { Button } from "../button/button.component";
 import { RouterLink } from "../router-link/router-link.component";
@@ -20,6 +20,7 @@ import { RouterLink } from "../router-link/router-link.component";
 type Props = {
     data: Alert;
     mode: "detail" | "list";
+    onActiveChange?: (event: React.ChangeEvent, state: boolean) => void;
 };
 
 const useStyles = makeStyles((them: Theme) => {
@@ -34,7 +35,11 @@ const useStyles = makeStyles((them: Theme) => {
     };
 });
 
-const AlertCard = ({ data, mode = "list" }: Props): ReactElement => {
+const AlertCard = ({
+    data,
+    mode = "list",
+    onActiveChange,
+}: Props): ReactElement => {
     const classes = useStyles();
     const {
         id,
@@ -92,7 +97,11 @@ const AlertCard = ({ data, mode = "list" }: Props): ReactElement => {
                                 </>
                             </Tooltip>
                         )}
-                        <Switch checked={active} color="primary" />
+                        <Switch
+                            checked={active}
+                            color="primary"
+                            onChange={onActiveChange}
+                        />
                         <RouterLink to={`${AppRoute.ALERTS_EDIT}/${id}`}>
                             <Button
                                 color="primary"

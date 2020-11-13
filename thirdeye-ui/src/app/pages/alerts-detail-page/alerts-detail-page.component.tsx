@@ -6,7 +6,7 @@ import { CustomBreadcrumbs } from "../../components/breadcrumbs/breadcrumbs.comp
 import { PageContainer } from "../../components/containers/page-container.component";
 import { RouterLink } from "../../components/router-link/router-link.component";
 import { cardStyles } from "../../components/styles/common.styles";
-import { useAlert } from "../../utils/rest/alerts-rest/alerts-rest.util";
+import { updateAlert, useAlert } from "../../rest/alert/alert.rest";
 import { AppRoute } from "../../utils/routes.util";
 
 export const AlertsDetailPage = withRouter((props) => {
@@ -26,10 +26,24 @@ export const AlertsDetailPage = withRouter((props) => {
         </CustomBreadcrumbs>
     );
 
+    const handleActiveStateChange = async (
+        _event: React.ChangeEvent,
+        state: boolean
+    ): Promise<void> => {
+        await updateAlert({ ...alert, active: state });
+        // Temporary fix
+        // Found some other way to update alert
+        window.location.reload();
+    };
+
     return (
         <PageContainer breadcrumbs={breadcrumbs}>
             <Typography variant="h4">{alert.name}</Typography>
-            <AlertCard data={alert} mode="detail" />
+            <AlertCard
+                data={alert}
+                mode="detail"
+                onActiveChange={handleActiveStateChange}
+            />
             <Card className={cardClasses.base}>
                 <Typography variant="subtitle2">
                     All detection rules anomalies over time (0)

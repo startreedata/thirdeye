@@ -23,11 +23,10 @@
 # ---------------------------------------------
 # ./thirdeye.sh ${MODE}
 #
-# - MODE: Choices: {frontend, backend, * }
-#       frontend: Start the frontend server only
-#       backend: Start the backend server only
-#       database: Start the H@ db service. Also initializes the db with the required tables
-#       For any other value, defaults to starting all services with an h2 db.
+# - MODE: Choices: {coordinator, worker, * }
+#       coordinator: Start the coordinator
+#       worker: Start the worker
+#       For any other value, the script fails.
 #
 
 # Attempt to set APP_HOME
@@ -73,6 +72,6 @@ function start_coordinator {
 MODE=$1
 case ${MODE} in
     "coordinator" )  start_coordinator ;;
-    "worker"  )  start_worker ;;
-    * )           echo "Invalid argument! Exiting.";;
+    "worker"  )      start_worker ;;
+    * )              echo "Invalid argument: ${MODE}! Exiting."; exit 1;;
 esac

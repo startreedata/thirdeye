@@ -51,64 +51,28 @@ cd "$SAVED" >/dev/null
 CONFIG_DIR="${APP_HOME}/config"
 LIB_DIR="${APP_HOME}/lib"
 
-CLASSPATH="${APP_HOME}/lib/fat/*"
+CLASSPATH=""
+for filepath in "${LIB_DIR}"/*; do
+  CLASSPATH="${CLASSPATH}:${filepath}"
+done
 
-function start_server {
-  class_ref=$1
-  config_dir=$2
-  java -Dlog4j.configurationFile=log4j2.xml -cp "${CLASSPATH}" ${class_ref} "${config_dir}"
-}
+function start_worker {
+  class_ref="org.apache.pinot.thirdeye.worker.ThirdEyeWorker"
 
-function start_frontend {
-  echo "Running Thirdeye frontend config: ${CONFIG_DIR}"
-  start_server org.apache.pinot.thirdeye.dashboard.ThirdEyeDashboardApplication "${CONFIG_DIR}"
-}
-
-function start_backend {
-  echo "Running Thirdeye backend config: ${CONFIG_DIR}"
-  start_server  org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyApplication "${CONFIG_DIR}"
-}
-
-
-function start_db {
-  echo "Starting H2 database server"
-  java -cp "${CLASSPATH}" org.h2.tools.Server -tcp -baseDir "${CONFIG_DIR}/.." &
-  sleep 1
-
-  echo "Creating ThirdEye database schema"
-  java -cp "${CLASSPATH}" org.h2.tools.RunScript -user "sa" -password "sa" -url "jdbc:h2:tcp:localhost/h2db" -script "zip:./bin/thirdeye-dashboard.jar!/schema/create-schema.sql"
-
-  if [ -f "${CONFIG_DIR}/bootstrap.sql" ]; then
-    echo "Running database bootstrap script ${CONFIG_DIR}/bootstrap.sql"
-    java -cp "${CLASSPATH}" org.h2.tools.RunScript -user "sa" -password "sa" -url "jdbc:h2:tcp:localhost/h2db" -script "${CONFIG_DIR}/bootstrap.sql"
-  fi
+  echo "Starting Thirdeye worker.. config_dir: ${CONFIG_DIR}"
+  java -cp "${CLASSPATH}" ${class_ref} "${CONFIG_DIR}"
 }
 
 function start_coordinator {
-  CLASSPATH=""
-  for filepath in "${LIB_DIR}"/*; do
-    CLASSPATH="${CLASSPATH}:${filepath}"
-  done
-  class_ref="org.apache.pinot.thirdeye.ThirdEyeServer"
+  class_ref="org.apache.pinot.thirdeye.ThirdEyeCoordinator"
 
-  java -Dlog4j.configurationFile=log4j2.xml -cp "${CLASSPATH}" ${class_ref} "${config_dir}"
-}
-
-function start_all {
-  start_db
-
-  start_backend &
-  sleep 10
-
-  start_frontend &
-  wait
+  echo "Starting Thirdeye coordinator.. config_dir: ${CONFIG_DIR}"
+  java -cp "${CLASSPATH}" ${class_ref} server "${CONFIG_DIR}"/coordinator.yaml
 }
 
 MODE=$1
 case ${MODE} in
     "coordinator" )  start_coordinator ;;
-    "frontend" )  start_frontend ;;
-    "backend"  )  start_backend ;;
-    "database" )  start_db;;
-    * )           echo "blah" #start_all ;;
+    "worker"  )  start_worker ;;
+    * )           echo "Invalid argument! Exiting.";;
 esac

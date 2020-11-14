@@ -31,12 +31,16 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-dist/src/main/bash</directory>
+      <directory>${basedir}/src/main/bash</directory>
       <outputDirectory>bin/</outputDirectory>
       <includes>
         <include>*.sh</include>
       </includes>
       <fileMode>0755</fileMode>
+    </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/config</directory>
+      <outputDirectory>config/</outputDirectory>
     </fileSet>
   </fileSets>
   <dependencySets>

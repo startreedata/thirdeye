@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.util;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.apache.pinot.thirdeye.datalayer.pojo.AlertNodeType.DETECTION;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.api.AlertApi;
-import org.apache.pinot.thirdeye.api.AlertComponentApi;
+import org.apache.pinot.thirdeye.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.api.AnomalyApi;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.api.DatasetApi;
@@ -25,6 +26,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datalayer.pojo.AlertNode;
 import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
 
 public abstract class ApiBeanMapper {
@@ -79,19 +81,57 @@ public abstract class ApiBeanMapper {
         .setDescription(dto.getDescription())
         .setActive(dto.isActive())
         .setCron(dto.getCron())
-        .setDetections(toComponentMap(dto.getComponentSpecs()))
+        .setNodes(toAlertNodeApiMap(dto.getNodes()))
         .setLastTimestamp(new Date(dto.getLastTimestamp()))
         .setOwner(new UserApi()
             .setPrincipal(dto.getCreatedBy()))
         ;
   }
 
-  private static Map<String, AlertComponentApi> toComponentMap(
+  private static Map<String, AlertNodeApi> toAlertNodeApiMap(
+      final Map<String, AlertNode> nodes) {
+    Map<String, AlertNodeApi> map = new HashMap<>(nodes.size());
+    for (Map.Entry<String, AlertNode> e : nodes.entrySet()) {
+      map.put(e.getKey(), toNodeApi(e.getValue()));
+    }
+    return map;
+  }
+
+  private static AlertNodeApi toNodeApi(final AlertNode dto) {
+    return new AlertNodeApi()
+        .setName(dto.getName())
+        .setType(dto.getType())
+        .setSubType(dto.getSubType())
+        .setDependsOn(dto.getDependsOn())
+        .setParams(dto.getParams())
+        ;
+  }
+
+  public static Map<String, AlertNode> toAlertNodeMap(
+      final Map<String, AlertNodeApi> nodes) {
+    Map<String, AlertNode> map = new HashMap<>(nodes.size());
+    for (Map.Entry<String, AlertNodeApi> e : nodes.entrySet()) {
+      map.put(e.getKey(), toAlertNode(e.getValue()));
+    }
+    return map;
+  }
+
+  public static AlertNode toAlertNode(final AlertNodeApi api) {
+    return new AlertNode()
+        .setName(api.getName())
+        .setType(api.getType())
+        .setSubType(api.getSubType())
+        .setDependsOn(api.getDependsOn())
+        .setParams(api.getParams())
+        ;
+  }
+
+  private static Map<String, AlertNodeApi> toNodeMap(
       final Map<String, Object> componentSpecs) {
     if (componentSpecs == null) {
       return null;
     }
-    Map<String, AlertComponentApi> map = new HashMap<>(componentSpecs.size());
+    Map<String, AlertNodeApi> map = new HashMap<>(componentSpecs.size());
     for (Map.Entry<String, Object> e : componentSpecs.entrySet()) {
 
       final Map<String, Object> valueMap = (Map<String, Object>) e.getValue();
@@ -99,7 +139,7 @@ public abstract class ApiBeanMapper {
       valueMap.remove("metricUrn");
       valueMap.remove("className");
 
-      final AlertComponentApi alertComponentApi = toAlertComponentApi(e.getKey());
+      final AlertNodeApi alertComponentApi = toDetectionAlertNodeApi(e.getKey());
       map.put(alertComponentApi.getName(), alertComponentApi
           .setParams(valueMap)
           .setMetric(toMetricApi(metricUrn))
@@ -109,13 +149,14 @@ public abstract class ApiBeanMapper {
     return map;
   }
 
-  private static AlertComponentApi toAlertComponentApi(final String detectorComponentName) {
+  private static AlertNodeApi toDetectionAlertNodeApi(final String detectorComponentName) {
     final String[] splitted = detectorComponentName.split(":");
     checkState(splitted.length == 2);
 
-    return new AlertComponentApi()
+    return new AlertNodeApi()
         .setName(splitted[0])
-        .setType(splitted[1]);
+        .setType(DETECTION)
+        .setSubType(splitted[1]);
   }
 
   public static MetricApi toMetricApi(final String metricUrn) {
@@ -204,9 +245,9 @@ public abstract class ApiBeanMapper {
                 .map(p -> p.get("subEntityName"))
                 .orElse(null))
         )
-        .setAlertComponent(optional(dto.getProperties())
+        .setAlertNode(optional(dto.getProperties())
             .map(p -> p.get("detectorComponentName"))
-            .map(ApiBeanMapper::toAlertComponentApi)
+            .map(ApiBeanMapper::toDetectionAlertNodeApi)
             .orElse(null))
         ;
   }

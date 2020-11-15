@@ -17,9 +17,7 @@ public class AlertApi {
   private Date created;
   private Date updated;
   private UserApi owner;
-  private Map<String, AlertComponentApi> detections;
-  private Map<String, AlertComponentApi> filters;
-  private Map<String, AlertComponentApi> qualityChecks;
+  private Map<String, AlertNodeApi> nodes;
 
   public Long getId() {
     return id;
@@ -102,33 +100,13 @@ public class AlertApi {
     return this;
   }
 
-  public Map<String, AlertComponentApi> getDetections() {
-    return detections;
+  public Map<String, AlertNodeApi> getNodes() {
+    return nodes;
   }
 
-  public AlertApi setDetections(
-      final Map<String, AlertComponentApi> detections) {
-    this.detections = detections;
-    return this;
-  }
-
-  public Map<String, AlertComponentApi> getFilters() {
-    return filters;
-  }
-
-  public AlertApi setFilters(
-      final Map<String, AlertComponentApi> filters) {
-    this.filters = filters;
-    return this;
-  }
-
-  public Map<String, AlertComponentApi> getQualityChecks() {
-    return qualityChecks;
-  }
-
-  public AlertApi setQualityChecks(
-      final Map<String, AlertComponentApi> qualityChecks) {
-    this.qualityChecks = qualityChecks;
+  public AlertApi setNodes(
+      final Map<String, AlertNodeApi> nodes) {
+    this.nodes = nodes;
     return this;
   }
 }

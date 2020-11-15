@@ -28,7 +28,7 @@ public class AnomalyApi {
   private String message;
 
   private AlertApi alert;
-  private AlertComponentApi alertComponent;
+  private AlertNodeApi alertNode;
   private MetricApi metric;
 
   private List<AnomalyApi> children; // ids of the anomalies this anomaly merged from
@@ -153,13 +153,13 @@ public class AnomalyApi {
     return this;
   }
 
-  public AlertComponentApi getAlertComponent() {
-    return alertComponent;
+  public AlertNodeApi getAlertNode() {
+    return alertNode;
   }
 
-  public AnomalyApi setAlertComponent(
-      final AlertComponentApi alertComponent) {
-    this.alertComponent = alertComponent;
+  public AnomalyApi setAlertNode(
+      final AlertNodeApi alertNode) {
+    this.alertNode = alertNode;
     return this;
   }
 

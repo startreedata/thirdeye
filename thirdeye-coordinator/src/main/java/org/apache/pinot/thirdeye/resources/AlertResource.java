@@ -28,8 +28,8 @@ import org.apache.pinot.thirdeye.alert.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
 import org.apache.pinot.thirdeye.alert.AlertPreviewGenerator;
 import org.apache.pinot.thirdeye.api.AlertApi;
-import org.apache.pinot.thirdeye.api.AlertComponentApi;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
+import org.apache.pinot.thirdeye.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.api.DatasetApi;
 import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.api.UserApi;
@@ -105,8 +105,8 @@ public class AlertResource {
 
   private AlertDTO createAlert(final ThirdEyePrincipal principal, final AlertApi alertApi) {
     ensureExists(alertApi.getName(), "Name must be present");
-    ensureExists(alertApi.getDetections(), "Exactly 1 detection must be present");
-    ensure(alertApi.getDetections().size() == 1, "Exactly 1 detection must be present");
+    ensureExists(alertApi.getNodes(), "Exactly 1 detection must be present");
+    ensure(alertApi.getNodes().size() == 1, "Exactly 1 detection must be present");
 
     return alertCreater.create(alertApi
         .setOwner(new UserApi().setPrincipal(principal.getName()))
@@ -117,8 +117,8 @@ public class AlertResource {
     final AlertApi api = ApiBeanMapper.toApi(dto);
 
     // Add metric and dataset info
-    api.getDetections().values().stream()
-        .map(AlertComponentApi::getMetric)
+    api.getNodes().values().stream()
+        .map(AlertNodeApi::getMetric)
         .forEach(metricApi -> optional(metricApi)
             .map(MetricApi::getId)
             .map(metricConfigManager::findById)

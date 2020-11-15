@@ -12,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.api.AlertApi;
-import org.apache.pinot.thirdeye.api.AlertComponentApi;
+import org.apache.pinot.thirdeye.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.api.UserApi;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -21,6 +21,7 @@ import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricProperties;
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionPropertiesBuilder;
+import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,9 +49,9 @@ public class AlertApiBeanMapper {
     DatasetConfigDTO datasetConfigDTO = null;
 
     final List<Map<String, Object>> listOfDetectionMaps = new ArrayList<>();
-    for (Map.Entry<String, AlertComponentApi> e : api.getDetections().entrySet()) {
+    for (Map.Entry<String, AlertNodeApi> e : api.getNodes().entrySet()) {
       final String name = e.getKey();
-      final AlertComponentApi component = e.getValue();
+      final AlertNodeApi component = e.getValue();
 
       final String key = metricAttributesMap.loadMetricCache(
           component.getMetric().getName(),
@@ -89,11 +90,11 @@ public class AlertApiBeanMapper {
 
   private Map<String, Object> ruleMap(
       final String name,
-      final AlertComponentApi component) {
+      final AlertNodeApi node) {
     final Map<String, Object> ruleMap = new LinkedHashMap<>();
     ruleMap.put("name", name);
-    ruleMap.put("type", component.getType());
-    ruleMap.put("params", component.getParams());
+    ruleMap.put("type", node.getSubType());
+    ruleMap.put("params", node.getParams());
     return ruleMap;
   }
 
@@ -108,6 +109,10 @@ public class AlertApiBeanMapper {
         .map(d -> d.toInstant().toEpochMilli())
         .orElse(0L));
     dto.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+
+    optional(api.getNodes())
+        .map(ApiBeanMapper::toAlertNodeMap)
+        .ifPresent(dto::setNodes);
 
     // May not get updated while edits
     optional(api.getOwner())

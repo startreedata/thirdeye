@@ -1,10 +1,11 @@
 [
   {
-    "name": "pc5",
-    "description": "Percentage drop",
-    "detections": {
-      "detection_rule_1": {
-        "type": "PERCENTAGE_RULE",
+    "name": "newAlert",
+    "description": "This is the detection used by online service",
+    "nodes": {
+      "d1": {
+        "type": "DETECTION",
+        "subType": "PERCENTAGE_RULE",
         "metric": {
           "name": "views",
           "dataset": {
@@ -13,11 +14,20 @@
         },
         "params": {
           "offset": "wo1w",
-          "percentageChange": 0.1,
-          "pattern": "down"
+          "percentageChange": 0.2
         }
+      },
+      "f1": {
+        "type": "FILTER",
+        "subType": "PERCENTAGE_CHANGE_FILTER",
+        "params": {
+          "pattern": "UP_OR_DOWN",
+          "threshold": 0.05
+        },
+        "dependsOn": [
+          "d1"
+        ]
       }
-    },
-    "lastTimestamp": 0
+    }
   }
 ]

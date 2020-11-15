@@ -36,23 +36,26 @@ import org.apache.pinot.thirdeye.detection.health.DetectionHealth;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DetectionConfigBean extends AbstractBean {
 
-  String cron;
   String name;
   String description;
-  long lastTimestamp;
-  Map<String, Object> properties;
   boolean active;
-  String yaml;
-  Map<String, Object> componentSpecs;
+  String cron;
+  long lastTimestamp;
   long lastTuningTimestamp;
+  boolean isDataAvailabilitySchedule;
+  long taskTriggerFallBackTimeInSec;
+  String yaml;
+
   List<String> owners;
+  Map<String, Object> properties;
+  Map<String, Object> componentSpecs;
+  DetectionHealth health;
 
   // Stores properties related to data SLA rules for every metric
   Map<String, Object> dataQualityProperties;
 
-  boolean isDataAvailabilitySchedule;
-  long taskTriggerFallBackTimeInSec;
-  DetectionHealth health;
+  // The execution dag
+  Map<String, AlertNode> nodes;
 
   public List<String> getOwners() {
     return owners;
@@ -166,6 +169,16 @@ public class DetectionConfigBean extends AbstractBean {
     this.health = health;
   }
 
+  public Map<String, AlertNode> getNodes() {
+    return nodes;
+  }
+
+  public DetectionConfigBean setNodes(
+      final Map<String, AlertNode> nodes) {
+    this.nodes = nodes;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -175,13 +188,16 @@ public class DetectionConfigBean extends AbstractBean {
       return false;
     }
     DetectionConfigBean that = (DetectionConfigBean) o;
-    return lastTimestamp == that.lastTimestamp && active == that.active && Objects
-        .equals(cron, that.cron)
-        && Objects.equals(name, that.name) && Objects.equals(properties, that.properties) && Objects
-        .equals(yaml,
-            that.yaml) && Objects.equals(dataQualityProperties, that.dataQualityProperties)
-        && Objects.equals(isDataAvailabilitySchedule, that.isDataAvailabilitySchedule) && Objects
-        .equals(taskTriggerFallBackTimeInSec, that.taskTriggerFallBackTimeInSec);
+    return lastTimestamp == that.lastTimestamp
+        && active == that.active
+        && Objects.equals(cron, that.cron)
+        && Objects.equals(name, that.name)
+        && Objects.equals(properties, that.properties)
+        && Objects.equals(yaml, that.yaml)
+        && Objects.equals(dataQualityProperties, that.dataQualityProperties)
+        && Objects.equals(isDataAvailabilitySchedule, that.isDataAvailabilitySchedule)
+        && Objects.equals(taskTriggerFallBackTimeInSec, that.taskTriggerFallBackTimeInSec)
+        ;
   }
 
   @Override

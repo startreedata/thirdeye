@@ -2,9 +2,10 @@
   "alert": {
     "name": "pc5",
     "description": "Percentage drop",
-    "detections": {
+    "nodes": {
       "detection_rule_1": {
-        "type": "PERCENTAGE_RULE",
+        "type": "DETECTION",
+        "subType": "PERCENTAGE_RULE",
         "metric": {
           "name": "views",
           "dataset": {

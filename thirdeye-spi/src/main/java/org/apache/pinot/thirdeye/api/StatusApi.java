@@ -7,24 +7,14 @@ import org.apache.pinot.thirdeye.ThirdEyeStatus;
 @JsonInclude(Include.NON_NULL)
 public class StatusApi {
 
-  private String code;
+  private ThirdEyeStatus code;
   private String msg;
 
-  @SuppressWarnings("unused")
-  public StatusApi() {
-    // Used by Jackson deserialization
-  }
-
-  public StatusApi(ThirdEyeStatus status) {
-    this.code = status.name();
-    this.msg = status.getMessage();
-  }
-
-  public String getCode() {
+  public ThirdEyeStatus getCode() {
     return code;
   }
 
-  public StatusApi setCode(final String code) {
+  public StatusApi setCode(final ThirdEyeStatus code) {
     this.code = code;
     return this;
   }

@@ -4,8 +4,9 @@ public enum ThirdEyeStatus {
 
   ERR_DUPLICATE_NAME("Name must be unique!"),
   ERR_MISSING_ID("ID is missing from the entity!"),
-  ERR_OBJECT_DOES_NOT_EXIST("Object does not exist!"),
-  ERR_UNKNOWN("Unknown Error!");
+  ERR_OBJECT_UNEXPECTED("Object should be null/empty! %s"),
+  ERR_OBJECT_DOES_NOT_EXIST("Object does not exist! %s"),
+  ERR_UNKNOWN("Untagged Error! %s");
 
   final String message;
 

@@ -2,12 +2,12 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 
 import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -106,7 +106,6 @@ public class AlertResource {
   private AlertDTO createAlert(final ThirdEyePrincipal principal, final AlertApi alertApi) {
     ensureExists(alertApi.getName(), "Name must be present");
     ensureExists(alertApi.getNodes(), "Exactly 1 detection must be present");
-    ensure(alertApi.getNodes().size() == 1, "Exactly 1 detection must be present");
 
     return alertCreater.create(alertApi
         .setOwner(new UserApi().setPrincipal(principal.getName()))
@@ -117,15 +116,17 @@ public class AlertResource {
     final AlertApi api = ApiBeanMapper.toApi(dto);
 
     // Add metric and dataset info
-    api.getNodes().values().stream()
-        .map(AlertNodeApi::getMetric)
-        .forEach(metricApi -> optional(metricApi)
-            .map(MetricApi::getId)
-            .map(metricConfigManager::findById)
-            .ifPresent(metricDto -> metricApi
-                .setName(metricDto.getName())
-                .setDataset(new DatasetApi()
-                    .setName(metricDto.getDataset()))));
+    optional(api.getNodes())
+        .map(Map::values)
+        .ifPresent(nodes -> nodes.stream()
+            .map(AlertNodeApi::getMetric)
+            .forEach(metricApi -> optional(metricApi)
+                .map(MetricApi::getId)
+                .map(metricConfigManager::findById)
+                .ifPresent(metricDto -> metricApi
+                    .setName(metricDto.getName())
+                    .setDataset(new DatasetApi()
+                        .setName(metricDto.getDataset())))));
 
     return api;
   }

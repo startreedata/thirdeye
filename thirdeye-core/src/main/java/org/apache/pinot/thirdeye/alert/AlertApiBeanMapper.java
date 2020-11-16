@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.alert;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
@@ -38,8 +39,12 @@ public class AlertApiBeanMapper {
     this.dataProvider = dataProvider;
   }
 
-  private Map<String, Object> buildDetectionProperties(final AlertApi api,
+  @VisibleForTesting
+  Map<String, Object> buildDetectionProperties(final AlertApi api,
       final DetectionMetricAttributeHolder metricAttributesMap) {
+    if (api.getNodes() == null) {
+      return Collections.emptyMap();
+    }
 
     final DetectionPropertiesBuilder detectionTranslatorBuilder =
         new DetectionPropertiesBuilder(metricAttributesMap, dataProvider);

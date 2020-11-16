@@ -45,7 +45,7 @@ const AlertCard = ({
         id,
         name,
         active,
-        detections,
+        nodes: detections,
         owner: { principal },
     } = data;
 

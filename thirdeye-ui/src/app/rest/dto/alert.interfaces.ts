@@ -12,17 +12,16 @@ export interface Alert {
     created: Date;
     updated: Date;
     owner: User;
-    detections: { [index: string]: AlertComponent };
-    filters: { [index: string]: AlertComponent };
-    qualityChecks: { [index: string]: AlertComponent };
+    nodes: { [index: string]: AlertNode };
 }
 
-export interface AlertComponent {
+export interface AlertNode {
     name: string;
     type: string;
+    subType: string;
     metric: Metric;
     params: { [index: string]: unknown };
-    alert: Alert;
+    dependsOn: string[];
 }
 
 export interface AlertEvaluation {

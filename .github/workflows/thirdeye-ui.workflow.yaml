@@ -42,6 +42,10 @@ jobs:
               working-directory: thirdeye-ui
               run: npm run pretty
 
+            - name: thirdeye-ui > test
+              working-directory: thirdeye-ui
+              run: npm run test
+
             - name: thirdeye-ui > build
               working-directory: thirdeye-ui
               run: npm run build

@@ -1,10 +1,9 @@
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
-import en from "../locale/en.json";
+import { InitOptions } from "i18next";
+import en from "../../locale/en.json";
 
-// Initializes i18next
-export const initI18next = (): void => {
-    i18n.use(initReactI18next).init({
+// Returns i18next InitOptions
+export const getInitOptions = (): InitOptions => {
+    const initOptions: InitOptions = {
         interpolation: {
             escapeValue: false, // XSS safety provided by React
         },
@@ -19,5 +18,7 @@ export const initI18next = (): void => {
             },
         },
         saveMissing: true, // Required for missingKeyHandler
-    });
+    };
+
+    return initOptions;
 };

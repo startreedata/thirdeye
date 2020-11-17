@@ -13,7 +13,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import React, { ReactElement } from "react";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { AppRoute } from "../../utils/routes.util";
+import { getAlertsUpdatePath } from "../../utils/route/routes.util";
 import { Button } from "../button/button.component";
 import { RouterLink } from "../router-link/router-link.component";
 
@@ -102,7 +102,7 @@ const AlertCard = ({
                             color="primary"
                             onChange={onActiveChange}
                         />
-                        <RouterLink to={`${AppRoute.ALERTS_EDIT}/${id}`}>
+                        <RouterLink to={getAlertsUpdatePath(id)}>
                             <Button
                                 color="primary"
                                 startIcon={<EditIcon />}

@@ -31,7 +31,6 @@
         "start": "webpack serve --config ./webpack.config.dev.js --env development",
         "build": "webpack --config ./webpack.config.prod.js --env production",
         "test": "jest",
-        "test-file": "jest $file",
         "test-watch": "jest --watch",
         "test-coverage": "jest --coverage",
         "eslint": "eslint '**/*.{ts,tsx,js}' --config './.eslintrc.json' --ignore-path './.eslintignore' --fix",
@@ -51,8 +50,7 @@
         "react-codemirror2": "^7.2.1",
         "react-dom": "^16.13.1",
         "react-i18next": "^11.7.3",
-        "react-router-dom": "^5.2.0",
-        "swr": "^0.3.8"
+        "react-router-dom": "^5.2.0"
     },
     "devDependencies": {
         "@svgr/webpack": "^5.4.0",

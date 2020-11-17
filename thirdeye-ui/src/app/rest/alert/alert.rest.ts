@@ -1,19 +1,22 @@
 import axios, { AxiosResponse } from "axios";
-import useSWR, { responseInterface } from "swr";
 import { Alert, AlertEvaluation } from "../dto/alert.interfaces";
 
 const BASE_URL_ALERTS = "/api/alerts";
 
-export const useAlert = (id: number): responseInterface<Alert, Error> => {
-    return useSWR(`${BASE_URL_ALERTS}/${id}`);
+export const getAlert = async (id: number): Promise<Alert> => {
+    const response: AxiosResponse = await axios.get(`${BASE_URL_ALERTS}/${id}`);
+
+    return response.data;
 };
 
-export const useAllAlerts = (): responseInterface<Alert[], Error> => {
-    return useSWR(BASE_URL_ALERTS);
+export const getAllAlerts = async (): Promise<Alert[]> => {
+    const response: AxiosResponse = await axios.get(BASE_URL_ALERTS);
+
+    return response.data;
 };
 
 export const createAlert = async (alert: Alert): Promise<Alert> => {
-    const response: AxiosResponse = await axios.post(BASE_URL_ALERTS, alert);
+    const response: AxiosResponse = await axios.post(BASE_URL_ALERTS, [alert]);
 
     return response.data[0];
 };

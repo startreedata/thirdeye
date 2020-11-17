@@ -4,7 +4,7 @@ import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { ReactComponent as ThirdEye } from "../../../assets/icons/third-eye.svg";
-import { AppRoute } from "../../utils/routes.util";
+import { AppRoute } from "../../utils/route/routes.util";
 import { Button } from "../button/button.component";
 import { applicationBarStyles } from "./application-bar.styles";
 
@@ -47,7 +47,7 @@ export const ApplicationBar: FunctionComponent = () => {
 
                 <RouterLink
                     style={{ textDecoration: "none" }}
-                    to={AppRoute.ALERT_NEW}
+                    to={AppRoute.ALERTS_CREATE}
                 >
                     <Button
                         color="primary"

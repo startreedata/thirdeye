@@ -1,20 +1,26 @@
 import axios, { AxiosResponse } from "axios";
-import useSWR, { responseInterface } from "swr";
 import { SubscriptionGroup } from "../dto/subscription-group.interfaces";
 
 const BASE_URL_SUBSCRIPTION_GROUPS = "/api/subscription-groups";
 
-export const useSubscriptionGroup = (
+export const getSubscriptionGroup = async (
     id: number
-): responseInterface<SubscriptionGroup, Error> => {
-    return useSWR(`${BASE_URL_SUBSCRIPTION_GROUPS}/${id}`);
+): Promise<SubscriptionGroup> => {
+    const response: AxiosResponse = await axios.get(
+        `${BASE_URL_SUBSCRIPTION_GROUPS}/${id}`
+    );
+
+    return response.data;
 };
 
-export const useAllSubscriptionGroups = (): responseInterface<
-    SubscriptionGroup[],
-    Error
+export const getAllSubscriptionGroups = async (): Promise<
+    SubscriptionGroup[]
 > => {
-    return useSWR(BASE_URL_SUBSCRIPTION_GROUPS);
+    const response: AxiosResponse = await axios.get(
+        BASE_URL_SUBSCRIPTION_GROUPS
+    );
+
+    return response.data;
 };
 
 export const createSubscriptionGroup = async (

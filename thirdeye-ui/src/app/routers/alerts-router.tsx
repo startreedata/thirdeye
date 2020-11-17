@@ -3,7 +3,7 @@ import { Redirect, Route, Switch } from "react-router-dom";
 import { CreateAlertPage } from "../pages/alert-create-page/create-alert.component";
 import { AlertsAllPage } from "../pages/alerts-all-page/alerts-all-page.component";
 import { AlertsDetailPage } from "../pages/alerts-detail-page/alerts-detail-page.component";
-import { AppRoute, getAlertsAllPath } from "../utils/routes.util";
+import { AppRoute, getAlertsAllPath } from "../utils/route/routes.util";
 
 // ThirdEye UI alerts path router
 export const AlertsRouter: FunctionComponent = () => {
@@ -12,7 +12,7 @@ export const AlertsRouter: FunctionComponent = () => {
             <Route
                 exact
                 component={CreateAlertPage}
-                path={AppRoute.ALERT_NEW}
+                path={AppRoute.ALERTS_CREATE}
             />
             {/* Alerts path */}
             <Route exact path={AppRoute.ALERTS}>
@@ -30,7 +30,7 @@ export const AlertsRouter: FunctionComponent = () => {
             <Route
                 exact
                 component={AlertsAllPage}
-                path={AppRoute.ALERTS_EDIT}
+                path={AppRoute.ALERTS_UPDATE}
             />
         </Switch>
     );

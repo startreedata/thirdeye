@@ -1,18 +1,19 @@
 import { Box, CssBaseline, ThemeProvider } from "@material-ui/core";
+import axios from "axios";
+import i18n from "i18next";
 import React, { FunctionComponent } from "react";
-import { SWRConfig } from "swr";
+import { initReactI18next } from "react-i18next";
 import { ApplicationBar } from "./components/application-bar/application-bar.component";
 import { AppRouter } from "./routers/app-router";
-import { initHTTPInterceptors } from "./utils/axios.util";
-import { initI18next } from "./utils/i18next.util";
+import { requestInterceptor } from "./utils/axios/axios.util";
+import { getInitOptions } from "./utils/i18next/i18next.util";
 import { theme } from "./utils/material-ui/theme.util";
-import { swrFetcher } from "./utils/swr.util";
 
-// Initialize i18next
-initI18next();
-
-// Initialize axios
-initHTTPInterceptors();
+// Initializations
+// i18next
+i18n.use(initReactI18next).init(getInitOptions());
+// axios
+axios.interceptors.request.use(requestInterceptor);
 
 // ThirdEye UI app
 export const App: FunctionComponent = () => {
@@ -24,11 +25,8 @@ export const App: FunctionComponent = () => {
 
                 <ApplicationBar />
 
-                {/* Initialize SWR config */}
-                <SWRConfig value={{ fetcher: swrFetcher }}>
-                    {/* Router */}
-                    <AppRouter />
-                </SWRConfig>
+                {/* Router */}
+                <AppRouter />
             </ThemeProvider>
         </Box>
     );

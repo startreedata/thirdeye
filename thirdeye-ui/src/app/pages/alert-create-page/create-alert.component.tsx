@@ -24,7 +24,7 @@ import { CustomStepper } from "../../components/stepper/stepper.component";
 import { createAlert } from "../../rest/alert/alert.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
-import { AppRoute } from "../../utils/routes.util";
+import { AppRoute } from "../../utils/route/routes.util";
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 

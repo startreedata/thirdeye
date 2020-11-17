@@ -7,7 +7,7 @@ import {
     getAlertsPath,
     getBasePath,
     getSignInPath,
-} from "../utils/routes.util";
+} from "../utils/route/routes.util";
 import { AlertsRouter } from "./alerts-router";
 
 // ThirdEye UI app router

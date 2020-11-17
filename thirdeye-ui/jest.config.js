@@ -21,7 +21,7 @@ module.exports = {
     // Test Environment
     testEnvironment: "jest-environment-jsdom-fourteen",
     moduleNameMapper: {
-        "\\.svg": "<rootDir>/src/test/mocks/svgrMock.js", // Mock SVG imports
+        "\\.svg": "<rootDir>/src/test/mocks/svgr-mock.js", // Mock SVG imports
         "\\.(css|scss)$": "identity-obj-proxy", // Mock stylesheet imports
     },
 };

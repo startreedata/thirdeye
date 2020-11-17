@@ -1,17 +1,26 @@
 import { Card, Grid, Typography } from "@material-ui/core";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { withRouter } from "react-router-dom";
 import AlertCard from "../../components/alerts/alert-card.component";
 import { CustomBreadcrumbs } from "../../components/breadcrumbs/breadcrumbs.component";
 import { PageContainer } from "../../components/containers/page-container.component";
 import { RouterLink } from "../../components/router-link/router-link.component";
 import { cardStyles } from "../../components/styles/common.styles";
-import { updateAlert, useAlert } from "../../rest/alert/alert.rest";
-import { AppRoute } from "../../utils/routes.util";
+import { getAlert, updateAlert } from "../../rest/alert/alert.rest";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import { AppRoute } from "../../utils/route/routes.util";
 
 export const AlertsDetailPage = withRouter((props) => {
     const { id } = props.match.params;
-    const { data: alert } = useAlert(id);
+    const [alert, setAlert] = useState<Alert>();
+
+    useEffect(() => {
+        fetchAlert(parseInt(id));
+    }, [id]);
+
+    const fetchAlert = async (id: number): Promise<void> => {
+        setAlert(await getAlert(id));
+    };
 
     const cardClasses = cardStyles();
 

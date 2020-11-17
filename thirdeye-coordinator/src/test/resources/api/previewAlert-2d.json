@@ -2,9 +2,10 @@
   "alert": {
     "name": "pc5",
     "description": "Percentage drop",
-    "detections": {
-      "detection_rule_1": {
-        "type": "PERCENTAGE_RULE",
+    "nodes": {
+      "d1": {
+        "type": "DETECTION",
+        "subType": "PERCENTAGE_RULE",
         "metric": {
           "name": "views",
           "dataset": {
@@ -13,12 +14,13 @@
         },
         "params": {
           "offset": "wo1w",
-          "percentageChange": 0.1,
+          "percentageChange": 0.2,
           "pattern": "down"
         }
       },
-      "detection_rule_2": {
-        "type": "PERCENTAGE_RULE",
+      "d2": {
+        "type": "DETECTION",
+        "subType": "PERCENTAGE_RULE",
         "metric": {
           "name": "views",
           "dataset": {
@@ -34,6 +36,5 @@
     }
   },
   "start": 1577865600000,
-  "end": 1590994800000,
-  "lastTimestamp": 0
+  "end": 1590994800000
 }

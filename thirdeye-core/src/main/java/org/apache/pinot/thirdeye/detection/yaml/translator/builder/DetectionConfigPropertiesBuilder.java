@@ -48,9 +48,11 @@ public abstract class DetectionConfigPropertiesBuilder {
   public static final String PROP_DIMENSION_EXPLORATION = "dimensionExploration";
   public static final String PROP_FILTERS = "filters";
 
-  static final String PROP_DETECTION = "detection";
-  static final String PROP_FILTER = "filter";
-  static final String PROP_QUALITY = "quality";
+  public static final String PROP_DETECTION = "detection";
+  public static final String PROP_FILTER = "filter";
+  public static final String PROP_QUALITY = "quality";
+  public static final String PROP_LABELER = "labeler";
+
   static final String PROP_TYPE = "type";
   static final String PROP_CLASS_NAME = "className";
   static final String PROP_PARAMS = "params";
@@ -59,7 +61,6 @@ public abstract class DetectionConfigPropertiesBuilder {
   static final String PROP_NESTED_METRIC_URNS = "nestedMetricUrns";
   static final String PROP_RULES = "rules";
   static final String PROP_GROUPER = "grouper";
-  static final String PROP_LABELER = "labeler";
   static final String PROP_NESTED = "nested";
   static final String PROP_BASELINE_PROVIDER = "baselineValueProvider";
   static final String PROP_DETECTOR = "detector";
@@ -138,7 +139,8 @@ public abstract class DetectionConfigPropertiesBuilder {
     return properties;
   }
 
-  List<Map<String, Object>> buildFilterWrapperProperties(String metricUrn, String wrapperClassName,
+  public List<Map<String, Object>> buildFilterWrapperProperties(String metricUrn,
+      String wrapperClassName,
       Map<String, Object> yamlConfig, List<Map<String, Object>> nestedProperties) {
     if (yamlConfig == null || yamlConfig.isEmpty()) {
       return nestedProperties;
@@ -156,7 +158,8 @@ public abstract class DetectionConfigPropertiesBuilder {
     return Collections.singletonList(wrapperProperties);
   }
 
-  Map<String, Object> buildLabelerWrapperProperties(String metricUrn, String wrapperClassName,
+  public Map<String, Object> buildLabelerWrapperProperties(String metricUrn,
+      String wrapperClassName,
       Map<String, Object> yamlConfig, List<Map<String, Object>> nestedProperties) {
     Map<String, Object> wrapperProperties = buildWrapperProperties(wrapperClassName,
         nestedProperties);

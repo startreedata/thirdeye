@@ -21,14 +21,12 @@ import org.apache.pinot.thirdeye.detection.algorithm.DimensionWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyDetectorWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper;
-import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class AlertApiBeanMapperTest {
+public class AlertExecutionPlanBuilderTest {
 
-  private AlertApiBeanMapper alertApiBeanMapper;
-  private DataProvider dataProvider;
+  private AlertExecutionPlanBuilder instance;
 
   private static AlertNodeApi sampleDetectionNode() {
     final HashMap<String, Object> params = new HashMap<>();
@@ -66,8 +64,8 @@ public class AlertApiBeanMapperTest {
 
   @BeforeMethod
   public void setUp() {
-    dataProvider = mock(DataProvider.class);
-    alertApiBeanMapper = new AlertApiBeanMapper(dataProvider);
+    final DataProvider dataProvider = mock(DataProvider.class);
+    instance = new AlertExecutionPlanBuilder(dataProvider);
 
     final DatasetConfigDTO datasetConfigDTO = mockDatasetConfigDTO();
     final MetricConfigDTO metricConfigDTO = mockMetricConfigDTO(datasetConfigDTO.getDisplayName());
@@ -81,12 +79,8 @@ public class AlertApiBeanMapperTest {
 
   @Test
   public void testBuildDetectionPropertiesEmpty() {
-    final DetectionMetricAttributeHolder metricAttributesMap =
-        new DetectionMetricAttributeHolder(dataProvider);
-
     final AlertApi alertApi = new AlertApi();
-    final Map<String, Object> map = alertApiBeanMapper
-        .buildDetectionProperties(alertApi, metricAttributesMap);
+    final Map<String, Object> map = instance.process(alertApi).getProperties();
 
     final Map<String, Object> expected = new HashMap<>();
     assertThat(map).isEqualTo(expected);
@@ -94,16 +88,12 @@ public class AlertApiBeanMapperTest {
 
   @Test
   public void testBuildDetectionPropertiesSingleDetection() {
-    final DetectionMetricAttributeHolder metricAttributesMap =
-        new DetectionMetricAttributeHolder(dataProvider);
-
     final AlertNodeApi alertNodeApi = sampleDetectionNode();
     final AlertApi alertApi = new AlertApi()
         .setName("a1")
         .setNodes(ImmutableMap.of(alertNodeApi.getName(), alertNodeApi));
 
-    final Map<String, Object> map = alertApiBeanMapper
-        .buildDetectionProperties(alertApi, metricAttributesMap);
+    final Map<String, Object> map = instance.process(alertApi).getProperties();
 
     final Map<String, Object> expected = ImmutableMap.<String, Object>builder()
         .put("className", ChildKeepingMergeWrapper.class.getName())

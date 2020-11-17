@@ -140,7 +140,7 @@ public class AlertResource {
       throws InterruptedException, ExecutionException, TimeoutException {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
-    ensureExists(request.getStart());
+    ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd());
 
     ensureExists(request.getAlert())

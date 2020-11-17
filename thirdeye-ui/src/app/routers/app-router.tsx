@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { SignInPage } from "../pages/sign-in-page/sign-in-page.component";
-import { isAuthenticated } from "../utils/authentication.util";
+import { isAuthenticated } from "../utils/auth/auth.util";
 import {
     AppRoute,
     getAlertsPath,

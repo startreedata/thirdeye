@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from "axios";
-import { getAccessToken, isAuthenticated } from "../authentication.util";
+import { getAccessToken, isAuthenticated } from "../auth/auth.util";
 
 // axios request interceptor
 export const requestInterceptor = (

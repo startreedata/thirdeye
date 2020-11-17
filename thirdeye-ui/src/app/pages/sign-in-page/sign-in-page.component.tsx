@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect } from "react";
+import { login } from "../../rest/auth/auth.rest";
+import { Auth } from "../../rest/dto/auth.interfaces";
 import { setAuthentication } from "../../utils/authentication.util";
-import { Authentication } from "../../utils/rest/authentication-rest/authentication-rest.interfaces";
-import { login } from "../../utils/rest/authentication-rest/authentication-rest.util";
 
 export const SignInPage: FunctionComponent = () => {
     useEffect(() => {
@@ -9,7 +9,7 @@ export const SignInPage: FunctionComponent = () => {
     }, []);
 
     const performLogin = async (): Promise<void> => {
-        const authentication: Authentication = await login();
+        const authentication: Auth = await login();
         setAuthentication(authentication.accessToken);
 
         location.reload();

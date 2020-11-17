@@ -1,13 +1,13 @@
 package org.apache.pinot.thirdeye.alert;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_DETECTION;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_FILTER;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_LABELER;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,7 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.api.AlertApi;
@@ -82,43 +81,38 @@ public class AlertExecutionPlanBuilder {
     final DatasetConfigDTO datasetConfigDTO = requireNonNull(
         detectionMetricProperties.getDatasetConfigDTO());
 
-    final List<Map<String, Object>> nestedPipelines = new ArrayList<>();
-
-    final Queue<AlertNodeApi> q = new ArrayDeque<>();
-    q.offer(findRoot(nodes));
-
     final Map<String, Collection<String>> dimensionFiltersMap = Collections.emptyMap();
     final Map<String, Object> mergerProperties = Collections.emptyMap();
     final String metricUrn = MetricEntity
         .fromMetric(dimensionFiltersMap, metricConfigDTO.getId())
         .getUrn();
 
-    while (q.size() != 0) {
-      final AlertNodeApi node = q.poll();
-      if (node == null) {
-        break;
-      }
-
-      if (node.getType() == AlertNodeType.DETECTION) {
-
-        final List<Map<String, Object>> detectionList = Collections
-            .singletonList(ruleMap(node));
-        List<Map<String, Object>> detectionProperties = detectionTranslatorBuilder
-            .buildListOfMergeWrapperProperties(
+    final Map<String, Object> map = nodes.values()
+        .stream()
+        .filter(n -> n.getType() == AlertNodeType.DETECTION)
+        .findFirst()
+        .map(n -> detectionTranslatorBuilder
+            .buildMergeWrapperProperties(
                 api.getName(),
                 metricUrn,
-                detectionList,
+                toMap(n),
                 mergerProperties,
-                datasetConfigDTO.bucketTimeGranularity());
-        nestedPipelines.addAll(detectionProperties);
-      }
+                datasetConfigDTO.bucketTimeGranularity()))
+        .orElse(null);
 
-      optional(node.getDependsOn())
-          .ifPresent(l -> l.stream()
-              .map(nodes::get)
-              .forEach(q::offer))
-      ;
-    }
+    ensureExists(map);
+
+    final List<Map<String, Object>> mapList = nodes.values()
+        .stream()
+        .filter(n -> n.getType() == AlertNodeType.FILTER)
+        .findFirst()
+        .map(n -> detectionTranslatorBuilder
+            .buildFilterWrapperProperties(metricUrn,
+                AnomalyFilterWrapper.class.getName(),
+                toMap(n),
+                singletonList(map)))
+        .orElse(singletonList(map));
+
     final String alertName = api.getName();
 
     // TODO suvodeep Add Dimension Exploration and Labeler code.
@@ -134,7 +128,7 @@ public class AlertExecutionPlanBuilder {
             false,
             Collections.emptyList(),
             metricUrn,
-            nestedPipelines);
+            mapList);
 
     return this;
   }
@@ -229,15 +223,7 @@ public class AlertExecutionPlanBuilder {
     return metricApiMap.values().iterator().next();
   }
 
-  private List<Map<String, Object>> toRuleYamls(
-      final List<Map<String, Object>> listOfDetectionMaps) {
-    final Map<String, Object> map = new LinkedHashMap<>();
-    map.put("detection", listOfDetectionMaps);
-
-    return Collections.singletonList(map);
-  }
-
-  private Map<String, Object> ruleMap(
+  private Map<String, Object> toMap(
       final AlertNodeApi node) {
     final Map<String, Object> ruleMap = new LinkedHashMap<>();
     ruleMap.put("name", node.getName());

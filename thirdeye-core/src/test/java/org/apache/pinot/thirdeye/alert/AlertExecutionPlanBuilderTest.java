@@ -19,6 +19,7 @@ import org.apache.pinot.thirdeye.datalayer.pojo.AlertNodeType;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.algorithm.DimensionWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyDetectorWrapper;
+import org.apache.pinot.thirdeye.detection.wrapper.AnomalyFilterWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper;
 import org.testng.annotations.BeforeMethod;
@@ -38,10 +39,30 @@ public class AlertExecutionPlanBuilderTest {
         .setType(AlertNodeType.DETECTION)
         .setSubType("PERCENTAGE_RULE")
         .setParams(params)
+        .setParams(ImmutableMap.<String, Object>builder()
+            .put("offset", "w01w")
+            .put("percentageChange", "0.2")
+            .build())
         .setMetric(new MetricApi()
             .setName("views")
             .setDataset(new DatasetApi()
                 .setName("pageviews")));
+  }
+
+  private static AlertNodeApi sampleFilterNode() {
+    final HashMap<String, Object> params = new HashMap<>();
+    params.put("pattern", "UP_OR_DOWN");
+    params.put("threshold", "0.3");
+
+    return new AlertNodeApi()
+        .setName("f1")
+        .setType(AlertNodeType.FILTER)
+        .setSubType("PERCENTAGE_CHANGE_FILTER")
+        .setParams(ImmutableMap.<String, Object>builder()
+            .put("pattern", "UP_OR_DOWN")
+            .put("threshold", "0.3")
+            .build())
+        ;
   }
 
   private static DatasetConfigDTO mockDatasetConfigDTO() {
@@ -108,6 +129,48 @@ public class AlertExecutionPlanBuilderTest {
                     .put("className", AnomalyDetectorWrapper.class.getName())
                     .put("bucketPeriod", "P1D")
                     .put("subEntityName", "a1")
+                    .build()
+                ))
+                .build()
+            ))
+            .build()
+        ))
+        .build();
+
+    assertThat(map).isEqualTo(expected);
+  }
+
+  @Test
+  public void testBuildDetectionPropertiesSingleDetectionSingleFilter() {
+    final AlertNodeApi detectionNode = sampleDetectionNode();
+    final AlertNodeApi filterNode = sampleFilterNode();
+    final AlertApi alertApi = new AlertApi()
+        .setName("a1")
+        .setNodes(ImmutableMap.of(
+            detectionNode.getName(), detectionNode,
+            filterNode.getName(), filterNode
+        ));
+
+    final Map<String, Object> map = instance.process(alertApi).getProperties();
+
+    final Map<String, Object> expected = ImmutableMap.<String, Object>builder()
+        .put("className", ChildKeepingMergeWrapper.class.getName())
+        .put("nested", singletonList(ImmutableMap.<String, Object>builder()
+            .put("nestedMetricUrns", singletonList("thirdeye:metric:11"))
+            .put("className", DimensionWrapper.class.getName())
+            .put("nested", singletonList(ImmutableMap.<String, Object>builder()
+                .put("filter", "$f1:PERCENTAGE_CHANGE_FILTER")
+                .put("className", AnomalyFilterWrapper.class.getName())
+                .put("nested", singletonList(ImmutableMap.<String, Object>builder()
+                    .put("className", BaselineFillingMergeWrapper.class.getName())
+                    .put("baselineValueProvider", "$d1:PERCENTAGE_RULE")
+                    .put("detector", "$d1:PERCENTAGE_RULE")
+                    .put("nested", singletonList(ImmutableMap.<String, Object>builder()
+                        .put("className", AnomalyDetectorWrapper.class.getName())
+                        .put("bucketPeriod", "P1D")
+                        .put("subEntityName", "a1")
+                        .build()
+                    ))
                     .build()
                 ))
                 .build()

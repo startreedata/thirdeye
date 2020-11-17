@@ -206,7 +206,7 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
     return properties;
   }
 
-  private Map<String, Object> buildMergeWrapperProperties(String subEntityName, String metricUrn,
+  public Map<String, Object> buildMergeWrapperProperties(String subEntityName, String metricUrn,
       Map<String, Object> yamlConfig,
       Map<String, Object> mergerProperties, TimeGranularity datasetTimegranularity) {
     String detectorType = MapUtils.getString(yamlConfig, PROP_TYPE);

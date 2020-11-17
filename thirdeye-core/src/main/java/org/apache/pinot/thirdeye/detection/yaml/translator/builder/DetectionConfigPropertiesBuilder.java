@@ -139,35 +139,44 @@ public abstract class DetectionConfigPropertiesBuilder {
     return properties;
   }
 
-  public List<Map<String, Object>> buildFilterWrapperProperties(String metricUrn,
+  public List<Map<String, Object>> buildFilterWrapperPropertiesLegacy(String metricUrn,
       String wrapperClassName,
       Map<String, Object> yamlConfig, List<Map<String, Object>> nestedProperties) {
     if (yamlConfig == null || yamlConfig.isEmpty()) {
       return nestedProperties;
     }
-    Map<String, Object> wrapperProperties = buildWrapperProperties(wrapperClassName,
-        nestedProperties);
-    if (wrapperProperties.isEmpty()) {
-      return Collections.emptyList();
-    }
-    String filterRefKey = makeComponentRefKey(
-        MapUtils.getString(yamlConfig, PROP_TYPE), MapUtils.getString(yamlConfig, PROP_NAME));
-    wrapperProperties.put(PROP_FILTER, filterRefKey);
-    buildComponentSpec(metricUrn, yamlConfig, filterRefKey);
+    Map<String, Object> wrapperProperties = buildFilterLabelerWrapperProperties(metricUrn,
+        wrapperClassName, yamlConfig, nestedProperties,
+        PROP_FILTER);
 
     return Collections.singletonList(wrapperProperties);
+  }
+
+  public Map<String, Object> buildFilterLabelerWrapperProperties(
+      final String metricUrn,
+      final String wrapperClassName,
+      final Map<String, Object> yamlConfig,
+      final List<Map<String, Object>> nestedProperties,
+      final String propFilter) {
+    Map<String, Object> wrapperProperties = buildWrapperProperties(wrapperClassName,
+        nestedProperties);
+    String filterRefKey = makeComponentRefKey(
+        MapUtils.getString(yamlConfig, PROP_TYPE), MapUtils.getString(yamlConfig, PROP_NAME));
+    wrapperProperties.put(propFilter, filterRefKey);
+    buildComponentSpec(metricUrn, yamlConfig, filterRefKey);
+    return wrapperProperties;
   }
 
   public Map<String, Object> buildLabelerWrapperProperties(String metricUrn,
       String wrapperClassName,
       Map<String, Object> yamlConfig, List<Map<String, Object>> nestedProperties) {
-    Map<String, Object> wrapperProperties = buildWrapperProperties(wrapperClassName,
-        nestedProperties);
-    String labelerRefKey = makeComponentRefKey(
-        MapUtils.getString(yamlConfig, PROP_TYPE), MapUtils.getString(yamlConfig, PROP_NAME));
-    wrapperProperties.put(PROP_LABELER, labelerRefKey);
-    buildComponentSpec(metricUrn, yamlConfig, labelerRefKey);
-    return wrapperProperties;
+    return buildFilterLabelerWrapperProperties(
+        metricUrn,
+        wrapperClassName,
+        yamlConfig,
+        nestedProperties,
+        PROP_LABELER
+    );
   }
 
   void buildComponentSpec(String metricUrn, Map<String, Object> yamlConfig,

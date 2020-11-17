@@ -1,12 +1,10 @@
 package org.apache.pinot.thirdeye.alert;
 
-import static java.util.Collections.singletonList;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_DETECTION;
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_FILTER;
-import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_LABELER;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,13 +20,12 @@ import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.api.MetricApi;
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertNodeType;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyFilterWrapper;
-import org.apache.pinot.thirdeye.detection.wrapper.AnomalyLabelerWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricProperties;
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionPropertiesBuilder;
@@ -42,7 +39,13 @@ public class AlertExecutionPlanBuilder {
 
   private final DataProvider dataProvider;
   private final DetectionMetricAttributeHolder metricAttributesMap;
+
   private Map<String, Object> properties = Collections.emptyMap();
+  private DetectionPropertiesBuilder detectionTranslatorBuilder;
+  private String metricUrn;
+  private TimeGranularity timeGranularity;
+  private Map<String, AlertNodeApi> nodes;
+  private AlertApi alertApi;
 
   public AlertExecutionPlanBuilder(
       final DataProvider dataProvider) {
@@ -58,14 +61,14 @@ public class AlertExecutionPlanBuilder {
   }
 
   public AlertExecutionPlanBuilder process(final AlertApi api) {
-    final Map<String, AlertNodeApi> nodes = api.getNodes();
+    alertApi = api;
+    nodes = api.getNodes();
     if (nodes == null) {
       return this;
     }
     populateNodeNames(nodes);
 
-    final DetectionPropertiesBuilder detectionTranslatorBuilder =
-        new DetectionPropertiesBuilder(metricAttributesMap, dataProvider);
+    detectionTranslatorBuilder = new DetectionPropertiesBuilder(metricAttributesMap, dataProvider);
 
     final MetricApi metric = findMetricApi(nodes);
     final String key = metricAttributesMap.loadMetricCache(
@@ -80,48 +83,25 @@ public class AlertExecutionPlanBuilder {
         detectionMetricProperties.getMetricConfigDTO());
     final DatasetConfigDTO datasetConfigDTO = requireNonNull(
         detectionMetricProperties.getDatasetConfigDTO());
+    timeGranularity = datasetConfigDTO.bucketTimeGranularity();
 
     final Map<String, Collection<String>> dimensionFiltersMap = Collections.emptyMap();
     final Map<String, Object> mergerProperties = Collections.emptyMap();
-    final String metricUrn = MetricEntity
+    this.metricUrn = MetricEntity
         .fromMetric(dimensionFiltersMap, metricConfigDTO.getId())
         .getUrn();
 
-    final Map<String, Object> map = nodes.values()
-        .stream()
-        .filter(n -> n.getType() == AlertNodeType.DETECTION)
-        .findFirst()
-        .map(n -> detectionTranslatorBuilder
-            .buildMergeWrapperProperties(
-                api.getName(),
-                metricUrn,
-                toMap(n),
-                mergerProperties,
-                datasetConfigDTO.bucketTimeGranularity()))
-        .orElse(null);
-
-    ensureExists(map);
-
-    final List<Map<String, Object>> mapList = nodes.values()
-        .stream()
-        .filter(n -> n.getType() == AlertNodeType.FILTER)
-        .findFirst()
-        .map(n -> detectionTranslatorBuilder
-            .buildFilterWrapperProperties(metricUrn,
-                AnomalyFilterWrapper.class.getName(),
-                toMap(n),
-                singletonList(map)))
-        .orElse(singletonList(map));
-
-    final String alertName = api.getName();
-
-    // TODO suvodeep Add Dimension Exploration and Labeler code.
+    final List<Map<String, Object>> mapList = new ArrayList<>();
+    final Set<String> rootNodeNames = findRoots(nodes);
+    for (String name : rootNodeNames) {
+      mapList.add(toProperties(nodes.get(name)));
+    }
 
     // Wrap with dimension exploration properties
     properties = detectionTranslatorBuilder
         .buildMetricAlertExecutionPlan(
             datasetConfigDTO,
-            alertName,
+            api.getName(),
             mergerProperties,
             dimensionFiltersMap,
             Collections.emptyMap(),
@@ -133,50 +113,34 @@ public class AlertExecutionPlanBuilder {
     return this;
   }
 
-  @SuppressWarnings("unused")
-  private List<Map<String, Object>> processRules(
-      final DatasetConfigDTO datasetConfigDTO,
-      final String alertName,
-      final Map<String, Object> mergerProperties,
-      final List<Map<String, Object>> ruleYamls,
-      final String metricUrn,
-      final DetectionPropertiesBuilder detectionTranslatorBuilder) {
-    List<Map<String, Object>> nestedPipelines = new ArrayList<>();
-    for (Map<String, Object> ruleYaml : ruleYamls) {
-      List<Map<String, Object>> detectionYamls = ConfigUtils.getList(ruleYaml.get(PROP_DETECTION));
-      List<Map<String, Object>> detectionProperties = detectionTranslatorBuilder
-          .buildListOfMergeWrapperProperties(
-              alertName, metricUrn, detectionYamls, mergerProperties,
-              datasetConfigDTO.bucketTimeGranularity());
+  private Map<String, Object> toProperties(final AlertNodeApi node) {
+    final List<Map<String, Object>> mapList = optional(node.getDependsOn())
+        .orElse(Collections.emptyList())
+        .stream()
+        .map(name -> nodes.get(name))
+        .map(this::toProperties)
+        .collect(Collectors.toList());
 
-      List<Map<String, Object>> filterYamls = ConfigUtils.getList(ruleYaml.get(PROP_FILTER));
-      List<Map<String, Object>> labelerYamls = ConfigUtils.getList(ruleYaml.get(PROP_LABELER));
-      if (filterYamls.isEmpty() && labelerYamls.isEmpty()) {
-        // output detection properties if neither filter and labeler is configured
-        nestedPipelines.addAll(detectionProperties);
-      } else {
-        // wrap detection properties around with filter properties if a filter is configured
-        List<Map<String, Object>> filterNestedProperties = detectionProperties;
-        for (Map<String, Object> filterProperties : filterYamls) {
-          filterNestedProperties = detectionTranslatorBuilder
-              .buildFilterWrapperProperties(metricUrn,
-                  AnomalyFilterWrapper.class.getName(), filterProperties,
-                  filterNestedProperties);
-        }
-        if (labelerYamls.isEmpty()) {
-          // output filter properties if no labeler is configured
-          nestedPipelines.addAll(filterNestedProperties);
-        } else {
-          // wrap filter properties around with labeler properties if a labeler is configured
-          nestedPipelines.add(
-              detectionTranslatorBuilder
-                  .buildLabelerWrapperProperties(metricUrn, AnomalyLabelerWrapper.class.getName(),
-                      labelerYamls.get(0),
-                      filterNestedProperties));
-        }
-      }
+    if (node.getType() == AlertNodeType.DETECTION) {
+      return detectionTranslatorBuilder
+          .buildMergeWrapperProperties(
+              alertApi.getName(),
+              metricUrn,
+              toMap(node),
+              emptyMap(),
+              timeGranularity);
+    } else if (node.getType() == AlertNodeType.FILTER) {
+
+      return detectionTranslatorBuilder
+          .buildFilterLabelerWrapperProperties(metricUrn,
+              AnomalyFilterWrapper.class.getName(),
+              toMap(node),
+              mapList,
+              PROP_FILTER);
     }
-    return nestedPipelines;
+    ensure(false, "Unsupported node type!");
+    // TODO suvodeep Add Dimension Exploration and Labeler code.
+    return null;
   }
 
   public Map<String, Object> getComponentSpecs() {
@@ -193,7 +157,7 @@ public class AlertExecutionPlanBuilder {
     }
   }
 
-  private AlertNodeApi findRoot(final Map<String, AlertNodeApi> nodes) {
+  private Set<String> findRoots(final Map<String, AlertNodeApi> nodes) {
     final Set<String> allNodeNames = new HashSet<>(nodes.keySet());
     final Set<String> nonRootNodes = nodes
         .values()
@@ -204,10 +168,7 @@ public class AlertExecutionPlanBuilder {
         .collect(Collectors.toSet());
 
     allNodeNames.removeAll(nonRootNodes);
-    ensure(allNodeNames.size() == 1, "Found more than 1 root!");
-
-    final String rootNodeName = allNodeNames.iterator().next();
-    return nodes.get(rootNodeName);
+    return allNodeNames;
   }
 
   private MetricApi findMetricApi(final Map<String, AlertNodeApi> nodes) {

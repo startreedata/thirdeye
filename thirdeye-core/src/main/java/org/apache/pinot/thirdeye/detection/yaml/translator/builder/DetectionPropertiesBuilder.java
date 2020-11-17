@@ -152,7 +152,7 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
         // wrap detection properties around with filter properties if a filter is configured
         List<Map<String, Object>> filterNestedProperties = detectionProperties;
         for (Map<String, Object> filterProperties : filterYamls) {
-          filterNestedProperties = buildFilterWrapperProperties(metricUrn,
+          filterNestedProperties = buildFilterWrapperPropertiesLegacy(metricUrn,
               AnomalyFilterWrapper.class.getName(), filterProperties,
               filterNestedProperties);
         }
@@ -208,7 +208,8 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
 
   public Map<String, Object> buildMergeWrapperProperties(String subEntityName, String metricUrn,
       Map<String, Object> yamlConfig,
-      Map<String, Object> mergerProperties, TimeGranularity datasetTimegranularity) {
+      Map<String, Object> mergerProperties,
+      TimeGranularity datasetTimegranularity) {
     String detectorType = MapUtils.getString(yamlConfig, PROP_TYPE);
     String name = MapUtils.getString(yamlConfig, PROP_NAME);
     Map<String, Object> nestedProperties = new HashMap<>();

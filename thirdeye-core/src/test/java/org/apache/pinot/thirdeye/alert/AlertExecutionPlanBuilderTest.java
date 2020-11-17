@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -108,7 +109,7 @@ public class AlertExecutionPlanBuilderTest {
   }
 
   @Test
-  public void testBuildDetectionPropertiesSingleDetection() {
+  public void testBuildDetectionProperties_1D() {
     final AlertNodeApi alertNodeApi = sampleDetectionNode();
     final AlertApi alertApi = new AlertApi()
         .setName("a1")
@@ -141,14 +142,14 @@ public class AlertExecutionPlanBuilderTest {
   }
 
   @Test
-  public void testBuildDetectionPropertiesSingleDetectionSingleFilter() {
+  public void testBuildDetectionProperties_1D_1F() {
     final AlertNodeApi detectionNode = sampleDetectionNode();
     final AlertNodeApi filterNode = sampleFilterNode();
     final AlertApi alertApi = new AlertApi()
         .setName("a1")
         .setNodes(ImmutableMap.of(
             detectionNode.getName(), detectionNode,
-            filterNode.getName(), filterNode
+            filterNode.getName(), filterNode.setDependsOn(singletonList(detectionNode.getName()))
         ));
 
     final Map<String, Object> map = instance.process(alertApi).getProperties();
@@ -172,6 +173,63 @@ public class AlertExecutionPlanBuilderTest {
                         .build()
                     ))
                     .build()
+                ))
+                .build()
+            ))
+            .build()
+        ))
+        .build();
+
+    assertThat(map).isEqualTo(expected);
+  }
+
+  @Test
+  public void testBuildDetectionProperties_2D_1F() {
+    final AlertNodeApi d1 = sampleDetectionNode();
+    final AlertNodeApi d2 = sampleDetectionNode().setName("d2");
+    final AlertNodeApi filterNode = sampleFilterNode();
+    final AlertApi alertApi = new AlertApi()
+        .setName("a1")
+        .setNodes(ImmutableMap.of(
+            d1.getName(), d1,
+            d2.getName(), d2,
+            filterNode.getName(),
+            filterNode.setDependsOn(ImmutableList.of(d1.getName(), d2.getName()))
+        ));
+
+    final Map<String, Object> map = instance.process(alertApi).getProperties();
+
+    final Map<String, Object> expected = ImmutableMap.<String, Object>builder()
+        .put("className", ChildKeepingMergeWrapper.class.getName())
+        .put("nested", singletonList(ImmutableMap.<String, Object>builder()
+            .put("nestedMetricUrns", singletonList("thirdeye:metric:11"))
+            .put("className", DimensionWrapper.class.getName())
+            .put("nested", singletonList(ImmutableMap.<String, Object>builder()
+                .put("filter", "$f1:PERCENTAGE_CHANGE_FILTER")
+                .put("className", AnomalyFilterWrapper.class.getName())
+                .put("nested", ImmutableList.of(
+                    ImmutableMap.<String, Object>builder()
+                        .put("className", BaselineFillingMergeWrapper.class.getName())
+                        .put("baselineValueProvider", "$d1:PERCENTAGE_RULE")
+                        .put("detector", "$d1:PERCENTAGE_RULE")
+                        .put("nested", singletonList(ImmutableMap.<String, Object>builder()
+                            .put("className", AnomalyDetectorWrapper.class.getName())
+                            .put("bucketPeriod", "P1D")
+                            .put("subEntityName", "a1")
+                            .build()
+                        ))
+                        .build(),
+                    ImmutableMap.<String, Object>builder()
+                        .put("className", BaselineFillingMergeWrapper.class.getName())
+                        .put("baselineValueProvider", "$d2:PERCENTAGE_RULE")
+                        .put("detector", "$d2:PERCENTAGE_RULE")
+                        .put("nested", singletonList(ImmutableMap.<String, Object>builder()
+                            .put("className", AnomalyDetectorWrapper.class.getName())
+                            .put("bucketPeriod", "P1D")
+                            .put("subEntityName", "a1")
+                            .build()
+                        ))
+                        .build()
                 ))
                 .build()
             ))

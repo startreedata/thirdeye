@@ -8,9 +8,7 @@ const mockAnomalyResponse: Anomaly = {
     id: 2,
 } as Anomaly;
 
-const mockError = {
-    message: "testError",
-};
+const mockError = new Error("testErrorMessage");
 
 describe("Anomaly REST", () => {
     beforeEach(() => {
@@ -35,11 +33,7 @@ describe("Anomaly REST", () => {
     test("getAnomaly shall throw encountered error", async () => {
         (axios.get as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await getAnomaly(1);
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(getAnomaly(1)).rejects.toThrow("testErrorMessage");
     });
 
     test("getAllAnomalies shall invoke axios.get with appropriate input and return result", async () => {
@@ -56,11 +50,7 @@ describe("Anomaly REST", () => {
     test("getAllAnomalies shall throw encountered error", async () => {
         (axios.get as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await getAllAnomalies();
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(getAllAnomalies()).rejects.toThrow("testErrorMessage");
     });
 
     test("deleteAnomaly shall invoke axios.delete with appropriate input and return result", async () => {
@@ -77,10 +67,6 @@ describe("Anomaly REST", () => {
     test("deleteAnomaly shall throw encountered error", async () => {
         (axios.delete as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await deleteAnomaly(1);
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(deleteAnomaly(1)).rejects.toThrow("testErrorMessage");
     });
 });

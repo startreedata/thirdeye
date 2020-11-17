@@ -13,9 +13,7 @@ const mockAuthResponse: Auth = {
     accessToken: "testAccessTokenResponse",
 } as Auth;
 
-const mockError = {
-    message: "testError",
-};
+const mockError = new Error("testErrorMessage");
 
 describe("Auth REST", () => {
     beforeEach(() => {
@@ -41,10 +39,6 @@ describe("Auth REST", () => {
     test("login shall throw encountered error", async () => {
         (axios.post as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await login();
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(login()).rejects.toThrow("testErrorMessage");
     });
 });

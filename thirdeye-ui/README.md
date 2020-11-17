@@ -13,7 +13,6 @@ This is the project for CortexData ThirdEye UI.
     -   [`start`](#start)
     -   [`build`](#build)
     -   [`test`](#test)
-    -   [`test-file`](#test-file)
     -   [`test-watch`](#test-watch)
     -   [`test-coverage`](#test-coverage)
     -   [`eslint`](#eslint)
@@ -68,14 +67,6 @@ Run all tests
 
 ```
 $ npm run test
-```
-
-### `test-file`
-
-Run all tests in a given test file
-
-```
-$ npm run test <filename>
 ```
 
 ### `test-watch`

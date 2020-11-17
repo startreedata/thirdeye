@@ -9,6 +9,9 @@
         "eslint:recommended",
         "plugin:react/recommended",
         "plugin:react-hooks/recommended",
+        "plugin:jest/recommended",
+        "plugin:jest/style",
+        "plugin:jest-formatting/recommended",
         "plugin:@typescript-eslint/recommended",
         "prettier",
         "prettier/react",
@@ -22,7 +25,7 @@
             "jsx": true
         }
     },
-    "plugins": ["react", "@typescript-eslint"],
+    "plugins": ["react", "jest", "jest-formatting", "@typescript-eslint"],
     "rules": {
         // ESLint rules
 
@@ -71,6 +74,19 @@
 
         // Require PascalCase for user-defined JSX components
         "react/jsx-pascal-case": ["error"],
+
+        // eslint-plugin-jest rules
+
+        // Prefer 'test' over 'it'
+        "jest/consistent-test-it": [
+            "error",
+            { "fn": "test", "withinDescribe": "test" }
+        ],
+
+        // eslint-plugin-jest-formatting rules
+
+        // Require blank line before certain statements (ESLint doesn't work for Jest)
+        "jest-formatting/padding-around-all": 2,
 
         // @typescript-eslint rules
 

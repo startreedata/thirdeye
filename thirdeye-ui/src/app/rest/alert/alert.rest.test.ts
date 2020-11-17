@@ -27,9 +27,7 @@ const mockAlertEvaluationResponse: AlertEvaluation = {
     alert: mockAlertResponse,
 } as AlertEvaluation;
 
-const mockError = {
-    message: "testError",
-};
+const mockError = new Error("testErrorMessage");
 
 describe("Alert REST", () => {
     beforeEach(() => {
@@ -52,11 +50,7 @@ describe("Alert REST", () => {
     test("getAlert shall throw encountered error", async () => {
         (axios.get as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await getAlert(1);
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(getAlert(1)).rejects.toThrow("testErrorMessage");
     });
 
     test("getAllAlerts shall invoke axios.get with appropriate input and return result", async () => {
@@ -73,11 +67,7 @@ describe("Alert REST", () => {
     test("getAllAlerts shall throw encountered error", async () => {
         (axios.get as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await getAllAlerts();
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(getAllAlerts()).rejects.toThrow("testErrorMessage");
     });
 
     test("createAlert shall invoke axios.post with appropriate input and return result", async () => {
@@ -96,11 +86,9 @@ describe("Alert REST", () => {
     test("createAlert shall throw encountered error", async () => {
         (axios.post as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await createAlert(mockAlertRequest);
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(createAlert(mockAlertRequest)).rejects.toThrow(
+            "testErrorMessage"
+        );
     });
 
     test("updateAlert shall invoke axios.put with appropriate input and return result", async () => {
@@ -119,11 +107,9 @@ describe("Alert REST", () => {
     test("updateAlert shall throw encountered error", async () => {
         (axios.put as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await updateAlert(mockAlertRequest);
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(updateAlert(mockAlertRequest)).rejects.toThrow(
+            "testErrorMessage"
+        );
     });
 
     test("deleteAlert shall invoke axios.delete with appropriate input and return result", async () => {
@@ -140,11 +126,7 @@ describe("Alert REST", () => {
     test("deleteAlert shall throw encountered error", async () => {
         (axios.delete as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await deleteAlert(1);
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(deleteAlert(1)).rejects.toThrow("testErrorMessage");
     });
 
     test("getAlertPreview shall invoke axios.post with appropriate input and return result", async () => {
@@ -164,10 +146,8 @@ describe("Alert REST", () => {
     test("getAlertPreview shall throw encountered error", async () => {
         (axios.post as jest.Mock).mockRejectedValue(mockError);
 
-        try {
-            await getAlertPreview(mockAlertEvaluationRequest);
-        } catch (error) {
-            expect(error).toEqual(mockError);
-        }
+        await expect(
+            getAlertPreview(mockAlertEvaluationRequest)
+        ).rejects.toThrow("testErrorMessage");
     });
 });

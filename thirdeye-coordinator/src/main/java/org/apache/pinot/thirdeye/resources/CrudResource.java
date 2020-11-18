@@ -27,27 +27,27 @@ import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class CrudResource<ApiType, DtoType extends AbstractDTO> {
+public abstract class CrudResource<ApiT, DtoT extends AbstractDTO> {
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
   protected final AuthService authService;
-  protected final AbstractManager<DtoType> dtoManager;
+  protected final AbstractManager<DtoT> dtoManager;
 
   @Inject
   public CrudResource(
-      final AuthService authService, final AbstractManager<DtoType> dtoManager) {
+      final AuthService authService, final AbstractManager<DtoT> dtoManager) {
     this.dtoManager = dtoManager;
     this.authService = authService;
   }
 
-  protected abstract DtoType createDto(final ThirdEyePrincipal principal, final ApiType api);
+  protected abstract DtoT createDto(final ThirdEyePrincipal principal, final ApiT api);
 
-  protected abstract DtoType updateDto(final ThirdEyePrincipal principal, final ApiType api);
+  protected abstract DtoT updateDto(final ThirdEyePrincipal principal, final ApiT api);
 
-  protected abstract ApiType toApi(final DtoType dto);
+  protected abstract ApiT toApi(final DtoT dto);
 
-  protected DtoType get(final Long id) {
+  protected DtoT get(final Long id) {
     return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
   }
 
@@ -58,7 +58,7 @@ public abstract class CrudResource<ApiType, DtoType extends AbstractDTO> {
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader
   ) {
     authService.authenticate(authHeader);
-    final List<DtoType> all = dtoManager.findAll();
+    final List<DtoT> all = dtoManager.findAll();
     return Response
         .ok(all.stream().map(this::toApi))
         .build();
@@ -69,7 +69,7 @@ public abstract class CrudResource<ApiType, DtoType extends AbstractDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      List<ApiType> list) {
+      List<ApiT> list) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
     ensureExists(list, "Invalid request");
@@ -89,7 +89,7 @@ public abstract class CrudResource<ApiType, DtoType extends AbstractDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      List<ApiType> list) {
+      List<ApiT> list) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     return Response
         .ok(list.stream()
@@ -108,7 +108,7 @@ public abstract class CrudResource<ApiType, DtoType extends AbstractDTO> {
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     authService.authenticate(authHeader);
-    final DtoType dto = dtoManager.findById(id);
+    final DtoT dto = dtoManager.findById(id);
     ensureExists(dto, "Invalid id");
 
     return Response
@@ -124,7 +124,7 @@ public abstract class CrudResource<ApiType, DtoType extends AbstractDTO> {
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    final DtoType dto = dtoManager.findById(id);
+    final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
       dtoManager.delete(dto);
       log.warn(String.format("Deleted id: %d by principal: %s", id, principal));

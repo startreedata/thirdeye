@@ -1,103 +1,60 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
 
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.api.ApplicationApi;
+import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
-public class MetricResource {
-
-  private static final Logger log = LoggerFactory.getLogger(MetricResource.class);
-
-  private final MetricConfigManager metricConfigManager;
-  private final AuthService authService;
+public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
 
   @Inject
   public MetricResource(
-      final MetricConfigManager metricConfigManager,
-      final AuthService authService) {
-    this.metricConfigManager = metricConfigManager;
-    this.authService = authService;
+      final AuthService authService,
+      final MetricConfigManager datasetConfigManager) {
+    super(authService, datasetConfigManager);
   }
 
-  @GET
-  public Response getAll(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader
-  ) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-
-    final List<MetricConfigDTO> all = metricConfigManager.findAll();
-    return Response
-        .ok(all.stream().map(ApiBeanMapper::toApi))
-        .build();
+  @Override
+  protected MetricConfigDTO createDto(final ThirdEyePrincipal principal,
+      final MetricApi api) {
+    throw badRequest(ERR_OPERATION_UNSUPPORTED);
   }
 
-  @POST
-  public Response createMultiple(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      List<ApplicationApi> applicationApiList) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    ensure(false, "Unsupported Operation.");
-    return Response
-        .ok()
-        .build();
+  @Override
+  protected MetricConfigDTO updateDto(final ThirdEyePrincipal principal,
+      final MetricApi api) {
+    throw badRequest(ERR_OPERATION_UNSUPPORTED);
   }
 
-  @PUT
-  public Response editMultiple(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      List<ApplicationApi> applicationApiList) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    ensure(false, "Unsupported Operation.");
-    return Response
-        .ok()
-        .build();
-  }
-
-  @GET
-  @Path("{id}")
-  public Response get(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      @PathParam("id") Long id) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    final MetricConfigDTO dto = metricConfigManager.findById(id);
-    ensureExists(dto, "Invalid id");
-
-    return Response
-        .ok(ApiBeanMapper.toApi(dto))
-        .build();
+  @Override
+  protected MetricApi toApi(final MetricConfigDTO dto) {
+    return ApiBeanMapper.toApi(dto);
   }
 
   @DELETE
   @Path("{id}")
+  @Override
   public Response delete(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    ensure(false, "Unsupported Operation.");
-    return Response.ok().build();
+    authService.authenticate(authHeader);
+    throw badRequest(ERR_OPERATION_UNSUPPORTED);
   }
 }

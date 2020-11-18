@@ -31,13 +31,12 @@ public abstract class CrudResource<ApiType, DtoType extends AbstractDTO> {
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
-  protected final AbstractManager<DtoType> dtoManager;
   protected final AuthService authService;
+  protected final AbstractManager<DtoType> dtoManager;
 
   @Inject
   public CrudResource(
-      final AbstractManager<DtoType> dtoManager,
-      final AuthService authService) {
+      final AuthService authService, final AbstractManager<DtoType> dtoManager) {
     this.dtoManager = dtoManager;
     this.authService = authService;
   }

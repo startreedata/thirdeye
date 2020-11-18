@@ -25,7 +25,7 @@ public class ApplicationResource extends CrudResource<ApplicationApi, Applicatio
   public ApplicationResource(
       final ApplicationManager applicationManager,
       final AuthService authService) {
-    super(applicationManager, authService);
+    super(authService, applicationManager);
   }
 
   @Override

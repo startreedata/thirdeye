@@ -2,21 +2,32 @@ import { Card, Grid, Typography } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { withRouter } from "react-router-dom";
 import AlertCard from "../../components/alerts/alert-card.component";
-import { CustomBreadcrumbs } from "../../components/breadcrumbs/breadcrumbs.component";
 import { PageContainer } from "../../components/containers/page-container.component";
-import { RouterLink } from "../../components/router-link/router-link.component";
+import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { cardStyles } from "../../components/styles/common.styles";
 import { getAlert, updateAlert } from "../../rest/alert/alert.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { AppRoute } from "../../utils/route/routes.util";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
 
 export const AlertsDetailPage = withRouter((props) => {
+    const [loading, setLoading] = useState(true);
+    const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
     const { id } = props.match.params;
     const [alert, setAlert] = useState<Alert>();
 
     useEffect(() => {
+        // Create page breadcrumb
+        push([
+            {
+                text: "ALERT_NAME",
+                path: "",
+            },
+        ]);
+
         fetchAlert(parseInt(id));
-    }, [id]);
+
+        setLoading(false);
+    }, [push, id]);
 
     const fetchAlert = async (id: number): Promise<void> => {
         setAlert(await getAlert(id));
@@ -28,13 +39,6 @@ export const AlertsDetailPage = withRouter((props) => {
         return <>LOADING</>;
     }
 
-    const breadcrumbs = (
-        <CustomBreadcrumbs>
-            <RouterLink to={AppRoute.ALERTS_ALL}>Alerts</RouterLink>
-            <Typography color="textPrimary">{alert.name}</Typography>
-        </CustomBreadcrumbs>
-    );
-
     const handleActiveStateChange = async (
         _event: React.ChangeEvent,
         state: boolean
@@ -45,8 +49,16 @@ export const AlertsDetailPage = withRouter((props) => {
         window.location.reload();
     };
 
+    if (loading) {
+        return (
+            <PageContainer>
+                <PageLoadingIndicator />
+            </PageContainer>
+        );
+    }
+
     return (
-        <PageContainer breadcrumbs={breadcrumbs}>
+        <PageContainer>
             <Typography variant="h4">{alert.name}</Typography>
             <AlertCard
                 data={alert}

@@ -2,6 +2,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { PageContainer } from "../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../components/page-loading-indicator/page-loading-indicator.component";
+import { HomePage } from "../pages/home-page/home-page.component";
 import { PageNotFoundPage } from "../pages/page-not-found-page/page-not-found-page.component";
 import { SignInPage } from "../pages/sign-in-page/sign-in-page.component";
 import { SignOutPage } from "../pages/sign-out-page/sign-out-page.component";
@@ -15,7 +16,6 @@ import {
 } from "../utils/route/routes.util";
 import { AlertsRouter } from "./alerts-router";
 import { AnomaliesRouter } from "./anomalies-router";
-import { HomeRouter } from "./home-router";
 
 export const AppRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -46,8 +46,8 @@ export const AppRouter: FunctionComponent = () => {
                     <Redirect to={getHomePath()} />
                 </Route>
 
-                {/* Direct all home paths to home router */}
-                <Route component={HomeRouter} path={AppRoute.HOME} />
+                {/* Home path */}
+                <Route exact component={HomePage} path={AppRoute.HOME} />
 
                 {/* Direct all alerts paths to alerts router */}
                 <Route component={AlertsRouter} path={AppRoute.ALERTS} />

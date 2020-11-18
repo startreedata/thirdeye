@@ -11,25 +11,28 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import { Alert as CustomAlert } from "@material-ui/lab";
 import yaml from "js-yaml";
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RouteComponentProps, withRouter } from "react-router-dom";
-import { CustomBreadcrumbs } from "../../components/breadcrumbs/breadcrumbs.component";
 import { Button } from "../../components/button/button.component";
 import { ConfigurationStep } from "../../components/configuration-step/configuration-step.component";
 import { PageContainer } from "../../components/containers/page-container.component";
 import CommonCodeMirror from "../../components/editor/code-mirror.component";
 import { AppLoader } from "../../components/loader/app-loader.component";
-import { RouterLink } from "../../components/router-link/router-link.component";
+import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { CustomStepper } from "../../components/stepper/stepper.component";
 import { createAlert } from "../../rest/alert/alert.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
-import { AppRoute } from "../../utils/route/routes.util";
+import { AppRoute, getAlertsCreatePath } from "../../utils/route/routes.util";
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 
 export const AlertsCreatePage = withRouter(
     (props: RouteComponentProps): ReactElement => {
+        const [loading, setLoading] = useState(false);
+        const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
         const [detectionConfig, setDetectionConfig] = useState(
             DETECTION_CONFIG
         );
@@ -41,7 +44,19 @@ export const AlertsCreatePage = withRouter(
         const [message, setMessage] = useState<
             { status: "success" | "error"; text: string } | undefined
         >();
-        const [loading, setLoading] = useState(false);
+        const { t } = useTranslation();
+
+        useEffect(() => {
+            // Create page breadcrumb
+            push([
+                {
+                    text: t("label.create"),
+                    path: getAlertsCreatePath(),
+                },
+            ]);
+
+            setLoading(false);
+        }, [push, t]);
 
         const handleStepChange = (step: number): void => {
             if (step > 2) {
@@ -71,13 +86,6 @@ export const AlertsCreatePage = withRouter(
             }
         };
 
-        const breadcrumbs = (
-            <CustomBreadcrumbs>
-                <RouterLink to={AppRoute.ALERTS_ALL}>Alerts</RouterLink>
-                <Typography>New Alert</Typography>
-            </CustomBreadcrumbs>
-        );
-
         const selectionGroupComp = (
             <FormControl
                 style={{ margin: "8px 0", minWidth: 250, borderRadius: 8 }}
@@ -104,8 +112,16 @@ export const AlertsCreatePage = withRouter(
             </FormControl>
         );
 
+        if (loading) {
+            return (
+                <PageContainer>
+                    <PageLoadingIndicator />
+                </PageContainer>
+            );
+        }
+
         return (
-            <PageContainer centered noPadding breadcrumbs={breadcrumbs}>
+            <PageContainer centered noPadding>
                 <AppLoader visible={loading} />
                 <CustomStepper
                     currentStep={activeStep}

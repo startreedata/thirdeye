@@ -50,7 +50,8 @@
         "react-codemirror2": "^7.2.1",
         "react-dom": "^16.13.1",
         "react-i18next": "^11.7.3",
-        "react-router-dom": "^5.2.0"
+        "react-router-dom": "^5.2.0",
+        "zustand": "^3.2.0"
     },
     "devDependencies": {
         "@svgr/webpack": "^5.4.0",

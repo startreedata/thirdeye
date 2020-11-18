@@ -1,16 +1,16 @@
 {
-    "entity": {
-        "thirdeye": "Third Eye",
-        "alert": "Alert",
-        "anomaly": "Anomaly"
-    },
+    "entity": {},
     "label": {
         "home": "Home",
         "alerts": "Alerts",
         "anomalies": "Anomalies",
         "sign-in": "Sign In",
         "sign-out": "Sign Out",
-        "create-alert": "Create Alert"
+        "page-not-found": "Page Not Found",
+        "create-alert": "Create Alert",
+        "all": "All",
+        "create": "Create",
+        "update": "Update"
     },
     "message": {}
 }

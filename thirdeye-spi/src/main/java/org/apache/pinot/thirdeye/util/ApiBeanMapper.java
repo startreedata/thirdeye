@@ -5,6 +5,7 @@ import static org.apache.pinot.thirdeye.datalayer.pojo.AlertNodeType.DETECTION;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -172,8 +173,9 @@ public abstract class ApiBeanMapper {
   public static SubscriptionGroupApi toApi(final SubscriptionGroupDTO dto) {
     final List<AlertApi> alertApis = optional(dto.getProperties())
         .map(o1 -> o1.get("detectionConfigIds"))
-        .map(l -> ((List<Integer>) l).stream()
-            .map(o -> new AlertApi().setId(Long.valueOf(o)))
+        .map(l -> ((List<Number>) l).stream()
+            .map(Number::longValue)
+            .map(o -> new AlertApi().setId(o))
             .collect(Collectors.toList()))
         .orElse(null);
 
@@ -217,6 +219,16 @@ public abstract class ApiBeanMapper {
         .ifPresent(dto::setApplication);
 
     // TODO spyne implement translation of alert schemes, suppressors etc.
+
+    dto.setProperties(new HashMap<>());
+
+    final List<Long> alertIds = optional(api.getAlerts())
+        .orElse(Collections.emptyList())
+        .stream()
+        .map(AlertApi::getId)
+        .collect(Collectors.toList());
+
+    dto.getProperties().put("detectionConfigIds", alertIds);
 
     return dto;
   }

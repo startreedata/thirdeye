@@ -1,8 +1,16 @@
 [
   {
-    "name": "sgn",
+    "name": "sgn2",
     "application": {
       "name": "myApp"
-    }
+    },
+    "alerts": [
+      {
+        "id": 7590
+      },
+      {
+        "id": 7597
+      }
+    ]
   }
 ]

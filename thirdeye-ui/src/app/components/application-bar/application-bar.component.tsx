@@ -1,7 +1,7 @@
 import { AppBar, Link, Toolbar } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import classnames from "classnames";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { ReactComponent as ThirdEye } from "../../../assets/icons/third-eye.svg";
@@ -22,10 +22,15 @@ import { applicationBarStyles } from "./application-bar.styles";
 export const ApplicationBar: FunctionComponent = () => {
     const applicationBarClasses = applicationBarStyles();
 
-    const [authenticated] = useState(isAuthenticated());
+    const [authenticated, setAuthenticated] = useState(false);
     const history = useHistory();
     const location = useLocation();
     const { t } = useTranslation();
+
+    useEffect(() => {
+        // Determine authentication
+        setAuthenticated(isAuthenticated());
+    }, [location.pathname]);
 
     const onLogoClick = (): void => {
         history.push(getBasePath());
@@ -78,9 +83,10 @@ export const ApplicationBar: FunctionComponent = () => {
                         applicationBarClasses.link,
                         isRouteCurrent(AppRoute.HOME)
                             ? applicationBarClasses.selected
-                            : applicationBarClasses.unSelected
+                            : ""
                     )}
                     component="button"
+                    disabled={isRouteCurrent(AppRoute.HOME)}
                     variant="subtitle2"
                     onClick={onHomeClick}
                 >
@@ -93,9 +99,10 @@ export const ApplicationBar: FunctionComponent = () => {
                         applicationBarClasses.link,
                         isRouteCurrent(AppRoute.ALERTS)
                             ? applicationBarClasses.selected
-                            : applicationBarClasses.unSelected
+                            : ""
                     )}
                     component="button"
+                    disabled={isRouteCurrent(AppRoute.ALERTS)}
                     variant="subtitle2"
                     onClick={onAlertsClick}
                 >
@@ -108,54 +115,60 @@ export const ApplicationBar: FunctionComponent = () => {
                         applicationBarClasses.link,
                         isRouteCurrent(AppRoute.ANOMALIES)
                             ? applicationBarClasses.selected
-                            : applicationBarClasses.unSelected
+                            : ""
                     )}
                     component="button"
+                    disabled={isRouteCurrent(AppRoute.ANOMALIES)}
                     variant="subtitle2"
                     onClick={onAnomaliesClick}
                 >
                     {t("label.anomalies")}
                 </Link>
 
-                {/* Create alert */}
-                <Button
-                    className={classnames(
-                        applicationBarClasses.link,
-                        applicationBarClasses.rightAlign
-                    )}
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    variant="outlined"
-                    onClick={onCreateAlert}
-                >
-                    {t("label.create-alert")}
-                </Button>
-
                 {(authenticated && (
-                    // Sign out
-                    <Link
-                        className={classnames(
-                            applicationBarClasses.link,
-                            isRouteCurrent(AppRoute.SIGN_OUT)
-                                ? applicationBarClasses.selected
-                                : applicationBarClasses.unSelected
-                        )}
-                        component="button"
-                        variant="subtitle2"
-                        onClick={onSignOutClick}
-                    >
-                        {t("label.sign-out")}
-                    </Link>
+                    <>
+                        {/* Create alert */}
+                        <Button
+                            className={classnames(
+                                applicationBarClasses.link,
+                                applicationBarClasses.rightAlign
+                            )}
+                            color="primary"
+                            startIcon={<AddIcon />}
+                            variant="outlined"
+                            onClick={onCreateAlert}
+                        >
+                            {t("label.create-alert")}
+                        </Button>
+
+                        {/* Sign out */}
+                        <Link
+                            className={classnames(
+                                applicationBarClasses.link,
+                                isRouteCurrent(AppRoute.SIGN_OUT)
+                                    ? applicationBarClasses.selected
+                                    : ""
+                            )}
+                            component="button"
+                            disabled={isRouteCurrent(AppRoute.SIGN_OUT)}
+                            variant="subtitle2"
+                            onClick={onSignOutClick}
+                        >
+                            {t("label.sign-out")}
+                        </Link>
+                    </>
                 )) || (
                     // Sign in
                     <Link
                         className={classnames(
                             applicationBarClasses.link,
+                            applicationBarClasses.rightAlign,
                             isRouteCurrent(AppRoute.SIGN_IN)
                                 ? applicationBarClasses.selected
-                                : applicationBarClasses.unSelected
+                                : ""
                         )}
                         component="button"
+                        disabled={isRouteCurrent(AppRoute.SIGN_IN)}
                         variant="subtitle2"
                         onClick={onSignInClick}
                     >

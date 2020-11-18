@@ -27,9 +27,6 @@ export const applicationBarStyles = makeStyles((theme: Theme) => {
             },
         },
         selected: {
-            color: Palette.COLOR_PRIMARY,
-        },
-        unSelected: {
             color: Color.BLACK,
         },
         rightAlign: {

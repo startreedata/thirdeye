@@ -7,6 +7,7 @@ public enum ThirdEyeStatus {
   ERR_ID_UNEXPECTED_AT_CREATION("ID should be null at creation time."),
   ERR_OBJECT_UNEXPECTED("Object should be null/empty! %s"),
   ERR_OBJECT_DOES_NOT_EXIST("Object does not exist! %s"),
+  ERR_OPERATION_UNSUPPORTED("Operation is not supported!"),
   ERR_UNKNOWN("Untagged Error! %s");
 
   final String message;

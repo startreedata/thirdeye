@@ -36,6 +36,10 @@ public class ResourceUtils {
     ensure(o == null, ERR_OBJECT_UNEXPECTED, message);
   }
 
+  public static void ensureNull(Object o, ThirdEyeStatus status, Object... args) {
+    ensure(o == null, status, args);
+  }
+
   public static void ensure(boolean condition, String message) {
     ensure(condition, ThirdEyeStatus.ERR_UNKNOWN, message);
   }

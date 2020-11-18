@@ -1,5 +1,16 @@
 {
-    "entity": {},
-    "label": {},
+    "entity": {
+        "thirdeye": "Third Eye",
+        "alert": "Alert",
+        "anomaly": "Anomaly"
+    },
+    "label": {
+        "home": "Home",
+        "alerts": "Alerts",
+        "anomalies": "Anomalies",
+        "sign-in": "Sign In",
+        "sign-out": "Sign Out",
+        "create-alert": "Create Alert"
+    },
     "message": {}
 }

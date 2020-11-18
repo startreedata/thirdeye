@@ -66,7 +66,6 @@ export const typographyOptions = <TypographyOptions>{
         fontWeight: "bold",
         letterSpacing: "-0.25px",
         lineHeight: "35px",
-        margin: "12px 0",
     },
     h5: {
         fontFamily: "Quattrocento Sans",
@@ -82,7 +81,6 @@ export const typographyOptions = <TypographyOptions>{
         fontWeight: "bold",
         letterSpacing: "0.15px",
         lineHeight: "22px",
-        margin: "12px 0",
     },
     overline: {
         fontFamily: "Nunito",

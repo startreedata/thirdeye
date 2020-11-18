@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Auth } from "../dto/auth.interfaces";
-import { login } from "./auth.rest";
+import { login, logout } from "./auth.rest";
 
 jest.mock("axios");
 
@@ -40,5 +40,19 @@ describe("Auth REST", () => {
         (axios.post as jest.Mock).mockRejectedValue(mockError);
 
         await expect(login()).rejects.toThrow("testErrorMessage");
+    });
+
+    test("logout shall invoke axios.post with appropriate input", async () => {
+        (axios.post as jest.Mock).mockResolvedValue({});
+
+        await logout();
+
+        expect(axios.post).toHaveBeenCalledWith("/api/auth/logout");
+    });
+
+    test("logout shall throw encountered error", async () => {
+        (axios.post as jest.Mock).mockRejectedValue(mockError);
+
+        await expect(logout()).rejects.toThrow("testErrorMessage");
     });
 });

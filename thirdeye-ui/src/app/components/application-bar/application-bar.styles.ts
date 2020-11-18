@@ -1,4 +1,5 @@
 import { createStyles, makeStyles, Theme } from "@material-ui/core";
+import { Color } from "../../utils/material-ui/color.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { Shadow } from "../../utils/material-ui/shadow.util";
 
@@ -13,17 +14,25 @@ export const applicationBarStyles = makeStyles((theme: Theme) => {
         logo: {
             alignItems: "center",
             display: "flex",
+            marginLeft: "8px",
             marginRight: "8px",
         },
         link: {
             alignItems: "center",
             display: "flex",
-        },
-        linkLeftAlign: {
             marginLeft: "8px",
             marginRight: "8px",
+            "&:last-of-type": {
+                marginRight: "0px",
+            },
         },
-        linkRightAlign: {
+        selected: {
+            color: Palette.COLOR_PRIMARY,
+        },
+        unSelected: {
+            color: Color.BLACK,
+        },
+        rightAlign: {
             marginLeft: "auto",
             marginRight: "8px",
         },

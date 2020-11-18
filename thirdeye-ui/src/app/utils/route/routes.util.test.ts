@@ -8,6 +8,8 @@ import {
     getAnomaliesDetailPath,
     getAnomaliesPath,
     getBasePath,
+    getHomePath,
+    getPageNotFoundPath,
     getSignInPath,
     getSignOutPath,
 } from "./routes.util";
@@ -15,6 +17,10 @@ import {
 describe("Routes Util", () => {
     test("getBasePath shall return appropriate path", () => {
         expect(getBasePath()).toEqual("/");
+    });
+
+    test("getHomePath shall return appropriate path", () => {
+        expect(getHomePath()).toEqual("/home");
     });
 
     test("getAlertsPath shall return appropriate path", () => {
@@ -55,5 +61,9 @@ describe("Routes Util", () => {
 
     test("getSignOutPath shall return appropriate path", () => {
         expect(getSignOutPath()).toEqual("/signOut");
+    });
+
+    test("getPageNotFoundPath shall return appropriate path", () => {
+        expect(getPageNotFoundPath()).toEqual("/pageNotFound");
     });
 });

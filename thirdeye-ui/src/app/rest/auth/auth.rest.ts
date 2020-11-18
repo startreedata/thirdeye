@@ -13,3 +13,7 @@ export const login = async (): Promise<Auth> => {
 
     return response.data;
 };
+
+export const logout = async (): Promise<void> => {
+    await axios.post(`${BASE_URL_AUTH}/logout`);
+};

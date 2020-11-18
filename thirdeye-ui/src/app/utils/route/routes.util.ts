@@ -2,6 +2,7 @@ const ROUTE_PLACEHOLDER_ID = ":id";
 
 export const AppRoute = {
     BASE: "/",
+    HOME: "/home",
     ALERTS: "/alerts",
     ALERTS_ALL: "/alerts/all",
     ALERTS_DETAIL: `/alerts/id/${ROUTE_PLACEHOLDER_ID}`,
@@ -12,10 +13,15 @@ export const AppRoute = {
     ANOMALIES_DETAIL: `/anomalies/id/${ROUTE_PLACEHOLDER_ID}`,
     SIGN_IN: "/signIn",
     SIGN_OUT: "/signOut",
+    PAGE_NOT_FOUND: "/pageNotFound",
 } as const;
 
 export const getBasePath = (): string => {
     return AppRoute.BASE;
+};
+
+export const getHomePath = (): string => {
+    return AppRoute.HOME;
 };
 
 export const getAlertsPath = (): string => {
@@ -65,4 +71,8 @@ export const getSignInPath = (): string => {
 
 export const getSignOutPath = (): string => {
     return AppRoute.SIGN_OUT;
+};
+
+export const getPageNotFoundPath = (): string => {
+    return AppRoute.PAGE_NOT_FOUND;
 };

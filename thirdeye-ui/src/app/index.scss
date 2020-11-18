@@ -1,3 +1,13 @@
 // Material UI fonts
 @import "../assets/fonts/fonts.scss";
 @import "codemirror/lib/codemirror.css";
+
+// Make HTML body and app container occupy entire height and width
+html,
+body,
+#root {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}

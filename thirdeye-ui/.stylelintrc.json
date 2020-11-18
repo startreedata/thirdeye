@@ -7,7 +7,7 @@
     "rules": {
         "no-invalid-double-slash-comments": true,
         "comment-whitespace-inside": "always",
-        "rule-empty-line-before": "always",
+        "rule-empty-line-before": ["always", { "ignore": ["after-comment"] }],
         "property-case": "lower",
         "value-keyword-case": "lower",
         "unit-case": "lower",

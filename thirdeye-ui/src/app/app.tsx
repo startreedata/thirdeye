@@ -1,4 +1,4 @@
-import { Box, CssBaseline, ThemeProvider } from "@material-ui/core";
+import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import axios from "axios";
 import i18n from "i18next";
 import React, { FunctionComponent } from "react";
@@ -18,16 +18,14 @@ axios.interceptors.request.use(requestInterceptor);
 // ThirdEye UI app
 export const App: FunctionComponent = () => {
     return (
-        <Box display="flex">
-            {/* Apply Meterial UI theme */}
-            <ThemeProvider theme={theme}>
-                <CssBaseline />
+        // Apply Meterial UI theme
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
 
-                <ApplicationBar />
+            <ApplicationBar />
 
-                {/* Router */}
-                <AppRouter />
-            </ThemeProvider>
-        </Box>
+            {/* Router */}
+            <AppRouter />
+        </ThemeProvider>
     );
 };

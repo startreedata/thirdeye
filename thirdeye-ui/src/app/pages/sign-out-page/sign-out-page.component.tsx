@@ -2,19 +2,18 @@ import { Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { login } from "../../rest/auth/auth.rest";
-import { Auth } from "../../rest/dto/auth.interfaces";
-import { setAccessToken } from "../../utils/auth/auth.util";
-import { signInPageStyles } from "./sign-in-page.styles";
+import { logout } from "../../rest/auth/auth.rest";
+import { removeAccessToken } from "../../utils/auth/auth.util";
+import { signOutPageStyles } from "./sign-out-page.styles";
 
-export const SignInPage: FunctionComponent = () => {
-    const signInPageClasses = signInPageStyles();
+export const SignOutPage: FunctionComponent = () => {
+    const signOutPageClasses = signOutPageStyles();
 
     const { t } = useTranslation();
 
-    const performLogin = async (): Promise<void> => {
-        const authentication: Auth = await login();
-        setAccessToken(authentication.accessToken);
+    const performLogout = async (): Promise<void> => {
+        await logout();
+        removeAccessToken();
 
         location.reload();
     };
@@ -24,16 +23,16 @@ export const SignInPage: FunctionComponent = () => {
             <Grid
                 container
                 alignItems="center"
-                className={signInPageClasses.grid}
+                className={signOutPageClasses.grid}
                 justify="center"
             >
                 <Grid item>
                     <Button
                         color="primary"
                         variant="contained"
-                        onClick={performLogin}
+                        onClick={performLogout}
                     >
-                        {t("label.sign-in")}
+                        {t("label.sign-out")}
                     </Button>
                 </Grid>
             </Grid>

@@ -28,7 +28,7 @@ import { AppRoute } from "../../utils/route/routes.util";
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 
-export const CreateAlertPage = withRouter(
+export const AlertsCreatePage = withRouter(
     (props: RouteComponentProps): ReactElement => {
         const [detectionConfig, setDetectionConfig] = useState(
             DETECTION_CONFIG

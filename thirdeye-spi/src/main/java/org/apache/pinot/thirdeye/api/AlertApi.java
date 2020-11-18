@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
@@ -18,6 +19,7 @@ public class AlertApi {
   private Date updated;
   private UserApi owner;
   private Map<String, AlertNodeApi> nodes;
+  private List<SubscriptionGroupApi> subscriptionGroups;
 
   public Long getId() {
     return id;
@@ -107,6 +109,16 @@ public class AlertApi {
   public AlertApi setNodes(
       final Map<String, AlertNodeApi> nodes) {
     this.nodes = nodes;
+    return this;
+  }
+
+  public List<SubscriptionGroupApi> getSubscriptionGroups() {
+    return subscriptionGroups;
+  }
+
+  public AlertApi setSubscriptionGroups(
+      final List<SubscriptionGroupApi> subscriptionGroups) {
+    this.subscriptionGroups = subscriptionGroups;
     return this;
   }
 }

@@ -2,7 +2,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { PageContainer } from "../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../components/page-loading-indicator/page-loading-indicator.component";
-import { SignInPage } from "../pages/sign-in-page/sign-in-page.component";
+import { SignInPage } from "../pages/sign-in/sign-in-page.component";
 import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs-store";
 import { Breadcrumb } from "../store/application-breadcrumbs/application-breadcrumbs-store.interfaces";
 import { ApplicationRoute, getSignInPath } from "../utils/route/routes-util";

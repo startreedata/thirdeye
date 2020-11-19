@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
 
+import io.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
@@ -20,6 +21,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 
+@Api(tags = "Metric")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {

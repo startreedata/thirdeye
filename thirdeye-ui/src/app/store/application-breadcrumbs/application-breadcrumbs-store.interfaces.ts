@@ -1,11 +1,9 @@
-export interface Breadcrumb {
-    text: string;
-    path: string;
-}
+import { Breadcrumb } from "../../components/application-breadcrumbs/application-breadcrumbs.interfaces";
 
 export type ApplicationBreadcrumbsStore = {
     routerBreadcrumb: Breadcrumb;
     pageBreadcrumbs: Breadcrumb[];
+    breadcrumbs: Breadcrumb[];
     setRouterBreadcrumb: (breadcrumb: Breadcrumb) => void;
-    setPageBreadcrumbs: (breadcrumb: Breadcrumb[]) => void;
+    setPageBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
 };

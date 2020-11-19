@@ -1,6 +1,6 @@
 export type AuthStore = {
     auth: boolean;
     accessToken: string;
-    setAccessToken: (accessToken: string) => void;
+    setAccessToken: (token: string) => void;
     removeAccessToken: () => void;
 };

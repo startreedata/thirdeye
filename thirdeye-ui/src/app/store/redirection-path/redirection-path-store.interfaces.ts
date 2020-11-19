@@ -1,5 +1,5 @@
 export type RedirectionPathStore = {
     redirectToPath: string;
-    setRedirectToPath: (redirectToPath: string) => void;
+    setRedirectToPath: (path: string) => void;
     clearRedirectToPath: () => void;
 };

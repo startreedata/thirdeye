@@ -9,7 +9,7 @@ export const PageLoadingIndicator: FunctionComponent = () => {
         <Grid
             container
             alignItems="center"
-            className={pageLoadingIndicatorClasses.grid}
+            className={pageLoadingIndicatorClasses.container}
             justify="center"
         >
             <Grid item>

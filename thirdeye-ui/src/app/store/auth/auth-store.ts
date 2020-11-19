@@ -12,10 +12,10 @@ export const useAuthStore = create<AuthStore>(
             accessToken: "",
 
             // Action for signing in
-            setAccessToken: (accessToken: string): void => {
+            setAccessToken: (token: string): void => {
                 set({
                     auth: true,
-                    accessToken: accessToken,
+                    accessToken: token,
                 });
             },
 

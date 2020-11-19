@@ -1,10 +1,10 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { Breadcrumb } from "../components/application-breadcrumbs/application-breadcrumbs.interfaces";
 import { PageContainer } from "../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../components/page-loading-indicator/page-loading-indicator.component";
 import { SignInPage } from "../pages/sign-in/sign-in-page.component";
 import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs-store";
-import { Breadcrumb } from "../store/application-breadcrumbs/application-breadcrumbs-store.interfaces";
 import { useRedirectionPathStore } from "../store/redirection-path/redirection-path-store";
 import { ApplicationRoute, getSignInPath } from "../utils/route/routes-util";
 

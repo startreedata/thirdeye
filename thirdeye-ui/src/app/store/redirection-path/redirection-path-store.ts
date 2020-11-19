@@ -6,9 +6,9 @@ export const useRedirectionPathStore = create<RedirectionPathStore>(
     (set: SetState<RedirectionPathStore>) => ({
         redirectToPath: "",
 
-        setRedirectToPath: (redirectToPath: string): void => {
+        setRedirectToPath: (path: string): void => {
             set({
-                redirectToPath: redirectToPath,
+                redirectToPath: path,
             });
         },
 

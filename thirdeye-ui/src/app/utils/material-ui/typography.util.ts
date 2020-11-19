@@ -2,6 +2,7 @@ import { TypographyOptions } from "@material-ui/core/styles/createTypography";
 
 // CortexData Material-UI theme typography
 export const typographyOptions = <TypographyOptions>{
+    fontFamily: "Quattrocento Sans, Nunito",
     body1: {
         fontFamily: "Nunito",
         fontSize: "16px",
@@ -35,7 +36,6 @@ export const typographyOptions = <TypographyOptions>{
         letterSpacing: "0.4px",
         lineHeight: "16px",
     },
-    fontFamily: "Quattrocento Sans, Nunito",
     h1: {
         fontFamily: "Quattrocento Sans",
         fontSize: "48px",

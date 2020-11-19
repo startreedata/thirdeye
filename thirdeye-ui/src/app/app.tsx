@@ -22,6 +22,7 @@ export const App: FunctionComponent = () => {
         <ThemeProvider theme={theme}>
             <CssBaseline />
 
+            {/* Application bar */}
             <ApplicationBar />
 
             {/* Router */}

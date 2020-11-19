@@ -1,4 +1,4 @@
-import { AppBar, Link, Toolbar } from "@material-ui/core";
+import { AppBar, Button, Link, Toolbar } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import classnames from "classnames";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -16,7 +16,6 @@ import {
     getSignInPath,
     getSignOutPath,
 } from "../../utils/route/routes.util";
-import { Button } from "../button/button.component";
 import { applicationBarStyles } from "./application-bar.styles";
 
 export const ApplicationBar: FunctionComponent = () => {

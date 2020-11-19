@@ -1,9 +1,9 @@
 import { CircularProgress, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { pageLoadingIndicatorStyles } from "./page-loading-indicator.styles";
+import { usePageLoadingIndicatorStyles } from "./page-loading-indicator.styles";
 
 export const PageLoadingIndicator: FunctionComponent = () => {
-    const pageLoadingIndicatorClasses = pageLoadingIndicatorStyles();
+    const pageLoadingIndicatorClasses = usePageLoadingIndicatorStyles();
 
     return (
         <Grid

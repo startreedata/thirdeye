@@ -1,9 +1,7 @@
-import { createStyles, makeStyles } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 
-export const signOutPageStyles = makeStyles(
-    createStyles({
-        grid: {
-            height: "100%",
-        },
-    })
-);
+export const useSignOutPageStyles = makeStyles({
+    grid: {
+        height: "100%",
+    },
+});

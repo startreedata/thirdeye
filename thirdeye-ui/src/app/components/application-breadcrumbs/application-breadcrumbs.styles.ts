@@ -1,10 +1,8 @@
-import { createStyles, makeStyles } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 import { Color } from "../../utils/material-ui/color-util";
 
-export const applicationBreadcrumbsStyles = makeStyles(
-    createStyles({
-        selected: {
-            color: Color.BLACK,
-        },
-    })
-);
+export const useApplicationBreadcrumbsStyles = makeStyles({
+    selected: {
+        color: Color.BLACK,
+    },
+});

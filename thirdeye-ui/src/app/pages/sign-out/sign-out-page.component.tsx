@@ -7,11 +7,10 @@ import { logout } from "../../rest/auth/auth-rest";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import { useAuthStore } from "../../store/auth/auth-store";
 import { getSignOutPath } from "../../utils/route/routes-util";
-import { signOutPageStyles } from "./sign-out-page.styles";
+import { useSignOutPageStyles } from "./sign-out-page.styles";
 
 export const SignOutPage: FunctionComponent = () => {
-    const signOutPageClasses = signOutPageStyles();
-
+    const signOutPageClasses = useSignOutPageStyles();
     const [loading, setLoading] = useState(true);
     const [removeAccessToken] = useAuthStore((state) => [
         state.removeAccessToken,

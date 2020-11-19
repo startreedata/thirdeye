@@ -1,9 +1,7 @@
-import { createStyles, makeStyles } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 
-export const signInPageStyles = makeStyles(
-    createStyles({
-        grid: {
-            height: "100%",
-        },
-    })
-);
+export const useSignInPageStyles = makeStyles({
+    grid: {
+        height: "100%",
+    },
+});

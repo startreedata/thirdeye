@@ -10,11 +10,10 @@ import { useApplicationBreadcrumbsStore } from "../../store/application-breadcru
 import { useAuthStore } from "../../store/auth/auth-store";
 import { useRedirectionPathStore } from "../../store/redirection-path/redirection-path-store";
 import { getSignInPath } from "../../utils/route/routes-util";
-import { signInPageStyles } from "./sign-in-page.styles";
+import { useSignInPageStyles } from "./sign-in-page.styles";
 
 export const SignInPage: FunctionComponent = () => {
-    const signInPageClasses = signInPageStyles();
-
+    const signInPageClasses = useSignInPageStyles();
     const [loading, setLoading] = useState(true);
     const [setAccessToken] = useAuthStore((state) => [state.setAccessToken]);
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [

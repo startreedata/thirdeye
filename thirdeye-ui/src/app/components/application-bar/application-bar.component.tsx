@@ -16,11 +16,10 @@ import {
     getSignInPath,
     getSignOutPath,
 } from "../../utils/route/routes-util";
-import { applicationBarStyles } from "./application-bar.styles";
+import { useApplicationBarStyles } from "./application-bar.styles";
 
 export const ApplicationBar: FunctionComponent = () => {
-    const applicationBarClasses = applicationBarStyles();
-
+    const applicationBarClasses = useApplicationBarStyles();
     const [auth] = useAuthStore((state) => [state.auth]);
     const history = useHistory();
     const location = useLocation();

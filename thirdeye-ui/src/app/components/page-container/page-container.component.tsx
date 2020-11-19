@@ -3,13 +3,12 @@ import React, { FunctionComponent } from "react";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import { ApplicationBreadcrumbs } from "../application-breadcrumbs/application-breadcrumbs.component";
 import { PageContainerProps } from "./page-container.interfaces";
-import { pageContainerStyles } from "./page-container.styles";
+import { usePageContainerStyles } from "./page-container.styles";
 
 export const PageContainer: FunctionComponent<PageContainerProps> = (
     props: PageContainerProps
 ) => {
-    const pageContainerClasses = pageContainerStyles();
-
+    const pageContainerClasses = usePageContainerStyles();
     const [breadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.breadcrumbs,
     ]);

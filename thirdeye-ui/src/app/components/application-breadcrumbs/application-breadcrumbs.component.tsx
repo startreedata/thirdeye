@@ -5,13 +5,12 @@ import { useHistory } from "react-router-dom";
 import { Dimension } from "../../utils/material-ui/dimension-util";
 import { Palette } from "../../utils/material-ui/palette-util";
 import { ApplicationBreadcrumbsProps } from "./application-breadcrumbs.interfaces";
-import { applicationBreadcrumbsStyles } from "./application-breadcrumbs.styles";
+import { useApplicationBreadcrumbsStyles } from "./application-breadcrumbs.styles";
 
 export const ApplicationBreadcrumbs: FunctionComponent<ApplicationBreadcrumbsProps> = (
     props: ApplicationBreadcrumbsProps
 ) => {
-    const applicationBreadcrumbsClasses = applicationBreadcrumbsStyles();
-
+    const applicationBreadcrumbsClasses = useApplicationBreadcrumbsStyles();
     const history = useHistory();
 
     const onBreadcrumbClick = (path: string): void => {

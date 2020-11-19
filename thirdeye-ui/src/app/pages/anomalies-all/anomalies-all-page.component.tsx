@@ -1,20 +1,31 @@
+import { Typography } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import AnomaliesCard from "../../components/anomalies/anomalies-card.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
+import { getAllAnomalies } from "../../rest/anomaly/anomaly-rest";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import {
-    getAnomaliesAllPath,
-    getAnomaliesDetailPath,
-} from "../../utils/route/routes-util";
+import { getAnomaliesAllPath } from "../../utils/route/routes-util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
+    const [anomalies, setAnomalies] = useState<Anomaly[] | undefined>();
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const { t } = useTranslation();
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async (): Promise<void> => {
+        const anomalies = await getAllAnomalies();
+        setAnomalies(anomalies);
+        setLoading(false);
+    };
 
     useEffect(() => {
         // Create page breadcrumb
@@ -25,7 +36,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             },
         ]);
 
-        setLoading(false);
+        // setLoading(false);
     }, [setPageBreadcrumbs, t]);
 
     if (loading) {
@@ -38,35 +49,10 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <Link to={getAnomaliesDetailPath(2)}>test</Link>
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <Link to={getAnomaliesDetailPath(2)}>test</Link>
+            <Typography variant="h5">{t("label.anomalies")}</Typography>
+            {anomalies?.map((anomalie) => (
+                <AnomaliesCard data={anomalie} key={anomalie.id} mode="list" />
+            ))}
         </PageContainer>
     );
 };

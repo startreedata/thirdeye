@@ -8,7 +8,11 @@ export const RouterLink: FunctionComponent<LinkProps> = ({
 }: LinkProps) => {
     return (
         <Link style={{ textDecoration: "none" }} to={to}>
-            <Typography color="primary" variant="subtitle2">
+            <Typography
+                color="primary"
+                style={{ display: "inline-flex" }}
+                variant="subtitle2"
+            >
                 <strong>{children}</strong>
             </Typography>
         </Link>

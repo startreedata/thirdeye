@@ -7,10 +7,22 @@
         "sign-in": "Sign In",
         "sign-out": "Sign Out",
         "page-not-found": "Page Not Found",
-        "create-alert": "Create Alert",
         "all": "All",
         "create": "Create",
-        "update": "Update"
+        "update": "Update",
+        "create-alert": "Create Alert",
+        "id": "ID",
+        "investigate": "Investigate",
+        "start": "Start",
+        "duration": "Duration",
+        "dimensions": "Dimensions",
+        "current": "Current",
+        "predicted": "Predicted",
+        "resolution": "Resolution",
+        "anomaly-type": "Anomaly Type",
+        "feedback": "Feedback",
+        "metric": "Metric",
+        "dataset": "Dataset"
     },
     "message": {}
 }

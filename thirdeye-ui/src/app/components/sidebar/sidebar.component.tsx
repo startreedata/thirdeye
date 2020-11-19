@@ -3,6 +3,7 @@ import React, { FunctionComponent } from "react";
 import DisplayFilter from "../filter/display-filter.component";
 import FilterDropdownComponent from "../filter/filter-dropdown.component";
 import QuickFilters from "../filter/quick-filters.component";
+import { SidebarProps } from "./sidebar.interfaces";
 
 const drawerWidth = 360;
 const useStyles = makeStyles(() => {
@@ -20,7 +21,9 @@ const useStyles = makeStyles(() => {
     };
 });
 
-export const SideBar: FunctionComponent = () => {
+export const SideBar: FunctionComponent<SidebarProps> = ({
+    hideQuickFilters,
+}: SidebarProps) => {
     const classes = useStyles();
 
     return (
@@ -33,19 +36,21 @@ export const SideBar: FunctionComponent = () => {
             variant="permanent"
         >
             <Toolbar />
-            <QuickFilters
-                filters={[
-                    {
-                        name: "alerts i subscribe to (0)",
-                        value: "subscribed",
-                    },
-                    { name: "alerts i own (0)", value: "own" },
-                    { name: "all alerts (1)", value: "all" },
-                ]}
-                onFilter={(value): void => {
-                    console.log(value);
-                }}
-            />
+            {!hideQuickFilters && (
+                <QuickFilters
+                    filters={[
+                        {
+                            name: "alerts i subscribe to (0)",
+                            value: "subscribed",
+                        },
+                        { name: "alerts i own (0)", value: "own" },
+                        { name: "all alerts (1)", value: "all" },
+                    ]}
+                    onFilter={(value): void => {
+                        console.log(value);
+                    }}
+                />
+            )}
             <DisplayFilter />
             <FilterDropdownComponent
                 label="Applications"

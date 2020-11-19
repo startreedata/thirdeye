@@ -6,12 +6,14 @@ import { useApplicationBreadcrumbsStore } from "../../store/application-breadcru
 
 export const AlertsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
+    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+        state.setPageBreadcrumbs,
+    ]);
     const { t } = useTranslation();
 
     useEffect(() => {
         // Create page breadcrumb
-        push([
+        setPageBreadcrumbs([
             {
                 text: "ALERT_NAME",
                 path: "",
@@ -23,7 +25,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         ]);
 
         setLoading(false);
-    }, [push, t]);
+    }, [setPageBreadcrumbs, t]);
 
     if (loading) {
         return (
@@ -33,5 +35,9 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         );
     }
 
-    return <></>;
+    return (
+        <PageContainer>
+            <PageLoadingIndicator />
+        </PageContainer>
+    );
 };

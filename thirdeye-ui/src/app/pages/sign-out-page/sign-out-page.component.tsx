@@ -13,23 +13,22 @@ export const SignOutPage: FunctionComponent = () => {
     const signOutPageClasses = signOutPageStyles();
 
     const [loading, setLoading] = useState(true);
-    const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
+    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+        state.setPageBreadcrumbs,
+    ]);
     const { t } = useTranslation();
 
     useEffect(() => {
         // Create page breadcrumb
-        push(
-            [
-                {
-                    text: t("label.sign-out"),
-                    path: getSignOutPath(),
-                },
-            ],
-            true // Clear existing breadcrumbs
-        );
+        setPageBreadcrumbs([
+            {
+                text: t("label.sign-out"),
+                path: getSignOutPath(),
+            },
+        ]);
 
         setLoading(false);
-    }, [push, t]);
+    }, [setPageBreadcrumbs, t]);
 
     const performLogout = async (): Promise<void> => {
         await logout();

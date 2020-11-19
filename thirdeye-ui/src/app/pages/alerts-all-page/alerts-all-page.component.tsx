@@ -12,14 +12,16 @@ import { getAlertsAllPath } from "../../utils/route/routes.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
+    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+        state.setPageBreadcrumbs,
+    ]);
     const [alerts, setAlerts] = useState<Alert[]>();
     const [search, setSearch] = useState("");
     const { t } = useTranslation();
 
     useEffect(() => {
         // Create page breadcrumb
-        push([
+        setPageBreadcrumbs([
             {
                 text: t("label.all"),
                 path: getAlertsAllPath(),
@@ -29,7 +31,7 @@ export const AlertsAllPage: FunctionComponent = () => {
         fetchAllAlerts();
 
         setLoading(false);
-    }, [push, t]);
+    }, [setPageBreadcrumbs, t]);
 
     const fetchAllAlerts = async (): Promise<void> => {
         setAlerts(await getAllAlerts());

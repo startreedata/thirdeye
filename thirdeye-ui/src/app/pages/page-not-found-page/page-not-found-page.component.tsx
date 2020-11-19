@@ -7,23 +7,22 @@ import { getPageNotFoundPath } from "../../utils/route/routes.util";
 
 export const PageNotFoundPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
+    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+        state.setPageBreadcrumbs,
+    ]);
     const { t } = useTranslation();
 
     useEffect(() => {
         // Create page breadcrumb
-        push(
-            [
-                {
-                    text: t("label.page-not-found"),
-                    path: getPageNotFoundPath(),
-                },
-            ],
-            true // Clear existing breadcrumbs
-        );
+        setPageBreadcrumbs([
+            {
+                text: t("label.page-not-found"),
+                path: getPageNotFoundPath(),
+            },
+        ]);
 
         setLoading(false);
-    }, [push, t]);
+    }, [setPageBreadcrumbs, t]);
 
     if (loading) {
         return (
@@ -33,5 +32,9 @@ export const PageNotFoundPage: FunctionComponent = () => {
         );
     }
 
-    return <></>;
+    return (
+        <PageContainer>
+            <PageLoadingIndicator />
+        </PageContainer>
+    );
 };

@@ -1,21 +1,13 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import { PageContainer } from "../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../components/page-loading-indicator/page-loading-indicator.component";
-import { HomePage } from "../pages/home-page/home-page.component";
-import { PageNotFoundPage } from "../pages/page-not-found-page/page-not-found-page.component";
-import { SignInPage } from "../pages/sign-in-page/sign-in-page.component";
-import { SignOutPage } from "../pages/sign-out-page/sign-out-page.component";
 import { isAuthenticated } from "../utils/auth/auth.util";
-import {
-    AppRoute,
-    getBasePath,
-    getHomePath,
-    getPageNotFoundPath,
-    getSignInPath,
-} from "../utils/route/routes.util";
+import { AppRoute } from "../utils/route/routes.util";
 import { AlertsRouter } from "./alerts-router";
 import { AnomaliesRouter } from "./anomalies-router";
+import { GeneralAuthenticatedRouter } from "./general-authenticated-router";
+import { GeneralUnauthenticatedRouter } from "./general-unauthenticated-router";
 
 export const AppRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -40,39 +32,14 @@ export const AppRouter: FunctionComponent = () => {
         return (
             // Authenticated
             <Switch>
-                {/* Base path */}
-                <Route exact path={AppRoute.BASE}>
-                    {/* Redirect to home path */}
-                    <Redirect to={getHomePath()} />
-                </Route>
-
-                {/* Home path */}
-                <Route exact component={HomePage} path={AppRoute.HOME} />
-
                 {/* Direct all alerts paths to alerts router */}
                 <Route component={AlertsRouter} path={AppRoute.ALERTS} />
 
                 {/* Direct all anomalies paths to anomalies router */}
                 <Route component={AnomaliesRouter} path={AppRoute.ANOMALIES} />
 
-                {/* /Sign in path */}
-                <Route exact path={AppRoute.SIGN_IN}>
-                    {/* Already authenticated, redirect to base path */}
-                    <Redirect to={getBasePath()} />
-                </Route>
-
-                {/* Sign out path */}
-                <Route exact component={SignOutPage} path={AppRoute.SIGN_OUT} />
-
-                {/* Page not found path */}
-                <Route
-                    exact
-                    component={PageNotFoundPage}
-                    path={AppRoute.PAGE_NOT_FOUND}
-                />
-
-                {/* No match found, redirect to page not found path */}
-                <Redirect to={getPageNotFoundPath()} />
+                {/* Direct all other paths to general authenticated router */}
+                <Route component={GeneralAuthenticatedRouter} />
             </Switch>
         );
     }
@@ -80,11 +47,8 @@ export const AppRouter: FunctionComponent = () => {
     return (
         // Not authenticated
         <Switch>
-            {/* Sign in path */}
-            <Route exact component={SignInPage} path={AppRoute.SIGN_IN} />
-
-            {/* No match found, redirect to sign in path*/}
-            <Redirect to={getSignInPath()} />
+            {/* Direct all paths to geenral unauthenticated router */}
+            <Route component={GeneralUnauthenticatedRouter} />
         </Switch>
     );
 };

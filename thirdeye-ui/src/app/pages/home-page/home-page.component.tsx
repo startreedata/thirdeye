@@ -7,23 +7,22 @@ import { getHomePath } from "../../utils/route/routes.util";
 
 export const HomePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
+    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+        state.setPageBreadcrumbs,
+    ]);
     const { t } = useTranslation();
 
     useEffect(() => {
         // Create page breadcrumb
-        push(
-            [
-                {
-                    text: t("label.home"),
-                    path: getHomePath(),
-                },
-            ],
-            true // Clear existing breadcrumbs
-        );
+        setPageBreadcrumbs([
+            {
+                text: t("label.home"),
+                path: getHomePath(),
+            },
+        ]);
 
         setLoading(false);
-    }, [push, t]);
+    }, [setPageBreadcrumbs, t]);
 
     if (loading) {
         return (
@@ -33,5 +32,9 @@ export const HomePage: FunctionComponent = () => {
         );
     }
 
-    return <></>;
+    return (
+        <PageContainer>
+            <PageLoadingIndicator />
+        </PageContainer>
+    );
 };

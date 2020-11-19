@@ -11,13 +11,15 @@ import { useApplicationBreadcrumbsStore } from "../../store/application-breadcru
 
 export const AlertsDetailPage = withRouter((props) => {
     const [loading, setLoading] = useState(true);
-    const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
+    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+        state.setPageBreadcrumbs,
+    ]);
     const { id } = props.match.params;
     const [alert, setAlert] = useState<Alert>();
 
     useEffect(() => {
         // Create page breadcrumb
-        push([
+        setPageBreadcrumbs([
             {
                 text: "ALERT_NAME",
                 path: "",
@@ -27,7 +29,7 @@ export const AlertsDetailPage = withRouter((props) => {
         fetchAlert(parseInt(id));
 
         setLoading(false);
-    }, [push, id]);
+    }, [setPageBreadcrumbs, id]);
 
     const fetchAlert = async (id: number): Promise<void> => {
         setAlert(await getAlert(id));

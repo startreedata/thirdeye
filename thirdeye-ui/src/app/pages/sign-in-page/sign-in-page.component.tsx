@@ -14,23 +14,22 @@ export const SignInPage: FunctionComponent = () => {
     const signInPageClasses = signInPageStyles();
 
     const [loading, setLoading] = useState(true);
-    const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
+    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+        state.setPageBreadcrumbs,
+    ]);
     const { t } = useTranslation();
 
     useEffect(() => {
         // Create page breadcrumb
-        push(
-            [
-                {
-                    text: t("label.sign-in"),
-                    path: getSignInPath(),
-                },
-            ],
-            true // Clear existing breadcrumbs
-        );
+        setPageBreadcrumbs([
+            {
+                text: t("label.sign-in"),
+                path: getSignInPath(),
+            },
+        ]);
 
         setLoading(false);
-    }, [push, t]);
+    }, [setPageBreadcrumbs, t]);
 
     const performLogin = async (): Promise<void> => {
         const authentication: Auth = await login();

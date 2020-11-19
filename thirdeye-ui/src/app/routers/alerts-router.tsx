@@ -17,23 +17,20 @@ import {
 
 export const AlertsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
+    const [setRouterBreadcrumb] = useApplicationBreadcrumbsStore((state) => [
+        state.setRouterBreadcrumb,
+    ]);
     const { t } = useTranslation();
 
     useEffect(() => {
         // Create router breadcrumb
-        push(
-            [
-                {
-                    text: t("label.alerts"),
-                    path: getAlertsPath(),
-                },
-            ],
-            true // Clear existing breadcrumbs
-        );
+        setRouterBreadcrumb({
+            text: t("label.alerts"),
+            path: getAlertsPath(),
+        });
 
         setLoading(false);
-    }, [push, t]);
+    }, [setRouterBreadcrumb, t]);
 
     if (loading) {
         return (

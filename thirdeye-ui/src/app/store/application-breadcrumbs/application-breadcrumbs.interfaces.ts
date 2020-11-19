@@ -4,6 +4,8 @@ export interface Breadcrumb {
 }
 
 export type ApplicationBreadcrumbs = {
-    breadcrumbs: Breadcrumb[];
-    push: (breadcrumbs: Breadcrumb[], resetBeforePush?: boolean) => void;
+    routerBreadcrumb: Breadcrumb;
+    pageBreadcrumbs: Breadcrumb[];
+    setRouterBreadcrumb: (breadcrumb: Breadcrumb) => void;
+    setPageBreadcrumbs: (breadcrumb: Breadcrumb[]) => void;
 };

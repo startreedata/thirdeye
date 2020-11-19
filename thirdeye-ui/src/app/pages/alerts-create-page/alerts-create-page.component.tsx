@@ -32,7 +32,9 @@ const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 export const AlertsCreatePage = withRouter(
     (props: RouteComponentProps): ReactElement => {
         const [loading, setLoading] = useState(false);
-        const [push] = useApplicationBreadcrumbsStore((state) => [state.push]);
+        const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+            state.setPageBreadcrumbs,
+        ]);
         const [detectionConfig, setDetectionConfig] = useState(
             DETECTION_CONFIG
         );
@@ -48,7 +50,7 @@ export const AlertsCreatePage = withRouter(
 
         useEffect(() => {
             // Create page breadcrumb
-            push([
+            setPageBreadcrumbs([
                 {
                     text: t("label.create"),
                     path: getAlertsCreatePath(),
@@ -56,7 +58,7 @@ export const AlertsCreatePage = withRouter(
             ]);
 
             setLoading(false);
-        }, [push, t]);
+        }, [setPageBreadcrumbs, t]);
 
         const handleStepChange = (step: number): void => {
             if (step > 2) {

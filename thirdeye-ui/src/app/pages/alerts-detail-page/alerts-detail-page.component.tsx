@@ -43,10 +43,11 @@ export const AlertsDetailPage = withRouter((props) => {
         _event: React.ChangeEvent,
         state: boolean
     ): Promise<void> => {
-        await updateAlert({ ...alert, active: state });
-        // Temporary fix
-        // Found some other way to update alert
-        window.location.reload();
+        try {
+            setAlert(await updateAlert({ ...alert, active: state }));
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     if (loading) {

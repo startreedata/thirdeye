@@ -49,7 +49,10 @@ const AlertCard = ({
         owner: { principal },
     } = data;
 
-    const detection = detections[Object.keys(detections).pop() || ""];
+    // Temp fix will update once schema gets finalised
+    const detection = detections
+        ? detections[Object.keys(detections).pop() || ""]
+        : { type: "N/A", metric: { id: "N/A" } };
 
     return (
         <Card className={classes.root}>
@@ -57,7 +60,7 @@ const AlertCard = ({
                 {mode === "list" ? (
                     <>
                         <Box display="flex">
-                            <RouterLink to={`${id}`}>{name}</RouterLink>
+                            <RouterLink to={`id/${id}`}>{name}</RouterLink>
                             &emsp;
                             {active && (
                                 <Tooltip title="active">
@@ -102,15 +105,18 @@ const AlertCard = ({
                             color="primary"
                             onChange={onActiveChange}
                         />
-                        <RouterLink to={getAlertsUpdatePath(id)}>
-                            <Button
-                                color="primary"
-                                startIcon={<EditIcon />}
-                                variant="outlined"
-                            >
-                                Edit Alert
-                            </Button>
-                        </RouterLink>
+                        <Tooltip title="Coming soon">
+                            <RouterLink to={getAlertsUpdatePath(id)}>
+                                <Button
+                                    disabled
+                                    color="primary"
+                                    startIcon={<EditIcon />}
+                                    variant="outlined"
+                                >
+                                    Edit Alert
+                                </Button>
+                            </RouterLink>
+                        </Tooltip>
                     </Box>
                 )}
             </Box>

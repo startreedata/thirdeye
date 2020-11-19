@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
-import { getPageNotFoundPath } from "../../utils/route/routes.util";
+import { getPageNotFoundPath } from "../../utils/route/routes-util";
 
 export const PageNotFoundPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

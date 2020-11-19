@@ -5,8 +5,8 @@ import { PageContainer } from "../../components/page-container/page-container.co
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { logout } from "../../rest/auth/auth.rest";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
-import { removeAccessToken } from "../../utils/auth/auth.util";
-import { getSignOutPath } from "../../utils/route/routes.util";
+import { removeAccessToken } from "../../utils/auth/auth-util";
+import { getSignOutPath } from "../../utils/route/routes-util";
 import { signOutPageStyles } from "./sign-out-page.styles";
 
 export const SignOutPage: FunctionComponent = () => {

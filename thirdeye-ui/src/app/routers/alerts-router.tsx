@@ -9,11 +9,11 @@ import { AlertsDetailPage } from "../pages/alerts-detail-page/alerts-detail-page
 import { AlertsUpdatePage } from "../pages/alerts-update-page/alerts-update-page.component";
 import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs.store";
 import {
-    AppRoute,
+    ApplicationRoute,
     getAlertsAllPath,
     getAlertsPath,
     getPageNotFoundPath,
-} from "../utils/route/routes.util";
+} from "../utils/route/routes-util";
 
 export const AlertsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -43,33 +43,37 @@ export const AlertsRouter: FunctionComponent = () => {
     return (
         <Switch>
             {/* Alerts path */}
-            <Route exact path={AppRoute.ALERTS}>
+            <Route exact path={ApplicationRoute.ALERTS}>
                 {/* Redirect to alerts all path */}
                 <Redirect to={getAlertsAllPath()} />
             </Route>
 
             {/* Alerts all path */}
-            <Route exact component={AlertsAllPage} path={AppRoute.ALERTS_ALL} />
+            <Route
+                exact
+                component={AlertsAllPage}
+                path={ApplicationRoute.ALERTS_ALL}
+            />
 
             {/* Alerts detail path */}
             <Route
                 exact
                 component={AlertsDetailPage}
-                path={AppRoute.ALERTS_DETAIL}
+                path={ApplicationRoute.ALERTS_DETAIL}
             />
 
             {/* Alerts create path */}
             <Route
                 exact
                 component={AlertsCreatePage}
-                path={AppRoute.ALERTS_CREATE}
+                path={ApplicationRoute.ALERTS_CREATE}
             />
 
             {/* Alerts update path */}
             <Route
                 exact
                 component={AlertsUpdatePage}
-                path={AppRoute.ALERTS_UPDATE}
+                path={ApplicationRoute.ALERTS_UPDATE}
             />
 
             {/* No match found, redirect to page not found path */}

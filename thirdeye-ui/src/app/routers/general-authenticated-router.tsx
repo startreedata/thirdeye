@@ -8,11 +8,11 @@ import { SignOutPage } from "../pages/sign-out-page/sign-out-page.component";
 import { Breadcrumb } from "../store/application-breadcrumbs/application-breadcrumbs.interfaces";
 import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs.store";
 import {
-    AppRoute,
+    ApplicationRoute,
     getBasePath,
     getHomePath,
     getPageNotFoundPath,
-} from "../utils/route/routes.util";
+} from "../utils/route/routes-util";
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -38,28 +38,32 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     return (
         <Switch>
             {/* Base path */}
-            <Route exact path={AppRoute.BASE}>
+            <Route exact path={ApplicationRoute.BASE}>
                 {/* Redirect to home path */}
                 <Redirect to={getHomePath()} />
             </Route>
 
             {/* Home path */}
-            <Route exact component={HomePage} path={AppRoute.HOME} />
+            <Route exact component={HomePage} path={ApplicationRoute.HOME} />
 
             {/* /Sign in path */}
-            <Route exact path={AppRoute.SIGN_IN}>
+            <Route exact path={ApplicationRoute.SIGN_IN}>
                 {/* Already authenticated, redirect to base path */}
                 <Redirect to={getBasePath()} />
             </Route>
 
             {/* Sign out path */}
-            <Route exact component={SignOutPage} path={AppRoute.SIGN_OUT} />
+            <Route
+                exact
+                component={SignOutPage}
+                path={ApplicationRoute.SIGN_OUT}
+            />
 
             {/* Page not found path */}
             <Route
                 exact
                 component={PageNotFoundPage}
-                path={AppRoute.PAGE_NOT_FOUND}
+                path={ApplicationRoute.PAGE_NOT_FOUND}
             />
 
             {/* No match found, redirect to page not found path */}

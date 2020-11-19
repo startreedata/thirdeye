@@ -6,8 +6,8 @@ import { PageLoadingIndicator } from "../../components/page-loading-indicator/pa
 import { login } from "../../rest/auth/auth.rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
-import { setAccessToken } from "../../utils/auth/auth.util";
-import { getSignInPath } from "../../utils/route/routes.util";
+import { setAccessToken } from "../../utils/auth/auth-util";
+import { getSignInPath } from "../../utils/route/routes-util";
 import { signInPageStyles } from "./sign-in-page.styles";
 
 export const SignInPage: FunctionComponent = () => {

@@ -1,6 +1,6 @@
 import { createStyles, makeStyles, Theme } from "@material-ui/core";
-import { Color } from "../../utils/material-ui/color.util";
-import { Palette } from "../../utils/material-ui/palette.util";
+import { Color } from "../../utils/material-ui/color-util";
+import { Palette } from "../../utils/material-ui/palette-util";
 
 export const applicationBarStyles = makeStyles((theme: Theme) => {
     return createStyles({

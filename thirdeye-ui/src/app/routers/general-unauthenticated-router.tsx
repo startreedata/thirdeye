@@ -5,7 +5,7 @@ import { PageLoadingIndicator } from "../components/page-loading-indicator/page-
 import { SignInPage } from "../pages/sign-in-page/sign-in-page.component";
 import { Breadcrumb } from "../store/application-breadcrumbs/application-breadcrumbs.interfaces";
 import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs.store";
-import { AppRoute, getSignInPath } from "../utils/route/routes.util";
+import { ApplicationRoute, getSignInPath } from "../utils/route/routes-util";
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -31,7 +31,11 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     return (
         <Switch>
             {/* Sign in path */}
-            <Route exact component={SignInPage} path={AppRoute.SIGN_IN} />
+            <Route
+                exact
+                component={SignInPage}
+                path={ApplicationRoute.SIGN_IN}
+            />
 
             {/* No match found, redirect to sign in path*/}
             <Redirect to={getSignInPath()} />

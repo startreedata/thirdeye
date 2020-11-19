@@ -8,7 +8,7 @@ import { SideBar } from "../../components/sidebar/sidebar.component";
 import { getAllAlerts } from "../../rest/alert/alert.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
-import { getAlertsAllPath } from "../../utils/route/routes.util";
+import { getAlertsAllPath } from "../../utils/route/routes-util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

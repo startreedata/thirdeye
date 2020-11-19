@@ -25,7 +25,10 @@ import { createAlert } from "../../rest/alert/alert.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
-import { AppRoute, getAlertsCreatePath } from "../../utils/route/routes.util";
+import {
+    ApplicationRoute,
+    getAlertsCreatePath,
+} from "../../utils/route/routes-util";
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 
@@ -76,7 +79,7 @@ export const AlertsCreatePage = withRouter(
                     status: "success",
                     text: "Alert created successfully",
                 });
-                props.history.push(AppRoute.ALERTS_ALL);
+                props.history.push(ApplicationRoute.ALERTS_ALL);
             } catch (err) {
                 console.error(err);
                 setMessage({

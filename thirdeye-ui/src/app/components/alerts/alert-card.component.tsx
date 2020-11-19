@@ -13,7 +13,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import React, { ReactElement } from "react";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { getAlertsUpdatePath } from "../../utils/route/routes.util";
+import { getAlertsUpdatePath } from "../../utils/route/routes-util";
 import { Button } from "../button/button.component";
 import { RouterLink } from "../router-link/router-link.component";
 

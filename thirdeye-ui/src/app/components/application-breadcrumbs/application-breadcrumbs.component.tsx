@@ -3,8 +3,8 @@ import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import React, { FunctionComponent } from "react";
 import { useHistory } from "react-router-dom";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
-import { Dimension } from "../../utils/material-ui/dimension.util";
-import { Palette } from "../../utils/material-ui/palette.util";
+import { Dimension } from "../../utils/material-ui/dimension-util";
+import { Palette } from "../../utils/material-ui/palette-util";
 import { applicationBreadcrumbsStyles } from "./application-breadcrumbs.styles";
 
 export const ApplicationBreadcrumbs: FunctionComponent = () => {

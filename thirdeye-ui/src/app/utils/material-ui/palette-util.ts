@@ -1,5 +1,5 @@
 import { PaletteOptions } from "@material-ui/core/styles/createPalette";
-import { Color } from "./color.util";
+import { Color } from "./color-util";
 
 // CortexData Material-UI theme component colors
 export const Palette = {

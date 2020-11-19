@@ -12,7 +12,7 @@ import {
     getPageNotFoundPath,
     getSignInPath,
     getSignOutPath,
-} from "./routes.util";
+} from "./routes-util";
 
 describe("Routes Util", () => {
     test("getBasePath shall return appropriate path", () => {

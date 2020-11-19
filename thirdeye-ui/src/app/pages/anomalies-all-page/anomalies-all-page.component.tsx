@@ -7,7 +7,7 @@ import { useApplicationBreadcrumbsStore } from "../../store/application-breadcru
 import {
     getAnomaliesAllPath,
     getAnomaliesDetailPath,
-} from "../../utils/route/routes.util";
+} from "../../utils/route/routes-util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

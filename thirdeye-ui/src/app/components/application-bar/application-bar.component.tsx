@@ -5,9 +5,9 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { ReactComponent as ThirdEye } from "../../../assets/icons/third-eye.svg";
-import { isAuthenticated } from "../../utils/auth/auth.util";
+import { isAuthenticated } from "../../utils/auth/auth-util";
 import {
-    AppRoute,
+    ApplicationRoute,
     getAlertsCreatePath,
     getAlertsPath,
     getAnomaliesAllPath,
@@ -15,7 +15,7 @@ import {
     getHomePath,
     getSignInPath,
     getSignOutPath,
-} from "../../utils/route/routes.util";
+} from "../../utils/route/routes-util";
 import { applicationBarStyles } from "./application-bar.styles";
 
 export const ApplicationBar: FunctionComponent = () => {
@@ -80,12 +80,12 @@ export const ApplicationBar: FunctionComponent = () => {
                 <Link
                     className={classnames(
                         applicationBarClasses.link,
-                        isRouteCurrent(AppRoute.HOME)
+                        isRouteCurrent(ApplicationRoute.HOME)
                             ? applicationBarClasses.selected
                             : ""
                     )}
                     component="button"
-                    disabled={isRouteCurrent(AppRoute.HOME)}
+                    disabled={isRouteCurrent(ApplicationRoute.HOME)}
                     variant="subtitle2"
                     onClick={onHomeClick}
                 >
@@ -96,12 +96,12 @@ export const ApplicationBar: FunctionComponent = () => {
                 <Link
                     className={classnames(
                         applicationBarClasses.link,
-                        isRouteCurrent(AppRoute.ALERTS)
+                        isRouteCurrent(ApplicationRoute.ALERTS)
                             ? applicationBarClasses.selected
                             : ""
                     )}
                     component="button"
-                    disabled={isRouteCurrent(AppRoute.ALERTS)}
+                    disabled={isRouteCurrent(ApplicationRoute.ALERTS)}
                     variant="subtitle2"
                     onClick={onAlertsClick}
                 >
@@ -112,12 +112,12 @@ export const ApplicationBar: FunctionComponent = () => {
                 <Link
                     className={classnames(
                         applicationBarClasses.link,
-                        isRouteCurrent(AppRoute.ANOMALIES)
+                        isRouteCurrent(ApplicationRoute.ANOMALIES)
                             ? applicationBarClasses.selected
                             : ""
                     )}
                     component="button"
-                    disabled={isRouteCurrent(AppRoute.ANOMALIES)}
+                    disabled={isRouteCurrent(ApplicationRoute.ANOMALIES)}
                     variant="subtitle2"
                     onClick={onAnomaliesClick}
                 >
@@ -144,12 +144,12 @@ export const ApplicationBar: FunctionComponent = () => {
                         <Link
                             className={classnames(
                                 applicationBarClasses.link,
-                                isRouteCurrent(AppRoute.SIGN_OUT)
+                                isRouteCurrent(ApplicationRoute.SIGN_OUT)
                                     ? applicationBarClasses.selected
                                     : ""
                             )}
                             component="button"
-                            disabled={isRouteCurrent(AppRoute.SIGN_OUT)}
+                            disabled={isRouteCurrent(ApplicationRoute.SIGN_OUT)}
                             variant="subtitle2"
                             onClick={onSignOutClick}
                         >
@@ -162,12 +162,12 @@ export const ApplicationBar: FunctionComponent = () => {
                         className={classnames(
                             applicationBarClasses.link,
                             applicationBarClasses.rightAlign,
-                            isRouteCurrent(AppRoute.SIGN_IN)
+                            isRouteCurrent(ApplicationRoute.SIGN_IN)
                                 ? applicationBarClasses.selected
                                 : ""
                         )}
                         component="button"
-                        disabled={isRouteCurrent(AppRoute.SIGN_IN)}
+                        disabled={isRouteCurrent(ApplicationRoute.SIGN_IN)}
                         variant="subtitle2"
                         onClick={onSignInClick}
                     >

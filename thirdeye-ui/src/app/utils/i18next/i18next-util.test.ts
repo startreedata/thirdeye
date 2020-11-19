@@ -1,4 +1,4 @@
-import { getInitOptions } from "./i18next.util";
+import { getInitOptions } from "./i18next-util";
 
 describe("i18next Util", () => {
     afterAll(() => {

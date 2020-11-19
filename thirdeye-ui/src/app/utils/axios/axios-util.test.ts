@@ -1,5 +1,5 @@
-import { getAccessToken, isAuthenticated } from "../auth/auth.util";
-import { requestInterceptor } from "./axios.util";
+import { getAccessToken, isAuthenticated } from "../auth/auth-util";
+import { requestInterceptor } from "./axios-util";
 
 jest.mock("../auth/auth.util");
 

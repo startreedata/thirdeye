@@ -3,7 +3,7 @@ import {
     isAuthenticated,
     removeAccessToken,
     setAccessToken,
-} from "./auth.util";
+} from "./auth-util";
 
 describe("Auth Util", () => {
     beforeEach(() => {

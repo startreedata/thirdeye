@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Anomaly } from "../dto/anomaly.interfaces";
-import { deleteAnomaly, getAllAnomalies, getAnomaly } from "./anomaly.rest";
+import { deleteAnomaly, getAllAnomalies, getAnomaly } from "./anomaly-rest";
 
 jest.mock("axios");
 

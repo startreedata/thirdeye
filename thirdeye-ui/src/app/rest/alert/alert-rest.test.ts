@@ -7,7 +7,7 @@ import {
     getAlertPreview,
     getAllAlerts,
     updateAlert,
-} from "./alert.rest";
+} from "./alert-rest";
 
 jest.mock("axios");
 

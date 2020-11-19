@@ -21,7 +21,7 @@ import CommonCodeMirror from "../../components/editor/code-mirror.component";
 import { AppLoader } from "../../components/loader/app-loader.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { CustomStepper } from "../../components/stepper/stepper.component";
-import { createAlert } from "../../rest/alert/alert.rest";
+import { createAlert } from "../../rest/alert/alert-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";

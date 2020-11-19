@@ -3,7 +3,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { login } from "../../rest/auth/auth.rest";
+import { login } from "../../rest/auth/auth-rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import { setAccessToken } from "../../utils/auth/auth-util";

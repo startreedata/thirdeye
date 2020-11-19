@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Auth } from "../dto/auth.interfaces";
-import { login, logout } from "./auth.rest";
+import { login, logout } from "./auth-rest";
 
 jest.mock("axios");
 

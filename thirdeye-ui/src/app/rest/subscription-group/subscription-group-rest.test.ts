@@ -6,7 +6,7 @@ import {
     getAllSubscriptionGroups,
     getSubscriptionGroup,
     updateSubscriptionGroup,
-} from "./subscription-group.rest";
+} from "./subscription-group-rest";
 
 jest.mock("axios");
 

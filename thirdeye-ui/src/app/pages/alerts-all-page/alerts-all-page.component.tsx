@@ -5,7 +5,7 @@ import { PageContainer } from "../../components/containers/page-container.compon
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import SearchBar from "../../components/search/search.component";
 import { SideBar } from "../../components/sidebar/sidebar.component";
-import { getAllAlerts } from "../../rest/alert/alert.rest";
+import { getAllAlerts } from "../../rest/alert/alert-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import { getAlertsAllPath } from "../../utils/route/routes-util";

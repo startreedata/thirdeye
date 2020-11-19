@@ -1,12 +1,14 @@
 import { Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { login } from "../../rest/auth/auth-rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import { useAuthStore } from "../../store/auth/auth-store";
+import { useRedirectionPathStore } from "../../store/redirection-path/redirection-path-store";
 import { getSignInPath } from "../../utils/route/routes-util";
 import { signInPageStyles } from "./sign-in-page.styles";
 
@@ -18,6 +20,14 @@ export const SignInPage: FunctionComponent = () => {
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
+    const [
+        redirectToPath,
+        clearRedirectToPath,
+    ] = useRedirectionPathStore((state) => [
+        state.redirectToPath,
+        state.clearRedirectToPath,
+    ]);
+    const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -36,7 +46,12 @@ export const SignInPage: FunctionComponent = () => {
         const auth: Auth = await login();
         setAccessToken(auth.accessToken);
 
-        location.reload();
+        // Redirect if a path to redirect to is available, or let authentication state force reload
+        if (redirectToPath) {
+            history.push(redirectToPath);
+
+            clearRedirectToPath();
+        }
     };
 
     if (loading) {

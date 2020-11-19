@@ -1,25 +1,25 @@
 import create, { SetState } from "zustand";
 import {
-    ApplicationBreadcrumbs,
+    ApplicationBreadcrumbsStore,
     Breadcrumb,
 } from "./application-breadcrumbs-store.interfaces";
 
 // Application store for application breadcrumbs
-export const useApplicationBreadcrumbsStore = create<ApplicationBreadcrumbs>(
-    (set: SetState<ApplicationBreadcrumbs>) => ({
-        routerBreadcrumb: {} as Breadcrumb,
-        pageBreadcrumbs: [],
+export const useApplicationBreadcrumbsStore = create<
+    ApplicationBreadcrumbsStore
+>((set: SetState<ApplicationBreadcrumbsStore>) => ({
+    routerBreadcrumb: {} as Breadcrumb,
+    pageBreadcrumbs: [],
 
-        setRouterBreadcrumb: (breadcrumb: Breadcrumb): void => {
-            set({
-                routerBreadcrumb: breadcrumb,
-            });
-        },
+    setRouterBreadcrumb: (breadcrumb: Breadcrumb): void => {
+        set({
+            routerBreadcrumb: breadcrumb,
+        });
+    },
 
-        setPageBreadcrumbs: (breadcrumbs: Breadcrumb[]): void => {
-            set({
-                pageBreadcrumbs: breadcrumbs,
-            });
-        },
-    })
-);
+    setPageBreadcrumbs: (breadcrumbs: Breadcrumb[]): void => {
+        set({
+            pageBreadcrumbs: breadcrumbs,
+        });
+    },
+}));

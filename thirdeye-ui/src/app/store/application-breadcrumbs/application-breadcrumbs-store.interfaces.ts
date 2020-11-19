@@ -3,7 +3,7 @@ export interface Breadcrumb {
     path: string;
 }
 
-export type ApplicationBreadcrumbs = {
+export type ApplicationBreadcrumbsStore = {
     routerBreadcrumb: Breadcrumb;
     pageBreadcrumbs: Breadcrumb[];
     setRouterBreadcrumb: (breadcrumb: Breadcrumb) => void;

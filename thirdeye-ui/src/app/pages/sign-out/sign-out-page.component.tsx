@@ -37,7 +37,7 @@ export const SignOutPage: FunctionComponent = () => {
         await logout();
         removeAccessToken();
 
-        location.reload();
+        // Let authentication state force reload
     };
 
     if (loading) {

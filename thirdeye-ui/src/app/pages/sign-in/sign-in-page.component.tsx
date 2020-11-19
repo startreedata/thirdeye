@@ -6,7 +6,7 @@ import { PageLoadingIndicator } from "../../components/page-loading-indicator/pa
 import { login } from "../../rest/auth/auth-rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { setAccessToken } from "../../utils/auth/auth-util";
+import { useAuthStore } from "../../store/auth/auth-store";
 import { getSignInPath } from "../../utils/route/routes-util";
 import { signInPageStyles } from "./sign-in-page.styles";
 
@@ -14,13 +14,14 @@ export const SignInPage: FunctionComponent = () => {
     const signInPageClasses = signInPageStyles();
 
     const [loading, setLoading] = useState(true);
+    const [setAccessToken] = useAuthStore((state) => [state.setAccessToken]);
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumb
+        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.sign-in"),
@@ -32,8 +33,8 @@ export const SignInPage: FunctionComponent = () => {
     }, [setPageBreadcrumbs, t]);
 
     const performLogin = async (): Promise<void> => {
-        const authentication: Auth = await login();
-        setAccessToken(authentication.accessToken);
+        const auth: Auth = await login();
+        setAccessToken(auth.accessToken);
 
         location.reload();
     };

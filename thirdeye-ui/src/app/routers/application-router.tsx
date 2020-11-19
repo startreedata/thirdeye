@@ -1,8 +1,6 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { Route, Switch } from "react-router-dom";
-import { PageContainer } from "../components/page-container/page-container.component";
-import { PageLoadingIndicator } from "../components/page-loading-indicator/page-loading-indicator.component";
-import { isAuthenticated } from "../utils/auth/auth-util";
+import { useAuthStore } from "../store/auth/auth-store";
 import { ApplicationRoute } from "../utils/route/routes-util";
 import { AlertsRouter } from "./alerts-router";
 import { AnomaliesRouter } from "./anomalies-router";
@@ -10,25 +8,9 @@ import { GeneralAuthenticatedRouter } from "./general-authenticated-router";
 import { GeneralUnauthenticatedRouter } from "./general-unauthenticated-router";
 
 export const ApplicationRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const [authenticated, setAuthenticated] = useState(false);
+    const [auth] = useAuthStore((state) => [state.auth]);
 
-    useEffect(() => {
-        // Determine authentication
-        setAuthenticated(isAuthenticated());
-
-        setLoading(false);
-    }, []);
-
-    if (loading) {
-        return (
-            <PageContainer>
-                <PageLoadingIndicator />
-            </PageContainer>
-        );
-    }
-
-    if (authenticated) {
+    if (auth) {
         return (
             // Authenticated
             <Switch>
@@ -53,7 +35,7 @@ export const ApplicationRouter: FunctionComponent = () => {
     return (
         // Not authenticated
         <Switch>
-            {/* Direct all paths to geenral unauthenticated router */}
+            {/* Direct all paths to general unauthenticated router */}
             <Route component={GeneralUnauthenticatedRouter} />
         </Switch>
     );

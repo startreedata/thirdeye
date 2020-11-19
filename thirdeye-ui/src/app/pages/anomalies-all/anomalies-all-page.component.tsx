@@ -28,7 +28,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     };
 
     useEffect(() => {
-        // Create page breadcrumb
+        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.all"),

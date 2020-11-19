@@ -30,7 +30,7 @@ export const AnomaliesDetailPage = withRouter((props) => {
     const cardClasses = cardStyles();
 
     useEffect(() => {
-        // Create page breadcrumb
+        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: "ANOMALY_NAME",

@@ -1,11 +1,11 @@
 import { AppBar, Button, Link, Toolbar } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import classnames from "classnames";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { ReactComponent as ThirdEye } from "../../../assets/icons/third-eye.svg";
-import { isAuthenticated } from "../../utils/auth/auth-util";
+import { useAuthStore } from "../../store/auth/auth-store";
 import {
     ApplicationRoute,
     getAlertsCreatePath,
@@ -21,15 +21,10 @@ import { applicationBarStyles } from "./application-bar.styles";
 export const ApplicationBar: FunctionComponent = () => {
     const applicationBarClasses = applicationBarStyles();
 
-    const [authenticated, setAuthenticated] = useState(false);
+    const [auth] = useAuthStore((state) => [state.auth]);
     const history = useHistory();
     const location = useLocation();
     const { t } = useTranslation();
-
-    useEffect(() => {
-        // Determine authentication
-        setAuthenticated(isAuthenticated());
-    }, [location.pathname]);
 
     const onLogoClick = (): void => {
         history.push(getBasePath());
@@ -124,7 +119,7 @@ export const ApplicationBar: FunctionComponent = () => {
                     {t("label.anomalies")}
                 </Link>
 
-                {(authenticated && (
+                {(auth && (
                     <>
                         {/* Create alert */}
                         <Button

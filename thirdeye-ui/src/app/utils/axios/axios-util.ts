@@ -1,16 +1,21 @@
 import { AxiosRequestConfig } from "axios";
-import { getAccessToken, isAuthenticated } from "../auth/auth-util";
 
-// axios request interceptor
-export const requestInterceptor = (
-    config: AxiosRequestConfig
-): AxiosRequestConfig => {
-    if (isAuthenticated()) {
-        // If authenticated, attach access token to the request
-        config.headers = {
-            Authorization: `Bearer ${getAccessToken()}`,
-        };
-    }
+// Returns axios request interceptor
+export const getRequestInterceptor = (
+    accessToken: string
+): ((config: AxiosRequestConfig) => AxiosRequestConfig) => {
+    const requestInterceptor = (
+        config: AxiosRequestConfig
+    ): AxiosRequestConfig => {
+        if (accessToken) {
+            // If accessToken is available, attach it to the request
+            config.headers = {
+                Authorization: `Bearer ${accessToken}`,
+            };
+        }
 
-    return config;
+        return config;
+    };
+
+    return requestInterceptor;
 };

@@ -11,7 +11,6 @@ import {
     ApplicationRoute,
     getBasePath,
     getHomePath,
-    getPageNotFoundPath,
 } from "../utils/route/routes-util";
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
@@ -59,15 +58,8 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
                 path={ApplicationRoute.SIGN_OUT}
             />
 
-            {/* Page not found path */}
-            <Route
-                exact
-                component={PageNotFoundPage}
-                path={ApplicationRoute.PAGE_NOT_FOUND}
-            />
-
-            {/* No match found, redirect to page not found path */}
-            <Redirect to={getPageNotFoundPath()} />
+            {/* No match found, render page not found */}
+            <Route component={PageNotFoundPage} />
         </Switch>
     );
 };

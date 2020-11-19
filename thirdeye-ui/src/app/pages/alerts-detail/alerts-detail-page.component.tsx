@@ -18,7 +18,7 @@ export const AlertsDetailPage = withRouter((props) => {
     const [alert, setAlert] = useState<Alert>();
 
     useEffect(() => {
-        // Create page breadcrumb
+        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: "ALERT_NAME",

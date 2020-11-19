@@ -13,7 +13,7 @@ export const PageNotFoundPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumb
+        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.page-not-found"),

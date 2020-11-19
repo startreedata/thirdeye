@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
+import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 
 @JsonInclude(Include.NON_NULL)
 public class MetricApi {
@@ -14,6 +15,10 @@ public class MetricApi {
   private Boolean active;
   private Date created;
   private Date updated;
+  private Boolean derived;
+  private String derivedMetricExpression;
+  private MetricAggFunction aggregationFunction;
+  private Double rollupThreshold;
 
   public Long getId() {
     return id;
@@ -75,6 +80,43 @@ public class MetricApi {
 
   public MetricApi setUpdated(final Date updated) {
     this.updated = updated;
+    return this;
+  }
+
+  public Boolean getDerived() {
+    return derived;
+  }
+
+  public MetricApi setDerived(final Boolean derived) {
+    this.derived = derived;
+    return this;
+  }
+
+  public String getDerivedMetricExpression() {
+    return derivedMetricExpression;
+  }
+
+  public MetricApi setDerivedMetricExpression(final String derivedMetricExpression) {
+    this.derivedMetricExpression = derivedMetricExpression;
+    return this;
+  }
+
+  public MetricAggFunction getAggregationFunction() {
+    return aggregationFunction;
+  }
+
+  public MetricApi setAggregationFunction(
+      final MetricAggFunction aggregationFunction) {
+    this.aggregationFunction = aggregationFunction;
+    return this;
+  }
+
+  public Double getRollupThreshold() {
+    return rollupThreshold;
+  }
+
+  public MetricApi setRollupThreshold(final Double rollupThreshold) {
+    this.rollupThreshold = rollupThreshold;
     return this;
   }
 }

@@ -100,35 +100,20 @@ public class MetricConfigBean extends AbstractBean {
   }
 
   private String name;
-
   private String dataset;
-
   private String alias;
-
   private Set<String> tags;
-
   private MetricType datatype;
-
   private boolean derived = false;
-
   private String derivedMetricExpression;
-
   private MetricAggFunction defaultAggFunction = DEFAULT_AGG_FUNCTION;
-
   private Double rollupThreshold = DEFAULT_THRESHOLD;
-
   private boolean inverseMetric = false;
-
   private String cellSizeExpression;
-
   private boolean active = true;
-
   private Map<String, String> extSourceLinkInfo;
-
   private Map<String, String> extSourceLinkTimeGranularity;
-
   private Map<String, String> metricProperties = null;
-
   private boolean dimensionAsMetric = false;
 
   public String getName() {

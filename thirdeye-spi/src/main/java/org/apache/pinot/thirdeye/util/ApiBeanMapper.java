@@ -72,6 +72,10 @@ public abstract class ApiBeanMapper {
         .setDataset(new DatasetApi()
             .setName(dto.getDataset())
         )
+        .setDerived(dto.isDerived() ? true : null)
+        .setDerivedMetricExpression(dto.getDerivedMetricExpression())
+        .setAggregationFunction(dto.getDefaultAggFunction())
+        .setRollupThreshold(dto.getRollupThreshold())
         ;
   }
 

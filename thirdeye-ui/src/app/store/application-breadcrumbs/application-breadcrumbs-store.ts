@@ -2,7 +2,7 @@ import create, { SetState } from "zustand";
 import {
     ApplicationBreadcrumbs,
     Breadcrumb,
-} from "./application-breadcrumbs.interfaces";
+} from "./application-breadcrumbs-store.interfaces";
 
 export const useApplicationBreadcrumbsStore = create<ApplicationBreadcrumbs>(
     (set: SetState<ApplicationBreadcrumbs>) => ({

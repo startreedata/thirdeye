@@ -7,7 +7,7 @@ import { PageLoadingIndicator } from "../../components/page-loading-indicator/pa
 import { cardStyles } from "../../components/styles/common.styles";
 import { getAlert, updateAlert } from "../../rest/alert/alert.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 
 export const AlertsDetailPage = withRouter((props) => {
     const [loading, setLoading] = useState(true);

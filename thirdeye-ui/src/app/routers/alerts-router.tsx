@@ -7,7 +7,7 @@ import { AlertsAllPage } from "../pages/alerts-all-page/alerts-all-page.componen
 import { AlertsCreatePage } from "../pages/alerts-create-page/alerts-create-page.component";
 import { AlertsDetailPage } from "../pages/alerts-detail-page/alerts-detail-page.component";
 import { AlertsUpdatePage } from "../pages/alerts-update-page/alerts-update-page.component";
-import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs.store";
+import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs-store";
 import {
     ApplicationRoute,
     getAlertsAllPath,

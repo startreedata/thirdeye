@@ -1,7 +1,7 @@
 import { getAccessToken, isAuthenticated } from "../auth/auth-util";
 import { requestInterceptor } from "./axios-util";
 
-jest.mock("../auth/auth.util");
+jest.mock("../auth/auth-util");
 
 describe("Axios Util", () => {
     beforeAll(() => {

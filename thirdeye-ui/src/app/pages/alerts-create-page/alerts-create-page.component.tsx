@@ -23,7 +23,7 @@ import { PageLoadingIndicator } from "../../components/page-loading-indicator/pa
 import { CustomStepper } from "../../components/stepper/stepper.component";
 import { createAlert } from "../../rest/alert/alert.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs.store";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import {
     ApplicationRoute,

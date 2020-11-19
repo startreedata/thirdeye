@@ -5,8 +5,8 @@ import { PageLoadingIndicator } from "../components/page-loading-indicator/page-
 import { HomePage } from "../pages/home-page/home-page.component";
 import { PageNotFoundPage } from "../pages/page-not-found-page/page-not-found-page.component";
 import { SignOutPage } from "../pages/sign-out-page/sign-out-page.component";
-import { Breadcrumb } from "../store/application-breadcrumbs/application-breadcrumbs.interfaces";
-import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs.store";
+import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs-store";
+import { Breadcrumb } from "../store/application-breadcrumbs/application-breadcrumbs-store.interfaces";
 import {
     ApplicationRoute,
     getBasePath,

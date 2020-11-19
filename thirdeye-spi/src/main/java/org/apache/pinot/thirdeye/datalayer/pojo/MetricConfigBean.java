@@ -120,128 +120,148 @@ public class MetricConfigBean extends AbstractBean {
     return name;
   }
 
-  public void setName(String name) {
+  public MetricConfigBean setName(final String name) {
     this.name = name;
+    return this;
   }
 
   public String getDataset() {
     return dataset;
   }
 
-  public void setDataset(String dataset) {
+  public MetricConfigBean setDataset(final String dataset) {
     this.dataset = dataset;
-  }
-
-  public Set<String> getTags() {
-    return tags;
-  }
-
-  public void setTags(Set<String> tags) {
-    this.tags = tags;
+    return this;
   }
 
   public String getAlias() {
     return alias;
   }
 
-  public void setAlias(String alias) {
+  public MetricConfigBean setAlias(final String alias) {
     this.alias = alias;
+    return this;
+  }
+
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  public MetricConfigBean setTags(final Set<String> tags) {
+    this.tags = tags;
+    return this;
   }
 
   public MetricType getDatatype() {
     return datatype;
   }
 
-  public void setDatatype(MetricType datatype) {
+  public MetricConfigBean setDatatype(final MetricType datatype) {
     this.datatype = datatype;
+    return this;
   }
 
   public boolean isDerived() {
     return derived;
   }
 
-  public void setDerived(boolean derived) {
+  public MetricConfigBean setDerived(final boolean derived) {
     this.derived = derived;
+    return this;
   }
 
   public String getDerivedMetricExpression() {
     return derivedMetricExpression;
   }
 
-  public void setDerivedMetricExpression(String derivedMetricExpression) {
+  public MetricConfigBean setDerivedMetricExpression(final String derivedMetricExpression) {
     this.derivedMetricExpression = derivedMetricExpression;
+    return this;
   }
 
   public MetricAggFunction getDefaultAggFunction() {
     return defaultAggFunction;
   }
 
-  public void setDefaultAggFunction(MetricAggFunction defaultAggFunction) {
+  public MetricConfigBean setDefaultAggFunction(
+      final MetricAggFunction defaultAggFunction) {
     this.defaultAggFunction = defaultAggFunction;
-  }
-
-  public boolean isDimensionAsMetric() {
-    return dimensionAsMetric;
-  }
-
-  public void setDimensionAsMetric(boolean dimensionAsMetric) {
-    this.dimensionAsMetric = dimensionAsMetric;
+    return this;
   }
 
   public Double getRollupThreshold() {
     return rollupThreshold;
   }
 
-  public void setRollupThreshold(Double rollupThreshold) {
+  public MetricConfigBean setRollupThreshold(final Double rollupThreshold) {
     this.rollupThreshold = rollupThreshold;
+    return this;
   }
 
   public boolean isInverseMetric() {
     return inverseMetric;
   }
 
-  public void setInverseMetric(boolean inverseMetric) {
+  public MetricConfigBean setInverseMetric(final boolean inverseMetric) {
     this.inverseMetric = inverseMetric;
+    return this;
   }
 
   public String getCellSizeExpression() {
     return cellSizeExpression;
   }
 
-  public void setCellSizeExpression(String cellSizeExpression) {
+  public MetricConfigBean setCellSizeExpression(final String cellSizeExpression) {
     this.cellSizeExpression = cellSizeExpression;
+    return this;
   }
 
   public boolean isActive() {
     return active;
   }
 
-  public void setActive(boolean active) {
+  public MetricConfigBean setActive(final boolean active) {
     this.active = active;
+    return this;
   }
 
   public Map<String, String> getExtSourceLinkInfo() {
     return extSourceLinkInfo;
   }
 
-  public void setExtSourceLinkInfo(Map<String, String> extSourceLinkInfo) {
+  public MetricConfigBean setExtSourceLinkInfo(
+      final Map<String, String> extSourceLinkInfo) {
     this.extSourceLinkInfo = extSourceLinkInfo;
+    return this;
   }
 
   public Map<String, String> getExtSourceLinkTimeGranularity() {
     return extSourceLinkTimeGranularity;
   }
 
-  public void setExtSourceLinkTimeGranularity(Map<String, String> extSourceLinkTimeGranularity) {
+  public MetricConfigBean setExtSourceLinkTimeGranularity(
+      final Map<String, String> extSourceLinkTimeGranularity) {
     this.extSourceLinkTimeGranularity = extSourceLinkTimeGranularity;
+    return this;
   }
 
   public Map<String, String> getMetricProperties() {
     return metricProperties;
   }
 
-  public void setMetricProperties(Map<String, String> metricProperties) {
+  public MetricConfigBean setMetricProperties(
+      final Map<String, String> metricProperties) {
     this.metricProperties = metricProperties;
+    return this;
+  }
+
+  public boolean isDimensionAsMetric() {
+    return dimensionAsMetric;
+  }
+
+  public MetricConfigBean setDimensionAsMetric(final boolean dimensionAsMetric) {
+    this.dimensionAsMetric = dimensionAsMetric;
+    return this;
   }
 
   @Override

@@ -43,25 +43,15 @@ public class DatasetConfigBean extends AbstractBean {
       TimeUnit.HOURS);
 
   private String dataset;
-
   private String displayName;
-
   private List<String> dimensions;
-
   private String timeColumn;
-
   private TimeUnit timeUnit;
-
   private Integer timeDuration;
-
   private String timeFormat = TimeSpec.SINCE_EPOCH_FORMAT;
-
   private String timezone = TimeSpec.DEFAULT_TIMEZONE;
-
   private String dataSource;
-
   private Set<String> owners;
-
   private boolean active = true;
 
   /**

@@ -1,6 +1,5 @@
 const LOCAL_STORAGE_KEY_AUTH = "LOCAL_STORAGE_KEY_AUTH";
 
-// Returns true if the session is authenticated
 export const isAuthenticated = (): boolean => {
     return localStorage.getItem(LOCAL_STORAGE_KEY_AUTH) ? true : false;
 };

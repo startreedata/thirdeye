@@ -9,7 +9,7 @@ import { AnomaliesRouter } from "./anomalies-router";
 import { GeneralAuthenticatedRouter } from "./general-authenticated-router";
 import { GeneralUnauthenticatedRouter } from "./general-unauthenticated-router";
 
-export const AppRouter: FunctionComponent = () => {
+export const ApplicationRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [authenticated, setAuthenticated] = useState(false);
 

@@ -4,7 +4,7 @@ import i18n from "i18next";
 import React, { FunctionComponent } from "react";
 import { initReactI18next } from "react-i18next";
 import { ApplicationBar } from "./components/application-bar/application-bar.component";
-import { AppRouter } from "./routers/app-router";
+import { ApplicationRouter } from "./routers/application-router";
 import { requestInterceptor } from "./utils/axios/axios-util";
 import { getInitOptions } from "./utils/i18next/i18next-util";
 import { theme } from "./utils/material-ui/theme-util";
@@ -25,8 +25,8 @@ export const App: FunctionComponent = () => {
             {/* Application bar */}
             <ApplicationBar />
 
-            {/* Router */}
-            <AppRouter />
+            {/* Application router */}
+            <ApplicationRouter />
         </ThemeProvider>
     );
 };

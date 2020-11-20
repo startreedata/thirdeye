@@ -29,7 +29,14 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                         justify="space-between"
                     >
                         {/* Title */}
-                        <Grid item>
+                        <Grid
+                            item
+                            className={
+                                props.titleCenterAlign
+                                    ? pageContentsClasses.titleCenterAlign
+                                    : ""
+                            }
+                        >
                             <Typography variant="h5">{props.title}</Typography>
                         </Grid>
 

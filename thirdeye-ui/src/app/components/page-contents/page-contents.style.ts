@@ -13,9 +13,16 @@ export const usePageContentsStyles = makeStyles({
     },
     centeredContainer: {
         width: Dimension.WIDTH_PAGE_CONTENTS_DEFAULT,
-        margin: "auto",
+        // Left and right margins to auto, to horizontally center align but not vertically center
+        // align
+        marginLeft: "auto",
+        marginRight: "auto",
     },
     header: {
         minHeight: "75px",
+    },
+    titleCenterAlign: {
+        flexGrow: 1,
+        textAlign: "center",
     },
 });

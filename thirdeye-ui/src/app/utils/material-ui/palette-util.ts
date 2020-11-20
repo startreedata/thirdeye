@@ -6,7 +6,6 @@ export const Palette = {
     COLOR_BACKGROUND_APP_BAR: Color.WHITE,
     COLOR_BACKGROUND_BREADCRUMBS: Color.WHITE,
     COLOR_BORDER_DEFAULT: Color.GREY,
-    COLOR_PRIMARY: Color.TEAL, // same as paletteOptions.primary.main, for convenience
 } as const;
 
 // CortexData Material-UI theme color palette

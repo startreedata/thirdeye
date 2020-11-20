@@ -6,6 +6,7 @@
         "anomalies": "Anomalies",
         "sign-in": "Sign In",
         "sign-out": "Sign Out",
+        "404": "404",
         "page-not-found": "Page Not Found",
         "all": "All",
         "create": "Create",
@@ -27,5 +28,7 @@
         "cancel": "Cancel",
         "alert": "Alert"
     },
-    "message": {}
+    "message": {
+        "page-not-found-message": "Requested URL not found"
+    }
 }

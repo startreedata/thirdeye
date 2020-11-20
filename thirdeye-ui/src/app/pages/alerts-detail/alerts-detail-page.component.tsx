@@ -2,12 +2,15 @@ import { Card, Grid, Typography } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { withRouter } from "react-router-dom";
 import AlertCard from "../../components/alerts/alert-card.component";
+import LineChart from "../../components/charts/line-graph.component";
 import { PageContainer } from "../../components/containers/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { cardStyles } from "../../components/styles/common.styles";
 import { getAlert, updateAlert } from "../../rest/alert/alert-rest";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { getGraphDataFromAPIData } from "../../utils/chart/chart-util";
+import data from "../../utils/defaults/previewResponse.json";
 
 export const AlertsDetailPage = withRouter((props) => {
     const [loading, setLoading] = useState(true);
@@ -72,7 +75,13 @@ export const AlertsDetailPage = withRouter((props) => {
                 <Typography variant="subtitle2">
                     All detection rules anomalies over time (0)
                 </Typography>
-                <Card className={cardClasses.base}>Chart</Card>
+                <Card className={cardClasses.base}>
+                    <LineChart
+                        data={getGraphDataFromAPIData(
+                            (data as unknown) as AlertEvaluation
+                        )}
+                    />
+                </Card>
             </Card>
             <Card className={cardClasses.base}>
                 <Grid container spacing={0}>

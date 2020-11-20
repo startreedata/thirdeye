@@ -22,7 +22,10 @@
         "anomaly-type": "Anomaly Type",
         "feedback": "Feedback",
         "metric": "Metric",
-        "dataset": "Dataset"
+        "dataset": "Dataset",
+        "apply": "Apply",
+        "cancel": "Cancel",
+        "alert": "Alert"
     },
     "message": {}
 }

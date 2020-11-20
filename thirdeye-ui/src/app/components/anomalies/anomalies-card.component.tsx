@@ -6,9 +6,12 @@ import {
     Theme,
     Typography,
 } from "@material-ui/core";
-import moment from "moment";
 import React, { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    getRelativeTime,
+    parseDateTime,
+} from "../../utils/datetime/date-utils";
 import { getAnomaliesDetailPath } from "../../utils/route/routes-util";
 import { Button } from "../button/button.component";
 import { RouterLink } from "../router-link/router-link.component";
@@ -58,7 +61,7 @@ const AnomaliesCard = ({ data, mode }: AnomalyCardProps): ReactElement => {
                             <strong>{t("label.start")}</strong>
                         </Typography>
                         <Typography variant="body2">
-                            {moment(created).format("MMM DD, h:mm A")}
+                            {parseDateTime(created, "MMM DD, h:mm A")}
                         </Typography>
                     </Grid>
                     <Grid item xs={4}>
@@ -66,7 +69,7 @@ const AnomaliesCard = ({ data, mode }: AnomalyCardProps): ReactElement => {
                             <strong>{t("label.duration")}</strong>
                         </Typography>
                         <Typography variant="body2">
-                            {moment(endTime).from(created)}
+                            {getRelativeTime(endTime, created)}
                         </Typography>
                     </Grid>
                     <Grid item xs={4}>
@@ -81,7 +84,7 @@ const AnomaliesCard = ({ data, mode }: AnomalyCardProps): ReactElement => {
                     </Grid>
                     <Grid item xs={4}>
                         <Typography variant="body2">
-                            <strong>{t("entity.alert")}</strong>
+                            <strong>{t("label.alert")}</strong>
                         </Typography>
                         <Typography variant="body2">{alert?.name}</Typography>
                     </Grid>

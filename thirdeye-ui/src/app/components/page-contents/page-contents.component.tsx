@@ -1,6 +1,7 @@
 import { Grid, Typography } from "@material-ui/core";
 import classnames from "classnames";
 import React, { FunctionComponent } from "react";
+import DateRangePicker from "../date-picker/date-range-picker.component";
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.style";
 
@@ -44,7 +45,7 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                         {!props.hideTimeRange && (
                             <Grid item>
                                 <Typography variant="h5">
-                                    time range placeholder
+                                    <DateRangePicker />
                                 </Typography>
                             </Grid>
                         )}

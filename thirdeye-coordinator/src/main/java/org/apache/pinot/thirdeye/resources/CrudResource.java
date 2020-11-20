@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
@@ -20,6 +21,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.thirdeye.api.ThirdEyeApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.AbstractManager;
@@ -27,7 +29,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class CrudResource<ApiT, DtoT extends AbstractDTO> {
+public abstract class CrudResource<ApiT extends ThirdEyeApi, DtoT extends AbstractDTO> {
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
@@ -59,9 +61,7 @@ public abstract class CrudResource<ApiT, DtoT extends AbstractDTO> {
   ) {
     authService.authenticate(authHeader);
     final List<DtoT> all = dtoManager.findAll();
-    return Response
-        .ok(all.stream().map(this::toApi))
-        .build();
+    return respondOk(all.stream().map(this::toApi));
   }
 
   @POST
@@ -74,14 +74,12 @@ public abstract class CrudResource<ApiT, DtoT extends AbstractDTO> {
 
     ensureExists(list, "Invalid request");
 
-    return Response
-        .ok(list.stream()
-            .map(alertApi -> createDto(principal, alertApi))
-            .peek(dtoManager::save)
-            .map(this::toApi)
-            .collect(Collectors.toList())
-        )
-        .build();
+    return respondOk(list.stream()
+        .map(alertApi -> createDto(principal, alertApi))
+        .peek(dtoManager::save)
+        .map(this::toApi)
+        .collect(Collectors.toList())
+    );
   }
 
   @PUT
@@ -91,13 +89,11 @@ public abstract class CrudResource<ApiT, DtoT extends AbstractDTO> {
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<ApiT> list) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    return Response
-        .ok(list.stream()
-            .map(o -> updateDto(principal, o))
-            .peek(dtoManager::update)
-            .map(this::toApi)
-            .collect(Collectors.toList()))
-        .build();
+    return respondOk(list.stream()
+        .map(o -> updateDto(principal, o))
+        .peek(dtoManager::update)
+        .map(this::toApi)
+        .collect(Collectors.toList()));
   }
 
   @GET
@@ -111,9 +107,7 @@ public abstract class CrudResource<ApiT, DtoT extends AbstractDTO> {
     final DtoT dto = dtoManager.findById(id);
     ensureExists(dto, "Invalid id");
 
-    return Response
-        .ok(toApi(dto))
-        .build();
+    return respondOk(toApi(dto));
   }
 
   @DELETE
@@ -129,11 +123,9 @@ public abstract class CrudResource<ApiT, DtoT extends AbstractDTO> {
       dtoManager.delete(dto);
       log.warn(String.format("Deleted id: %d by principal: %s", id, principal));
 
-      return Response.ok(toApi(dto)).build();
+      return respondOk(toApi(dto));
     }
 
-    return Response
-        .ok(statusResponse(ERR_OBJECT_DOES_NOT_EXIST, id))
-        .build();
+    return respondOk(statusResponse(ERR_OBJECT_DOES_NOT_EXIST, id));
   }
 }

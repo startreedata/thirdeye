@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.unauthenticatedException;
 
 import com.codahale.metrics.annotation.Timed;
@@ -55,7 +56,7 @@ public class AuthResource {
           password
       );
 
-      return Response.ok(authApi(thirdEyePrincipal)).build();
+      return respondOk(authApi(thirdEyePrincipal));
     } catch (NotAuthorizedException e) {
       throw e;
     } catch (Exception e) {

@@ -6,7 +6,7 @@ import java.util.Date;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 
 @JsonInclude(Include.NON_NULL)
-public class MetricApi {
+public class MetricApi implements ThirdEyeApi {
 
   private Long id;
   private String name;

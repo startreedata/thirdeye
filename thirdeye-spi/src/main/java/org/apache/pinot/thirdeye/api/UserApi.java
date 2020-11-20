@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 
 @JsonInclude(Include.NON_NULL)
-public class UserApi {
+public class UserApi implements ThirdEyeApi {
 
   private Long id;
   private String principal;

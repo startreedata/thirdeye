@@ -3,6 +3,8 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_UNEXPECTED;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
@@ -10,8 +12,21 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.pinot.thirdeye.ThirdEyeStatus;
 import org.apache.pinot.thirdeye.api.StatusApi;
 import org.apache.pinot.thirdeye.api.StatusListApi;
+import org.apache.pinot.thirdeye.api.ThirdEyeApi;
 
 public class ResourceUtils {
+
+  public static Response respondOk(ThirdEyeApi api) {
+    return Response.ok(api).build();
+  }
+
+  public static <T extends ThirdEyeApi> Response respondOk(Collection<T> api) {
+    return Response.ok(api).build();
+  }
+
+  public static <T extends ThirdEyeApi> Response respondOk(Stream<T> api) {
+    return Response.ok(api).build();
+  }
 
   public static void authenticate(boolean condition) {
     if (!condition) {

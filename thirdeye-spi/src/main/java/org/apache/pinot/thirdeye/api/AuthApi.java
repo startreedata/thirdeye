@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
-public class AuthApi {
+public class AuthApi implements ThirdEyeApi {
 
   private UserApi user;
   private String accessToken;

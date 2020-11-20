@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
-public class StatusListApi {
+public class StatusListApi implements ThirdEyeApi {
 
   private List<StatusApi> list;
 

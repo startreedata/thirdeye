@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
-public class SubscriptionGroupApi {
+public class SubscriptionGroupApi implements ThirdEyeApi {
 
   private Long id;
   private String name;

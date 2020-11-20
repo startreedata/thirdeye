@@ -9,7 +9,7 @@ import org.apache.pinot.thirdeye.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 
 @JsonInclude(Include.NON_NULL)
-public class AnomalyApi {
+public class AnomalyApi implements ThirdEyeApi {
 
   private Long id;
   private Date startTime;

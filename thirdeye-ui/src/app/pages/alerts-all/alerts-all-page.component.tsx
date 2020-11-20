@@ -1,7 +1,8 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AlertCard from "../../components/alerts/alert-card.component";
-import { PageContainer } from "../../components/containers/page-container.component";
+import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import SearchBar from "../../components/search/search.component";
 import { SideBar } from "../../components/sidebar/sidebar.component";
@@ -52,14 +53,14 @@ export const AlertsAllPage: FunctionComponent = () => {
     }
 
     return (
-        <>
+        <PageContainer>
             <SideBar />
-            <PageContainer centered={false}>
+            <PageContents title={t("label.alerts")}>
                 <SearchBar searchValue={search} onSearch={setSearch} />
                 {filtered.map((alert) => (
                     <AlertCard data={alert} key={alert.name} mode="list" />
                 ))}
-            </PageContainer>
-        </>
+            </PageContents>
+        </PageContainer>
     );
 };

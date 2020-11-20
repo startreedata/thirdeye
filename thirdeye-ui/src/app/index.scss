@@ -2,7 +2,8 @@
 @import "../assets/fonts/fonts.scss";
 @import "codemirror/lib/codemirror.css";
 
-// Make HTML body and app container occupy entire height and width
+// Makes HTML body and app container occupy entire height and width so that contained components
+// can be vertically centered if required
 html,
 body,
 #root {

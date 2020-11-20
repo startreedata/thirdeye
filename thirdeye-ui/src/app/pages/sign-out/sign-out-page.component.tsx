@@ -52,7 +52,7 @@ export const SignOutPage: FunctionComponent = () => {
             <Grid
                 container
                 alignItems="center"
-                className={signOutPageClasses.grid}
+                className={signOutPageClasses.container}
                 justify="center"
             >
                 <Grid item>

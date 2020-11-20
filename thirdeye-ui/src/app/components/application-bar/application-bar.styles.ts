@@ -4,12 +4,12 @@ import { Palette } from "../../utils/material-ui/palette-util";
 
 export const useApplicationBarStyles = makeStyles((theme: Theme) => {
     return createStyles({
-        applicationBar: {
+        appBar: {
             backgroundColor: Palette.COLOR_BACKGROUND_APP_BAR,
             boxShadow:
                 "0px 8px 8px rgba(0, 0, 0, 0.04), 0px 16px 22px rgba(0, 0, 0, 0.04), 0px 8px 26px rgba(41, 148, 169, 0.1), 0px 0px 2px rgba(110, 196, 209, 0.12)",
-            // AppBar to be always above Drawer
-            zIndex: theme.zIndex.drawer + 1,
+            // AppBar to be always above Drawer and Breadcrumbs
+            zIndex: theme.zIndex.drawer + 2,
         },
         logo: {
             alignItems: "center",

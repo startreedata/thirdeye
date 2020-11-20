@@ -66,7 +66,7 @@ export const SignInPage: FunctionComponent = () => {
             <Grid
                 container
                 alignItems="center"
-                className={signInPageClasses.grid}
+                className={signInPageClasses.container}
                 justify="center"
             >
                 <Grid item>

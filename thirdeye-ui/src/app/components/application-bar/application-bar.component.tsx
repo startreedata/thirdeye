@@ -58,7 +58,7 @@ export const ApplicationBar: FunctionComponent = () => {
     };
 
     return (
-        <AppBar className={applicationBarClasses.applicationBar}>
+        <AppBar className={applicationBarClasses.appBar}>
             {/* Required to appropriately layout children in AppBar */}
             <Toolbar>
                 {/* ThirdEye logo */}

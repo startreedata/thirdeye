@@ -1,8 +1,8 @@
-import { Typography } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AnomaliesCard from "../../components/anomalies/anomalies-card.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { getAllAnomalies } from "../../rest/anomaly/anomaly-rest";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
@@ -49,10 +49,15 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <Typography variant="h5">{t("label.anomalies")}</Typography>
-            {anomalies?.map((anomalie) => (
-                <AnomaliesCard data={anomalie} key={anomalie.id} mode="list" />
-            ))}
+            <PageContents centerAlign title={t("label.anomalies")}>
+                {anomalies?.map((anomalie) => (
+                    <AnomaliesCard
+                        data={anomalie}
+                        key={anomalie.id}
+                        mode="list"
+                    />
+                ))}
+            </PageContents>
         </PageContainer>
     );
 };

@@ -20,6 +20,7 @@ export const ApplicationBreadcrumbs: FunctionComponent<ApplicationBreadcrumbsPro
     return (
         <Box
             borderBottom={Dimension.WIDTH_BORDER_DEFAULT}
+            className={applicationBreadcrumbsClasses.container}
             color={Palette.COLOR_BORDER_DEFAULT}
         >
             {/* Required to appropriately layout children in Breadcrumbs */}

@@ -120,6 +120,7 @@ const LineChart: React.FunctionComponent<LineGraphProps> = ({
                 "d",
                 d3
                     .area<GraphData>()
+                    .defined((d: GraphData) => !isNaN(d.lowerBound))
                     .x((d: GraphData) => xScale(d.timestamp) as number)
                     .y0((d: GraphData) => linearYScale(d.lowerBound) as number)
                     .y1((d: GraphData) => linearYScale(d.current) as number)

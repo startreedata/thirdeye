@@ -1,6 +1,7 @@
 import {
     Box,
     FormControl,
+    Grid,
     InputLabel,
     MenuItem,
     Select,
@@ -16,14 +17,15 @@ import { useTranslation } from "react-i18next";
 import { RouteComponentProps, withRouter } from "react-router-dom";
 import { Button } from "../../components/button/button.component";
 import { ConfigurationStep } from "../../components/configuration-step/configuration-step.component";
-import { PageContainer } from "../../components/containers/page-container.component";
-import CommonCodeMirror from "../../components/editor/code-mirror.component";
-import { AppLoader } from "../../components/loader/app-loader.component";
+import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
+import { ReviewStep } from "../../components/review-step/review-step.component";
 import { CustomStepper } from "../../components/stepper/stepper.component";
-import { createAlert } from "../../rest/alert/alert-rest";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { createAlert, getAlertPreview } from "../../rest/alert/alert-rest";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import alertPreview from "../../utils/defaults/alert-preview";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import {
     ApplicationRoute,
@@ -49,6 +51,7 @@ export const AlertsCreatePage = withRouter(
         const [message, setMessage] = useState<
             { status: "success" | "error"; text: string } | undefined
         >();
+        const [previewData, setPreviewData] = useState<AlertEvaluation>();
         const { t } = useTranslation();
 
         useEffect(() => {
@@ -91,6 +94,18 @@ export const AlertsCreatePage = withRouter(
             }
         };
 
+        const handlePreviewAlert = async (): Promise<void> => {
+            try {
+                const preview = await getAlertPreview(
+                    (alertPreview as unknown) as AlertEvaluation
+                );
+                setPreviewData(preview);
+            } catch (err) {
+                console.error(err);
+                setPreviewData((alertPreview as unknown) as AlertEvaluation);
+            }
+        };
+
         const selectionGroupComp = (
             <FormControl
                 style={{ margin: "8px 0", minWidth: 250, borderRadius: 8 }}
@@ -125,131 +140,137 @@ export const AlertsCreatePage = withRouter(
             );
         }
 
+        if (loading) {
+            return <PageLoadingIndicator />;
+        }
+
         return (
-            <PageContainer centered noPadding>
-                <AppLoader visible={loading} />
-                <CustomStepper
-                    currentStep={activeStep}
-                    steps={[
-                        {
-                            label: "Detection Configuration",
-                            // eslint-disable-next-line react/display-name
-                            content: (
-                                <ConfigurationStep
-                                    config={detectionConfig}
-                                    extraFields={
-                                        <Typography variant="h6">
-                                            General Details
-                                        </Typography>
+            <PageContainer>
+                <PageContents centerAlign hideTimeRange title="">
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <CustomStepper
+                                currentStep={activeStep}
+                                steps={[
+                                    {
+                                        label: "Detection Configuration",
+                                        // eslint-disable-next-line react/display-name
+                                        content: (
+                                            <ConfigurationStep
+                                                config={detectionConfig}
+                                                extraFields={
+                                                    <Typography variant="h6">
+                                                        {t(
+                                                            "label.general-details"
+                                                        )}
+                                                    </Typography>
+                                                }
+                                                name={"Define Detection"}
+                                                previewData={previewData}
+                                                showPreviewButton={true}
+                                                onConfigChange={
+                                                    setDetectionConfig
+                                                }
+                                                onPreviewAlert={
+                                                    handlePreviewAlert
+                                                }
+                                                onResetConfig={(): void =>
+                                                    setDetectionConfig(
+                                                        DETECTION_CONFIG
+                                                    )
+                                                }
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        label: "Subscription Configuration",
+                                        // eslint-disable-next-line react/display-name
+                                        content: (
+                                            <ConfigurationStep
+                                                config={subscriptionConfig}
+                                                extraFields={selectionGroupComp}
+                                                name={"Subscription"}
+                                                onConfigChange={
+                                                    setSubscriptionConfig
+                                                }
+                                                onResetConfig={(): void =>
+                                                    setDetectionConfig(
+                                                        DEFAULT_SUBSCRIPTION
+                                                    )
+                                                }
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        label: "Review & Submit",
+                                        // eslint-disable-next-line react/display-name
+                                        content: (
+                                            <ReviewStep
+                                                detectionConfig={
+                                                    detectionConfig
+                                                }
+                                                subscriptionConfig={
+                                                    subscriptionConfig
+                                                }
+                                                subscriptionGroup={
+                                                    subscriptionGroup
+                                                }
+                                            />
+                                        ),
+                                    },
+                                ]}
+                                onStepChange={handleStepChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box>
+                                {activeStep !== 0 && (
+                                    <Button
+                                        color="primary"
+                                        startIcon={<ArrowBackIcon />}
+                                        style={{ marginRight: 10 }}
+                                        variant="outlined"
+                                        onClick={(): void =>
+                                            handleStepChange(activeStep - 1)
+                                        }
+                                    >
+                                        Prev
+                                    </Button>
+                                )}
+                                <Button
+                                    color="primary"
+                                    endIcon={
+                                        activeStep >= 2 ? null : (
+                                            <ArrowForwardIcon />
+                                        )
                                     }
-                                    name={"Define Detection"}
-                                    showPreviewButton={true}
-                                    onConfigChange={setDetectionConfig}
-                                    onResetConfig={(): void =>
-                                        setDetectionConfig(DETECTION_CONFIG)
+                                    variant="contained"
+                                    onClick={(): void =>
+                                        handleStepChange(activeStep + 1)
                                     }
-                                />
-                            ),
-                        },
-                        {
-                            label: "Subscription Configuration",
-                            // eslint-disable-next-line react/display-name
-                            content: (
-                                <ConfigurationStep
-                                    config={subscriptionConfig}
-                                    extraFields={selectionGroupComp}
-                                    name={"Subscription"}
-                                    onConfigChange={setSubscriptionConfig}
-                                    onResetConfig={(): void =>
-                                        setDetectionConfig(DEFAULT_SUBSCRIPTION)
-                                    }
-                                />
-                            ),
-                        },
-                        {
-                            label: "Review & Submit",
-                            // eslint-disable-next-line react/display-name
-                            content: (
-                                <>
-                                    <Typography variant="h4">
-                                        Review & Submit
-                                    </Typography>
-                                    <Typography variant="h6">
-                                        Detection Configuration
-                                    </Typography>
-                                    <CommonCodeMirror
-                                        options={{
-                                            mode: "text/x-ymal",
-                                            readOnly: true,
-                                        }}
-                                        value={detectionConfig}
-                                    />
-                                    <Typography variant="h6">
-                                        Subscription Configuration
-                                    </Typography>
-                                    <Typography variant="subtitle1">
-                                        Add to Subscription Group
-                                    </Typography>
-                                    <Typography variant="body1">
-                                        {subscriptionGroup}
-                                    </Typography>
-                                    <CommonCodeMirror
-                                        options={{
-                                            mode: "text/x-ymal",
-                                            readOnly: true,
-                                        }}
-                                        value={subscriptionConfig}
-                                    />
-                                    <Box>
-                                        <Button color="primary" variant="text">
-                                            Preview Alert
-                                        </Button>
-                                    </Box>
-                                </>
-                            ),
-                        },
-                    ]}
-                    onStepChange={handleStepChange}
-                />
-                <Box>
-                    {activeStep !== 0 && (
-                        <Button
-                            color="primary"
-                            startIcon={<ArrowBackIcon />}
-                            style={{ marginRight: 10 }}
-                            variant="outlined"
-                            onClick={(): void =>
-                                handleStepChange(activeStep - 1)
-                            }
+                                >
+                                    {activeStep >= 2 ? "Finish" : "Next"}
+                                </Button>
+                            </Box>
+                        </Grid>
+                    </Grid>
+                    {
+                        <Snackbar
+                            autoHideDuration={3000}
+                            open={!!message}
+                            onClose={(): void => setMessage(undefined)}
                         >
-                            Prev
-                        </Button>
-                    )}
-                    <Button
-                        color="primary"
-                        endIcon={activeStep >= 2 ? null : <ArrowForwardIcon />}
-                        variant="contained"
-                        onClick={(): void => handleStepChange(activeStep + 1)}
-                    >
-                        {activeStep >= 2 ? "Finish" : "Next"}
-                    </Button>
-                </Box>
-                {
-                    <Snackbar
-                        autoHideDuration={3000}
-                        open={!!message}
-                        onClose={(): void => setMessage(undefined)}
-                    >
-                        {message && (
-                            <CustomAlert
-                                severity={message?.status}
-                                onClose={(): void => setMessage(undefined)}
-                            >
-                                {message?.text}
-                            </CustomAlert>
-                        )}
-                    </Snackbar>
-                }
+                            {message && (
+                                <CustomAlert
+                                    severity={message?.status}
+                                    onClose={(): void => setMessage(undefined)}
+                                >
+                                    {message?.text}
+                                </CustomAlert>
+                            )}
+                        </Snackbar>
+                    }
+                </PageContents>
             </PageContainer>
         );
     }

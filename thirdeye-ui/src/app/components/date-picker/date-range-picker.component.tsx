@@ -185,7 +185,12 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
                             color="primary"
                             style={{ marginLeft: 16 }}
                             variant="outlined"
-                            onClick={(): void => setIsOpen(false)}
+                            onClick={(): void => {
+                                setIsOpen(false);
+                                // Reset localstate when user cancel selection
+                                setStartDate(dateRange.from || currentDate);
+                                setEndDate(dateRange.to || currentDate);
+                            }}
                         >
                             {t("label.cancel")}
                         </Button>

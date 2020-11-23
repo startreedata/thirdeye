@@ -11,6 +11,7 @@ export const useApplicationBreadcrumbsStyles = makeStyles((theme: Theme) => {
         },
         selected: {
             color: Color.BLACK,
+            cursor: "default",
         },
     });
 });

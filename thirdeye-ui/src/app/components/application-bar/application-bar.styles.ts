@@ -27,6 +27,7 @@ export const useApplicationBarStyles = makeStyles((theme: Theme) => {
         },
         selected: {
             color: Color.BLACK,
+            cursor: "default",
         },
         rightAlign: {
             marginLeft: "auto",

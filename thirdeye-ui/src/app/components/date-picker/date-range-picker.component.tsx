@@ -12,6 +12,7 @@ import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useTranslation } from "react-i18next";
 import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
+import { DateRange } from "../../store/date-range-picker/date-range-picker-store.interfaces";
 import { parseDateTime, subtractDate } from "../../utils/datetime/date-utils";
 import { cardStyles } from "../styles/common.styles";
 import { DatePickerProps } from "./date-range-picker.interfaces";
@@ -32,9 +33,11 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
     // If no ranges provided then set default one
     ranges = RANGES,
 }: DatePickerProps) => {
-    const [activeRange, setActiveRange] = React.useState("Custom");
-    const [startDate, setStartDate] = React.useState(currentDate);
-    const [endDate, setEndDate] = React.useState(currentDate);
+    const [localDateRange, setLocalDateRange] = React.useState<DateRange>({
+        from: currentDate,
+        to: currentDate,
+        predefineRangeName: "Custom",
+    });
     const [isOpen, setIsOpen] = React.useState(false);
     const popupRef = React.useRef<HTMLButtonElement>(null);
     const rootRef = React.useRef<HTMLDivElement>(null);
@@ -48,8 +51,11 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
     const cardClasses = cardStyles();
 
     useEffect(() => {
-        setStartDate(dateRange.from || currentDate);
-        setEndDate(dateRange.to || currentDate);
+        setLocalDateRange({
+            from: dateRange.from || currentDate,
+            to: dateRange.to || currentDate,
+            predefineRangeName: dateRange.predefineRangeName || "Custom",
+        });
     }, [dateRange]);
 
     const openPopUp = (): void => {
@@ -82,8 +88,8 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
         <div>
             <Box alignItems="center" display="flex">
                 <Typography variant="body2">
-                    {parseDateTime(startDate, "h:mm a, MMM DD, 'YY")} -{" "}
-                    {parseDateTime(endDate, "h:mm a, MMM DD, 'YY")}
+                    {parseDateTime(localDateRange.from, "h:mm a, MMM DD, 'YY")}{" "}
+                    - {parseDateTime(localDateRange.to, "h:mm a, MMM DD, 'YY")}
                 </Typography>
                 <Button
                     className={datePickerClasses.buttonIcon}
@@ -121,15 +127,21 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
                                 key={key}
                                 style={{ marginTop: "4px" }}
                                 variant={
-                                    activeRange === key
+                                    localDateRange.predefineRangeName === key
                                         ? "contained"
                                         : "outlined"
                                 }
                                 onClick={(): void => {
                                     const dates = ranges[key];
-                                    setActiveRange(key);
-                                    setStartDate(dates[0]);
-                                    setEndDate(dates[1]);
+                                    setDateRange({
+                                        from: dates[0],
+                                        to: dates[1],
+                                        predefineRangeName: key,
+                                    });
+                                    // Close popup if range isn't custom
+                                    if (key !== "Custom") {
+                                        setIsOpen(false);
+                                    }
                                 }}
                             >
                                 {key}
@@ -143,12 +155,15 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
                             showTimeInput
                             calendarClassName={datePickerClasses.datePicker}
                             dateFormat="MM/dd/yyyy h:mm aa"
-                            endDate={endDate}
-                            selected={startDate}
-                            startDate={startDate}
+                            endDate={localDateRange.to}
+                            selected={localDateRange.from}
+                            startDate={localDateRange.from}
                             onChange={(date: Date): void => {
-                                setStartDate(date);
-                                setActiveRange("Custom");
+                                setLocalDateRange({
+                                    ...localDateRange,
+                                    from: date,
+                                    predefineRangeName: "Custom",
+                                });
                             }}
                         />
                         <ReactDatePicker
@@ -157,13 +172,16 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
                             showTimeInput
                             calendarClassName={datePickerClasses.datePicker}
                             dateFormat="MM/dd/yyyy h:mm aa"
-                            endDate={endDate}
-                            minDate={startDate}
-                            selected={endDate}
-                            startDate={startDate}
+                            endDate={localDateRange.to}
+                            minDate={localDateRange.from}
+                            selected={localDateRange.to}
+                            startDate={localDateRange.from}
                             onChange={(date: Date): void => {
-                                setEndDate(date);
-                                setActiveRange("Custom");
+                                setLocalDateRange({
+                                    ...localDateRange,
+                                    to: date,
+                                    predefineRangeName: "Custom",
+                                });
                             }}
                         />
                     </Box>
@@ -172,10 +190,7 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
                             color="primary"
                             variant="contained"
                             onClick={(): void => {
-                                setDateRange({
-                                    from: startDate,
-                                    to: endDate,
-                                });
+                                setDateRange(localDateRange);
                                 setIsOpen(false);
                             }}
                         >
@@ -187,9 +202,8 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
                             variant="outlined"
                             onClick={(): void => {
                                 setIsOpen(false);
-                                // Reset localstate when user cancel selection
-                                setStartDate(dateRange.from || currentDate);
-                                setEndDate(dateRange.to || currentDate);
+                                // Reset local date with store, To be in sync
+                                setLocalDateRange(dateRange);
                             }}
                         >
                             {t("label.cancel")}

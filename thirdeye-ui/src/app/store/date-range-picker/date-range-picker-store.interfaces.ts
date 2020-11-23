@@ -1,6 +1,7 @@
 export interface DateRange {
     from: Date;
     to: Date;
+    predefineRangeName: string;
 }
 
 export type DateRangePicker = {

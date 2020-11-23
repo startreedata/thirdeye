@@ -7,6 +7,7 @@
 This is the project for CortexData ThirdEye UI.
 
 -   [Getting Started](#getting-started)
+    -   [Prerequisites](#prerequisites)
     -   [Setup](#setup)
     -   [Run](#run)
 -   [Scripts](#scripts)
@@ -25,29 +26,30 @@ These instructions will help you get the project up and running on your local ma
 
 ### Prerequisites
 
-##### Node Version Manager [nvm]
-The project uses [nvm](https://github.com/nvm-sh/nvm) to maintain the node version.
-Once installed, you can switch to the recommended node version using
+#### Node Version Manager [nvm]
+
+The project uses [nvm](https://github.com/nvm-sh/nvm) to maintain the Node version. Compatible Node version is listed in project root `.nvmrc`.
+
+Once you install nvm, go to the project directory and switch to the compatible node version
+
 ```
-# cd into the thirdeye-ui dir
-cd path/to/repo/thirdeye/thirdeye-ui
-
-# Use the node version from .nvmrc
-nvm use
-``` 
-You should have `node` and `npm` available in the terminal.
-
-###### Note
-If that version of node isn't installed, nvm will recommend the command to install it.
-Following the installation, you can use the same command above to use the recommended node version.
-
-Example:
+$ nvm use
 ```
-Found '/Users/spyne/repo/thirdeye/thirdeye-ui/.nvmrc' with version <14.7.0>
+
+This will switch to the required Node version if already installed and make `npm` available in the terminal.
+
+If required Node version is not installed, it will recommend the command to install it
+
+```
+Found '/Users/default/thirdeye/thirdeye-ui/.nvmrc' with version <14.7.0>
 N/A: version "14.7.0 -> N/A" is not yet installed.
 
 You need to run "nvm install 14.7.0" to install it before using it.
+
 ```
+
+Following the installation, the command above will let you switch to the required Node version.
+
 ### Setup
 
 Once you clone the repository, go to the project directory and install

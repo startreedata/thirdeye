@@ -37,6 +37,6 @@
         "add-subscription-group": "Add to Subscription Group"
     },
     "message": {
-        "page-not-found-message": "Requested URL not found"
+        "page-not-found": "Requested URL not found"
     }
 }

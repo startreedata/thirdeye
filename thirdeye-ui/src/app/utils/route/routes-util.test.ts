@@ -9,7 +9,6 @@ import {
     getAnomaliesPath,
     getBasePath,
     getHomePath,
-    getPageNotFoundPath,
     getSignInPath,
     getSignOutPath,
 } from "./routes-util";
@@ -61,9 +60,5 @@ describe("Routes Util", () => {
 
     test("getSignOutPath shall return appropriate path", () => {
         expect(getSignOutPath()).toEqual("/signOut");
-    });
-
-    test("getPageNotFoundPath shall return appropriate path", () => {
-        expect(getPageNotFoundPath()).toEqual("/pageNotFound");
     });
 });

@@ -13,7 +13,6 @@ export const ApplicationRoute = {
     ANOMALIES_DETAIL: `/anomalies/id/${ROUTE_PLACEHOLDER_ID}`,
     SIGN_IN: "/signIn",
     SIGN_OUT: "/signOut",
-    PAGE_NOT_FOUND: "/pageNotFound",
 } as const;
 
 export const getBasePath = (): string => {
@@ -71,8 +70,4 @@ export const getSignInPath = (): string => {
 
 export const getSignOutPath = (): string => {
     return ApplicationRoute.SIGN_OUT;
-};
-
-export const getPageNotFoundPath = (): string => {
-    return ApplicationRoute.PAGE_NOT_FOUND;
 };

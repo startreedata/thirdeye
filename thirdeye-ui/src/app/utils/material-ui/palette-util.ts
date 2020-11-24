@@ -3,27 +3,33 @@ import { Color } from "./color-util";
 
 // CortexData Material-UI theme component colors
 export const Palette = {
-    COLOR_BACKGROUND_APP_BAR: Color.WHITE,
-    COLOR_BACKGROUND_BREADCRUMBS: Color.WHITE,
-    COLOR_BORDER_DEFAULT: Color.GREY,
+    COLOR_TEXT_DEFAULT: Color.BLACK_1,
+    COLOR_TEXT_GREY: Color.GREY_1,
+    COLOR_BACKGROUND_DEFAULT: Color.WHITE_1,
+    COLOR_BACKGROUND_APP_BAR: Color.WHITE_1,
+    COLOR_BACKGROUND_BREADCRUMBS: Color.WHITE_1,
+    COLOR_BORDER_DEFAULT: Color.GREY_1,
+    COLOR_ERROR_LIGHT: Color.RED_1,
+    COLOR_SUCCESS_LIGHT: Color.GREEN_4,
+    COLOR_DISABLED_LIGHT: Color.GREY_2,
 } as const;
 
 // CortexData Material-UI theme color palette
 export const paletteOptions = <PaletteOptions>{
     primary: {
-        contrastText: Color.WHITE,
-        dark: Color.TEAL_DARK,
-        light: Color.TEAL_LIGHT,
-        main: Color.TEAL,
+        contrastText: Color.WHITE_1,
+        dark: Color.TEAL_2,
+        light: Color.TEAL_3,
+        main: Color.TEAL_1,
     },
     secondary: {
-        contrastText: Color.WHITE,
-        dark: Color.GREEN_DARK,
-        light: Color.GREEN_LIGHT,
-        main: Color.GREEN,
+        contrastText: Color.WHITE_1,
+        dark: Color.GREEN_2,
+        light: Color.GREEN_3,
+        main: Color.GREEN_1,
     },
     background: {
-        paper: Color.WHITE,
-        default: Color.WHITE,
+        paper: Color.WHITE_1,
+        default: Color.WHITE_1,
     },
 };

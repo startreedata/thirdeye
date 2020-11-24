@@ -1,5 +1,4 @@
 import { createStyles, makeStyles, Theme } from "@material-ui/core";
-import { Color } from "../../utils/material-ui/color-util";
 import { Palette } from "../../utils/material-ui/palette-util";
 
 export const useApplicationBarStyles = makeStyles((theme: Theme) => {
@@ -26,7 +25,7 @@ export const useApplicationBarStyles = makeStyles((theme: Theme) => {
             },
         },
         selected: {
-            color: Color.BLACK,
+            color: Palette.COLOR_TEXT_DEFAULT,
             cursor: "default",
         },
         rightAlign: {

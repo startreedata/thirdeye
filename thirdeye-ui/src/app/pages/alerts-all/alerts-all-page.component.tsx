@@ -1,23 +1,27 @@
+import { Grid } from "@material-ui/core";
+import _ from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import AlertCard from "../../components/alerts/alert-card.component";
+import { AlertCard } from "../../components/alert-card/alert-card.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import SearchBar from "../../components/search/search.component";
-import { SideBar } from "../../components/sidebar/sidebar.component";
-import { getAllAlerts } from "../../rest/alert/alert-rest";
+import { Search } from "../../components/search/search.component";
+import { getAllAlerts, updateAlert } from "../../rest/alert/alert-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { filterAlerts } from "../../utils/alert/alert-util";
 import { getAlertsAllPath } from "../../utils/route/routes-util";
 
 export const AlertsAllPage: FunctionComponent = () => {
+    const [fetch, setFetch] = useState(true);
     const [loading, setLoading] = useState(true);
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const [alerts, setAlerts] = useState<Alert[]>();
-    const [search, setSearch] = useState("");
+    const [alerts, setAlerts] = useState<Alert[]>([]);
+    const [filteredAlerts, setfilteredAlerts] = useState<Alert[]>([]);
+    const [searchWords, setSearchWords] = useState<string[]>([]);
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -28,21 +32,37 @@ export const AlertsAllPage: FunctionComponent = () => {
                 path: getAlertsAllPath(),
             },
         ]);
-
-        fetchAllAlerts();
-
-        setLoading(false);
     }, [setPageBreadcrumbs, t]);
 
-    const fetchAllAlerts = async (): Promise<void> => {
-        setAlerts(await getAllAlerts());
+    useEffect(() => {
+        const fetchData = async (): Promise<void> => {
+            const alerts = await getAllAlerts();
+
+            setAlerts(alerts);
+            setfilteredAlerts(filterAlerts(alerts, searchWords));
+
+            setLoading(false);
+        };
+
+        fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetch]); // Doesn't need to depend on searchWords
+
+    const onSearch = (searchWords: string[]): void => {
+        setSearchWords(searchWords);
+        setfilteredAlerts(filterAlerts(alerts, searchWords));
     };
 
-    if (!alerts) {
-        return <>LOADING</>;
-    }
+    const onAlertStateToggle = async (alert: Alert): Promise<void> => {
+        // Original alert need not be modified unless it's really updated in the backend
+        const alertCopy = _.cloneDeep(alert);
+        alertCopy.active = !alertCopy.active;
 
-    const filtered = alerts.filter((alert) => alert.name.startsWith(search));
+        await updateAlert(alertCopy);
+
+        // Fetch all alerts
+        setFetch(!fetch);
+    };
 
     if (loading) {
         return (
@@ -54,12 +74,29 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <SideBar />
-            <PageContents title={t("label.alerts")}>
-                <SearchBar searchValue={search} onSearch={setSearch} />
-                {filtered.map((alert) => (
-                    <AlertCard data={alert} key={alert.name} mode="list" />
-                ))}
+            <PageContents centerAlign title={t("label.alerts")}>
+                <Grid container>
+                    <Grid item md={12}>
+                        <Search
+                            autoFocus
+                            searchStatusText={t("label.search-count", {
+                                count: filteredAlerts.length,
+                                total: alerts.length,
+                            })}
+                            onChange={onSearch}
+                        />
+                    </Grid>
+
+                    {filteredAlerts.map((alert) => (
+                        <Grid item key={alert.id} md={12}>
+                            <AlertCard
+                                alert={alert}
+                                searchWords={searchWords}
+                                onAlertStateToggle={onAlertStateToggle}
+                            />
+                        </Grid>
+                    ))}
+                </Grid>
             </PageContents>
         </PageContainer>
     );

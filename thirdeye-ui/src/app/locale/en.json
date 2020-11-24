@@ -34,7 +34,22 @@
         "submit": "Submit",
         "detection-configuration": "Detection Configuration",
         "subscription-configuration": "Subscription Configuration",
-        "add-subscription-group": "Add to Subscription Group"
+        "add-subscription-group": "Add to Subscription Group",
+        "detection-type": "Detection Type",
+        "subscription-group": "Subscription Group",
+        "application": "Application",
+        "created-by": "Created by",
+        "filtered-by": "Filtered by",
+        "breakdown-by": "Breakdown by",
+        "no-data-available": "-",
+        "search": "Search",
+        "search-count": "Showing {{count}} of {{total}}",
+        "view-details": "View Details",
+        "edit-alert": "Edit Alert",
+        "activate-alert": "Activate Alert",
+        "deactivate-alert": "Deactivate Alert",
+        "active": "Active",
+        "inactive": "Inactive"
     },
     "message": {
         "page-not-found": "Requested URL not found"

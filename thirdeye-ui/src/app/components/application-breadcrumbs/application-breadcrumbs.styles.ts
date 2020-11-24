@@ -1,5 +1,4 @@
 import { createStyles, makeStyles, Theme } from "@material-ui/core";
-import { Color } from "../../utils/material-ui/color-util";
 import { Palette } from "../../utils/material-ui/palette-util";
 
 export const useApplicationBreadcrumbsStyles = makeStyles((theme: Theme) => {
@@ -10,7 +9,7 @@ export const useApplicationBreadcrumbsStyles = makeStyles((theme: Theme) => {
             zIndex: theme.zIndex.drawer + 1,
         },
         selected: {
-            color: Color.BLACK,
+            color: Palette.COLOR_TEXT_DEFAULT,
             cursor: "default",
         },
     });

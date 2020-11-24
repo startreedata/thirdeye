@@ -15,6 +15,7 @@
         "id": "ID",
         "investigate": "Investigate",
         "start": "Start",
+        "end": "End",
         "duration": "Duration",
         "dimensions": "Dimensions",
         "current": "Current",
@@ -49,7 +50,24 @@
         "activate-alert": "Activate Alert",
         "deactivate-alert": "Deactivate Alert",
         "active": "Active",
-        "inactive": "Inactive"
+        "inactive": "Inactive",
+        "anomaly": "Anomaly",
+        "millisecond-lowercase": "millisecond",
+        "milliseconds-lowercase": "milliseconds",
+        "second-lowercase": "second",
+        "seconds-lowercase": "seconds",
+        "minute-lowercase": "minute",
+        "minutes-lowercase": "minutes",
+        "hour-lowercase": "hour",
+        "hours-lowercase": "hours",
+        "day-lowercase": "day",
+        "days-lowercase": "days",
+        "week-lowercase": "week",
+        "weeks-lowercase": "weeks",
+        "month-lowercase": "month",
+        "months-lowercase": "months",
+        "year-lowercase": "year",
+        "years-lowercase": "years"
     },
     "message": {
         "page-not-found": "Requested URL not found"

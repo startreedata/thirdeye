@@ -89,8 +89,8 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                 }
                 className={
                     props.alert.active
-                        ? alertCardClasses.activeContainer
-                        : alertCardClasses.inactiveContainer
+                        ? alertCardClasses.activeHeader
+                        : alertCardClasses.inactiveHeader
                 }
                 title={
                     <Link
@@ -199,8 +199,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         </Grid>
                     </Grid>
 
-                    {/* Application */}
                     <Divider className={alertCardClasses.divider} />
+
+                    {/* Application */}
                     <Grid container item>
                         <Grid item md={3}>
                             <Typography variant="body2">

@@ -7,10 +7,10 @@ export interface Alert {
     name: string;
     description: string;
     cron: string;
-    lastTimestamp: Date;
+    lastTimestamp: number;
     active: boolean;
-    created: Date;
-    updated: Date;
+    created: number;
+    upnumberd: number;
     owner: User;
     nodes: { [index: string]: AlertNode };
 }
@@ -27,7 +27,7 @@ export interface AlertNode {
 export interface AlertEvaluation {
     alert: Alert;
     detectionEvaluations: { [index: string]: DetectionEvaluation };
-    start: Date;
-    end: Date;
-    lastTimestamp: Date;
+    start: number;
+    end: number;
+    lastTimestamp: number;
 }

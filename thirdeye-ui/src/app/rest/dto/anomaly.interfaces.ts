@@ -3,15 +3,15 @@ import { Metric } from "./metric.interfaces";
 
 export interface Anomaly {
     id: number;
-    startTime: Date;
-    endTime: Date;
+    startTime: number;
+    endTime: number;
     avgCurrentVal: number;
     avgBaselineVal: number;
     score: number;
     weight: number;
     impactToGlobal: number;
     sourceType: AnomalyResultSource;
-    created: Date;
+    created: number;
     notified: boolean;
     message: string;
     alert: Alert;

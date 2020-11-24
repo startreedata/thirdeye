@@ -36,7 +36,11 @@
         // Trailing comments allowed beyond maximum line length
         "max-len": [
             "error",
-            { "code": 200, "comments": 100, "ignoreTrailingComments": true }
+            {
+                "code": 200,
+                "comments": 100,
+                "ignoreTrailingComments": true
+            }
         ],
 
         // Require braces around blocks
@@ -48,14 +52,47 @@
         // Require blank line before certain statements
         "padding-line-between-statements": [
             "error",
-            { "blankLine": "always", "prev": "*", "next": "function" },
-            { "blankLine": "always", "prev": "*", "next": "class" },
-            { "blankLine": "always", "prev": "*", "next": "export" },
-            { "blankLine": "any", "prev": "export", "next": "export" }, // Ignore consecutive export statements
-            { "blankLine": "always", "prev": "*", "next": "return" },
-            { "blankLine": "always", "prev": "*", "next": "break" },
-            { "blankLine": "always", "prev": "*", "next": "continue" },
-            { "blankLine": "always", "prev": "*", "next": "throw" }
+            {
+                "blankLine": "always",
+                "prev": "*",
+                "next": "function"
+            },
+            {
+                "blankLine": "always",
+                "prev": "*",
+                "next": "class"
+            },
+            {
+                "blankLine": "always",
+                "prev": "*",
+                "next": "export"
+            },
+            // Ignore consecutive export statements
+            {
+                "blankLine": "any",
+                "prev": "export",
+                "next": "export"
+            },
+            {
+                "blankLine": "always",
+                "prev": "*",
+                "next": "return"
+            },
+            {
+                "blankLine": "always",
+                "prev": "*",
+                "next": "break"
+            },
+            {
+                "blankLine": "always",
+                "prev": "*",
+                "next": "continue"
+            },
+            {
+                "blankLine": "always",
+                "prev": "*",
+                "next": "throw"
+            }
         ],
 
         // eslint-plugin-react rules
@@ -80,7 +117,10 @@
         // Prefer 'test' over 'it'
         "jest/consistent-test-it": [
             "error",
-            { "fn": "test", "withinDescribe": "test" }
+            {
+                "fn": "test",
+                "withinDescribe": "test"
+            }
         ],
 
         // eslint-plugin-jest-formatting rules

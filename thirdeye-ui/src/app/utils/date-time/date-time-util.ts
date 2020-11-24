@@ -3,7 +3,7 @@ import { DateTime, Interval } from "luxon/";
 
 // Returns the interval between given start and end time formatted as the most appropriate duration
 // For example 1 second, 1 day, 1 month etc.
-export const formatDuration = (startTime: Date, endTime: Date): string => {
+export const formatDuration = (startTime: number, endTime: number): string => {
     const duration = Interval.fromDateTimes(
         new Date(startTime),
         new Date(endTime)
@@ -68,7 +68,8 @@ export const formatDuration = (startTime: Date, endTime: Date): string => {
     }
 };
 
-export const formatLongDateAndTime = (date: Date): string => {
+// Returns given date as a formatted string of the form MMM DD, YY, HH:MM AM/PM
+export const formatLongDateAndTime = (date: number): string => {
     const dateTime = DateTime.fromJSDate(new Date(date));
 
     return dateTime.toLocaleString({

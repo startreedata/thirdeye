@@ -4,8 +4,8 @@ export interface Metric {
     urn: string;
     dataset: Dataset;
     active: boolean;
-    created: Date;
-    updated: Date;
+    created: number;
+    upnumberd: number;
 }
 
 export interface Dataset {
@@ -34,7 +34,7 @@ export interface Duration {
 }
 
 export interface TemporalUnit {
-    dateBased: boolean;
+    numberBased: boolean;
     timeBased: boolean;
     duration: Duration;
     durationEstimated: boolean;

@@ -61,7 +61,7 @@ const AnomaliesCard = ({ data, mode }: AnomalyCardProps): ReactElement => {
                             <strong>{t("label.start")}</strong>
                         </Typography>
                         <Typography variant="body2">
-                            {parseDateTime(created, "MMM DD, h:mm A")}
+                            {parseDateTime(new Date(created), "MMM DD, h:mm A")}
                         </Typography>
                     </Grid>
                     <Grid item xs={4}>
@@ -69,7 +69,10 @@ const AnomaliesCard = ({ data, mode }: AnomalyCardProps): ReactElement => {
                             <strong>{t("label.duration")}</strong>
                         </Typography>
                         <Typography variant="body2">
-                            {getRelativeTime(endTime, created)}
+                            {getRelativeTime(
+                                new Date(endTime),
+                                new Date(created)
+                            )}
                         </Typography>
                     </Grid>
                     <Grid item xs={4}>

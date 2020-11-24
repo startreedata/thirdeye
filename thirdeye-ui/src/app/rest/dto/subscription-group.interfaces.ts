@@ -7,8 +7,8 @@ export interface SubscriptionGroup {
     name: string;
     application: Application;
     alerts: Alert[];
-    created: Date;
-    updated: Date;
+    created: number;
+    upnumberd: number;
     owner: User;
     emailSettings: EmailSettings;
 }

@@ -33,44 +33,49 @@ public abstract class AbstractDTO implements Serializable {
   protected String createdBy;
   protected String updatedBy;
 
-  public Timestamp getUpdateTime() {
-    return updateTime;
-  }
-
-  public void setUpdateTime(Timestamp updateTime) {
-    this.updateTime = updateTime;
-  }
-
   public Long getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public AbstractDTO setId(final Long id) {
     this.id = id;
+    return this;
   }
 
   public int getVersion() {
     return version;
   }
 
-  public void setVersion(int version) {
+  public AbstractDTO setVersion(final int version) {
     this.version = version;
+    return this;
+  }
+
+  public Timestamp getUpdateTime() {
+    return updateTime;
+  }
+
+  public AbstractDTO setUpdateTime(final Timestamp updateTime) {
+    this.updateTime = updateTime;
+    return this;
   }
 
   public String getCreatedBy() {
     return createdBy;
   }
 
-  public void setCreatedBy(String createdBy) {
+  public AbstractDTO setCreatedBy(final String createdBy) {
     this.createdBy = createdBy;
+    return this;
   }
 
   public String getUpdatedBy() {
     return updatedBy;
   }
 
-  public void setUpdatedBy(String updatedBy) {
+  public AbstractDTO setUpdatedBy(final String updatedBy) {
     this.updatedBy = updatedBy;
+    return this;
   }
 
   @Override

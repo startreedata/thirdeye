@@ -29,8 +29,13 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertNode;
 import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
+import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 
 public abstract class ApiBeanMapper {
+
+  private static Boolean boolApi(final boolean value) {
+    return value ? true : null;
+  }
 
   public static ApplicationApi toApi(final ApplicationBean o) {
     return new ApplicationApi()
@@ -63,16 +68,16 @@ public abstract class ApiBeanMapper {
         ;
   }
 
-  public static MetricApi toApi(final MetricConfigDTO dto) {
+  public static MetricApi toApi(final MetricConfigBean dto) {
     return new MetricApi()
         .setId(dto.getId())
-        .setActive(dto.isActive())
+        .setActive(boolApi(dto.isActive()))
         .setName(dto.getName())
         .setUpdated(dto.getUpdateTime())
         .setDataset(new DatasetApi()
             .setName(dto.getDataset())
         )
-        .setDerived(dto.isDerived() ? true : null)
+        .setDerived(boolApi(dto.isDerived()))
         .setDerivedMetricExpression(dto.getDerivedMetricExpression())
         .setAggregationFunction(dto.getDefaultAggFunction())
         .setRollupThreshold(dto.getRollupThreshold())
@@ -99,18 +104,25 @@ public abstract class ApiBeanMapper {
       final Map<String, AlertNode> nodes) {
     Map<String, AlertNodeApi> map = new HashMap<>(nodes.size());
     for (Map.Entry<String, AlertNode> e : nodes.entrySet()) {
-      map.put(e.getKey(), toNodeApi(e.getValue()));
+      map.put(e.getKey(), toAlertNodeApi(e.getValue()));
     }
     return map;
   }
 
-  private static AlertNodeApi toNodeApi(final AlertNode dto) {
+  private static AlertNodeApi toAlertNodeApi(final AlertNode dto) {
     return new AlertNodeApi()
         .setName(dto.getName())
         .setType(dto.getType())
         .setSubType(dto.getSubType())
         .setDependsOn(dto.getDependsOn())
         .setParams(dto.getParams())
+        .setMetric(optional(dto.getMetric())
+            .map(ApiBeanMapper::toApi)
+            .map(m -> m // TODO suvodeep fix hack. The
+                .setRollupThreshold(null)
+                .setAggregationFunction(null)
+                .setActive(null))
+            .orElse(null))
         ;
   }
 
@@ -130,30 +142,27 @@ public abstract class ApiBeanMapper {
         .setSubType(api.getSubType())
         .setDependsOn(api.getDependsOn())
         .setParams(api.getParams())
+        .setMetric(optional(api.getMetric())
+            .map(ApiBeanMapper::toMetricConfigDto)
+            .orElse(null)
+        )
         ;
   }
 
-  private static Map<String, AlertNodeApi> toNodeMap(
-      final Map<String, Object> componentSpecs) {
-    if (componentSpecs == null) {
-      return null;
-    }
-    Map<String, AlertNodeApi> map = new HashMap<>(componentSpecs.size());
-    for (Map.Entry<String, Object> e : componentSpecs.entrySet()) {
+  private static MetricConfigDTO toMetricConfigDto(final MetricApi api) {
+    final MetricConfigDTO dto = new MetricConfigDTO();
 
-      final Map<String, Object> valueMap = (Map<String, Object>) e.getValue();
-      final String metricUrn = (String) valueMap.get("metricUrn");
-      valueMap.remove("metricUrn");
-      valueMap.remove("className");
-
-      final AlertNodeApi alertComponentApi = toDetectionAlertNodeApi(e.getKey());
-      map.put(alertComponentApi.getName(), alertComponentApi
-          .setParams(valueMap)
-          .setMetric(toMetricApi(metricUrn))
-      );
-    }
-
-    return map;
+    dto.setId(api.getId());
+    dto
+        .setName(api.getName())
+        .setDataset(optional(api.getDataset())
+            .map(DatasetApi::getName)
+            .orElse(null))
+        .setRollupThreshold(api.getRollupThreshold())
+        .setDefaultAggFunction(api.getAggregationFunction())
+        // TODO suvodeep Revisit this: Assume false if active is not set.
+        .setActive(optional(api.getActive()).orElse(false));
+    return dto;
   }
 
   private static AlertNodeApi toDetectionAlertNodeApi(final String detectorComponentName) {

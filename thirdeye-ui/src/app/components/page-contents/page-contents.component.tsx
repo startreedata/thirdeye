@@ -44,9 +44,7 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                         {/* Time range */}
                         {!props.hideTimeRange && (
                             <Grid item>
-                                <Typography variant="h5">
-                                    <DateRangePicker />
-                                </Typography>
+                                <DateRangePicker />
                             </Grid>
                         )}
                     </Grid>

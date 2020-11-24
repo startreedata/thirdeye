@@ -79,7 +79,6 @@ export const ApplicationBar: FunctionComponent = () => {
                             : ""
                     )}
                     component="button"
-                    disabled={isRouteCurrent(ApplicationRoute.HOME)}
                     variant="subtitle2"
                     onClick={onHomeClick}
                 >
@@ -95,7 +94,6 @@ export const ApplicationBar: FunctionComponent = () => {
                             : ""
                     )}
                     component="button"
-                    disabled={isRouteCurrent(ApplicationRoute.ALERTS)}
                     variant="subtitle2"
                     onClick={onAlertsClick}
                 >
@@ -111,7 +109,6 @@ export const ApplicationBar: FunctionComponent = () => {
                             : ""
                     )}
                     component="button"
-                    disabled={isRouteCurrent(ApplicationRoute.ANOMALIES)}
                     variant="subtitle2"
                     onClick={onAnomaliesClick}
                 >
@@ -143,7 +140,6 @@ export const ApplicationBar: FunctionComponent = () => {
                                     : ""
                             )}
                             component="button"
-                            disabled={isRouteCurrent(ApplicationRoute.SIGN_OUT)}
                             variant="subtitle2"
                             onClick={onSignOutClick}
                         >
@@ -161,7 +157,6 @@ export const ApplicationBar: FunctionComponent = () => {
                                 : ""
                         )}
                         component="button"
-                        disabled={isRouteCurrent(ApplicationRoute.SIGN_IN)}
                         variant="subtitle2"
                         onClick={onSignInClick}
                     >

@@ -1,6 +1,3 @@
-create alias if not exists TO_UNIXTIME as $$ long unix_timestamp(java.sql.Timestamp timestamp) { return
-(long) (timestamp.getTime() / 1000L); } $$;
-
 create table if not exists generic_json_entity (
     id bigint(20) primary key auto_increment,
     json_val text,
@@ -172,8 +169,8 @@ create index override_config_base_id_idx ON override_config_index(base_id);
 
 create table if not exists alert_config_index (
     active boolean,
-    name varchar(500) not null,
-    application VARCHAR(500) not null,
+    name varchar(200) not null,
+    application VARCHAR(200) not null,
     base_id bigint(20) not null,
     create_time timestamp,
     update_time timestamp default current_timestamp,

@@ -22,9 +22,9 @@
 # ThirdEye on Docker
 This directory builds a docker image of [CortexData ThirdEye](https://github.com/cortexdata/thirdeye)  
 
-## Building the image
+## Build
 
-There is a docker build script which will build a given Git repo/branch and tag the image.
+This section guides you to customize and build the docker image.
 
 Usage:
 

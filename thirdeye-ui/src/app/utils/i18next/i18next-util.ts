@@ -1,5 +1,5 @@
 import { InitOptions } from "i18next";
-import en from "../../locale/en.json";
+import en from "../../locale/languages/en-us.json";
 
 // Returns i18next InitOptions
 export const getInitOptions = (): InitOptions => {

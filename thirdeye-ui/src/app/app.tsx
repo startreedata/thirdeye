@@ -1,9 +1,11 @@
 import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import axios from "axios";
 import i18n from "i18next";
+import numbro from "numbro";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { initReactI18next } from "react-i18next";
 import { ApplicationBar } from "./components/application-bar/application-bar.component";
+import { enUs } from "./locale/numbers/en-us";
 import { ApplicationRouter } from "./routers/application-router";
 import { useAuthStore } from "./store/auth/auth-store";
 import {
@@ -23,9 +25,17 @@ export const App: FunctionComponent = () => {
     ]);
 
     useEffect(() => {
-        // Application initializations
-        // i18next
+        // Localization
+        // i18next (language)
         i18n.use(initReactI18next).init(getInitOptions());
+        // Numbro (number formatting)
+        numbro.registerLanguage(enUs);
+        numbro.setLanguage("en-US");
+        // Luxon (date, time formatting), picks up system default
+    }, []);
+
+    useEffect(() => {
+        // Initialization
         // axios
         axios.interceptors.request.use(getRequestInterceptor(accessToken));
         axios.interceptors.response.use(
@@ -37,7 +47,7 @@ export const App: FunctionComponent = () => {
     }, [accessToken, removeAccessToken]);
 
     if (loading) {
-        // Wait until application initializations complete
+        // Wait until initialization completes
         return <></>;
     }
 

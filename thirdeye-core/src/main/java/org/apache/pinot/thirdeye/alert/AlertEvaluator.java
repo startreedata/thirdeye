@@ -35,9 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class AlertPreviewGenerator {
+public class AlertEvaluator {
 
-  protected static final Logger LOG = LoggerFactory.getLogger(AlertPreviewGenerator.class);
+  protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluator.class);
   // 5 detection previews are running at the same time at most
   private static final int PARALLELISM = 5;
   // max time allowed for a preview task
@@ -49,7 +49,7 @@ public class AlertPreviewGenerator {
   private final ExecutorService executorService;
 
   @Inject
-  public AlertPreviewGenerator(
+  public AlertEvaluator(
       final DataProvider dataProvider,
       final AlertManager alertManager,
       final AlertApiBeanMapper alertApiBeanMapper) {
@@ -66,7 +66,7 @@ public class AlertPreviewGenerator {
     return split[0];
   }
 
-  public AlertEvaluationApi runPreview(final AlertEvaluationApi request)
+  public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws InterruptedException, ExecutionException, TimeoutException {
     final AlertDTO alert = getAlert(ensureExists(request.getAlert()));
 

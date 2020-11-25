@@ -20,7 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.alert.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
-import org.apache.pinot.thirdeye.alert.AlertPreviewGenerator;
+import org.apache.pinot.thirdeye.alert.AlertEvaluator;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.api.AlertNodeApi;
@@ -48,7 +48,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertCreater alertCreater;
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final AuthService authService;
-  private final AlertPreviewGenerator alertPreviewGenerator;
+  private final AlertEvaluator alertEvaluator;
 
   @Inject
   public AlertResource(
@@ -57,14 +57,14 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertCreater alertCreater,
       final AlertApiBeanMapper alertApiBeanMapper,
       final AuthService authService,
-      final AlertPreviewGenerator alertPreviewGenerator) {
+      final AlertEvaluator alertEvaluator) {
     super(authService, alertManager);
     this.alertManager = alertManager;
     this.metricConfigManager = metricConfigManager;
     this.alertCreater = alertCreater;
     this.alertApiBeanMapper = alertApiBeanMapper;
     this.authService = authService;
-    this.alertPreviewGenerator = alertPreviewGenerator;
+    this.alertEvaluator = alertEvaluator;
   }
 
   @Override
@@ -111,23 +111,23 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return api;
   }
 
-  @Path("preview")
+  @Path("evaluate")
   @POST
   @Timed
-  public Response preview(
+  public Response evaluate(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       AlertEvaluationApi request)
       throws InterruptedException, ExecutionException, TimeoutException {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
     ensureExists(request.getStart(), "start");
-    ensureExists(request.getEnd());
+    ensureExists(request.getEnd(), "end");
 
     ensureExists(request.getAlert())
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
 
-    final AlertEvaluationApi evaluation = alertPreviewGenerator.runPreview(request);
+    final AlertEvaluationApi evaluation = alertEvaluator.evaluate(request);
     return Response
         .ok(evaluation)
         .build();

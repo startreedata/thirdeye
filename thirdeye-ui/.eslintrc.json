@@ -8,7 +8,6 @@
     "extends": [
         "eslint:recommended",
         "plugin:react/recommended",
-        "plugin:react-hooks/recommended",
         "plugin:jest/recommended",
         "plugin:jest/style",
         "plugin:jest-formatting/recommended",
@@ -25,7 +24,13 @@
             "jsx": true
         }
     },
-    "plugins": ["react", "jest", "jest-formatting", "@typescript-eslint"],
+    "plugins": [
+        "react",
+        "react-hooks",
+        "jest",
+        "jest-formatting",
+        "@typescript-eslint"
+    ],
     "rules": {
         // ESLint rules
 
@@ -111,6 +116,11 @@
 
         // Require PascalCase for user-defined JSX components
         "react/jsx-pascal-case": ["error"],
+
+        // eslint-plugin-react-hooks rules
+
+        // Enforce rules of hooks
+        "react-hooks/rules-of-hooks": "error",
 
         // eslint-plugin-jest rules
 

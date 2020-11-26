@@ -1,5 +1,4 @@
 {
-    "entity": {},
     "label": {
         "home": "Home",
         "alerts": "Alerts",
@@ -12,14 +11,9 @@
         "create": "Create",
         "update": "Update",
         "create-alert": "Create Alert",
+        "no-data-available": "-",
         "id": "ID",
-        "investigate": "Investigate",
-        "start": "Start",
-        "end": "End",
-        "duration": "Duration",
         "dimensions": "Dimensions",
-        "current": "Current",
-        "predicted": "Predicted",
         "resolution": "Resolution",
         "anomaly-type": "Anomaly Type",
         "feedback": "Feedback",
@@ -42,7 +36,6 @@
         "created-by": "Created by",
         "filtered-by": "Filtered by",
         "breakdown-by": "Breakdown by",
-        "no-data-available": "-",
         "search": "Search",
         "search-count": "Showing {{count}} of {{total}}",
         "view-details": "View Details",
@@ -52,6 +45,10 @@
         "active": "Active",
         "inactive": "Inactive",
         "anomaly": "Anomaly",
+        "anomaly-id": "#{{id}}",
+        "start": "Start",
+        "end": "End",
+        "duration": "Duration",
         "millisecond-lowercase": "millisecond",
         "milliseconds-lowercase": "milliseconds",
         "second-lowercase": "second",
@@ -67,7 +64,13 @@
         "month-lowercase": "month",
         "months-lowercase": "months",
         "year-lowercase": "year",
-        "years-lowercase": "years"
+        "years-lowercase": "years",
+        "current": "Current",
+        "predicted": "Predicted",
+        "current-/-predicted": "Current / Predicted",
+        "current-/-predicted-values": "{{current}} / {{predicted}}",
+        "deviation": "Deviation",
+        "investigate": "Investigate"
     },
     "message": {
         "page-not-found": "Requested URL not found"

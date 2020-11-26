@@ -8,11 +8,9 @@ const mockAuthRequest = new URLSearchParams();
 mockAuthRequest.append("grant_type", "password");
 mockAuthRequest.append("principal", "admin");
 mockAuthRequest.append("password", "password");
-
 const mockAuthResponse: Auth = {
     accessToken: "testAccessTokenResponse",
 } as Auth;
-
 const mockError = new Error("testErrorMessage");
 
 describe("Auth REST", () => {
@@ -25,7 +23,7 @@ describe("Auth REST", () => {
     });
 
     test("login shall invoke axios.post with appropriate input and return result", async () => {
-        (axios.post as jest.Mock).mockResolvedValue({ data: mockAuthResponse });
+        axios.post = jest.fn().mockResolvedValue({ data: mockAuthResponse });
 
         const response = await login();
 
@@ -37,13 +35,13 @@ describe("Auth REST", () => {
     });
 
     test("login shall throw encountered error", async () => {
-        (axios.post as jest.Mock).mockRejectedValue(mockError);
+        axios.post = jest.fn().mockRejectedValue(mockError);
 
         await expect(login()).rejects.toThrow("testErrorMessage");
     });
 
     test("logout shall invoke axios.post with appropriate input", async () => {
-        (axios.post as jest.Mock).mockResolvedValue({});
+        axios.post = jest.fn().mockResolvedValue({});
 
         await logout();
 
@@ -51,7 +49,7 @@ describe("Auth REST", () => {
     });
 
     test("logout shall throw encountered error", async () => {
-        (axios.post as jest.Mock).mockRejectedValue(mockError);
+        axios.post = jest.fn().mockRejectedValue(mockError);
 
         await expect(logout()).rejects.toThrow("testErrorMessage");
     });

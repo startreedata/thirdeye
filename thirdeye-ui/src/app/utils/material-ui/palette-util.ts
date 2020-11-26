@@ -9,13 +9,12 @@ export const Palette = {
     COLOR_BACKGROUND_APP_BAR: Color.WHITE_1,
     COLOR_BACKGROUND_BREADCRUMBS: Color.WHITE_1,
     COLOR_BORDER_DEFAULT: Color.GREY_1,
-    COLOR_ERROR_LIGHT: Color.RED_1,
     COLOR_SUCCESS_LIGHT: Color.GREEN_4,
     COLOR_DISABLED_LIGHT: Color.GREY_2,
 } as const;
 
 // CortexData Material-UI theme color palette
-export const paletteOptions = <PaletteOptions>{
+export const paletteOptions: PaletteOptions = {
     primary: {
         contrastText: Color.WHITE_1,
         dark: Color.TEAL_2,

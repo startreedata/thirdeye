@@ -1,41 +1,8 @@
 import { TypographyOptions } from "@material-ui/core/styles/createTypography";
 
 // CortexData Material-UI theme typography
-export const typographyOptions = <TypographyOptions>{
+export const typographyOptions: TypographyOptions = {
     fontFamily: "Quattrocento Sans, Nunito",
-    body1: {
-        fontFamily: "Nunito",
-        fontSize: "16px",
-        fontStyle: "normal",
-        fontWeight: "normal",
-        letterSpacing: "0.5px",
-        lineHeight: "28px",
-    },
-    body2: {
-        fontFamily: "Nunito",
-        fontSize: "14px",
-        fontStyle: "normal",
-        fontWeight: "normal",
-        letterSpacing: "0.25px",
-        lineHeight: "20px",
-    },
-    button: {
-        fontFamily: "Nunito",
-        fontSize: "14px",
-        fontStyle: "normal",
-        fontWeight: "normal",
-        letterSpacing: "0.75px",
-        lineHeight: "16px",
-        textTransform: "uppercase",
-    },
-    caption: {
-        fontFamily: "Nunito",
-        fontSize: "12px",
-        fontStyle: "normal",
-        fontWeight: "normal",
-        letterSpacing: "0.4px",
-        lineHeight: "16px",
-    },
     h1: {
         fontFamily: "Quattrocento Sans",
         fontSize: "48px",
@@ -81,6 +48,39 @@ export const typographyOptions = <TypographyOptions>{
         fontWeight: "bold",
         letterSpacing: "0.15px",
         lineHeight: "22px",
+    },
+    body1: {
+        fontFamily: "Nunito",
+        fontSize: "16px",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        letterSpacing: "0.5px",
+        lineHeight: "28px",
+    },
+    body2: {
+        fontFamily: "Nunito",
+        fontSize: "14px",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        letterSpacing: "0.25px",
+        lineHeight: "20px",
+    },
+    button: {
+        fontFamily: "Nunito",
+        fontSize: "14px",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        letterSpacing: "0.75px",
+        lineHeight: "16px",
+        textTransform: "uppercase",
+    },
+    caption: {
+        fontFamily: "Nunito",
+        fontSize: "12px",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        letterSpacing: "0.4px",
+        lineHeight: "16px",
     },
     overline: {
         fontFamily: "Nunito",

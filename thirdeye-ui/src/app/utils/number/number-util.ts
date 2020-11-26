@@ -36,5 +36,22 @@ export const formatNumber = (num: number): string => {
 export const formatLargeNumber = (num: number): string => {
     return numbro(num).format({
         average: true,
+        lowPrecision: false,
+    } as numbro.Format);
+};
+
+// Returns percentage, string representation of given number
+// For example:
+// 1 -> 100%
+// 10 -> 1,000%
+// 0.1 -> 10%
+// 0.01234 -> 1.23%
+// 0.01237 -> 1.24%
+export const formatPercentage = (num: number): string => {
+    return numbro(num).format({
+        output: "percent",
+        thousandSeparated: true,
+        mantissa: 2,
+        optionalMantissa: true,
     });
 };

@@ -7,7 +7,7 @@ import { shapeOptions } from "./shape-util";
 import { typographyOptions } from "./typography-util";
 
 // CortexData Material-UI theme
-export const theme = <Theme>createMuiTheme({
+export const theme: Theme = createMuiTheme({
     palette: paletteOptions,
     props: {
         MuiGrid: gridProps,

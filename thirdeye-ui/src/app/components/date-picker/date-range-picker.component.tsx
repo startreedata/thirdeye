@@ -1,12 +1,12 @@
 import {
-    Box,
     Button,
     ButtonGroup,
-    Card,
+    Grid,
     Popover,
     Typography,
 } from "@material-ui/core";
 import { CalendarToday } from "@material-ui/icons";
+import classnames from "classnames";
 import React, { FunctionComponent, useEffect } from "react";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -14,8 +14,8 @@ import { useTranslation } from "react-i18next";
 import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
 import { DateRange } from "../../store/date-range-picker/date-range-picker-store.interfaces";
 import { parseDateTime, subtractDate } from "../../utils/datetime/date-utils";
-import { cardStyles } from "../styles/common.styles";
 import { DatePickerProps } from "./date-range-picker.interfaces";
+import "./date-range-picker.scss";
 import { useDatePickerStyles } from "./date-range-picker.styles";
 
 const currentDate = new Date();
@@ -48,7 +48,6 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
         state.setDateRange,
         state.dateRange,
     ]);
-    const cardClasses = cardStyles();
 
     useEffect(() => {
         setLocalDateRange({
@@ -85,12 +84,14 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
     }, []);
 
     return (
-        <div>
-            <Box alignItems="center" display="flex">
+        <Grid container alignItems="center" direction="row">
+            <Grid item>
                 <Typography variant="body2">
                     {parseDateTime(localDateRange.from, "h:mm a, MMM DD, 'YY")}{" "}
                     - {parseDateTime(localDateRange.to, "h:mm a, MMM DD, 'YY")}
                 </Typography>
+            </Grid>
+            <Grid item>
                 <Button
                     className={datePickerClasses.buttonIcon}
                     color="primary"
@@ -100,118 +101,133 @@ const DateRangePicker: FunctionComponent<DatePickerProps> = ({
                 >
                     <CalendarToday />
                 </Button>
-            </Box>
+            </Grid>
             <Popover
+                PaperProps={{ style: { padding: 16 } }}
                 anchorEl={popupRef.current}
                 anchorOrigin={{
                     vertical: "bottom",
-                    horizontal: "center",
+                    horizontal: "right",
                 }}
                 id={isOpen ? "simple-popper" : ""}
                 open={isOpen}
                 transformOrigin={{
                     vertical: "top",
-                    horizontal: "center",
+                    horizontal: "right",
                 }}
             >
-                <Card
-                    className={cardClasses.base}
-                    ref={rootRef}
-                    style={{ margin: 0 }}
-                >
-                    <Typography variant="h6">Customize Period</Typography>
-                    <ButtonGroup style={{ margin: "16px 0" }}>
-                        {Object.keys(ranges).map((key) => (
+                <Grid container direction="column" ref={rootRef}>
+                    <Grid item>
+                        <Typography variant="h6">Customize Period</Typography>
+                    </Grid>
+                    <Grid item>
+                        <ButtonGroup style={{ margin: "16px 0" }}>
+                            {Object.keys(ranges).map((key) => (
+                                <Button
+                                    color="primary"
+                                    key={key}
+                                    style={{ marginTop: "4px" }}
+                                    variant={
+                                        localDateRange.predefineRangeName ===
+                                        key
+                                            ? "contained"
+                                            : "outlined"
+                                    }
+                                    onClick={(): void => {
+                                        const dates = ranges[key];
+                                        setDateRange({
+                                            from: dates[0],
+                                            to: dates[1],
+                                            predefineRangeName: key,
+                                        });
+                                        // Close popup if range isn't custom
+                                        if (key !== "Custom") {
+                                            setIsOpen(false);
+                                        }
+                                    }}
+                                >
+                                    {key}
+                                </Button>
+                            ))}
+                        </ButtonGroup>
+                    </Grid>
+                    <Grid container item>
+                        <Grid item md={6}>
+                            <ReactDatePicker
+                                inline
+                                selectsStart
+                                showTimeInput
+                                calendarClassName={classnames(
+                                    "date-range-picker-container",
+                                    datePickerClasses.datePicker
+                                )}
+                                dateFormat="MM/dd/yyyy h:mm aa"
+                                endDate={localDateRange.to}
+                                selected={localDateRange.from}
+                                startDate={localDateRange.from}
+                                onChange={(date: Date): void => {
+                                    setLocalDateRange({
+                                        ...localDateRange,
+                                        from: date,
+                                        predefineRangeName: "Custom",
+                                    });
+                                }}
+                            />
+                        </Grid>
+                        <Grid item md={6}>
+                            <ReactDatePicker
+                                inline
+                                selectsEnd
+                                showTimeInput
+                                calendarClassName={classnames(
+                                    "date-range-picker-container",
+                                    datePickerClasses.datePicker
+                                )}
+                                dateFormat="MM/dd/yyyy h:mm aa"
+                                endDate={localDateRange.to}
+                                minDate={localDateRange.from}
+                                selected={localDateRange.to}
+                                startDate={localDateRange.from}
+                                onChange={(date: Date): void => {
+                                    setLocalDateRange({
+                                        ...localDateRange,
+                                        to: date,
+                                        predefineRangeName: "Custom",
+                                    });
+                                }}
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid container item>
+                        <Grid item>
                             <Button
                                 color="primary"
-                                key={key}
-                                style={{ marginTop: "4px" }}
-                                variant={
-                                    localDateRange.predefineRangeName === key
-                                        ? "contained"
-                                        : "outlined"
-                                }
+                                variant="contained"
                                 onClick={(): void => {
-                                    const dates = ranges[key];
-                                    setDateRange({
-                                        from: dates[0],
-                                        to: dates[1],
-                                        predefineRangeName: key,
-                                    });
-                                    // Close popup if range isn't custom
-                                    if (key !== "Custom") {
-                                        setIsOpen(false);
-                                    }
+                                    setDateRange(localDateRange);
+                                    setIsOpen(false);
                                 }}
                             >
-                                {key}
+                                {t("label.apply")}
                             </Button>
-                        ))}
-                    </ButtonGroup>
-                    <Box display="flex">
-                        <ReactDatePicker
-                            inline
-                            selectsStart
-                            showTimeInput
-                            calendarClassName={datePickerClasses.datePicker}
-                            dateFormat="MM/dd/yyyy h:mm aa"
-                            endDate={localDateRange.to}
-                            selected={localDateRange.from}
-                            startDate={localDateRange.from}
-                            onChange={(date: Date): void => {
-                                setLocalDateRange({
-                                    ...localDateRange,
-                                    from: date,
-                                    predefineRangeName: "Custom",
-                                });
-                            }}
-                        />
-                        <ReactDatePicker
-                            inline
-                            selectsEnd
-                            showTimeInput
-                            calendarClassName={datePickerClasses.datePicker}
-                            dateFormat="MM/dd/yyyy h:mm aa"
-                            endDate={localDateRange.to}
-                            minDate={localDateRange.from}
-                            selected={localDateRange.to}
-                            startDate={localDateRange.from}
-                            onChange={(date: Date): void => {
-                                setLocalDateRange({
-                                    ...localDateRange,
-                                    to: date,
-                                    predefineRangeName: "Custom",
-                                });
-                            }}
-                        />
-                    </Box>
-                    <Box marginY={2}>
-                        <Button
-                            color="primary"
-                            variant="contained"
-                            onClick={(): void => {
-                                setDateRange(localDateRange);
-                                setIsOpen(false);
-                            }}
-                        >
-                            {t("label.apply")}
-                        </Button>
-                        <Button
-                            color="primary"
-                            style={{ marginLeft: 16 }}
-                            variant="outlined"
-                            onClick={(): void => {
-                                setIsOpen(false);
-                                // Reset local date with store, To be in sync
-                                setLocalDateRange(dateRange);
-                            }}
-                        >
-                            {t("label.cancel")}
-                        </Button>
-                    </Box>
-                </Card>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                color="primary"
+                                variant="outlined"
+                                onClick={(): void => {
+                                    setIsOpen(false);
+                                    // Reset local date with store, To be in sync
+                                    setLocalDateRange(dateRange);
+                                }}
+                            >
+                                {t("label.cancel")}
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
             </Popover>
-        </div>
+        </Grid>
     );
 };
 

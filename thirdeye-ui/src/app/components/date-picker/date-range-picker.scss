@@ -1,0 +1,64 @@
+// To apply custom styles to date picker
+.react-datepicker__day--in-range {
+    border-radius: 0.3rem;
+    background-color: #54bac9;
+    color: #ffffff;
+}
+
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__month-text--in-selecting-range,
+.date-range-picker-container
+    .react-datepicker__quarter-text--in-selecting-range,
+.react-datepicker__year-text--in-selecting-range {
+    background-color: inherit;
+    color: inherit;
+}
+
+.react-datepicker__day--selected:hover,
+.react-datepicker__day--in-selecting-range:hover,
+.react-datepicker__day--in-range:hover,
+.react-datepicker__month-text--selected:hover,
+.date-range-picker-container
+    .react-datepicker__month-text--in-selecting-range:hover,
+.react-datepicker__month-text--in-range:hover,
+.react-datepicker__quarter-text--selected:hover,
+.date-range-picker-container
+    .react-datepicker__quarter-text--in-selecting-range:hover,
+.react-datepicker__quarter-text--in-range:hover,
+.react-datepicker__year-text--selected:hover,
+.date-range-picker-container
+    .react-datepicker__year-text--in-selecting-range:hover,
+.react-datepicker__year-text--in-range:hover {
+    background-color: #2994a9;
+}
+
+.react-datepicker__day:hover,
+.react-datepicker__month-text:hover,
+.react-datepicker__quarter-text:hover,
+.react-datepicker__year-text:hover {
+    border-radius: 0.3rem;
+    background-color: inherit;
+}
+
+.react-datepicker__month--selecting-range .react-datepicker__day--in-range,
+.react-datepicker__month--selecting-range
+    .react-datepicker__month-text--in-range,
+.react-datepicker__month--selecting-range
+    .react-datepicker__quarter-text--in-range,
+.react-datepicker__month--selecting-range
+    .react-datepicker__year-text--in-range {
+    border-radius: 0.3rem;
+    background-color: #54bac9;
+    color: #ffffff;
+}
+
+.date-range-picker-container .react-datepicker__day--selected,
+.date-range-picker-container .react-datepicker__day--range-end {
+    border-radius: 0.3rem;
+    background-color: #2994a9;
+    color: #ffffff;
+}
+
+.react-datepicker__day:focus {
+    outline: none;
+}

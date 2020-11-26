@@ -8,7 +8,6 @@ export const useDatePickerStyles = makeStyles((theme: Theme) =>
         buttonIcon: {
             padding: "7px 8px",
             minWidth: 0,
-            margin: 8,
         },
     })
 );

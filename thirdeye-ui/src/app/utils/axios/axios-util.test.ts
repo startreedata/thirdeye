@@ -59,7 +59,7 @@ describe("Axios Util", () => {
         expect(responseInterceptor).toBeInstanceOf(Function);
     });
 
-    test("axios rejected response interceptor shall invoke unauthenticatedAccessHandler and return 401 error", () => {
+    test("axios rejected response interceptor shall invoke unauthenticatedAccessHandler and throw 401 error", () => {
         const mockError = {
             response: {
                 status: 401,
@@ -69,13 +69,12 @@ describe("Axios Util", () => {
         const responseInterceptor = getRejectedResponseInterceptor(
             mockUnauthenticatedAccessHandler
         );
-        const error = responseInterceptor(mockError);
 
+        expect(() => responseInterceptor(mockError)).toThrow();
         expect(mockUnauthenticatedAccessHandler).toHaveBeenCalled();
-        expect(error).toEqual(mockError);
     });
 
-    test("axios rejected response interceptor shall not invoke unauthenticatedAccessHandler and return any error other than 401", () => {
+    test("axios rejected response interceptor shall not invoke unauthenticatedAccessHandler and throw any error other than 401", () => {
         const mockError = {
             response: {
                 status: 500,
@@ -85,21 +84,8 @@ describe("Axios Util", () => {
         const responseInterceptor = getRejectedResponseInterceptor(
             mockUnauthenticatedAccessHandler
         );
-        const error = responseInterceptor(mockError);
 
+        expect(() => responseInterceptor(mockError)).toThrow();
         expect(mockUnauthenticatedAccessHandler).not.toHaveBeenCalled();
-        expect(error).toEqual(mockError);
-    });
-
-    test("axios rejected response interceptor shall not invoke unauthenticatedAccessHandler and return any unknown error", () => {
-        const mockError = {} as AxiosError;
-
-        const responseInterceptor = getRejectedResponseInterceptor(
-            mockUnauthenticatedAccessHandler
-        );
-        const error = responseInterceptor(mockError);
-
-        expect(mockUnauthenticatedAccessHandler).not.toHaveBeenCalled();
-        expect(error).toEqual(mockError);
     });
 });

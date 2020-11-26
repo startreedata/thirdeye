@@ -35,19 +35,14 @@ export const getFulfilledResponseInterceptor = (): (<T>(
 // Returns axios rejected response interceptor
 export const getRejectedResponseInterceptor = (
     unauthenticatedAccessHandler: () => void
-): ((error: AxiosError) => AxiosError) => {
-    const rejectedResponseInterceptor = (error: AxiosError): AxiosError => {
-        if (!error.response?.status) {
-            // Can't figure out the error
-            return error;
-        }
-
-        if (error.response.status === 401) {
+): ((error: AxiosError) => void) => {
+    const rejectedResponseInterceptor = (error: AxiosError): void => {
+        if (error.response?.status === 401) {
             // Unauthenticated access
             unauthenticatedAccessHandler();
         }
 
-        return error;
+        throw error;
     };
 
     return rejectedResponseInterceptor;

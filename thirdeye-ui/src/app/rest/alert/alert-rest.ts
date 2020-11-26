@@ -33,11 +33,11 @@ export const deleteAlert = async (id: number): Promise<Alert> => {
     return response.data;
 };
 
-export const getAlertPreview = async (
+export const getAlertEvaluation = async (
     alertEvaluation: AlertEvaluation
 ): Promise<AlertEvaluation> => {
     const response = await axios.post(
-        `${BASE_URL_ALERTS}/preview`,
+        `${BASE_URL_ALERTS}/evaluate`,
         alertEvaluation
     );
 

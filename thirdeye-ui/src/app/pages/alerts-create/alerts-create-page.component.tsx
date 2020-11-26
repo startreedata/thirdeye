@@ -22,7 +22,7 @@ import { PageContents } from "../../components/page-contents/page-contents.compo
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { ReviewStep } from "../../components/review-step/review-step.component";
 import { CustomStepper } from "../../components/stepper/stepper.component";
-import { createAlert, getAlertPreview } from "../../rest/alert/alert-rest";
+import { createAlert, getAlertEvaluation } from "../../rest/alert/alert-rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import alertPreview from "../../utils/defaults/alert-preview";
@@ -96,7 +96,7 @@ export const AlertsCreatePage = withRouter(
 
         const handlePreviewAlert = async (): Promise<void> => {
             try {
-                const preview = await getAlertPreview(
+                const preview = await getAlertEvaluation(
                     (alertPreview as unknown) as AlertEvaluation
                 );
                 setPreviewData(preview);

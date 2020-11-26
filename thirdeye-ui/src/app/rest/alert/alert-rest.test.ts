@@ -4,7 +4,7 @@ import {
     createAlert,
     deleteAlert,
     getAlert,
-    getAlertPreview,
+    getAlertEvaluation,
     getAllAlerts,
     updateAlert,
 } from "./alert-rest";
@@ -129,25 +129,25 @@ describe("Alert REST", () => {
         await expect(deleteAlert(1)).rejects.toThrow("testErrorMessage");
     });
 
-    test("getAlertPreview shall invoke axios.post with appropriate input and return result", async () => {
+    test("getAlertEvaluation shall invoke axios.post with appropriate input and return result", async () => {
         (axios.post as jest.Mock).mockResolvedValue({
             data: mockAlertEvaluationResponse,
         });
 
-        const response = await getAlertPreview(mockAlertEvaluationRequest);
+        const response = await getAlertEvaluation(mockAlertEvaluationRequest);
 
         expect(axios.post).toHaveBeenCalledWith(
-            "/api/alerts/preview",
+            "/api/alerts/evaluate",
             mockAlertEvaluationRequest
         );
         expect(response).toEqual(mockAlertEvaluationResponse);
     });
 
-    test("getAlertPreview shall throw encountered error", async () => {
+    test("getAlertEvaluation shall throw encountered error", async () => {
         (axios.post as jest.Mock).mockRejectedValue(mockError);
 
         await expect(
-            getAlertPreview(mockAlertEvaluationRequest)
+            getAlertEvaluation(mockAlertEvaluationRequest)
         ).rejects.toThrow("testErrorMessage");
     });
 });

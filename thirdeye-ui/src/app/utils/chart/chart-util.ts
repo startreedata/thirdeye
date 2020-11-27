@@ -1,7 +1,9 @@
-import { GraphData } from "../../components/charts/line-graph.interfaces";
+import { TimeSeriesProps } from "../../components/timeseries-chart/timeseries-chart.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 
-export const getGraphDataFromAPIData = (data: AlertEvaluation): GraphData[] => {
+export const getGraphDataFromAPIData = (
+    data: AlertEvaluation
+): TimeSeriesProps[] => {
     const lineChartData = data.detectionEvaluations.detection_rule_1.data;
 
     return lineChartData.timestamp.map((time, idx) => ({

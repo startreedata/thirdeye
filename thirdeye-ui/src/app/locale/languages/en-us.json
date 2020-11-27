@@ -25,8 +25,7 @@
         "preview-alert": "Preview Alert",
         "reset-configuration": "Reset Configuration",
         "general-details": "General Details",
-        "review": "Review",
-        "submit": "Submit",
+        "review-submit": "Review & Submit",
         "detection-configuration": "Detection Configuration",
         "subscription-configuration": "Subscription Configuration",
         "add-subscription-group": "Add to Subscription Group",
@@ -70,7 +69,15 @@
         "predicted": "Predicted",
         "current-/-predicted": "Current / Predicted",
         "current-/-predicted-values": "{{current}} / {{predicted}}",
-        "deviation": "Deviation"
+        "deviation": "Deviation",
+        "add-subscription-gorup": "Add to Subscription Group",
+        "create-subscription-gorup": "Create Subscription Group",
+        "all-detection-rules-anomalies-over-time": "All detection rules anomalies over time",
+        "alert-performance": "Alert Performance",
+        "response-rate": "Response Rate",
+        "precision": "Precision",
+        "recall": "Recall",
+        "detection-health": "Detection Health"
     },
     "message": {
         "url-not-found": "Requested URL not found"

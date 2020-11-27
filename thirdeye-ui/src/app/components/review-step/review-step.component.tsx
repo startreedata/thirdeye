@@ -15,9 +15,7 @@ export const ReviewStep: FunctionComponent<ReviewStepProps> = ({
     return (
         <Grid container>
             <Grid item xs={12}>
-                <Typography variant="h4">
-                    {t("label.review")} & {t("label.submit")}
-                </Typography>
+                <Typography variant="h4">{t("label.review-submit")}</Typography>
             </Grid>
             <Grid item xs={12}>
                 <Typography variant="h6">

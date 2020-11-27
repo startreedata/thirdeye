@@ -1,18 +1,11 @@
 import { makeStyles } from "@material-ui/core";
-import { Editor, EditorChange, EditorConfiguration } from "codemirror";
+import { Editor, EditorChange } from "codemirror";
 import "codemirror/addon/hint/show-hint";
 import "codemirror/addon/hint/show-hint.css";
+import "codemirror/lib/codemirror.css";
 import React, { FunctionComponent } from "react";
 import { Controlled as CodeMirror } from "react-codemirror2";
-
-type Props = {
-    options: EditorConfiguration;
-    value?: string;
-    defaultValue?: string;
-    register?: (ref: Element | null) => void;
-    name?: string;
-    onChange?: (value: string) => void;
-};
+import { CommonCodeMirrorProps } from "./code-mirror.interfaces";
 
 const useStyles = makeStyles(() => {
     return {
@@ -28,11 +21,11 @@ const useStyles = makeStyles(() => {
     };
 });
 
-const CommonCodeMirror: FunctionComponent<Props> = ({
+const CommonCodeMirror: FunctionComponent<CommonCodeMirrorProps> = ({
     options,
     value,
     onChange,
-}: Props) => {
+}: CommonCodeMirrorProps) => {
     const classes = useStyles();
 
     return (

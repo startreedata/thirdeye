@@ -12,6 +12,7 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import { Alert as CustomAlert } from "@material-ui/lab";
 import yaml from "js-yaml";
+import _ from "lodash";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RouteComponentProps, withRouter } from "react-router-dom";
@@ -24,6 +25,11 @@ import { ReviewStep } from "../../components/review-step/review-step.component";
 import { CustomStepper } from "../../components/stepper/stepper.component";
 import { createAlert, getAlertEvaluation } from "../../rest/alert/alert-rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    getAllSubscriptionGroups,
+    updateSubscriptionGroup,
+} from "../../rest/subscription-group/subscription-group-rest";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import alertPreview from "../../utils/defaults/alert-preview";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
@@ -46,12 +52,15 @@ export const AlertsCreatePage = withRouter(
         const [subscriptionConfig, setSubscriptionConfig] = useState(
             DEFAULT_SUBSCRIPTION
         );
-        const [subscriptionGroup, setSubscriptionGroup] = useState("");
+        const [subscriptionGroup, setSubscriptionGroup] = useState(-1);
         const [activeStep, setActiveStep] = useState(0);
         const [message, setMessage] = useState<
             { status: "success" | "error"; text: string } | undefined
         >();
         const [previewData, setPreviewData] = useState<AlertEvaluation>();
+        const [subscriptionGroups, setSubscriptionGroups] = useState<
+            SubscriptionGroup[]
+        >([]);
         const { t } = useTranslation();
 
         useEffect(() => {
@@ -66,6 +75,13 @@ export const AlertsCreatePage = withRouter(
             setLoading(false);
         }, [setPageBreadcrumbs, t]);
 
+        useEffect(() => {
+            async function fetchData(): Promise<void> {
+                setSubscriptionGroups(await getAllSubscriptionGroups());
+            }
+            fetchData();
+        }, []);
+
         const handleStepChange = (step: number): void => {
             if (step > 2) {
                 handleCreateAlert();
@@ -77,17 +93,40 @@ export const AlertsCreatePage = withRouter(
         const handleCreateAlert = async (): Promise<void> => {
             setLoading(true);
             try {
-                await createAlert(yaml.safeLoad(detectionConfig) as Alert);
+                const alert = await createAlert(
+                    yaml.safeLoad(detectionConfig) as Alert
+                );
+
+                if (subscriptionGroup !== -1) {
+                    const updatedScubscriptionGroup = subscriptionGroups.find(
+                        (sg) => sg.id === subscriptionGroup
+                    );
+                    try {
+                        await updateSubscriptionGroup({
+                            ...(updatedScubscriptionGroup as SubscriptionGroup),
+                            alerts: [
+                                ...(updatedScubscriptionGroup?.alerts || []),
+                                { id: alert.id },
+                            ] as Alert[],
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
                 setMessage({
                     status: "success",
                     text: "Alert created successfully",
                 });
                 props.history.push(ApplicationRoute.ALERTS_ALL);
             } catch (err) {
-                console.error(err);
+                console.log(err);
                 setMessage({
                     status: "error",
-                    text: "Failed to create an alert",
+                    text: _.get(
+                        err,
+                        "response.data.list.0.msg",
+                        "Failed to create an alert"
+                    ),
                 });
             } finally {
                 setLoading(false);
@@ -112,10 +151,10 @@ export const AlertsCreatePage = withRouter(
                 variant="outlined"
             >
                 <InputLabel id="select-group">
-                    Add to Subscription Group
+                    {t("label.add-subscription-gorup")}
                 </InputLabel>
                 <Select
-                    label="Add to Subscription Group"
+                    label={t("label.add-subscription-gorup")}
                     labelId="select-group"
                     style={{ borderRadius: 8 }}
                     value={subscriptionGroup}
@@ -124,10 +163,16 @@ export const AlertsCreatePage = withRouter(
                             name?: string;
                             value: unknown;
                         }>
-                    ): void => setSubscriptionGroup(e.target.value + "")}
+                    ): void => setSubscriptionGroup(e.target.value as number)}
                 >
-                    <MenuItem value="1">1st</MenuItem>
-                    <MenuItem value="2">2nd</MenuItem>
+                    <MenuItem key={-1} value={-1}>
+                        {t("label.create-subscription-gorup")}
+                    </MenuItem>
+                    {subscriptionGroups.map(({ id, name }) => (
+                        <MenuItem key={id} value={id}>
+                            {name}
+                        </MenuItem>
+                    ))}
                 </Select>
             </FormControl>
         );
@@ -153,7 +198,9 @@ export const AlertsCreatePage = withRouter(
                                 currentStep={activeStep}
                                 steps={[
                                     {
-                                        label: "Detection Configuration",
+                                        label: t(
+                                            "label.detection-configuration"
+                                        ),
                                         // eslint-disable-next-line react/display-name
                                         content: (
                                             <ConfigurationStep
@@ -183,11 +230,20 @@ export const AlertsCreatePage = withRouter(
                                         ),
                                     },
                                     {
-                                        label: "Subscription Configuration",
+                                        label: t(
+                                            "label.subscription-configuration"
+                                        ),
                                         // eslint-disable-next-line react/display-name
                                         content: (
                                             <ConfigurationStep
                                                 config={subscriptionConfig}
+                                                editorProps={{
+                                                    options: {
+                                                        readOnly:
+                                                            subscriptionGroup !==
+                                                            -1,
+                                                    },
+                                                }}
                                                 extraFields={selectionGroupComp}
                                                 name={"Subscription"}
                                                 onConfigChange={
@@ -202,7 +258,7 @@ export const AlertsCreatePage = withRouter(
                                         ),
                                     },
                                     {
-                                        label: "Review & Submit",
+                                        label: t("label.review-submit"),
                                         // eslint-disable-next-line react/display-name
                                         content: (
                                             <ReviewStep
@@ -213,7 +269,13 @@ export const AlertsCreatePage = withRouter(
                                                     subscriptionConfig
                                                 }
                                                 subscriptionGroup={
-                                                    subscriptionGroup
+                                                    subscriptionGroup !== -1
+                                                        ? subscriptionGroups.find(
+                                                              (sg) =>
+                                                                  sg.id ===
+                                                                  subscriptionGroup
+                                                          )?.name || ""
+                                                        : "-"
                                                 }
                                             />
                                         ),

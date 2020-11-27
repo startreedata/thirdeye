@@ -17,6 +17,7 @@ export const ConfigurationStep: FunctionComponent<ConfigStepsProps> = ({
     onConfigChange,
     onResetConfig,
     onPreviewAlert,
+    editorProps,
 }: ConfigStepsProps) => {
     const { t } = useTranslation();
     const handlePreviewAlert = (): void => {
@@ -56,6 +57,7 @@ export const ConfigurationStep: FunctionComponent<ConfigStepsProps> = ({
                         lineNumbers: true,
                         lineWrapping: true,
                         extraKeys: { "'@'": "autocomplete" },
+                        ...(editorProps?.options || {}),
                     }}
                     value={config}
                     onChange={onConfigChange}

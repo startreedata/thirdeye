@@ -2,14 +2,17 @@ import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnomalyCard } from "../../components/anomaly-card/anomaly-card.component";
+import { AnomalyCardData } from "../../components/anomaly-card/anomaly-card.interfaces";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { Search } from "../../components/search/search.component";
 import { getAllAnomalies } from "../../rest/anomaly/anomaly-rest";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { filterAnomalies } from "../../utils/anomaly/anomaly-util";
+import {
+    filterAnomalies,
+    getAnomalyCardDatas,
+} from "../../utils/anomaly/anomaly-util";
 import { getAnomaliesAllPath } from "../../utils/route/routes-util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
@@ -17,8 +20,10 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
-    const [filteredAnomalies, setfilteredAnomalies] = useState<Anomaly[]>([]);
+    const [anomalies, setAnomalies] = useState<AnomalyCardData[]>([]);
+    const [filteredAnomalies, setfilteredAnomalies] = useState<
+        AnomalyCardData[]
+    >([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
     const { t } = useTranslation();
 
@@ -30,21 +35,24 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 path: getAnomaliesAllPath(),
             },
         ]);
-    }, [setPageBreadcrumbs, t]);
+    }, []);
 
     useEffect(() => {
-        const fetchData = async (): Promise<void> => {
-            const alerts = await getAllAnomalies();
-
-            setAnomalies(alerts);
-            setfilteredAnomalies(filterAnomalies(alerts, searchWords));
+        const init = async (): Promise<void> => {
+            await fetchData();
 
             setLoading(false);
         };
 
-        fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Doesn't need to depend on searchWords
+        init();
+    }, []);
+
+    const fetchData = async (): Promise<void> => {
+        const anomalies = getAnomalyCardDatas(await getAllAnomalies());
+
+        setAnomalies(anomalies);
+        setfilteredAnomalies(filterAnomalies(anomalies, searchWords));
+    };
 
     const onSearch = (searchWords: string[]): void => {
         setSearchWords(searchWords);

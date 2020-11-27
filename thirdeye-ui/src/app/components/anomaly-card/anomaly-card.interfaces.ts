@@ -1,6 +1,18 @@
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+export interface AnomalyCardData {
+    id: number;
+    name: string;
+    alertName: string;
+    alertId: number;
+    currentAndPredicted: string;
+    deviation: string;
+    negativeDeviation: boolean;
+    duration: string;
+    startTime: string;
+    endTime: string;
+}
 
 export interface AnomalyCardProps {
-    anomaly: Anomaly;
+    anomaly: AnomalyCardData;
     searchWords?: string[];
+    hideViewDetailsLinks?: boolean;
 }

@@ -3,6 +3,7 @@ import { buttonClasses } from "./button-util";
 import { gridProps } from "./grid-util";
 import { linkProps } from "./link-util";
 import { paletteOptions } from "./palette-util";
+import { paperClasses } from "./paper-util";
 import { shapeOptions } from "./shape-util";
 import { typographyOptions } from "./typography-util";
 
@@ -14,6 +15,7 @@ export const theme: Theme = createMuiTheme({
         MuiLink: linkProps,
     },
     overrides: {
+        MuiPaper: paperClasses,
         MuiButton: buttonClasses,
     },
     shape: shapeOptions,

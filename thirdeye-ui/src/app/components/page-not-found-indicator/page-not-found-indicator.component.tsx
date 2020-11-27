@@ -30,7 +30,7 @@ export const PageNotFoundIndicator: FunctionComponent = () => {
             <Grid item>
                 {/* Page not found error message */}
                 <Typography variant="subtitle1">
-                    {t("message.page-not-found")}
+                    {t("message.url-not-found")}
                 </Typography>
             </Grid>
         </Grid>

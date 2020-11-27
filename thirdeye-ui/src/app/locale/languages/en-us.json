@@ -46,6 +46,7 @@
         "inactive": "Inactive",
         "anomaly": "Anomaly",
         "anomaly-id": "#{{id}}",
+        "investigate": "Investigate",
         "start": "Start",
         "end": "End",
         "duration": "Duration",
@@ -69,10 +70,9 @@
         "predicted": "Predicted",
         "current-/-predicted": "Current / Predicted",
         "current-/-predicted-values": "{{current}} / {{predicted}}",
-        "deviation": "Deviation",
-        "investigate": "Investigate"
+        "deviation": "Deviation"
     },
     "message": {
-        "page-not-found": "Requested URL not found"
+        "url-not-found": "Requested URL not found"
     }
 }

@@ -1,5 +1,6 @@
 import { InputAdornment, TextField } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
+import { debounce } from "lodash";
 import React, { ChangeEvent, FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { SearchProps } from "./search.interfaces";
@@ -8,16 +9,16 @@ export const Search: FunctionComponent<SearchProps> = (props: SearchProps) => {
     const { t } = useTranslation();
 
     const onChange = (event: ChangeEvent<HTMLInputElement>): void => {
-        if (!event || !event.currentTarget) {
-            return;
-        }
-
         // Split input text into words
         const text = event.currentTarget.value;
         const searchWords = text ? text.trim().split(" ") : [];
 
-        props.onChange && props.onChange(searchWords);
+        sendOnChange(searchWords);
     };
+
+    const sendOnChange = debounce((searchWords: string[]): void => {
+        props.onChange && props.onChange(searchWords);
+    }, 500);
 
     return (
         <TextField

@@ -2,7 +2,7 @@ import { makeStyles } from "@material-ui/core";
 
 export const usePageContainerStyles = makeStyles({
     outerContainer: {
-        // Makes the container occupy entire height and width so that contained components can be
+        // Container to occupy entire height and width so that contained components can be
         // vertically centered if required
         height: "100%",
         width: "100%",
@@ -13,7 +13,7 @@ export const usePageContainerStyles = makeStyles({
     },
     innerContainer: {
         display: "flex",
-        flexGrow: 1, // Makes the inner container occupy entire available area
-        overflowX: "hidden", // Makes this container scrollable and everything outside is fixed
+        flexGrow: 1, // Make the inner container occupy entire available area
+        overflowX: "hidden", // Make this container scrollable while everything outside is fixed
     },
 });

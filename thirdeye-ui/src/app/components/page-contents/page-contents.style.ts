@@ -13,8 +13,6 @@ export const usePageContentsStyles = makeStyles({
     },
     centeredContainer: {
         width: Dimension.WIDTH_PAGE_CONTENTS_DEFAULT,
-        // Left and right margins to auto, to horizontally center align but not vertically center
-        // align
         marginLeft: "auto",
         marginRight: "auto",
     },

@@ -13,4 +13,4 @@ export const SnackbarOption = {
     INFO: {
         variant: "info",
     } as OptionsObject,
-};
+} as const;

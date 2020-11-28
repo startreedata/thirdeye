@@ -80,6 +80,7 @@
         "detection-health": "Detection Health"
     },
     "message": {
-        "url-not-found": "Requested URL not found"
+        "url-not-found": "Requested URL not found",
+        "signed-out": "You have been signed out"
     }
 }

@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnomalyCard } from "../../components/anomaly-card/anomaly-card.component";
@@ -14,6 +15,7 @@ import {
     getAnomalyCardDatas,
 } from "../../utils/anomaly/anomaly-util";
 import { getAnomaliesAllPath } from "../../utils/route/routes-util";
+import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -25,6 +27,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         AnomalyCardData[]
     >([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
+    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -48,10 +51,15 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }, []);
 
     const fetchData = async (): Promise<void> => {
-        const anomalies = getAnomalyCardDatas(await getAllAnomalies());
-
-        setAnomalies(anomalies);
-        setfilteredAnomalies(filterAnomalies(anomalies, searchWords));
+        let anomalies: AnomalyCardData[] = [];
+        try {
+            anomalies = getAnomalyCardDatas(await getAllAnomalies());
+        } catch (error) {
+            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
+        } finally {
+            setAnomalies(anomalies);
+            setfilteredAnomalies(filterAnomalies(anomalies, searchWords));
+        }
     };
 
     const onSearch = (searchWords: string[]): void => {

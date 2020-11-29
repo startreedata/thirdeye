@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { withRouter } from "react-router-dom";
 import AlertCard from "../../components/alerts/alert-card.component";
 import LineChart from "../../components/charts/line-graph.component";
-import { PageContainer } from "../../components/containers/page-container.component";
+import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { cardStyles } from "../../components/styles/common.styles";
 import { getAlert, updateAlert } from "../../rest/alert/alert-rest";

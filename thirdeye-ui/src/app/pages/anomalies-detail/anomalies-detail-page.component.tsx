@@ -1,5 +1,8 @@
 import { Grid } from "@material-ui/core";
+import { isEmpty, toNumber } from "lodash";
+import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { AnomalyCard } from "../../components/anomaly-card/anomaly-card.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
@@ -12,16 +15,20 @@ import {
     getAnomalyCardData,
     getAnomalyName,
 } from "../../utils/anomaly/anomaly-util";
+import { isValidNumberId } from "../../utils/params/params-util";
 import { getAnomaliesDetailPath } from "../../utils/route/routes-util";
+import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
 import { AnomaliesDetailPageParams } from "./anomalies-detail-page.interfaces";
 
 export const AnomaliesDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
+    const [anomaly, setAnomaly] = useState<Anomaly>({} as Anomaly);
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const params = useParams<AnomaliesDetailPageParams>();
-    const [anomaly, setAnomaly] = useState<Anomaly>({} as Anomaly);
+    const { enqueueSnackbar } = useSnackbar();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const init = async (): Promise<void> => {
@@ -34,17 +41,34 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     }, []);
 
     const fetchData = async (): Promise<void> => {
-        const anomaly = await getAnomaly(parseInt(params.id));
+        if (!isValidNumberId(params.id)) {
+            enqueueSnackbar(
+                t("message.invalid-id", {
+                    entity: t("label.anomaly"),
+                    id: params.id,
+                }),
+                SnackbarOption.ERROR
+            );
 
-        setAnomaly(anomaly);
+            return;
+        }
 
-        // Create page breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: getAnomalyName(anomaly),
-                path: getAnomaliesDetailPath(anomaly.id),
-            },
-        ]);
+        let anomaly = {} as Anomaly;
+        try {
+            anomaly = await getAnomaly(toNumber(params.id));
+        } catch (error) {
+            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
+        } finally {
+            setAnomaly(anomaly);
+
+            // Create page breadcrumbs
+            setPageBreadcrumbs([
+                {
+                    text: getAnomalyName(anomaly),
+                    path: getAnomaliesDetailPath(anomaly.id),
+                },
+            ]);
+        }
     };
 
     if (loading) {
@@ -58,14 +82,16 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents centerAlign title={getAnomalyName(anomaly)}>
-                <Grid container>
-                    <Grid item md={12}>
-                        <AnomalyCard
-                            hideViewDetailsLinks
-                            anomaly={getAnomalyCardData(anomaly)}
-                        />
+                {!isEmpty(anomaly) && (
+                    <Grid container>
+                        <Grid item md={12}>
+                            <AnomalyCard
+                                hideViewDetailsLinks
+                                anomaly={getAnomalyCardData(anomaly)}
+                            />
+                        </Grid>
                     </Grid>
-                </Grid>
+                )}
             </PageContents>
         </PageContainer>
     );

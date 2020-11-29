@@ -33,7 +33,7 @@ export const getAlertsAllPath = (): string => {
 
 export const getAlertsDetailPath = (id: number): string => {
     let path: string = ApplicationRoute.ALERTS_DETAIL;
-    path = path.replace(ROUTE_PLACEHOLDER_ID, id.toString());
+    path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
     return path;
 };
@@ -44,7 +44,7 @@ export const getAlertsCreatePath = (): string => {
 
 export const getAlertsUpdatePath = (id: number): string => {
     let path: string = ApplicationRoute.ALERTS_UPDATE;
-    path = path.replace(ROUTE_PLACEHOLDER_ID, id.toString());
+    path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
     return path;
 };
@@ -59,7 +59,7 @@ export const getAnomaliesAllPath = (): string => {
 
 export const getAnomaliesDetailPath = (id: number): string => {
     let path: string = ApplicationRoute.ANOMALIES_DETAIL;
-    path = path.replace(ROUTE_PLACEHOLDER_ID, id.toString());
+    path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
     return path;
 };

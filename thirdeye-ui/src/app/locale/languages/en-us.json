@@ -81,6 +81,8 @@
     },
     "message": {
         "url-not-found": "Requested URL not found",
-        "signed-out": "You have been signed out"
+        "signed-out": "You have been signed out",
+        "invalid-id": "Invalid {{entity}} id {{id}}",
+        "fetch-error": "Error fetching data"
     }
 }

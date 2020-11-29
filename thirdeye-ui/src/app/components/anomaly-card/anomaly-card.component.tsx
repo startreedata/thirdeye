@@ -12,21 +12,19 @@ import {
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
-import Highlighter from "react-highlight-words";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import {
     getAlertsDetailPath,
     getAnomaliesDetailPath,
 } from "../../utils/route/routes-util";
+import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
 import { useAnomalyCardStyles } from "./anomaly-card.styles";
 
-export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
-    anomaly,
-    searchWords = [] as string[],
-    hideViewDetailsLinks,
-}: AnomalyCardProps) => {
+export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
+    props: AnomalyCardProps
+) => {
     const anomalyCardClasses = useAnomalyCardStyles();
     const [
         optionsAnchorElement,
@@ -36,7 +34,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
     const { t } = useTranslation();
 
     const onAnomalyDetails = (): void => {
-        history.push(getAnomaliesDetailPath(anomaly.id));
+        history.push(getAnomaliesDetailPath(props.anomaly.id));
     };
 
     const onInvestigate = (): void => {
@@ -44,7 +42,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
     };
 
     const onAlertDetails = (): void => {
-        history.push(getAlertsDetailPath(anomaly.alertId));
+        history.push(getAlertsDetailPath(props.anomaly.alertId));
     };
 
     const onAnomalyOptionsClick = (event: MouseEvent<HTMLElement>): void => {
@@ -66,18 +64,15 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                     </IconButton>
                 }
                 title={
-                    !hideViewDetailsLinks ? (
+                    !props.hideViewDetailsLinks ? (
                         <Link
                             component="button"
                             variant="h6"
                             onClick={onAnomalyDetails}
                         >
-                            <Highlighter
-                                highlightClassName={
-                                    anomalyCardClasses.highlight
-                                }
-                                searchWords={searchWords}
-                                textToHighlight={anomaly.name}
+                            <TextHighlighter
+                                searchWords={props.searchWords}
+                                textToHighlight={props.anomaly.name}
                             />
                         </Link>
                     ) : (
@@ -91,7 +86,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                 open={Boolean(optionsAnchorElement)}
                 onClose={closeAnomalyOptions}
             >
-                {!hideViewDetailsLinks && (
+                {!props.hideViewDetailsLinks && (
                     <MenuItem onClick={onAnomalyDetails}>
                         {t("label.view-details")}
                     </MenuItem>
@@ -114,12 +109,9 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                                 variant="body2"
                                 onClick={onAlertDetails}
                             >
-                                <Highlighter
-                                    highlightClassName={
-                                        anomalyCardClasses.highlight
-                                    }
-                                    searchWords={searchWords}
-                                    textToHighlight={anomaly.alertName}
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    textToHighlight={props.anomaly.alertName}
                                 />
                             </Link>
                         </Grid>
@@ -132,13 +124,10 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                                 </strong>
                             </Typography>
                             <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        anomalyCardClasses.highlight
-                                    }
-                                    searchWords={searchWords}
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
                                     textToHighlight={
-                                        anomaly.currentAndPredicted
+                                        props.anomaly.currentAndPredicted
                                     }
                                 />
                             </Typography>
@@ -151,18 +140,15 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                             </Typography>
                             <Typography
                                 className={
-                                    anomaly.negativeDeviation
+                                    props.anomaly.negativeDeviation
                                         ? anomalyCardClasses.deviationError
                                         : ""
                                 }
                                 variant="body2"
                             >
-                                <Highlighter
-                                    highlightClassName={
-                                        anomalyCardClasses.highlight
-                                    }
-                                    searchWords={searchWords}
-                                    textToHighlight={anomaly.deviation}
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    textToHighlight={props.anomaly.deviation}
                                 />
                             </Typography>
                         </Grid>
@@ -179,12 +165,9 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                                 <strong>{t("label.duration")}</strong>
                             </Typography>
                             <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        anomalyCardClasses.highlight
-                                    }
-                                    searchWords={searchWords}
-                                    textToHighlight={anomaly.duration}
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    textToHighlight={props.anomaly.duration}
                                 />
                             </Typography>
                         </Grid>
@@ -195,12 +178,9 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                                 <strong>{t("label.start")}</strong>
                             </Typography>
                             <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        anomalyCardClasses.highlight
-                                    }
-                                    searchWords={searchWords}
-                                    textToHighlight={anomaly.startTime}
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    textToHighlight={props.anomaly.startTime}
                                 />
                             </Typography>
                         </Grid>
@@ -211,12 +191,9 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                                 <strong>{t("label.end")}</strong>
                             </Typography>
                             <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        anomalyCardClasses.highlight
-                                    }
-                                    searchWords={searchWords}
-                                    textToHighlight={anomaly.endTime}
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    textToHighlight={props.anomaly.endTime}
                                 />
                             </Typography>
                         </Grid>

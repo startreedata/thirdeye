@@ -122,6 +122,8 @@ export const filterAlerts = (
 
     for (const alert of alerts) {
         for (const searchWord of searchWords) {
+            let alertFiltered = false;
+
             // Try and match alert property values to search words
             for (const propertyValue of Object.values(alert)) {
                 if (!propertyValue) {
@@ -136,6 +138,9 @@ export const filterAlerts = (
                         .indexOf(searchWord.toLowerCase()) > -1
                 ) {
                     filteredAlerts.add(alert);
+                    alertFiltered = true;
+
+                    break;
                 }
                 // Check arrays
                 else if (propertyValue.length && propertyValue.length > 0) {
@@ -152,6 +157,9 @@ export const filterAlerts = (
                                 .indexOf(searchWord.toLowerCase()) > -1
                         ) {
                             filteredAlerts.add(alert);
+                            alertFiltered = true;
+
+                            break;
                         }
                         // Check dataset and metric
                         else if (arrayValue.datasetId) {
@@ -164,6 +172,9 @@ export const filterAlerts = (
                                     .indexOf(searchWord.toLowerCase()) > -1
                             ) {
                                 filteredAlerts.add(alert);
+                                alertFiltered = true;
+
+                                break;
                             }
                         }
                         // Check subscription group
@@ -174,9 +185,27 @@ export const filterAlerts = (
                                 .indexOf(searchWord.toLowerCase()) > -1
                         ) {
                             filteredAlerts.add(alert);
+                            alertFiltered = true;
+
+                            break;
                         }
                     }
+
+                    if (alertFiltered) {
+                        // Alert already filtered, check next anomaly
+                        break;
+                    }
                 }
+
+                if (alertFiltered) {
+                    // Alert already filtered, check next anomaly
+                    break;
+                }
+            }
+
+            if (alertFiltered) {
+                // Alert already filtered, check next anomaly
+                break;
             }
         }
     }

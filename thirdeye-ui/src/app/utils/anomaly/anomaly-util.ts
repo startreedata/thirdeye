@@ -103,6 +103,8 @@ export const filterAnomalies = (
 
     for (const anomaly of anomalies) {
         for (const searchWord of searchWords) {
+            let anomalyFiltered = false;
+
             // Try and match anomaly property values to search words
             for (const propertyValue of Object.values(anomaly)) {
                 if (!propertyValue) {
@@ -116,7 +118,15 @@ export const filterAnomalies = (
                         .indexOf(searchWord.toLowerCase()) > -1
                 ) {
                     filteredAnomalies.add(anomaly);
+                    anomalyFiltered = true;
+
+                    break;
                 }
+            }
+
+            if (anomalyFiltered) {
+                // Anomaly already filtered, check next anomaly
+                break;
             }
         }
     }

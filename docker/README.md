@@ -24,56 +24,12 @@ This directory builds a docker image of [CortexData ThirdEye](https://github.com
 
 ## Build
 
-This section guides you to customize and build the docker image.
+This section guides you to customize and build the docker image. It is required to build the project with maven before running the Docker build.
 
 Usage:
 
 ```SHELL
-docker build -t ${DOCKER_TAG} --build-arg BRANCH=${BRANCH} --build-arg GIT_URL=${GIT_URL} -f Dockerfile .
-```
-
-This tags the image with `${DOCKER_TAG}`.
-
-- `DOCKER_TAG`: Name and tag your docker image. Default is `thirdeye:latest`.
-- `BRANCH`: The branch to build. Default is `master`.
-- `GIT_URL`: The HTTPS Git repo url. Default: `https://github.com/cortexdata/thirdeye`
-- `SSH_PRIVATE_KEY`: Insert your ssh key here if this is a private GitHub repo.
-
-Example:
-```
-# Using defaults
-docker build -t thirdeye:latest
-```
-
-```SHELL
-# If you want to customize the build
-docker build \
-    --tag thirdeye:latest \
-    --build-arg BRANCH=master \
-    --build-arg GIT_URL="https://github.com/cortexdata/thirdeye" \
-    --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" \
-    -f Dockerfile .
-```
-
-## How to publish a docker image
-
-Script `docker-push.sh` publishes a given docker image to your docker registry.
-
-In order to push to your own repo, the image needs to be explicitly tagged with the repo name.
-
-* Example of publishing a image to [apachepinot/thirdeye](https://cloud.docker.com/u/apachepinot/repository/docker/apachepinot/thirdeye) dockerHub repo.
-
-```SHELL
-docker tag thirdeye:latest apachepinot/thirdeye:latest
-./docker-push.sh apachepinot/thirdeye:latest
-```
-
-Script `docker-build-and-push.sh` builds and publishes this docker image to your docker registry after build.
-
-* Example of building and publishing a image to [apachepinot/thirdeye](https://cloud.docker.com/u/apachepinot/repository/docker/apachepinot/thirdeye) dockerHub repo.
-
-```SHELL
-./docker-build-and-push.sh apachepinot/thirdeye:latest master https://github.com/apache/incubator-pinot.git
+./mvnw package -D skipTests && docker build -t thirdeye:latest .
 ```
 
 ## How to Run it

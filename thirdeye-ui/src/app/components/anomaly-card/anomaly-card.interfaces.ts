@@ -3,7 +3,8 @@ export interface AnomalyCardData {
     name: string;
     alertName: string;
     alertId: number;
-    currentAndPredicted: string;
+    current: string;
+    predicted: string;
     deviation: string;
     negativeDeviation: boolean;
     duration: string;

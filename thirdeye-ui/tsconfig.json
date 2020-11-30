@@ -6,7 +6,7 @@
         "incremental": true,
         "target": "ES5",
         "module": "ES2020",
-        "lib": ["DOM"],
+        "lib": ["DOM", "ES2020.Promise"],
         "allowJs": false,
         "checkJs": false,
         "jsx": "react",

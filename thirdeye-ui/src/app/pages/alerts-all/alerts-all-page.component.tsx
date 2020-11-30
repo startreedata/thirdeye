@@ -1,27 +1,30 @@
 import { Grid } from "@material-ui/core";
-import _ from "lodash";
+import { cloneDeep } from "lodash";
+import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCard } from "../../components/alert-card/alert-card.component";
+import { AlertCardData } from "../../components/alert-card/alert-card.interfaces";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { Search } from "../../components/search/search.component";
 import { getAllAlerts, updateAlert } from "../../rest/alert/alert-rest";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { getAllSubscriptionGroups } from "../../rest/subscription-group/subscription-group-rest";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { filterAlerts } from "../../utils/alert/alert-util";
+import { filterAlerts, getAlertCardDatas } from "../../utils/alert/alert-util";
 import { getAlertsAllPath } from "../../utils/route/routes-util";
+import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
 
 export const AlertsAllPage: FunctionComponent = () => {
-    const [fetch, setFetch] = useState(true);
     const [loading, setLoading] = useState(true);
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const [alerts, setAlerts] = useState<Alert[]>([]);
-    const [filteredAlerts, setfilteredAlerts] = useState<Alert[]>([]);
+    const [alerts, setAlerts] = useState<AlertCardData[]>([]);
+    const [filteredAlerts, setfilteredAlerts] = useState<AlertCardData[]>([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
+    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -32,36 +35,65 @@ export const AlertsAllPage: FunctionComponent = () => {
                 path: getAlertsAllPath(),
             },
         ]);
-    }, [setPageBreadcrumbs, t]);
+    }, []);
 
     useEffect(() => {
-        const fetchData = async (): Promise<void> => {
-            const alerts = await getAllAlerts();
-
-            setAlerts(alerts);
-            setfilteredAlerts(filterAlerts(alerts, searchWords));
+        const init = async (): Promise<void> => {
+            await fetchData();
 
             setLoading(false);
         };
 
-        fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetch]); // Doesn't need to depend on searchWords
+        init();
+    }, []);
+
+    const fetchData = async (): Promise<void> => {
+        let alerts: AlertCardData[] = [];
+        const [
+            alertsResponse,
+            subscriptionGroupResponse,
+        ] = await Promise.allSettled([
+            getAllAlerts(),
+            getAllSubscriptionGroups(),
+        ]);
+
+        if (
+            alertsResponse.status === "rejected" ||
+            subscriptionGroupResponse.status === "rejected"
+        ) {
+            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
+        } else {
+            alerts = getAlertCardDatas(
+                alertsResponse.value,
+                subscriptionGroupResponse.value
+            );
+        }
+
+        setAlerts(alerts);
+        setfilteredAlerts(filterAlerts(alerts, searchWords));
+    };
 
     const onSearch = (searchWords: string[]): void => {
         setSearchWords(searchWords);
         setfilteredAlerts(filterAlerts(alerts, searchWords));
     };
 
-    const onAlertStateToggle = async (alert: Alert): Promise<void> => {
-        // Original alert need not be modified unless it's really updated in the backend
-        const alertCopy = _.cloneDeep(alert);
+    const onAlertStateToggle = async (
+        alertCardData: AlertCardData
+    ): Promise<void> => {
+        let alertCopy = cloneDeep(alertCardData.alert);
         alertCopy.active = !alertCopy.active;
 
-        await updateAlert(alertCopy);
+        try {
+            alertCopy = await updateAlert(alertCopy);
 
-        // Fetch all alerts
-        setFetch(!fetch);
+            fetchData();
+        } catch (error) {
+            enqueueSnackbar(
+                t("message.update-error", { entity: t("label.alert") }),
+                SnackbarOption.ERROR
+            );
+        }
     };
 
     if (loading) {

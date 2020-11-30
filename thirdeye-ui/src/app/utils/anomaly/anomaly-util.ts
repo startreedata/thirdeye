@@ -10,7 +10,7 @@ import { formatLargeNumber, formatPercentage } from "../number/number-util";
 
 export const getAnomalyName = (anomaly: Anomaly): string => {
     if (!anomaly) {
-        return "";
+        return i18n.t("label.no-data-available");
     }
 
     return `${i18n.t("label.anomaly")} ${i18n.t("label.anomaly-id", {
@@ -36,39 +36,50 @@ export const getAnomalyCardDatas = (
     }
 
     for (const anomaly of anomalies) {
-        const anomalyData = {} as AnomalyCardData;
-        anomalyData.id = anomaly.id;
-        anomalyData.name = getAnomalyName(anomaly);
-        anomalyData.alertName = anomaly.alert.name;
-        anomalyData.alertId = anomaly.alert.id;
+        const anomalyCardData = {} as AnomalyCardData;
 
-        const current = anomaly.avgCurrentVal
+        // Basic properties
+        anomalyCardData.id = anomaly.id;
+        anomalyCardData.name = getAnomalyName(anomaly);
+        anomalyCardData.alertName = anomaly.alert?.name
+            ? anomaly.alert.name
+            : i18n.t("label.no-data-available");
+        anomalyCardData.alertId = anomaly.alert?.id;
+
+        // Current and predicted values, if available
+        anomalyCardData.current = anomaly.avgCurrentVal
             ? formatLargeNumber(anomaly.avgCurrentVal)
             : i18n.t("label.no-data-available");
-        const predicted = anomaly.avgBaselineVal
+        anomalyCardData.predicted = anomaly.avgBaselineVal
             ? formatLargeNumber(anomaly.avgBaselineVal)
             : i18n.t("label.no-data-available");
-        anomalyData.currentAndPredicted = i18n.t(
-            "label.current-/-predicted-values",
-            { current: current, predicted: predicted }
-        );
 
+        // Calculate deviation if both average and current values are available
+        anomalyCardData.deviation = i18n.t("label.no-data-available");
         if (anomaly.avgCurrentVal && anomaly.avgBaselineVal) {
             const deviation =
                 (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
                 anomaly.avgBaselineVal;
-            anomalyData.deviation = formatPercentage(deviation);
-            anomalyData.negativeDeviation = deviation < 0;
+            anomalyCardData.deviation = formatPercentage(deviation);
+            anomalyCardData.negativeDeviation = deviation < 0;
         }
 
-        anomalyData.duration = formatDuration(
-            anomaly.startTime,
-            anomaly.endTime
-        );
-        anomalyData.startTime = formatLongDateAndTime(anomaly.startTime);
-        anomalyData.endTime = formatLongDateAndTime(anomaly.endTime);
+        // Duration, start and end time
+        anomalyCardData.duration = i18n.t("label.no-data-available");
+        anomalyCardData.startTime = i18n.t("label.no-data-available");
+        anomalyCardData.endTime = i18n.t("label.no-data-available");
+        if (anomaly.startTime && anomaly.endTime) {
+            anomalyCardData.duration = formatDuration(
+                anomaly.startTime,
+                anomaly.endTime
+            );
+            anomalyCardData.startTime = formatLongDateAndTime(
+                anomaly.startTime
+            );
+            anomalyCardData.endTime = formatLongDateAndTime(anomaly.endTime);
+        }
 
-        anomalyCardDatas.push(anomalyData);
+        anomalyCardDatas.push(anomalyCardData);
     }
 
     return anomalyCardDatas;
@@ -82,7 +93,7 @@ export const filterAnomalies = (
 
     if (isEmpty(anomalies)) {
         // No anomalies available, return empty result
-        return Array.from(filteredAnomalies);
+        return [...filteredAnomalies];
     }
 
     if (isEmpty(searchWords)) {
@@ -94,6 +105,10 @@ export const filterAnomalies = (
         for (const searchWord of searchWords) {
             // Try and match anomaly property values to search words
             for (const propertyValue of Object.values(anomaly)) {
+                if (!propertyValue) {
+                    continue;
+                }
+
                 if (
                     typeof propertyValue === "string" &&
                     propertyValue
@@ -106,5 +121,5 @@ export const filterAnomalies = (
         }
     }
 
-    return Array.from(filteredAnomalies);
+    return [...filteredAnomalies];
 };

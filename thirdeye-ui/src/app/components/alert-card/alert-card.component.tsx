@@ -10,15 +10,18 @@ import {
     MenuItem,
     Typography,
 } from "@material-ui/core";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import SettingsIcon from "@material-ui/icons/Settings";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
-import Highlighter from "react-highlight-words";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import {
     getAlertsDetailPath,
     getAlertsUpdatePath,
 } from "../../utils/route/routes-util";
+import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { AlertCardProps } from "./alert-card.interfaces";
 import { useAlertCardStyles } from "./alert-card.styles";
 
@@ -26,6 +29,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
     props: AlertCardProps
 ) => {
     const alertCardClasses = useAlertCardStyles();
+    const [expanded, setExpanded] = useState(false);
     const [
         optionsAnchorElement,
         setOptionsAnchorElement,
@@ -48,10 +52,6 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
     };
 
     const onAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
-        if (!event) {
-            return;
-        }
-
         setOptionsAnchorElement(event.currentTarget);
     };
 
@@ -59,8 +59,12 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         setOptionsAnchorElement(null);
     };
 
+    const onExpandedToggle = (): void => {
+        setExpanded(!expanded);
+    };
+
     return (
-        <Card className={alertCardClasses.container} variant="outlined">
+        <Card variant="outlined">
             {/* Alert name */}
             <CardHeader
                 disableTypography
@@ -75,9 +79,10 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 }
                                 variant="h6"
                             >
-                                {props.alert.active
-                                    ? t("label.active")
-                                    : t("label.inactive")}
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    textToHighlight={props.alert.activeText}
+                                />
                             </Typography>
                         </Grid>
                         <Grid item>
@@ -87,23 +92,23 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         </Grid>
                     </Grid>
                 }
-                className={
-                    props.alert.active
-                        ? alertCardClasses.activeHeader
-                        : alertCardClasses.inactiveHeader
-                }
                 title={
-                    <Link
-                        component="button"
-                        variant="h6"
-                        onClick={onAlertDetails}
-                    >
-                        <Highlighter
-                            highlightClassName={alertCardClasses.highlight}
-                            searchWords={props.searchWords as string[]}
-                            textToHighlight={props.alert.name}
-                        />
-                    </Link>
+                    (props.hideViewDetailsLinks && (
+                        <Typography variant="h6">
+                            {t("label.summary")}
+                        </Typography>
+                    )) || (
+                        <Link
+                            component="button"
+                            variant="h6"
+                            onClick={onAlertDetails}
+                        >
+                            <TextHighlighter
+                                searchWords={props.searchWords}
+                                textToHighlight={props.alert.name}
+                            />
+                        </Link>
+                    )
                 }
             />
 
@@ -112,9 +117,11 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                 open={Boolean(optionsAnchorElement)}
                 onClose={closeAlertOptions}
             >
-                <MenuItem onClick={onAlertDetails}>
-                    {t("label.view-details")}
-                </MenuItem>
+                {!props.hideViewDetailsLinks && (
+                    <MenuItem onClick={onAlertDetails}>
+                        {t("label.view-details")}
+                    </MenuItem>
+                )}
                 <MenuItem onClick={onAlertEdit}>
                     {t("label.edit-alert")}
                 </MenuItem>
@@ -127,151 +134,352 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
 
             <CardContent>
                 <Grid container>
-                    <Grid container item>
-                        <Grid item md={3}>
-                            {/* Metric */}
-                            <Typography variant="body2">
-                                <strong>{t("label.metric")}</strong>
-                            </Typography>
-                            <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        alertCardClasses.highlight
-                                    }
-                                    searchWords={props.searchWords as string[]}
-                                    textToHighlight={t(
-                                        "label.no-data-available"
-                                    )}
-                                />
-                            </Typography>
-                        </Grid>
-
-                        {/* Dataset */}
-                        <Grid item md={3}>
-                            <Typography variant="body2">
-                                <strong>{t("label.dataset")}</strong>
-                            </Typography>
-                            <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        alertCardClasses.highlight
-                                    }
-                                    searchWords={props.searchWords as string[]}
-                                    textToHighlight={t(
-                                        "label.no-data-available"
-                                    )}
-                                />
-                            </Typography>
-                        </Grid>
-
-                        {/* Detection type */}
-                        <Grid item md={3}>
-                            <Typography variant="body2">
-                                <strong>{t("label.detection-type")}</strong>
-                            </Typography>
-                            <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        alertCardClasses.highlight
-                                    }
-                                    searchWords={props.searchWords as string[]}
-                                    textToHighlight={props.alert.description}
-                                />
-                            </Typography>
-                        </Grid>
-
-                        {/* Subscription group */}
-                        <Grid item md={3}>
-                            <Typography variant="body2">
-                                <strong>{t("label.subscription-group")}</strong>
-                            </Typography>
-                            <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        alertCardClasses.highlight
-                                    }
-                                    searchWords={props.searchWords as string[]}
-                                    textToHighlight={t(
-                                        "label.no-data-available"
-                                    )}
-                                />
-                            </Typography>
-                        </Grid>
-                    </Grid>
-
-                    <Divider className={alertCardClasses.divider} />
-
-                    {/* Application */}
-                    <Grid container item>
-                        <Grid item md={3}>
-                            <Typography variant="body2">
-                                <strong>{t("label.application")}</strong>
-                            </Typography>
-                            <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        alertCardClasses.highlight
-                                    }
-                                    searchWords={props.searchWords as string[]}
-                                    textToHighlight={t(
-                                        "label.no-data-available"
-                                    )}
-                                />
-                            </Typography>
-                        </Grid>
-
+                    <Grid container item md={12}>
                         {/* Created by */}
-                        <Grid item md={3}>
+                        <Grid item md={4}>
                             <Typography variant="body2">
                                 <strong>{t("label.created-by")}</strong>
                             </Typography>
-                            <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        alertCardClasses.highlight
-                                    }
-                                    searchWords={props.searchWords as string[]}
-                                    textToHighlight={
-                                        props.alert.owner.principal
-                                    }
-                                />
-                            </Typography>
+                            <TextHighlighter
+                                searchWords={props.searchWords}
+                                textToHighlight={props.alert.createdBy}
+                            />
+                        </Grid>
+                    </Grid>
+
+                    <Grid item md={12}>
+                        <Divider variant="fullWidth" />
+                    </Grid>
+
+                    <Grid container item md={12}>
+                        {/* Detection type */}
+                        <Grid item md={3}>
+                            <div className={alertCardClasses.bottomRowLabel}>
+                                <Typography variant="body2">
+                                    <strong>{t("label.detection-type")}</strong>
+                                </Typography>
+                            </div>
+                            {!isEmpty(props.alert.detectionTypes) &&
+                                props.alert.detectionTypes.length > 1 && (
+                                    <div
+                                        className={
+                                            alertCardClasses.bottomRowIcon
+                                        }
+                                    >
+                                        <Link
+                                            component="button"
+                                            onClick={onExpandedToggle}
+                                        >
+                                            {(expanded && (
+                                                <ExpandLessIcon
+                                                    color="primary"
+                                                    fontSize="small"
+                                                />
+                                            )) || (
+                                                <ExpandMoreIcon
+                                                    color="primary"
+                                                    fontSize="small"
+                                                />
+                                            )}
+                                        </Link>
+                                    </div>
+                                )}
+                            <div className={alertCardClasses.bottomRowValue}>
+                                {(isEmpty(props.alert.detectionTypes) && (
+                                    <Typography variant="body2">
+                                        <TextHighlighter
+                                            searchWords={props.searchWords}
+                                            textToHighlight={t(
+                                                "label.no-data-available"
+                                            )}
+                                        />
+                                    </Typography>
+                                )) ||
+                                    (expanded && (
+                                        <>
+                                            {props.alert.detectionTypes.map(
+                                                (detectionType) => (
+                                                    <Typography
+                                                        key={detectionType}
+                                                        variant="body2"
+                                                    >
+                                                        <TextHighlighter
+                                                            searchWords={
+                                                                props.searchWords
+                                                            }
+                                                            textToHighlight={
+                                                                detectionType
+                                                            }
+                                                        />
+                                                    </Typography>
+                                                )
+                                            )}
+                                        </>
+                                    )) || (
+                                        <Typography variant="body2">
+                                            <TextHighlighter
+                                                searchWords={props.searchWords}
+                                                textToHighlight={
+                                                    props.alert
+                                                        .detectionTypes[0]
+                                                }
+                                            />
+                                        </Typography>
+                                    )}
+                            </div>
+                        </Grid>
+                        {/* Dataset / Metric */}
+                        <Grid item md={3}>
+                            <div className={alertCardClasses.bottomRowLabel}>
+                                <Typography variant="body2">
+                                    <strong>
+                                        {t("label.dataset-/-metric")}
+                                    </strong>
+                                </Typography>
+                            </div>
+                            {!isEmpty(props.alert.datasetAndMetrics) &&
+                                props.alert.datasetAndMetrics.length > 1 && (
+                                    <div
+                                        className={
+                                            alertCardClasses.bottomRowIcon
+                                        }
+                                    >
+                                        <Link
+                                            component="button"
+                                            onClick={onExpandedToggle}
+                                        >
+                                            {(expanded && (
+                                                <ExpandLessIcon
+                                                    color="primary"
+                                                    fontSize="small"
+                                                />
+                                            )) || (
+                                                <ExpandMoreIcon
+                                                    color="primary"
+                                                    fontSize="small"
+                                                />
+                                            )}
+                                        </Link>
+                                    </div>
+                                )}
+                            <div className={alertCardClasses.bottomRowValue}>
+                                {(isEmpty(props.alert.datasetAndMetrics) && (
+                                    <Typography variant="body2">
+                                        <TextHighlighter
+                                            searchWords={props.searchWords}
+                                            textToHighlight={t(
+                                                "label.no-data-available"
+                                            )}
+                                        />
+                                    </Typography>
+                                )) ||
+                                    (expanded && (
+                                        <>
+                                            {props.alert.datasetAndMetrics.map(
+                                                (datasetAndMetric) => (
+                                                    <Typography
+                                                        key={
+                                                            datasetAndMetric.metricId
+                                                        }
+                                                        variant="body2"
+                                                    >
+                                                        <TextHighlighter
+                                                            searchWords={
+                                                                props.searchWords
+                                                            }
+                                                            textToHighlight={t(
+                                                                "label.dataset-/-metric-values",
+                                                                {
+                                                                    dataset:
+                                                                        datasetAndMetric.datasetName,
+                                                                    metric:
+                                                                        datasetAndMetric.metricName,
+                                                                }
+                                                            )}
+                                                        />
+                                                    </Typography>
+                                                )
+                                            )}
+                                        </>
+                                    )) || (
+                                        <Typography variant="body2">
+                                            <TextHighlighter
+                                                searchWords={props.searchWords}
+                                                textToHighlight={t(
+                                                    "label.dataset-/-metric-values",
+                                                    {
+                                                        dataset:
+                                                            props.alert
+                                                                .datasetAndMetrics[0]
+                                                                .datasetName,
+                                                        metric:
+                                                            props.alert
+                                                                .datasetAndMetrics[0]
+                                                                .metricName,
+                                                    }
+                                                )}
+                                            />
+                                        </Typography>
+                                    )}
+                            </div>
                         </Grid>
 
                         {/* Filtered by */}
                         <Grid item md={3}>
-                            <Typography variant="body2">
-                                <strong>{t("label.filtered-by")}</strong>
-                            </Typography>
-                            <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        alertCardClasses.highlight
-                                    }
-                                    searchWords={props.searchWords as string[]}
-                                    textToHighlight={t(
-                                        "label.no-data-available"
+                            <div className={alertCardClasses.bottomRowLabel}>
+                                <Typography variant="body2">
+                                    <strong>{t("label.filtered-by")}</strong>
+                                </Typography>
+                            </div>
+                            {!isEmpty(props.alert.filteredBy) &&
+                                props.alert.filteredBy.length > 1 && (
+                                    <div
+                                        className={
+                                            alertCardClasses.bottomRowIcon
+                                        }
+                                    >
+                                        <Link
+                                            component="button"
+                                            onClick={onExpandedToggle}
+                                        >
+                                            {(expanded && (
+                                                <ExpandLessIcon
+                                                    color="primary"
+                                                    fontSize="small"
+                                                />
+                                            )) || (
+                                                <ExpandMoreIcon
+                                                    color="primary"
+                                                    fontSize="small"
+                                                />
+                                            )}
+                                        </Link>
+                                    </div>
+                                )}
+                            <div className={alertCardClasses.bottomRowValue}>
+                                {(isEmpty(props.alert.filteredBy) && (
+                                    <Typography variant="body2">
+                                        <TextHighlighter
+                                            searchWords={props.searchWords}
+                                            textToHighlight={t(
+                                                "label.no-data-available"
+                                            )}
+                                        />
+                                    </Typography>
+                                )) ||
+                                    (expanded && (
+                                        <>
+                                            {props.alert.filteredBy.map(
+                                                (filteredBy) => (
+                                                    <Typography
+                                                        key={filteredBy}
+                                                        variant="body2"
+                                                    >
+                                                        <TextHighlighter
+                                                            searchWords={
+                                                                props.searchWords
+                                                            }
+                                                            textToHighlight={
+                                                                filteredBy
+                                                            }
+                                                        />
+                                                    </Typography>
+                                                )
+                                            )}
+                                        </>
+                                    )) || (
+                                        <Typography variant="body2">
+                                            <TextHighlighter
+                                                searchWords={props.searchWords}
+                                                textToHighlight={
+                                                    props.alert.filteredBy[0]
+                                                }
+                                            />
+                                        </Typography>
                                     )}
-                                />
-                            </Typography>
+                            </div>
                         </Grid>
 
-                        {/* Breakdown by */}
+                        {/* Subscription groups */}
                         <Grid item md={3}>
-                            <Typography variant="body2">
-                                <strong>{t("label.breakdown-by")}</strong>
-                            </Typography>
-                            <Typography variant="body2">
-                                <Highlighter
-                                    highlightClassName={
-                                        alertCardClasses.highlight
-                                    }
-                                    searchWords={props.searchWords as string[]}
-                                    textToHighlight={t(
-                                        "label.no-data-available"
+                            <div className={alertCardClasses.bottomRowLabel}>
+                                <Typography variant="body2">
+                                    <strong>
+                                        {t("label.subscription-groups")}
+                                    </strong>
+                                </Typography>
+                            </div>
+                            {!isEmpty(props.alert.subscriptionGroups) &&
+                                props.alert.subscriptionGroups.length > 1 && (
+                                    <div
+                                        className={
+                                            alertCardClasses.bottomRowIcon
+                                        }
+                                    >
+                                        <Link
+                                            component="button"
+                                            onClick={onExpandedToggle}
+                                        >
+                                            {(expanded && (
+                                                <ExpandLessIcon
+                                                    color="primary"
+                                                    fontSize="small"
+                                                />
+                                            )) || (
+                                                <ExpandMoreIcon
+                                                    color="primary"
+                                                    fontSize="small"
+                                                />
+                                            )}
+                                        </Link>
+                                    </div>
+                                )}
+                            <div className={alertCardClasses.bottomRowValue}>
+                                {(isEmpty(props.alert.subscriptionGroups) && (
+                                    <Typography variant="body2">
+                                        <TextHighlighter
+                                            searchWords={props.searchWords}
+                                            textToHighlight={t(
+                                                "label.no-data-available"
+                                            )}
+                                        />
+                                    </Typography>
+                                )) ||
+                                    (expanded && (
+                                        <>
+                                            {props.alert.subscriptionGroups.map(
+                                                (subscriptionGroup) => (
+                                                    <Typography
+                                                        key={
+                                                            subscriptionGroup.id
+                                                        }
+                                                        variant="body2"
+                                                    >
+                                                        <TextHighlighter
+                                                            searchWords={
+                                                                props.searchWords
+                                                            }
+                                                            textToHighlight={
+                                                                subscriptionGroup.name
+                                                            }
+                                                        />
+                                                    </Typography>
+                                                )
+                                            )}
+                                        </>
+                                    )) || (
+                                        <Typography variant="body2">
+                                            <TextHighlighter
+                                                searchWords={props.searchWords}
+                                                textToHighlight={
+                                                    props.alert
+                                                        .subscriptionGroups[0]
+                                                        .name
+                                                }
+                                            />
+                                        </Typography>
                                     )}
-                                />
-                            </Typography>
+                            </div>
                         </Grid>
                     </Grid>
                 </Grid>

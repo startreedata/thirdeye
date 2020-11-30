@@ -10,18 +10,23 @@ export interface Alert {
     lastTimestamp: number;
     active: boolean;
     created: number;
-    upnumberd: number;
+    updated: number;
     owner: User;
     nodes: { [index: string]: AlertNode };
 }
 
 export interface AlertNode {
     name: string;
-    type: string;
+    type: AlertNodeType;
     subType: string;
     metric: Metric;
     params: { [index: string]: unknown };
     dependsOn: string[];
+}
+
+export enum AlertNodeType {
+    DETECTION = "DETECTION",
+    FILTER = "FILTER",
 }
 
 export interface AlertEvaluation {

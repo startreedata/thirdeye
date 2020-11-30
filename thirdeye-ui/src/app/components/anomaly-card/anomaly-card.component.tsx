@@ -64,7 +64,11 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                     </IconButton>
                 }
                 title={
-                    !props.hideViewDetailsLinks ? (
+                    (props.hideViewDetailsLinks && (
+                        <Typography variant="h6">
+                            {t("label.summary")}
+                        </Typography>
+                    )) || (
                         <Link
                             component="button"
                             variant="h6"
@@ -75,8 +79,6 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                                 textToHighlight={props.anomaly.name}
                             />
                         </Link>
-                    ) : (
-                        ""
                     )
                 }
             />
@@ -126,9 +128,13 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             <Typography variant="body2">
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    textToHighlight={
-                                        props.anomaly.currentAndPredicted
-                                    }
+                                    textToHighlight={t(
+                                        "label.current-/-predicted-values",
+                                        {
+                                            current: props.anomaly.current,
+                                            predicted: props.anomaly.predicted,
+                                        }
+                                    )}
                                 />
                             </Typography>
                         </Grid>

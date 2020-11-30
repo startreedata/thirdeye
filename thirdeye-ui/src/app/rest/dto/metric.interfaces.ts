@@ -5,7 +5,7 @@ export interface Metric {
     dataset: Dataset;
     active: boolean;
     created: number;
-    upnumberd: number;
+    updated: number;
 }
 
 export interface Dataset {

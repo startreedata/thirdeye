@@ -1,57 +1,103 @@
-import { Card, Grid, Typography } from "@material-ui/core";
-import React, { useEffect, useState } from "react";
-import { withRouter } from "react-router-dom";
-import AlertCard from "../../components/alerts/alert-card.component";
-import LineChart from "../../components/charts/line-graph.component";
+import { Grid } from "@material-ui/core";
+import { cloneDeep, isEmpty, toNumber } from "lodash";
+import { useSnackbar } from "notistack";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import { AlertCard } from "../../components/alert-card/alert-card.component";
+import { AlertCardData } from "../../components/alert-card/alert-card.interfaces";
 import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { cardStyles } from "../../components/styles/common.styles";
 import { getAlert, updateAlert } from "../../rest/alert/alert-rest";
-import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { getAllSubscriptionGroups } from "../../rest/subscription-group/subscription-group-rest";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { getGraphDataFromAPIData } from "../../utils/chart/chart-util";
-import data from "../../utils/defaults/previewResponse.json";
+import { getAlertCardData } from "../../utils/alert/alert-util";
+import { isValidNumberId } from "../../utils/params/params-util";
+import { getAlertsDetailPath } from "../../utils/route/routes-util";
+import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
+import { AlertsDetailPageParams } from "./alerts-detail-page.interfaces";
 
-export const AlertsDetailPage = withRouter((props) => {
+export const AlertsDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
+    const [alert, setAlert] = useState<AlertCardData>({} as AlertCardData);
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const { id } = props.match.params;
-    const [alert, setAlert] = useState<Alert>();
+    const params = useParams<AlertsDetailPageParams>();
+    const { enqueueSnackbar } = useSnackbar();
+    const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: "ALERT_NAME",
-                path: "",
-            },
+        const init = async (): Promise<void> => {
+            await fetchData();
+
+            setLoading(false);
+        };
+
+        init();
+    }, []);
+
+    const fetchData = async (): Promise<void> => {
+        if (!isValidNumberId(params.id)) {
+            enqueueSnackbar(
+                t("message.invalid-id", {
+                    entity: t("label.alert"),
+                    id: params.id,
+                }),
+                SnackbarOption.ERROR
+            );
+
+            return;
+        }
+
+        let alert = {} as AlertCardData;
+        const [
+            alertResponse,
+            subscriptionGroupsResponse,
+        ] = await Promise.allSettled([
+            getAlert(toNumber(params.id)),
+            getAllSubscriptionGroups(),
         ]);
 
-        fetchAlert(parseInt(id));
+        if (
+            alertResponse.status === "rejected" ||
+            subscriptionGroupsResponse.status === "rejected"
+        ) {
+            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
+        } else {
+            alert = getAlertCardData(
+                alertResponse.value,
+                subscriptionGroupsResponse.value
+            );
 
-        setLoading(false);
-    }, [setPageBreadcrumbs, id]);
+            // Create page breadcrumbs
+            setPageBreadcrumbs([
+                {
+                    text: alert.name,
+                    path: getAlertsDetailPath(alert.id),
+                },
+            ]);
+        }
 
-    const fetchAlert = async (id: number): Promise<void> => {
-        setAlert(await getAlert(id));
+        setAlert(alert);
     };
 
-    const cardClasses = cardStyles();
-
-    if (!alert) {
-        return <>LOADING</>;
-    }
-
-    const handleActiveStateChange = async (
-        _event: React.ChangeEvent,
-        state: boolean
+    const onAlertStateToggle = async (
+        alertCardData: AlertCardData
     ): Promise<void> => {
+        let alertCopy = cloneDeep(alertCardData.alert);
+        alertCopy.active = !alertCopy.active;
+
         try {
-            setAlert(await updateAlert({ ...alert, active: state }));
-        } catch (err) {
-            console.error(err);
+            alertCopy = await updateAlert(alertCopy);
+
+            fetchData();
+        } catch (error) {
+            enqueueSnackbar(
+                t("message.update-error", { entity: t("label.alert") }),
+                SnackbarOption.ERROR
+            );
         }
     };
 
@@ -65,90 +111,19 @@ export const AlertsDetailPage = withRouter((props) => {
 
     return (
         <PageContainer>
-            <Typography variant="h4">{alert.name}</Typography>
-            <AlertCard
-                data={alert}
-                mode="detail"
-                onActiveChange={handleActiveStateChange}
-            />
-            <Card className={cardClasses.base}>
-                <Typography variant="subtitle2">
-                    All detection rules anomalies over time (0)
-                </Typography>
-                <Card className={cardClasses.base}>
-                    <LineChart
-                        data={getGraphDataFromAPIData(
-                            (data as unknown) as AlertEvaluation
-                        )}
-                    />
-                </Card>
-            </Card>
-            <Card className={cardClasses.base}>
-                <Grid container spacing={0}>
-                    <Grid item xs={10}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <Typography variant="subtitle1">
-                                    Alert Performance
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Grid container>
-                                    <Grid item xs={3}>
-                                        <Typography variant="subtitle2">
-                                            Annomalies
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={3}>
-                                        <Typography variant="subtitle2">
-                                            Response Rate
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={3}>
-                                        <Typography variant="subtitle2">
-                                            Precision
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={3}>
-                                        <Typography variant="subtitle2">
-                                            Recall
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={3}>
-                                        <Typography variant="h4">0</Typography>
-                                    </Grid>
-                                    <Grid item xs={3}>
-                                        <Typography variant="h4">-%</Typography>
-                                    </Grid>
-                                    <Grid item xs={3}>
-                                        <Typography variant="h4">-%</Typography>
-                                    </Grid>
-                                    <Grid item xs={3}>
-                                        <Typography variant="h4">-%</Typography>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
+            <PageContents centerAlign title={alert.name ? alert.name : ""}>
+                {!isEmpty(alert) && (
+                    <Grid container>
+                        <Grid item md={12}>
+                            <AlertCard
+                                hideViewDetailsLinks
+                                alert={alert}
+                                onAlertStateToggle={onAlertStateToggle}
+                            />
                         </Grid>
                     </Grid>
-                    <Grid item xs={2}>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <Typography variant="subtitle1">
-                                    Detection Health
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Typography variant="subtitle2">
-                                    30-day Status
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Typography variant="body2">Normal</Typography>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </Card>
+                )}
+            </PageContents>
         </PageContainer>
     );
-});
+};

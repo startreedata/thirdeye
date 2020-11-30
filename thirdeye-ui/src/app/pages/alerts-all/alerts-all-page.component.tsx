@@ -51,7 +51,7 @@ export const AlertsAllPage: FunctionComponent = () => {
         let alerts: AlertCardData[] = [];
         const [
             alertsResponse,
-            subscriptionGroupResponse,
+            subscriptionGroupsResponse,
         ] = await Promise.allSettled([
             getAllAlerts(),
             getAllSubscriptionGroups(),
@@ -59,13 +59,13 @@ export const AlertsAllPage: FunctionComponent = () => {
 
         if (
             alertsResponse.status === "rejected" ||
-            subscriptionGroupResponse.status === "rejected"
+            subscriptionGroupsResponse.status === "rejected"
         ) {
             enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
         } else {
             alerts = getAlertCardDatas(
                 alertsResponse.value,
-                subscriptionGroupResponse.value
+                subscriptionGroupsResponse.value
             );
         }
 

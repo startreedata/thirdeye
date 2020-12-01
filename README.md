@@ -45,6 +45,38 @@ Detailed documentation can be found at [ThirdEye documentation](https://thirdeye
 - [Production Settings](https://thirdeye.readthedocs.io/en/latest/production.html)
 - [Alert Setup](https://thirdeye.readthedocs.io/en/latest/alert_setup.html)
 
+## Build
+
+ThirdEye is a maven project and uses standard maven commands
+```
+# Build ThirdEye from source
+mvn install
+
+# To skip tests during build
+mvn install -DskipTests
+```
+
+### Running ThirdEye from Distribution
+
+ThirdEye builds a tarball and creates an installed dir post build.
+```
+# cd to the distribution dir
+cd thirdeye-distribution/target/thirdeye-distribution-1.0.0-SNAPSHOT-dist/thirdeye-distribution-1.0.0-SNAPSHOT
+```
+
+ThirdEye has 2 components
+- **Coordinator**: This is the API server which exposes a swagger endpoint that will be used in this guide
+- **Worker**: This is the component that does all the hard work: running detection tasks and generating anomalies.
+
+> **Warning! You must have at least 1 worker running in order to generate alerts and fire emails.**
+```
+# Run the coordinator
+bin/thirdeye.sh coordinator
+
+# Run the worker
+bin/thirdeye.sh worker
+```
+
 ## Developer Guide
 
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.

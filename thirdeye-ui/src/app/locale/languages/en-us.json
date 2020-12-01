@@ -84,5 +84,7 @@
         "invalid-id": "Invalid {{entity}} id {{id}}",
         "fetch-error": "Error fetching data",
         "update-error": "Error updating {{entity}}"
+        "alert-created": "Alert created successfully",
+        "alert-creation-failed": "Failed to create an alert"
     }
 }

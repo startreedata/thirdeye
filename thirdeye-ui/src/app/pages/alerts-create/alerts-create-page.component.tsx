@@ -5,14 +5,13 @@ import {
     InputLabel,
     MenuItem,
     Select,
-    Snackbar,
     Typography,
 } from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
-import { Alert as CustomAlert } from "@material-ui/lab";
 import yaml from "js-yaml";
 import _ from "lodash";
+import { useSnackbar } from "notistack";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RouteComponentProps, withRouter } from "react-router-dom";
@@ -37,6 +36,7 @@ import {
     ApplicationRoute,
     getAlertsCreatePath,
 } from "../../utils/route/routes-util";
+import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 
@@ -54,9 +54,7 @@ export const AlertsCreatePage = withRouter(
         );
         const [subscriptionGroup, setSubscriptionGroup] = useState(-1);
         const [activeStep, setActiveStep] = useState(0);
-        const [message, setMessage] = useState<
-            { status: "success" | "error"; text: string } | undefined
-        >();
+        const { enqueueSnackbar } = useSnackbar();
         const [previewData, setPreviewData] = useState<AlertEvaluation>();
         const [subscriptionGroups, setSubscriptionGroups] = useState<
             SubscriptionGroup[]
@@ -113,21 +111,17 @@ export const AlertsCreatePage = withRouter(
                         console.error(e);
                     }
                 }
-                setMessage({
-                    status: "success",
-                    text: "Alert created successfully",
-                });
+                enqueueSnackbar(
+                    t("message.alert-created"),
+                    SnackbarOption.SUCCESS
+                );
                 props.history.push(ApplicationRoute.ALERTS_ALL);
             } catch (err) {
                 console.log(err);
-                setMessage({
-                    status: "error",
-                    text: _.get(
-                        err,
-                        "response.data.list.0.msg",
-                        "Failed to create an alert"
-                    ),
-                });
+                enqueueSnackbar(
+                    _.get(err, t("message.alert-creation-failed")),
+                    SnackbarOption.SUCCESS
+                );
             } finally {
                 setLoading(false);
             }
@@ -316,22 +310,6 @@ export const AlertsCreatePage = withRouter(
                             </Box>
                         </Grid>
                     </Grid>
-                    {
-                        <Snackbar
-                            autoHideDuration={3000}
-                            open={!!message}
-                            onClose={(): void => setMessage(undefined)}
-                        >
-                            {message && (
-                                <CustomAlert
-                                    severity={message?.status}
-                                    onClose={(): void => setMessage(undefined)}
-                                >
-                                    {message?.text}
-                                </CustomAlert>
-                            )}
-                        </Snackbar>
-                    }
                 </PageContents>
             </PageContainer>
         );

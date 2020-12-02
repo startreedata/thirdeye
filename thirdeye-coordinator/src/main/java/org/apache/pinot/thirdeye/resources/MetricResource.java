@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
 
+import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,7 +31,7 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
   public MetricResource(
       final AuthService authService,
       final MetricConfigManager datasetConfigManager) {
-    super(authService, datasetConfigManager);
+    super(authService, datasetConfigManager, ImmutableMap.of());
   }
 
   @Override

@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
 
+import com.google.common.collect.ImmutableMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
@@ -28,7 +29,7 @@ public class DatasetResource extends CrudResource<DatasetApi, DatasetConfigDTO> 
   public DatasetResource(
       final AuthService authService,
       final DatasetConfigManager datasetConfigManager) {
-    super(authService, datasetConfigManager);
+    super(authService, datasetConfigManager, ImmutableMap.of());
   }
 
   @Override

@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
+import com.google.common.collect.ImmutableMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
@@ -25,7 +26,7 @@ public class ApplicationResource extends CrudResource<ApplicationApi, Applicatio
   public ApplicationResource(
       final ApplicationManager applicationManager,
       final AuthService authService) {
-    super(authService, applicationManager);
+    super(authService, applicationManager, ImmutableMap.of());
   }
 
   @Override

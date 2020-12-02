@@ -5,6 +5,7 @@ import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toSubscriptionGroupDTO;
 
+import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -29,7 +30,7 @@ public class SubscriptionGroupResource extends
   public SubscriptionGroupResource(
       final SubscriptionGroupManager subscriptionGroupManager,
       final AuthService authService) {
-    super(authService, subscriptionGroupManager);
+    super(authService, subscriptionGroupManager, ImmutableMap.of());
   }
 
   @Override

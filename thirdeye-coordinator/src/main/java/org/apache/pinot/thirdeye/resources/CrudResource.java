@@ -2,12 +2,16 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_UNEXPECTED_QUERY_PARAM;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
@@ -18,14 +22,18 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.apache.pinot.thirdeye.api.ThirdEyeApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.AbstractManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +43,16 @@ public abstract class CrudResource<ApiT extends ThirdEyeApi, DtoT extends Abstra
 
   protected final AuthService authService;
   protected final AbstractManager<DtoT> dtoManager;
+  protected final ImmutableMap<String, String> apiToBeanMap;
 
   @Inject
   public CrudResource(
-      final AuthService authService, final AbstractManager<DtoT> dtoManager) {
+      final AuthService authService,
+      final AbstractManager<DtoT> dtoManager,
+      final ImmutableMap<String, String> apiToBeanMap) {
     this.dtoManager = dtoManager;
     this.authService = authService;
+    this.apiToBeanMap = apiToBeanMap;
   }
 
   protected abstract DtoT createDto(final ThirdEyePrincipal principal, final ApiT api);
@@ -53,15 +65,35 @@ public abstract class CrudResource<ApiT extends ThirdEyeApi, DtoT extends Abstra
     return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
   }
 
+  protected Predicate buildFilterPredicate(final MultivaluedMap<String, String> queryParameters) {
+
+    List<Predicate> predicates = new ArrayList<>();
+    for (Map.Entry<String, List<String>> e : queryParameters.entrySet()) {
+      final String columnName = ensureExists(
+          apiToBeanMap.get(e.getKey()),
+          ERR_UNEXPECTED_QUERY_PARAM,
+          apiToBeanMap.keySet());
+      final Object[] objects = e.getValue().toArray();
+      predicates.add(Predicate.IN(columnName, objects));
+    }
+    return Predicate.AND(predicates.toArray(new Predicate[]{}));
+  }
+
   @GET
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAll(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @Context UriInfo uriInfo
   ) {
     authService.authenticate(authHeader);
-    final List<DtoT> all = dtoManager.findAll();
-    return respondOk(all.stream().map(this::toApi));
+
+    final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
+    final List<DtoT> results = queryParameters.size() > 0
+        ? dtoManager.findByPredicate(buildFilterPredicate(queryParameters))
+        : dtoManager.findAll();
+
+    return respondOk(results.stream().map(this::toApi));
   }
 
   @POST

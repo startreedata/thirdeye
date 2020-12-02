@@ -5,6 +5,7 @@ import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -58,7 +59,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertApiBeanMapper alertApiBeanMapper,
       final AuthService authService,
       final AlertEvaluator alertEvaluator) {
-    super(authService, alertManager);
+    super(authService, alertManager, ImmutableMap.of());
     this.alertManager = alertManager;
     this.metricConfigManager = metricConfigManager;
     this.alertCreater = alertCreater;

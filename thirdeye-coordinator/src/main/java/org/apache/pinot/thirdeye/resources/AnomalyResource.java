@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
 
+import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,11 +21,15 @@ import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 @Produces(MediaType.APPLICATION_JSON)
 public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResultDTO> {
 
+  public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
+      .put("alert.id", "detectionConfigId")
+      .build();
+
   @Inject
   public AnomalyResource(
       final AuthService authService,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(authService, mergedAnomalyResultManager);
+    super(authService, mergedAnomalyResultManager, API_TO_BEAN_MAP);
   }
 
   @Override

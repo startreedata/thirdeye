@@ -77,6 +77,30 @@ bin/thirdeye.sh coordinator
 bin/thirdeye.sh worker
 ```
 
+### Docker
+
+Once a distribution is ready, you can simply package it into a docker container using the command below.
+
+```SHELL
+./mvnw package -D skipTests && docker build -t thirdeye:latest .
+```
+
+#### Start ThirdEye Coordinator
+```SHELL
+docker run \
+    --name  thirdeye-coordinator \
+    -p 8081:8080 \
+    -d thirdeye:latest coordinator
+```
+
+#### Start ThirdEye worker
+```SHELL
+docker run \
+    --name  thirdeye-worker \
+    -p 8081:8080 \
+    -d thirdeye:latest worker
+```
+
 ## Developer Guide
 
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.

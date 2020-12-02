@@ -26,24 +26,8 @@ public class Predicate {
   private final OPER oper;
 
   private String lhs;
-
-  enum OPER {
-    AND("AND"), OR("OR"), EQ("="), GT(">"), GE(">="), LT("<"), LE("<="), NEQ("!="), IN(
-        "IN"), BETWEEN("BETWEEN"), LIKE("LIKE");
-    private final String sign;
-
-    OPER(String sign) {
-      this.sign = sign;
-    }
-
-    @Override
-    public String toString() {
-      return sign;
-    }
-  }
   private Object rhs;
   private Predicate[] childPredicates;
-
   private Predicate(String lhs, OPER oper, Object rhs) {
     this.lhs = lhs;
     this.oper = oper;
@@ -53,22 +37,6 @@ public class Predicate {
   private Predicate(OPER oper, Predicate[] childPredicates) {
     this.childPredicates = childPredicates;
     this.oper = oper;
-  }
-
-  public String getLhs() {
-    return lhs;
-  }
-
-  public OPER getOper() {
-    return oper;
-  }
-
-  public Object getRhs() {
-    return rhs;
-  }
-
-  public Predicate[] getChildPredicates() {
-    return childPredicates;
   }
 
   public static Predicate EQ(String columnName, Object value) {
@@ -114,5 +82,46 @@ public class Predicate {
 
   public static Predicate LIKE(String columnName, Object value) {
     return new Predicate(columnName, OPER.LIKE, value);
+  }
+
+  public String getLhs() {
+    return lhs;
+  }
+
+  public OPER getOper() {
+    return oper;
+  }
+
+  public Object getRhs() {
+    return rhs;
+  }
+
+  public Predicate[] getChildPredicates() {
+    return childPredicates;
+  }
+
+  enum OPER {
+    AND("AND"),
+    OR("OR"),
+    EQ("="),
+    GT(">"),
+    GE(">="),
+    LT("<"),
+    LE("<="),
+    NEQ("!="),
+    IN("IN"),
+    BETWEEN("BETWEEN"),
+    LIKE("LIKE");
+
+    private final String sign;
+
+    OPER(String sign) {
+      this.sign = sign;
+    }
+
+    @Override
+    public String toString() {
+      return sign;
+    }
   }
 }

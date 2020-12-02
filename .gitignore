@@ -16,4 +16,4 @@ docs/_build
 
 .DS_Store
 
-thirdeye-coordinator/config/h2db.mv.db
+config/*.db

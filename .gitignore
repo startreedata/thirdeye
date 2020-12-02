@@ -16,4 +16,4 @@ docs/_build
 
 .DS_Store
 
-config/*.db
+*.db

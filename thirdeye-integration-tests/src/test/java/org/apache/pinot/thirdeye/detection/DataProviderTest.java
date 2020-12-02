@@ -331,7 +331,7 @@ public class DataProviderTest {
     this.provider.fetchAnomalies(Collections.singleton(new AnomalySlice()));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testAnomalySingle() {
     AnomalySlice slice = makeAnomalySlice(1209000000L, -1, Collections.emptyList());
 
@@ -344,7 +344,7 @@ public class DataProviderTest {
             Collections.emptyList())));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testAnomalyDimension() {
     AnomalySlice slice = makeAnomalySlice(0, -1, Arrays.asList("a=1", "c=3"));
 
@@ -364,7 +364,7 @@ public class DataProviderTest {
             Collections.emptyList())));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testAnomalyMultiDimensions() {
     AnomalySlice slice = makeAnomalySlice(0, -1, Arrays.asList("a=1", "a=2", "c=3"));
 

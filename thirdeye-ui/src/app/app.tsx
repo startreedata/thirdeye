@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApplicationBar } from "./components/application-bar/application-bar.component";
-import { ApplicationRouter } from "./routers/application-router";
+import { ApplicationRouter } from "./router/application-router/application-router";
 import { useAuthStore } from "./store/auth/auth-store";
 import {
     getFulfilledResponseInterceptor,

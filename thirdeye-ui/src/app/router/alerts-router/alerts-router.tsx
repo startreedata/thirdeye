@@ -1,36 +1,38 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { PageContainer } from "../components/page-container/page-container.component";
-import { PageLoadingIndicator } from "../components/page-loading-indicator/page-loading-indicator.component";
-import { AlertsAllPage } from "../pages/alerts-all/alerts-all-page.component";
-import { AlertsCreatePage } from "../pages/alerts-create/alerts-create-page.component";
-import { AlertsDetailPage } from "../pages/alerts-detail/alerts-detail-page.component";
-import { AlertsUpdatePage } from "../pages/alerts-update/alerts-update-page.component";
-import { PageNotFoundPage } from "../pages/page-not-found/page-not-found-page.component";
-import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs-store";
+import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
+import { AlertsAllPage } from "../../pages/alerts-all/alerts-all-page.component";
+import { AlertsCreatePage } from "../../pages/alerts-create/alerts-create-page.component";
+import { AlertsDetailPage } from "../../pages/alerts-detail/alerts-detail-page.component";
+import { AlertsUpdatePage } from "../../pages/alerts-update/alerts-update-page.component";
+import { PageNotFoundPage } from "../../pages/page-not-found/page-not-found-page.component";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import {
     ApplicationRoute,
     getAlertsAllPath,
     getAlertsPath,
-} from "../utils/routes/routes-util";
+} from "../../utils/routes/routes-util";
 
 export const AlertsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setRouterBreadcrumb] = useApplicationBreadcrumbsStore((state) => [
-        state.setRouterBreadcrumb,
+    const [
+        setAppSectionBreadcrumb,
+    ] = useApplicationBreadcrumbsStore((state) => [
+        state.setAppSectionBreadcrumb,
     ]);
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create router breadcrumb
-        setRouterBreadcrumb({
+        // Create app section breadcrumb
+        setAppSectionBreadcrumb({
             text: t("label.alerts"),
             path: getAlertsPath(),
         });
 
         setLoading(false);
-    }, [setRouterBreadcrumb, t]);
+    }, []);
 
     if (loading) {
         return (

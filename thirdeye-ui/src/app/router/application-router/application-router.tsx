@@ -1,18 +1,18 @@
 import React, { FunctionComponent } from "react";
 import { Route, Switch } from "react-router-dom";
-import { useAuthStore } from "../store/auth/auth-store";
-import { ApplicationRoute } from "../utils/routes/routes-util";
-import { AlertsRouter } from "./alerts-router";
-import { AnomaliesRouter } from "./anomalies-router";
-import { GeneralAuthenticatedRouter } from "./general-authenticated-router";
-import { GeneralUnauthenticatedRouter } from "./general-unauthenticated-router";
+import { useAuthStore } from "../../store/auth/auth-store";
+import { ApplicationRoute } from "../../utils/routes/routes-util";
+import { AlertsRouter } from "../alerts-router/alerts-router";
+import { AnomaliesRouter } from "../anomalies-router/anomalies-router";
+import { GeneralAuthenticatedRouter } from "../general-authenticated-router/general-authenticated-router";
+import { GeneralUnauthenticatedRouter } from "../general-unauthenticated-router/general-unauthenticated-router";
 
 export const ApplicationRouter: FunctionComponent = () => {
     const [auth] = useAuthStore((state) => [state.auth]);
 
     if (auth) {
+        // Authenticated
         return (
-            // Authenticated
             <Switch>
                 {/* Direct all alerts paths to alerts router */}
                 <Route
@@ -33,10 +33,7 @@ export const ApplicationRouter: FunctionComponent = () => {
     }
 
     return (
-        // Not authenticated
-        <Switch>
-            {/* Direct all paths to general unauthenticated router */}
-            <Route component={GeneralUnauthenticatedRouter} />
-        </Switch>
+        // Not authenticated, direct all paths to general unauthenticated router
+        <GeneralUnauthenticatedRouter />
     );
 };

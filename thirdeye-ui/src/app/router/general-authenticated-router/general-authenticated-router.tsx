@@ -1,30 +1,32 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { Breadcrumb } from "../components/application-breadcrumbs/application-breadcrumbs.interfaces";
-import { PageContainer } from "../components/page-container/page-container.component";
-import { PageLoadingIndicator } from "../components/page-loading-indicator/page-loading-indicator.component";
-import { HomePage } from "../pages/home/home-page.component";
-import { PageNotFoundPage } from "../pages/page-not-found/page-not-found-page.component";
-import { SignOutPage } from "../pages/sign-out/sign-out-page.component";
-import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs-store";
+import { Breadcrumb } from "../../components/application-breadcrumbs/application-breadcrumbs.interfaces";
+import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
+import { HomePage } from "../../pages/home/home-page.component";
+import { PageNotFoundPage } from "../../pages/page-not-found/page-not-found-page.component";
+import { SignOutPage } from "../../pages/sign-out/sign-out-page.component";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import {
     ApplicationRoute,
     getBasePath,
     getHomePath,
-} from "../utils/routes/routes-util";
+} from "../../utils/routes/routes-util";
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setRouterBreadcrumb] = useApplicationBreadcrumbsStore((state) => [
-        state.setRouterBreadcrumb,
+    const [
+        setAppSectionBreadcrumb,
+    ] = useApplicationBreadcrumbsStore((state) => [
+        state.setAppSectionBreadcrumb,
     ]);
 
     useEffect(() => {
-        // Create router breadcrumb
-        setRouterBreadcrumb({} as Breadcrumb);
+        // Create app section breadcrumb
+        setAppSectionBreadcrumb({} as Breadcrumb);
 
         setLoading(false);
-    }, [setRouterBreadcrumb]);
+    }, []);
 
     if (loading) {
         return (

@@ -1,34 +1,36 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { PageContainer } from "../components/page-container/page-container.component";
-import { PageLoadingIndicator } from "../components/page-loading-indicator/page-loading-indicator.component";
-import { AnomaliesAllPage } from "../pages/anomalies-all/anomalies-all-page.component";
-import { AnomaliesDetailPage } from "../pages/anomalies-detail/anomalies-detail-page.component";
-import { PageNotFoundPage } from "../pages/page-not-found/page-not-found-page.component";
-import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs-store";
+import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
+import { AnomaliesAllPage } from "../../pages/anomalies-all/anomalies-all-page.component";
+import { AnomaliesDetailPage } from "../../pages/anomalies-detail/anomalies-detail-page.component";
+import { PageNotFoundPage } from "../../pages/page-not-found/page-not-found-page.component";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import {
     ApplicationRoute,
     getAnomaliesAllPath,
     getAnomaliesPath,
-} from "../utils/routes/routes-util";
+} from "../../utils/routes/routes-util";
 
 export const AnomaliesRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setRouterBreadcrumb] = useApplicationBreadcrumbsStore((state) => [
-        state.setRouterBreadcrumb,
+    const [
+        setAppSectionBreadcrumb,
+    ] = useApplicationBreadcrumbsStore((state) => [
+        state.setAppSectionBreadcrumb,
     ]);
     const { t } = useTranslation();
 
     useEffect(() => {
         // Create router breadcrumb
-        setRouterBreadcrumb({
+        setAppSectionBreadcrumb({
             text: t("label.anomalies"),
             path: getAnomaliesPath(),
         });
 
         setLoading(false);
-    }, [setRouterBreadcrumb, t]);
+    }, []);
 
     if (loading) {
         return (

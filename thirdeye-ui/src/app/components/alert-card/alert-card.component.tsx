@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import SettingsIcon from "@material-ui/icons/Settings";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +20,7 @@ import { useHistory } from "react-router-dom";
 import {
     getAlertsDetailPath,
     getAlertsUpdatePath,
-} from "../../utils/route/routes-util";
+} from "../../utils/routes/routes-util";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { AlertCardProps } from "./alert-card.interfaces";
 import { useAlertCardStyles } from "./alert-card.styles";
@@ -87,7 +87,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         </Grid>
                         <Grid item>
                             <IconButton onClick={onAlertOptionsClick}>
-                                <SettingsIcon color="primary" />
+                                <MoreVertIcon />
                             </IconButton>
                         </Grid>
                     </Grid>
@@ -190,7 +190,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         <TextHighlighter
                                             searchWords={props.searchWords}
                                             textToHighlight={t(
-                                                "label.no-data-available"
+                                                "label.no-data-available-marker"
                                             )}
                                         />
                                     </Typography>
@@ -268,7 +268,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         <TextHighlighter
                                             searchWords={props.searchWords}
                                             textToHighlight={t(
-                                                "label.no-data-available"
+                                                "label.no-data-available-marker"
                                             )}
                                         />
                                     </Typography>
@@ -362,7 +362,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         <TextHighlighter
                                             searchWords={props.searchWords}
                                             textToHighlight={t(
-                                                "label.no-data-available"
+                                                "label.no-data-available-marker"
                                             )}
                                         />
                                     </Typography>
@@ -440,7 +440,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         <TextHighlighter
                                             searchWords={props.searchWords}
                                             textToHighlight={t(
-                                                "label.no-data-available"
+                                                "label.no-data-available-marker"
                                             )}
                                         />
                                     </Typography>

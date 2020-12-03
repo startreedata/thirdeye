@@ -11,18 +11,7 @@
         "create": "Create",
         "update": "Update",
         "create-alert": "Create Alert",
-        "no-data-available": "-",
-
-        "apply": "Apply",
-        "cancel": "Cancel",
-        "preview-alert": "Preview Alert",
-        "reset-configuration": "Reset Configuration",
-        "general-details": "General Details",
-        "review-submit": "Review & Submit",
-        "detection-configuration": "Detection Configuration",
-        "subscription-configuration": "Subscription Configuration",
-        "add-subscription-group": "Add to Subscription Group",
-
+        "no-data-available-marker": "-",
         "search": "Search",
         "search-count": "Showing {{count}} of {{total}}",
         "summary": "Summary",
@@ -69,6 +58,15 @@
         "current-/-predicted-values": "{{current}} / {{predicted}}",
         "deviation": "Deviation",
 
+        "apply": "Apply",
+        "cancel": "Cancel",
+        "preview-alert": "Preview Alert",
+        "reset-configuration": "Reset Configuration",
+        "general-details": "General Details",
+        "review-submit": "Review & Submit",
+        "detection-configuration": "Detection Configuration",
+        "subscription-configuration": "Subscription Configuration",
+        "add-subscription-group": "Add to Subscription Group",
         "add-subscription-gorup": "Add to Subscription Group",
         "create-subscription-gorup": "Create Subscription Group",
         "all-detection-rules-anomalies-over-time": "All detection rules anomalies over time",
@@ -87,7 +85,7 @@
         "invalid-id": "Invalid {{entity}} id {{id}}",
         "fetch-error": "Error fetching data",
         "update-error": "Error updating {{entity}}",
-        "alert-created": "Alert created successfully",
-        "alert-creation-failed": "Failed to create an alert"
+        "create-success": "{{entity}} created successfully",
+        "create-error": "Error creating {{entity}}"
     }
 }

@@ -20,7 +20,7 @@ import {
     getAnomalyName,
 } from "../../utils/anomaly/anomaly-util";
 import { isValidNumberId } from "../../utils/params/params-util";
-import { getAnomaliesDetailPath } from "../../utils/route/routes-util";
+import { getAnomaliesDetailPath } from "../../utils/routes/routes-util";
 import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
 import { AnomaliesDetailPageParams } from "./anomalies-detail-page.interfaces";
 

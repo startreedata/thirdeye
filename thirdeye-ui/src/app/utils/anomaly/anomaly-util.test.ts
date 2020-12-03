@@ -32,9 +32,9 @@ describe("Anomaly Util", () => {
         });
     });
 
-    test("getAnomalyName shall return empty string for an invalid anomaly", () => {
+    test("getAnomalyName shall return no data available string for an invalid anomaly", () => {
         const name = getAnomalyName((null as unknown) as Anomaly);
 
-        expect(name).toEqual("");
+        expect(name).toEqual("label.no-data-available-marker");
     });
 });

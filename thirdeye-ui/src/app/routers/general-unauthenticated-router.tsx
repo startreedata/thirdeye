@@ -6,7 +6,7 @@ import { PageLoadingIndicator } from "../components/page-loading-indicator/page-
 import { SignInPage } from "../pages/sign-in/sign-in-page.component";
 import { useApplicationBreadcrumbsStore } from "../store/application-breadcrumbs/application-breadcrumbs-store";
 import { useRedirectionPathStore } from "../store/redirection-path/redirection-path-store";
-import { ApplicationRoute, getSignInPath } from "../utils/route/routes-util";
+import { ApplicationRoute, getSignInPath } from "../utils/routes/routes-util";
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

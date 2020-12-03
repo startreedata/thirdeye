@@ -15,7 +15,7 @@ import {
     getHomePath,
     getSignInPath,
     getSignOutPath,
-} from "../../utils/route/routes-util";
+} from "../../utils/routes/routes-util";
 import { useApplicationBarStyles } from "./application-bar.styles";
 
 export const ApplicationBar: FunctionComponent = () => {

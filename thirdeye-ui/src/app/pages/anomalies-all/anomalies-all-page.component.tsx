@@ -14,7 +14,7 @@ import {
     filterAnomalies,
     getAnomalyCardDatas,
 } from "../../utils/anomaly/anomaly-util";
-import { getAnomaliesAllPath } from "../../utils/route/routes-util";
+import { getAnomaliesAllPath } from "../../utils/routes/routes-util";
 import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {

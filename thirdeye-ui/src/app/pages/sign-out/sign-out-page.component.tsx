@@ -6,7 +6,7 @@ import { PageLoadingIndicator } from "../../components/page-loading-indicator/pa
 import { logout } from "../../rest/auth/auth-rest";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import { useAuthStore } from "../../store/auth/auth-store";
-import { getSignOutPath } from "../../utils/route/routes-util";
+import { getSignOutPath } from "../../utils/routes/routes-util";
 import { useSignOutPageStyles } from "./sign-out-page.styles";
 
 export const SignOutPage: FunctionComponent = () => {

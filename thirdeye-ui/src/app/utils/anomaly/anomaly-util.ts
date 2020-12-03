@@ -10,7 +10,7 @@ import { formatLargeNumber, formatPercentage } from "../number/number-util";
 
 export const getAnomalyName = (anomaly: Anomaly): string => {
     if (!anomaly) {
-        return i18n.t("label.no-data-available");
+        return i18n.t("label.no-data-available-marker");
     }
 
     return `${i18n.t("label.anomaly")} ${i18n.t("label.anomaly-id", {
@@ -43,19 +43,19 @@ export const getAnomalyCardDatas = (
         anomalyCardData.name = getAnomalyName(anomaly);
         anomalyCardData.alertName = anomaly.alert?.name
             ? anomaly.alert.name
-            : i18n.t("label.no-data-available");
+            : i18n.t("label.no-data-available-marker");
         anomalyCardData.alertId = anomaly.alert?.id;
 
         // Current and predicted values, if available
         anomalyCardData.current = anomaly.avgCurrentVal
             ? formatLargeNumber(anomaly.avgCurrentVal)
-            : i18n.t("label.no-data-available");
+            : i18n.t("label.no-data-available-marker");
         anomalyCardData.predicted = anomaly.avgBaselineVal
             ? formatLargeNumber(anomaly.avgBaselineVal)
-            : i18n.t("label.no-data-available");
+            : i18n.t("label.no-data-available-marker");
 
         // Calculate deviation if both average and current values are available
-        anomalyCardData.deviation = i18n.t("label.no-data-available");
+        anomalyCardData.deviation = i18n.t("label.no-data-available-marker");
         if (anomaly.avgCurrentVal && anomaly.avgBaselineVal) {
             const deviation =
                 (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
@@ -65,9 +65,9 @@ export const getAnomalyCardDatas = (
         }
 
         // Duration, start and end time
-        anomalyCardData.duration = i18n.t("label.no-data-available");
-        anomalyCardData.startTime = i18n.t("label.no-data-available");
-        anomalyCardData.endTime = i18n.t("label.no-data-available");
+        anomalyCardData.duration = i18n.t("label.no-data-available-marker");
+        anomalyCardData.startTime = i18n.t("label.no-data-available-marker");
+        anomalyCardData.endTime = i18n.t("label.no-data-available-marker");
         if (anomaly.startTime && anomaly.endTime) {
             anomalyCardData.duration = formatDuration(
                 anomaly.startTime,

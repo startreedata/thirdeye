@@ -44,7 +44,7 @@ export const getAlertCardDatas = (
         alertCardData.id = alert.id;
         alertCardData.name = alert.name
             ? alert.name
-            : i18n.t("label.no-data-available");
+            : i18n.t("label.no-data-available-marker");
         alertCardData.active = alert.active;
         alertCardData.activeText = alert.active
             ? i18n.t("label.active")
@@ -52,7 +52,7 @@ export const getAlertCardDatas = (
         alertCardData.userId = alert.owner?.id;
         alertCardData.createdBy = alert.owner?.principal
             ? alert.owner.principal
-            : i18n.t("label.no-data-available");
+            : i18n.t("label.no-data-available-marker");
         alertCardData.detectionTypes = [];
         alertCardData.filteredBy = [];
         alertCardData.datasetAndMetrics = [];
@@ -83,12 +83,12 @@ export const getAlertCardDatas = (
                     datasetAndMetric.datasetId = alertNode.metric.dataset.id;
                     datasetAndMetric.datasetName = alertNode.metric.dataset.name
                         ? alertNode.metric.dataset.name
-                        : i18n.t("label.no-data-available");
+                        : i18n.t("label.no-data-available-marker");
                 }
                 datasetAndMetric.metricId = alertNode.metric.id;
                 datasetAndMetric.metricName = alertNode.metric.name
                     ? alertNode.metric.name
-                    : i18n.t("label.no-data-available");
+                    : i18n.t("label.no-data-available-marker");
 
                 alertCardData.datasetAndMetrics.push(datasetAndMetric);
             }
@@ -236,7 +236,7 @@ const mapSubscriptionGroupsToAlertIds = (
             id: subscriptionGroup.id,
             name: subscriptionGroup.name
                 ? subscriptionGroup.name
-                : i18n.t("label.no-data-available"),
+                : i18n.t("label.no-data-available-marker"),
         };
 
         for (const alert of subscriptionGroup.alerts) {

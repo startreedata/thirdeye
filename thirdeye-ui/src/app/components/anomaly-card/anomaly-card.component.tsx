@@ -17,7 +17,7 @@ import { useHistory } from "react-router-dom";
 import {
     getAlertsDetailPath,
     getAnomaliesDetailPath,
-} from "../../utils/route/routes-util";
+} from "../../utils/routes/routes-util";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
 import { useAnomalyCardStyles } from "./anomaly-card.styles";

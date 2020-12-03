@@ -100,6 +100,7 @@
         "jest-environment-jsdom-fourteen": "^1.0.1",
         "lint-staged": "^10.5.1",
         "organize-imports-cli": "^0.8.0",
+        "postcss": "^8.1.10",
         "prettier": "^2.1.2",
         "sass": "^1.29.0",
         "sass-loader": "^10.0.5",

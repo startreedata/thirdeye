@@ -9,7 +9,7 @@ import { Auth } from "../../rest/dto/auth.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import { useAuthStore } from "../../store/auth/auth-store";
 import { useRedirectionPathStore } from "../../store/redirection-path/redirection-path-store";
-import { getSignInPath } from "../../utils/route/routes-util";
+import { getSignInPath } from "../../utils/routes/routes-util";
 import { useSignInPageStyles } from "./sign-in-page.styles";
 
 export const SignInPage: FunctionComponent = () => {

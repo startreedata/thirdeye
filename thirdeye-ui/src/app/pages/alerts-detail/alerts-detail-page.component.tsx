@@ -21,7 +21,7 @@ import { useApplicationBreadcrumbsStore } from "../../store/application-breadcru
 import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
 import { getAlertCardData } from "../../utils/alert/alert-util";
 import { isValidNumberId } from "../../utils/params/params-util";
-import { getAlertsDetailPath } from "../../utils/route/routes-util";
+import { getAlertsDetailPath } from "../../utils/routes/routes-util";
 import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
 import { AlertsDetailPageParams } from "./alerts-detail-page.interfaces";
 

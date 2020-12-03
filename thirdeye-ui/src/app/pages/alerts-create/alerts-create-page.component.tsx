@@ -35,7 +35,7 @@ import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import {
     ApplicationRoute,
     getAlertsCreatePath,
-} from "../../utils/route/routes-util";
+} from "../../utils/routes/routes-util";
 import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
@@ -119,14 +119,17 @@ export const AlertsCreatePage = withRouter(
                     }
                 }
                 enqueueSnackbar(
-                    t("message.alert-created"),
+                    t("message.create-success", { entity: t("label.alert") }),
                     SnackbarOption.SUCCESS
                 );
                 props.history.push(ApplicationRoute.ALERTS_ALL);
             } catch (err) {
                 console.log(err);
                 enqueueSnackbar(
-                    _.get(err, t("message.alert-creation-failed")),
+                    _.get(
+                        err,
+                        t("message.create-error", { entity: t("label.alert") })
+                    ),
                     SnackbarOption.SUCCESS
                 );
             } finally {

@@ -11,7 +11,7 @@ import {
     ApplicationRoute,
     getAnomaliesAllPath,
     getAnomaliesPath,
-} from "../utils/route/routes-util";
+} from "../utils/routes/routes-util";
 
 export const AnomaliesRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

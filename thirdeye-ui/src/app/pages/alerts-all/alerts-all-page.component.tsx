@@ -13,7 +13,7 @@ import { getAllAlerts, updateAlert } from "../../rest/alert/alert-rest";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group/subscription-group-rest";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
 import { filterAlerts, getAlertCardDatas } from "../../utils/alert/alert-util";
-import { getAlertsAllPath } from "../../utils/route/routes-util";
+import { getAlertsAllPath } from "../../utils/routes/routes-util";
 import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
 
 export const AlertsAllPage: FunctionComponent = () => {

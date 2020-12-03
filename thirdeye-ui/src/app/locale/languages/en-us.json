@@ -76,14 +76,17 @@
         "response-rate": "Response Rate",
         "precision": "Precision",
         "recall": "Recall",
-        "detection-health": "Detection Health"
+        "detection-health": "Detection Health",
+
+        "no-chart-data-available": "No relevant data available",
+        "chart": "Chart"
     },
     "message": {
         "url-not-found": "Requested URL not found",
         "signed-out": "You have been signed out",
         "invalid-id": "Invalid {{entity}} id {{id}}",
         "fetch-error": "Error fetching data",
-        "update-error": "Error updating {{entity}}"
+        "update-error": "Error updating {{entity}}",
         "alert-created": "Alert created successfully",
         "alert-creation-failed": "Failed to create an alert"
     }

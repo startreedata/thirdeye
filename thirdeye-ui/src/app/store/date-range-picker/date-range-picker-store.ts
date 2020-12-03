@@ -6,7 +6,10 @@ import {
 
 export const useDateRangePickerStore = create<DateRangePicker>(
     (set: SetState<DateRangePicker>, get) => ({
-        dateRange: {} as DateRange,
+        dateRange: {
+            from: new Date(),
+            to: new Date(),
+        } as DateRange,
 
         setDateRange: (dateRange: DateRange): void => {
             set({ dateRange });

@@ -13,6 +13,32 @@ export const useTimeseriesChartStyles = makeStyles(() => {
             textAlign: "center",
             transform: "translateX(-50%)",
         },
+        grayout: {
+            opacity: 0.5,
+        },
+        clickable: {
+            cursor: "pointer",
+        },
+        legends: {
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            display: "flex",
+            justifyContent: "space-around",
+        },
+        legendsShape: {
+            display: "flex",
+            margin: "2px 4px 2px 0",
+        },
+        noDataLabel: {
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: "50%",
+            textAlign: "center",
+            transform: "translateY(-50%)",
+        },
     });
 });
 

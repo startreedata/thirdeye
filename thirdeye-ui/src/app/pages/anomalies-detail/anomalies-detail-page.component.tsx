@@ -8,9 +8,13 @@ import { AnomalyCard } from "../../components/anomaly-card/anomaly-card.componen
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
+import { TimeSeriesChartCard } from "../../components/timeseries-chart-card/timeseries-chart-card.component";
+import { getAlertEvaluation } from "../../rest/alert/alert-rest";
 import { getAnomaly } from "../../rest/anomaly/anomaly-rest";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
 import {
     getAnomalyCardData,
     getAnomalyName,
@@ -28,6 +32,9 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     ]);
     const params = useParams<AnomaliesDetailPageParams>();
     const { enqueueSnackbar } = useSnackbar();
+
+    const [dateRange] = useDateRangePickerStore((state) => [state.dateRange]);
+    const [chartData, setChartData] = useState<AlertEvaluation | null>();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -71,6 +78,37 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         }
     };
 
+    // To fetch chartData on dateRange Change
+    useEffect(() => {
+        const init = async (): Promise<void> => {
+            setChartData(null);
+
+            setChartData(await fetchChartData());
+        };
+
+        init();
+    }, [dateRange, anomaly?.alert?.id]);
+
+    const fetchChartData = async (): Promise<AlertEvaluation | null> => {
+        if (!isValidNumberId(anomaly?.alert?.id + "")) {
+            return null;
+        }
+        let chartData = null;
+        try {
+            const alertEvalution = {
+                alert: ({ id: anomaly?.alert?.id } as unknown) as Alert,
+                start: dateRange.from.getTime(),
+                end: dateRange.to.getTime(),
+            } as AlertEvaluation;
+
+            chartData = await getAlertEvaluation(alertEvalution);
+        } catch (e) {
+            chartData = {} as AlertEvaluation;
+        }
+
+        return chartData;
+    };
+
     if (loading) {
         return (
             <PageContainer>
@@ -88,6 +126,12 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                             <AnomalyCard
                                 hideViewDetailsLinks
                                 anomaly={getAnomalyCardData(anomaly)}
+                            />
+                        </Grid>
+                        <Grid item md={12}>
+                            <TimeSeriesChartCard
+                                data={chartData as AlertEvaluation}
+                                title={t("label.chart")}
                             />
                         </Grid>
                     </Grid>

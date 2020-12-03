@@ -30,7 +30,7 @@ import {
     updateSubscriptionGroup,
 } from "../../rest/subscription-group/subscription-group-rest";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import alertPreview from "../../utils/defaults/alert-preview";
+import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import {
     ApplicationRoute,
@@ -55,10 +55,17 @@ export const AlertsCreatePage = withRouter(
         const [subscriptionGroup, setSubscriptionGroup] = useState(-1);
         const [activeStep, setActiveStep] = useState(0);
         const { enqueueSnackbar } = useSnackbar();
-        const [previewData, setPreviewData] = useState<AlertEvaluation>();
+        const [chartData, setChartData] = useState<AlertEvaluation | null>();
         const [subscriptionGroups, setSubscriptionGroups] = useState<
             SubscriptionGroup[]
         >([]);
+
+        const [isFirstTime, setIsFirstTime] = useState(true);
+
+        const [dateRange] = useDateRangePickerStore((state) => [
+            state.dateRange,
+        ]);
+
         const { t } = useTranslation();
 
         useEffect(() => {
@@ -127,16 +134,38 @@ export const AlertsCreatePage = withRouter(
             }
         };
 
+        useEffect(() => {
+            handlePreviewAlert();
+        }, [dateRange]);
+
         const handlePreviewAlert = async (): Promise<void> => {
-            try {
-                const preview = await getAlertEvaluation(
-                    (alertPreview as unknown) as AlertEvaluation
-                );
-                setPreviewData(preview);
-            } catch (err) {
-                console.error(err);
-                setPreviewData((alertPreview as unknown) as AlertEvaluation);
+            if (isFirstTime) {
+                setIsFirstTime(false);
+
+                return;
             }
+            setChartData(null);
+            setChartData(await fetchChartData());
+        };
+
+        const fetchChartData = async (): Promise<AlertEvaluation | null> => {
+            const alertEvalution = {
+                alert: yaml.safeLoad(detectionConfig) as Alert,
+                start: dateRange.from.getTime(),
+                end: dateRange.to.getTime(),
+            };
+
+            let chartData = null;
+            try {
+                chartData = await getAlertEvaluation(
+                    alertEvalution as AlertEvaluation
+                );
+            } catch (error) {
+                enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
+                chartData = {} as AlertEvaluation;
+            }
+
+            return chartData;
         };
 
         const selectionGroupComp = (
@@ -207,7 +236,9 @@ export const AlertsCreatePage = withRouter(
                                                     </Typography>
                                                 }
                                                 name={"Define Detection"}
-                                                previewData={previewData}
+                                                previewData={
+                                                    chartData as AlertEvaluation
+                                                }
                                                 showPreviewButton={true}
                                                 onConfigChange={
                                                     setDetectionConfig

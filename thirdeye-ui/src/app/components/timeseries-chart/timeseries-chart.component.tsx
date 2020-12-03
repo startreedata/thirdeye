@@ -1,11 +1,12 @@
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import AxisBottom from "@visx/axis/lib/axis/AxisBottom";
 import AxisLeft from "@visx/axis/lib/axis/AxisLeft";
 import { Brush } from "@visx/brush";
+import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import localPoint from "@visx/event/lib/localPoint";
 import Group from "@visx/group/lib/Group";
-import { Legend } from "@visx/legend";
+import { Legend, LegendItem, LegendLabel } from "@visx/legend";
 import { PatternLines } from "@visx/pattern";
 import { scaleLinear, scaleOrdinal, scaleTime } from "@visx/scale";
 import AreaClosed from "@visx/shape/lib/shapes/AreaClosed";
@@ -18,8 +19,28 @@ import {
     TooltipWithBounds,
     withTooltip,
 } from "@visx/tooltip";
-import { bisector, extent, format as d3Format, max, timeFormat } from "d3";
-import React, { useCallback, useMemo, useState } from "react";
+import { extent, max } from "d3";
+import React, {
+    createRef,
+    ReactElement,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import {
+    bisectDate,
+    CHART_SEPRATION_HEIGHT,
+    formatDate,
+    formatDateDetailed,
+    formatValue,
+    getBaseline,
+    getDate,
+    getLowerBound,
+    getUpperBound,
+    getValue,
+} from "../../utils/chart/chart-util";
 import {
     TimeSeriesChartProps,
     TimeSeriesProps,
@@ -29,46 +50,48 @@ import {
     useTimeseriesChartStyles,
 } from "./timeseries-chart.styles";
 
-const chartSeparation = 30;
-
-// Utils functions
-const format = timeFormat("%b %d");
-const formatDateDetailed = timeFormat("%b %d, %H:%M %p");
-const formatDate = (
-    date: Date | number | { valueOf(): number },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _i: number
-): string => format(date as Date);
-
-const formatValue = (d: number | { valueOf(): number }): string =>
-    d3Format("~s")(d);
-const bisectDate = bisector<TimeSeriesProps, Date>((d) => new Date(d.timestamp))
-    .left;
-
 // Constants
 const COLORS = {
     current: "#1B1B1E",
     expacted: "#FF9505",
     shaded: "#1CAFED",
 };
-// Margin for bursh
-const brushMargin = { top: 10, bottom: 15, left: 50, right: 20 };
+
+enum CHARTS_TYPES {
+    CURRENT_LINE,
+    EXPECTED_LINE,
+    SHADED_AREA,
+}
 
 const ordinalColor2Scale = scaleOrdinal({
-    domain: ["Current", "Baseline", "UpperBound", "LowerBound"],
-    range: [COLORS.current, COLORS.expacted, COLORS.shaded, COLORS.expacted],
+    domain: ["Current", "Baseline", "Upper and Lower bound"],
+    range: [
+        <rect
+            fill={COLORS.current}
+            height={5}
+            key="current"
+            stroke={COLORS.current}
+            width={15}
+            y={5}
+        />,
+        <line
+            key="baseline"
+            stroke={COLORS.expacted}
+            strokeDasharray="5, 5"
+            strokeWidth={5}
+            x1={0}
+            x2={15}
+            y1={5}
+            y2={5}
+        />,
+        <rect
+            fill={COLORS.shaded}
+            height={15}
+            key="upper-lower-bound"
+            width={15}
+        />,
+    ],
 });
-
-// accessors
-const getDate = (d: TimeSeriesProps): Date => d.timestamp;
-const getValue = (d: TimeSeriesProps): number =>
-    isNaN(d.current) ? 0 : d.current;
-const getBaseline = (d: TimeSeriesProps): number =>
-    isNaN(d.expacted) ? 0 : d.expacted;
-const getLowerBound = (d: TimeSeriesProps): number =>
-    isNaN(d.lowerBound) ? d.current : d.lowerBound;
-const getUpperBound = (d: TimeSeriesProps): number =>
-    isNaN(d.current) ? 0 : d.current;
 
 export const TimeSeriesChart = withTooltip<
     TimeSeriesChartProps,
@@ -85,10 +108,20 @@ export const TimeSeriesChart = withTooltip<
         tooltipTop = 0,
         tooltipLeft = 0,
         compact = false,
+        showLegend,
     } = props;
 
     const [filteredData, setFilteredData] = useState(data);
     const timeseriesChartClasses = useTimeseriesChartStyles();
+    const brushRef = createRef<BaseBrush>();
+    const [activeChartsList, setActiveChartList] = useState<Set<number>>(
+        new Set([
+            CHARTS_TYPES.CURRENT_LINE,
+            CHARTS_TYPES.EXPECTED_LINE,
+            CHARTS_TYPES.SHADED_AREA,
+        ])
+    );
+    const { t } = useTranslation();
 
     // brush handler
     const onBrushChange = (domain: Bounds | null): void => {
@@ -110,19 +143,26 @@ export const TimeSeriesChart = withTooltip<
 
     const innerHeight = height - margin.top - margin.bottom;
     const topChartBottomMargin = compact
-        ? chartSeparation / 2
-        : chartSeparation + 10;
+        ? CHART_SEPRATION_HEIGHT / 2
+        : CHART_SEPRATION_HEIGHT + 10;
     const topChartHeight = 0.8 * innerHeight - topChartBottomMargin;
-    const bottomChartHeight = innerHeight - topChartHeight - chartSeparation;
+    const bottomChartHeight =
+        innerHeight - topChartHeight - CHART_SEPRATION_HEIGHT;
 
     // bounds
     const xMax = Math.max(width - margin.left - margin.right, 0);
     const yMax = Math.max(topChartHeight, 0);
-    const xBrushMax = Math.max(width - brushMargin.left - brushMargin.right, 0);
+    const xBrushMax = Math.max(width - margin.left - margin.right, 0);
     const yBrushMax = Math.max(
-        bottomChartHeight - brushMargin.top - brushMargin.bottom,
+        bottomChartHeight - margin.top - margin.bottom,
         0
     );
+
+    useEffect(() => {
+        // Reset chart when data changes
+        brushRef.current?.reset();
+        setFilteredData(data);
+    }, [data]);
 
     // scales
     const dateScale = useMemo(
@@ -137,7 +177,7 @@ export const TimeSeriesChart = withTooltip<
         () =>
             scaleLinear<number>({
                 range: [yMax, 0],
-                domain: [0, max(filteredData, getValue) || 0],
+                domain: [0, max(filteredData, getValue) || 100],
                 nice: true,
             }),
         [yMax, filteredData]
@@ -158,15 +198,6 @@ export const TimeSeriesChart = withTooltip<
                 nice: true,
             }),
         [yBrushMax, data]
-    );
-
-    // Initial position for brush
-    const initialBrushPosition = useMemo(
-        () => ({
-            start: { x: brushDateScale(getDate(data[25])) },
-            end: { x: brushDateScale(getDate(data[25])) },
-        }),
-        [brushDateScale, data]
     );
 
     // tooltip handler
@@ -228,31 +259,56 @@ export const TimeSeriesChart = withTooltip<
         y: (d: TimeSeriesProps): number => valueScale(getBaseline(d)) ?? 0,
     };
 
+    // if (!data || !data.length) {
+    //     return <Typography variant="h4">No charts data available</Typography>;
+    // }
+
+    // Initial position for brush
+    // const initialBrushPosition = useMemo(
+    //     () => ({
+    //         start: { x: brushDateScale(getDate(data[25] || 0)) },
+    //         end: { x: brushDateScale(getDate(data[25])) },
+    //     }),
+    //     [brushDateScale, data]
+    // );
+
     return width < 10 ? null : (
         <div>
             <svg height={height} width={width}>
+                {/* Main Graph Region */}
                 <Group left={margin.left} top={margin.top}>
-                    <AreaClosed<TimeSeriesProps> {...areaProps} />
-                    <LinePath<TimeSeriesProps>
-                        {...commonGraphProps}
-                        {...currentLineProps}
-                    />
-                    <LinePath<TimeSeriesProps>
-                        {...commonGraphProps}
-                        {...expectedLineProps}
-                    />
+                    {/* Shaded region */}
+                    {activeChartsList?.has(CHARTS_TYPES.SHADED_AREA) && (
+                        <AreaClosed<TimeSeriesProps> {...areaProps} />
+                    )}
+                    {/* Line graph with Current value */}
+                    {activeChartsList?.has(CHARTS_TYPES.CURRENT_LINE) && (
+                        <LinePath<TimeSeriesProps>
+                            {...commonGraphProps}
+                            {...currentLineProps}
+                        />
+                    )}
+                    {/* Line graph with expacted value */}
+                    {activeChartsList?.has(CHARTS_TYPES.EXPECTED_LINE) && (
+                        <LinePath<TimeSeriesProps>
+                            {...commonGraphProps}
+                            {...expectedLineProps}
+                        />
+                    )}
+                    {/* X-Axis */}
                     <AxisBottom
                         scale={dateScale}
                         tickFormat={formatDate}
                         tickStroke={"rgba(0,0,0,0.85)"}
                         top={yMax}
                     />
-
+                    {/* Y-Axis */}
                     <AxisLeft
                         scale={valueScale}
                         tickFormat={formatValue}
                         tickStroke={"rgba(0,0,0,0.85)"}
                     />
+                    {/* Transparent Layer for Tooltip */}
                     <Bar
                         fill="transparent"
                         height={yMax}
@@ -263,6 +319,8 @@ export const TimeSeriesChart = withTooltip<
                         onTouchMove={handleTooltip}
                         onTouchStart={handleTooltip}
                     />
+
+                    {/* Visuals for Tooltip */}
                     {tooltipData && (
                         <g>
                             <Line
@@ -296,44 +354,57 @@ export const TimeSeriesChart = withTooltip<
                         </g>
                     )}
                 </Group>
+
+                {/* Brush Region */}
                 <Group
-                    left={brushMargin.left}
-                    top={
-                        topChartHeight + topChartBottomMargin + brushMargin.top
-                    }
+                    left={margin.left}
+                    top={topChartHeight + topChartBottomMargin + margin.top}
                 >
-                    <AreaClosed<TimeSeriesProps>
-                        {...areaProps}
-                        data={data}
-                        x={(d): number => brushDateScale(getDate(d)) ?? 0}
-                        y0={(d): number =>
-                            brushValueScale(getLowerBound(d)) ?? 0
-                        }
-                        y1={(d): number =>
-                            brushValueScale(getUpperBound(d)) ?? 0
-                        }
-                        yScale={brushValueScale}
-                    />
-                    <LinePath<TimeSeriesProps>
-                        {...commonGraphProps}
-                        {...currentLineProps}
-                        data={data}
-                        x={(d): number => brushDateScale(getDate(d)) ?? 0}
-                        y={(d): number => brushValueScale(getValue(d)) ?? 0}
-                    />
-                    <LinePath<TimeSeriesProps>
-                        {...commonGraphProps}
-                        {...expectedLineProps}
-                        data={data}
-                        x={(d): number => brushDateScale(getDate(d)) ?? 0}
-                        y={(d): number => brushValueScale(getBaseline(d)) ?? 0}
-                    />
+                    {/* Shaded region */}
+                    {activeChartsList?.has(CHARTS_TYPES.SHADED_AREA) && (
+                        <AreaClosed<TimeSeriesProps>
+                            {...areaProps}
+                            data={data}
+                            x={(d): number => brushDateScale(getDate(d)) ?? 0}
+                            y0={(d): number =>
+                                brushValueScale(getLowerBound(d)) ?? 0
+                            }
+                            y1={(d): number =>
+                                brushValueScale(getUpperBound(d)) ?? 0
+                            }
+                            yScale={brushValueScale}
+                        />
+                    )}
+                    {/* Line graph with Current value */}
+                    {activeChartsList?.has(CHARTS_TYPES.CURRENT_LINE) && (
+                        <LinePath<TimeSeriesProps>
+                            {...commonGraphProps}
+                            {...currentLineProps}
+                            data={data}
+                            x={(d): number => brushDateScale(getDate(d)) ?? 0}
+                            y={(d): number => brushValueScale(getValue(d)) ?? 0}
+                        />
+                    )}
+                    {/* Line graph with expacted value */}
+                    {activeChartsList?.has(CHARTS_TYPES.EXPECTED_LINE) && (
+                        <LinePath<TimeSeriesProps>
+                            {...commonGraphProps}
+                            {...expectedLineProps}
+                            data={data}
+                            x={(d): number => brushDateScale(getDate(d)) ?? 0}
+                            y={(d): number =>
+                                brushValueScale(getBaseline(d)) ?? 0
+                            }
+                        />
+                    )}
+                    {/* X-Axis for brush area */}
                     <AxisBottom
                         scale={brushDateScale}
                         tickFormat={formatDate}
                         tickStroke={"rgba(0,0,0,0.85)"}
                         top={yBrushMax}
                     />
+                    {/* Visual for selected region on brush */}
                     <PatternLines
                         height={8}
                         id={"brush_pattern"}
@@ -342,12 +413,14 @@ export const TimeSeriesChart = withTooltip<
                         strokeWidth={1}
                         width={8}
                     />
+                    {/* Brush component */}
                     <Brush
                         brushDirection="horizontal"
                         handleSize={8}
                         height={yBrushMax}
-                        initialBrushPosition={initialBrushPosition}
-                        margin={brushMargin}
+                        innerRef={brushRef}
+                        // initialBrushPosition={initialBrushPosition}
+                        margin={margin}
                         resizeTriggerAreas={["left", "right"]}
                         selectedBoxStyle={selectedBrushStyle}
                         width={xBrushMax}
@@ -358,6 +431,75 @@ export const TimeSeriesChart = withTooltip<
                     />
                 </Group>
             </svg>
+
+            {/* Legends for graph with interactions */}
+            {showLegend && (
+                <Legend scale={ordinalColor2Scale}>
+                    {(labels): ReactElement => (
+                        <div className={timeseriesChartClasses.legends}>
+                            {labels.map((label, i) => {
+                                const shape = ordinalColor2Scale(label.datum);
+                                const isValidElement = React.isValidElement(
+                                    shape
+                                );
+
+                                return (
+                                    <LegendItem
+                                        alignItems=""
+                                        className={`${
+                                            !activeChartsList.has(label.index)
+                                                ? timeseriesChartClasses.grayout
+                                                : ""
+                                        } ${timeseriesChartClasses.clickable}`}
+                                        flexDirection="row"
+                                        key={`legend-quantile-${i}`}
+                                        onClick={(): void => {
+                                            console.log(label);
+                                            const { index } = label;
+                                            const newArray = new Set(
+                                                activeChartsList
+                                            );
+                                            if (newArray.has(index)) {
+                                                newArray.delete(index);
+                                            } else {
+                                                newArray?.add(index);
+                                            }
+                                            if (newArray.size === 0) {
+                                                newArray.add(
+                                                    CHARTS_TYPES.CURRENT_LINE
+                                                );
+                                            }
+                                            setActiveChartList(newArray);
+                                        }}
+                                    >
+                                        <div
+                                            className={`visx-legend-shape ${timeseriesChartClasses.legendsShape}`}
+                                        >
+                                            <svg height={15} width={15}>
+                                                {isValidElement
+                                                    ? React.cloneElement(
+                                                          shape as React.ReactElement
+                                                      )
+                                                    : null}
+                                            </svg>
+                                        </div>
+                                        <LegendLabel
+                                            align="left"
+                                            flex="0 0 100%"
+                                            margin="0 4px"
+                                            wrap="wrap"
+                                        >
+                                            {label.text}
+                                        </LegendLabel>
+                                    </LegendItem>
+                                );
+                            })}
+                        </div>
+                    )}
+                </Legend>
+            )}
+
+            {/* Tooltip for hovered region */}
             {tooltipData && (
                 <div>
                     <TooltipWithBounds
@@ -390,7 +532,14 @@ export const TimeSeriesChart = withTooltip<
                     </Tooltip>
                 </div>
             )}
-            <Legend scale={ordinalColor2Scale} />
+            {!data.length ? (
+                <Typography
+                    className={timeseriesChartClasses.noDataLabel}
+                    variant="h6"
+                >
+                    {t("label.no-chart-data-available")}
+                </Typography>
+            ) : null}
         </div>
     );
 });

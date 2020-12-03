@@ -9,9 +9,16 @@ import { AlertCardData } from "../../components/alert-card/alert-card.interfaces
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { getAlert, updateAlert } from "../../rest/alert/alert-rest";
+import { TimeSeriesChartCard } from "../../components/timeseries-chart-card/timeseries-chart-card.component";
+import {
+    getAlert,
+    getAlertEvaluation,
+    updateAlert,
+} from "../../rest/alert/alert-rest";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group/subscription-group-rest";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
 import { getAlertCardData } from "../../utils/alert/alert-util";
 import { isValidNumberId } from "../../utils/params/params-util";
 import { getAlertsDetailPath } from "../../utils/route/routes-util";
@@ -27,6 +34,11 @@ export const AlertsDetailPage: FunctionComponent = () => {
     const params = useParams<AlertsDetailPageParams>();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
+
+    const [dateRange] = useDateRangePickerStore((state) => [state.dateRange]);
+    const [chartData, setChartData] = useState<AlertEvaluation | null>(
+        {} as AlertEvaluation
+    );
 
     useEffect(() => {
         const init = async (): Promise<void> => {
@@ -83,6 +95,40 @@ export const AlertsDetailPage: FunctionComponent = () => {
         setAlert(alert);
     };
 
+    // To fetch chartData on dateRange Change
+    useEffect(() => {
+        const init = async (): Promise<void> => {
+            setChartData(null);
+
+            setChartData(await fetchChartData());
+        };
+
+        init();
+    }, [dateRange, params.id]);
+
+    const fetchChartData = async (): Promise<AlertEvaluation | null> => {
+        if (!isValidNumberId(params.id)) {
+            return null;
+        }
+
+        let chartData = null;
+
+        try {
+            const alertEvalution = {
+                alert: ({ id: params.id } as unknown) as Alert,
+                start: dateRange.from.getTime(),
+                end: dateRange.to.getTime(),
+            } as AlertEvaluation;
+
+            chartData = await getAlertEvaluation(alertEvalution);
+        } catch (e) {
+            // Empty block
+            chartData = {} as AlertEvaluation;
+        }
+
+        return chartData;
+    };
+
     const onAlertStateToggle = async (
         alertCardData: AlertCardData
     ): Promise<void> => {
@@ -119,6 +165,12 @@ export const AlertsDetailPage: FunctionComponent = () => {
                                 hideViewDetailsLinks
                                 alert={alert}
                                 onAlertStateToggle={onAlertStateToggle}
+                            />
+                        </Grid>
+                        <Grid item md={12}>
+                            <TimeSeriesChartCard
+                                data={chartData as AlertEvaluation}
+                                title={t("label.chart")}
                             />
                         </Grid>
                     </Grid>

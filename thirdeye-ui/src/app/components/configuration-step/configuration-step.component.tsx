@@ -1,11 +1,12 @@
-import { Box, Card, Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Typography } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
+import { isUndefined } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { getGraphDataFromAPIData } from "../../utils/chart/chart-util";
 import { Button } from "../button/button.component";
-import LineChart from "../charts/line-graph.component";
+import DateRangePicker from "../date-picker/date-range-picker.component";
 import CommonCodeMirror from "../editor/code-mirror.component";
+import { TimeSeriesChartCard } from "../timeseries-chart-card/timeseries-chart-card.component";
 import { ConfigStepsProps } from "./configuration-step.interfaces";
 
 export const ConfigurationStep: FunctionComponent<ConfigStepsProps> = ({
@@ -64,25 +65,29 @@ export const ConfigurationStep: FunctionComponent<ConfigStepsProps> = ({
                 />
             </Grid>
             {showPreviewButton && (
-                <Grid item xs={12}>
-                    <Box>
-                        <Button
-                            color="primary"
-                            variant="text"
-                            onClick={handlePreviewAlert}
-                        >
-                            {t("label.preview-alert")}
-                        </Button>
-                    </Box>
+                <Grid container item direction="row" justify="space-between">
+                    <Grid item>
+                        <Box>
+                            <Button
+                                color="primary"
+                                variant="text"
+                                onClick={handlePreviewAlert}
+                            >
+                                {t("label.preview-alert")}
+                            </Button>
+                        </Box>
+                    </Grid>
+                    <Grid item direction="row-reverse">
+                        <DateRangePicker />
+                    </Grid>
                 </Grid>
             )}
-            {previewData ? (
+            {!isUndefined(previewData) ? (
                 <Grid item xs={12}>
-                    <Card>
-                        <LineChart
-                            data={getGraphDataFromAPIData(previewData)}
-                        />
-                    </Card>
+                    <TimeSeriesChartCard
+                        data={previewData}
+                        title={t("label.chart")}
+                    />
                 </Grid>
             ) : null}
         </Grid>

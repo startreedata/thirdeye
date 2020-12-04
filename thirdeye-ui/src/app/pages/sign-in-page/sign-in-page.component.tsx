@@ -4,12 +4,11 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { login } from "../../rest/auth/auth-rest";
-import { Auth } from "../../rest/dto/auth.interfaces";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { useAuthStore } from "../../store/auth/auth-store";
-import { useRedirectionPathStore } from "../../store/redirection-path/redirection-path-store";
-import { getSignInPath } from "../../utils/routes/routes-util";
+import { login } from "../../rest/auth-rest/auth-rest";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useAuthStore } from "../../store/auth-store/auth-store";
+import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
+import { getSignInPath } from "../../utils/routes-util/routes-util";
 import { useSignInPageStyles } from "./sign-in-page.styles";
 
 export const SignInPage: FunctionComponent = () => {
@@ -20,11 +19,11 @@ export const SignInPage: FunctionComponent = () => {
         state.setPageBreadcrumbs,
     ]);
     const [
-        redirectToPath,
-        clearRedirectToPath,
+        redirectionPath,
+        clearRedirectionPath,
     ] = useRedirectionPathStore((state) => [
-        state.redirectToPath,
-        state.clearRedirectToPath,
+        state.redirectionPath,
+        state.clearRedirectionPath,
     ]);
     const history = useHistory();
     const { t } = useTranslation();
@@ -39,17 +38,17 @@ export const SignInPage: FunctionComponent = () => {
         ]);
 
         setLoading(false);
-    }, [setPageBreadcrumbs, t]);
+    }, []);
 
     const performLogin = async (): Promise<void> => {
-        const auth: Auth = await login();
+        const auth = await login();
         setAccessToken(auth.accessToken);
 
         // Redirect if a path to redirect to is available, or let authentication state force reload
-        if (redirectToPath) {
-            history.push(redirectToPath);
+        if (redirectionPath) {
+            history.push(redirectionPath);
 
-            clearRedirectToPath();
+            clearRedirectionPath();
         }
     };
 

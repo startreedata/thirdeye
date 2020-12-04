@@ -1,41 +1,44 @@
 import { Grid } from "@material-ui/core";
-import { isEmpty, toNumber } from "lodash";
+import { cloneDeep, isEmpty, toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { AnomalyCard } from "../../components/anomaly-card/anomaly-card.component";
+import { AlertCard } from "../../components/alert-card/alert-card.component";
+import { AlertCardData } from "../../components/alert-card/alert-card.interfaces";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { TimeSeriesChartCard } from "../../components/timeseries-chart-card/timeseries-chart-card.component";
-import { getAlertEvaluation } from "../../rest/alert/alert-rest";
-import { getAnomaly } from "../../rest/anomaly/anomaly-rest";
-import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
 import {
-    getAnomalyCardData,
-    getAnomalyName,
-} from "../../utils/anomaly/anomaly-util";
-import { isValidNumberId } from "../../utils/params/params-util";
-import { getAnomaliesDetailPath } from "../../utils/routes/routes-util";
-import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
-import { AnomaliesDetailPageParams } from "./anomalies-detail-page.interfaces";
+    getAlert,
+    getAlertEvaluation,
+    updateAlert,
+} from "../../rest/alert-rest/alert-rest";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
+import { getAlertCardData } from "../../utils/alert-util/alert-util";
+import { isValidNumberId } from "../../utils/params-util/params-util";
+import { getAlertsDetailPath } from "../../utils/routes-util/routes-util";
+import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+import { AlertsDetailPageParams } from "./alerts-detail-page.interfaces";
 
-export const AnomaliesDetailPage: FunctionComponent = () => {
+export const AlertsDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [anomaly, setAnomaly] = useState<Anomaly>({} as Anomaly);
+    const [alert, setAlert] = useState<AlertCardData>({} as AlertCardData);
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const params = useParams<AnomaliesDetailPageParams>();
+    const params = useParams<AlertsDetailPageParams>();
     const { enqueueSnackbar } = useSnackbar();
+    const { t } = useTranslation();
 
     const [dateRange] = useDateRangePickerStore((state) => [state.dateRange]);
-    const [chartData, setChartData] = useState<AlertEvaluation | null>();
-    const { t } = useTranslation();
+    const [chartData, setChartData] = useState<AlertEvaluation | null>(
+        {} as AlertEvaluation
+    );
 
     useEffect(() => {
         const init = async (): Promise<void> => {
@@ -51,7 +54,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
-                    entity: t("label.anomaly"),
+                    entity: t("label.alert"),
                     id: params.id,
                 }),
                 SnackbarOption.ERROR
@@ -60,22 +63,36 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
             return;
         }
 
-        let anomaly = {} as Anomaly;
-        try {
-            anomaly = await getAnomaly(toNumber(params.id));
-        } catch (error) {
+        let alert = {} as AlertCardData;
+        const [
+            alertResponse,
+            subscriptionGroupsResponse,
+        ] = await Promise.allSettled([
+            getAlert(toNumber(params.id)),
+            getAllSubscriptionGroups(),
+        ]);
+
+        if (
+            alertResponse.status === "rejected" ||
+            subscriptionGroupsResponse.status === "rejected"
+        ) {
             enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
-        } finally {
-            setAnomaly(anomaly);
+        } else {
+            alert = getAlertCardData(
+                alertResponse.value,
+                subscriptionGroupsResponse.value
+            );
 
             // Create page breadcrumbs
             setPageBreadcrumbs([
                 {
-                    text: getAnomalyName(anomaly),
-                    path: getAnomaliesDetailPath(anomaly.id),
+                    text: alert.name,
+                    path: getAlertsDetailPath(alert.id),
                 },
             ]);
         }
+
+        setAlert(alert);
     };
 
     // To fetch chartData on dateRange Change
@@ -87,26 +104,47 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         };
 
         init();
-    }, [dateRange, anomaly?.alert?.id]);
+    }, [dateRange, params.id]);
 
     const fetchChartData = async (): Promise<AlertEvaluation | null> => {
-        if (!isValidNumberId(anomaly?.alert?.id + "")) {
+        if (!isValidNumberId(params.id)) {
             return null;
         }
+
         let chartData = null;
+
         try {
             const alertEvalution = {
-                alert: ({ id: anomaly?.alert?.id } as unknown) as Alert,
+                alert: ({ id: params.id } as unknown) as Alert,
                 start: dateRange.from.getTime(),
                 end: dateRange.to.getTime(),
             } as AlertEvaluation;
 
             chartData = await getAlertEvaluation(alertEvalution);
         } catch (e) {
+            // Empty block
             chartData = {} as AlertEvaluation;
         }
 
         return chartData;
+    };
+
+    const onAlertStateToggle = async (
+        alertCardData: AlertCardData
+    ): Promise<void> => {
+        let alertCopy = cloneDeep(alertCardData.alert);
+        alertCopy.active = !alertCopy.active;
+
+        try {
+            alertCopy = await updateAlert(alertCopy);
+
+            fetchData();
+        } catch (error) {
+            enqueueSnackbar(
+                t("message.update-error", { entity: t("label.alert") }),
+                SnackbarOption.ERROR
+            );
+        }
     };
 
     if (loading) {
@@ -119,13 +157,14 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents centerAlign title={getAnomalyName(anomaly)}>
-                {!isEmpty(anomaly) && (
+            <PageContents centerAlign title={alert.name ? alert.name : ""}>
+                {!isEmpty(alert) && (
                     <Grid container>
                         <Grid item md={12}>
-                            <AnomalyCard
+                            <AlertCard
                                 hideViewDetailsLinks
-                                anomaly={getAnomalyCardData(anomaly)}
+                                alert={alert}
+                                onAlertStateToggle={onAlertStateToggle}
                             />
                         </Grid>
                         <Grid item md={12}>

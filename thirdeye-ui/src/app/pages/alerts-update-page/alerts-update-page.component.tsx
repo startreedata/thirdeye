@@ -2,10 +2,9 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { getHomePath } from "../../utils/routes/routes-util";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 
-export const HomePage: FunctionComponent = () => {
+export const AlertsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
@@ -16,8 +15,12 @@ export const HomePage: FunctionComponent = () => {
         // Create page breadcrumbs
         setPageBreadcrumbs([
             {
-                text: t("label.home"),
-                path: getHomePath(),
+                text: "ALERT_NAME",
+                path: "",
+            },
+            {
+                text: t("label.update"),
+                path: "",
             },
         ]);
 

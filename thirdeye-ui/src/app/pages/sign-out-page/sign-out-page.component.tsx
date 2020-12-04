@@ -3,10 +3,10 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { logout } from "../../rest/auth/auth-rest";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { useAuthStore } from "../../store/auth/auth-store";
-import { getSignOutPath } from "../../utils/routes/routes-util";
+import { logout } from "../../rest/auth-rest/auth-rest";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useAuthStore } from "../../store/auth-store/auth-store";
+import { getSignOutPath } from "../../utils/routes-util/routes-util";
 import { useSignOutPageStyles } from "./sign-out-page.styles";
 
 export const SignOutPage: FunctionComponent = () => {
@@ -30,7 +30,7 @@ export const SignOutPage: FunctionComponent = () => {
         ]);
 
         setLoading(false);
-    }, [setPageBreadcrumbs, t]);
+    }, []);
 
     const performLogout = async (): Promise<void> => {
         await logout();

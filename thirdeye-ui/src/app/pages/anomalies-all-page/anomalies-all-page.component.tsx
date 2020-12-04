@@ -7,15 +7,15 @@ import { AnomalyCardData } from "../../components/anomaly-card/anomaly-card.inte
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { Search } from "../../components/search/search.component";
-import { getAllAnomalies } from "../../rest/anomaly/anomaly-rest";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { SearchBar } from "../../components/search-bar/search-bar.component";
+import { getAllAnomalies } from "../../rest/anomaly-rest/anomaly-rest";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import {
     filterAnomalies,
     getAnomalyCardDatas,
-} from "../../utils/anomaly/anomaly-util";
-import { getAnomaliesAllPath } from "../../utils/routes/routes-util";
-import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
+} from "../../utils/anomaly-util/anomaly-util";
+import { getAnomaliesAllPath } from "../../utils/routes-util/routes-util";
+import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -80,7 +80,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             <PageContents centerAlign title={t("label.anomalies")}>
                 <Grid container>
                     <Grid item md={12}>
-                        <Search
+                        <SearchBar
                             autoFocus
                             searchStatusText={t("label.search-count", {
                                 count: filteredAnomalies.length,

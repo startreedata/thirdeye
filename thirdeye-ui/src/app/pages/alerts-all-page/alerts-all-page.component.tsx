@@ -8,13 +8,16 @@ import { AlertCardData } from "../../components/alert-card/alert-card.interfaces
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { Search } from "../../components/search/search.component";
-import { getAllAlerts, updateAlert } from "../../rest/alert/alert-rest";
-import { getAllSubscriptionGroups } from "../../rest/subscription-group/subscription-group-rest";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { filterAlerts, getAlertCardDatas } from "../../utils/alert/alert-util";
-import { getAlertsAllPath } from "../../utils/routes/routes-util";
-import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
+import { SearchBar } from "../../components/search-bar/search-bar.component";
+import { getAllAlerts, updateAlert } from "../../rest/alert-rest/alert-rest";
+import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import {
+    filterAlerts,
+    getAlertCardDatas,
+} from "../../utils/alert-util/alert-util";
+import { getAlertsAllPath } from "../../utils/routes-util/routes-util";
+import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -109,7 +112,7 @@ export const AlertsAllPage: FunctionComponent = () => {
             <PageContents centerAlign title={t("label.alerts")}>
                 <Grid container>
                     <Grid item md={12}>
-                        <Search
+                        <SearchBar
                             autoFocus
                             searchStatusText={t("label.search-count", {
                                 count: filteredAlerts.length,

@@ -1,10 +1,12 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { PageNotFoundIndicator } from "../../components/page-not-found-indicator/page-not-found-indicator.component";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 
-export const AlertsUpdatePage: FunctionComponent = () => {
+export const PageNotFoundPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
@@ -15,17 +17,13 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         // Create page breadcrumbs
         setPageBreadcrumbs([
             {
-                text: "ALERT_NAME",
-                path: "",
-            },
-            {
-                text: t("label.update"),
+                text: t("label.page-not-found"),
                 path: "",
             },
         ]);
 
         setLoading(false);
-    }, [setPageBreadcrumbs, t]);
+    }, []);
 
     if (loading) {
         return (
@@ -37,7 +35,14 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageLoadingIndicator />
+            <PageContents
+                centerAlign
+                hideTimeRange
+                titleCenterAlign
+                title={t("label.page-not-found")}
+            >
+                <PageNotFoundIndicator />
+            </PageContents>
         </PageContainer>
     );
 };

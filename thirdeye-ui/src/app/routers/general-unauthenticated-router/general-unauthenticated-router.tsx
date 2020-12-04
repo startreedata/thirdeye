@@ -3,7 +3,7 @@ import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import { Breadcrumb } from "../../components/application-breadcrumbs/application-breadcrumbs.interfaces";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { SignInPage } from "../../pages/sign-in/sign-in-page.component";
+import { SignInPage } from "../../pages/sign-in-page/sign-in-page.component";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
 import {
@@ -18,8 +18,8 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     ] = useApplicationBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumb,
     ]);
-    const [setRedirectToPath] = useRedirectionPathStore((state) => [
-        state.setRedirectToPath,
+    const [setRedirectionPath] = useRedirectionPathStore((state) => [
+        state.setRedirectionPath,
     ]);
     const location = useLocation();
 
@@ -27,12 +27,12 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
         // Create app section breadcrumb
         setAppSectionBreadcrumb({} as Breadcrumb);
 
-        setRedirectionPath();
+        setupRedirectionPath();
 
         setLoading(false);
     }, []);
 
-    const setRedirectionPath = (): void => {
+    const setupRedirectionPath = (): void => {
         // If location is anything other than the sign in/out path, store it to redirect the user
         // after potential authentication
         if (
@@ -42,7 +42,7 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
             return;
         }
 
-        setRedirectToPath(location.pathname);
+        setRedirectionPath(location.pathname);
     };
 
     if (loading) {

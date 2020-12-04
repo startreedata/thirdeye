@@ -22,21 +22,24 @@ import { PageContents } from "../../components/page-contents/page-contents.compo
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { ReviewStep } from "../../components/review-step/review-step.component";
 import { CustomStepper } from "../../components/stepper/stepper.component";
-import { createAlert, getAlertEvaluation } from "../../rest/alert/alert-rest";
+import {
+    createAlert,
+    getAlertEvaluation,
+} from "../../rest/alert-rest/alert-rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     getAllSubscriptionGroups,
     updateSubscriptionGroup,
-} from "../../rest/subscription-group/subscription-group-rest";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+} from "../../rest/subscription-group-rest/subscription-group-rest";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import {
     ApplicationRoute,
     getAlertsCreatePath,
-} from "../../utils/routes/routes-util";
-import { SnackbarOption } from "../../utils/snackbar/snackbar-util";
+} from "../../utils/routes-util/routes-util";
+import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 

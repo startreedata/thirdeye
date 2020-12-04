@@ -3,9 +3,9 @@ import { Redirect, Route, Switch } from "react-router-dom";
 import { Breadcrumb } from "../../components/application-breadcrumbs/application-breadcrumbs.interfaces";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
-import { HomePage } from "../../pages/home/home-page.component";
-import { PageNotFoundPage } from "../../pages/page-not-found/page-not-found-page.component";
-import { SignOutPage } from "../../pages/sign-out/sign-out-page.component";
+import { HomePage } from "../../pages/home-page/home-page.component";
+import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
+import { SignOutPage } from "../../pages/sign-out-page/sign-out-page.component";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import {
     ApplicationRoute,

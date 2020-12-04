@@ -32,8 +32,8 @@ import {
     getAllSubscriptionGroups,
     updateSubscriptionGroup,
 } from "../../rest/subscription-group-rest/subscription-group-rest";
+import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
-import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import {
     ApplicationRoute,
@@ -65,10 +65,13 @@ export const AlertsCreatePage = withRouter(
 
         const [isFirstTime, setIsFirstTime] = useState(true);
 
-        const [dateRange] = useDateRangePickerStore((state) => [
-            state.dateRange,
+        const [
+            appTimeRange,
+            getAppTimeRangeDuration,
+        ] = useAppTimeRangeStore((state) => [
+            state.appTimeRange,
+            state.getAppTimeRangeDuration,
         ]);
-
         const { t } = useTranslation();
 
         useEffect(() => {
@@ -142,7 +145,7 @@ export const AlertsCreatePage = withRouter(
 
         useEffect(() => {
             handlePreviewAlert();
-        }, [dateRange]);
+        }, [appTimeRange]);
 
         const handlePreviewAlert = async (): Promise<void> => {
             if (isFirstTime) {
@@ -155,10 +158,11 @@ export const AlertsCreatePage = withRouter(
         };
 
         const fetchChartData = async (): Promise<AlertEvaluation | null> => {
+            const { startTime, endTime } = getAppTimeRangeDuration();
             const alertEvalution = {
                 alert: yaml.safeLoad(detectionConfig) as Alert,
-                start: dateRange.from.getTime(),
-                end: dateRange.to.getTime(),
+                start: startTime,
+                end: endTime,
             };
 
             let chartData = null;

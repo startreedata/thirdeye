@@ -13,8 +13,8 @@ import { getAlertEvaluation } from "../../rest/alert-rest/alert-rest";
 import { getAnomaly } from "../../rest/anomaly-rest/anomaly-rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
 import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
-import { useDateRangePickerStore } from "../../store/date-range-picker/date-range-picker-store";
 import {
     getAnomalyCardData,
     getAnomalyName,
@@ -33,7 +33,13 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     const params = useParams<AnomaliesDetailPageParams>();
     const { enqueueSnackbar } = useSnackbar();
 
-    const [dateRange] = useDateRangePickerStore((state) => [state.dateRange]);
+    const [
+        appTimeRange,
+        getAppTimeRangeDuration,
+    ] = useAppTimeRangeStore((state) => [
+        state.appTimeRange,
+        state.getAppTimeRangeDuration,
+    ]);
     const [chartData, setChartData] = useState<AlertEvaluation | null>();
     const { t } = useTranslation();
 
@@ -87,18 +93,25 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         };
 
         init();
-    }, [dateRange, anomaly?.alert?.id]);
+    }, [appTimeRange, anomaly?.alert?.id]);
 
     const fetchChartData = async (): Promise<AlertEvaluation | null> => {
-        if (!isValidNumberId(anomaly?.alert?.id + "")) {
-            return null;
+        const { startTime, endTime } = getAppTimeRangeDuration();
+
+        if (
+            !isValidNumberId(anomaly?.alert?.id + "") ||
+            !startTime ||
+            !endTime
+        ) {
+            // To turn off the loader
+            return {} as AlertEvaluation;
         }
         let chartData = null;
         try {
             const alertEvalution = {
                 alert: ({ id: anomaly?.alert?.id } as unknown) as Alert,
-                start: dateRange.from.getTime(),
-                end: dateRange.to.getTime(),
+                start: startTime,
+                end: endTime,
             } as AlertEvaluation;
 
             chartData = await getAlertEvaluation(alertEvalution);

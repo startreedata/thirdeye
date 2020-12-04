@@ -4,17 +4,17 @@ import { RedirectionPathStore } from "./redirection-path-store.interfaces";
 // Application store for redirection path, particularly to redirect after signing in
 export const useRedirectionPathStore = create<RedirectionPathStore>(
     (set: SetState<RedirectionPathStore>) => ({
-        redirectToPath: "",
+        redirectionPath: "",
 
-        setRedirectToPath: (path: string): void => {
+        setRedirectionPath: (path: string): void => {
             set({
-                redirectToPath: path,
+                redirectionPath: path,
             });
         },
 
-        clearRedirectToPath: (): void => {
+        clearRedirectionPath: (): void => {
             set({
-                redirectToPath: "",
+                redirectionPath: "",
             });
         },
     })

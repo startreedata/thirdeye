@@ -8,7 +8,7 @@ import { AlertsCreatePage } from "../../pages/alerts-create/alerts-create-page.c
 import { AlertsDetailPage } from "../../pages/alerts-detail/alerts-detail-page.component";
 import { AlertsUpdatePage } from "../../pages/alerts-update/alerts-update-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found/page-not-found-page.component";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import {
     ApplicationRoute,
     getAlertsAllPath,

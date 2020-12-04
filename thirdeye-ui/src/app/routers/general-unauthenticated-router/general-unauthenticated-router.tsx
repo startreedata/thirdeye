@@ -4,8 +4,8 @@ import { Breadcrumb } from "../../components/application-breadcrumbs/application
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { SignInPage } from "../../pages/sign-in/sign-in-page.component";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
-import { useRedirectionPathStore } from "../../store/redirection-path/redirection-path-store";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
 import {
     ApplicationRoute,
     getSignInPath,

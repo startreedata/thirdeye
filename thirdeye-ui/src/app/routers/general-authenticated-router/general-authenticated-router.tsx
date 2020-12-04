@@ -6,7 +6,7 @@ import { PageLoadingIndicator } from "../../components/page-loading-indicator/pa
 import { HomePage } from "../../pages/home/home-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found/page-not-found-page.component";
 import { SignOutPage } from "../../pages/sign-out/sign-out-page.component";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import {
     ApplicationRoute,
     getBasePath,

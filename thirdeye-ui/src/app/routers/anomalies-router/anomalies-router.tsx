@@ -6,7 +6,7 @@ import { PageLoadingIndicator } from "../../components/page-loading-indicator/pa
 import { AnomaliesAllPage } from "../../pages/anomalies-all/anomalies-all-page.component";
 import { AnomaliesDetailPage } from "../../pages/anomalies-detail/anomalies-detail-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found/page-not-found-page.component";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import {
     ApplicationRoute,
     getAnomaliesAllPath,

@@ -11,35 +11,35 @@ export const useApplicationBreadcrumbsStore = create<
         set: SetState<ApplicationBreadcrumbsStore>,
         get: GetState<ApplicationBreadcrumbsStore>
     ) => ({
-        routerBreadcrumb: {} as Breadcrumb,
+        appSectionBreadcrumb: {} as Breadcrumb,
         pageBreadcrumbs: [],
-        breadcrumbs: [],
+        applcationBreadcrumbs: [],
 
-        setRouterBreadcrumb: (breadcrumb: Breadcrumb): void => {
+        setAppSectionBreadcrumb: (breadcrumb: Breadcrumb): void => {
             const { pageBreadcrumbs } = get();
 
             set({
-                // Set routerBreadcrumb
-                routerBreadcrumb: breadcrumb,
+                // Set appSectionBreadcrumb
+                appSectionBreadcrumb: breadcrumb,
                 // Create application breadcrumbs using existing pageBreadcrumbs and new
-                // routerBreadcrumb depending on whether it's empty
-                breadcrumbs: isEmpty(breadcrumb)
+                // appSectionBreadcrumb depending on whether it's empty
+                applcationBreadcrumbs: isEmpty(breadcrumb)
                     ? pageBreadcrumbs
                     : [breadcrumb, ...pageBreadcrumbs],
             });
         },
 
         setPageBreadcrumbs: (breadcrumbs: Breadcrumb[]): void => {
-            const { routerBreadcrumb } = get();
+            const { appSectionBreadcrumb } = get();
 
             set({
                 // Set pageBreadcrumbs
                 pageBreadcrumbs: breadcrumbs,
                 // Create application breadcrumbs using new pageBreadcrumbs and existing
-                // routerBreadcrumb depending on whether it's empty
-                breadcrumbs: isEmpty(routerBreadcrumb)
+                // appSectionBreadcrumb depending on whether it's empty
+                applcationBreadcrumbs: isEmpty(appSectionBreadcrumb)
                     ? breadcrumbs
-                    : [routerBreadcrumb, ...breadcrumbs],
+                    : [appSectionBreadcrumb, ...breadcrumbs],
             });
         },
     })

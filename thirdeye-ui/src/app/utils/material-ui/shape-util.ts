@@ -1,6 +1,7 @@
 import { ShapeOptions } from "@material-ui/core/styles/shape";
+import { Dimension } from "./dimension-util";
 
 // CortexData Material-UI theme shape
 export const shapeOptions: ShapeOptions = {
-    borderRadius: 8,
+    borderRadius: Dimension.RADIUS_BORDER_DEFAULT,
 };

@@ -1,4 +1,4 @@
-import { toNumber } from "lodash";
+import { isInteger, toNumber } from "lodash";
 
 export const isValidNumberId = (param: string): boolean => {
     if (!param) {
@@ -7,5 +7,5 @@ export const isValidNumberId = (param: string): boolean => {
 
     const numberId = toNumber(param);
 
-    return !isNaN(numberId) && numberId >= 0;
+    return isInteger(numberId) && numberId >= 0;
 };

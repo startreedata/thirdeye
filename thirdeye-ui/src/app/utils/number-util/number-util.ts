@@ -1,22 +1,26 @@
 import numbro from "numbro";
 
-// Returns formatted, string representation of given number
-// For example:
+// Returns formatted string representation of given number
+// For example, mantissa = 2:
 // 10 -> 10
 // 1000 -> 1,000
 // 10.0 -> 10
 // 10.1 -> 10.10
 // 10.123 -> 10.12
 // 10.127 -> 10.13
-export const formatNumber = (num: number): string => {
+export const formatNumber = (
+    num: number,
+    mantissa = 2,
+    optionalMantissa = true
+): string => {
     return numbro(num).format({
         thousandSeparated: true,
-        mantissa: 2,
-        optionalMantissa: true,
+        mantissa: mantissa,
+        optionalMantissa: optionalMantissa,
     });
 };
 
-// Returns abbreviated, string representation of given large number
+// Returns abbreviated string representation of given large number
 // For example:
 // 1 -> 1
 // 10 -> 10
@@ -40,18 +44,22 @@ export const formatLargeNumber = (num: number): string => {
     } as numbro.Format);
 };
 
-// Returns percentage, string representation of given number
-// For example:
+// Returns percentage string representation of given number
+// For example, mantissa = 2::
 // 1 -> 100%
 // 10 -> 1,000%
 // 0.1 -> 10%
 // 0.01234 -> 1.23%
 // 0.01237 -> 1.24%
-export const formatPercentage = (num: number): string => {
+export const formatPercentage = (
+    num: number,
+    mantissa = 2,
+    optionalMantissa = true
+): string => {
     return numbro(num).format({
         output: "percent",
         thousandSeparated: true,
-        mantissa: 2,
-        optionalMantissa: true,
+        mantissa: mantissa,
+        optionalMantissa: optionalMantissa,
     });
 };

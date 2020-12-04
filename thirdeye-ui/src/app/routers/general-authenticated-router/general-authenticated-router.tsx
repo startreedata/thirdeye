@@ -11,7 +11,7 @@ import {
     ApplicationRoute,
     getBasePath,
     getHomePath,
-} from "../../utils/routes/routes-util";
+} from "../../utils/routes-util/routes-util";
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

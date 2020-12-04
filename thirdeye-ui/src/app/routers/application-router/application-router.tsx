@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { Route, Switch } from "react-router-dom";
 import { useAuthStore } from "../../store/auth/auth-store";
-import { ApplicationRoute } from "../../utils/routes/routes-util";
+import { ApplicationRoute } from "../../utils/routes-util/routes-util";
 import { AlertsRouter } from "../alerts-router/alerts-router";
 import { AnomaliesRouter } from "../anomalies-router/anomalies-router";
 import { GeneralAuthenticatedRouter } from "../general-authenticated-router/general-authenticated-router";

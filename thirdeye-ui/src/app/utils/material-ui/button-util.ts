@@ -1,15 +1,17 @@
+import { Dimension } from "./dimension-util";
+
 // CortexData Material-UI theme style overrides for Button
 export const buttonClasses = {
     outlined: {
         "&:hover": {
-            borderWidth: "2px",
+            borderWidth: Dimension.WIDTH_BORDER_BUTTON_OUTLINED,
         },
-        borderWidth: "2px",
+        borderWidth: Dimension.WIDTH_BORDER_BUTTON_OUTLINED,
     },
     outlinedPrimary: {
         "&:hover": {
-            borderWidth: "2px",
+            borderWidth: Dimension.WIDTH_BORDER_BUTTON_OUTLINED,
         },
-        borderWidth: "2px",
+        borderWidth: Dimension.WIDTH_BORDER_BUTTON_OUTLINED,
     },
 };

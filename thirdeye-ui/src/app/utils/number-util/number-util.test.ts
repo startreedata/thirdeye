@@ -24,7 +24,7 @@ describe("Number Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("formatNumber shall invoke numbro.format with appropriate input and return result", () => {
+    test("formatNumber shall invoke numbro.format with appropriate default input and return result", () => {
         const numberString = formatNumber(1);
 
         expect(numbro).toHaveBeenCalledWith(1);
@@ -32,6 +32,18 @@ describe("Number Util", () => {
             thousandSeparated: true,
             mantissa: 2,
             optionalMantissa: true,
+        });
+        expect(numberString).toEqual("testNumberFormat");
+    });
+
+    test("formatNumber shall invoke numbro.format with appropriate input and return result", () => {
+        const numberString = formatNumber(1, 1, false);
+
+        expect(numbro).toHaveBeenCalledWith(1);
+        expect(mockNumbro.format).toHaveBeenCalledWith({
+            thousandSeparated: true,
+            mantissa: 1,
+            optionalMantissa: false,
         });
         expect(numberString).toEqual("testNumberFormat");
     });
@@ -47,7 +59,7 @@ describe("Number Util", () => {
         expect(numberString).toEqual("testNumberFormat");
     });
 
-    test("formatPercentage shall invoke numbro.format with appropriate input and return result", () => {
+    test("formatPercentage shall invoke numbro.format with appropriate default input and return result", () => {
         const numberString = formatPercentage(1);
 
         expect(numbro).toHaveBeenCalledWith(1);
@@ -56,6 +68,19 @@ describe("Number Util", () => {
             thousandSeparated: true,
             mantissa: 2,
             optionalMantissa: true,
+        });
+        expect(numberString).toEqual("testNumberFormat");
+    });
+
+    test("formatPercentage shall invoke numbro.format with appropriate input and return result", () => {
+        const numberString = formatPercentage(1, 1, false);
+
+        expect(numbro).toHaveBeenCalledWith(1);
+        expect(mockNumbro.format).toHaveBeenCalledWith({
+            output: "percent",
+            thousandSeparated: true,
+            mantissa: 1,
+            optionalMantissa: false,
         });
         expect(numberString).toEqual("testNumberFormat");
     });

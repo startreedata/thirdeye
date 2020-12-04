@@ -5,8 +5,11 @@ import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
     formatDuration,
     formatLongDateAndTime,
-} from "../date-time/date-time-util";
-import { formatLargeNumber, formatPercentage } from "../number/number-util";
+} from "../date-time-util/date-time-util";
+import {
+    formatLargeNumber,
+    formatPercentage,
+} from "../number-util/number-util";
 
 export const getAnomalyName = (anomaly: Anomaly): string => {
     if (!anomaly) {

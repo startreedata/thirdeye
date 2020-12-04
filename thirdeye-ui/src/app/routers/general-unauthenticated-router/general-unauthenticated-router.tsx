@@ -9,7 +9,7 @@ import { useRedirectionPathStore } from "../../store/redirection-path/redirectio
 import {
     ApplicationRoute,
     getSignInPath,
-} from "../../utils/routes/routes-util";
+} from "../../utils/routes-util/routes-util";
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

@@ -23,18 +23,16 @@ describe("Anomaly Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("getAnomalyName shall return anomaly name for a valid anomaly", () => {
-        const name = getAnomalyName(mockAnomaly);
-
-        expect(name).toEqual("label.anomaly label.anomaly-id");
-        expect(i18n.t).toHaveBeenCalledWith("label.anomaly-id", {
-            id: mockAnomaly.id,
-        });
-    });
-
     test("getAnomalyName shall return no data available string for an invalid anomaly", () => {
         const name = getAnomalyName((null as unknown) as Anomaly);
 
         expect(name).toEqual("label.no-data-available-marker");
+    });
+
+    test("getAnomalyName shall return anomaly name for a valid anomaly", () => {
+        const name = getAnomalyName(mockAnomaly);
+
+        expect(name).toEqual("label.anomaly label.anomaly-id");
+        expect(i18n.t).toHaveBeenCalledWith("label.anomaly-id", { id: 1 });
     });
 });

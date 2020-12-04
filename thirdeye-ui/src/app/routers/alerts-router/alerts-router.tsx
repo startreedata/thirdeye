@@ -13,7 +13,7 @@ import {
     ApplicationRoute,
     getAlertsAllPath,
     getAlertsPath,
-} from "../../utils/routes/routes-util";
+} from "../../utils/routes-util/routes-util";
 
 export const AlertsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

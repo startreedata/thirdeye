@@ -22,6 +22,13 @@ describe("Axios Util", () => {
         expect(requestInterceptor).toBeInstanceOf(Function);
     });
 
+    test("axios request interceptor shall not attach invalid access token to request header", () => {
+        const requestInterceptor = getRequestInterceptor("");
+        const requestConfig = requestInterceptor({});
+
+        expect(requestConfig.headers).toBeUndefined();
+    });
+
     test("axios request interceptor shall attach valid access token to request header", () => {
         const requestInterceptor = getRequestInterceptor("testToken");
         const requestConfig = requestInterceptor({});
@@ -29,13 +36,6 @@ describe("Axios Util", () => {
         expect(requestConfig.headers).toEqual({
             Authorization: "Bearer testToken",
         });
-    });
-
-    test("axios request interceptor shall not attach invalid access token to request header", () => {
-        const requestInterceptor = getRequestInterceptor("");
-        const requestConfig = requestInterceptor({});
-
-        expect(requestConfig.headers).toBeUndefined();
     });
 
     test("getFulfilledResponseInterceptor shall return an axios response interceptor", () => {

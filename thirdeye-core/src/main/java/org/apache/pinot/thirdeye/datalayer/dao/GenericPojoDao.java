@@ -613,10 +613,8 @@ public class GenericPojoDao {
 
   @SuppressWarnings("unchecked")
   public <E extends AbstractBean> List<E> filter(final DaoFilter daoFilter) {
-    /*
-     * If the predicate is null, you can just do getAll() which doesn't need to fetch IDs first
-     */
-    requireNonNull(daoFilter.getPredicate());
+    requireNonNull(daoFilter.getPredicate(), "If the predicate is null, you can just do "
+        + "getAll() which doesn't need to fetch IDs first");
 
     final Class<? extends AbstractBean> beanClass = daoFilter.getBeanClass();
     final List<Long> ids = filterIds(daoFilter);

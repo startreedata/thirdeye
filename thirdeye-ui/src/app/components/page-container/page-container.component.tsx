@@ -1,6 +1,6 @@
 import { Toolbar } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs/application-breadcrumbs-store";
+import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import { ApplicationBreadcrumbs } from "../application-breadcrumbs/application-breadcrumbs.component";
 import { PageContainerProps } from "./page-container.interfaces";
 import { usePageContainerStyles } from "./page-container.styles";
@@ -9,8 +9,8 @@ export const PageContainer: FunctionComponent<PageContainerProps> = (
     props: PageContainerProps
 ) => {
     const pageContainerClasses = usePageContainerStyles();
-    const [breadcrumbs] = useApplicationBreadcrumbsStore((state) => [
-        state.breadcrumbs,
+    const [applcationBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+        state.applcationBreadcrumbs,
     ]);
 
     return (
@@ -20,7 +20,7 @@ export const PageContainer: FunctionComponent<PageContainerProps> = (
 
             {!props.hideApplicaionBreadCrumbs && (
                 // Application breadcrumbs
-                <ApplicationBreadcrumbs breadcrumbs={breadcrumbs} />
+                <ApplicationBreadcrumbs breadcrumbs={applcationBreadcrumbs} />
             )}
 
             <div className={pageContainerClasses.innerContainer}>

@@ -10,9 +10,7 @@ import {
     MenuItem,
     Typography,
 } from "@material-ui/core";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { ExpandLess, ExpandMore, MoreVert } from "@material-ui/icons";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +18,7 @@ import { useHistory } from "react-router-dom";
 import {
     getAlertsDetailPath,
     getAlertsUpdatePath,
-} from "../../utils/routes/routes-util";
+} from "../../utils/routes-util/routes-util";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { AlertCardProps } from "./alert-card.interfaces";
 import { useAlertCardStyles } from "./alert-card.styles";
@@ -85,9 +83,10 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 />
                             </Typography>
                         </Grid>
+
                         <Grid item>
                             <IconButton onClick={onAlertOptionsClick}>
-                                <MoreVertIcon />
+                                <MoreVert />
                             </IconButton>
                         </Grid>
                     </Grid>
@@ -122,9 +121,11 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         {t("label.view-details")}
                     </MenuItem>
                 )}
+
                 <MenuItem onClick={onAlertEdit}>
                     {t("label.edit-alert")}
                 </MenuItem>
+
                 <MenuItem onClick={onAlertStateToggle}>
                     {props.alert.active
                         ? t("label.deactivate-alert")
@@ -159,6 +160,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                     <strong>{t("label.detection-type")}</strong>
                                 </Typography>
                             </div>
+
                             {!isEmpty(props.alert.detectionTypes) &&
                                 props.alert.detectionTypes.length > 1 && (
                                     <div
@@ -171,12 +173,12 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             onClick={onExpandedToggle}
                                         >
                                             {(expanded && (
-                                                <ExpandLessIcon
+                                                <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
                                             )) || (
-                                                <ExpandMoreIcon
+                                                <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
                                                 />
@@ -184,6 +186,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         </Link>
                                     </div>
                                 )}
+
                             <div className={alertCardClasses.bottomRowValue}>
                                 {(isEmpty(props.alert.detectionTypes) && (
                                     <Typography variant="body2">
@@ -228,6 +231,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                     )}
                             </div>
                         </Grid>
+
                         {/* Dataset / Metric */}
                         <Grid item md={3}>
                             <div className={alertCardClasses.bottomRowLabel}>
@@ -237,6 +241,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                     </strong>
                                 </Typography>
                             </div>
+
                             {!isEmpty(props.alert.datasetAndMetrics) &&
                                 props.alert.datasetAndMetrics.length > 1 && (
                                     <div
@@ -249,12 +254,12 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             onClick={onExpandedToggle}
                                         >
                                             {(expanded && (
-                                                <ExpandLessIcon
+                                                <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
                                             )) || (
-                                                <ExpandMoreIcon
+                                                <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
                                                 />
@@ -262,6 +267,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         </Link>
                                     </div>
                                 )}
+
                             <div className={alertCardClasses.bottomRowValue}>
                                 {(isEmpty(props.alert.datasetAndMetrics) && (
                                     <Typography variant="body2">
@@ -331,6 +337,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                     <strong>{t("label.filtered-by")}</strong>
                                 </Typography>
                             </div>
+
                             {!isEmpty(props.alert.filteredBy) &&
                                 props.alert.filteredBy.length > 1 && (
                                     <div
@@ -343,12 +350,12 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             onClick={onExpandedToggle}
                                         >
                                             {(expanded && (
-                                                <ExpandLessIcon
+                                                <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
                                             )) || (
-                                                <ExpandMoreIcon
+                                                <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
                                                 />
@@ -356,6 +363,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         </Link>
                                     </div>
                                 )}
+
                             <div className={alertCardClasses.bottomRowValue}>
                                 {(isEmpty(props.alert.filteredBy) && (
                                     <Typography variant="body2">
@@ -409,6 +417,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                     </strong>
                                 </Typography>
                             </div>
+
                             {!isEmpty(props.alert.subscriptionGroups) &&
                                 props.alert.subscriptionGroups.length > 1 && (
                                     <div
@@ -421,12 +430,12 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             onClick={onExpandedToggle}
                                         >
                                             {(expanded && (
-                                                <ExpandLessIcon
+                                                <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
                                             )) || (
-                                                <ExpandMoreIcon
+                                                <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
                                                 />
@@ -434,6 +443,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         </Link>
                                     </div>
                                 )}
+
                             <div className={alertCardClasses.bottomRowValue}>
                                 {(isEmpty(props.alert.subscriptionGroups) && (
                                     <Typography variant="body2">

@@ -10,14 +10,14 @@ import {
     MenuItem,
     Typography,
 } from "@material-ui/core";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { MoreVert } from "@material-ui/icons";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import {
     getAlertsDetailPath,
     getAnomaliesDetailPath,
-} from "../../utils/routes/routes-util";
+} from "../../utils/routes-util/routes-util";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
 import { useAnomalyCardStyles } from "./anomaly-card.styles";
@@ -60,7 +60,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                 disableTypography
                 action={
                     <IconButton onClick={onAnomalyOptionsClick}>
-                        <MoreVertIcon />
+                        <MoreVert />
                     </IconButton>
                 }
                 title={
@@ -93,6 +93,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                         {t("label.view-details")}
                     </MenuItem>
                 )}
+
                 <MenuItem onClick={onInvestigate}>
                     {t("label.investigate")}
                 </MenuItem>
@@ -106,6 +107,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             <Typography variant="body2">
                                 <strong>{t("label.alert")}</strong>
                             </Typography>
+
                             <Link
                                 component="button"
                                 variant="body2"
@@ -125,6 +127,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                                     {t("label.current-/-predicted")}
                                 </strong>
                             </Typography>
+
                             <Typography variant="body2">
                                 <TextHighlighter
                                     searchWords={props.searchWords}
@@ -144,6 +147,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             <Typography variant="body2">
                                 <strong>{t("label.deviation")}</strong>
                             </Typography>
+
                             <Typography
                                 className={
                                     props.anomaly.negativeDeviation
@@ -170,6 +174,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             <Typography variant="body2">
                                 <strong>{t("label.duration")}</strong>
                             </Typography>
+
                             <Typography variant="body2">
                                 <TextHighlighter
                                     searchWords={props.searchWords}
@@ -183,6 +188,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             <Typography variant="body2">
                                 <strong>{t("label.start")}</strong>
                             </Typography>
+
                             <Typography variant="body2">
                                 <TextHighlighter
                                     searchWords={props.searchWords}
@@ -196,6 +202,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             <Typography variant="body2">
                                 <strong>{t("label.end")}</strong>
                             </Typography>
+
                             <Typography variant="body2">
                                 <TextHighlighter
                                     searchWords={props.searchWords}

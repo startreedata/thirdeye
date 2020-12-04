@@ -1,5 +1,5 @@
 import { IconButton } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { Close } from "@material-ui/icons";
 import { SnackbarKey, SnackbarProvider } from "notistack";
 import React, { createRef, FunctionComponent, ReactNode } from "react";
 import { ApplicationSnackbarProviderProps } from "./application-snackbar-provider.interfaces";
@@ -26,7 +26,7 @@ export const ApplicationSnackbarProvider: FunctionComponent<ApplicationSnackbarP
                             onCloseSnackbar(key);
                         }}
                     >
-                        <CloseIcon />
+                        <Close />
                     </IconButton>
                 );
             }}

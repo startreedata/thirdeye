@@ -1,5 +1,5 @@
 import { Box, Breadcrumbs, Link, Toolbar } from "@material-ui/core";
-import NavigateNextIcon from "@material-ui/icons/NavigateNext";
+import { NavigateNext } from "@material-ui/icons";
 import React, { FunctionComponent } from "react";
 import { useHistory } from "react-router-dom";
 import { Dimension } from "../../utils/material-ui/dimension-util";
@@ -25,7 +25,7 @@ export const ApplicationBreadcrumbs: FunctionComponent<ApplicationBreadcrumbsPro
         >
             {/* Required to appropriately layout children in Breadcrumbs */}
             <Toolbar variant="dense">
-                <Breadcrumbs separator={<NavigateNextIcon />}>
+                <Breadcrumbs separator={<NavigateNext />}>
                     {props.breadcrumbs.map((breadcrumb, index) => (
                         <Link
                             className={

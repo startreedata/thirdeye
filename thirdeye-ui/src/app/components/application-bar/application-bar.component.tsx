@@ -1,11 +1,11 @@
 import { AppBar, Button, Link, Toolbar } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
+import { Add } from "@material-ui/icons";
 import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { ReactComponent as ThirdEye } from "../../../assets/icons/third-eye.svg";
-import { useAuthStore } from "../../store/auth/auth-store";
+import { useAuthStore } from "../../store/auth-store/auth-store";
 import {
     ApplicationRoute,
     getAlertsCreatePath,
@@ -15,7 +15,7 @@ import {
     getHomePath,
     getSignInPath,
     getSignOutPath,
-} from "../../utils/routes/routes-util";
+} from "../../utils/routes-util/routes-util";
 import { useApplicationBarStyles } from "./application-bar.styles";
 
 export const ApplicationBar: FunctionComponent = () => {
@@ -124,7 +124,7 @@ export const ApplicationBar: FunctionComponent = () => {
                                 applicationBarClasses.rightAlign
                             )}
                             color="primary"
-                            startIcon={<AddIcon />}
+                            startIcon={<Add />}
                             variant="outlined"
                             onClick={onCreateAlert}
                         >

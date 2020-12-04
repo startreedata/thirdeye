@@ -4,13 +4,13 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApplicationBar } from "./components/application-bar/application-bar.component";
 import { ApplicationRouter } from "./routers/application-router/application-router";
-import { useAuthStore } from "./store/auth/auth-store";
+import { useAuthStore } from "./store/auth-store/auth-store";
 import {
     getFulfilledResponseInterceptor,
     getRejectedResponseInterceptor,
     getRequestInterceptor,
-} from "./utils/axios/axios-util";
-import { SnackbarOption } from "./utils/snackbar/snackbar-util";
+} from "./utils/axios-util/axios-util";
+import { SnackbarOption } from "./utils/snackbar-util/snackbar-util";
 
 // ThirdEye UI app
 export const App: FunctionComponent = () => {

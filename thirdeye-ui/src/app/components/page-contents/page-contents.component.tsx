@@ -1,7 +1,8 @@
 import { Grid, Typography } from "@material-ui/core";
 import classnames from "classnames";
 import React, { FunctionComponent } from "react";
-import DateRangePicker from "../date-picker/date-range-picker.component";
+import { useTimeRangeStore } from "../../store/time-range-store/time-range-store";
+import { TimeRangeSelector } from "../time-range/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.style";
 
@@ -9,6 +10,10 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     props: PageContentsProps
 ) => {
     const pageContentsClasses = usePageContentsStyles();
+    const [timeRange, setTimeRange] = useTimeRangeStore((state) => [
+        state.timeRange,
+        state.setTimeRange,
+    ]);
 
     return (
         <main
@@ -41,10 +46,14 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                             <Typography variant="h5">{props.title}</Typography>
                         </Grid>
 
-                        {/* Time range */}
+                        {/* Time range selector */}
                         {!props.hideTimeRange && (
                             <Grid item>
-                                <DateRangePicker />
+                                {/* <DateRangePicker /> */}
+                                <TimeRangeSelector
+                                    timeRange={timeRange}
+                                    onChange={setTimeRange}
+                                />
                             </Grid>
                         )}
                     </Grid>

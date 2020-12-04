@@ -3,12 +3,14 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_UNEXPECTED_QUERY_PARAM;
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.pinot.thirdeye.api.ThirdEyeApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.bao.AbstractManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
@@ -65,18 +68,29 @@ public abstract class CrudResource<ApiT extends ThirdEyeApi, DtoT extends Abstra
     return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
   }
 
-  protected Predicate buildFilterPredicate(final MultivaluedMap<String, String> queryParameters) {
+  protected DaoFilter buildFilter(final MultivaluedMap<String, String> queryParameters) {
+    final ImmutableSet<String> keywords = ImmutableSet.of("limit");
+
+    final DaoFilter daoFilter = new DaoFilter();
+    optional(queryParameters.getFirst("limit"))
+        .map(Integer::valueOf)
+        .ifPresent(daoFilter::setLimit);
 
     List<Predicate> predicates = new ArrayList<>();
     for (Map.Entry<String, List<String>> e : queryParameters.entrySet()) {
+      final String qParam = e.getKey();
+      if (keywords.contains(qParam)) {
+        continue;
+      }
       final String columnName = ensureExists(
-          apiToBeanMap.get(e.getKey()),
+          apiToBeanMap.get(qParam),
           ERR_UNEXPECTED_QUERY_PARAM,
           apiToBeanMap.keySet());
       final Object[] objects = e.getValue().toArray();
       predicates.add(Predicate.IN(columnName, objects));
     }
-    return Predicate.AND(predicates.toArray(new Predicate[]{}));
+    return daoFilter
+        .setPredicate(Predicate.AND(predicates.toArray(new Predicate[]{})));
   }
 
   @GET
@@ -90,7 +104,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeApi, DtoT extends Abstra
 
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final List<DtoT> results = queryParameters.size() > 0
-        ? dtoManager.findByPredicate(buildFilterPredicate(queryParameters))
+        ? dtoManager.filter(buildFilter(queryParameters))
         : dtoManager.findAll();
 
     return respondOk(results.stream().map(this::toApi));

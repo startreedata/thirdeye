@@ -19,7 +19,9 @@
 
 package org.apache.pinot.thirdeye.datalayer.util;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Sets;
 import java.lang.reflect.Array;
@@ -41,6 +43,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
 import org.slf4j.Logger;
@@ -322,7 +325,7 @@ public class SqlQueryBuilder {
     for (Pair<String, Object> pair : parametersList) {
       String dbFieldName = pair.getKey();
       ColumnInfo info = columnInfoMap.get(dbFieldName);
-      Preconditions.checkNotNull(info,
+      checkNotNull(info,
           String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
       prepareStatement.setObject(parameterIndex++, pair.getValue(), info.sqlType);
       LOG.debug("Setting {} to {}", pair.getKey(), pair.getValue());
@@ -356,10 +359,55 @@ public class SqlQueryBuilder {
     for (Pair<String, Object> pair : parametersList) {
       String dbFieldName = pair.getKey();
       ColumnInfo info = columnInfoMap.get(dbFieldName);
-      Preconditions.checkNotNull(info,
+      checkNotNull(info,
           String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
       prepareStatement.setObject(parameterIndex++, pair.getValue(), info.sqlType);
       LOG.debug("Setting {} to {}", pair.getKey(), pair.getValue());
+    }
+    return prepareStatement;
+  }
+
+  public PreparedStatement createStatement(Connection connection, DaoFilter daoFilter,
+      final Class<? extends AbstractIndexEntity> entityClass)
+      throws Exception {
+    String tableName = entityMappingHolder.tableToEntityNameMap.inverse()
+        .get(entityClass.getSimpleName());
+    final BiMap<String, String> entityNameToDBNameMapping =
+        entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
+
+    List<Pair<String, Object>> parametersList = new ArrayList<>();
+
+    StringBuilder whereClause = new StringBuilder(" WHERE ");
+    generateWhereClause(entityNameToDBNameMapping,
+        daoFilter.getPredicate(),
+        parametersList,
+        whereClause);
+    final StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM " + tableName);
+    sqlBuilder.append(whereClause);
+
+    optional(daoFilter.getOrderByKey())
+        .ifPresent(key -> sqlBuilder
+            .append(" ORDER BY ")
+            .append(key)
+            .append(daoFilter.isDesc() ? " DESC" : ""));
+
+    optional(daoFilter.getLimit())
+        .ifPresent(limit -> sqlBuilder.append(" LIMIT ").append(limit));
+
+    optional(daoFilter.getOffset())
+        .ifPresent(offset -> sqlBuilder.append(" OFFSET ").append(offset));
+
+    final PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
+    int parameterIndex = 1;
+    final Map<String, ColumnInfo> columnInfoMap =
+        entityMappingHolder.columnInfoPerTable.get(tableName);
+
+    for (Pair<String, Object> pair : parametersList) {
+      final String dbFieldName = pair.getKey();
+      final ColumnInfo info = columnInfoMap.get(dbFieldName);
+      checkNotNull(info,
+          String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
+      prepareStatement.setObject(parameterIndex++, pair.getValue(), info.sqlType);
     }
     return prepareStatement;
   }
@@ -379,7 +427,7 @@ public class SqlQueryBuilder {
 
     if (predicate.getLhs() != null) {
       columnName = entityNameToDBNameMapping.get(predicate.getLhs());
-      Preconditions.checkNotNull(columnName, String
+      checkNotNull(columnName, String
           .format("Found field '%s' but expected %s", predicate.getLhs(),
               entityNameToDBNameMapping.keySet()));
     }

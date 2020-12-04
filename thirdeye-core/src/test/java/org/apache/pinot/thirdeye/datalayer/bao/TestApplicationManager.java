@@ -18,8 +18,10 @@ package org.apache.pinot.thirdeye.datalayer.bao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
+import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -34,6 +36,13 @@ public class TestApplicationManager {
 
   private TestDatabase db;
   private ApplicationManager applicationManager;
+
+  private static ApplicationDTO newApplication(final String name) {
+    ApplicationDTO request = new ApplicationDTO();
+    request.setApplication(name);
+    request.setRecipients(APPLICATION_EMAIL);
+    return request;
+  }
 
   @BeforeClass
   void beforeClass() {
@@ -50,9 +59,7 @@ public class TestApplicationManager {
 
   @Test
   public void testCreateApplication() {
-    ApplicationDTO request = new ApplicationDTO();
-    request.setApplication(APPLICATION_NAME);
-    request.setRecipients(APPLICATION_EMAIL);
+    ApplicationDTO request = newApplication(APPLICATION_NAME);
     applicationId = applicationManager.save(request);
     assertThat(applicationId).isGreaterThan(0);
   }
@@ -66,8 +73,37 @@ public class TestApplicationManager {
     assertThat(response.getId()).isEqualTo(applicationId);
     assertThat(response.getApplication()).isEqualTo(APPLICATION_NAME);
     assertThat(response.getRecipients()).isEqualTo(APPLICATION_EMAIL);
+  }
 
-    assertThat(applicationManager.findAll().size()).isEqualTo(1);
+  @Test(dependsOnMethods = {"testCreateApplication"})
+  public void testFilter() {
+    assertThat(applicationManager.findAll().size())
+        .isEqualTo(1);
+    assertThat(applicationManager.filter(new DaoFilter()
+        .setPredicate(Predicate.EQ("application", APPLICATION_NAME))).size())
+        .isEqualTo(1);
+    assertThat(applicationManager.filter(new DaoFilter()
+        .setPredicate(Predicate.EQ("baseId", applicationId))).size())
+        .isEqualTo(1);
+    assertThat(applicationManager.filter(new DaoFilter()
+        .setPredicate(Predicate.EQ("baseId", applicationId))).size())
+        .isEqualTo(1);
+
+    final Long id2 = applicationManager.save(newApplication("app2"));
+    assertThat(applicationManager.findAll().size())
+        .isEqualTo(2);
+
+    assertThat(applicationManager.filter(new DaoFilter()
+        .setPredicate(Predicate.GT("baseId", 0))
+        .setLimit(1))
+        .size())
+        .isEqualTo(1);
+    assertThat(id2).isGreaterThan(applicationId); // else the next assert will fail!
+    assertThat(applicationManager.filter(new DaoFilter()
+        .setPredicate(Predicate.GT("baseId", applicationId)))
+        .size())
+        .isEqualTo(1);
+    applicationManager.deleteById(id2);
   }
 
   @Test(dependsOnMethods = {"testFetchApplication"})

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.bao.AbstractManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
@@ -163,6 +164,11 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   public List<E> findByPredicate(Predicate predicate) {
     List<? extends AbstractBean> list = genericPojoDao.get(predicate, beanClass);
     return convertBeanListToDTOList(list);
+  }
+
+  @Override
+  public List<E> filter(final DaoFilter daoFilter) {
+    return convertBeanListToDTOList(genericPojoDao.filter(daoFilter.setBeanClass(beanClass)));
   }
 
   @Override

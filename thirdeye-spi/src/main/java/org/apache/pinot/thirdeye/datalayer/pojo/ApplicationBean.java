@@ -32,15 +32,17 @@ public class ApplicationBean extends AbstractBean {
     return application;
   }
 
-  public void setApplication(String application) {
+  public ApplicationBean setApplication(final String application) {
     this.application = application;
+    return this;
   }
 
   public String getRecipients() {
     return recipients;
   }
 
-  public void setRecipients(String recipients) {
+  public ApplicationBean setRecipients(final String recipients) {
     this.recipients = recipients;
+    return this;
   }
 }

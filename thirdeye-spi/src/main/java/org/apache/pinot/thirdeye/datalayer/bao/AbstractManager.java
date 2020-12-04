@@ -23,6 +23,7 @@ package org.apache.pinot.thirdeye.datalayer.bao;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
@@ -53,6 +54,8 @@ public interface AbstractManager<E extends AbstractDTO> {
   List<E> findByParams(Map<String, Object> filters);
 
   List<E> findByPredicate(Predicate predicate);
+
+  List<E> filter(DaoFilter daoFilter);
 
   List<Long> findIdsByPredicate(Predicate predicate);
 

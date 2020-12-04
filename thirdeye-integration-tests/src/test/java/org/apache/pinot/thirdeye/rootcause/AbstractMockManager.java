@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.rootcause;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.bao.AbstractManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
@@ -50,6 +51,11 @@ public abstract class AbstractMockManager<T extends AbstractDTO> implements Abst
   @Override
   public List<T> findByIds(List<Long> id) {
     throw new AssertionError("not implemented");
+  }
+
+  @Override
+  public List<T> filter(final DaoFilter daoFilter) {
+    throw new UnsupportedOperationException();
   }
 
   @Override

@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.dao;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -42,6 +44,7 @@ import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractJsonEntity;
@@ -121,6 +124,8 @@ public class GenericPojoDao {
       new HashMap<Class<? extends AbstractBean>, GenericPojoDao.PojoInfo>();
 
   static String DEFAULT_BASE_TABLE_NAME = "GENERIC_JSON_ENTITY";
+  static ModelMapper MODEL_MAPPER = new ModelMapper();
+  static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   static {
     pojoInfoMap.put(AnomalyFeedbackBean.class,
@@ -181,27 +186,22 @@ public class GenericPojoDao {
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, AnomalySubscriptionGroupNotificationIndex.class));
   }
 
+  @Inject
+  DataSource dataSource;
+  @Inject
+  SqlQueryBuilder sqlQueryBuilder;
+  @Inject
+  GenericResultSetMapper genericResultSetMapper;
+
+  public GenericPojoDao() {
+  }
+
   private static PojoInfo newPojoInfo(String baseTableName,
       Class<? extends AbstractIndexEntity> indexEntityClass) {
     PojoInfo pojoInfo = new PojoInfo();
     pojoInfo.baseTableName = baseTableName;
     pojoInfo.indexEntityClass = indexEntityClass;
     return pojoInfo;
-  }
-
-  @Inject
-  DataSource dataSource;
-
-  @Inject
-  SqlQueryBuilder sqlQueryBuilder;
-
-  @Inject
-  GenericResultSetMapper genericResultSetMapper;
-
-  static ModelMapper MODEL_MAPPER = new ModelMapper();
-  static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  public GenericPojoDao() {
   }
 
   /**
@@ -611,6 +611,53 @@ public class GenericPojoDao {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractBean> List<E> filter(final DaoFilter daoFilter) {
+    /*
+     * If the predicate is null, you can just do getAll() which doesn't need to fetch IDs first
+     */
+    requireNonNull(daoFilter.getPredicate());
+
+    final Class<? extends AbstractBean> beanClass = daoFilter.getBeanClass();
+    final List<Long> ids = filterIds(daoFilter);
+    if (ids.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    long tStart = System.nanoTime();
+    try {
+      //apply the predicates and fetch the primary key ids
+      //look up the id and convert them to bean
+      return runTask(connection -> {
+        //fetch the entities
+        List<E> results = new ArrayList<>();
+        try (PreparedStatement selectStatement = sqlQueryBuilder
+            .createFindByIdStatement(connection, GenericJsonEntity.class, ids)) {
+          final List<GenericJsonEntity> entities;
+          try (ResultSet resultSet = selectStatement.executeQuery()) {
+            entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
+          }
+          if (CollectionUtils.isNotEmpty(entities)) {
+            for (GenericJsonEntity entity : entities) {
+              final String json = entity.getJsonVal();
+              ThirdeyeMetricsUtil.dbReadByteCounter.inc(json.length());
+
+              E bean = (E) OBJECT_MAPPER.readValue(json, beanClass);
+              bean.setId(entity.getId())
+                  .setVersion(entity.getVersion())
+                  .setUpdateTime(entity.getUpdateTime());
+              results.add(bean);
+            }
+          }
+        }
+        return results;
+      }, Collections.emptyList());
+    } finally {
+      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
+      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+    }
+  }
+
   /**
    * @param parameterizedSQL second part of the sql (omit select from table section)
    */
@@ -720,29 +767,33 @@ public class GenericPojoDao {
 
   public <E extends AbstractBean> List<Long> getIdsByPredicate(final Predicate predicate,
       final Class<E> pojoClass) {
+    return filterIds(new DaoFilter()
+        .setPredicate(predicate)
+        .setBeanClass(pojoClass)
+    );
+  }
+
+  public <E extends AbstractBean> List<Long> filterIds(final DaoFilter daoFilter) {
     long tStart = System.nanoTime();
     try {
       //apply the predicates and fetch the primary key ids
-      return runTask(new QueryTask<List<Long>>() {
-        @Override
-        public List<Long> handle(Connection connection) throws Exception {
-          PojoInfo pojoInfo = pojoInfoMap.get(pojoClass);
-          //find the matching ids
-          List<? extends AbstractIndexEntity> indexEntities;
-          try (PreparedStatement findByParamsStatement = sqlQueryBuilder
-              .createFindByParamsStatement(connection, pojoInfo.indexEntityClass, predicate)) {
-            try (ResultSet rs = findByParamsStatement.executeQuery()) {
-              indexEntities = genericResultSetMapper.mapAll(rs, pojoInfo.indexEntityClass);
-            }
+      return runTask(connection -> {
+        PojoInfo pojoInfo = pojoInfoMap.get(daoFilter.getBeanClass());
+        //find the matching ids
+        List<? extends AbstractIndexEntity> indexEntities;
+        try (PreparedStatement findByParamsStatement = sqlQueryBuilder
+            .createStatement(connection, daoFilter, pojoInfo.indexEntityClass)) {
+          try (ResultSet rs = findByParamsStatement.executeQuery()) {
+            indexEntities = genericResultSetMapper.mapAll(rs, pojoInfo.indexEntityClass);
           }
-          List<Long> idsToReturn = new ArrayList<>();
-          if (CollectionUtils.isNotEmpty(indexEntities)) {
-            for (AbstractIndexEntity entity : indexEntities) {
-              idsToReturn.add(entity.getBaseId());
-            }
-          }
-          return idsToReturn;
         }
+        List<Long> idsToReturn = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(indexEntities)) {
+          for (AbstractIndexEntity entity : indexEntities) {
+            idsToReturn.add(entity.getBaseId());
+          }
+        }
+        return idsToReturn;
       }, Collections.emptyList());
     } finally {
       ThirdeyeMetricsUtil.dbReadCallCounter.inc();
@@ -903,11 +954,6 @@ public class GenericPojoDao {
     return delete(idsToDelete, pojoClass);
   }
 
-  private interface QueryTask<T> {
-
-    T handle(Connection connection) throws Exception;
-  }
-
   <T> T runTask(QueryTask<T> task, T defaultReturnValue) {
     ThirdeyeMetricsUtil.dbCallCounter.inc();
 
@@ -943,6 +989,11 @@ public class GenericPojoDao {
         }
       }
     }
+  }
+
+  private interface QueryTask<T> {
+
+    T handle(Connection connection) throws Exception;
   }
 
   static class PojoInfo {

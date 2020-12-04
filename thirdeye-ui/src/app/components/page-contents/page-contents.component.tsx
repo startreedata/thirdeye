@@ -1,8 +1,8 @@
 import { Grid, Typography } from "@material-ui/core";
 import classnames from "classnames";
 import React, { FunctionComponent } from "react";
-import { useTimeRangeStore } from "../../store/time-range-store/time-range-store";
-import { TimeRangeSelector } from "../time-range/time-range-selector.component";
+import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
+import { TimeRangeSelector } from "../time-range-selector/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.style";
 
@@ -10,9 +10,14 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     props: PageContentsProps
 ) => {
     const pageContentsClasses = usePageContentsStyles();
-    const [timeRange, setTimeRange] = useTimeRangeStore((state) => [
-        state.timeRange,
-        state.setTimeRange,
+    const [
+        appTimeRange,
+        setAppTimeRange,
+        getAppTimeRangeDuration,
+    ] = useAppTimeRangeStore((state) => [
+        state.appTimeRange,
+        state.setAppTimeRange,
+        state.getAppTimeRangeDuration,
     ]);
 
     return (
@@ -49,10 +54,12 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                         {/* Time range selector */}
                         {!props.hideTimeRange && (
                             <Grid item>
-                                {/* <DateRangePicker /> */}
                                 <TimeRangeSelector
-                                    timeRange={timeRange}
-                                    onChange={setTimeRange}
+                                    getTimeRangeDuration={
+                                        getAppTimeRangeDuration
+                                    }
+                                    timeRange={appTimeRange}
+                                    onChange={setAppTimeRange}
                                 />
                             </Grid>
                         )}

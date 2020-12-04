@@ -16,6 +16,7 @@
         "start-time-end-time": "{{startTime}} - {{endTime}}",
         "last-15-minutes": "Last 15 Minutes",
         "last-1-hour": "Last 1 Hour",
+        "last-12-hours": "Last 12 Hours",
         "last-24-hours": "Last 24 Hours",
         "last-7-days": "Last 7 Days",
         "last-30-days": "Last 30 Days",

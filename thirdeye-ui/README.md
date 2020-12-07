@@ -8,6 +8,8 @@ This is the project for CortexData ThirdEye UI.
 
 -   [Getting Started](#getting-started)
     -   [Prerequisites](#prerequisites)
+        -   [Node Version Manager(nvm)](#node-version-manager-(nvm))
+        -   [Configure Node Package Manager (npm) for use with GitHub Packages](#configure-node-package-manager-(npm)-for-use-with-github-packages)
     -   [Setup](#setup)
     -   [Run](#run)
 -   [Scripts](#scripts)
@@ -26,7 +28,7 @@ These instructions will help you get the project up and running on your local ma
 
 ### Prerequisites
 
-#### Node Version Manager [nvm]
+#### Node Version Manager (nvm)
 
 The project uses [nvm](https://github.com/nvm-sh/nvm) to maintain the Node version. Compatible Node version is listed in project root `.nvmrc`.
 
@@ -36,7 +38,7 @@ Once you install nvm, go to the project directory and switch to the compatible n
 $ nvm use
 ```
 
-This will switch to the required Node version if already installed and make `npm` available in the terminal.
+This will switch to the required Node version if already installed and make `npm` command available in the terminal.
 
 If required Node version is not installed, it will recommend the command to install it
 
@@ -49,6 +51,12 @@ You need to run "nvm install 14.7.0" to install it before using it.
 ```
 
 Following the installation, the command above will let you switch to the required Node version.
+
+#### Configure Node Package Manager (npm) for use with GitHub Packages
+
+The project may depend on some GitHub Packages and [npm](https://www.npmjs.com) needs to be configured to allow access to these packages using a GitHub account. The GitHub repository to install packages from is configured in project root `.npmrc`.
+
+Follow the official GitHub Docs [here](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-with-a-personal-access-token) to configure npm with a GitHub personal access token using `~/.npmrc` file.
 
 ### Setup
 

@@ -25,6 +25,7 @@ src/test/coverage/
 *.txt
 
 # Ignore files (Prettier has trouble parsing files without extension)
+.dockerignore
 .eslintignore
 .gitignore
 .prettierignore

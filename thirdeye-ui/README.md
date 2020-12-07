@@ -8,8 +8,8 @@ This is the project for CortexData ThirdEye UI.
 
 -   [Getting Started](#getting-started)
     -   [Prerequisites](#prerequisites)
-        -   [Node Version Manager(nvm)](#node-version-manager-(nvm))
-        -   [Configure Node Package Manager (npm) for use with GitHub Packages](#configure-node-package-manager-(npm)-for-use-with-github-packages)
+        -   [Node Version Manager (nvm)](#node-version-manager-nvm)
+        -   [Configure Node Package Manager (npm) for use with GitHub Packages](#configure-node-package-manager-npm-for-use-with-github-packages)
     -   [Setup](#setup)
     -   [Run](#run)
 -   [Scripts](#scripts)
@@ -47,7 +47,6 @@ Found '/Users/default/thirdeye/thirdeye-ui/.nvmrc' with version <14.7.0>
 N/A: version "14.7.0 -> N/A" is not yet installed.
 
 You need to run "nvm install 14.7.0" to install it before using it.
-
 ```
 
 Following the installation, the command above will let you switch to the required Node version.

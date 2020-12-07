@@ -21,12 +21,70 @@ export const getAnomalyName = (anomaly: Anomaly): string => {
     })}`;
 };
 
+export const getEmptyAnomalyCardData = (): AnomalyCardData => {
+    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+
+    return {
+        id: -1,
+        name: noDataAvailableMarker,
+        alertName: noDataAvailableMarker,
+        alertId: -1,
+        current: noDataAvailableMarker,
+        predicted: noDataAvailableMarker,
+        deviation: noDataAvailableMarker,
+        negativeDeviation: false,
+        duration: noDataAvailableMarker,
+        startTime: noDataAvailableMarker,
+        endTime: noDataAvailableMarker,
+    };
+};
+
 export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
-    if (isEmpty(anomaly)) {
-        return {} as AnomalyCardData;
+    const anomalyCardData = getEmptyAnomalyCardData();
+
+    if (!anomaly) {
+        return anomalyCardData;
     }
 
-    return getAnomalyCardDatas([anomaly])[0];
+    // Basic properties
+    anomalyCardData.id = anomaly.id;
+    anomalyCardData.name = getAnomalyName(anomaly);
+
+    // Alert properties
+    if (anomaly.alert) {
+        anomalyCardData.alertName = anomaly.alert.name;
+        anomalyCardData.alertId = anomaly.alert.id;
+    }
+
+    // Current and predicted values
+    if (anomaly.avgCurrentVal) {
+        anomalyCardData.current = formatLargeNumber(anomaly.avgCurrentVal);
+    }
+
+    if (anomaly.avgBaselineVal) {
+        anomalyCardData.predicted = formatLargeNumber(anomaly.avgBaselineVal);
+    }
+
+    // Calculate deviation if both average and current values are available
+    if (anomaly.avgCurrentVal && anomaly.avgBaselineVal) {
+        const deviation =
+            (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
+            anomaly.avgBaselineVal;
+        anomalyCardData.deviation = formatPercentage(deviation);
+        anomalyCardData.negativeDeviation = deviation < 0;
+    }
+
+    // Duration, start and end time
+    if (anomaly.startTime && anomaly.endTime) {
+        anomalyCardData.duration = formatDuration(
+            anomaly.startTime,
+            anomaly.endTime
+        );
+        anomalyCardData.startTime = formatLongDateAndTime(anomaly.startTime);
+        anomalyCardData.endTime = formatLongDateAndTime(anomaly.endTime);
+    }
+
+    return anomalyCardData;
 };
 
 export const getAnomalyCardDatas = (
@@ -39,49 +97,7 @@ export const getAnomalyCardDatas = (
     }
 
     for (const anomaly of anomalies) {
-        const anomalyCardData = {} as AnomalyCardData;
-
-        // Basic properties
-        anomalyCardData.id = anomaly.id;
-        anomalyCardData.name = getAnomalyName(anomaly);
-        anomalyCardData.alertName = anomaly.alert?.name
-            ? anomaly.alert.name
-            : i18n.t("label.no-data-available-marker");
-        anomalyCardData.alertId = anomaly.alert?.id;
-
-        // Current and predicted values, if available
-        anomalyCardData.current = anomaly.avgCurrentVal
-            ? formatLargeNumber(anomaly.avgCurrentVal)
-            : i18n.t("label.no-data-available-marker");
-        anomalyCardData.predicted = anomaly.avgBaselineVal
-            ? formatLargeNumber(anomaly.avgBaselineVal)
-            : i18n.t("label.no-data-available-marker");
-
-        // Calculate deviation if both average and current values are available
-        anomalyCardData.deviation = i18n.t("label.no-data-available-marker");
-        if (anomaly.avgCurrentVal && anomaly.avgBaselineVal) {
-            const deviation =
-                (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
-                anomaly.avgBaselineVal;
-            anomalyCardData.deviation = formatPercentage(deviation);
-            anomalyCardData.negativeDeviation = deviation < 0;
-        }
-
-        // Duration, start and end time
-        anomalyCardData.duration = i18n.t("label.no-data-available-marker");
-        anomalyCardData.startTime = i18n.t("label.no-data-available-marker");
-        anomalyCardData.endTime = i18n.t("label.no-data-available-marker");
-        if (anomaly.startTime && anomaly.endTime) {
-            anomalyCardData.duration = formatDuration(
-                anomaly.startTime,
-                anomaly.endTime
-            );
-            anomalyCardData.startTime = formatLongDateAndTime(
-                anomaly.startTime
-            );
-            anomalyCardData.endTime = formatLongDateAndTime(anomaly.endTime);
-        }
-
+        const anomalyCardData = getAnomalyCardData(anomaly);
         anomalyCardDatas.push(anomalyCardData);
     }
 

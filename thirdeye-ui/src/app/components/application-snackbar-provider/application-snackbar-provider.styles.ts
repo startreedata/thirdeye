@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core";
-import { Dimension } from "../../utils/material-ui/dimension-util";
-import { Palette } from "../../utils/material-ui/palette-util";
+import { Dimension } from "../../utils/material-ui-util/dimension-util";
+import { Palette } from "../../utils/material-ui-util/palette-util";
 
 export const useApplicationSnackbarProviderStyles = makeStyles({
     container: {

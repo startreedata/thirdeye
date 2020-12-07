@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core";
-import { theme } from "../../utils/material-ui/theme-util";
+import { theme } from "../../utils/material-ui-util/theme-util";
 
 export const cardStyles = makeStyles(() => {
     return {

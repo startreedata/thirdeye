@@ -2,8 +2,8 @@ import { Box, Breadcrumbs, Link, Toolbar } from "@material-ui/core";
 import { NavigateNext } from "@material-ui/icons";
 import React, { FunctionComponent } from "react";
 import { useHistory } from "react-router-dom";
-import { Dimension } from "../../utils/material-ui/dimension-util";
-import { Palette } from "../../utils/material-ui/palette-util";
+import { Dimension } from "../../utils/material-ui-util/dimension-util";
+import { Palette } from "../../utils/material-ui-util/palette-util";
 import { ApplicationBreadcrumbsProps } from "./application-breadcrumbs.interfaces";
 import { useApplicationBreadcrumbsStyles } from "./application-breadcrumbs.styles";
 

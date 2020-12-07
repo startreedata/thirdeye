@@ -1,7 +1,7 @@
-import { AppBar, Button, Link, Toolbar } from "@material-ui/core";
+import { AppBar, Fab, Link, Menu, MenuItem, Toolbar } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
 import classnames from "classnames";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { ReactComponent as ThirdEye } from "../../../assets/icons/third-eye.svg";
@@ -21,6 +21,10 @@ import { useApplicationBarStyles } from "./application-bar.styles";
 export const ApplicationBar: FunctionComponent = () => {
     const applicationBarClasses = useApplicationBarStyles();
     const [auth] = useAuthStore((state) => [state.auth]);
+    const [
+        optionsAnchorElement,
+        setOptionsAnchorElement,
+    ] = useState<HTMLElement | null>();
     const history = useHistory();
     const location = useLocation();
     const { t } = useTranslation();
@@ -43,6 +47,8 @@ export const ApplicationBar: FunctionComponent = () => {
 
     const onCreateAlert = (): void => {
         history.push(getAlertsCreatePath());
+
+        closeAlertOptions();
     };
 
     const onSignInClick = (): void => {
@@ -55,6 +61,14 @@ export const ApplicationBar: FunctionComponent = () => {
 
     const isRouteCurrent = (route: string): boolean => {
         return location.pathname.indexOf(route) === 0;
+    };
+
+    const onAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
+        setOptionsAnchorElement(event.currentTarget);
+    };
+
+    const closeAlertOptions = (): void => {
+        setOptionsAnchorElement(null);
     };
 
     return (
@@ -118,18 +132,31 @@ export const ApplicationBar: FunctionComponent = () => {
                 {(auth && (
                     <>
                         {/* Create alert */}
-                        <Button
+                        <Fab
                             className={classnames(
                                 applicationBarClasses.link,
                                 applicationBarClasses.rightAlign
                             )}
                             color="primary"
-                            startIcon={<Add />}
-                            variant="outlined"
-                            onClick={onCreateAlert}
+                            size="small"
+                            onClick={onAlertOptionsClick}
                         >
-                            {t("label.create-alert")}
-                        </Button>
+                            <Add />
+                        </Fab>
+
+                        <Menu
+                            anchorEl={optionsAnchorElement}
+                            open={Boolean(optionsAnchorElement)}
+                            onClose={closeAlertOptions}
+                        >
+                            <MenuItem onClick={onCreateAlert}>
+                                {t("label.create-alert")}
+                            </MenuItem>
+
+                            <MenuItem disabled>
+                                {"Create Subscription Group"}
+                            </MenuItem>
+                        </Menu>
 
                         {/* Sign out */}
                         <Link

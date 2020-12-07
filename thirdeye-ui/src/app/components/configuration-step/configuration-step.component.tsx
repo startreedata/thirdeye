@@ -4,7 +4,6 @@ import { isUndefined } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../button/button.component";
-import DateRangePicker from "../date-picker/date-range-picker.component";
 import CommonCodeMirror from "../editor/code-mirror.component";
 import { TimeSeriesChartCard } from "../timeseries-chart-card/timeseries-chart-card.component";
 import { ConfigStepsProps } from "./configuration-step.interfaces";
@@ -76,9 +75,6 @@ export const ConfigurationStep: FunctionComponent<ConfigStepsProps> = ({
                                 {t("label.preview-alert")}
                             </Button>
                         </Box>
-                    </Grid>
-                    <Grid item direction="row-reverse">
-                        <DateRangePicker />
                     </Grid>
                 </Grid>
             )}

@@ -10,7 +10,7 @@ import { ApplicationSnackbarProvider } from "./components/application-snackbar-p
 import "./index.scss";
 import { enUs } from "./locale/numbers/en-us";
 import { getInitOptions } from "./utils/i18next-util/i18next-util";
-import { theme } from "./utils/material-ui/theme-util";
+import { theme } from "./utils/material-ui-util/theme-util";
 
 // Initialize localization
 // i18next (language)

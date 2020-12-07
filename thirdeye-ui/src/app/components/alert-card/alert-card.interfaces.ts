@@ -23,7 +23,7 @@ export interface AlertCardData {
     filteredBy: string[];
     datasetAndMetrics: AlertDatasetAndMetric[];
     subscriptionGroups: AlertSubscriptionGroup[];
-    alert: Alert;
+    alert: Alert | null;
 }
 
 export interface AlertCardProps {

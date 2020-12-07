@@ -142,6 +142,10 @@ export const AlertsDetailPage: FunctionComponent = () => {
     const onAlertStateToggle = async (
         alertCardData: AlertCardData
     ): Promise<void> => {
+        if (!alertCardData.alert) {
+            return;
+        }
+
         let alertCopy = cloneDeep(alertCardData.alert);
         alertCopy.active = !alertCopy.active;
 

@@ -8,15 +8,166 @@ import {
 import { Alert, AlertNodeType } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
+export const getEmptyAlertCardData = (): AlertCardData => {
+    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+
+    return {
+        id: -1,
+        name: noDataAvailableMarker,
+        active: false,
+        activeText: noDataAvailableMarker,
+        userId: -1,
+        createdBy: noDataAvailableMarker,
+        detectionTypes: [],
+        filteredBy: [],
+        datasetAndMetrics: [],
+        subscriptionGroups: [],
+        alert: null,
+    };
+};
+
+export const getEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
+    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+
+    return {
+        datasetId: -1,
+        datasetName: noDataAvailableMarker,
+        metricId: -1,
+        metricName: noDataAvailableMarker,
+    };
+};
+
+export const getEmptyAlertSubscriptionGroup = (): AlertSubscriptionGroup => {
+    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+
+    return {
+        id: -1,
+        name: noDataAvailableMarker,
+    };
+};
+
+const mapSubscriptionGroupsToAlertIds = (
+    subscriptionGroups: SubscriptionGroup[]
+): Map<number, AlertSubscriptionGroup[]> => {
+    const subscriptionGroupsToAlertIdsMap = new Map<
+        number,
+        AlertSubscriptionGroup[]
+    >();
+
+    if (isEmpty(subscriptionGroups)) {
+        // No subscription groups available, return empty result
+        return subscriptionGroupsToAlertIdsMap;
+    }
+
+    for (const subscriptionGroup of subscriptionGroups) {
+        if (isEmpty(subscriptionGroup.alerts)) {
+            // No alerts
+            continue;
+        }
+
+        const alertSubscriptionGroup = getEmptyAlertSubscriptionGroup();
+        alertSubscriptionGroup.id = subscriptionGroup.id;
+        alertSubscriptionGroup.name = subscriptionGroup.name;
+
+        for (const alert of subscriptionGroup.alerts) {
+            const subscriptionGroups = subscriptionGroupsToAlertIdsMap.get(
+                alert.id
+            );
+            if (subscriptionGroups) {
+                // Add to existing list
+                subscriptionGroups.push(alertSubscriptionGroup);
+            } else {
+                // Create and add to list
+                subscriptionGroupsToAlertIdsMap.set(alert.id, [
+                    alertSubscriptionGroup,
+                ]);
+            }
+        }
+    }
+
+    return subscriptionGroupsToAlertIdsMap;
+};
+
 export const getAlertCardData = (
     alert: Alert,
     subscriptionGroups: SubscriptionGroup[]
 ): AlertCardData => {
-    if (isEmpty(alert)) {
-        return {} as AlertCardData;
+    // Map subscription groups to alert ids
+    const subscriptionGroupsToAlertIdsMap = mapSubscriptionGroupsToAlertIds(
+        subscriptionGroups
+    );
+
+    return getAlertCardDataInternal(alert, subscriptionGroupsToAlertIdsMap);
+};
+
+export const getAlertCardDataInternal = (
+    alert: Alert,
+    subscriptionGroupsToAlertIdsMap: Map<number, AlertSubscriptionGroup[]>
+): AlertCardData => {
+    const alertCardData = getEmptyAlertCardData();
+
+    if (!alert) {
+        return alertCardData;
     }
 
-    return getAlertCardDatas([alert], subscriptionGroups)[0];
+    // Basic properties
+    alertCardData.id = alert.id;
+    alertCardData.name = alert.name;
+    alertCardData.active = alert.active;
+    alertCardData.activeText = alert.active
+        ? i18n.t("label.active")
+        : i18n.t("label.inactive");
+
+    // User properties
+    if (alert.owner) {
+        alertCardData.userId = alert.owner.id;
+        alertCardData.createdBy = alert.owner.principal;
+    }
+
+    // Maintain a copy of alert, needed when updating/changing status of the alert
+    alertCardData.alert = alert;
+
+    // Subscription groups
+    if (!isEmpty(subscriptionGroupsToAlertIdsMap)) {
+        alertCardData.subscriptionGroups =
+            subscriptionGroupsToAlertIdsMap.get(alert.id) || [];
+    }
+
+    // Detection, dataset and metric properties
+    if (isEmpty(alert.nodes)) {
+        // None available
+        return alertCardData;
+    }
+
+    for (const alertNode of Object.values(alert.nodes)) {
+        // Detection properties
+        if (alertNode.type === AlertNodeType.DETECTION && alertNode.subType) {
+            alertCardData.detectionTypes.push(alertNode.subType);
+        } else if (
+            alertNode.type === AlertNodeType.FILTER &&
+            alertNode.subType
+        ) {
+            alertCardData.filteredBy.push(alertNode.subType);
+        }
+
+        // Dataset and metric properties
+        if (!alertNode.metric) {
+            // None available
+            continue;
+        }
+
+        const datasetAndMetric = getEmptyAlertDatasetAndMetric();
+        if (alertNode.metric.dataset) {
+            datasetAndMetric.datasetId = alertNode.metric.dataset.id;
+            datasetAndMetric.datasetName = alertNode.metric.dataset.name;
+        }
+        datasetAndMetric.metricId = alertNode.metric.id;
+        datasetAndMetric.metricName = alertNode.metric.name;
+
+        alertCardData.datasetAndMetrics.push(datasetAndMetric);
+    }
+
+    return alertCardData;
 };
 
 export const getAlertCardDatas = (
@@ -35,69 +186,10 @@ export const getAlertCardDatas = (
     );
 
     for (const alert of alerts) {
-        const alertCardData = {} as AlertCardData;
-
-        // Maintain a copy of alert, needed when updating/changing status of the alert
-        alertCardData.alert = alert;
-
-        // Basic properties
-        alertCardData.id = alert.id;
-        alertCardData.name = alert.name
-            ? alert.name
-            : i18n.t("label.no-data-available-marker");
-        alertCardData.active = alert.active;
-        alertCardData.activeText = alert.active
-            ? i18n.t("label.active")
-            : i18n.t("label.inactive");
-        alertCardData.userId = alert.owner?.id;
-        alertCardData.createdBy = alert.owner?.principal
-            ? alert.owner.principal
-            : i18n.t("label.no-data-available-marker");
-        alertCardData.detectionTypes = [];
-        alertCardData.filteredBy = [];
-        alertCardData.datasetAndMetrics = [];
-
-        if (!isEmpty(alert.nodes)) {
-            for (const alertNode of Object.values(alert.nodes)) {
-                // Detection properties
-                if (
-                    alertNode.type === AlertNodeType.DETECTION &&
-                    alertNode.subType
-                ) {
-                    alertCardData.detectionTypes.push(alertNode.subType);
-                } else if (
-                    alertNode.type === AlertNodeType.FILTER &&
-                    alertNode.subType
-                ) {
-                    alertCardData.filteredBy.push(alertNode.subType);
-                }
-
-                if (!alertNode.metric) {
-                    // No metric available
-                    continue;
-                }
-
-                // Dataset and metric
-                const datasetAndMetric = {} as AlertDatasetAndMetric;
-                if (alertNode.metric.dataset) {
-                    datasetAndMetric.datasetId = alertNode.metric.dataset.id;
-                    datasetAndMetric.datasetName = alertNode.metric.dataset.name
-                        ? alertNode.metric.dataset.name
-                        : i18n.t("label.no-data-available-marker");
-                }
-                datasetAndMetric.metricId = alertNode.metric.id;
-                datasetAndMetric.metricName = alertNode.metric.name
-                    ? alertNode.metric.name
-                    : i18n.t("label.no-data-available-marker");
-
-                alertCardData.datasetAndMetrics.push(datasetAndMetric);
-            }
-        }
-
-        // Subscription groups
-        alertCardData.subscriptionGroups =
-            subscriptionGroupsToAlertIdsMap.get(alert.id) || [];
-
+        const alertCardData = getAlertCardDataInternal(
+            alert,
+            subscriptionGroupsToAlertIdsMap
+        );
         alertCardDatas.push(alertCardData);
     }
 
@@ -111,12 +203,12 @@ export const filterAlerts = (
     const filteredAlerts = new Set<AlertCardData>();
 
     if (isEmpty(alerts)) {
-        // No anomalies available, return empty result
+        // No alerts available, return empty result
         return [...filteredAlerts];
     }
 
     if (isEmpty(searchWords)) {
-        // No search words available, return original anomalies
+        // No search words available, return original alerts
         return alerts;
     }
 
@@ -142,6 +234,7 @@ export const filterAlerts = (
 
                     break;
                 }
+
                 // Check arrays
                 else if (propertyValue.length && propertyValue.length > 0) {
                     for (const arrayValue of propertyValue) {
@@ -161,7 +254,8 @@ export const filterAlerts = (
 
                             break;
                         }
-                        // Check dataset and metric
+
+                        // Check dataset and metric values
                         else if (arrayValue.datasetId) {
                             if (
                                 arrayValue.datasetName
@@ -177,7 +271,8 @@ export const filterAlerts = (
                                 break;
                             }
                         }
-                        // Check subscription group
+
+                        // Check subscription group value
                         else if (
                             arrayValue.name &&
                             arrayValue.name
@@ -192,68 +287,23 @@ export const filterAlerts = (
                     }
 
                     if (alertFiltered) {
-                        // Alert already filtered, check next anomaly
+                        // Alert already filtered, check next alert
                         break;
                     }
                 }
 
                 if (alertFiltered) {
-                    // Alert already filtered, check next anomaly
+                    // Alert already filtered, check next alert
                     break;
                 }
             }
 
             if (alertFiltered) {
-                // Alert already filtered, check next anomaly
+                // Alert already filtered, check next alert
                 break;
             }
         }
     }
 
     return [...filteredAlerts];
-};
-
-const mapSubscriptionGroupsToAlertIds = (
-    subscriptionGroups: SubscriptionGroup[]
-): Map<number, AlertSubscriptionGroup[]> => {
-    const subscriptionGroupsToAlertIdsMap = new Map<
-        number,
-        AlertSubscriptionGroup[]
-    >();
-
-    if (isEmpty(subscriptionGroups)) {
-        // No subscription groups available, return empty result
-        return subscriptionGroupsToAlertIdsMap;
-    }
-
-    for (const subscriptionGroup of subscriptionGroups) {
-        if (isEmpty(subscriptionGroup.alerts)) {
-            // No alerts
-            continue;
-        }
-
-        const alertSubscriptionGroup = {
-            id: subscriptionGroup.id,
-            name: subscriptionGroup.name
-                ? subscriptionGroup.name
-                : i18n.t("label.no-data-available-marker"),
-        };
-
-        for (const alert of subscriptionGroup.alerts) {
-            const alertSubscriptionGroups = subscriptionGroupsToAlertIdsMap.get(
-                alert.id
-            );
-            if (alertSubscriptionGroups) {
-                // Add to existing list
-                alertSubscriptionGroups.push(alertSubscriptionGroup);
-            } else {
-                // Create and add to list
-                subscriptionGroupsToAlertIdsMap.set(alert.id, [
-                    alertSubscriptionGroup,
-                ]);
-            }
-        }
-    }
-
-    return subscriptionGroupsToAlertIdsMap;
 };

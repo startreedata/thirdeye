@@ -1,5 +1,5 @@
 import { createStyles, makeStyles } from "@material-ui/core";
-import { Palette } from "../../utils/material-ui/palette-util";
+import { Palette } from "../../utils/material-ui-util/palette-util";
 
 export const useTimeseriesChartStyles = makeStyles(() => {
     return createStyles({

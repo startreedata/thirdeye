@@ -24,7 +24,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>org.apache.pinot.thirdeye</groupId>
-    <version>${revision}${sha1}</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 

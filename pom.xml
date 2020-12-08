@@ -140,7 +140,10 @@
   </developers>
 
   <scm>
-    <developerConnection>scm:git:git@github.com:apache/incubator-pinot.git</developerConnection>
+    <!-- This is used by maven-release-plugin -->
+    <url>https://github.com/cortexdata/thirdeye.git</url>
+    <connection>scm:git:git@github.com:cortexdata/thirdeye.git</connection>
+    <developerConnection>scm:git:git@github.com:cortexdata/thirdeye.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -159,6 +162,14 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
       </plugin>
     </plugins>
     <pluginManagement>
@@ -244,6 +255,57 @@
               <version>1.11.2</version>
             </dependency>
           </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>buildnumber-maven-plugin</artifactId>
+          <version>1.4</version>
+          <executions>
+            <execution>
+              <phase>validate</phase>
+              <goals>
+                <goal>create</goal>
+                <goal>create-metadata</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.4</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <Build-Time>${maven.build.timestamp}</Build-Time>
+                <!-- scmBranch is autopopulated by buildnumber-maven-plugin -->
+                <Implementation-Branch>${scmBranch}</Implementation-Branch>
+                <Implementation-Title>${project.artifactId}</Implementation-Title>
+                <!-- buildNumber is autopopulated by buildnumber-maven-plugin -->
+                <Implementation-Version>${project.version}-${buildNumber}</Implementation-Version>
+                <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>cobertura-maven-plugin</artifactId>
+          <version>2.7</version>
+          <configuration>
+            <formats>
+              <format>html</format>
+              <format>xml</format>
+            </formats>
+          </configuration>
         </plugin>
 
       </plugins>
@@ -772,7 +834,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.5.2</version>
         <configuration>
           <formats>
             <format>html</format>

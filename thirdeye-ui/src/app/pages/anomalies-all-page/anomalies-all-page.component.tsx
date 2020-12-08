@@ -7,7 +7,7 @@ import { AnomalyCardData } from "../../components/anomaly-card/anomaly-card.inte
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { Search } from "../../components/search/search.component";
+import { SearchBar } from "../../components/search-bar/search-bar.component";
 import { getAllAnomalies } from "../../rest/anomaly-rest/anomaly-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
@@ -80,9 +80,10 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             <PageContents centerAlign title={t("label.anomalies")}>
                 <Grid container>
                     <Grid item md={12}>
-                        <Search
+                        <SearchBar
                             autoFocus
-                            syncSearchWithURL
+                            setSearchQueryString
+                            label={t("label.search-anomalies")}
                             searchStatusText={t("label.search-count", {
                                 count: filteredAnomalies.length,
                                 total: anomalies.length,

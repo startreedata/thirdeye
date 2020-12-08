@@ -8,7 +8,7 @@ import { AlertCardData } from "../../components/alert-card/alert-card.interfaces
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { Search } from "../../components/search/search.component";
+import { SearchBar } from "../../components/search-bar/search-bar.component";
 import { getAllAlerts, updateAlert } from "../../rest/alert-rest/alert-rest";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
@@ -116,9 +116,10 @@ export const AlertsAllPage: FunctionComponent = () => {
             <PageContents centerAlign title={t("label.alerts")}>
                 <Grid container>
                     <Grid item md={12}>
-                        <Search
+                        <SearchBar
                             autoFocus
-                            syncSearchWithURL
+                            setSearchQueryString
+                            label={t("label.search-alerts")}
                             searchStatusText={t("label.search-count", {
                                 count: filteredAlerts.length,
                                 total: alerts.length,

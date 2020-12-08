@@ -17,9 +17,9 @@ import { useTranslation } from "react-i18next";
 import { RouteComponentProps, withRouter } from "react-router-dom";
 import { Button } from "../../components/button/button.component";
 import { ConfigurationStep } from "../../components/configuration-step/configuration-step.component";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { ReviewStep } from "../../components/review-step/review-step.component";
 import { CustomStepper } from "../../components/stepper/stepper.component";
 import {
@@ -213,13 +213,13 @@ export const AlertsCreatePage = withRouter(
         if (loading) {
             return (
                 <PageContainer>
-                    <PageLoadingIndicator />
+                    <LoadingIndicator />
                 </PageContainer>
             );
         }
 
         if (loading) {
-            return <PageLoadingIndicator />;
+            return <LoadingIndicator />;
         }
 
         return (

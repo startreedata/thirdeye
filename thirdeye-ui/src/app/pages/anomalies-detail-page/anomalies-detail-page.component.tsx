@@ -5,9 +5,9 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { AnomalyCard } from "../../components/anomaly-card/anomaly-card.component";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { TimeSeriesChartCard } from "../../components/timeseries-chart-card/timeseries-chart-card.component";
 import { getAlertEvaluation } from "../../rest/alert-rest/alert-rest";
 import { getAnomaly } from "../../rest/anomaly-rest/anomaly-rest";
@@ -125,7 +125,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     if (loading) {
         return (
             <PageContainer>
-                <PageLoadingIndicator />
+                <LoadingIndicator />
             </PageContainer>
         );
     }

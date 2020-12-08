@@ -1,8 +1,8 @@
 import { Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { logout } from "../../rest/auth-rest/auth-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAuthStore } from "../../store/auth-store/auth-store";
@@ -42,7 +42,7 @@ export const SignOutPage: FunctionComponent = () => {
     if (loading) {
         return (
             <PageContainer>
-                <PageLoadingIndicator />
+                <LoadingIndicator />
             </PageContainer>
         );
     }

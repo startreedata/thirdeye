@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { Breadcrumb } from "../../components/app-breadcrumbs/app-breadcrumbs.interfaces";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { HomePage } from "../../pages/home-page/home-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { SignOutPage } from "../../pages/sign-out-page/sign-out-page.component";
@@ -29,7 +29,7 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     if (loading) {
         return (
             <PageContainer>
-                <PageLoadingIndicator />
+                <LoadingIndicator />
             </PageContainer>
         );
     }

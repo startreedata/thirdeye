@@ -5,9 +5,9 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCard } from "../../components/alert-card/alert-card.component";
 import { AlertCardData } from "../../components/alert-card/alert-card.interfaces";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { Search } from "../../components/search/search.component";
 import { getAllAlerts, updateAlert } from "../../rest/alert-rest/alert-rest";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
@@ -106,7 +106,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     if (loading) {
         return (
             <PageContainer>
-                <PageLoadingIndicator />
+                <LoadingIndicator />
             </PageContainer>
         );
     }

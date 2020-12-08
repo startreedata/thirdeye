@@ -6,9 +6,9 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { AlertCard } from "../../components/alert-card/alert-card.component";
 import { AlertCardData } from "../../components/alert-card/alert-card.interfaces";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { TimeSeriesChartCard } from "../../components/timeseries-chart-card/timeseries-chart-card.component";
 import {
     getAlert,
@@ -164,7 +164,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
     if (loading) {
         return (
             <PageContainer>
-                <PageLoadingIndicator />
+                <LoadingIndicator />
             </PageContainer>
         );
     }

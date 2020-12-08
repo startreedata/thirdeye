@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
 export interface PageContainerProps {
-    hideApplicaionBreadCrumbs?: boolean;
+    hideAppBreadCrumbs?: boolean;
     children?: ReactNode;
 }

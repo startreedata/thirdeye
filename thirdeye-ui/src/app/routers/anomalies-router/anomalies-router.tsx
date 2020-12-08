@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch } from "react-router-dom";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { AnomaliesAllPage } from "../../pages/anomalies-all-page/anomalies-all-page.component";
 import { AnomaliesDetailPage } from "../../pages/anomalies-detail-page/anomalies-detail-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
@@ -33,7 +33,7 @@ export const AnomaliesRouter: FunctionComponent = () => {
     if (loading) {
         return (
             <PageContainer>
-                <PageLoadingIndicator />
+                <LoadingIndicator />
             </PageContainer>
         );
     }

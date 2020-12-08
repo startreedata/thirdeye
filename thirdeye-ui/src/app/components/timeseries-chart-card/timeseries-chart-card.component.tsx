@@ -5,7 +5,7 @@ import {
     getGraphDataFromAPIData,
     getMargins,
 } from "../../utils/chart/chart-util";
-import { PageLoadingIndicator } from "../page-loading-indicator/page-loading-indicator.component";
+import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { TimeSeriesChart } from "../timeseries-chart/timeseries-chart.component";
 import { TimeSeriesChartCardProps } from "./timeseries-chart-card.interfaces";
 
@@ -32,7 +32,7 @@ export const TimeSeriesChartCard: FunctionComponent<TimeSeriesChartCardProps> = 
                         )}
                     </ParentSize>
                 ) : (
-                    <PageLoadingIndicator />
+                    <LoadingIndicator />
                 )}
             </CardContent>
         </Card>

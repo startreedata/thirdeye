@@ -1,15 +1,15 @@
 import { CircularProgress, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { usePageLoadingIndicatorStyles } from "./page-loading-indicator.styles";
+import { useLoadingIndicatorStyles } from "./loading-indicator.styles";
 
-export const PageLoadingIndicator: FunctionComponent = () => {
-    const pageLoadingIndicatorClasses = usePageLoadingIndicatorStyles();
+export const LoadingIndicator: FunctionComponent = () => {
+    const loadingIndicatorClasses = useLoadingIndicatorStyles();
 
     return (
         <Grid
             container
             alignItems="center"
-            className={pageLoadingIndicatorClasses.container}
+            className={loadingIndicatorClasses.container}
             justify="center"
         >
             <Grid item>

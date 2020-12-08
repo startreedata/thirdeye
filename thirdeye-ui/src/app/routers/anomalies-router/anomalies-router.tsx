@@ -8,7 +8,7 @@ import { AnomaliesDetailPage } from "../../pages/anomalies-detail-page/anomalies
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
-    ApplicationRoute,
+    AppRoute,
     getAnomaliesAllPath,
     getAnomaliesPath,
 } from "../../utils/routes-util/routes-util";
@@ -41,7 +41,7 @@ export const AnomaliesRouter: FunctionComponent = () => {
     return (
         <Switch>
             {/* Anomalies path */}
-            <Route exact path={ApplicationRoute.ANOMALIES}>
+            <Route exact path={AppRoute.ANOMALIES}>
                 {/* Redirect to anomalies all path */}
                 <Redirect to={getAnomaliesAllPath()} />
             </Route>
@@ -50,14 +50,14 @@ export const AnomaliesRouter: FunctionComponent = () => {
             <Route
                 exact
                 component={AnomaliesAllPage}
-                path={ApplicationRoute.ANOMALIES_ALL}
+                path={AppRoute.ANOMALIES_ALL}
             />
 
             {/* Anomalies detail path */}
             <Route
                 exact
                 component={AnomaliesDetailPage}
-                path={ApplicationRoute.ANOMALIES_DETAIL}
+                path={AppRoute.ANOMALIES_DETAIL}
             />
 
             {/* No match found, render page not found */}

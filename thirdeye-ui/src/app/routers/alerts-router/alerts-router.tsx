@@ -10,7 +10,7 @@ import { AlertsUpdatePage } from "../../pages/alerts-update-page/alerts-update-p
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
-    ApplicationRoute,
+    AppRoute,
     getAlertsAllPath,
     getAlertsPath,
 } from "../../utils/routes-util/routes-util";
@@ -43,37 +43,33 @@ export const AlertsRouter: FunctionComponent = () => {
     return (
         <Switch>
             {/* Alerts path */}
-            <Route exact path={ApplicationRoute.ALERTS}>
+            <Route exact path={AppRoute.ALERTS}>
                 {/* Redirect to alerts all path */}
                 <Redirect to={getAlertsAllPath()} />
             </Route>
 
             {/* Alerts all path */}
-            <Route
-                exact
-                component={AlertsAllPage}
-                path={ApplicationRoute.ALERTS_ALL}
-            />
+            <Route exact component={AlertsAllPage} path={AppRoute.ALERTS_ALL} />
 
             {/* Alerts detail path */}
             <Route
                 exact
                 component={AlertsDetailPage}
-                path={ApplicationRoute.ALERTS_DETAIL}
+                path={AppRoute.ALERTS_DETAIL}
             />
 
             {/* Alerts create path */}
             <Route
                 exact
                 component={AlertsCreatePage}
-                path={ApplicationRoute.ALERTS_CREATE}
+                path={AppRoute.ALERTS_CREATE}
             />
 
             {/* Alerts update path */}
             <Route
                 exact
                 component={AlertsUpdatePage}
-                path={ApplicationRoute.ALERTS_UPDATE}
+                path={AppRoute.ALERTS_UPDATE}
             />
 
             {/* No match found, render page not found */}

@@ -1,6 +1,6 @@
 const ROUTE_PLACEHOLDER_ID = ":id";
 
-export const ApplicationRoute = {
+export const AppRoute = {
     BASE: "/",
     HOME: "/home",
     ALERTS: "/alerts",
@@ -17,62 +17,62 @@ export const ApplicationRoute = {
 } as const;
 
 export const getBasePath = (): string => {
-    return ApplicationRoute.BASE;
+    return AppRoute.BASE;
 };
 
 export const getHomePath = (): string => {
-    return ApplicationRoute.HOME;
+    return AppRoute.HOME;
 };
 
 export const getAlertsPath = (): string => {
-    return ApplicationRoute.ALERTS;
+    return AppRoute.ALERTS;
 };
 
 export const getAlertsAllPath = (): string => {
-    return ApplicationRoute.ALERTS_ALL;
+    return AppRoute.ALERTS_ALL;
 };
 
 export const getAlertsDetailPath = (id: number): string => {
-    let path: string = ApplicationRoute.ALERTS_DETAIL;
+    let path: string = AppRoute.ALERTS_DETAIL;
     path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
     return path;
 };
 
 export const getAlertsCreatePath = (): string => {
-    return ApplicationRoute.ALERTS_CREATE;
+    return AppRoute.ALERTS_CREATE;
 };
 
 export const getAlertsUpdatePath = (id: number): string => {
-    let path: string = ApplicationRoute.ALERTS_UPDATE;
+    let path: string = AppRoute.ALERTS_UPDATE;
     path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
     return path;
 };
 
 export const getAnomaliesPath = (): string => {
-    return ApplicationRoute.ANOMALIES;
+    return AppRoute.ANOMALIES;
 };
 
 export const getAnomaliesAllPath = (): string => {
-    return ApplicationRoute.ANOMALIES_ALL;
+    return AppRoute.ANOMALIES_ALL;
 };
 
 export const getAnomaliesDetailPath = (id: number): string => {
-    let path: string = ApplicationRoute.ANOMALIES_DETAIL;
+    let path: string = AppRoute.ANOMALIES_DETAIL;
     path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
     return path;
 };
 
 export const getConfigurationPath = (): string => {
-    return ApplicationRoute.CONFIGURATION;
+    return AppRoute.CONFIGURATION;
 };
 
 export const getSignInPath = (): string => {
-    return ApplicationRoute.SIGN_IN;
+    return AppRoute.SIGN_IN;
 };
 
 export const getSignOutPath = (): string => {
-    return ApplicationRoute.SIGN_OUT;
+    return AppRoute.SIGN_OUT;
 };

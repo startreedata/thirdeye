@@ -6,10 +6,7 @@ import { PageContainer } from "../../components/page-container/page-container.co
 import { SignInPage } from "../../pages/sign-in-page/sign-in-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
-import {
-    ApplicationRoute,
-    getSignInPath,
-} from "../../utils/routes-util/routes-util";
+import { AppRoute, getSignInPath } from "../../utils/routes-util/routes-util";
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -34,8 +31,8 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
         // If location is anything other than the sign in/out path, store it to redirect the user
         // after potential authentication
         if (
-            location.pathname === ApplicationRoute.SIGN_IN ||
-            location.pathname === ApplicationRoute.SIGN_OUT
+            location.pathname === AppRoute.SIGN_IN ||
+            location.pathname === AppRoute.SIGN_OUT
         ) {
             return;
         }
@@ -54,11 +51,7 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     return (
         <Switch>
             {/* Sign in path */}
-            <Route
-                exact
-                component={SignInPage}
-                path={ApplicationRoute.SIGN_IN}
-            />
+            <Route exact component={SignInPage} path={AppRoute.SIGN_IN} />
 
             {/* No match found, redirect to sign in path */}
             <Redirect to={getSignInPath()} />

@@ -8,7 +8,7 @@ import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found
 import { SignOutPage } from "../../pages/sign-out-page/sign-out-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
-    ApplicationRoute,
+    AppRoute,
     getBasePath,
     getHomePath,
 } from "../../utils/routes-util/routes-util";
@@ -37,26 +37,22 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     return (
         <Switch>
             {/* Base path */}
-            <Route exact path={ApplicationRoute.BASE}>
+            <Route exact path={AppRoute.BASE}>
                 {/* Redirect to home path */}
                 <Redirect to={getHomePath()} />
             </Route>
 
             {/* Home path */}
-            <Route exact component={HomePage} path={ApplicationRoute.HOME} />
+            <Route exact component={HomePage} path={AppRoute.HOME} />
 
             {/* Sign in path */}
-            <Route exact path={ApplicationRoute.SIGN_IN}>
+            <Route exact path={AppRoute.SIGN_IN}>
                 {/* Already authenticated, redirect to base path */}
                 <Redirect to={getBasePath()} />
             </Route>
 
             {/* Sign out path */}
-            <Route
-                exact
-                component={SignOutPage}
-                path={ApplicationRoute.SIGN_OUT}
-            />
+            <Route exact component={SignOutPage} path={AppRoute.SIGN_OUT} />
 
             {/* No match found, render page not found */}
             <Route component={PageNotFoundPage} />

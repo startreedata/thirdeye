@@ -14,7 +14,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import { ReactComponent as ThirdEye } from "../../../assets/icons/third-eye.svg";
 import { useAuthStore } from "../../store/auth-store/auth-store";
 import {
-    ApplicationRoute,
+    AppRoute,
     getAlertsCreatePath,
     getAlertsPath,
     getAnomaliesAllPath,
@@ -106,7 +106,7 @@ export const AppBar: FunctionComponent = () => {
                 <Link
                     className={classnames(
                         appBarClasses.link,
-                        isRouteCurrent(ApplicationRoute.HOME)
+                        isRouteCurrent(AppRoute.HOME)
                             ? appBarClasses.selected
                             : ""
                     )}
@@ -121,7 +121,7 @@ export const AppBar: FunctionComponent = () => {
                 <Link
                     className={classnames(
                         appBarClasses.link,
-                        isRouteCurrent(ApplicationRoute.ALERTS)
+                        isRouteCurrent(AppRoute.ALERTS)
                             ? appBarClasses.selected
                             : ""
                     )}
@@ -136,7 +136,7 @@ export const AppBar: FunctionComponent = () => {
                 <Link
                     className={classnames(
                         appBarClasses.link,
-                        isRouteCurrent(ApplicationRoute.ANOMALIES)
+                        isRouteCurrent(AppRoute.ANOMALIES)
                             ? appBarClasses.selected
                             : ""
                     )}
@@ -151,7 +151,7 @@ export const AppBar: FunctionComponent = () => {
                 <Link
                     className={classnames(
                         appBarClasses.link,
-                        isRouteCurrent(ApplicationRoute.CONFIGURATION)
+                        isRouteCurrent(AppRoute.CONFIGURATION)
                             ? appBarClasses.selected
                             : ""
                     )}
@@ -200,7 +200,7 @@ export const AppBar: FunctionComponent = () => {
                         <Link
                             className={classnames(
                                 appBarClasses.link,
-                                isRouteCurrent(ApplicationRoute.SIGN_OUT)
+                                isRouteCurrent(AppRoute.SIGN_OUT)
                                     ? appBarClasses.selected
                                     : ""
                             )}
@@ -217,7 +217,7 @@ export const AppBar: FunctionComponent = () => {
                         className={classnames(
                             appBarClasses.link,
                             appBarClasses.rightAlign,
-                            isRouteCurrent(ApplicationRoute.SIGN_IN)
+                            isRouteCurrent(AppRoute.SIGN_IN)
                                 ? appBarClasses.selected
                                 : ""
                         )}

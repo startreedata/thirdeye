@@ -4,11 +4,12 @@ import numbro from "numbro";
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom";
 import { initReactI18next } from "react-i18next";
-import { BrowserRouter as Router } from "react-router-dom";
+import { Router } from "react-router-dom";
 import { App } from "./app";
 import { AppSnackbarProvider } from "./components/app-snackbar-provider/app-snackbar-provider.component";
 import "./index.scss";
 import { enUs } from "./locale/numbers/en-us";
+import { appHistory } from "./utils/history-util/history-util";
 import { getInitOptions } from "./utils/i18next-util/i18next-util";
 import { theme } from "./utils/material-ui-util/theme-util";
 
@@ -29,7 +30,7 @@ ReactDOM.render(
 
             {/* Apply snackbar provider */}
             <AppSnackbarProvider>
-                <Router>
+                <Router history={appHistory}>
                     {/* App needs to be rendered by a router to allow navigation using AppBar */}
                     <App />
                 </Router>

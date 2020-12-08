@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { Route, Switch } from "react-router-dom";
 import { useAuthStore } from "../../store/auth-store/auth-store";
-import { ApplicationRoute } from "../../utils/routes-util/routes-util";
+import { AppRoute } from "../../utils/routes-util/routes-util";
 import { AlertsRouter } from "../alerts-router/alerts-router";
 import { AnomaliesRouter } from "../anomalies-router/anomalies-router";
 import { GeneralAuthenticatedRouter } from "../general-authenticated-router/general-authenticated-router";
@@ -15,18 +15,12 @@ export const AppRouter: FunctionComponent = () => {
         return (
             <Switch>
                 {/* Direct all alerts paths to alerts router */}
-                <Route
-                    component={AlertsRouter}
-                    path={ApplicationRoute.ALERTS}
-                />
+                <Route component={AlertsRouter} path={AppRoute.ALERTS} />
 
                 {/* Direct all anomalies paths to anomalies router */}
-                <Route
-                    component={AnomaliesRouter}
-                    path={ApplicationRoute.ANOMALIES}
-                />
+                <Route component={AnomaliesRouter} path={AppRoute.ANOMALIES} />
 
-                {/* Direct all other paths to general authenticated router */}
+                {/* DirectAppRoute to general authenticated router */}
                 <Route component={GeneralAuthenticatedRouter} />
             </Switch>
         );

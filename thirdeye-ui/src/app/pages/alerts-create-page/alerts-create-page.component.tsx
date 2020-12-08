@@ -36,7 +36,7 @@ import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-br
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import {
-    ApplicationRoute,
+    AppRoute,
     getAlertsCreatePath,
 } from "../../utils/routes-util/routes-util";
 import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
@@ -128,7 +128,7 @@ export const AlertsCreatePage = withRouter(
                     t("message.create-success", { entity: t("label.alert") }),
                     SnackbarOption.SUCCESS
                 );
-                props.history.push(ApplicationRoute.ALERTS_ALL);
+                props.history.push(AppRoute.ALERTS_ALL);
             } catch (err) {
                 console.log(err);
                 enqueueSnackbar(

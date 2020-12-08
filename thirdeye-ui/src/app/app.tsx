@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppBar } from "./components/app-bar/app-bar.component";
-import { ApplicationRouter } from "./routers/application-router/application-router";
+import { AppRouter } from "./routers/app-router/app-router";
 import { useAuthStore } from "./store/auth-store/auth-store";
 import {
     getFulfilledResponseInterceptor,
@@ -68,8 +68,8 @@ export const App: FunctionComponent = () => {
             {/* App bar */}
             <AppBar />
 
-            {/* Application router */}
-            <ApplicationRouter />
+            {/* App router */}
+            <AppRouter />
         </>
     );
 };

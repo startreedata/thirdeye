@@ -7,7 +7,7 @@ import { AnomaliesRouter } from "../anomalies-router/anomalies-router";
 import { GeneralAuthenticatedRouter } from "../general-authenticated-router/general-authenticated-router";
 import { GeneralUnauthenticatedRouter } from "../general-unauthenticated-router/general-unauthenticated-router";
 
-export const ApplicationRouter: FunctionComponent = () => {
+export const AppRouter: FunctionComponent = () => {
     const [auth] = useAuthStore((state) => [state.auth]);
 
     if (auth) {

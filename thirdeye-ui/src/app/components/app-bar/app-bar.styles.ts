@@ -1,7 +1,7 @@
 import { createStyles, makeStyles, Theme } from "@material-ui/core";
 import { Palette } from "../../utils/material-ui-util/palette-util";
 
-export const useApplicationBarStyles = makeStyles((theme: Theme) => {
+export const useAppBarStyles = makeStyles((theme: Theme) => {
     return createStyles({
         appBar: {
             backgroundColor: Palette.COLOR_BACKGROUND_APP_BAR,

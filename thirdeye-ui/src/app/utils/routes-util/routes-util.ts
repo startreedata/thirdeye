@@ -11,6 +11,7 @@ export const ApplicationRoute = {
     ANOMALIES: "/anomalies",
     ANOMALIES_ALL: "/anomalies/all",
     ANOMALIES_DETAIL: `/anomalies/id/${ROUTE_PLACEHOLDER_ID}`,
+    CONFIGURATION: "/configuration",
     SIGN_IN: "/signIn",
     SIGN_OUT: "/signOut",
 } as const;
@@ -62,6 +63,10 @@ export const getAnomaliesDetailPath = (id: number): string => {
     path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
     return path;
+};
+
+export const getConfigurationPath = (): string => {
+    return ApplicationRoute.CONFIGURATION;
 };
 
 export const getSignInPath = (): string => {

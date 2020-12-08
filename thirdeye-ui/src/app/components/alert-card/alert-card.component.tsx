@@ -57,7 +57,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         setOptionsAnchorElement(null);
     };
 
-    const onExpandedToggle = (): void => {
+    const onExpandToggle = (): void => {
         setExpanded(!expanded);
     };
 
@@ -116,16 +116,19 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                 open={Boolean(optionsAnchorElement)}
                 onClose={closeAlertOptions}
             >
+                {/* View details */}
                 {!props.hideViewDetailsLinks && (
                     <MenuItem onClick={onAlertDetails}>
                         {t("label.view-details")}
                     </MenuItem>
                 )}
 
+                {/* Edit alert */}
                 <MenuItem onClick={onAlertEdit}>
                     {t("label.edit-alert")}
                 </MenuItem>
 
+                {/* Activete/deactivete alert */}
                 <MenuItem onClick={onAlertStateToggle}>
                     {props.alert.active
                         ? t("label.deactivate-alert")
@@ -141,6 +144,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                             <Typography variant="body2">
                                 <strong>{t("label.created-by")}</strong>
                             </Typography>
+
                             <TextHighlighter
                                 searchWords={props.searchWords}
                                 textToHighlight={props.alert.createdBy}
@@ -170,7 +174,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                     >
                                         <Link
                                             component="button"
-                                            onClick={onExpandedToggle}
+                                            onClick={onExpandToggle}
                                         >
                                             {(expanded && (
                                                 <ExpandLess
@@ -251,7 +255,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                     >
                                         <Link
                                             component="button"
-                                            onClick={onExpandedToggle}
+                                            onClick={onExpandToggle}
                                         >
                                             {(expanded && (
                                                 <ExpandLess
@@ -347,7 +351,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                     >
                                         <Link
                                             component="button"
-                                            onClick={onExpandedToggle}
+                                            onClick={onExpandToggle}
                                         >
                                             {(expanded && (
                                                 <ExpandLess
@@ -427,7 +431,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                     >
                                         <Link
                                             component="button"
-                                            onClick={onExpandedToggle}
+                                            onClick={onExpandToggle}
                                         >
                                             {(expanded && (
                                                 <ExpandLess

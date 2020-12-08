@@ -88,12 +88,14 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                 open={Boolean(optionsAnchorElement)}
                 onClose={closeAnomalyOptions}
             >
+                {/* View details */}
                 {!props.hideViewDetailsLinks && (
                     <MenuItem onClick={onAnomalyDetails}>
                         {t("label.view-details")}
                     </MenuItem>
                 )}
 
+                {/* Investigate */}
                 <MenuItem onClick={onInvestigate}>
                     {t("label.investigate")}
                 </MenuItem>

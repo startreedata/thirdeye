@@ -2,7 +2,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ApplicationBar } from "./components/application-bar/application-bar.component";
+import { AppBar } from "./components/app-bar/app-bar.component";
 import { ApplicationRouter } from "./routers/application-router/application-router";
 import { useAuthStore } from "./store/auth-store/auth-store";
 import {
@@ -65,8 +65,8 @@ export const App: FunctionComponent = () => {
 
     return (
         <>
-            {/* Application bar */}
-            <ApplicationBar />
+            {/* App bar */}
+            <AppBar />
 
             {/* Application router */}
             <ApplicationRouter />

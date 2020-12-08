@@ -1,4 +1,11 @@
-import { AppBar, Fab, Link, Menu, MenuItem, Toolbar } from "@material-ui/core";
+import {
+    AppBar as MuiAppBar,
+    Fab,
+    Link,
+    Menu,
+    MenuItem,
+    Toolbar,
+} from "@material-ui/core";
 import { Add } from "@material-ui/icons";
 import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
@@ -12,19 +19,20 @@ import {
     getAlertsPath,
     getAnomaliesAllPath,
     getBasePath,
+    getConfigurationPath,
     getHomePath,
     getSignInPath,
     getSignOutPath,
 } from "../../utils/routes-util/routes-util";
-import { useApplicationBarStyles } from "./application-bar.styles";
+import { useAppBarStyles } from "./app-bar.styles";
 
-export const ApplicationBar: FunctionComponent = () => {
-    const applicationBarClasses = useApplicationBarStyles();
-    const [auth] = useAuthStore((state) => [state.auth]);
+export const AppBar: FunctionComponent = () => {
+    const appBarClasses = useAppBarStyles();
     const [
         optionsAnchorElement,
         setOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
+    const [auth] = useAuthStore((state) => [state.auth]);
     const history = useHistory();
     const location = useLocation();
     const { t } = useTranslation();
@@ -45,10 +53,24 @@ export const ApplicationBar: FunctionComponent = () => {
         history.push(getAnomaliesAllPath());
     };
 
+    const onConfigurationClick = (): void => {
+        history.push(getConfigurationPath());
+    };
+
+    const onCreateOptionsClick = (event: MouseEvent<HTMLElement>): void => {
+        setOptionsAnchorElement(event.currentTarget);
+    };
+
     const onCreateAlert = (): void => {
         history.push(getAlertsCreatePath());
 
-        closeAlertOptions();
+        closeCreateOptions();
+    };
+
+    const onCreateSubscriptionGroup = (): void => {
+        // TODO
+
+        closeCreateOptions();
     };
 
     const onSignInClick = (): void => {
@@ -63,21 +85,17 @@ export const ApplicationBar: FunctionComponent = () => {
         return location.pathname.indexOf(route) === 0;
     };
 
-    const onAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
-        setOptionsAnchorElement(event.currentTarget);
-    };
-
-    const closeAlertOptions = (): void => {
+    const closeCreateOptions = (): void => {
         setOptionsAnchorElement(null);
     };
 
     return (
-        <AppBar className={applicationBarClasses.appBar}>
+        <MuiAppBar className={appBarClasses.appBar}>
             {/* Required to appropriately layout children in AppBar */}
             <Toolbar>
                 {/* ThirdEye logo */}
                 <Link
-                    className={applicationBarClasses.logo}
+                    className={appBarClasses.logo}
                     component="button"
                     onClick={onLogoClick}
                 >
@@ -87,9 +105,9 @@ export const ApplicationBar: FunctionComponent = () => {
                 {/* Home */}
                 <Link
                     className={classnames(
-                        applicationBarClasses.link,
+                        appBarClasses.link,
                         isRouteCurrent(ApplicationRoute.HOME)
-                            ? applicationBarClasses.selected
+                            ? appBarClasses.selected
                             : ""
                     )}
                     component="button"
@@ -102,9 +120,9 @@ export const ApplicationBar: FunctionComponent = () => {
                 {/* Alerts */}
                 <Link
                     className={classnames(
-                        applicationBarClasses.link,
+                        appBarClasses.link,
                         isRouteCurrent(ApplicationRoute.ALERTS)
-                            ? applicationBarClasses.selected
+                            ? appBarClasses.selected
                             : ""
                     )}
                     component="button"
@@ -117,9 +135,9 @@ export const ApplicationBar: FunctionComponent = () => {
                 {/* Anomalies */}
                 <Link
                     className={classnames(
-                        applicationBarClasses.link,
+                        appBarClasses.link,
                         isRouteCurrent(ApplicationRoute.ANOMALIES)
-                            ? applicationBarClasses.selected
+                            ? appBarClasses.selected
                             : ""
                     )}
                     component="button"
@@ -129,17 +147,32 @@ export const ApplicationBar: FunctionComponent = () => {
                     {t("label.anomalies")}
                 </Link>
 
+                {/* Configuration */}
+                <Link
+                    className={classnames(
+                        appBarClasses.link,
+                        isRouteCurrent(ApplicationRoute.CONFIGURATION)
+                            ? appBarClasses.selected
+                            : ""
+                    )}
+                    component="button"
+                    variant="subtitle2"
+                    onClick={onConfigurationClick}
+                >
+                    {t("label.configuration")}
+                </Link>
+
                 {(auth && (
                     <>
-                        {/* Create alert */}
+                        {/* Create options */}
                         <Fab
                             className={classnames(
-                                applicationBarClasses.link,
-                                applicationBarClasses.rightAlign
+                                appBarClasses.link,
+                                appBarClasses.rightAlign
                             )}
                             color="primary"
                             size="small"
-                            onClick={onAlertOptionsClick}
+                            onClick={onCreateOptionsClick}
                         >
                             <Add />
                         </Fab>
@@ -147,13 +180,18 @@ export const ApplicationBar: FunctionComponent = () => {
                         <Menu
                             anchorEl={optionsAnchorElement}
                             open={Boolean(optionsAnchorElement)}
-                            onClose={closeAlertOptions}
+                            onClose={closeCreateOptions}
                         >
+                            {/* Create alert */}
                             <MenuItem onClick={onCreateAlert}>
                                 {t("label.create-alert")}
                             </MenuItem>
 
-                            <MenuItem disabled>
+                            {/* Create subscription group */}
+                            <MenuItem
+                                disabled
+                                onClick={onCreateSubscriptionGroup}
+                            >
                                 {"Create Subscription Group"}
                             </MenuItem>
                         </Menu>
@@ -161,9 +199,9 @@ export const ApplicationBar: FunctionComponent = () => {
                         {/* Sign out */}
                         <Link
                             className={classnames(
-                                applicationBarClasses.link,
+                                appBarClasses.link,
                                 isRouteCurrent(ApplicationRoute.SIGN_OUT)
-                                    ? applicationBarClasses.selected
+                                    ? appBarClasses.selected
                                     : ""
                             )}
                             component="button"
@@ -177,10 +215,10 @@ export const ApplicationBar: FunctionComponent = () => {
                     // Sign in
                     <Link
                         className={classnames(
-                            applicationBarClasses.link,
-                            applicationBarClasses.rightAlign,
+                            appBarClasses.link,
+                            appBarClasses.rightAlign,
                             isRouteCurrent(ApplicationRoute.SIGN_IN)
-                                ? applicationBarClasses.selected
+                                ? appBarClasses.selected
                                 : ""
                         )}
                         component="button"
@@ -191,6 +229,6 @@ export const ApplicationBar: FunctionComponent = () => {
                     </Link>
                 )}
             </Toolbar>
-        </AppBar>
+        </MuiAppBar>
     );
 };

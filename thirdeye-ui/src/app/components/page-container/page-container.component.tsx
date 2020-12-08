@@ -15,7 +15,7 @@ export const PageContainer: FunctionComponent<PageContainerProps> = (
 
     return (
         <div className={pageContainerClasses.outerContainer}>
-            {/* Required to clip the subsequent container under ApplicationBar */}
+            {/* Required to clip the subsequent container under AppBar */}
             <Toolbar />
 
             {!props.hideApplicaionBreadCrumbs && (

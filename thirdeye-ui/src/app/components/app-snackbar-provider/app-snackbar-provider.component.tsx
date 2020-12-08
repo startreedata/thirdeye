@@ -2,17 +2,21 @@ import { IconButton } from "@material-ui/core";
 import { Close } from "@material-ui/icons";
 import { SnackbarKey, SnackbarProvider } from "notistack";
 import React, { createRef, FunctionComponent, ReactNode } from "react";
-import { ApplicationSnackbarProviderProps } from "./application-snackbar-provider.interfaces";
-import { useApplicationSnackbarProviderStyles } from "./application-snackbar-provider.styles";
+import { AppSnackbarProviderProps } from "./app-snackbar-provider.interfaces";
+import { useAppSnackbarProviderStyles } from "./app-snackbar-provider.styles";
 
-export const ApplicationSnackbarProvider: FunctionComponent<ApplicationSnackbarProviderProps> = (
-    props: ApplicationSnackbarProviderProps
+export const AppSnackbarProvider: FunctionComponent<AppSnackbarProviderProps> = (
+    props: AppSnackbarProviderProps
 ) => {
-    const applicationSnackbarProviderClasses = useApplicationSnackbarProviderStyles();
+    const appSnackbarProviderClasses = useAppSnackbarProviderStyles();
     const snackbarRef = createRef<SnackbarProvider>();
 
     const onCloseSnackbar = (key: SnackbarKey): void => {
-        snackbarRef.current?.closeSnackbar(key);
+        if (!snackbarRef || !snackbarRef.current) {
+            return;
+        }
+
+        snackbarRef.current.closeSnackbar(key);
     };
 
     return (
@@ -36,12 +40,12 @@ export const ApplicationSnackbarProvider: FunctionComponent<ApplicationSnackbarP
                 vertical: "top",
             }}
             autoHideDuration={3500}
-            className={applicationSnackbarProviderClasses.container}
+            className={appSnackbarProviderClasses.container}
             classes={{
-                variantSuccess: applicationSnackbarProviderClasses.success,
-                variantError: applicationSnackbarProviderClasses.error,
-                variantWarning: applicationSnackbarProviderClasses.warning,
-                variantInfo: applicationSnackbarProviderClasses.info,
+                variantSuccess: appSnackbarProviderClasses.success,
+                variantError: appSnackbarProviderClasses.error,
+                variantWarning: appSnackbarProviderClasses.warning,
+                variantInfo: appSnackbarProviderClasses.info,
             }}
             ref={snackbarRef}
         >

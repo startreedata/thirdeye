@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
 
-export interface ApplicationSnackbarProviderProps {
+export interface AppSnackbarProviderProps {
     children?: ReactNode;
 }

@@ -6,7 +6,7 @@ import ReactDOM from "react-dom";
 import { initReactI18next } from "react-i18next";
 import { BrowserRouter as Router } from "react-router-dom";
 import { App } from "./app";
-import { ApplicationSnackbarProvider } from "./components/application-snackbar-provider/application-snackbar-provider.component";
+import { AppSnackbarProvider } from "./components/app-snackbar-provider/app-snackbar-provider.component";
 import "./index.scss";
 import { enUs } from "./locale/numbers/en-us";
 import { getInitOptions } from "./utils/i18next-util/i18next-util";
@@ -28,13 +28,12 @@ ReactDOM.render(
             <CssBaseline />
 
             {/* Apply snackbar provider */}
-            <ApplicationSnackbarProvider>
+            <AppSnackbarProvider>
                 <Router>
-                    {/* App needs to be rendered by a router to allow navigation using
-                    ApplicationBar */}
+                    {/* App needs to be rendered by a router to allow navigation using AppBar */}
                     <App />
                 </Router>
-            </ApplicationSnackbarProvider>
+            </AppSnackbarProvider>
         </ThemeProvider>
     </StrictMode>,
     document.getElementById("root") as HTMLElement

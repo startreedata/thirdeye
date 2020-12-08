@@ -1,7 +1,7 @@
 import { createStyles, makeStyles, Theme } from "@material-ui/core";
 import { Palette } from "../../utils/material-ui-util/palette-util";
 
-export const useApplicationBreadcrumbsStyles = makeStyles((theme: Theme) => {
+export const useAppBreadcrumbsStyles = makeStyles((theme: Theme) => {
     return createStyles({
         container: {
             backgroundColor: Palette.COLOR_BACKGROUND_BREADCRUMBS,

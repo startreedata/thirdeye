@@ -6,7 +6,7 @@ import { PageLoadingIndicator } from "../../components/page-loading-indicator/pa
 import { AnomaliesAllPage } from "../../pages/anomalies-all-page/anomalies-all-page.component";
 import { AnomaliesDetailPage } from "../../pages/anomalies-detail-page/anomalies-detail-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     ApplicationRoute,
     getAnomaliesAllPath,
@@ -15,9 +15,7 @@ import {
 
 export const AnomaliesRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [
-        setAppSectionBreadcrumb,
-    ] = useApplicationBreadcrumbsStore((state) => [
+    const [setAppSectionBreadcrumb] = useAppBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumb,
     ]);
     const { t } = useTranslation();

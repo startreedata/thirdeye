@@ -32,8 +32,8 @@ import {
     getAllSubscriptionGroups,
     updateSubscriptionGroup,
 } from "../../rest/subscription-group-rest/subscription-group-rest";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import {
     ApplicationRoute,
@@ -46,7 +46,7 @@ const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 export const AlertsCreatePage = withRouter(
     (props: RouteComponentProps): ReactElement => {
         const [loading, setLoading] = useState(false);
-        const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+        const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
             state.setPageBreadcrumbs,
         ]);
         const [detectionConfig, setDetectionConfig] = useState(

@@ -11,7 +11,7 @@ import { PageLoadingIndicator } from "../../components/page-loading-indicator/pa
 import { Search } from "../../components/search/search.component";
 import { getAllAlerts, updateAlert } from "../../rest/alert-rest/alert-rest";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     filterAlerts,
     getAlertCardDatas,
@@ -21,7 +21,7 @@ import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const [alerts, setAlerts] = useState<AlertCardData[]>([]);

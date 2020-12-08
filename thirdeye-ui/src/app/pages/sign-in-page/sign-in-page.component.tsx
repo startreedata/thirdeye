@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { login } from "../../rest/auth-rest/auth-rest";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAuthStore } from "../../store/auth-store/auth-store";
 import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
 import { getSignInPath } from "../../utils/routes-util/routes-util";
@@ -15,7 +15,7 @@ export const SignInPage: FunctionComponent = () => {
     const signInPageClasses = useSignInPageStyles();
     const [loading, setLoading] = useState(true);
     const [setAccessToken] = useAuthStore((state) => [state.setAccessToken]);
-    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const [

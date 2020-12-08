@@ -4,11 +4,11 @@ import { PageContainer } from "../../components/page-container/page-container.co
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { PageNotFoundIndicator } from "../../components/page-not-found-indicator/page-not-found-indicator.component";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 
 export const PageNotFoundPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const { t } = useTranslation();

@@ -9,7 +9,7 @@ import { PageContents } from "../../components/page-contents/page-contents.compo
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { Search } from "../../components/search/search.component";
 import { getAllAnomalies } from "../../rest/anomaly-rest/anomaly-rest";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     filterAnomalies,
     getAnomalyCardDatas,
@@ -19,7 +19,7 @@ import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const [anomalies, setAnomalies] = useState<AnomalyCardData[]>([]);

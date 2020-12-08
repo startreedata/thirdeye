@@ -13,8 +13,8 @@ import { getAlertEvaluation } from "../../rest/alert-rest/alert-rest";
 import { getAnomaly } from "../../rest/anomaly-rest/anomaly-rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import {
     getAnomalyCardData,
     getAnomalyName,
@@ -27,7 +27,7 @@ import { AnomaliesDetailPageParams } from "./anomalies-detail-page.interfaces";
 export const AnomaliesDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [anomaly, setAnomaly] = useState<Anomaly>({} as Anomaly);
-    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const params = useParams<AnomaliesDetailPageParams>();

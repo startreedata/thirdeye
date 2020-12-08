@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { logout } from "../../rest/auth-rest/auth-rest";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAuthStore } from "../../store/auth-store/auth-store";
 import { getSignOutPath } from "../../utils/routes-util/routes-util";
 import { useSignOutPageStyles } from "./sign-out-page.styles";
@@ -15,7 +15,7 @@ export const SignOutPage: FunctionComponent = () => {
     const [removeAccessToken] = useAuthStore((state) => [
         state.removeAccessToken,
     ]);
-    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const { t } = useTranslation();

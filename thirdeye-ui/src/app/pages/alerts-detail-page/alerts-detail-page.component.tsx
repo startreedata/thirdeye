@@ -17,8 +17,8 @@ import {
 } from "../../rest/alert-rest/alert-rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
 import { getAlertCardData } from "../../utils/alert-util/alert-util";
 import { isValidNumberId } from "../../utils/params-util/params-util";
 import { getAlertsDetailPath } from "../../utils/routes-util/routes-util";
@@ -28,7 +28,7 @@ import { AlertsDetailPageParams } from "./alerts-detail-page.interfaces";
 export const AlertsDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [alert, setAlert] = useState<AlertCardData>({} as AlertCardData);
-    const [setPageBreadcrumbs] = useApplicationBreadcrumbsStore((state) => [
+    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
     const params = useParams<AlertsDetailPageParams>();

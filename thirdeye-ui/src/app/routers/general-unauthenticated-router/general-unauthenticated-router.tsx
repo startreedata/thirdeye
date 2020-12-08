@@ -1,10 +1,10 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
-import { Breadcrumb } from "../../components/application-breadcrumbs/application-breadcrumbs.interfaces";
+import { Breadcrumb } from "../../components/app-breadcrumbs/app-breadcrumbs.interfaces";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageLoadingIndicator } from "../../components/page-loading-indicator/page-loading-indicator.component";
 import { SignInPage } from "../../pages/sign-in-page/sign-in-page.component";
-import { useApplicationBreadcrumbsStore } from "../../store/application-breadcrumbs-store/application-breadcrumbs-store";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
 import {
     ApplicationRoute,
@@ -13,9 +13,7 @@ import {
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [
-        setAppSectionBreadcrumb,
-    ] = useApplicationBreadcrumbsStore((state) => [
+    const [setAppSectionBreadcrumb] = useAppBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumb,
     ]);
     const [setRedirectionPath] = useRedirectionPathStore((state) => [

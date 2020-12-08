@@ -3,6 +3,6 @@ export interface Breadcrumb {
     path: string;
 }
 
-export interface ApplicationBreadcrumbsProps {
+export interface AppBreadcrumbsProps {
     breadcrumbs: Breadcrumb[];
 }

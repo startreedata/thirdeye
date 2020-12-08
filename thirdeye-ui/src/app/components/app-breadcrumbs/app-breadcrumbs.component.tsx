@@ -4,13 +4,13 @@ import React, { FunctionComponent } from "react";
 import { useHistory } from "react-router-dom";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
-import { ApplicationBreadcrumbsProps } from "./application-breadcrumbs.interfaces";
-import { useApplicationBreadcrumbsStyles } from "./application-breadcrumbs.styles";
+import { AppBreadcrumbsProps } from "./app-breadcrumbs.interfaces";
+import { useAppBreadcrumbsStyles } from "./app-breadcrumbs.styles";
 
-export const ApplicationBreadcrumbs: FunctionComponent<ApplicationBreadcrumbsProps> = (
-    props: ApplicationBreadcrumbsProps
+export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
+    props: AppBreadcrumbsProps
 ) => {
-    const applicationBreadcrumbsClasses = useApplicationBreadcrumbsStyles();
+    const appBreadcrumbsClasses = useAppBreadcrumbsStyles();
     const history = useHistory();
 
     const onBreadcrumbClick = (path: string): void => {
@@ -20,7 +20,7 @@ export const ApplicationBreadcrumbs: FunctionComponent<ApplicationBreadcrumbsPro
     return (
         <Box
             borderBottom={Dimension.WIDTH_BORDER_DEFAULT}
-            className={applicationBreadcrumbsClasses.container}
+            className={appBreadcrumbsClasses.container}
             color={Palette.COLOR_BORDER_DEFAULT}
         >
             {/* Required to appropriately layout children in Breadcrumbs */}
@@ -30,7 +30,7 @@ export const ApplicationBreadcrumbs: FunctionComponent<ApplicationBreadcrumbsPro
                         <Link
                             className={
                                 index === props.breadcrumbs.length - 1
-                                    ? applicationBreadcrumbsClasses.selected
+                                    ? appBreadcrumbsClasses.selected
                                     : ""
                             }
                             component="button"

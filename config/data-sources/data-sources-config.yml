@@ -4,7 +4,7 @@ dataSourceConfigs:
   - className: org.apache.pinot.thirdeye.datasource.mock.MockThirdEyeDataSource
     properties:
       H2:
-        db: jdbc:h2:./config/h2db
+        db: jdbc:h2:./h2db
         user: sa
         password: sa
         datasets:
@@ -206,7 +206,7 @@ dataSourceConfigs:
   - className: org.apache.pinot.thirdeye.datasource.sql.SqlThirdEyeDataSource
     properties:
       H2:
-        db: jdbc:h2:./config/h2db
+        db: jdbc:h2:./h2db
         user: sa
         password: sa
         datasets:

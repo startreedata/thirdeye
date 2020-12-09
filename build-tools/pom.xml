@@ -24,5 +24,5 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.pinot.thirdeye</groupId>
   <artifactId>build-tools</artifactId>
-  <version>1.1.0</version>
+  <version>1.0</version>
 </project>

@@ -1,7 +1,6 @@
 .idea
 target
 tmp
-dependency-reduced-pom.xml
 .project
 .classpath
 venv/
@@ -17,3 +16,8 @@ docs/_build
 .DS_Store
 
 *.db
+
+# Created by maven-release-plugin
+pom.xml.releaseBackup
+dependency-reduced-pom.xml
+release.properties

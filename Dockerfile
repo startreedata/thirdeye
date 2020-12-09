@@ -7,6 +7,7 @@ RUN addgroup -S thirdeye && \
   chown thirdeye:thirdeye /home/thirdeye
 
 USER thirdeye
+WORKDIR /home/thirdeye
 
 COPY thirdeye-distribution/target/thirdeye-distribution-*-dist.tar.gz thirdeye-distribution-dist.tar.gz
 

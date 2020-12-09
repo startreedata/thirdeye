@@ -81,12 +81,12 @@ export const AppBar: FunctionComponent = () => {
         history.push(getSignOutPath());
     };
 
-    const isRouteCurrent = (route: string): boolean => {
-        return location.pathname.indexOf(route) === 0;
-    };
-
     const closeCreateOptions = (): void => {
         setOptionsAnchorElement(null);
+    };
+
+    const isRouteCurrent = (route: string): boolean => {
+        return location.pathname.indexOf(route) === 0;
     };
 
     return (

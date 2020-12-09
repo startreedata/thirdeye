@@ -19,9 +19,12 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
 
     return (
         <Box
-            borderBottom={Dimension.WIDTH_BORDER_DEFAULT}
+            border={Dimension.WIDTH_BORDER_DEFAULT}
+            borderColor={Palette.COLOR_BORDER_DEFAULT}
+            borderLeft={0}
+            borderRight={0}
+            borderTop={0}
             className={appBreadcrumbsClasses.container}
-            color={Palette.COLOR_BORDER_DEFAULT}
         >
             {/* Required to appropriately layout children in Breadcrumbs */}
             <Toolbar variant="dense">

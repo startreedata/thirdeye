@@ -1,8 +1,11 @@
+import i18n from "i18next";
+import { kebabCase } from "lodash";
 import { DateTime } from "luxon";
 import {
     TimeRange,
     TimeRangeDuration,
 } from "../../components/time-range-selector/time-range-selector.interfaces";
+import { formatLongDateAndTime } from "../date-time-util/date-time-util";
 
 export const createTimeRangeDuration = (
     timeRange: TimeRange,
@@ -17,9 +20,9 @@ export const createTimeRangeDuration = (
 };
 
 export const getTimeRangeDuration = (
-    timerange: TimeRange
+    timeRange: TimeRange
 ): TimeRangeDuration => {
-    switch (timerange) {
+    switch (timeRange) {
         case TimeRange.LAST_15_MINUTES: {
             const now = DateTime.local();
             const last15Minutes = now.minus({ minute: 15 });
@@ -173,4 +176,29 @@ export const getTimeRangeDuration = (
             );
         }
     }
+};
+
+export const renderTimeRange = (timeRange: TimeRange): string => {
+    if (!timeRange) {
+        return "";
+    }
+
+    return i18n.t(`label.${kebabCase(timeRange)}`);
+};
+
+export const renderTimeRangeDuration = (
+    timeRangeDuration: TimeRangeDuration
+): string => {
+    if (timeRangeDuration && timeRangeDuration.timeRange === TimeRange.CUSTOM) {
+        return i18n.t("label.start-time-end-time", {
+            startTime: formatLongDateAndTime(timeRangeDuration.startTime),
+            endTime: formatLongDateAndTime(timeRangeDuration.endTime),
+        });
+    }
+
+    if (timeRangeDuration) {
+        return renderTimeRange(timeRangeDuration.timeRange);
+    }
+
+    return "";
 };

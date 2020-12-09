@@ -1,15 +1,35 @@
+import i18n from "i18next";
 import { DateTime } from "luxon";
-import { TimeRange } from "../../components/time-range-selector/time-range-selector.interfaces";
+import {
+    TimeRange,
+    TimeRangeDuration,
+} from "../../components/time-range-selector/time-range-selector.interfaces";
+import * as dateTimeUtil from "../date-time-util/date-time-util";
 import {
     createTimeRangeDuration,
     getTimeRangeDuration,
+    renderTimeRange,
+    renderTimeRangeDuration,
 } from "./time-range-util";
+
+jest.mock("i18next");
+jest.mock("../date-time-util/date-time-util");
 
 describe("Time Range Util", () => {
     beforeAll(() => {
         jest.spyOn(DateTime, "local").mockImplementation(
             (): DateTime => {
                 return DateTime.fromMillis(1606852800000); // December 1, 2020, 12:00:00 PM
+            }
+        );
+
+        i18n.t = jest.fn().mockImplementation((key: string): string => {
+            return key;
+        });
+
+        jest.spyOn(dateTimeUtil, "formatLongDateAndTime").mockImplementation(
+            (date: number): string => {
+                return date.toString();
             }
         );
     });
@@ -147,6 +167,50 @@ describe("Time Range Util", () => {
             timeRange: TimeRange.TODAY,
             startTime: 1606809600000,
             endTime: 1606852800000,
+        });
+    });
+
+    test("renderTimeRange shall return empty string for invalid time range", () => {
+        expect(renderTimeRange((null as unknown) as TimeRange)).toEqual("");
+    });
+
+    test("renderTimeRange shall return appropriate string for valid time range", () => {
+        expect(renderTimeRange(TimeRange.LAST_12_HOURS)).toEqual(
+            "label.last-12-hours"
+        );
+    });
+
+    test("renderTimeRangeDuration shall return empty string for invalid time range duration", () => {
+        expect(
+            renderTimeRangeDuration((null as unknown) as TimeRangeDuration)
+        ).toEqual("");
+    });
+
+    test("renderTimeRangeDuration shall return appropriate string for valid time range duration", () => {
+        const mockTimeRange: TimeRangeDuration = {
+            timeRange: TimeRange.LAST_12_HOURS,
+            startTime: 0,
+            endTime: 0,
+        };
+
+        expect(renderTimeRangeDuration(mockTimeRange)).toEqual(
+            "label.last-12-hours"
+        );
+    });
+
+    test("renderTimeRangeDuration shall return appropriate string for valid custom time range duration", () => {
+        const mockCustomTimeRange: TimeRangeDuration = {
+            timeRange: TimeRange.CUSTOM,
+            startTime: 1,
+            endTime: 2,
+        };
+
+        expect(renderTimeRangeDuration(mockCustomTimeRange)).toEqual(
+            "label.start-time-end-time"
+        );
+        expect(i18n.t).toHaveBeenCalledWith("label.start-time-end-time", {
+            startTime: "1",
+            endTime: "2",
         });
     });
 });

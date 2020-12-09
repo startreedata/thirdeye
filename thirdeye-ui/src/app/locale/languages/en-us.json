@@ -30,6 +30,8 @@
         "this-year": "This Year",
         "last-year": "Last Year",
         "custom": "Custom",
+        "customize-time-range": "Customize Time Range",
+        "recent-custom": "Recent Custom",
         "apply": "Apply",
         "cancel": "Cancel",
         "search": "Search",

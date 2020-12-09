@@ -7,6 +7,7 @@ export type AppTimeRangeStore = {
     appTimeRange: TimeRange;
     startTime: number;
     endTime: number;
+    recentCustomTimeRangeDurations: TimeRangeDuration[];
     setAppTimeRange: (
         timeRange: TimeRange,
         startTime?: number,

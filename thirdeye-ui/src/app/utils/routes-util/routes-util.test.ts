@@ -8,6 +8,7 @@ import {
     getAnomaliesDetailPath,
     getAnomaliesPath,
     getBasePath,
+    getConfigurationPath,
     getHomePath,
     getSignInPath,
     getSignOutPath,
@@ -52,6 +53,10 @@ describe("Routes Util", () => {
 
     test("getAnomaliesDetailPath shall return appropriate path", () => {
         expect(getAnomaliesDetailPath(1)).toEqual("/anomalies/id/1");
+    });
+
+    test("getConfigurationPath shall return appropriate path", () => {
+        expect(getConfigurationPath()).toEqual("/configuration");
     });
 
     test("getSignInPath shall return appropriate path", () => {

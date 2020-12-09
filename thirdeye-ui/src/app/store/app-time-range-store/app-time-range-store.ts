@@ -9,39 +9,65 @@ import {
 } from "../../utils/time-range-util/time-range-util";
 import { AppTimeRangeStore } from "./app-time-range-store.interfaces";
 
-// Application store for global time range
+const MAX_RECENT_TIME_RANGE_ENTRIES = 3;
+
+// App store for global time range
 export const useAppTimeRangeStore = create<AppTimeRangeStore>(
     (set: SetState<AppTimeRangeStore>, get: GetState<AppTimeRangeStore>) => ({
         appTimeRange: TimeRange.TODAY,
         startTime: 0,
         endTime: 0,
+        recentCustomTimeRangeDurations: [],
 
         setAppTimeRange: (
             timeRange: TimeRange,
             startTime?: number,
             endTime?: number
         ): void => {
+            const { recentCustomTimeRangeDurations } = get();
+
+            let newTimeRange = TimeRange.TODAY;
+            let newStartTime = 0;
+            let newEndTime = 0;
+
+            // Capture new time range
+            newTimeRange = timeRange;
+
             if (timeRange === TimeRange.CUSTOM && startTime && endTime) {
                 // Valid custom time range can be set
-                set({
-                    appTimeRange: timeRange,
-                    startTime: startTime,
-                    endTime: endTime,
-                });
+                newStartTime = startTime;
+                newEndTime = endTime;
 
-                return;
+                // Add to recent custom time range durations
+                recentCustomTimeRangeDurations.push(
+                    createTimeRangeDuration(
+                        newTimeRange,
+                        newStartTime,
+                        newEndTime
+                    )
+                );
+
+                if (
+                    recentCustomTimeRangeDurations.length >
+                    MAX_RECENT_TIME_RANGE_ENTRIES
+                ) {
+                    // Trim recent custom time range duration entries to set threshold
+                    const newRecentAppTimeRangeDurations = recentCustomTimeRangeDurations.slice(
+                        1,
+                        MAX_RECENT_TIME_RANGE_ENTRIES + 1
+                    );
+
+                    set({
+                        recentCustomTimeRangeDurations: newRecentAppTimeRangeDurations,
+                    });
+                }
             }
 
-            // Capture new time range, also default to TimeRange.TODAY at this stage if new time
-            // range is TimeRange.CUSTOM
-            const newTimeRange =
-                timeRange === TimeRange.CUSTOM ? TimeRange.TODAY : timeRange;
-
-            // Set predefined time range
+            // Set time range
             set({
                 appTimeRange: newTimeRange,
-                startTime: 0,
-                endTime: 0,
+                startTime: newStartTime,
+                endTime: newEndTime,
             });
         },
 
@@ -57,7 +83,6 @@ export const useAppTimeRangeStore = create<AppTimeRangeStore>(
                 );
             }
 
-            // Construct time range duration for a predefined time range
             return getTimeRangeDuration(appTimeRange);
         },
     })

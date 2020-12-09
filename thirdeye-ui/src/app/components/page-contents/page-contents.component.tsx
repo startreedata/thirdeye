@@ -12,10 +12,12 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     const pageContentsClasses = usePageContentsStyles();
     const [
         appTimeRange,
+        recentCustomTimeRangeDurations,
         setAppTimeRange,
         getAppTimeRangeDuration,
     ] = useAppTimeRangeStore((state) => [
         state.appTimeRange,
+        state.recentCustomTimeRangeDurations,
         state.setAppTimeRange,
         state.getAppTimeRangeDuration,
     ]);
@@ -57,6 +59,9 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                                 <TimeRangeSelector
                                     getTimeRangeDuration={
                                         getAppTimeRangeDuration
+                                    }
+                                    recentCustomTimeRangeDurations={
+                                        recentCustomTimeRangeDurations
                                     }
                                     timeRange={appTimeRange}
                                     onChange={setAppTimeRange}

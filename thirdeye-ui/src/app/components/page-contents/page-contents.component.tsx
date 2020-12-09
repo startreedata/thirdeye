@@ -1,7 +1,8 @@
 import { Grid, Typography } from "@material-ui/core";
 import classnames from "classnames";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
+import { getTimeRangeFromQueryString } from "../../utils/params-util/params-util";
 import { TimeRangeSelector } from "../time-range-selector/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.style";
@@ -21,6 +22,18 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
         state.setAppTimeRange,
         state.getAppTimeRangeDuration,
     ]);
+
+    useEffect(() => {
+        // Set time range from time range query string if available
+        const timeRageDuration = getTimeRangeFromQueryString();
+        if (timeRageDuration) {
+            setAppTimeRange(
+                timeRageDuration.timeRange,
+                timeRageDuration.startTime,
+                timeRageDuration.endTime
+            );
+        }
+    }, []);
 
     return (
         <main

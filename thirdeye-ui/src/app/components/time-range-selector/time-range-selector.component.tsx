@@ -125,12 +125,16 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
 
     const onApply = (): void => {
         // Notify that component state time range duration has changed
-        props.onChange &&
-            props.onChange(
-                timeRangeDuration.timeRange,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            );
+        if (timeRangeDuration.timeRange === TimeRange.CUSTOM) {
+            props.onChange &&
+                props.onChange(
+                    timeRangeDuration.timeRange,
+                    timeRangeDuration.startTime,
+                    timeRangeDuration.endTime
+                );
+        } else {
+            props.onChange && props.onChange(timeRangeDuration.timeRange);
+        }
 
         closeTimeRangeSelector();
     };
@@ -352,7 +356,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                         hideTabs
                                                         value={
                                                             new Date(
-                                                                timeRangeDuration.startTime as number
+                                                                timeRangeDuration.startTime
                                                             )
                                                         }
                                                         variant="static"
@@ -369,12 +373,12 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                         hideTabs
                                                         minDate={
                                                             new Date(
-                                                                timeRangeDuration.startTime as number
+                                                                timeRangeDuration.startTime
                                                             )
                                                         }
                                                         value={
                                                             new Date(
-                                                                timeRangeDuration.endTime as number
+                                                                timeRangeDuration.endTime
                                                             )
                                                         }
                                                         variant="static"

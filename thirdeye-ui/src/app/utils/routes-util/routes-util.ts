@@ -1,3 +1,5 @@
+import { getTimeRangeQueryString } from "../params-util/params-util";
+
 const ROUTE_PLACEHOLDER_ID = ":id";
 
 export const AppRoute = {
@@ -17,62 +19,67 @@ export const AppRoute = {
 } as const;
 
 export const getBasePath = (): string => {
-    return AppRoute.BASE;
+    return createPathWithTimeRangeQueryString(AppRoute.BASE);
 };
 
 export const getHomePath = (): string => {
-    return AppRoute.HOME;
+    return createPathWithTimeRangeQueryString(AppRoute.HOME);
 };
 
 export const getAlertsPath = (): string => {
-    return AppRoute.ALERTS;
+    return createPathWithTimeRangeQueryString(AppRoute.ALERTS);
 };
 
 export const getAlertsAllPath = (): string => {
-    return AppRoute.ALERTS_ALL;
+    return createPathWithTimeRangeQueryString(AppRoute.ALERTS_ALL);
 };
 
 export const getAlertsDetailPath = (id: number): string => {
     let path: string = AppRoute.ALERTS_DETAIL;
     path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
-    return path;
+    return createPathWithTimeRangeQueryString(path);
 };
 
 export const getAlertsCreatePath = (): string => {
-    return AppRoute.ALERTS_CREATE;
+    return createPathWithTimeRangeQueryString(AppRoute.ALERTS_CREATE);
 };
 
 export const getAlertsUpdatePath = (id: number): string => {
     let path: string = AppRoute.ALERTS_UPDATE;
     path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
-    return path;
+    return createPathWithTimeRangeQueryString(path);
 };
 
 export const getAnomaliesPath = (): string => {
-    return AppRoute.ANOMALIES;
+    return createPathWithTimeRangeQueryString(AppRoute.ANOMALIES);
 };
 
 export const getAnomaliesAllPath = (): string => {
-    return AppRoute.ANOMALIES_ALL;
+    return createPathWithTimeRangeQueryString(AppRoute.ANOMALIES_ALL);
 };
 
 export const getAnomaliesDetailPath = (id: number): string => {
     let path: string = AppRoute.ANOMALIES_DETAIL;
     path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
-    return path;
+    return createPathWithTimeRangeQueryString(path);
 };
 
 export const getConfigurationPath = (): string => {
-    return AppRoute.CONFIGURATION;
+    return createPathWithTimeRangeQueryString(AppRoute.CONFIGURATION);
 };
 
 export const getSignInPath = (): string => {
-    return AppRoute.SIGN_IN;
+    return createPathWithTimeRangeQueryString(AppRoute.SIGN_IN);
 };
 
 export const getSignOutPath = (): string => {
-    return AppRoute.SIGN_OUT;
+    return createPathWithTimeRangeQueryString(AppRoute.SIGN_OUT);
+};
+
+// Picks up time range query string from URL and ataches it to new path
+export const createPathWithTimeRangeQueryString = (path: string): string => {
+    return `${path}?${getTimeRangeQueryString()}`;
 };

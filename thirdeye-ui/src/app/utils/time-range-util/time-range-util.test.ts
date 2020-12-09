@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { DateTime } from "luxon";
+import { DateTime, Settings } from "luxon";
 import {
     TimeRange,
     TimeRangeDuration,
@@ -15,8 +15,16 @@ import {
 jest.mock("i18next");
 jest.mock("../date-time-util/date-time-util");
 
+const locale = Settings.defaultLocale;
+const zoneName = Settings.defaultZoneName;
+
 describe("Time Range Util", () => {
     beforeAll(() => {
+        // Make sure date time manipulations and literal results are consistent regardless of where
+        // tests are run by explicitly locale and setting time zone
+        Settings.defaultLocale = "en-US";
+        Settings.defaultZoneName = "America/Los_Angeles";
+
         jest.spyOn(DateTime, "local").mockImplementation(
             (): DateTime => {
                 return DateTime.fromMillis(1606852800000); // December 1, 2020, 12:00:00 PM
@@ -39,7 +47,18 @@ describe("Time Range Util", () => {
     });
 
     afterAll(() => {
+        Settings.defaultLocale = locale;
+        Settings.defaultZoneName = zoneName;
+
         jest.restoreAllMocks();
+    });
+
+    test("createTimeRangeDuration shall create appropriate time range with default inputs", () => {
+        const timeRange = createTimeRangeDuration(TimeRange.TODAY);
+
+        expect(timeRange.timeRange).toEqual(TimeRange.TODAY);
+        expect(timeRange.startTime).toEqual(0);
+        expect(timeRange.endTime).toEqual(0);
     });
 
     test("createTimeRangeDuration shall create appropriate time range", () => {

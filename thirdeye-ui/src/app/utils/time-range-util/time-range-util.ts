@@ -9,8 +9,8 @@ import { formatLongDateAndTime } from "../date-time-util/date-time-util";
 
 export const createTimeRangeDuration = (
     timeRange: TimeRange,
-    startTime: number,
-    endTime: number
+    startTime = 0,
+    endTime = 0
 ): TimeRangeDuration => {
     return {
         timeRange: timeRange,

@@ -1,6 +1,6 @@
 import i18n from "i18next";
 import { round } from "lodash";
-import { DateTime, Interval } from "luxon/";
+import { DateTime, Interval } from "luxon";
 import { formatNumber } from "../number-util/number-util";
 
 // Returns most appropriate formatted string representation of interval between given start and
@@ -15,8 +15,8 @@ export const formatDuration = (startTime: number, endTime: number): string => {
     }
 
     const duration = Interval.fromDateTimes(
-        new Date(startTime),
-        new Date(endTime)
+        DateTime.fromMillis(startTime),
+        DateTime.fromMillis(endTime)
     ).toDuration();
 
     let durationInUnits;

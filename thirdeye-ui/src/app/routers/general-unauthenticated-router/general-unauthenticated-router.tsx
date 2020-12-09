@@ -6,7 +6,11 @@ import { PageContainer } from "../../components/page-container/page-container.co
 import { SignInPage } from "../../pages/sign-in-page/sign-in-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
-import { AppRoute, getSignInPath } from "../../utils/routes-util/routes-util";
+import {
+    AppRoute,
+    createPathWithTimeRangeQueryString,
+    getSignInPath,
+} from "../../utils/routes-util/routes-util";
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -37,7 +41,9 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
             return;
         }
 
-        setRedirectionPath(location.pathname);
+        setRedirectionPath(
+            createPathWithTimeRangeQueryString(location.pathname)
+        );
     };
 
     if (loading) {

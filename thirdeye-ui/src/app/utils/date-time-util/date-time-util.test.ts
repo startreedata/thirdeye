@@ -1,10 +1,19 @@
 import i18n from "i18next";
+import { Settings } from "luxon";
 import { formatDuration, formatLongDateAndTime } from "./date-time-util";
 
 jest.mock("i18next");
 
+const locale = Settings.defaultLocale;
+const zoneName = Settings.defaultZoneName;
+
 describe("DateTime Util", () => {
     beforeAll(() => {
+        // Make sure date time manipulations and literal results are consistent regardless of where
+        // tests are run by explicitly locale and setting time zone
+        Settings.defaultLocale = "en-US";
+        Settings.defaultZoneName = "America/Los_Angeles";
+
         i18n.t = jest.fn().mockImplementation((key: string): string => {
             return key;
         });
@@ -15,6 +24,9 @@ describe("DateTime Util", () => {
     });
 
     afterAll(() => {
+        Settings.defaultLocale = locale;
+        Settings.defaultZoneName = zoneName;
+
         jest.restoreAllMocks();
     });
 
@@ -108,7 +120,7 @@ describe("DateTime Util", () => {
         expect(formatLongDateAndTime((null as unknown) as number)).toEqual("");
     });
 
-    test("formatLongDateAndTime shall invoke DateTime.fromJSDate with appropriate input and return result", () => {
+    test("formatLongDateAndTime shall return appropriate long formatted date and time", () => {
         expect(formatLongDateAndTime(1606852800000)).toEqual(
             "Dec 01, 20, 12:00 PM"
         );

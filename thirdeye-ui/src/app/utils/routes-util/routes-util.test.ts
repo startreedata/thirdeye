@@ -1,4 +1,6 @@
+import * as paramsUtil from "../params-util/params-util";
 import {
+    createPathWithTimeRangeQueryString,
     getAlertsAllPath,
     getAlertsCreatePath,
     getAlertsDetailPath,
@@ -14,56 +16,96 @@ import {
     getSignOutPath,
 } from "./routes-util";
 
-describe("Routes Util", () => {
-    test("getBasePath shall return appropriate path", () => {
-        expect(getBasePath()).toEqual("/");
+jest.mock("../params-util/params-util");
+
+describe("Routes Util with time range query string", () => {
+    beforeAll(() => {
+        jest.spyOn(paramsUtil, "getTimeRangeQueryString").mockImplementation(
+            (): string => {
+                return "testTimeRangeQueryString";
+            }
+        );
     });
 
-    test("getHomePath shall return appropriate path", () => {
-        expect(getHomePath()).toEqual("/home");
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    test("getAlertsPath shall return appropriate path", () => {
-        expect(getAlertsPath()).toEqual("/alerts");
+    afterAll(() => {
+        jest.restoreAllMocks();
     });
 
-    test("getAlertsAllPath shall return appropriate path", () => {
-        expect(getAlertsAllPath()).toEqual("/alerts/all");
+    test("getBasePath shall return appropriate path with time range query string", () => {
+        expect(getBasePath()).toEqual("/?testTimeRangeQueryString");
     });
 
-    test("getAlertsDetailPath shall return appropriate path", () => {
-        expect(getAlertsDetailPath(1)).toEqual("/alerts/id/1");
+    test("getHomePath shall return appropriate path with time range query string", () => {
+        expect(getHomePath()).toEqual("/home?testTimeRangeQueryString");
     });
 
-    test("getAlertsCreatePath shall return appropriate path", () => {
-        expect(getAlertsCreatePath()).toEqual("/alerts/create");
+    test("getAlertsPath shall return appropriate path with time range query string", () => {
+        expect(getAlertsPath()).toEqual("/alerts?testTimeRangeQueryString");
     });
 
-    test("getAlertsUpdatePath shall return appropriate path", () => {
-        expect(getAlertsUpdatePath(1)).toEqual("/alerts/update/id/1");
+    test("getAlertsAllPath shall return appropriate path with time range query string", () => {
+        expect(getAlertsAllPath()).toEqual(
+            "/alerts/all?testTimeRangeQueryString"
+        );
     });
 
-    test("getAnomaliesPath shall return appropriate path", () => {
-        expect(getAnomaliesPath()).toEqual("/anomalies");
+    test("getAlertsDetailPath shall return appropriate path with time range query string", () => {
+        expect(getAlertsDetailPath(1)).toEqual(
+            "/alerts/id/1?testTimeRangeQueryString"
+        );
     });
 
-    test("getAnomaliesAllPath shall return appropriate path", () => {
-        expect(getAnomaliesAllPath()).toEqual("/anomalies/all");
+    test("getAlertsCreatePath shall return appropriate path with time range query string", () => {
+        expect(getAlertsCreatePath()).toEqual(
+            "/alerts/create?testTimeRangeQueryString"
+        );
     });
 
-    test("getAnomaliesDetailPath shall return appropriate path", () => {
-        expect(getAnomaliesDetailPath(1)).toEqual("/anomalies/id/1");
+    test("getAlertsUpdatePath shall return appropriate path with time range query string", () => {
+        expect(getAlertsUpdatePath(1)).toEqual(
+            "/alerts/update/id/1?testTimeRangeQueryString"
+        );
     });
 
-    test("getConfigurationPath shall return appropriate path", () => {
-        expect(getConfigurationPath()).toEqual("/configuration");
+    test("getAnomaliesPath shall return appropriate path with time range query string", () => {
+        expect(getAnomaliesPath()).toEqual(
+            "/anomalies?testTimeRangeQueryString"
+        );
     });
 
-    test("getSignInPath shall return appropriate path", () => {
-        expect(getSignInPath()).toEqual("/signIn");
+    test("getAnomaliesAllPath shall return appropriate path with time range query string", () => {
+        expect(getAnomaliesAllPath()).toEqual(
+            "/anomalies/all?testTimeRangeQueryString"
+        );
     });
 
-    test("getSignOutPath shall return appropriate path", () => {
-        expect(getSignOutPath()).toEqual("/signOut");
+    test("getAnomaliesDetailPath shall return appropriate path with time range query string", () => {
+        expect(getAnomaliesDetailPath(1)).toEqual(
+            "/anomalies/id/1?testTimeRangeQueryString"
+        );
+    });
+
+    test("getConfigurationPath shall return appropriate path with time range query string", () => {
+        expect(getConfigurationPath()).toEqual(
+            "/configuration?testTimeRangeQueryString"
+        );
+    });
+
+    test("getSignInPath shall return appropriate path with time range query string", () => {
+        expect(getSignInPath()).toEqual("/signIn?testTimeRangeQueryString");
+    });
+
+    test("getSignOutPath shall return appropriate path with time range query string", () => {
+        expect(getSignOutPath()).toEqual("/signOut?testTimeRangeQueryString");
+    });
+
+    test("createPathWithTimeRangeQueryString shall return input path with time range query string", () => {
+        expect(createPathWithTimeRangeQueryString("/testPath")).toEqual(
+            "/testPath?testTimeRangeQueryString"
+        );
     });
 });

@@ -35,10 +35,6 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     };
 
     const updateSearchText = (searchText: string): void => {
-        if (!searchText) {
-            return;
-        }
-
         setSearchText(searchText);
 
         // Split search text into words

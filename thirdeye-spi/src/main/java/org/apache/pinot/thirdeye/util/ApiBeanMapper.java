@@ -11,9 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.api.AnomalyApi;
+import org.apache.pinot.thirdeye.api.AnomalyFeedbackApi;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.api.DatasetApi;
 import org.apache.pinot.thirdeye.api.EmailSettingsApi;
@@ -276,6 +278,15 @@ public abstract class ApiBeanMapper {
             .map(p -> p.get("detectorComponentName"))
             .map(ApiBeanMapper::toDetectionAlertNodeApi)
             .orElse(null))
+        .setFeedback(optional(dto.getFeedback())
+            .map(ApiBeanMapper::toApi)
+            .orElse(null))
         ;
+  }
+
+  private static AnomalyFeedbackApi toApi(final AnomalyFeedback feedbackDto) {
+    return new AnomalyFeedbackApi()
+        .setComment(feedbackDto.getComment())
+        .setType(feedbackDto.getFeedbackType());
   }
 }

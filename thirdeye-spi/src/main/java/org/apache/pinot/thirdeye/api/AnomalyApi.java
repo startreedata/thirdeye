@@ -36,6 +36,8 @@ public class AnomalyApi implements ThirdEyeApi {
   private AnomalyType type;
   private AnomalySeverity severity;
 
+  private AnomalyFeedbackApi feedback;
+
   public Long getId() {
     return id;
   }
@@ -205,6 +207,15 @@ public class AnomalyApi implements ThirdEyeApi {
 
   public AnomalyApi setSeverity(final AnomalySeverity severity) {
     this.severity = severity;
+    return this;
+  }
+
+  public AnomalyFeedbackApi getFeedback() {
+    return feedback;
+  }
+
+  public AnomalyApi setFeedback(final AnomalyFeedbackApi feedback) {
+    this.feedback = feedback;
     return this;
   }
 }

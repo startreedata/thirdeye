@@ -150,10 +150,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeApi, DtoT extends Abstra
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     authService.authenticate(authHeader);
-    final DtoT dto = dtoManager.findById(id);
-    ensureExists(dto, "Invalid id");
-
-    return respondOk(toApi(dto));
+    return respondOk(toApi(get(id)));
   }
 
   @DELETE

@@ -25,7 +25,6 @@
   <name>thirdeye</name>
 
   <modules>
-    <module>build-tools</module>
     <module>thirdeye-spi</module>
     <module>thirdeye-core</module>
     <module>thirdeye-coordinator</module>
@@ -200,15 +199,8 @@
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>3.1.1</version>
           <inherited>true</inherited>
-          <dependencies>
-            <dependency>
-              <groupId>org.apache.pinot.thirdeye</groupId>
-              <artifactId>build-tools</artifactId>
-              <version>1.0</version>
-            </dependency>
-          </dependencies>
           <configuration>
-            <configLocation>thirdeye/checkstyle.xml</configLocation>
+            <configLocation>thirdeye-checkstyle.xml</configLocation>
             <encoding>UTF-8</encoding>
             <consoleOutput>true</consoleOutput>
             <failsOnError>true</failsOnError>

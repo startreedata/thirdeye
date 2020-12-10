@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.pinot.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.2.0</version>
+  <version>1.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -139,7 +139,7 @@
     <url>https://github.com/cortexdata/thirdeye.git</url>
     <connection>scm:git:git@github.com:cortexdata/thirdeye.git</connection>
     <developerConnection>scm:git:git@github.com:cortexdata/thirdeye.git</developerConnection>
-    <tag>thirdeye-1.2.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <inceptionYear>2014-2018</inceptionYear>

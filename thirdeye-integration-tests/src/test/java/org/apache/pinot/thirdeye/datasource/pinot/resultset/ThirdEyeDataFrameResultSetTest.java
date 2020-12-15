@@ -188,6 +188,11 @@ public class ThirdEyeDataFrameResultSetTest {
     }
 
     @Override
+    public String getColumnDataType(final int columnIndex) {
+      return null;
+    }
+
+    @Override
     public String getString(int rowIdx, int columnIdx) {
       if (columnIdx != 0) {
         throw new IllegalArgumentException("Column index has to be 0 for single group by result.");
@@ -261,6 +266,11 @@ public class ThirdEyeDataFrameResultSetTest {
     }
 
     @Override
+    public String getColumnDataType(final int columnIndex) {
+      return null;
+    }
+
+    @Override
     public String getString(int rowIdx, int columnIdx) {
       if (rowIdx != 0 || columnIdx != 0) {
         throw new IllegalArgumentException(
@@ -322,6 +332,11 @@ public class ThirdEyeDataFrameResultSetTest {
     @Override
     public String getColumnName(int columnIdx) {
       return columnArray.get(columnIdx);
+    }
+
+    @Override
+    public String getColumnDataType(final int columnIndex) {
+      return null;
     }
 
     @Override

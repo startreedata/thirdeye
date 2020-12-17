@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -80,6 +81,18 @@ public class ResourceUtils {
   public static BadRequestException badRequest(final StatusListApi response) {
     return new BadRequestException(Response
         .status(Status.BAD_REQUEST)
+        .entity(response)
+        .build()
+    );
+  }
+
+  public static InternalServerErrorException serverError(ThirdEyeStatus status, Object... args) {
+    return serverError(statusResponse(status, args));
+  }
+
+  public static InternalServerErrorException serverError(final StatusListApi response) {
+    return new InternalServerErrorException(Response
+        .status(Status.INTERNAL_SERVER_ERROR)
         .entity(response)
         .build()
     );

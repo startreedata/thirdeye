@@ -1,7 +1,11 @@
 package org.apache.pinot.thirdeye.alert;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_TIMEOUT;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_UNKNOWN;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.serverError;
 
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
@@ -26,7 +30,9 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
+import org.apache.pinot.thirdeye.detection.DataProviderException;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
@@ -67,18 +73,46 @@ public class AlertEvaluator {
   }
 
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
+      throws ExecutionException {
+    try {
+      final DetectionPipelineResult result = runPipeline(request);
+      return toApi(result);
+    } catch (InterruptedException e) {
+      LOG.error("Error occurred during evaluate", e);
+      throw serverError(ERR_UNKNOWN, e.getMessage());
+    } catch (TimeoutException e) {
+      LOG.error("Error occurred during evaluate", e);
+      throw serverError(ERR_TIMEOUT);
+    } catch (ExecutionException e) {
+      LOG.error("Error occurred during evaluate", e);
+      handleExecutionException(e);
+      throw e;
+    }
+  }
+
+  private void handleExecutionException(final ExecutionException e) {
+    final Throwable cause = e.getCause();
+    if (cause instanceof DetectionPipelineException) {
+      final Throwable innerCause = cause.getCause();
+      if (innerCause instanceof DataProviderException) {
+        throw serverError(ERR_DATA_UNAVAILABLE, innerCause.getMessage());
+      }
+      throw serverError(ERR_UNKNOWN, cause.getMessage());
+    }
+  }
+
+  private DetectionPipelineResult runPipeline(final AlertEvaluationApi request)
       throws InterruptedException, ExecutionException, TimeoutException {
     final AlertDTO alert = getAlert(ensureExists(request.getAlert()));
-
     final DetectionPipeline pipeline = new DetectionPipelineLoader().from(
         dataProvider,
         alert,
         request.getStart().getTime(),
         request.getEnd().getTime());
 
-    return toApi(executorService
+    return executorService
         .submit(pipeline::run)
-        .get(TIMEOUT, TimeUnit.MILLISECONDS));
+        .get(TIMEOUT, TimeUnit.MILLISECONDS);
   }
 
   private AlertEvaluationApi toApi(final DetectionPipelineResult result) {

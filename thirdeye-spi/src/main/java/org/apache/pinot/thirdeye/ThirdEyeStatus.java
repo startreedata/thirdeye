@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye;
 
 public enum ThirdEyeStatus {
 
+  ERR_DATA_UNAVAILABLE("Data not available! %s"),
   ERR_DUPLICATE_NAME("Name must be unique!"),
   ERR_MISSING_ID("ID is null!"),
   ERR_UNEXPECTED_QUERY_PARAM("Unexpected Query Param. Allowed values: %s"),
@@ -9,6 +10,7 @@ public enum ThirdEyeStatus {
   ERR_OBJECT_UNEXPECTED("Object should be null/empty! %s"),
   ERR_OBJECT_DOES_NOT_EXIST("Object does not exist! %s"),
   ERR_OPERATION_UNSUPPORTED("Operation is not supported!"),
+  ERR_TIMEOUT("Operation timed out!"),
   ERR_UNKNOWN("Untagged Error! %s");
 
   final String message;

@@ -113,7 +113,7 @@ public class DefaultDataProvider implements DataProvider {
       }
       return timeseriesResult;
     } catch (Exception e) {
-      throw new RuntimeException("fetch time series failed", e);
+      throw new DataProviderException("fetch time series failed", e);
     }
   }
 
@@ -141,7 +141,7 @@ public class DefaultDataProvider implements DataProvider {
       }
       return output;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new DataProviderException(e);
     }
   }
 
@@ -168,7 +168,7 @@ public class DefaultDataProvider implements DataProvider {
 
       return output;
     } catch (Exception e) {
-      throw new RuntimeException("Failed to fetch anomalies from database.", e);
+      throw new DataProviderException("Failed to fetch anomalies from database.", e);
     }
   }
 

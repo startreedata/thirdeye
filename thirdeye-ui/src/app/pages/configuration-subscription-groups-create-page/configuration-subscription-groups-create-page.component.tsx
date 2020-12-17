@@ -1,11 +1,13 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ConfigurationToolbar } from "../../components/configuration-toolbar/configuration-toolbar.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
+import { getConfigurationSubscriptionGroupsCreatePath } from "../../utils/routes-util/routes-util";
 
-export const AlertsUpdatePage: FunctionComponent = () => {
+export const ConfigurationSubscriptionGroupsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
@@ -16,12 +18,8 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         // Create page breadcrumbs
         setPageBreadcrumbs([
             {
-                text: "ALERT",
-                path: "",
-            },
-            {
-                text: t("label.update"),
-                path: "",
+                text: t("label.create"),
+                path: getConfigurationSubscriptionGroupsCreatePath(),
             },
         ]);
     }, []);
@@ -36,15 +34,15 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
     if (loading) {
         return (
-            <PageContainer>
+            <PageContainer toolbar={<ConfigurationToolbar />}>
                 <LoadingIndicator />
             </PageContainer>
         );
     }
 
     return (
-        <PageContainer>
-            <PageContents centerAlign title={t("label.update")} />
+        <PageContainer toolbar={<ConfigurationToolbar />}>
+            <PageContents centerAlign title={t("label.create")} />
         </PageContainer>
     );
 };

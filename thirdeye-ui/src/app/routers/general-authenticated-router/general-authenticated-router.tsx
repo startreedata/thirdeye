@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { Breadcrumb } from "../../components/app-breadcrumbs/app-breadcrumbs.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { HomePage } from "../../pages/home-page/home-page.component";
@@ -15,13 +14,13 @@ import {
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setAppSectionBreadcrumb] = useAppBreadcrumbsStore((state) => [
-        state.setAppSectionBreadcrumb,
+    const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
+        state.setAppSectionBreadcrumbs,
     ]);
 
     useEffect(() => {
-        // Create app section breadcrumb
-        setAppSectionBreadcrumb({} as Breadcrumb);
+        // Create app section breadcrumbs
+        setAppSectionBreadcrumbs([]);
 
         setLoading(false);
     }, []);

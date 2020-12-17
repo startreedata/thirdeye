@@ -7,13 +7,20 @@ export const AppRoute = {
     HOME: "/home",
     ALERTS: "/alerts",
     ALERTS_ALL: "/alerts/all",
-    ALERTS_DETAIL: `/alerts/id/${ROUTE_PLACEHOLDER_ID}`,
+    ALERTS_DETAIL: `/alerts/detail/id/${ROUTE_PLACEHOLDER_ID}`,
     ALERTS_CREATE: "/alerts/create",
     ALERTS_UPDATE: `/alerts/update/id/${ROUTE_PLACEHOLDER_ID}`,
     ANOMALIES: "/anomalies",
     ANOMALIES_ALL: "/anomalies/all",
-    ANOMALIES_DETAIL: `/anomalies/id/${ROUTE_PLACEHOLDER_ID}`,
+    ANOMALIES_DETAIL: `/anomalies/detail/id/${ROUTE_PLACEHOLDER_ID}`,
     CONFIGURATION: "/configuration",
+    CONFIGURATION_SUBSCRIPTION_GROUPS: "/configuration/subscriptionGroups",
+    CONFIGURATION_SUBSCRIPTION_GROUPS_ALL:
+        "/configuration/subscriptionGroups/all",
+    CONFIGURATION_SUBSCRIPTION_GROUPS_DETAIL: `/configuration/subscriptionGroups/detail/id/${ROUTE_PLACEHOLDER_ID}`,
+    CONFIGURATION_SUBSCRIPTION_GROUPS_CREATE:
+        "/configuration/subscriptionGroups/create",
+    CONFIGURATION_SUBSCRIPTION_GROUPS_UPDATE: `/configuration/subscriptionGroups/update/id/${ROUTE_PLACEHOLDER_ID}`,
     SIGN_IN: "/signIn",
     SIGN_OUT: "/signOut",
 } as const;
@@ -69,6 +76,42 @@ export const getAnomaliesDetailPath = (id: number): string => {
 
 export const getConfigurationPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.CONFIGURATION);
+};
+
+export const getConfigurationSubscriptionGroupsPath = (): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.CONFIGURATION_SUBSCRIPTION_GROUPS
+    );
+};
+
+export const getConfigurationSubscriptionGroupsAllPath = (): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.CONFIGURATION_SUBSCRIPTION_GROUPS_ALL
+    );
+};
+
+export const getConfigurationSubscriptionGroupsDetailPath = (
+    id: number
+): string => {
+    let path: string = AppRoute.CONFIGURATION_SUBSCRIPTION_GROUPS_DETAIL;
+    path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getConfigurationSubscriptionGroupsCreatePath = (): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.CONFIGURATION_SUBSCRIPTION_GROUPS_CREATE
+    );
+};
+
+export const getConfigurationSubscriptionGroupsUpdatePath = (
+    id: number
+): string => {
+    let path: string = AppRoute.CONFIGURATION_SUBSCRIPTION_GROUPS_UPDATE;
+    path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
 };
 
 export const getSignInPath = (): string => {

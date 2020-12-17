@@ -18,10 +18,11 @@ export const PageContainer: FunctionComponent<PageContainerProps> = (
             {/* Required to clip the subsequent container under AppBar */}
             <Toolbar />
 
-            {!props.hideAppBreadCrumbs && (
-                // App breadcrumbs
-                <AppBreadcrumbs breadcrumbs={appBreadcrumbs} />
-            )}
+            {/* Toolbar, if provided */}
+            {props.toolbar}
+
+            {/* App breadcrumbs */}
+            <AppBreadcrumbs breadcrumbs={appBreadcrumbs} />
 
             <div className={pageContainerClasses.innerContainer}>
                 {/* Include children */}

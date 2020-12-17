@@ -17,17 +17,19 @@ import {
 
 export const AlertsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setAppSectionBreadcrumb] = useAppBreadcrumbsStore((state) => [
-        state.setAppSectionBreadcrumb,
+    const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
+        state.setAppSectionBreadcrumbs,
     ]);
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create app section breadcrumb
-        setAppSectionBreadcrumb({
-            text: t("label.alerts"),
-            path: getAlertsPath(),
-        });
+        // Create app section breadcrumbs
+        setAppSectionBreadcrumbs([
+            {
+                text: t("label.alerts"),
+                path: getAlertsPath(),
+            },
+        ]);
 
         setLoading(false);
     }, []);

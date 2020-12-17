@@ -15,17 +15,19 @@ import {
 
 export const AnomaliesRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setAppSectionBreadcrumb] = useAppBreadcrumbsStore((state) => [
-        state.setAppSectionBreadcrumb,
+    const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
+        state.setAppSectionBreadcrumbs,
     ]);
     const { t } = useTranslation();
 
     useEffect(() => {
         // Create router breadcrumb
-        setAppSectionBreadcrumb({
-            text: t("label.anomalies"),
-            path: getAnomaliesPath(),
-        });
+        setAppSectionBreadcrumbs([
+            {
+                text: t("label.anomalies"),
+                path: getAnomaliesPath(),
+            },
+        ]);
 
         setLoading(false);
     }, []);

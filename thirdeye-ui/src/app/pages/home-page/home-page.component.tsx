@@ -2,6 +2,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { getHomePath } from "../../utils/routes-util/routes-util";
 
@@ -20,8 +21,14 @@ export const HomePage: FunctionComponent = () => {
                 path: getHomePath(),
             },
         ]);
+    }, []);
 
-        setLoading(false);
+    useEffect(() => {
+        const init = async (): Promise<void> => {
+            setLoading(false);
+        };
+
+        init();
     }, []);
 
     if (loading) {
@@ -34,7 +41,7 @@ export const HomePage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <LoadingIndicator />
+            <PageContents centerAlign title={t("label.home")} />
         </PageContainer>
     );
 };

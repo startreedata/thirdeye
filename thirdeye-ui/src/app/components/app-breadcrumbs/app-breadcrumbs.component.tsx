@@ -27,7 +27,10 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
             className={appBreadcrumbsClasses.container}
         >
             {/* Required to appropriately layout children in Breadcrumbs */}
-            <Toolbar variant="dense">
+            <Toolbar
+                classes={{ dense: appBreadcrumbsClasses.dense }}
+                variant="dense"
+            >
                 <Breadcrumbs separator={<NavigateNext />}>
                     {props.breadcrumbs.map((breadcrumb, index) => (
                         <Link
@@ -39,7 +42,7 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
                             component="button"
                             disabled={index === props.breadcrumbs.length - 1}
                             key={index}
-                            variant="subtitle1"
+                            variant="subtitle2"
                             onClick={(): void => {
                                 onBreadcrumbClick(breadcrumb.path);
                             }}

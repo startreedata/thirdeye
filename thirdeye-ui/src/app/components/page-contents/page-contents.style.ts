@@ -17,7 +17,7 @@ export const usePageContentsStyles = makeStyles({
         marginRight: "auto",
     },
     header: {
-        minHeight: "75px",
+        minHeight: "80px",
     },
     titleCenterAlign: {
         flexGrow: 1,

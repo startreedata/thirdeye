@@ -2,8 +2,9 @@ import { Card, CardContent, CardHeader } from "@material-ui/core";
 import ParentSize from "@visx/responsive/lib/components/ParentSize";
 import React, { FunctionComponent, ReactElement } from "react";
 import {
-    getGraphDataFromAPIData,
+    getAnomaliesFromAlertEvalution,
     getMargins,
+    getTimeSeriesFromAlertEvalution,
 } from "../../utils/chart/chart-util";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { TimeSeriesChart } from "../timeseries-chart/timeseries-chart.component";
@@ -22,7 +23,8 @@ export const TimeSeriesChartCard: FunctionComponent<TimeSeriesChartCardProps> = 
                         {({ width, height }): ReactElement => (
                             <TimeSeriesChart
                                 showLegend
-                                data={getGraphDataFromAPIData(data)}
+                                anomalies={getAnomaliesFromAlertEvalution(data)}
+                                data={getTimeSeriesFromAlertEvalution(data)}
                                 height={height}
                                 margin={getMargins({
                                     showLegend: false,

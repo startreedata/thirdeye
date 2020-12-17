@@ -1,8 +1,11 @@
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+
 export interface TimeSeriesChartProps {
     height: number;
     width: number;
     margin: Margin;
     data: TimeSeriesProps[];
+    anomalies: Anomaly[];
     compact?: boolean;
     showLegend?: boolean;
 }

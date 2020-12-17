@@ -1,10 +1,12 @@
 import { bisector, format, timeFormat } from "d3";
 import { isEmpty } from "lodash";
+import { TimeSeriesAnomaly } from "../../components/anomaly-chart/anomaly-chart.interface";
 import {
     Margin,
     TimeSeriesProps,
 } from "../../components/timeseries-chart/timeseries-chart.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 
 export const CHART_SEPRATION_HEIGHT = 30;
 
@@ -17,7 +19,7 @@ export const getMargins = ({ showLegend }: { showLegend: boolean }): Margin => {
     };
 };
 
-export const getGraphDataFromAPIData = (
+export const getTimeSeriesFromAlertEvalution = (
     data: AlertEvaluation
 ): TimeSeriesProps[] => {
     if (isEmpty(data)) {
@@ -36,9 +38,21 @@ export const getGraphDataFromAPIData = (
     }));
 };
 
+export const getAnomaliesFromAlertEvalution = (
+    data: AlertEvaluation
+): Anomaly[] => {
+    if (isEmpty(data)) {
+        return [];
+    }
+    const detectionKeys = Object.keys(data.detectionEvaluations);
+
+    return data.detectionEvaluations[detectionKeys[0]].anomalies;
+};
+
 // accessors
-export const getDate = (d: TimeSeriesProps): Date => d.timestamp;
-export const getValue = (d: TimeSeriesProps): number =>
+export const getDate = (d: TimeSeriesProps | TimeSeriesAnomaly): Date =>
+    d.timestamp;
+export const getValue = (d: TimeSeriesProps | TimeSeriesAnomaly): number =>
     isNaN(d.current) ? 0 : d.current;
 export const getBaseline = (d: TimeSeriesProps): number =>
     isNaN(d.expacted) ? 0 : d.expacted;

@@ -41,6 +41,7 @@ import {
     getUpperBound,
     getValue,
 } from "../../utils/chart/chart-util";
+import { AnomalyChart } from "../anomaly-chart/anomaly-chart.component";
 import {
     TimeSeriesChartProps,
     TimeSeriesProps,
@@ -55,16 +56,18 @@ const COLORS = {
     current: "#1B1B1E",
     expacted: "#FF9505",
     shaded: "#1CAFED",
+    anomaly: "#FF0000",
 };
 
 enum CHARTS_TYPES {
     CURRENT_LINE,
     EXPECTED_LINE,
     SHADED_AREA,
+    ANOMALIES,
 }
 
 const ordinalColor2Scale = scaleOrdinal({
-    domain: ["Current", "Baseline", "Upper and Lower bound"],
+    domain: ["Current", "Baseline", "Upper and Lower bound", "Anomaly"],
     range: [
         <rect
             fill={COLORS.current}
@@ -90,6 +93,7 @@ const ordinalColor2Scale = scaleOrdinal({
             key="upper-lower-bound"
             width={15}
         />,
+        <rect fill={COLORS.anomaly} height={15} key="anomaly" width={15} />,
     ],
 });
 
@@ -109,6 +113,7 @@ export const TimeSeriesChart = withTooltip<
         tooltipLeft = 0,
         compact = false,
         showLegend,
+        anomalies,
     } = props;
 
     const [filteredData, setFilteredData] = useState(data);
@@ -119,6 +124,7 @@ export const TimeSeriesChart = withTooltip<
             CHARTS_TYPES.CURRENT_LINE,
             CHARTS_TYPES.EXPECTED_LINE,
             CHARTS_TYPES.SHADED_AREA,
+            CHARTS_TYPES.ANOMALIES,
         ])
     );
     const { t } = useTranslation();
@@ -220,11 +226,12 @@ export const TimeSeriesChart = withTooltip<
                         ? d1
                         : d0;
             }
-            showTooltip({
-                tooltipData: d,
-                tooltipLeft: x - margin.left,
-                tooltipTop: valueScale(getValue(d)),
-            });
+            d &&
+                showTooltip({
+                    tooltipData: d,
+                    tooltipLeft: x - margin.left,
+                    tooltipTop: valueScale(getValue(d)),
+                });
         },
         [showTooltip, valueScale, dateScale, filteredData, margin]
     );
@@ -258,19 +265,6 @@ export const TimeSeriesChart = withTooltip<
         strokeDasharray: "5, 5",
         y: (d: TimeSeriesProps): number => valueScale(getBaseline(d)) ?? 0,
     };
-
-    // if (!data || !data.length) {
-    //     return <Typography variant="h4">No charts data available</Typography>;
-    // }
-
-    // Initial position for brush
-    // const initialBrushPosition = useMemo(
-    //     () => ({
-    //         start: { x: brushDateScale(getDate(data[25] || 0)) },
-    //         end: { x: brushDateScale(getDate(data[25])) },
-    //     }),
-    //     [brushDateScale, data]
-    // );
 
     return width < 10 ? null : (
         <div>
@@ -308,6 +302,14 @@ export const TimeSeriesChart = withTooltip<
                         tickFormat={formatValue}
                         tickStroke={"rgba(0,0,0,0.85)"}
                     />
+                    {/* Show Anomaly with Line & Dots */}
+                    {activeChartsList?.has(CHARTS_TYPES.ANOMALIES) && (
+                        <AnomalyChart
+                            anomalies={anomalies}
+                            xScale={dateScale}
+                            yScale={valueScale}
+                        />
+                    )}
                     {/* Transparent Layer for Tooltip */}
                     <Bar
                         fill="transparent"
@@ -319,7 +321,6 @@ export const TimeSeriesChart = withTooltip<
                         onTouchMove={handleTooltip}
                         onTouchStart={handleTooltip}
                     />
-
                     {/* Visuals for Tooltip */}
                     {tooltipData && (
                         <g>
@@ -395,6 +396,15 @@ export const TimeSeriesChart = withTooltip<
                             y={(d): number =>
                                 brushValueScale(getBaseline(d)) ?? 0
                             }
+                        />
+                    )}
+                    {/* Show Anomaly Circless */}
+                    {activeChartsList?.has(CHARTS_TYPES.ANOMALIES) && (
+                        <AnomalyChart
+                            anomalies={anomalies}
+                            dotRadius={3}
+                            xScale={brushDateScale}
+                            yScale={brushValueScale}
                         />
                     )}
                     {/* X-Axis for brush area */}

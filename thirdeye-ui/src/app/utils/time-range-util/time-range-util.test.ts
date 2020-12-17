@@ -7,9 +7,9 @@ import {
 import * as dateTimeUtil from "../date-time-util/date-time-util";
 import {
     createTimeRangeDuration,
+    formatTimeRange,
+    formatTimeRangeDuration,
     getTimeRangeDuration,
-    renderTimeRange,
-    renderTimeRangeDuration,
 } from "./time-range-util";
 
 jest.mock("i18next");
@@ -189,42 +189,42 @@ describe("Time Range Util", () => {
         });
     });
 
-    test("renderTimeRange shall return empty string for invalid time range", () => {
-        expect(renderTimeRange((null as unknown) as TimeRange)).toEqual("");
+    test("formatTimeRange shall return empty string for invalid time range", () => {
+        expect(formatTimeRange((null as unknown) as TimeRange)).toEqual("");
     });
 
-    test("renderTimeRange shall return appropriate string for valid time range", () => {
-        expect(renderTimeRange(TimeRange.LAST_12_HOURS)).toEqual(
+    test("formatTimeRange shall return appropriate string for valid time range", () => {
+        expect(formatTimeRange(TimeRange.LAST_12_HOURS)).toEqual(
             "label.last-12-hours"
         );
     });
 
-    test("renderTimeRangeDuration shall return empty string for invalid time range duration", () => {
+    test("formatTimeRangeDuration shall return empty string for invalid time range duration", () => {
         expect(
-            renderTimeRangeDuration((null as unknown) as TimeRangeDuration)
+            formatTimeRangeDuration((null as unknown) as TimeRangeDuration)
         ).toEqual("");
     });
 
-    test("renderTimeRangeDuration shall return appropriate string for valid time range duration", () => {
+    test("formatTimeRangeDuration shall return appropriate string for valid time range duration", () => {
         const mockTimeRange: TimeRangeDuration = {
             timeRange: TimeRange.LAST_12_HOURS,
             startTime: 0,
             endTime: 0,
         };
 
-        expect(renderTimeRangeDuration(mockTimeRange)).toEqual(
+        expect(formatTimeRangeDuration(mockTimeRange)).toEqual(
             "label.last-12-hours"
         );
     });
 
-    test("renderTimeRangeDuration shall return appropriate string for valid custom time range duration", () => {
+    test("formatTimeRangeDuration shall return appropriate string for valid custom time range duration", () => {
         const mockCustomTimeRange: TimeRangeDuration = {
             timeRange: TimeRange.CUSTOM,
             startTime: 1,
             endTime: 2,
         };
 
-        expect(renderTimeRangeDuration(mockCustomTimeRange)).toEqual(
+        expect(formatTimeRangeDuration(mockCustomTimeRange)).toEqual(
             "label.start-time-end-time"
         );
         expect(i18n.t).toHaveBeenCalledWith("label.start-time-end-time", {

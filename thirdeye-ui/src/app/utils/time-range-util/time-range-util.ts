@@ -178,7 +178,7 @@ export const getTimeRangeDuration = (
     }
 };
 
-export const renderTimeRange = (timeRange: TimeRange): string => {
+export const formatTimeRange = (timeRange: TimeRange): string => {
     if (!timeRange) {
         return "";
     }
@@ -186,7 +186,7 @@ export const renderTimeRange = (timeRange: TimeRange): string => {
     return i18n.t(`label.${kebabCase(timeRange)}`);
 };
 
-export const renderTimeRangeDuration = (
+export const formatTimeRangeDuration = (
     timeRangeDuration: TimeRangeDuration
 ): string => {
     if (timeRangeDuration && timeRangeDuration.timeRange === TimeRange.CUSTOM) {
@@ -197,7 +197,7 @@ export const renderTimeRangeDuration = (
     }
 
     if (timeRangeDuration) {
-        return renderTimeRange(timeRangeDuration.timeRange);
+        return formatTimeRange(timeRangeDuration.timeRange);
     }
 
     return "";

@@ -13,7 +13,7 @@ export const useTimeRangeSelectorStyles = makeStyles({
         padding: "16px",
     },
     timeRangeList: {
-        height: "475px",
+        height: "490px",
         width: "190px",
         overflow: "scroll",
     },

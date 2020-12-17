@@ -8,7 +8,7 @@ import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-br
 import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
 import {
     AppRoute,
-    createPathWithTimeRangeQueryString,
+    createPathWithRecognizedQueryString,
     getSignInPath,
 } from "../../utils/routes-util/routes-util";
 
@@ -42,7 +42,7 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
         }
 
         setRedirectionPath(
-            createPathWithTimeRangeQueryString(location.pathname)
+            createPathWithRecognizedQueryString(location.pathname)
         );
     };
 

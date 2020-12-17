@@ -26,9 +26,9 @@ import { useTranslation } from "react-i18next";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
 import {
+    formatTimeRange,
+    formatTimeRangeDuration,
     getTimeRangeDuration,
-    renderTimeRange,
-    renderTimeRangeDuration,
 } from "../../utils/time-range-util/time-range-util";
 import {
     TimeRange,
@@ -166,10 +166,10 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
             <Grid item>
                 {(timeRangeDuration.timeRange === TimeRange.CUSTOM &&
                     // Render time range duration
-                    renderTimeRangeDuration(timeRangeDuration)) ||
+                    formatTimeRangeDuration(timeRangeDuration)) ||
                     (timeRangeDuration.timeRange &&
                         // Render time range name
-                        renderTimeRange(timeRangeDuration.timeRange))}
+                        formatTimeRange(timeRangeDuration.timeRange))}
             </Grid>
 
             {/* Time range button */}
@@ -267,12 +267,12 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                             <Tooltip
                                                                 arrow
                                                                 placement="right"
-                                                                title={renderTimeRangeDuration(
+                                                                title={formatTimeRangeDuration(
                                                                     recentTimeRangeDuration
                                                                 )}
                                                             >
                                                                 <ListItemText
-                                                                    primary={renderTimeRangeDuration(
+                                                                    primary={formatTimeRangeDuration(
                                                                         recentTimeRangeDuration
                                                                     )}
                                                                     primaryTypographyProps={{
@@ -289,6 +289,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                     )
                                                 )}
 
+                                            {/* Divider */}
                                             {props.recentCustomTimeRangeDurations &&
                                                 props
                                                     .recentCustomTimeRangeDurations
@@ -304,35 +305,51 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                         "string"
                                                 )
                                                 .map((timeRange) => (
-                                                    <ListItem
-                                                        button
-                                                        key={timeRange}
-                                                        onClick={(): void => {
-                                                            onTimeRangeClick(
-                                                                timeRange
-                                                            );
-                                                        }}
-                                                    >
-                                                        <ListItemText
-                                                            primary={renderTimeRange(
-                                                                timeRange
-                                                            )}
-                                                            primaryTypographyProps={{
-                                                                variant:
-                                                                    "button",
-                                                                color:
-                                                                    "primary",
-                                                                className:
-                                                                    timeRangeDuration.timeRange ===
+                                                    <>
+                                                        <ListItem
+                                                            button
+                                                            key={timeRange}
+                                                            onClick={(): void => {
+                                                                onTimeRangeClick(
                                                                     timeRange
-                                                                        ? classnames(
-                                                                              timeRangeSelectorClasses.selectedTimeRange,
-                                                                              timeRangeSelectorClasses.timeRangeListItem
-                                                                          )
-                                                                        : timeRangeSelectorClasses.timeRangeListItem,
+                                                                );
                                                             }}
-                                                        />
-                                                    </ListItem>
+                                                        >
+                                                            <ListItemText
+                                                                primary={formatTimeRange(
+                                                                    timeRange
+                                                                )}
+                                                                primaryTypographyProps={{
+                                                                    variant:
+                                                                        "button",
+                                                                    color:
+                                                                        "primary",
+                                                                    className:
+                                                                        timeRangeDuration.timeRange ===
+                                                                        timeRange
+                                                                            ? classnames(
+                                                                                  timeRangeSelectorClasses.selectedTimeRange,
+                                                                                  timeRangeSelectorClasses.timeRangeListItem
+                                                                              )
+                                                                            : timeRangeSelectorClasses.timeRangeListItem,
+                                                                }}
+                                                            />
+                                                        </ListItem>
+
+                                                        {/* Place divider after certain options */}
+                                                        {(timeRange ===
+                                                            TimeRange.CUSTOM ||
+                                                            timeRange ===
+                                                                TimeRange.LAST_30_DAYS ||
+                                                            timeRange ===
+                                                                TimeRange.YESTERDAY ||
+                                                            timeRange ===
+                                                                TimeRange.LAST_WEEK ||
+                                                            timeRange ===
+                                                                TimeRange.LAST_MONTH) && (
+                                                            <Divider />
+                                                        )}
+                                                    </>
                                                 ))}
                                         </List>
                                     </Box>

@@ -99,3 +99,36 @@ export const formatLongDateAndTime = (date: number): string => {
         minute: "2-digit",
     });
 };
+
+// Returns long formatted string representation of date part of given date
+// For example:
+// MMM DD, YYYY
+export const formatLongDate = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    const dateTime = DateTime.fromMillis(date);
+
+    return dateTime.toLocaleString({
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+    });
+};
+
+// Returns long formatted string representation of time part of given date
+// For example:
+// HH:MM AM/PM
+export const formatLongTime = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    const dateTime = DateTime.fromMillis(date);
+
+    return dateTime.toLocaleString({
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+};

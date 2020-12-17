@@ -11,7 +11,9 @@ import React, {
 import { useTranslation } from "react-i18next";
 import {
     getSearchFromQueryString,
+    getSearchTextFromQueryString,
     setSearchInQueryString,
+    setSearchTextInQueryString,
 } from "../../utils/params-util/params-util";
 import { SearchBarProps } from "./search-bar.interfaces";
 
@@ -24,9 +26,14 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Set search text from search query string if available
-        if (props.setSearchQueryString) {
-            updateSearchText(getSearchFromQueryString());
+        if (!props.setSearchQueryString) {
+            // Do nothing
+        }
+
+        // If search label matches search query string, set search text from search text query
+        // string
+        if (props.label === getSearchFromQueryString()) {
+            updateSearchText(getSearchTextFromQueryString());
         }
     }, []);
 
@@ -49,9 +56,14 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         debounce((searchWords: string[]): void => {
             props.onChange && props.onChange(searchWords);
 
-            // Set search in query string
+            // Set search and search text in query string
             if (props.setSearchQueryString) {
-                setSearchInQueryString(searchWords.join(SEARCH_WORD_DELIMITER));
+                setSearchInQueryString(
+                    props.label ? props.label : t("label.search")
+                );
+                setSearchTextInQueryString(
+                    searchWords.join(SEARCH_WORD_DELIMITER)
+                );
             }
         }, 500),
         []

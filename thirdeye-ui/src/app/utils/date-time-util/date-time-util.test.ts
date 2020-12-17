@@ -1,6 +1,11 @@
 import i18n from "i18next";
 import { Settings } from "luxon";
-import { formatDuration, formatLongDateAndTime } from "./date-time-util";
+import {
+    formatDuration,
+    formatLongDate,
+    formatLongDateAndTime,
+    formatLongTime,
+} from "./date-time-util";
 
 jest.mock("i18next");
 
@@ -124,5 +129,21 @@ describe("DateTime Util", () => {
         expect(formatLongDateAndTime(1606852800000)).toEqual(
             "Dec 01, 20, 12:00 PM"
         );
+    });
+
+    test("formatLongDate shall return empty string for invalid input", () => {
+        expect(formatLongDate((null as unknown) as number)).toEqual("");
+    });
+
+    test("formatLongDate shall return appropriate long formatted date", () => {
+        expect(formatLongDate(1606852800000)).toEqual("Dec 01, 2020");
+    });
+
+    test("formatLongTime shall return empty string for invalid input", () => {
+        expect(formatLongTime((null as unknown) as number)).toEqual("");
+    });
+
+    test("formatLongTime shall return appropriate long formatted time", () => {
+        expect(formatLongTime(1606852800000)).toEqual("12:00 PM");
     });
 });

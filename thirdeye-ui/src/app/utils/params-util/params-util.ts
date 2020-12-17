@@ -7,17 +7,26 @@ import { appHistory } from "../history-util/history-util";
 
 export enum AppQueryStringKey {
     SEARCH = "SEARCH",
+    SEARCH_TEXT = "SEARCH_TEXT",
     TIME_RANGE = "TIME_RANGE",
     START_TIME = "START_TIME",
     END_TIME = "END_TIME",
 }
 
-export const setSearchInQueryString = (searchText: string): void => {
-    setQueryString(AppQueryStringKey.SEARCH.toLowerCase(), searchText);
+export const setSearchInQueryString = (search: string): void => {
+    setQueryString(AppQueryStringKey.SEARCH.toLowerCase(), search);
 };
 
 export const getSearchFromQueryString = (): string => {
     return getQueryString(AppQueryStringKey.SEARCH.toLowerCase());
+};
+
+export const setSearchTextInQueryString = (searchText: string): void => {
+    setQueryString(AppQueryStringKey.SEARCH_TEXT.toLowerCase(), searchText);
+};
+
+export const getSearchTextFromQueryString = (): string => {
+    return getQueryString(AppQueryStringKey.SEARCH_TEXT.toLowerCase());
 };
 
 export const setTimeRangeInQueryString = (
@@ -34,39 +43,6 @@ export const setTimeRangeInQueryString = (
         AppQueryStringKey.END_TIME.toLowerCase(),
         endTime.toString()
     );
-};
-
-export const getTimeRangeQueryString = (): string => {
-    const timeRangeString = getQueryString(
-        AppQueryStringKey.TIME_RANGE.toLowerCase()
-    );
-    const startTimeString = getQueryString(
-        AppQueryStringKey.START_TIME.toLowerCase()
-    );
-    const endTimeString = getQueryString(
-        AppQueryStringKey.END_TIME.toLowerCase()
-    );
-
-    // Validate time range query string
-    if (!timeRangeString || !startTimeString || !endTimeString) {
-        return "";
-    }
-
-    const urlSearchParams = new URLSearchParams();
-    urlSearchParams.set(
-        AppQueryStringKey.TIME_RANGE.toLowerCase(),
-        timeRangeString
-    );
-    urlSearchParams.set(
-        AppQueryStringKey.START_TIME.toLowerCase(),
-        startTimeString
-    );
-    urlSearchParams.set(
-        AppQueryStringKey.END_TIME.toLowerCase(),
-        endTimeString
-    );
-
-    return urlSearchParams.toString();
 };
 
 export const getTimeRangeFromQueryString = (): TimeRangeDuration | null => {
@@ -122,6 +98,23 @@ export const getQueryString = (key: string): string => {
     }
 
     return value;
+};
+
+// Returns current query string from URL with all the recognized key value pairs
+export const getRecognizedQueryString = (): string => {
+    const urlSearchParams = new URLSearchParams(location.search);
+    urlSearchParams.forEach((_value: string, key: string): void => {
+        if (
+            !AppQueryStringKey[
+                key.toUpperCase() as keyof typeof AppQueryStringKey
+            ]
+        ) {
+            // Unrecognized query string key
+            urlSearchParams.delete(key);
+        }
+    });
+
+    return urlSearchParams.toString();
 };
 
 export const isValidNumberId = (param: string): boolean => {

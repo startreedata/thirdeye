@@ -16,7 +16,12 @@ server:
 
 
 alert: true
+
+# Enable autoloading data sources with a default frequency of 5 min
 autoload: true
+autoOnboardConfiguration:
+  frequency: PT5m # 5 min
+
 holidayEventsLoader: true
 mockEventsLoader: true
 monitor: false

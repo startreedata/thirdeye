@@ -17,9 +17,8 @@
 package org.apache.pinot.thirdeye.auto.onboard;
 
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.testng.annotations.Test;
 
 public class AutoOnboardServiceTest {
@@ -29,7 +28,7 @@ public class AutoOnboardServiceTest {
     ThirdEyeAnomalyConfiguration thirdEyeAnomalyConfiguration = new ThirdEyeAnomalyConfiguration();
 
     AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
-    autoOnboardConfiguration.setRunFrequency(new TimeGranularity(1, TimeUnit.SECONDS));
+    autoOnboardConfiguration.setFrequency(Duration.ofSeconds(1));
     thirdEyeAnomalyConfiguration.setAutoOnboardConfiguration(autoOnboardConfiguration);
 
     URL url = AutoOnboardServiceTest.class.getResource("/data-sources/data-sources-config-1.yml");

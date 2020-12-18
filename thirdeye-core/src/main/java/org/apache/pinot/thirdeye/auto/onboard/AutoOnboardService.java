@@ -19,13 +19,14 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,14 +41,14 @@ public class AutoOnboardService implements Runnable {
   private final ScheduledExecutorService scheduledExecutorService;
 
   private final List<AutoOnboard> autoOnboardServices = new ArrayList<>();
-  private final TimeGranularity runFrequency;
+  private final Duration frequency;
 
   /**
    * Reads data sources configs and instantiates the constructors for auto load of all data sources,
    * if availble
    */
   public AutoOnboardService(ThirdEyeAnomalyConfiguration config) {
-    this.runFrequency = config.getAutoOnboardConfiguration().getRunFrequency();
+    frequency = config.getAutoOnboardConfiguration().getFrequency();
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
@@ -60,7 +61,7 @@ public class AutoOnboardService implements Runnable {
 
   public void start() {
     scheduledExecutorService
-        .scheduleAtFixedRate(this, 0, runFrequency.getSize(), runFrequency.getUnit());
+        .scheduleAtFixedRate(this, 0, frequency.getSeconds(), TimeUnit.SECONDS);
   }
 
   public void shutdown() {

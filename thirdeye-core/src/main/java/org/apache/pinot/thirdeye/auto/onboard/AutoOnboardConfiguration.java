@@ -19,18 +19,18 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
-import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import java.time.Duration;
 
 public class AutoOnboardConfiguration {
 
-  private TimeGranularity runFrequency = new TimeGranularity(6, TimeUnit.HOURS);
+  private Duration frequency = Duration.ofMinutes(5);
 
-  public TimeGranularity getRunFrequency() {
-    return runFrequency;
+  public Duration getFrequency() {
+    return frequency;
   }
 
-  public void setRunFrequency(TimeGranularity runFrequency) {
-    this.runFrequency = runFrequency;
+  public AutoOnboardConfiguration setFrequency(final Duration frequency) {
+    this.frequency = frequency;
+    return this;
   }
 }

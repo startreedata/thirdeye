@@ -21,8 +21,6 @@ package org.apache.pinot.thirdeye.worker;
 
 import static org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.readPersistenceConfig;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
@@ -41,8 +39,6 @@ import org.apache.pinot.thirdeye.common.ThirdEyeSwaggerBundle;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.util.DataFrameSerializer;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
@@ -85,20 +81,9 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
     new ThirdEyeWorker().run(argList.toArray(new String[argList.size()]));
   }
 
-  /**
-   * Helper for Object mapper with DataFrame support
-   *
-   * @return initialized ObjectMapper
-   */
-  private static Module makeMapperModule() {
-    SimpleModule module = new SimpleModule();
-    module.addSerializer(DataFrame.class, new DataFrameSerializer());
-    return module;
-  }
-
   @Override
   public String getName() {
-    return "Thirdeye Controller";
+    return "Thirdeye Worker";
   }
 
   @Override
@@ -109,7 +94,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
 
   @Override
   public void run(final ThirdEyeAnomalyConfiguration config, final Environment env) {
-    LOG.info("Starting ThirdeyeAnomalyApplication : Scheduler {} Worker {}", config.isScheduler(),
+    LOG.info("Starting ThirdEye Worker : Scheduler {} Worker {}", config.isScheduler(),
         config.isWorker());
     final DatabaseConfiguration dbConfig = getDatabaseConfiguration();
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
@@ -120,7 +105,6 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
     schedulerService = new SchedulerService(config);
 
-    env.getObjectMapper().registerModule(makeMapperModule());
     env.lifecycle().manage(lifecycleManager(config, env));
   }
 

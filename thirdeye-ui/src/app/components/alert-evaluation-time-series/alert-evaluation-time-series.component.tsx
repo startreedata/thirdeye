@@ -29,6 +29,8 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { Dimension } from "../../utils/material-ui-util/dimension-util";
+import { Palette } from "../../utils/material-ui-util/palette-util";
 import {
     formatLargeNumberForVisualization,
     formatMonthDayDateForVisualization,
@@ -36,9 +38,7 @@ import {
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
-} from "../../utils/chart/chart-util";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
+} from "../../utils/visualization/visualization-util";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { NoDataAvailableIndicator } from "../no-data-available-indicator/no-data-available-indicator.component";
 import {

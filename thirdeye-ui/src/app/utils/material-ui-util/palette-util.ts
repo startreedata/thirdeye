@@ -14,6 +14,10 @@ export const Palette = {
     COLOR_BACKGROUND_ALERT_WARNING: Color.YELLOW_1,
     COLOR_BACKGROUND_ALERT_INFO: Color.TEAL_4,
     COLOR_BORDER_DEFAULT: Color.GREY_1,
+    // Visualizations
+    COLOR_VISUALIZATION_STROKE_DEFAULT: Color.BLACK_1,
+    COLOR_VISUALIZATION_STROKE_GREY: Color.GREY_1,
+    COLOR_VISUALIZATION_STROKE_BASELINE: Color.ORANGE_1,
 } as const;
 
 // CortexData Material-UI theme color palette

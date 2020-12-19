@@ -13,4 +13,5 @@ export const Color = {
     TEAL_4: "#EAF7F9",
     RED_1: "#FFDCDC",
     YELLOW_1: "#FFF7DC",
+    ORANGE_1: "#FF9505",
 } as const;

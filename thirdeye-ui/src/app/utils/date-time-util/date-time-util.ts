@@ -81,10 +81,10 @@ export const formatDuration = (startTime: number, endTime: number): string => {
     }
 };
 
-// Returns long formatted string representation of given date
+// Returns formatted string representation of given date
 // For example:
 // MMM DD, YY, HH:MM AM/PM
-export const formatLongDateAndTime = (date: number): string => {
+export const formatDateAndTime = (date: number): string => {
     if (!date) {
         return "";
     }
@@ -100,10 +100,10 @@ export const formatLongDateAndTime = (date: number): string => {
     });
 };
 
-// Returns long formatted string representation of date part of given date
+// Returns formatted string representation of date part of given date
 // For example:
 // MMM DD, YYYY
-export const formatLongDate = (date: number): string => {
+export const formatDate = (date: number): string => {
     if (!date) {
         return "";
     }
@@ -117,10 +117,10 @@ export const formatLongDate = (date: number): string => {
     });
 };
 
-// Returns long formatted string representation of time part of given date
+// Returns formatted string representation of time part of given date
 // For example:
 // HH:MM AM/PM
-export const formatLongTime = (date: number): string => {
+export const formatTime = (date: number): string => {
     if (!date) {
         return "";
     }
@@ -130,5 +130,21 @@ export const formatLongTime = (date: number): string => {
     return dateTime.toLocaleString({
         hour: "2-digit",
         minute: "2-digit",
+    });
+};
+
+// Returns formatted string representation of month and day part of given date
+// For example:
+// MMM DD
+export const formatMonthDayDate = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    const dateTime = DateTime.fromMillis(date);
+
+    return dateTime.toLocaleString({
+        month: "short",
+        day: "2-digit",
     });
 };

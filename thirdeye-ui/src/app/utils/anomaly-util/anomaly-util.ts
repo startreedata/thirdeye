@@ -3,8 +3,8 @@ import { isEmpty } from "lodash";
 import { AnomalyCardData } from "../../components/anomaly-card/anomaly-card.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
+    formatDateAndTime,
     formatDuration,
-    formatLongDateAndTime,
 } from "../date-time-util/date-time-util";
 import {
     formatLargeNumber,
@@ -80,8 +80,8 @@ export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
             anomaly.startTime,
             anomaly.endTime
         );
-        anomalyCardData.startTime = formatLongDateAndTime(anomaly.startTime);
-        anomalyCardData.endTime = formatLongDateAndTime(anomaly.endTime);
+        anomalyCardData.startTime = formatDateAndTime(anomaly.startTime);
+        anomalyCardData.endTime = formatDateAndTime(anomaly.endTime);
     }
 
     return anomalyCardData;

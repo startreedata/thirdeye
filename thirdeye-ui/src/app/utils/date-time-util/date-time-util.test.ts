@@ -1,10 +1,11 @@
 import i18n from "i18next";
 import { Settings } from "luxon";
 import {
+    formatDate,
+    formatDateAndTime,
     formatDuration,
-    formatLongDate,
-    formatLongDateAndTime,
-    formatLongTime,
+    formatMonthDayDate,
+    formatTime,
 } from "./date-time-util";
 
 jest.mock("i18next");
@@ -12,7 +13,7 @@ jest.mock("i18next");
 const locale = Settings.defaultLocale;
 const zoneName = Settings.defaultZoneName;
 
-describe("DateTime Util", () => {
+describe("Date Time Util", () => {
     beforeAll(() => {
         // Make sure date time manipulations and literal results are consistent regardless of where
         // tests are run by explicitly locale and setting time zone
@@ -121,29 +122,37 @@ describe("DateTime Util", () => {
         );
     });
 
-    test("formatLongDateAndTime shall return empty string for invalid input", () => {
-        expect(formatLongDateAndTime((null as unknown) as number)).toEqual("");
+    test("formatDateAndTime shall return empty string for invalid input", () => {
+        expect(formatDateAndTime((null as unknown) as number)).toEqual("");
     });
 
-    test("formatLongDateAndTime shall return appropriate long formatted date and time", () => {
-        expect(formatLongDateAndTime(1606852800000)).toEqual(
+    test("formatDateAndTime shall return appropriate formatted date and time", () => {
+        expect(formatDateAndTime(1606852800000)).toEqual(
             "Dec 01, 20, 12:00 PM"
         );
     });
 
-    test("formatLongDate shall return empty string for invalid input", () => {
-        expect(formatLongDate((null as unknown) as number)).toEqual("");
+    test("formatDate shall return empty string for invalid input", () => {
+        expect(formatDate((null as unknown) as number)).toEqual("");
     });
 
-    test("formatLongDate shall return appropriate long formatted date", () => {
-        expect(formatLongDate(1606852800000)).toEqual("Dec 01, 2020");
+    test("formatDate shall return appropriate formatted date part of given date", () => {
+        expect(formatDate(1606852800000)).toEqual("Dec 01, 2020");
     });
 
-    test("formatLongTime shall return empty string for invalid input", () => {
-        expect(formatLongTime((null as unknown) as number)).toEqual("");
+    test("formatTime shall return empty string for invalid input", () => {
+        expect(formatTime((null as unknown) as number)).toEqual("");
     });
 
-    test("formatLongTime shall return appropriate long formatted time", () => {
-        expect(formatLongTime(1606852800000)).toEqual("12:00 PM");
+    test("formatTime shall return appropriate formatted time part of given date", () => {
+        expect(formatTime(1606852800000)).toEqual("12:00 PM");
+    });
+
+    test("formatMonthDayDate shall return empty string for invalid input", () => {
+        expect(formatMonthDayDate((null as unknown) as number)).toEqual("");
+    });
+
+    test("formatMonthDayDate shall return appropriate formatted month and day part of given date", () => {
+        expect(formatMonthDayDate(1606852800000)).toEqual("Dec 01");
     });
 });

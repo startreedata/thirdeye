@@ -5,7 +5,7 @@ import {
     TimeRange,
     TimeRangeDuration,
 } from "../../components/time-range-selector/time-range-selector.interfaces";
-import { formatLongDateAndTime } from "../date-time-util/date-time-util";
+import { formatDateAndTime } from "../date-time-util/date-time-util";
 
 export const createTimeRangeDuration = (
     timeRange: TimeRange,
@@ -191,8 +191,8 @@ export const formatTimeRangeDuration = (
 ): string => {
     if (timeRangeDuration && timeRangeDuration.timeRange === TimeRange.CUSTOM) {
         return i18n.t("label.start-time-end-time", {
-            startTime: formatLongDateAndTime(timeRangeDuration.startTime),
-            endTime: formatLongDateAndTime(timeRangeDuration.endTime),
+            startTime: formatDateAndTime(timeRangeDuration.startTime),
+            endTime: formatDateAndTime(timeRangeDuration.endTime),
         });
     }
 

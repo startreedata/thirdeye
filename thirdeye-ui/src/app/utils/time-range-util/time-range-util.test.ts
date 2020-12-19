@@ -35,7 +35,7 @@ describe("Time Range Util", () => {
             return key;
         });
 
-        jest.spyOn(dateTimeUtil, "formatLongDateAndTime").mockImplementation(
+        jest.spyOn(dateTimeUtil, "formatDateAndTime").mockImplementation(
             (date: number): string => {
                 return date.toString();
             }

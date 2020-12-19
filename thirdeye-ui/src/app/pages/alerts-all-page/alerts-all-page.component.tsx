@@ -10,10 +10,13 @@ import { PageContainer } from "../../components/page-container/page-container.co
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SearchBar } from "../../components/search-bar/search-bar.component";
 import { getAllAlerts, updateAlert } from "../../rest/alert-rest/alert-rest";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     filterAlerts,
+    getAlertCardData,
     getAlertCardDatas,
 } from "../../utils/alert-util/alert-util";
 import { getAlertsAllPath } from "../../utils/routes-util/routes-util";
@@ -21,12 +24,17 @@ import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
+    const [alertCardDatas, setAlertCardDatas] = useState<AlertCardData[]>([]);
+    const [filteredAlertCardDatas, setFilteredAlertCardDatas] = useState<
+        AlertCardData[]
+    >([]);
+    const [subscriptionGroups, setSubscriptionGroups] = useState<
+        SubscriptionGroup[]
+    >([]);
+    const [searchWords, setSearchWords] = useState<string[]>([]);
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const [alerts, setAlerts] = useState<AlertCardData[]>([]);
-    const [filteredAlerts, setfilteredAlerts] = useState<AlertCardData[]>([]);
-    const [searchWords, setSearchWords] = useState<string[]>([]);
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
@@ -41,6 +49,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
+        // Fetch data
         const init = async (): Promise<void> => {
             await fetchData();
 
@@ -50,8 +59,14 @@ export const AlertsAllPage: FunctionComponent = () => {
         init();
     }, []);
 
+    useEffect(() => {
+        // Fetched data, or search changed, reset
+        setFilteredAlertCardDatas(filterAlerts(alertCardDatas, searchWords));
+    }, [alertCardDatas, searchWords]);
+
     const fetchData = async (): Promise<void> => {
-        let alerts: AlertCardData[] = [];
+        let fetchedAlertCardDatas: AlertCardData[] = [];
+        let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
         const [
             alertsResponse,
             subscriptionGroupsResponse,
@@ -66,25 +81,21 @@ export const AlertsAllPage: FunctionComponent = () => {
         ) {
             enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
         } else {
-            alerts = getAlertCardDatas(
+            fetchedAlertCardDatas = getAlertCardDatas(
                 alertsResponse.value,
                 subscriptionGroupsResponse.value
             );
+            fetchedSubscriptionGroups = subscriptionGroupsResponse.value;
         }
 
-        setAlerts(alerts);
-        setfilteredAlerts(filterAlerts(alerts, searchWords));
-    };
-
-    const onSearch = (searchWords: string[]): void => {
-        setSearchWords(searchWords);
-        setfilteredAlerts(filterAlerts(alerts, searchWords));
+        setAlertCardDatas(fetchedAlertCardDatas);
+        setSubscriptionGroups(fetchedSubscriptionGroups);
     };
 
     const onAlertStateToggle = async (
         alertCardData: AlertCardData
     ): Promise<void> => {
-        if (!alertCardData.alert) {
+        if (!alertCardData || !alertCardData.alert) {
             return;
         }
 
@@ -94,13 +105,33 @@ export const AlertsAllPage: FunctionComponent = () => {
         try {
             alertCopy = await updateAlert(alertCopy);
 
-            fetchData();
+            // Replace updated alert in fetched alerts
+            replaceAlertCardData(alertCopy);
         } catch (error) {
             enqueueSnackbar(
                 t("message.update-error", { entity: t("label.alert") }),
                 SnackbarOption.ERROR
             );
         }
+    };
+
+    const replaceAlertCardData = (alert: Alert): void => {
+        if (!alert) {
+            return;
+        }
+
+        setAlertCardDatas((alertCardDatas) =>
+            alertCardDatas.map(
+                (alertCardData: AlertCardData): AlertCardData => {
+                    if (alertCardData.id === alert.id) {
+                        // Replace
+                        return getAlertCardData(alert, subscriptionGroups);
+                    }
+
+                    return alertCardData;
+                }
+            )
+        );
     };
 
     if (loading) {
@@ -115,28 +146,37 @@ export const AlertsAllPage: FunctionComponent = () => {
         <PageContainer>
             <PageContents centerAlign title={t("label.alerts")}>
                 <Grid container>
+                    {/* Search */}
                     <Grid item md={12}>
                         <SearchBar
                             autoFocus
                             setSearchQueryString
                             label={t("label.search-alerts")}
                             searchStatusText={t("label.search-count", {
-                                count: filteredAlerts.length,
-                                total: alerts.length,
+                                count: filteredAlertCardDatas
+                                    ? filteredAlertCardDatas.length
+                                    : 0,
+                                total: alertCardDatas
+                                    ? alertCardDatas.length
+                                    : 0,
                             })}
-                            onChange={onSearch}
+                            onChange={setSearchWords}
                         />
                     </Grid>
 
-                    {filteredAlerts.map((alert) => (
-                        <Grid item key={alert.id} md={12}>
-                            <AlertCard
-                                alert={alert}
-                                searchWords={searchWords}
-                                onAlertStateToggle={onAlertStateToggle}
-                            />
-                        </Grid>
-                    ))}
+                    {/* Alerts */}
+                    {filteredAlertCardDatas &&
+                        filteredAlertCardDatas.map(
+                            (filteredAlertCardData, index) => (
+                                <Grid item key={index} md={12}>
+                                    <AlertCard
+                                        alert={filteredAlertCardData}
+                                        searchWords={searchWords}
+                                        onAlertStateToggle={onAlertStateToggle}
+                                    />
+                                </Grid>
+                            )
+                        )}
                 </Grid>
             </PageContents>
         </PageContainer>

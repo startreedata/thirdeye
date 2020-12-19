@@ -5,10 +5,14 @@ import {
     AlertDatasetAndMetric,
     AlertSubscriptionGroup,
 } from "../../components/alert-card/alert-card.interfaces";
-import { Alert, AlertNodeType } from "../../rest/dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    AlertNodeType,
+} from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
-export const getEmptyAlertCardData = (): AlertCardData => {
+export const createEmptyAlertCardData = (): AlertCardData => {
     const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
 
     return {
@@ -26,7 +30,7 @@ export const getEmptyAlertCardData = (): AlertCardData => {
     };
 };
 
-export const getEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
+export const createEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
     const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
 
     return {
@@ -37,13 +41,25 @@ export const getEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
     };
 };
 
-export const getEmptyAlertSubscriptionGroup = (): AlertSubscriptionGroup => {
+export const createEmptyAlertSubscriptionGroup = (): AlertSubscriptionGroup => {
     const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
 
     return {
         id: -1,
         name: noDataAvailableMarker,
     };
+};
+
+export const createAlertEvaluation = (
+    alert: Alert,
+    startTime: number,
+    endTime: number
+): AlertEvaluation => {
+    return {
+        alert: alert,
+        start: startTime,
+        end: endTime,
+    } as AlertEvaluation;
 };
 
 const mapSubscriptionGroupsToAlertIds = (
@@ -65,7 +81,7 @@ const mapSubscriptionGroupsToAlertIds = (
             continue;
         }
 
-        const alertSubscriptionGroup = getEmptyAlertSubscriptionGroup();
+        const alertSubscriptionGroup = createEmptyAlertSubscriptionGroup();
         alertSubscriptionGroup.id = subscriptionGroup.id;
         alertSubscriptionGroup.name = subscriptionGroup.name;
 
@@ -104,7 +120,7 @@ export const getAlertCardDataInternal = (
     alert: Alert,
     subscriptionGroupsToAlertIdsMap: Map<number, AlertSubscriptionGroup[]>
 ): AlertCardData => {
-    const alertCardData = getEmptyAlertCardData();
+    const alertCardData = createEmptyAlertCardData();
 
     if (!alert) {
         return alertCardData;
@@ -156,7 +172,7 @@ export const getAlertCardDataInternal = (
             continue;
         }
 
-        const datasetAndMetric = getEmptyAlertDatasetAndMetric();
+        const datasetAndMetric = createEmptyAlertDatasetAndMetric();
         if (alertNode.metric.dataset) {
             datasetAndMetric.datasetId = alertNode.metric.dataset.id;
             datasetAndMetric.datasetName = alertNode.metric.dataset.name;

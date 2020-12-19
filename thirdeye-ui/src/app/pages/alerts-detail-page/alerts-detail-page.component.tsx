@@ -1,5 +1,5 @@
 import { Grid } from "@material-ui/core";
-import { cloneDeep, isEmpty, toNumber } from "lodash";
+import { cloneDeep, toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,11 +15,16 @@ import {
     getAlertEvaluation,
     updateAlert,
 } from "../../rest/alert-rest/alert-rest";
-import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
-import { getAlertCardData } from "../../utils/alert-util/alert-util";
+import {
+    createAlertEvaluation,
+    createEmptyAlertCardData,
+    getAlertCardData,
+} from "../../utils/alert-util/alert-util";
 import { isValidNumberId } from "../../utils/params-util/params-util";
 import { getAlertsDetailPath } from "../../utils/routes-util/routes-util";
 import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
@@ -27,14 +32,19 @@ import { AlertsDetailPageParams } from "./alerts-detail-page.interfaces";
 
 export const AlertsDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [alert, setAlert] = useState<AlertCardData>({} as AlertCardData);
+    const [alertCardData, setAlertCardData] = useState<AlertCardData>(
+        createEmptyAlertCardData()
+    );
+    const [subscriptionGroups, setSubscriptionGroups] = useState<
+        SubscriptionGroup[]
+    >([]);
+    const [
+        alertEvaluation,
+        setAlertEvaluation,
+    ] = useState<AlertEvaluation | null>(null);
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const params = useParams<AlertsDetailPageParams>();
-    const { enqueueSnackbar } = useSnackbar();
-    const { t } = useTranslation();
-
     const [
         appTimeRange,
         getAppTimeRangeDuration,
@@ -42,12 +52,26 @@ export const AlertsDetailPage: FunctionComponent = () => {
         state.appTimeRange,
         state.getAppTimeRangeDuration,
     ]);
-
-    const [chartData, setChartData] = useState<AlertEvaluation | null>(
-        {} as AlertEvaluation
-    );
+    const params = useParams<AlertsDetailPageParams>();
+    const { enqueueSnackbar } = useSnackbar();
+    const { t } = useTranslation();
 
     useEffect(() => {
+        // Create page breadcrumbs
+        setPageBreadcrumbs([
+            {
+                text: alertCardData
+                    ? alertCardData.name
+                    : t("label.no-data-available-marker"),
+                path: alertCardData
+                    ? getAlertsDetailPath(alertCardData.id)
+                    : "",
+            },
+        ]);
+    }, [alertCardData]);
+
+    useEffect(() => {
+        // Fetch data
         const init = async (): Promise<void> => {
             await fetchData();
 
@@ -55,9 +79,23 @@ export const AlertsDetailPage: FunctionComponent = () => {
         };
 
         init();
-    }, []);
+    }, [params.id]);
+
+    useEffect(() => {
+        // Fetch visualization data
+        const init = async (): Promise<void> => {
+            setAlertEvaluation(null);
+
+            await fetchVisualizationData();
+        };
+
+        init();
+    }, [alertCardData, appTimeRange]);
 
     const fetchData = async (): Promise<void> => {
+        let fetchedAlertCardData = createEmptyAlertCardData();
+        let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
+
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
@@ -67,10 +105,11 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 SnackbarOption.ERROR
             );
 
+            setAlertCardData(fetchedAlertCardData);
+
             return;
         }
 
-        let alert = {} as AlertCardData;
         const [
             alertResponse,
             subscriptionGroupsResponse,
@@ -85,64 +124,46 @@ export const AlertsDetailPage: FunctionComponent = () => {
         ) {
             enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
         } else {
-            alert = getAlertCardData(
+            fetchedAlertCardData = getAlertCardData(
                 alertResponse.value,
                 subscriptionGroupsResponse.value
             );
-
-            // Create page breadcrumbs
-            setPageBreadcrumbs([
-                {
-                    text: alert.name,
-                    path: getAlertsDetailPath(alert.id),
-                },
-            ]);
+            fetchedSubscriptionGroups = subscriptionGroupsResponse.value;
         }
 
-        setAlert(alert);
+        setAlertCardData(fetchedAlertCardData);
+        setSubscriptionGroups(fetchedSubscriptionGroups);
     };
 
-    // To fetch chartData on dateRange Change
-    useEffect(() => {
-        const init = async (): Promise<void> => {
-            setChartData(null);
+    const fetchVisualizationData = async (): Promise<void> => {
+        let fetchedAlertEvaluation = {} as AlertEvaluation;
 
-            setChartData(await fetchChartData());
-        };
+        if (!alertCardData || !alertCardData.alert) {
+            setAlertEvaluation(fetchedAlertEvaluation);
 
-        init();
-    }, [appTimeRange, params.id]);
-
-    const fetchChartData = async (): Promise<AlertEvaluation | null> => {
-        const { startTime, endTime } = getAppTimeRangeDuration();
-
-        if (!isValidNumberId(params.id) || !startTime || !endTime) {
-            // To turn off the loader
-            return {} as AlertEvaluation;
+            return;
         }
 
-        let chartData = null;
-
+        const timeRangeDuration = getAppTimeRangeDuration();
         try {
-            const alertEvalution = {
-                alert: ({ id: params.id } as unknown) as Alert,
-                start: startTime,
-                end: endTime,
-            } as AlertEvaluation;
-
-            chartData = await getAlertEvaluation(alertEvalution);
-        } catch (e) {
-            // Empty block
-            chartData = {} as AlertEvaluation;
+            fetchedAlertEvaluation = await getAlertEvaluation(
+                createAlertEvaluation(
+                    alertCardData.alert,
+                    timeRangeDuration.startTime,
+                    timeRangeDuration.endTime
+                )
+            );
+        } catch (error) {
+            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
         }
 
-        return chartData;
+        setAlertEvaluation(fetchedAlertEvaluation);
     };
 
     const onAlertStateToggle = async (
         alertCardData: AlertCardData
     ): Promise<void> => {
-        if (!alertCardData.alert) {
+        if (!alertCardData || !alertCardData.alert) {
             return;
         }
 
@@ -152,7 +173,8 @@ export const AlertsDetailPage: FunctionComponent = () => {
         try {
             alertCopy = await updateAlert(alertCopy);
 
-            fetchData();
+            // Replace updated alert as fetched alert
+            setAlertCardData(getAlertCardData(alertCopy, subscriptionGroups));
         } catch (error) {
             enqueueSnackbar(
                 t("message.update-error", { entity: t("label.alert") }),
@@ -171,24 +193,31 @@ export const AlertsDetailPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents centerAlign title={alert.name ? alert.name : ""}>
-                {!isEmpty(alert) && (
-                    <Grid container>
-                        <Grid item md={12}>
-                            <AlertCard
-                                hideViewDetailsLinks
-                                alert={alert}
-                                onAlertStateToggle={onAlertStateToggle}
-                            />
-                        </Grid>
-
-                        <Grid item md={12}>
-                            <AlertEvaluationTimeSeriesCard
-                                alertEvaluation={chartData}
-                            />
-                        </Grid>
+            <PageContents
+                centerAlign
+                title={
+                    alertCardData
+                        ? alertCardData.name
+                        : t("label.no-data-available-marker")
+                }
+            >
+                <Grid container>
+                    {/* Alert */}
+                    <Grid item md={12}>
+                        <AlertCard
+                            hideViewDetailsLinks
+                            alert={alertCardData}
+                            onAlertStateToggle={onAlertStateToggle}
+                        />
                     </Grid>
-                )}
+
+                    {/* Alert evaluation time series */}
+                    <Grid item md={12}>
+                        <AlertEvaluationTimeSeriesCard
+                            alertEvaluation={alertEvaluation}
+                        />
+                    </Grid>
+                </Grid>
             </PageContents>
         </PageContainer>
     );

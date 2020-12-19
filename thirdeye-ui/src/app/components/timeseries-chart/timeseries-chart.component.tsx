@@ -46,10 +46,7 @@ import {
     TimeSeriesChartProps,
     TimeSeriesProps,
 } from "./timeseries-chart.interfaces";
-import {
-    selectedBrushStyle,
-    useTimeseriesChartStyles,
-} from "./timeseries-chart.styles";
+import { useTimeseriesChartStyles } from "./timeseries-chart.styles";
 
 // Constants
 const COLORS = {
@@ -262,7 +259,7 @@ export const TimeSeriesChart = withTooltip<
 
     const expectedLineProps = {
         stroke: COLORS.expacted,
-        strokeDasharray: "5, 5",
+        strokeDasharray: 4,
         y: (d: TimeSeriesProps): number => valueScale(getBaseline(d)) ?? 0,
     };
 
@@ -314,7 +311,6 @@ export const TimeSeriesChart = withTooltip<
                     <Bar
                         fill="transparent"
                         height={yMax}
-                        rx={14}
                         width={xMax}
                         onMouseLeave={(): void => hideTooltip()}
                         onMouseMove={handleTooltip}
@@ -346,10 +342,10 @@ export const TimeSeriesChart = withTooltip<
                             <circle
                                 cx={tooltipLeft}
                                 cy={tooltipTop}
-                                fill={"stealblue"}
+                                fill={"red"}
                                 pointerEvents="none"
                                 r={4}
-                                stroke="white"
+                                stroke="red"
                                 strokeWidth={2}
                             />
                         </g>
@@ -432,7 +428,6 @@ export const TimeSeriesChart = withTooltip<
                         // initialBrushPosition={initialBrushPosition}
                         margin={margin}
                         resizeTriggerAreas={["left", "right"]}
-                        selectedBoxStyle={selectedBrushStyle}
                         width={xBrushMax}
                         xScale={brushDateScale}
                         yScale={brushValueScale}

@@ -3,9 +3,9 @@ import RefreshIcon from "@material-ui/icons/Refresh";
 import { isUndefined } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { AlertEvaluationTimeSeriesCard } from "../alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { Button } from "../button/button.component";
 import CommonCodeMirror from "../editor/code-mirror.component";
-import { TimeSeriesChartCard } from "../timeseries-chart-card/timeseries-chart-card.component";
 import { ConfigStepsProps } from "./configuration-step.interfaces";
 
 export const ConfigurationStep: FunctionComponent<ConfigStepsProps> = ({
@@ -80,9 +80,8 @@ export const ConfigurationStep: FunctionComponent<ConfigStepsProps> = ({
             )}
             {!isUndefined(previewData) ? (
                 <Grid item xs={12}>
-                    <TimeSeriesChartCard
-                        data={previewData}
-                        title={t("label.chart")}
+                    <AlertEvaluationTimeSeriesCard
+                        alertEvaluation={previewData}
                     />
                 </Grid>
             ) : null}

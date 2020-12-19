@@ -4,11 +4,11 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
+import { AlertEvaluationTimeSeriesCard } from "../../components/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { AnomalyCard } from "../../components/anomaly-card/anomaly-card.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { TimeSeriesChartCard } from "../../components/timeseries-chart-card/timeseries-chart-card.component";
 import { getAlertEvaluation } from "../../rest/alert-rest/alert-rest";
 import { getAnomaly } from "../../rest/anomaly-rest/anomaly-rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
@@ -142,9 +142,8 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                             />
                         </Grid>
                         <Grid item md={12}>
-                            <TimeSeriesChartCard
-                                data={chartData as AlertEvaluation}
-                                title={t("label.chart")}
+                            <AlertEvaluationTimeSeriesCard
+                                alertEvaluation={chartData as AlertEvaluation}
                             />
                         </Grid>
                     </Grid>

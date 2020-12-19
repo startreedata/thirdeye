@@ -11,7 +11,6 @@ export const useTimeseriesChartStyles = makeStyles(() => {
         tooltip: {
             minWidth: 72,
             textAlign: "center",
-            transform: "translateX(-50%)",
         },
         grayout: {
             opacity: 0.5,

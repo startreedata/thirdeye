@@ -9,6 +9,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 import {
     getSearchFromQueryString,
     getSearchTextFromQueryString,
@@ -23,9 +24,11 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     props: SearchBarProps
 ) => {
     const [searchText, setSearchText] = useState("");
+    const location = useLocation();
     const { t } = useTranslation();
 
     useEffect(() => {
+        // Query string changed
         if (!props.setSearchQueryString) {
             return;
         }
@@ -37,7 +40,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
             // search
             updateSearchText(getSearchTextFromQueryString(), true);
         }
-    }, []);
+    }, [location.search]);
 
     const onChange = (event: ChangeEvent<HTMLInputElement>): void => {
         // Update search text and arrange to send event with a delay to account for a burst of

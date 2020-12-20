@@ -114,7 +114,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     const fetchVisualizationData = async (): Promise<void> => {
         let fetchedAlertEvaluation = {} as AlertEvaluation;
 
-        if (!anomalyCardData || anomalyCardData.alertId >= 0) {
+        if (!anomalyCardData || anomalyCardData.alertId < 0) {
             setAlertEvaluation(fetchedAlertEvaluation);
 
             return;

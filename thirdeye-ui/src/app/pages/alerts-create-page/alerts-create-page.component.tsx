@@ -66,10 +66,10 @@ export const AlertsCreatePage = withRouter(
         const [isFirstTime, setIsFirstTime] = useState(true);
 
         const [
-            appTimeRange,
+            appTimeRangeDuration,
             getAppTimeRangeDuration,
         ] = useAppTimeRangeStore((state) => [
-            state.appTimeRange,
+            state.appTimeRangeDuration,
             state.getAppTimeRangeDuration,
         ]);
         const { t } = useTranslation();
@@ -145,7 +145,7 @@ export const AlertsCreatePage = withRouter(
 
         useEffect(() => {
             handlePreviewAlert();
-        }, [appTimeRange]);
+        }, [appTimeRangeDuration]);
 
         const handlePreviewAlert = async (): Promise<void> => {
             if (isFirstTime) {

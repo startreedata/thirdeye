@@ -1,8 +1,7 @@
 import { Grid, Typography } from "@material-ui/core";
 import classnames from "classnames";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent } from "react";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
-import { getTimeRangeFromQueryString } from "../../utils/params-util/params-util";
 import { TimeRangeSelector } from "../time-range-selector/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.style";
@@ -12,30 +11,16 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
 ) => {
     const pageContentsClasses = usePageContentsStyles();
     const [
-        appTimeRange,
+        appTimeRangeDuration,
         recentCustomTimeRangeDurations,
-        setAppTimeRange,
+        setAppTimeRangeDuration,
         getAppTimeRangeDuration,
     ] = useAppTimeRangeStore((state) => [
-        state.appTimeRange,
+        state.appTimeRangeDuration,
         state.recentCustomTimeRangeDurations,
-        state.setAppTimeRange,
+        state.setAppTimeRangeDuration,
         state.getAppTimeRangeDuration,
     ]);
-
-    useEffect(() => {
-        // Set time range from time range query string if available
-        const timeRageDuration = getTimeRangeFromQueryString();
-        if (!timeRageDuration) {
-            return;
-        }
-
-        setAppTimeRange(
-            timeRageDuration.timeRange,
-            timeRageDuration.startTime,
-            timeRageDuration.endTime
-        );
-    }, []);
 
     return (
         <main
@@ -78,8 +63,8 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                                     recentCustomTimeRangeDurations={
                                         recentCustomTimeRangeDurations
                                     }
-                                    timeRange={appTimeRange}
-                                    onChange={setAppTimeRange}
+                                    timeRangeDuration={appTimeRangeDuration}
+                                    onChange={setAppTimeRangeDuration}
                                 />
                             </Grid>
                         )}

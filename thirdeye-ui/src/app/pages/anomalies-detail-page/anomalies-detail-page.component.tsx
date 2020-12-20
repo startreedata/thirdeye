@@ -38,10 +38,10 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         state.setPageBreadcrumbs,
     ]);
     const [
-        appTimeRange,
+        appTimeRangeDuration,
         getAppTimeRangeDuration,
     ] = useAppTimeRangeStore((state) => [
-        state.appTimeRange,
+        state.appTimeRangeDuration,
         state.getAppTimeRangeDuration,
     ]);
     const params = useParams<AnomaliesDetailPageParams>();
@@ -81,7 +81,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         };
 
         init();
-    }, [anomalyCardData.alertId, appTimeRange]);
+    }, [anomalyCardData.alertId, appTimeRangeDuration]);
 
     const fetchData = async (): Promise<void> => {
         let fetchedAnomalyCardData = createEmptyAnomalyCardData();

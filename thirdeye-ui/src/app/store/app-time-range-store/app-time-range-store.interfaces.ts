@@ -1,17 +1,8 @@
-import {
-    TimeRange,
-    TimeRangeDuration,
-} from "../../components/time-range-selector/time-range-selector.interfaces";
+import { TimeRangeDuration } from "../../components/time-range-selector/time-range-selector.interfaces";
 
 export type AppTimeRangeStore = {
-    appTimeRange: TimeRange;
-    startTime: number;
-    endTime: number;
+    appTimeRangeDuration: TimeRangeDuration;
     recentCustomTimeRangeDurations: TimeRangeDuration[];
-    setAppTimeRange: (
-        timeRange: TimeRange,
-        startTime?: number,
-        endTime?: number
-    ) => void;
+    setAppTimeRangeDuration: (timeRangeDuration: TimeRangeDuration) => void;
     getAppTimeRangeDuration: () => TimeRangeDuration;
 };

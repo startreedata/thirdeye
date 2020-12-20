@@ -15,19 +15,15 @@ import { CalendarToday } from "@material-ui/icons";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import classnames from "classnames";
-import { cloneDeep } from "lodash";
-import React, {
-    FunctionComponent,
-    MouseEvent,
-    useEffect,
-    useState,
-} from "react";
+import { cloneDeep, isEmpty } from "lodash";
+import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
 import {
     formatTimeRange,
     formatTimeRangeDuration,
+    getDefaultTimeRangeDuration,
     getTimeRangeDuration,
 } from "../../utils/time-range-util/time-range-util";
 import {
@@ -50,10 +46,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     ] = useState<HTMLElement | null>();
     const { t } = useTranslation();
 
-    useEffect(() => {
-        setTimeRangeDuration(props.getTimeRangeDuration());
-    }, [props.timeRange]);
-
     const onTimeRangeButtonClick = (event: MouseEvent<HTMLElement>): void => {
         setTimeRangeSelectorAnchorElement(event.currentTarget);
     };
@@ -66,11 +58,11 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     const onRecentCustomTimeRangeDurationClick = (
         timeRangeDuration: TimeRangeDuration
     ): void => {
-        if (!timeRangeDuration) {
+        if (isEmpty(timeRangeDuration)) {
             return;
         }
 
-        // Update component state time range duration to selected time range
+        // Update component state time range duration to selected custom time range
         setTimeRangeDuration(timeRangeDuration);
     };
 
@@ -125,35 +117,23 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
 
     const onApply = (): void => {
         // Notify that component state time range duration has changed
-        if (timeRangeDuration.timeRange === TimeRange.CUSTOM) {
-            props.onChange &&
-                props.onChange(
-                    timeRangeDuration.timeRange,
-                    timeRangeDuration.startTime,
-                    timeRangeDuration.endTime
-                );
-        } else {
-            props.onChange && props.onChange(timeRangeDuration.timeRange);
-        }
+        props.onChange && props.onChange(timeRangeDuration);
 
         closeTimeRangeSelector();
     };
 
     const closeTimeRangeSelector = (): void => {
-        // Discard any changes to component state time range
-        setTimeRangeDuration(props.getTimeRangeDuration());
-
         setTimeRangeSelectorAnchorElement(null);
     };
 
     const initCustomTimeRange = (): void => {
         if (timeRangeDuration.timeRange === TimeRange.CUSTOM) {
-            // Component state time range duration is already of custom type, do nothing
+            // Component state time range duration is already a custom time range, do nothing
             return;
         }
 
-        // Start with setting TimeRangeType.TODAY as custom time range duration
-        const customTimeRangeDuration = getTimeRangeDuration(TimeRange.TODAY);
+        // Start with setting default time range as custom time range duration
+        const customTimeRangeDuration = getDefaultTimeRangeDuration();
         customTimeRangeDuration.timeRange = TimeRange.CUSTOM;
 
         // Update component state time range duration
@@ -163,14 +143,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     return (
         <Grid container alignItems="center">
             {/* Time range */}
-            <Grid item>
-                {(timeRangeDuration.timeRange === TimeRange.CUSTOM &&
-                    // Render time range duration
-                    formatTimeRangeDuration(timeRangeDuration)) ||
-                    (timeRangeDuration.timeRange &&
-                        // Render time range name
-                        formatTimeRange(timeRangeDuration.timeRange))}
-            </Grid>
+            <Grid item>{formatTimeRangeDuration(props.timeRangeDuration)}</Grid>
 
             {/* Time range button */}
             <Grid item>
@@ -304,11 +277,10 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                         typeof timeRange ===
                                                         "string"
                                                 )
-                                                .map((timeRange) => (
-                                                    <>
+                                                .map((timeRange, index) => (
+                                                    <div key={index}>
                                                         <ListItem
                                                             button
-                                                            key={timeRange}
                                                             onClick={(): void => {
                                                                 onTimeRangeClick(
                                                                     timeRange
@@ -349,7 +321,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                                 TimeRange.LAST_MONTH) && (
                                                             <Divider />
                                                         )}
-                                                    </>
+                                                    </div>
                                                 ))}
                                         </List>
                                     </Box>

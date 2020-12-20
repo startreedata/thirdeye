@@ -23,12 +23,8 @@ export interface TimeRangeDuration {
 }
 
 export interface TimeRangeSelectorProps {
-    timeRange: TimeRange;
+    timeRangeDuration: TimeRangeDuration;
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
     getTimeRangeDuration: () => TimeRangeDuration;
-    onChange: (
-        timeRange: TimeRange,
-        startTime?: number,
-        endTime?: number
-    ) => void;
+    onChange: (timeRangeDuration: TimeRangeDuration) => void;
 }

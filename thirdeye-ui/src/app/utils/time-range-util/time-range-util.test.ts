@@ -9,6 +9,7 @@ import {
     createTimeRangeDuration,
     formatTimeRange,
     formatTimeRangeDuration,
+    getDefaultTimeRangeDuration,
     getTimeRangeDuration,
     isTimeRangeDurationEqual,
 } from "./time-range-util";
@@ -54,14 +55,6 @@ describe("Time Range Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("createTimeRangeDuration shall create appropriate time range duration with default inputs", () => {
-        const timeRangeDuration = createTimeRangeDuration(TimeRange.TODAY);
-
-        expect(timeRangeDuration.timeRange).toEqual(TimeRange.TODAY);
-        expect(timeRangeDuration.startTime).toEqual(0);
-        expect(timeRangeDuration.endTime).toEqual(0);
-    });
-
     test("createTimeRangeDuration shall create appropriate time range duration", () => {
         const timeRangeDuration = createTimeRangeDuration(
             TimeRange.CUSTOM,
@@ -72,6 +65,14 @@ describe("Time Range Util", () => {
         expect(timeRangeDuration.timeRange).toEqual(TimeRange.CUSTOM);
         expect(timeRangeDuration.startTime).toEqual(1);
         expect(timeRangeDuration.endTime).toEqual(2);
+    });
+
+    test("getDefaultTimeRangeDuration shall return TimeRange.TODAY time range duration", () => {
+        expect(getDefaultTimeRangeDuration()).toEqual({
+            timeRange: TimeRange.TODAY,
+            startTime: 1606809600000,
+            endTime: 1606852800000,
+        });
     });
 
     test("getTimeRangeDuration shall return appropriate TimeRange.LAST_15_MINUTES time range duration", () => {

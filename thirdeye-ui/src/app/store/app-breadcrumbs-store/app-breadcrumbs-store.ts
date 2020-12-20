@@ -8,9 +8,9 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
         set: SetState<AppBreadcrumbsStore>,
         get: GetState<AppBreadcrumbsStore>
     ) => ({
+        appBreadcrumbs: [],
         appSectionBreadcrumbs: [],
         pageBreadcrumbs: [],
-        appBreadcrumbs: [],
 
         setAppSectionBreadcrumbs: (breadcrumbs: Breadcrumb[]): void => {
             const { pageBreadcrumbs } = get();

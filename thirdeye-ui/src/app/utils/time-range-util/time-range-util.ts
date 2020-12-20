@@ -9,14 +9,26 @@ import { formatDateAndTime } from "../date-time-util/date-time-util";
 
 export const createTimeRangeDuration = (
     timeRange: TimeRange,
-    startTime = 0,
-    endTime = 0
+    startTime: number,
+    endTime: number
 ): TimeRangeDuration => {
     return {
         timeRange: timeRange,
         startTime: startTime,
         endTime: endTime,
     };
+};
+
+// Returns TimeRange.TODAY time range
+export const getDefaultTimeRangeDuration = (): TimeRangeDuration => {
+    const now = DateTime.local();
+    const today = now.startOf("day");
+
+    return createTimeRangeDuration(
+        TimeRange.TODAY,
+        today.toMillis(),
+        now.toMillis()
+    );
 };
 
 export const getTimeRangeDuration = (
@@ -165,15 +177,7 @@ export const getTimeRangeDuration = (
             );
         }
         default: {
-            // Default to TimeRange.TODAY
-            const now = DateTime.local();
-            const today = now.startOf("day");
-
-            return createTimeRangeDuration(
-                TimeRange.TODAY,
-                today.toMillis(),
-                now.toMillis()
-            );
+            return getDefaultTimeRangeDuration();
         }
     }
 };
@@ -190,6 +194,7 @@ export const formatTimeRangeDuration = (
     timeRangeDuration: TimeRangeDuration
 ): string => {
     if (timeRangeDuration && timeRangeDuration.timeRange === TimeRange.CUSTOM) {
+        // Custom time range duration, format start and end time
         return i18n.t("label.start-time-end-time", {
             startTime: formatDateAndTime(timeRangeDuration.startTime),
             endTime: formatDateAndTime(timeRangeDuration.endTime),
@@ -197,6 +202,7 @@ export const formatTimeRangeDuration = (
     }
 
     if (timeRangeDuration) {
+        // Predefined time range duration, render time range
         return formatTimeRange(timeRangeDuration.timeRange);
     }
 
@@ -221,10 +227,10 @@ export const isTimeRangeDurationEqual = (
         timeRangeDuration.timeRange === TimeRange.CUSTOM ||
         timeRangeDurationOther.timeRange === TimeRange.CUSTOM
     ) {
-        // Either of the time ranges is of type custom
+        // Either of the time range durations is custom time range
         return isEqual(timeRangeDuration, timeRangeDurationOther);
     }
 
-    // Compare just by time range
+    // Either of the time range durations is predefined time range
     return timeRangeDuration.timeRange === timeRangeDurationOther.timeRange;
 };

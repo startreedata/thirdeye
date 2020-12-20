@@ -46,10 +46,10 @@ export const AlertsDetailPage: FunctionComponent = () => {
         state.setPageBreadcrumbs,
     ]);
     const [
-        appTimeRange,
+        appTimeRangeDuration,
         getAppTimeRangeDuration,
     ] = useAppTimeRangeStore((state) => [
-        state.appTimeRange,
+        state.appTimeRangeDuration,
         state.getAppTimeRangeDuration,
     ]);
     const params = useParams<AlertsDetailPageParams>();
@@ -90,7 +90,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
         };
 
         init();
-    }, [alertCardData.id, appTimeRange]);
+    }, [alertCardData.id, appTimeRangeDuration]);
 
     const fetchData = async (): Promise<void> => {
         let fetchedAlertCardData = createEmptyAlertCardData();

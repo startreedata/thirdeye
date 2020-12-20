@@ -1,9 +1,10 @@
-import { isInteger, toNumber } from "lodash";
+import { isEmpty, isInteger, toNumber } from "lodash";
 import {
     TimeRange,
     TimeRangeDuration,
 } from "../../components/time-range-selector/time-range-selector.interfaces";
 import { appHistory } from "../history-util/history-util";
+import { createTimeRangeDuration } from "../time-range-util/time-range-util";
 
 export enum AppQueryStringKey {
     SEARCH = "SEARCH",
@@ -30,18 +31,23 @@ export const getSearchTextFromQueryString = (): string => {
 };
 
 export const setTimeRangeInQueryString = (
-    timeRange: TimeRange,
-    startTime: number,
-    endTime: number
+    timeRangeDuration: TimeRangeDuration
 ): void => {
-    setQueryString(AppQueryStringKey.TIME_RANGE.toLowerCase(), timeRange);
+    if (isEmpty(timeRangeDuration)) {
+        return;
+    }
+
+    setQueryString(
+        AppQueryStringKey.TIME_RANGE.toLowerCase(),
+        timeRangeDuration.timeRange
+    );
     setQueryString(
         AppQueryStringKey.START_TIME.toLowerCase(),
-        startTime.toString()
+        timeRangeDuration.startTime.toString()
     );
     setQueryString(
         AppQueryStringKey.END_TIME.toLowerCase(),
-        endTime.toString()
+        timeRangeDuration.endTime.toString()
     );
 };
 
@@ -59,19 +65,19 @@ export const getTimeRangeFromQueryString = (): TimeRangeDuration | null => {
     // Validate time range
     if (
         !TimeRange[timeRange as keyof typeof TimeRange] ||
-        isNaN(startTime) ||
+        !isFinite(startTime) ||
         startTime < 0 ||
-        isNaN(endTime) ||
+        !isFinite(endTime) ||
         endTime < 0
     ) {
         return null;
     }
 
-    return {
-        timeRange: TimeRange[timeRange as keyof typeof TimeRange],
-        startTime: startTime,
-        endTime: endTime,
-    };
+    return createTimeRangeDuration(
+        TimeRange[timeRange as keyof typeof TimeRange],
+        startTime,
+        endTime
+    );
 };
 
 export const setQueryString = (key: string, value: string): void => {

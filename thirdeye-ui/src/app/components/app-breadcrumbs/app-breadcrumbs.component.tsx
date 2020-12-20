@@ -1,5 +1,6 @@
 import { Box, Breadcrumbs, Link, Toolbar } from "@material-ui/core";
 import { NavigateNext } from "@material-ui/icons";
+import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useHistory } from "react-router-dom";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
@@ -34,11 +35,12 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
                 <Breadcrumbs separator={<NavigateNext />}>
                     {props.breadcrumbs.map((breadcrumb, index) => (
                         <Link
-                            className={
+                            className={classnames(
+                                appBreadcrumbsClasses.link,
                                 index === props.breadcrumbs.length - 1
                                     ? appBreadcrumbsClasses.selected
                                     : ""
-                            }
+                            )}
                             component="button"
                             disabled={index === props.breadcrumbs.length - 1}
                             key={index}

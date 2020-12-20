@@ -11,6 +11,10 @@ export const useAppBreadcrumbsStyles = makeStyles((theme: Theme) => {
         dense: {
             minHeight: "36px",
         },
+        link: {
+            alignItems: "center",
+            display: "flex",
+        },
         selected: {
             color: Palette.COLOR_TEXT_DEFAULT,
             cursor: "default",

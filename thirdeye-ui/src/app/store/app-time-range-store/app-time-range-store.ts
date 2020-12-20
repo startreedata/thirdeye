@@ -60,9 +60,6 @@ export const useAppTimeRangeStore = create<AppTimeRangeStore>(
                         });
                     }
                 }
-
-                // Set time range in query string
-                setTimeRangeInQueryString(timeRange, startTime, endTime);
             },
 
             getAppTimeRangeDuration: (): TimeRangeDuration => {
@@ -82,6 +79,34 @@ export const useAppTimeRangeStore = create<AppTimeRangeStore>(
         }),
         {
             name: LOCAL_STORAGE_KEY_APP_TIME_RANGE, // Persist in browser local storage
+
+            serialize: (appTimeRangeStore: AppTimeRangeStore): string => {
+                // While serializing the store to persist in browser local storage, set time range
+                // in query string
+                setTimeRangeInQueryString(
+                    appTimeRangeStore.appTimeRange,
+                    appTimeRangeStore.startTime,
+                    appTimeRangeStore.endTime
+                );
+
+                return JSON.stringify(appTimeRangeStore);
+            },
+
+            deserialize: (
+                appTimeRangeStoreString: string
+            ): AppTimeRangeStore => {
+                const appTimeRangeStore = JSON.parse(appTimeRangeStoreString);
+
+                // While deserializing the store from browser local storage, set time range in
+                // query string
+                setTimeRangeInQueryString(
+                    appTimeRangeStore.appTimeRange,
+                    appTimeRangeStore.startTime,
+                    appTimeRangeStore.endTime
+                );
+
+                return appTimeRangeStore;
+            },
         }
     )
 );

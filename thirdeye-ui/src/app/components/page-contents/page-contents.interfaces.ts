@@ -4,6 +4,6 @@ export interface PageContentsProps {
     title?: string;
     titleCenterAlign?: boolean;
     hideTimeRange?: boolean;
-    centerAlign?: boolean;
+    contentsCenterAlign?: boolean;
     children?: ReactNode;
 }

@@ -224,7 +224,7 @@ export const AlertsCreatePage = withRouter(
 
         return (
             <PageContainer>
-                <PageContents centerAlign hideTimeRange title="">
+                <PageContents contentsCenterAlign hideTimeRange title="">
                     <Grid container>
                         <Grid item xs={12}>
                             <CustomStepper

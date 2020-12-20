@@ -39,7 +39,7 @@ export const PageNotFoundPage: FunctionComponent<PageNotFoundPageProps> = (
     return (
         <PageContainer toolbar={props.pageContainerToolbar}>
             <PageContents
-                centerAlign
+                contentsCenterAlign
                 hideTimeRange
                 titleCenterAlign
                 title={t("label.page-not-found")}

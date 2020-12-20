@@ -83,7 +83,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents centerAlign title={t("label.anomalies")}>
+            <PageContents contentsCenterAlign title={t("label.anomalies")}>
                 <Grid container>
                     {/* Search */}
                     <Grid item md={12}>
@@ -91,7 +91,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                             autoFocus
                             setSearchQueryString
                             label={t("label.search-anomalies")}
-                            searchStatusText={t("label.search-count", {
+                            searchStatusLabel={t("label.search-count", {
                                 count: filteredAnomalyCardDatas
                                     ? filteredAnomalyCardDatas.length
                                     : 0,

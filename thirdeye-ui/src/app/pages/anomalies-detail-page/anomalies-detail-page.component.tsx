@@ -81,7 +81,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         };
 
         init();
-    }, [anomalyCardData, appTimeRange]);
+    }, [anomalyCardData.alertId, appTimeRange]);
 
     const fetchData = async (): Promise<void> => {
         let fetchedAnomalyCardData = createEmptyAnomalyCardData();
@@ -147,7 +147,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents
-                centerAlign
+                contentsCenterAlign
                 title={
                     anomalyCardData
                         ? anomalyCardData.name

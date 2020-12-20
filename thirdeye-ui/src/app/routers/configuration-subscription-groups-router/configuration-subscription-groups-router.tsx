@@ -17,6 +17,7 @@ import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     AppRoute,
+    getConfigurationPath,
     getConfigurationSubscriptionGroupsAllPath,
     getConfigurationSubscriptionGroupsPath,
 } from "../../utils/routes-util/routes-util";
@@ -33,7 +34,7 @@ export const ConfigurationSubscriptionGroupsRouter: FunctionComponent = () => {
         setAppSectionBreadcrumbs([
             {
                 text: t("label.configuration"),
-                path: getConfigurationSubscriptionGroupsPath(),
+                path: getConfigurationPath(),
             },
             {
                 text: t("label.subscription-groups"),

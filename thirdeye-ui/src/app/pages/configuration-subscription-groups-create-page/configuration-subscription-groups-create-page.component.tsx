@@ -42,7 +42,7 @@ export const ConfigurationSubscriptionGroupsCreatePage: FunctionComponent = () =
 
     return (
         <PageContainer toolbar={<ConfigurationToolbar />}>
-            <PageContents centerAlign title={t("label.create")} />
+            <PageContents contentsCenterAlign title={t("label.create")} />
         </PageContainer>
     );
 };

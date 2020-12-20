@@ -41,7 +41,7 @@ export const HomePage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents centerAlign title={t("label.home")} />
+            <PageContents contentsCenterAlign title={t("label.home")} />
         </PageContainer>
     );
 };

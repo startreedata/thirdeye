@@ -144,7 +144,7 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents centerAlign title={t("label.alerts")}>
+            <PageContents contentsCenterAlign title={t("label.alerts")}>
                 <Grid container>
                     {/* Search */}
                     <Grid item md={12}>
@@ -152,7 +152,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                             autoFocus
                             setSearchQueryString
                             label={t("label.search-alerts")}
-                            searchStatusText={t("label.search-count", {
+                            searchStatusLabel={t("label.search-count", {
                                 count: filteredAlertCardDatas
                                     ? filteredAlertCardDatas.length
                                     : 0,

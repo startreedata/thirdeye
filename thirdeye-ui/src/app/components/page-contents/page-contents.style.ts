@@ -4,7 +4,7 @@ import { Dimension } from "../../utils/material-ui-util/dimension-util";
 export const usePageContentsStyles = makeStyles({
     container: {
         // Avoids the effect of Material UI Grid negative margins
-        // Padding equivalent to 2x default Grid spacing in Material UI theme
+        // Padding equivalent to 2x Grid spacing in Material UI theme
         // https://material-ui.com/components/grid/#limitations
         padding: "16px",
     },

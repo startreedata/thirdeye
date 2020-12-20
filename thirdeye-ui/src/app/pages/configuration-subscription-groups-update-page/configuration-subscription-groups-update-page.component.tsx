@@ -45,7 +45,7 @@ export const ConfigurationSubscriptionGroupsUpdatePage: FunctionComponent = () =
 
     return (
         <PageContainer toolbar={<ConfigurationToolbar />}>
-            <PageContents centerAlign title={t("label.update")} />
+            <PageContents contentsCenterAlign title={t("label.update")} />
         </PageContainer>
     );
 };

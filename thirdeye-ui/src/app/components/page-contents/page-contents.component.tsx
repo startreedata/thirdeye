@@ -26,20 +26,22 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     useEffect(() => {
         // Set time range from time range query string if available
         const timeRageDuration = getTimeRangeFromQueryString();
-        if (timeRageDuration) {
-            setAppTimeRange(
-                timeRageDuration.timeRange,
-                timeRageDuration.startTime,
-                timeRageDuration.endTime
-            );
+        if (!timeRageDuration) {
+            return;
         }
+
+        setAppTimeRange(
+            timeRageDuration.timeRange,
+            timeRageDuration.startTime,
+            timeRageDuration.endTime
+        );
     }, []);
 
     return (
         <main
             className={classnames(
                 pageContentsClasses.container,
-                props.centerAlign
+                props.contentsCenterAlign
                     ? pageContentsClasses.centeredContainer
                     : pageContentsClasses.expandedContainer
             )}

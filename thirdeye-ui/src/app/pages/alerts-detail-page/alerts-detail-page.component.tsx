@@ -90,7 +90,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
         };
 
         init();
-    }, [alertCardData, appTimeRange]);
+    }, [alertCardData.id, appTimeRange]);
 
     const fetchData = async (): Promise<void> => {
         let fetchedAlertCardData = createEmptyAlertCardData();
@@ -194,7 +194,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents
-                centerAlign
+                contentsCenterAlign
                 title={
                     alertCardData
                         ? alertCardData.name

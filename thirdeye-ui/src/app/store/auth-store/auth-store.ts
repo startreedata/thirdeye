@@ -4,7 +4,7 @@ import { AuthStore } from "./auth-store.interfaces";
 
 const LOCAL_STORAGE_KEY_AUTH = "LOCAL_STORAGE_KEY_AUTH";
 
-// Application store for authentication, persisted in browser local storage
+// App store for authentication, persisted in browser local storage
 export const useAuthStore = create<AuthStore>(
     persist<AuthStore>(
         (set: SetState<AuthStore>) => ({

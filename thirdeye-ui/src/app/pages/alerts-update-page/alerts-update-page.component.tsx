@@ -44,7 +44,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents centerAlign title={t("label.update")} />
+            <PageContents contentsCenterAlign title={t("label.update")} />
         </PageContainer>
     );
 };

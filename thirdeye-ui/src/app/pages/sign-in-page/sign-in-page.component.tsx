@@ -40,7 +40,7 @@ export const SignInPage: FunctionComponent = () => {
         setLoading(false);
     }, []);
 
-    const performLogin = async (): Promise<void> => {
+    const performSignIn = async (): Promise<void> => {
         const auth = await login();
         setAccessToken(auth.accessToken);
 
@@ -72,7 +72,7 @@ export const SignInPage: FunctionComponent = () => {
                     <Button
                         color="primary"
                         variant="contained"
-                        onClick={performLogin}
+                        onClick={performSignIn}
                     >
                         {t("label.sign-in")}
                     </Button>

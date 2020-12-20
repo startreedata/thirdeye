@@ -32,7 +32,7 @@ export const SignOutPage: FunctionComponent = () => {
         setLoading(false);
     }, []);
 
-    const performLogout = async (): Promise<void> => {
+    const performSignOut = async (): Promise<void> => {
         await logout();
         removeAccessToken();
 
@@ -59,7 +59,7 @@ export const SignOutPage: FunctionComponent = () => {
                     <Button
                         color="primary"
                         variant="contained"
-                        onClick={performLogout}
+                        onClick={performSignOut}
                     >
                         {t("label.sign-out")}
                     </Button>

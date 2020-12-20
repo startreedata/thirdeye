@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import { isEmpty } from "lodash";
 import { AnomalyCardData } from "../../components/anomaly-card/anomaly-card.interfaces";
+import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
     formatDateAndTime,
@@ -21,7 +22,7 @@ export const getAnomalyName = (anomaly: Anomaly): string => {
     })}`;
 };
 
-export const getEmptyAnomalyCardData = (): AnomalyCardData => {
+export const createEmptyAnomalyCardData = (): AnomalyCardData => {
     const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
 
     return {
@@ -39,8 +40,22 @@ export const getEmptyAnomalyCardData = (): AnomalyCardData => {
     };
 };
 
+export const createAlertEvaluation = (
+    alertId: number,
+    startTime: number,
+    endTime: number
+): AlertEvaluation => {
+    return {
+        alert: {
+            id: alertId,
+        },
+        start: startTime,
+        end: endTime,
+    } as AlertEvaluation;
+};
+
 export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
-    const anomalyCardData = getEmptyAnomalyCardData();
+    const anomalyCardData = createEmptyAnomalyCardData();
 
     if (!anomaly) {
         return anomalyCardData;

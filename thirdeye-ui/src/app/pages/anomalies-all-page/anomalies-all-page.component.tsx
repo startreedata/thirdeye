@@ -19,14 +19,16 @@ import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-    ]);
-    const [anomalies, setAnomalies] = useState<AnomalyCardData[]>([]);
-    const [filteredAnomalies, setfilteredAnomalies] = useState<
+    const [anomalyCardDatas, setAnomalyCardDatas] = useState<AnomalyCardData[]>(
+        []
+    );
+    const [filteredAnomalyCardDatas, setFilteredAnomalyCardDatas] = useState<
         AnomalyCardData[]
     >([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
+    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
+        state.setPageBreadcrumbs,
+    ]);
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
@@ -41,6 +43,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
+        // Fetch data
         const init = async (): Promise<void> => {
             await fetchData();
 
@@ -50,21 +53,24 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         init();
     }, []);
 
+    useEffect(() => {
+        // Fetched data, or search changed, reset
+        setFilteredAnomalyCardDatas(
+            filterAnomalies(anomalyCardDatas, searchWords)
+        );
+    }, [anomalyCardDatas, searchWords]);
+
     const fetchData = async (): Promise<void> => {
-        let anomalies: AnomalyCardData[] = [];
+        let fetchedAnomalyCardDatas: AnomalyCardData[] = [];
         try {
-            anomalies = getAnomalyCardDatas(await getAllAnomalies());
+            fetchedAnomalyCardDatas = getAnomalyCardDatas(
+                await getAllAnomalies()
+            );
         } catch (error) {
             enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
         } finally {
-            setAnomalies(anomalies);
-            setfilteredAnomalies(filterAnomalies(anomalies, searchWords));
+            setAnomalyCardDatas(fetchedAnomalyCardDatas);
         }
-    };
-
-    const onSearch = (searchWords: string[]): void => {
-        setSearchWords(searchWords);
-        setfilteredAnomalies(filterAnomalies(anomalies, searchWords));
     };
 
     if (loading) {
@@ -79,27 +85,36 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         <PageContainer>
             <PageContents centerAlign title={t("label.anomalies")}>
                 <Grid container>
+                    {/* Search */}
                     <Grid item md={12}>
                         <SearchBar
                             autoFocus
                             setSearchQueryString
                             label={t("label.search-anomalies")}
                             searchStatusText={t("label.search-count", {
-                                count: filteredAnomalies.length,
-                                total: anomalies.length,
+                                count: filteredAnomalyCardDatas
+                                    ? filteredAnomalyCardDatas.length
+                                    : 0,
+                                total: anomalyCardDatas
+                                    ? anomalyCardDatas.length
+                                    : 0,
                             })}
-                            onChange={onSearch}
+                            onChange={setSearchWords}
                         />
                     </Grid>
 
-                    {filteredAnomalies.map((anomaly) => (
-                        <Grid item key={anomaly.id} md={12}>
-                            <AnomalyCard
-                                anomaly={anomaly}
-                                searchWords={searchWords}
-                            />
-                        </Grid>
-                    ))}
+                    {/* Anomalies */}
+                    {filteredAnomalyCardDatas &&
+                        filteredAnomalyCardDatas.map(
+                            (filteredAnomalyCardData, index) => (
+                                <Grid item key={index} md={12}>
+                                    <AnomalyCard
+                                        anomaly={filteredAnomalyCardData}
+                                        searchWords={searchWords}
+                                    />
+                                </Grid>
+                            )
+                        )}
                 </Grid>
             </PageContents>
         </PageContainer>

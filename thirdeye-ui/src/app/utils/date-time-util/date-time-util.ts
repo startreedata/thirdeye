@@ -100,7 +100,7 @@ export const formatDateAndTime = (date: number): string => {
     });
 };
 
-// Returns formatted string representation of date part of given date
+// Returns formatted string representation of date part in given date
 // For example:
 // MMM DD, YYYY
 export const formatDate = (date: number): string => {
@@ -117,7 +117,7 @@ export const formatDate = (date: number): string => {
     });
 };
 
-// Returns formatted string representation of time part of given date
+// Returns formatted string representation of time part in given date
 // For example:
 // HH:MM AM/PM
 export const formatTime = (date: number): string => {
@@ -133,7 +133,94 @@ export const formatTime = (date: number): string => {
     });
 };
 
-// Returns formatted string representation of month and day part of given date
+// Returns formatted string representation of year in given date
+// For example:
+// YYYY
+export const formatYear = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    return DateTime.fromMillis(date).toFormat("yyyy");
+};
+
+// Returns formatted string representation of month in given date
+// For example:
+// MMM
+export const formatMonth = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    return DateTime.fromMillis(date).toFormat("MMM");
+};
+
+// Returns formatted string representation of day in given date
+// For example:
+// DD
+export const formatDay = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    return DateTime.fromMillis(date).toFormat("dd");
+};
+
+// Returns formatted string representation of hour in given date
+// For example:
+// HH
+export const formatHour = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    return DateTime.fromMillis(date).toFormat("hh");
+};
+
+// Returns formatted string representation of minute in given date
+// For example:
+// MM
+export const formatMinute = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    return DateTime.fromMillis(date).toFormat("mm");
+};
+
+// Returns formatted string representation of meridiem in given date
+// For example:
+// AM/PM
+export const formatMeridiem = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    return DateTime.fromMillis(date).toFormat("a");
+};
+
+// Returns date with switched meridiem as compared to given date
+// For example:
+// Dec 01, 20, 12:00 PM to Dec 01, 20, 12:00 AM
+export const switchMeridiem = (date: number): number => {
+    if (!date) {
+        return -1;
+    }
+    const originalDate = DateTime.fromMillis(date);
+
+    // Subtract 12 hours from original date
+    let switchedDate = originalDate.minus({ hour: 12 });
+
+    // Verify only meridiem changed and not day
+    if (switchedDate.day !== originalDate.day) {
+        // Date changed, add 12 hours instead
+        switchedDate = originalDate.plus({ hour: 12 });
+    }
+
+    return switchedDate.toMillis();
+};
+
+// Returns formatted string representation of month and day in given date
 // For example:
 // MMM DD
 export const formatMonthDayDate = (date: number): string => {

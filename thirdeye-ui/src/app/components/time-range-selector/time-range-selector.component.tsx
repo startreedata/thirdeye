@@ -26,6 +26,7 @@ import {
     getDefaultTimeRangeDuration,
     getTimeRangeDuration,
 } from "../../utils/time-range-util/time-range-util";
+import { TimeRangeSelectorCalendarToolbar } from "./time-range-selector-calendar-toolbar/time-range-selector-calendar-toolbar.component";
 import {
     TimeRange,
     TimeRangeDuration,
@@ -338,11 +339,26 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                             <MuiPickersUtilsProvider
                                                 utils={LuxonUtils}
                                             >
-                                                {/* Start time calendar */}
+                                                {/* Start time */}
                                                 <Grid item>
+                                                    {/* Label */}
+                                                    <div
+                                                        className={
+                                                            timeRangeSelectorClasses.calendarLabel
+                                                        }
+                                                    >
+                                                        <Typography variant="overline">
+                                                            {t("label.from")}
+                                                        </Typography>
+                                                    </div>
+
+                                                    {/* Calendar */}
                                                     <DateTimePicker
                                                         disableFuture
                                                         hideTabs
+                                                        ToolbarComponent={
+                                                            TimeRangeSelectorCalendarToolbar
+                                                        }
                                                         value={
                                                             new Date(
                                                                 timeRangeDuration.startTime
@@ -355,11 +371,26 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                     />
                                                 </Grid>
 
-                                                {/* End time calendar */}
+                                                {/* End time */}
                                                 <Grid item>
+                                                    {/* Label */}
+                                                    <div
+                                                        className={
+                                                            timeRangeSelectorClasses.calendarLabel
+                                                        }
+                                                    >
+                                                        <Typography variant="overline">
+                                                            {t("label.to")}
+                                                        </Typography>
+                                                    </div>
+
+                                                    {/* Calendar */}
                                                     <DateTimePicker
                                                         disableFuture
                                                         hideTabs
+                                                        ToolbarComponent={
+                                                            TimeRangeSelectorCalendarToolbar
+                                                        }
                                                         minDate={
                                                             new Date(
                                                                 timeRangeDuration.startTime

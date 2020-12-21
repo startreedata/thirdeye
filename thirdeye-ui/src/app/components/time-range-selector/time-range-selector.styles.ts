@@ -7,13 +7,13 @@ export const useTimeRangeSelectorStyles = makeStyles({
     },
     timeRangeSelectorContainer: {
         overflow: "hidden",
-        height: "530px",
+        height: "495px",
     },
     timeRangeSelectorChildContainer: {
         padding: "16px",
     },
     timeRangeList: {
-        height: "490px",
+        height: "455px",
         width: "190px",
         overflow: "scroll",
     },
@@ -24,5 +24,9 @@ export const useTimeRangeSelectorStyles = makeStyles({
     },
     selectedTimeRange: {
         fontWeight: "bold",
+    },
+    calendarLabel: {
+        paddingTop: "10px",
+        paddingLeft: "25px",
     },
 });

@@ -1,8 +1,9 @@
 const path = require("path");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const WebpackBar = require("webpackbar");
 
 const outputPath = path.join(__dirname, "dist");
 
@@ -109,6 +110,11 @@ module.exports = {
                     to: outputPath,
                 },
             ],
+        }),
+        // Build progress bar
+        new WebpackBar({
+            name: "thirdeye-ui [dev]",
+            color: "#6EC4D1",
         }),
     ],
 

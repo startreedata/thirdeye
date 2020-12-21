@@ -16,7 +16,12 @@ import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import classnames from "classnames";
 import { cloneDeep, isEmpty } from "lodash";
-import React, { FunctionComponent, MouseEvent, useState } from "react";
+import React, {
+    Fragment,
+    FunctionComponent,
+    MouseEvent,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
@@ -279,7 +284,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                         "string"
                                                 )
                                                 .map((timeRange, index) => (
-                                                    <div key={index}>
+                                                    <Fragment key={index}>
                                                         <ListItem
                                                             button
                                                             onClick={(): void => {
@@ -322,7 +327,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                                 TimeRange.LAST_MONTH) && (
                                                             <Divider />
                                                         )}
-                                                    </div>
+                                                    </Fragment>
                                                 ))}
                                         </List>
                                     </Box>

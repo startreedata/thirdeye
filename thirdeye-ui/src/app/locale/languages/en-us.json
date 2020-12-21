@@ -96,13 +96,7 @@
         "add-subscription-gorup": "Add to Subscription Group",
         "create-subscription-gorup": "Create Subscription Group",
         "all-detection-rules-anomalies-over-time": "All detection rules anomalies over time",
-        "alert-performance": "Alert Performance",
-        "response-rate": "Response Rate",
-        "precision": "Precision",
-        "recall": "Recall",
-        "detection-health": "Detection Health",
-        "no-chart-data-available": "No relevant data available",
-        "chart": "Chart"
+        "alert-performance": "Alert Performance"
     },
     "message": {
         "url-not-found": "Requested URL not found",

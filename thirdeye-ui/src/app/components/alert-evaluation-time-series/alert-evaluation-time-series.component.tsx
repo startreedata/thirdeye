@@ -38,7 +38,7 @@ import {
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
-} from "../../utils/visualization/visualization-util";
+} from "../../utils/visualization-util/visualization-util";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { NoDataAvailableIndicator } from "../no-data-available-indicator/no-data-available-indicator.component";
 import {
@@ -305,7 +305,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     }
 
     return (
-        <div>
+        <>
             {/* SVG container with parent dimensions */}
             <svg height={svgHeight} width={svgWidth}>
                 {/* Time series */}
@@ -666,6 +666,6 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     </div>
                 )}
             </Legend>
-        </div>
+        </>
     );
 };

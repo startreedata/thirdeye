@@ -9,16 +9,16 @@ export const useTimeRangeSelectorCalendarToolbarStyles = makeStyles({
         color: Palette.COLOR_TEXT_DEFAULT,
     },
     month: {
-        marginRight: "5px",
+        marginRight: "6px",
     },
     link: {
-        marginLeft: "5x",
-        marginRight: "5px",
+        marginLeft: "6px",
+        marginRight: "6px",
     },
     rightAlign: {
         marginLeft: "auto",
     },
     meridiem: {
-        marginLeft: "5px",
+        marginLeft: "6px",
     },
 });

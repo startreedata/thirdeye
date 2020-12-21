@@ -20,23 +20,23 @@ export const TimeRangeSelectorCalendarToolbar: FunctionComponent<ToolbarComponen
     const timeRangeSelectorCalendarToolbarClasses = useTimeRangeSelectorCalendarToolbarStyles();
 
     const onMonthClick = (): void => {
-        props.setOpenView("month");
+        props.setOpenView && props.setOpenView("month");
     };
 
     const onDayClick = (): void => {
-        props.setOpenView("date");
+        props.setOpenView && props.setOpenView("date");
     };
 
     const onYearClick = (): void => {
-        props.setOpenView("year");
+        props.setOpenView && props.setOpenView("year");
     };
 
     const onHourClick = (): void => {
-        props.setOpenView("hours");
+        props.setOpenView && props.setOpenView("hours");
     };
 
     const onMinuteClick = (): void => {
-        props.setOpenView("minutes");
+        props.setOpenView && props.setOpenView("minutes");
     };
 
     const onMeridiemClick = (): void => {

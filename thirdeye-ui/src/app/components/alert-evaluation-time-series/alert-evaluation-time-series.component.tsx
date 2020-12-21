@@ -1,24 +1,17 @@
-import { Typography, useTheme } from "@material-ui/core";
+import { useTheme } from "@material-ui/core";
 import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import {
-    AreaClosed,
     AxisBottom,
     AxisLeft,
     Brush,
-    curveNatural,
     Group,
-    Legend,
-    LegendItem,
-    LegendLabel,
-    LinePath,
     ParentSize,
     scaleLinear,
-    scaleOrdinal,
     scaleTime,
 } from "@visx/visx";
-import classnames from "classnames";
-import { debounce, isEmpty, kebabCase } from "lodash";
+import { ScaleLinear, ScaleTime } from "d3";
+import { debounce, isEmpty } from "lodash";
 import React, {
     createRef,
     FunctionComponent,
@@ -28,9 +21,7 @@ import React, {
     useMemo,
     useState,
 } from "react";
-import { useTranslation } from "react-i18next";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
 import {
     formatLargeNumberForVisualization,
     formatMonthDayDateForVisualization,
@@ -41,6 +32,10 @@ import {
 } from "../../utils/visualization-util/visualization-util";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { NoDataAvailableIndicator } from "../no-data-available-indicator/no-data-available-indicator.component";
+import { AlertEvaluationTimeSeriesBaselinePlot } from "./alert-evaluation-time-series-baseline-plot/alert-evaluation-time-series-baseline-plot.component";
+import { AlertEvaluationTimeSeriesCurrentPlot } from "./alert-evaluation-time-series-current-plot/alert-evaluation-time-series-current-plot.component";
+import { AlertEvaluationTimeSeriesLegend } from "./alert-evaluation-time-series-legend/alert-evaluation-time-series-legend.component";
+import { AlertEvaluationTimeSeriesUpperAndLowerBoundPlot } from "./alert-evaluation-time-series-upper-and-lower-bound-plot/alert-evaluation-time-series-upper-and-lower-bound-plot.component";
 import {
     AlertEvaluationTimeSeriesInternalProps,
     AlertEvaluationTimeSeriesPlot,
@@ -89,12 +84,13 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         filteredAlertEvaluationTimeSeriesPoints,
         setFilteredAlertEvaluationTimeSeriesPoints,
     ] = useState<AlertEvaluationTimeSeriesPoint[]>([]);
-    const [showUpperAndLowerBound, setShowUpperAndLowerBound] = useState(true);
-    const [showCurrent, setShowCurrent] = useState(true);
-    const [showBaseline, setShowBaseline] = useState(true);
+    const [upperAndLowerBoundVisible, setUpperAndLowerBoundVisible] = useState(
+        true
+    );
+    const [currentVisible, setCurrentVisible] = useState(true);
+    const [baselineVisible, setBaselineVisible] = useState(true);
     const brushRef = createRef<BaseBrush>();
     const theme = useTheme();
-    const { t } = useTranslation();
 
     // SVG bounds
     const svgWidth = props.width; // container width
@@ -112,81 +108,59 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     const brushYMax = brushHeight; // Brush height
 
     // Time series scales
-    const timeSeriesXScale = useMemo(
-        () =>
-            scaleTime<number>({
-                range: [0, timeSeriesXMax],
-                domain: [
-                    getAlertEvaluationTimeSeriesPointsMinTimestamp(
-                        filteredAlertEvaluationTimeSeriesPoints
-                    ),
-                    getAlertEvaluationTimeSeriesPointsMaxTimestamp(
-                        filteredAlertEvaluationTimeSeriesPoints
-                    ),
-                ],
-            }),
-        [props.width, filteredAlertEvaluationTimeSeriesPoints]
-    );
-    const timeSeriesYScale = useMemo(
-        () =>
-            scaleLinear<number>({
-                range: [timeSeriesYMax, 0],
-                domain: [
-                    0,
-                    getAlertEvaluationTimeSeriesPointsMaxValue(
-                        filteredAlertEvaluationTimeSeriesPoints
-                    ),
-                ],
-                nice: true,
-            }),
-        [props.height, filteredAlertEvaluationTimeSeriesPoints]
-    );
+    const timeSeriesXScale = useMemo((): ScaleTime<number, number> => {
+        return scaleTime<number>({
+            range: [0, timeSeriesXMax],
+            domain: [
+                getAlertEvaluationTimeSeriesPointsMinTimestamp(
+                    filteredAlertEvaluationTimeSeriesPoints
+                ),
+                getAlertEvaluationTimeSeriesPointsMaxTimestamp(
+                    filteredAlertEvaluationTimeSeriesPoints
+                ),
+            ],
+        });
+    }, [props.width, filteredAlertEvaluationTimeSeriesPoints]);
+    const timeSeriesYScale = useMemo((): ScaleLinear<number, number> => {
+        return scaleLinear<number>({
+            range: [timeSeriesYMax, 0],
+            domain: [
+                0,
+                getAlertEvaluationTimeSeriesPointsMaxValue(
+                    filteredAlertEvaluationTimeSeriesPoints
+                ),
+            ],
+            nice: true,
+        });
+    }, [props.height, filteredAlertEvaluationTimeSeriesPoints]);
 
     // Brush scales
-    const brushXScale = useMemo(
-        () =>
-            scaleTime<number>({
-                range: [0, brushXMax],
-                domain: [
-                    getAlertEvaluationTimeSeriesPointsMinTimestamp(
-                        alertEvaluationTimeSeriesPoints
-                    ),
-                    getAlertEvaluationTimeSeriesPointsMaxTimestamp(
-                        alertEvaluationTimeSeriesPoints
-                    ),
-                ],
-                nice: true,
-            }),
-        [props.width, alertEvaluationTimeSeriesPoints]
-    );
-    const brushYScale = useMemo(
-        () =>
-            scaleLinear<number>({
-                range: [brushYMax, 0],
-                domain: [
-                    0,
-                    getAlertEvaluationTimeSeriesPointsMaxValue(
-                        alertEvaluationTimeSeriesPoints
-                    ),
-                ],
-                nice: true,
-            }),
-        [props.height, alertEvaluationTimeSeriesPoints]
-    );
-
-    // Legend scale
-    const legendOrdinalScale = scaleOrdinal({
-        domain: [
-            AlertEvaluationTimeSeriesPlot.CURRENT,
-            AlertEvaluationTimeSeriesPlot.BASELINE,
-            AlertEvaluationTimeSeriesPlot.UPPER_AND_LOWER_BOUND,
-        ],
-        range: [
-            Palette.COLOR_VISUALIZATION_STROKE_DEFAULT,
-            Palette.COLOR_VISUALIZATION_STROKE_BASELINE,
-            theme.palette.primary.main,
-        ],
-    });
+    const brushXScale = useMemo((): ScaleTime<number, number> => {
+        return scaleTime<number>({
+            range: [0, brushXMax],
+            domain: [
+                getAlertEvaluationTimeSeriesPointsMinTimestamp(
+                    alertEvaluationTimeSeriesPoints
+                ),
+                getAlertEvaluationTimeSeriesPointsMaxTimestamp(
+                    alertEvaluationTimeSeriesPoints
+                ),
+            ],
+            nice: true,
+        });
+    }, [props.width, alertEvaluationTimeSeriesPoints]);
+    const brushYScale = useMemo((): ScaleLinear<number, number> => {
+        return scaleLinear<number>({
+            range: [brushYMax, 0],
+            domain: [
+                0,
+                getAlertEvaluationTimeSeriesPointsMaxValue(
+                    alertEvaluationTimeSeriesPoints
+                ),
+            ],
+            nice: true,
+        });
+    }, [props.height, alertEvaluationTimeSeriesPoints]);
 
     useEffect(() => {
         // Input changed, reset
@@ -250,42 +224,24 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         [alertEvaluationTimeSeriesPoints]
     );
 
-    const getTimeSeriesState = (
-        alertEvaluationTimeSeries: AlertEvaluationTimeSeriesPlot
-    ): boolean => {
-        switch (alertEvaluationTimeSeries) {
-            case AlertEvaluationTimeSeriesPlot.UPPER_AND_LOWER_BOUND: {
-                return showUpperAndLowerBound;
-            }
-            case AlertEvaluationTimeSeriesPlot.CURRENT: {
-                return showCurrent;
-            }
-            case AlertEvaluationTimeSeriesPlot.BASELINE: {
-                return showBaseline;
-            }
-        }
-
-        return false;
-    };
-
-    const toggleTimeSeriesState = (
+    const onLegendChange = (
         alertEvaluationTimeSeries: AlertEvaluationTimeSeriesPlot
     ): void => {
         switch (alertEvaluationTimeSeries) {
             case AlertEvaluationTimeSeriesPlot.UPPER_AND_LOWER_BOUND: {
-                setShowUpperAndLowerBound(
+                setUpperAndLowerBoundVisible(
                     (showUpperAndLowerBound) => !showUpperAndLowerBound
                 );
 
                 break;
             }
             case AlertEvaluationTimeSeriesPlot.CURRENT: {
-                setShowCurrent((showCurrent) => !showCurrent);
+                setCurrentVisible((showCurrent) => !showCurrent);
 
                 break;
             }
             case AlertEvaluationTimeSeriesPlot.BASELINE: {
-                setShowBaseline((showBaseline) => !showBaseline);
+                setBaselineVisible((showBaseline) => !showBaseline);
 
                 break;
             }
@@ -311,118 +267,35 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 {/* Time series */}
                 <Group left={MARGIN_LEFT} top={MARGIN_TOP}>
                     {/* Upper and lower bound */}
-                    {showUpperAndLowerBound && (
-                        <AreaClosed
-                            curve={curveNatural}
-                            data={filteredAlertEvaluationTimeSeriesPoints}
-                            defined={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): boolean => {
-                                return (
-                                    isFinite(
-                                        alertEvaluationTimeSeriesPoint.lowerBound
-                                    ) &&
-                                    isFinite(
-                                        alertEvaluationTimeSeriesPoint.upperBound
-                                    )
-                                );
-                            }}
-                            fill={theme.palette.primary.main}
-                            stroke={theme.palette.primary.main}
-                            strokeWidth={
-                                Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT
+                    {upperAndLowerBoundVisible && (
+                        <AlertEvaluationTimeSeriesUpperAndLowerBoundPlot
+                            alertEvaluationTimeSeriesPoints={
+                                filteredAlertEvaluationTimeSeriesPoints
                             }
-                            x={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): number => {
-                                return timeSeriesXScale(
-                                    alertEvaluationTimeSeriesPoint.timestamp
-                                );
-                            }}
-                            y0={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): number => {
-                                return timeSeriesYScale(
-                                    alertEvaluationTimeSeriesPoint.lowerBound
-                                );
-                            }}
-                            y1={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): number => {
-                                return timeSeriesYScale(
-                                    alertEvaluationTimeSeriesPoint.upperBound
-                                );
-                            }}
+                            xScale={timeSeriesXScale}
                             yScale={timeSeriesYScale}
                         />
                     )}
 
                     {/* Current */}
-                    {showCurrent && (
-                        <LinePath
-                            curve={curveNatural}
-                            data={filteredAlertEvaluationTimeSeriesPoints}
-                            defined={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): boolean => {
-                                return isFinite(
-                                    alertEvaluationTimeSeriesPoint.current
-                                );
-                            }}
-                            stroke={Palette.COLOR_VISUALIZATION_STROKE_DEFAULT}
-                            strokeWidth={
-                                Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT
+                    {currentVisible && (
+                        <AlertEvaluationTimeSeriesCurrentPlot
+                            alertEvaluationTimeSeriesPoints={
+                                filteredAlertEvaluationTimeSeriesPoints
                             }
-                            x={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): number => {
-                                return timeSeriesXScale(
-                                    alertEvaluationTimeSeriesPoint.timestamp
-                                );
-                            }}
-                            y={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): number => {
-                                return timeSeriesYScale(
-                                    alertEvaluationTimeSeriesPoint.current
-                                );
-                            }}
+                            xScale={timeSeriesXScale}
+                            yScale={timeSeriesYScale}
                         />
                     )}
 
                     {/* Baseline */}
-                    {showBaseline && (
-                        <LinePath
-                            curve={curveNatural}
-                            data={filteredAlertEvaluationTimeSeriesPoints}
-                            defined={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): boolean => {
-                                return isFinite(
-                                    alertEvaluationTimeSeriesPoint.expected
-                                );
-                            }}
-                            stroke={Palette.COLOR_VISUALIZATION_STROKE_BASELINE}
-                            strokeDasharray={
-                                Dimension.WIDTH_VISUALIZATION_STROKE_DASHARRAY
+                    {baselineVisible && (
+                        <AlertEvaluationTimeSeriesBaselinePlot
+                            alertEvaluationTimeSeriesPoints={
+                                filteredAlertEvaluationTimeSeriesPoints
                             }
-                            strokeWidth={
-                                Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT
-                            }
-                            x={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): number => {
-                                return timeSeriesXScale(
-                                    alertEvaluationTimeSeriesPoint.timestamp
-                                );
-                            }}
-                            y={(
-                                alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                            ): number => {
-                                return timeSeriesYScale(
-                                    alertEvaluationTimeSeriesPoint.expected
-                                );
-                            }}
+                            xScale={timeSeriesXScale}
+                            yScale={timeSeriesYScale}
                         />
                     )}
 
@@ -449,118 +322,35 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
 
                 {/* Brush */}
                 <Group left={MARGIN_LEFT} top={timeSeriesHeight}>
-                    {/* Upper and lower bound */}
-                    <AreaClosed
-                        curve={curveNatural}
-                        data={alertEvaluationTimeSeriesPoints}
-                        defined={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): boolean => {
-                            return (
-                                isFinite(
-                                    alertEvaluationTimeSeriesPoint.lowerBound
-                                ) &&
-                                isFinite(
-                                    alertEvaluationTimeSeriesPoint.upperBound
-                                )
-                            );
-                        }}
-                        fill={theme.palette.primary.main}
-                        opacity={0.5}
-                        stroke={theme.palette.primary.main}
-                        strokeWidth={
-                            Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT
-                        }
-                        x={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): number => {
-                            return brushXScale(
-                                alertEvaluationTimeSeriesPoint.timestamp
-                            );
-                        }}
-                        y0={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): number => {
-                            return brushYScale(
-                                alertEvaluationTimeSeriesPoint.lowerBound
-                            );
-                        }}
-                        y1={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): number => {
-                            return brushYScale(
-                                alertEvaluationTimeSeriesPoint.upperBound
-                            );
-                        }}
-                        yScale={brushYScale}
-                    />
+                    {/* Time series in the brush to be always visible and slightly transparent */}
+                    <Group opacity={0.5}>
+                        {/* Upper and lower bound */}
+                        <AlertEvaluationTimeSeriesUpperAndLowerBoundPlot
+                            alertEvaluationTimeSeriesPoints={
+                                alertEvaluationTimeSeriesPoints
+                            }
+                            xScale={brushXScale}
+                            yScale={brushYScale}
+                        />
 
-                    {/* Current */}
-                    <LinePath
-                        curve={curveNatural}
-                        data={alertEvaluationTimeSeriesPoints}
-                        defined={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): boolean => {
-                            return isFinite(
-                                alertEvaluationTimeSeriesPoint.current
-                            );
-                        }}
-                        opacity={0.5}
-                        stroke={Palette.COLOR_VISUALIZATION_STROKE_DEFAULT}
-                        strokeWidth={
-                            Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT
-                        }
-                        x={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): number => {
-                            return brushXScale(
-                                alertEvaluationTimeSeriesPoint.timestamp
-                            );
-                        }}
-                        y={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): number => {
-                            return brushYScale(
-                                alertEvaluationTimeSeriesPoint.current
-                            );
-                        }}
-                    />
+                        {/* Current */}
+                        <AlertEvaluationTimeSeriesCurrentPlot
+                            alertEvaluationTimeSeriesPoints={
+                                alertEvaluationTimeSeriesPoints
+                            }
+                            xScale={brushXScale}
+                            yScale={brushYScale}
+                        />
 
-                    {/* Baseline */}
-                    <LinePath
-                        curve={curveNatural}
-                        data={alertEvaluationTimeSeriesPoints}
-                        defined={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): boolean => {
-                            return isFinite(
-                                alertEvaluationTimeSeriesPoint.expected
-                            );
-                        }}
-                        opacity={0.5}
-                        stroke={Palette.COLOR_VISUALIZATION_STROKE_BASELINE}
-                        strokeDasharray={
-                            Dimension.WIDTH_VISUALIZATION_STROKE_DASHARRAY
-                        }
-                        strokeWidth={
-                            Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT
-                        }
-                        x={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): number => {
-                            return brushXScale(
-                                alertEvaluationTimeSeriesPoint.timestamp
-                            );
-                        }}
-                        y={(
-                            alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                        ): number => {
-                            return brushYScale(
-                                alertEvaluationTimeSeriesPoint.expected
-                            );
-                        }}
-                    />
+                        {/* Baseline */}
+                        <AlertEvaluationTimeSeriesBaselinePlot
+                            alertEvaluationTimeSeriesPoints={
+                                alertEvaluationTimeSeriesPoints
+                            }
+                            xScale={brushXScale}
+                            yScale={brushYScale}
+                        />
+                    </Group>
 
                     {/* Brush */}
                     <Brush
@@ -598,74 +388,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             </svg>
 
             {/* Legend */}
-            <Legend direction="row" scale={legendOrdinalScale}>
-                {(labels): ReactNode => (
-                    <div
-                        className={
-                            alertEvaluationTimeSeriesInternalClasses.legendContainer
-                        }
-                    >
-                        {labels.map(
-                            (label, index): ReactNode => {
-                                return (
-                                    <LegendItem
-                                        className={classnames(
-                                            alertEvaluationTimeSeriesInternalClasses.legendItem,
-                                            getTimeSeriesState(
-                                                label.text as AlertEvaluationTimeSeriesPlot
-                                            )
-                                                ? ""
-                                                : alertEvaluationTimeSeriesInternalClasses.legendItemDisabled
-                                        )}
-                                        key={index}
-                                        onClick={(): void => {
-                                            toggleTimeSeriesState(
-                                                label.text as AlertEvaluationTimeSeriesPlot
-                                            );
-                                        }}
-                                    >
-                                        {/* Glyph */}
-                                        <svg
-                                            height={15}
-                                            opacity={
-                                                getTimeSeriesState(
-                                                    label.text as AlertEvaluationTimeSeriesPlot
-                                                )
-                                                    ? 1
-                                                    : 0.5
-                                            }
-                                            width={15}
-                                        >
-                                            <rect
-                                                fill={label.value}
-                                                height={15}
-                                                width={15}
-                                            />
-                                        </svg>
-
-                                        {/* Label */}
-                                        <LegendLabel
-                                            className={
-                                                alertEvaluationTimeSeriesInternalClasses.legendItemText
-                                            }
-                                        >
-                                            {
-                                                <Typography variant="body2">
-                                                    {t(
-                                                        `label.${kebabCase(
-                                                            label.text
-                                                        )}`
-                                                    )}
-                                                </Typography>
-                                            }
-                                        </LegendLabel>
-                                    </LegendItem>
-                                );
-                            }
-                        )}
-                    </div>
-                )}
-            </Legend>
+            <AlertEvaluationTimeSeriesLegend onChange={onLegendChange} />
         </>
     );
 };

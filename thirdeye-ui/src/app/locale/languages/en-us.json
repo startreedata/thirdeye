@@ -96,7 +96,13 @@
         "add-subscription-gorup": "Add to Subscription Group",
         "create-subscription-gorup": "Create Subscription Group",
         "all-detection-rules-anomalies-over-time": "All detection rules anomalies over time",
-        "alert-performance": "Alert Performance"
+        "alert-performance": "Alert Performance",
+
+        "subscription-group": "Subscription Group",
+        "application": "Application",
+        "subscribed-alerts": "Subscribed Alerts",
+        "subscribed-emails": "Subscribed Emails",
+        "edit-subscription-group": "Edit Subscription Group"
     },
     "message": {
         "url-not-found": "Requested URL not found",

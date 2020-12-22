@@ -63,9 +63,11 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 text: alertCardData
                     ? alertCardData.name
                     : t("label.no-data-available-marker"),
-                path: alertCardData
-                    ? getAlertsDetailPath(alertCardData.id)
-                    : "",
+                pathFn: (): string => {
+                    return alertCardData
+                        ? getAlertsDetailPath(alertCardData.id)
+                        : "";
+                },
             },
         ]);
     }, [alertCardData]);

@@ -21,7 +21,6 @@ export const PageNotFoundPage: FunctionComponent<PageNotFoundPageProps> = (
         setPageBreadcrumbs([
             {
                 text: t("label.page-not-found"),
-                path: "",
             },
         ]);
 

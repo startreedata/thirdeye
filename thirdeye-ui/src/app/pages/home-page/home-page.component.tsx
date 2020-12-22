@@ -18,7 +18,7 @@ export const HomePage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: t("label.home"),
-                path: getHomePath(),
+                pathFn: getHomePath,
             },
         ]);
     }, []);

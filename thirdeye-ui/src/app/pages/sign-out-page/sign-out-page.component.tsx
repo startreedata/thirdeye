@@ -25,7 +25,7 @@ export const SignOutPage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: t("label.sign-out"),
-                path: getSignOutPath(),
+                pathFn: getSignOutPath,
             },
         ]);
 

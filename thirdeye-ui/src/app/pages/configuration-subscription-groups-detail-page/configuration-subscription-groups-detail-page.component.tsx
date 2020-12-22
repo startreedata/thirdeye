@@ -18,7 +18,6 @@ export const ConfigurationSubscriptionGroupsDetailPage: FunctionComponent = () =
         setPageBreadcrumbs([
             {
                 text: t("SUBSCRIPTION GROUP"),
-                path: "",
             },
         ]);
     }, []);

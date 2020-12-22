@@ -33,7 +33,7 @@ export const SignInPage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: t("label.sign-in"),
-                path: getSignInPath(),
+                pathFn: getSignInPath,
             },
         ]);
 

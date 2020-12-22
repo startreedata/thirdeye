@@ -18,11 +18,9 @@ export const ConfigurationSubscriptionGroupsUpdatePage: FunctionComponent = () =
         setPageBreadcrumbs([
             {
                 text: "SUBSCRIPTION GROUP",
-                path: "",
             },
             {
                 text: t("label.update"),
-                path: "",
             },
         ]);
     }, []);

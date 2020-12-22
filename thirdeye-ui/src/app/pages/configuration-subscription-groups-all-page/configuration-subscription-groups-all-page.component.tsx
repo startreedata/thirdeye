@@ -19,7 +19,7 @@ export const ConfigurationSubscriptionGroupsAllPage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: t("label.all"),
-                path: getConfigurationSubscriptionGroupsAllPath(),
+                pathFn: getConfigurationSubscriptionGroupsAllPath,
             },
         ]);
     }, []);

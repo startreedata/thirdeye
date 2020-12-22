@@ -34,11 +34,11 @@ export const ConfigurationSubscriptionGroupsRouter: FunctionComponent = () => {
         setAppSectionBreadcrumbs([
             {
                 text: t("label.configuration"),
-                path: getConfigurationPath(),
+                pathFn: getConfigurationPath,
             },
             {
                 text: t("label.subscription-groups"),
-                path: getConfigurationSubscriptionGroupsPath(),
+                pathFn: getConfigurationSubscriptionGroupsPath,
             },
         ]);
 

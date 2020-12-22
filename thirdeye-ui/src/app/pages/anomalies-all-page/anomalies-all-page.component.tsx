@@ -37,7 +37,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: t("label.all"),
-                path: getAnomaliesAllPath(),
+                pathFn: getAnomaliesAllPath,
             },
         ]);
     }, []);

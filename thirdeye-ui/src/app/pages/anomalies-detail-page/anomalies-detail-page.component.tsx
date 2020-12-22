@@ -55,9 +55,11 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                 text: anomalyCardData
                     ? anomalyCardData.name
                     : t("label.no-data-available-marker"),
-                path: anomalyCardData
-                    ? getAnomaliesDetailPath(anomalyCardData.id)
-                    : "",
+                pathFn: (): string => {
+                    return anomalyCardData
+                        ? getAnomaliesDetailPath(anomalyCardData.id)
+                        : "";
+                },
             },
         ]);
     }, [anomalyCardData]);

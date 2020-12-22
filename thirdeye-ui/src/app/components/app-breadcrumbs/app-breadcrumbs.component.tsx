@@ -5,7 +5,7 @@ import React, { FunctionComponent } from "react";
 import { useHistory } from "react-router-dom";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
-import { AppBreadcrumbsProps } from "./app-breadcrumbs.interfaces";
+import { AppBreadcrumbsProps, Breadcrumb } from "./app-breadcrumbs.interfaces";
 import { useAppBreadcrumbsStyles } from "./app-breadcrumbs.styles";
 
 export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
@@ -14,8 +14,8 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
     const appBreadcrumbsClasses = useAppBreadcrumbsStyles();
     const history = useHistory();
 
-    const onBreadcrumbClick = (path: string): void => {
-        history.push(path);
+    const onBreadcrumbClick = (breadcrumb: Breadcrumb): void => {
+        breadcrumb && breadcrumb.pathFn && history.push(breadcrumb.pathFn());
     };
 
     return (
@@ -46,7 +46,7 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
                             key={index}
                             variant="subtitle2"
                             onClick={(): void => {
-                                onBreadcrumbClick(breadcrumb.path);
+                                onBreadcrumbClick(breadcrumb);
                             }}
                         >
                             {breadcrumb.text}

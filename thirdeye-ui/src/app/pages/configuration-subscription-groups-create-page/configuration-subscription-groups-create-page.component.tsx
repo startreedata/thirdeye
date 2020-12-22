@@ -19,7 +19,7 @@ export const ConfigurationSubscriptionGroupsCreatePage: FunctionComponent = () =
         setPageBreadcrumbs([
             {
                 text: t("label.create"),
-                path: getConfigurationSubscriptionGroupsCreatePath(),
+                pathFn: getConfigurationSubscriptionGroupsCreatePath,
             },
         ]);
     }, []);

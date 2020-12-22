@@ -17,11 +17,9 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: "ALERT",
-                path: "",
             },
             {
                 text: t("label.update"),
-                path: "",
             },
         ]);
     }, []);

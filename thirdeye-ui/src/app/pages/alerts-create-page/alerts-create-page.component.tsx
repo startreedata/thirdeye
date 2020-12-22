@@ -79,7 +79,7 @@ export const AlertsCreatePage = withRouter(
             setPageBreadcrumbs([
                 {
                     text: t("label.create"),
-                    path: getAlertsCreatePath(),
+                    pathFn: getAlertsCreatePath,
                 },
             ]);
 

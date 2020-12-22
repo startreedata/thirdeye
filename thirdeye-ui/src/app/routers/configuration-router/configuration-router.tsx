@@ -30,7 +30,7 @@ export const ConfigurationRouter: FunctionComponent = () => {
         setAppSectionBreadcrumbs([
             {
                 text: t("label.configuration"),
-                path: getConfigurationPath(),
+                pathFn: getConfigurationPath,
             },
         ]);
 

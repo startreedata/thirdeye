@@ -3,5 +3,5 @@ export interface AppBreadcrumbsProps {
 }
 export interface Breadcrumb {
     text: string;
-    path: string;
+    pathFn?: () => string; // Function that shall return path to be routed to
 }

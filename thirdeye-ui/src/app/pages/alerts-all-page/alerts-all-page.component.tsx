@@ -43,7 +43,7 @@ export const AlertsAllPage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: t("label.all"),
-                path: getAlertsAllPath(),
+                pathFn: getAlertsAllPath,
             },
         ]);
     }, []);

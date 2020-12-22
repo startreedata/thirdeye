@@ -27,7 +27,7 @@ export const AlertsRouter: FunctionComponent = () => {
         setAppSectionBreadcrumbs([
             {
                 text: t("label.alerts"),
-                path: getAlertsPath(),
+                pathFn: getAlertsPath,
             },
         ]);
 

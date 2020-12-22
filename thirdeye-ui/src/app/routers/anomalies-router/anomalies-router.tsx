@@ -25,7 +25,7 @@ export const AnomaliesRouter: FunctionComponent = () => {
         setAppSectionBreadcrumbs([
             {
                 text: t("label.anomalies"),
-                path: getAnomaliesPath(),
+                pathFn: getAnomaliesPath,
             },
         ]);
 

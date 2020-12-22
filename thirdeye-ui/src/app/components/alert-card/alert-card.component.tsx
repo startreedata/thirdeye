@@ -18,6 +18,7 @@ import { useHistory } from "react-router-dom";
 import {
     getAlertsDetailPath,
     getAlertsUpdatePath,
+    getConfigurationSubscriptionGroupsDetailPath,
 } from "../../utils/routes-util/routes-util";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { AlertCardProps } from "./alert-card.interfaces";
@@ -59,6 +60,10 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
 
     const onExpandToggle = (): void => {
         setExpanded(!expanded);
+    };
+
+    const onSubscriptionGroupDetails = (id: number) => (): void => {
+        history.push(getConfigurationSubscriptionGroupsDetailPath(id));
     };
 
     return (
@@ -463,11 +468,16 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         <>
                                             {props.alert.subscriptionGroups.map(
                                                 (subscriptionGroup) => (
-                                                    <Typography
+                                                    <Link
+                                                        component="button"
+                                                        display="block"
                                                         key={
                                                             subscriptionGroup.id
                                                         }
                                                         variant="body2"
+                                                        onClick={onSubscriptionGroupDetails(
+                                                            subscriptionGroup.id
+                                                        )}
                                                     >
                                                         <TextHighlighter
                                                             searchWords={
@@ -477,12 +487,19 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                                                 subscriptionGroup.name
                                                             }
                                                         />
-                                                    </Typography>
+                                                    </Link>
                                                 )
                                             )}
                                         </>
                                     )) || (
-                                        <Typography variant="body2">
+                                        <Link
+                                            component="button"
+                                            variant="body2"
+                                            onClick={onSubscriptionGroupDetails(
+                                                props.alert
+                                                    .subscriptionGroups[0].id
+                                            )}
+                                        >
                                             <TextHighlighter
                                                 searchWords={props.searchWords}
                                                 textToHighlight={
@@ -491,7 +508,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                                         .name
                                                 }
                                             />
-                                        </Typography>
+                                        </Link>
                                     )}
                             </div>
                         </Grid>

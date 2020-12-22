@@ -1,3 +1,16 @@
+export interface TimeRangeSelectorProps {
+    timeRangeDuration: TimeRangeDuration;
+    recentCustomTimeRangeDurations?: TimeRangeDuration[];
+    getTimeRangeDuration: () => TimeRangeDuration;
+    onChange: (timeRangeDuration: TimeRangeDuration) => void;
+}
+
+export interface TimeRangeDuration {
+    timeRange: TimeRange;
+    startTime: number;
+    endTime: number;
+}
+
 export enum TimeRange {
     CUSTOM = "CUSTOM",
     LAST_15_MINUTES = "LAST_15_MINUTES",
@@ -14,17 +27,4 @@ export enum TimeRange {
     LAST_MONTH = "LAST_MONTH",
     THIS_YEAR = "THIS_YEAR",
     LAST_YEAR = "LAST_YEAR",
-}
-
-export interface TimeRangeDuration {
-    timeRange: TimeRange;
-    startTime: number;
-    endTime: number;
-}
-
-export interface TimeRangeSelectorProps {
-    timeRangeDuration: TimeRangeDuration;
-    recentCustomTimeRangeDurations?: TimeRangeDuration[];
-    getTimeRangeDuration: () => TimeRangeDuration;
-    onChange: (timeRangeDuration: TimeRangeDuration) => void;
 }

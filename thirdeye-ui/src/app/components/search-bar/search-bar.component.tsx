@@ -81,7 +81,11 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         }
     };
 
-    const sendOnChangeDebounced = useCallback(debounce(sendOnChange, 400), []);
+    const sendOnChangeDebounced = useCallback(debounce(sendOnChange, 400), [
+        props.onChange,
+        props.setSearchQueryString,
+        props.label,
+    ]);
 
     return (
         // Search bar

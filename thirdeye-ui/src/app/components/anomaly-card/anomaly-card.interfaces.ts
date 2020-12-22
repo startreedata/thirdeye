@@ -1,3 +1,9 @@
+export interface AnomalyCardProps {
+    anomaly: AnomalyCardData;
+    searchWords?: string[];
+    hideViewDetailsLinks?: boolean;
+}
+
 export interface AnomalyCardData {
     id: number;
     name: string;
@@ -10,10 +16,4 @@ export interface AnomalyCardData {
     duration: string;
     startTime: string;
     endTime: string;
-}
-
-export interface AnomalyCardProps {
-    anomaly: AnomalyCardData;
-    searchWords?: string[];
-    hideViewDetailsLinks?: boolean;
 }

@@ -1,15 +1,10 @@
 import { Alert } from "../../rest/dto/alert.interfaces";
 
-export interface AlertDatasetAndMetric {
-    datasetId: number;
-    datasetName: string;
-    metricId: number;
-    metricName: string;
-}
-
-export interface AlertSubscriptionGroup {
-    id: number;
-    name: string;
+export interface AlertCardProps {
+    alert: AlertCardData;
+    searchWords?: string[];
+    hideViewDetailsLinks?: boolean;
+    onAlertStateToggle?: (alert: AlertCardData) => void;
 }
 
 export interface AlertCardData {
@@ -26,9 +21,14 @@ export interface AlertCardData {
     alert: Alert | null;
 }
 
-export interface AlertCardProps {
-    alert: AlertCardData;
-    searchWords?: string[];
-    hideViewDetailsLinks?: boolean;
-    onAlertStateToggle?: (alert: AlertCardData) => void;
+export interface AlertDatasetAndMetric {
+    datasetId: number;
+    datasetName: string;
+    metricId: number;
+    metricName: string;
+}
+
+export interface AlertSubscriptionGroup {
+    id: number;
+    name: string;
 }

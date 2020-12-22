@@ -9,7 +9,7 @@ import {
     formatMeridiem,
     formatMinute,
     formatMonth,
-    formatMonthDayDate,
+    formatMonthOfYear,
     formatTime,
     formatYear,
     switchMeridiem,
@@ -135,7 +135,7 @@ describe("Date Time Util", () => {
 
     test("formatDateAndTime shall return appropriate formatted date and time", () => {
         expect(formatDateAndTime(1606852800000)).toEqual(
-            "Dec 01, 20, 12:00 PM"
+            "Dec 01, 2020, 12:00 PM"
         );
     });
 
@@ -169,6 +169,14 @@ describe("Date Time Util", () => {
 
     test("formatMonth shall return appropriate formatted month in given date", () => {
         expect(formatMonth(1606852800000)).toEqual("Dec");
+    });
+
+    test("formatMonthOfYear shall return empty string for invalid input", () => {
+        expect(formatMonthOfYear((null as unknown) as number)).toEqual("");
+    });
+
+    test("formatMonthOfYear shall return appropriate formatted month with year in given date", () => {
+        expect(formatMonthOfYear(1606852800000)).toEqual("Dec 2020");
     });
 
     test("formatDay shall return empty string for invalid input", () => {
@@ -210,13 +218,5 @@ describe("Date Time Util", () => {
     test("switchMeridiem shall return date with switched meridiem as compared to given date", () => {
         expect(switchMeridiem(1606813200000)).toEqual(1606856400000);
         expect(switchMeridiem(1606856400000)).toEqual(1606813200000);
-    });
-
-    test("formatMonthDayDate shall return empty string for invalid input", () => {
-        expect(formatMonthDayDate((null as unknown) as number)).toEqual("");
-    });
-
-    test("formatMonthDayDate shall return appropriate formatted month and day in given date", () => {
-        expect(formatMonthDayDate(1606852800000)).toEqual("Dec 01");
     });
 });

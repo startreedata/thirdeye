@@ -2,7 +2,6 @@ import { useTheme } from "@material-ui/core";
 import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import {
-    AxisBottom,
     AxisLeft,
     Brush,
     Group,
@@ -24,7 +23,6 @@ import React, {
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import {
     formatLargeNumberForVisualization,
-    formatMonthDayDateForVisualization,
     getAlertEvaluationTimeSeriesPoints,
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
@@ -32,6 +30,7 @@ import {
 } from "../../utils/visualization-util/visualization-util";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { NoDataAvailableIndicator } from "../no-data-available-indicator/no-data-available-indicator.component";
+import { VisxCustomTimeAxisBottom } from "../visx-custom-time-axis-bottom/visx-custom-time-axis-bottom.component";
 import { AlertEvaluationTimeSeriesBaselinePlot } from "./alert-evaluation-time-series-baseline-plot/alert-evaluation-time-series-baseline-plot.component";
 import { AlertEvaluationTimeSeriesCurrentPlot } from "./alert-evaluation-time-series-current-plot/alert-evaluation-time-series-current-plot.component";
 import { AlertEvaluationTimeSeriesLegend } from "./alert-evaluation-time-series-legend/alert-evaluation-time-series-legend.component";
@@ -119,6 +118,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     filteredAlertEvaluationTimeSeriesPoints
                 ),
             ],
+            nice: true,
         });
     }, [props.width, filteredAlertEvaluationTimeSeriesPoints]);
     const timeSeriesYScale = useMemo((): ScaleLinear<number, number> => {
@@ -183,7 +183,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             return;
         }
         // Reset brush selection
-        brushRef.current?.reset();
+        brushRef.current && brushRef.current.reset();
 
         setAlertEvaluationTimeSeriesPoints(alertEvaluationTimeSeriesPoints);
         setFilteredAlertEvaluationTimeSeriesPoints(
@@ -196,7 +196,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
 
     const onBrushChange = useCallback(
         debounce((domain: Bounds | null): void => {
-            if (!domain) {
+            if (!domain || domain.x1 - domain.x0 === 0) {
                 // Reset brush selection
                 setFilteredAlertEvaluationTimeSeriesPoints(
                     alertEvaluationTimeSeriesPoints
@@ -300,13 +300,12 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     )}
 
                     {/* X axis */}
-                    <AxisBottom
-                        numTicks={8}
+                    <VisxCustomTimeAxisBottom
+                        numTicks={5}
                         scale={timeSeriesXScale}
                         tickClassName={
                             alertEvaluationTimeSeriesInternalClasses.axisLabel
                         }
-                        tickFormat={formatMonthDayDateForVisualization}
                         top={timeSeriesYMax}
                     />
 
@@ -376,12 +375,12 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     />
 
                     {/* X axis */}
-                    <AxisBottom
+                    <VisxCustomTimeAxisBottom
+                        numTicks={5}
                         scale={brushXScale}
                         tickClassName={
                             alertEvaluationTimeSeriesInternalClasses.axisLabel
                         }
-                        tickFormat={formatMonthDayDateForVisualization}
                         top={brushYMax}
                     />
                 </Group>

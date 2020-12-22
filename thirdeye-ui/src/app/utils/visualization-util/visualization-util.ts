@@ -1,7 +1,6 @@
 import { isEmpty } from "lodash";
 import { AlertEvaluationTimeSeriesPoint } from "../../components/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
-import { formatMonthDayDate } from "../date-time-util/date-time-util";
 import { formatLargeNumber } from "../number-util/number-util";
 
 // Returns abbreviated string representation of given large number
@@ -14,22 +13,6 @@ export const formatLargeNumberForVisualization = (
     }
 
     return formatLargeNumber(num.valueOf());
-};
-
-// Returns formatted string representation of month and day part of given date
-// Equivalent to Date Time Util formatMonthDayDate, but as required by D3 for visualizations
-export const formatMonthDayDateForVisualization = (
-    date: Date | number | { valueOf(): number }
-): string => {
-    if (date instanceof Date) {
-        return formatMonthDayDate(date.getTime());
-    }
-
-    if (typeof date === "number") {
-        return formatMonthDayDate(date);
-    }
-
-    return formatMonthDayDate(date.valueOf());
 };
 
 // Returns alert evaluation time series points from given alert evaluation

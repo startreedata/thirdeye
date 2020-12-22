@@ -27,63 +27,75 @@ export const formatDuration = (startTime: number, endTime: number): string => {
                 ? i18n.t("label.year-lowercase")
                 : i18n.t("label.years-lowercase")
         }`;
-    } else if ((durationInUnits = round(duration.as("months"), 1)) >= 1) {
+    }
+
+    if ((durationInUnits = round(duration.as("months"), 1)) >= 1) {
         // Duration in months
         return `${formatNumber(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.month-lowercase")
                 : i18n.t("label.months-lowercase")
         }`;
-    } else if ((durationInUnits = round(duration.as("weeks"), 1)) >= 1) {
+    }
+
+    if ((durationInUnits = round(duration.as("weeks"), 1)) >= 1) {
         // Duration in weeks
         return `${formatNumber(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.week-lowercase")
                 : i18n.t("label.weeks-lowercase")
         }`;
-    } else if ((durationInUnits = round(duration.as("days"), 1)) >= 1) {
+    }
+
+    if ((durationInUnits = round(duration.as("days"), 1)) >= 1) {
         // Duration in days
         return `${formatNumber(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.day-lowercase")
                 : i18n.t("label.days-lowercase")
         }`;
-    } else if ((durationInUnits = round(duration.as("hours"), 1)) >= 1) {
+    }
+
+    if ((durationInUnits = round(duration.as("hours"), 1)) >= 1) {
         // Duration in hours
         return `${formatNumber(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.hour-lowercase")
                 : i18n.t("label.hours-lowercase")
         }`;
-    } else if ((durationInUnits = round(duration.as("minutes"), 1)) >= 1) {
+    }
+
+    if ((durationInUnits = round(duration.as("minutes"), 1)) >= 1) {
         // Duration in minutes
         return `${formatNumber(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.minute-lowercase")
                 : i18n.t("label.minutes-lowercase")
         }`;
-    } else if ((durationInUnits = round(duration.as("seconds"), 1)) >= 1) {
+    }
+
+    if ((durationInUnits = round(duration.as("seconds"), 1)) >= 1) {
         // Duration in seconds
         return `${formatNumber(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.second-lowercase")
                 : i18n.t("label.seconds-lowercase")
         }`;
-    } else {
-        // Duration in milliseconds
-        durationInUnits = round(duration.as("milliseconds"), 1);
-
-        return `${formatNumber(durationInUnits, 1)} ${
-            durationInUnits === 1
-                ? i18n.t("label.millisecond-lowercase")
-                : i18n.t("label.milliseconds-lowercase")
-        }`;
     }
+
+    // Duration in milliseconds
+    durationInUnits = round(duration.as("milliseconds"), 1);
+
+    return `${formatNumber(durationInUnits, 1)} ${
+        durationInUnits === 1
+            ? i18n.t("label.millisecond-lowercase")
+            : i18n.t("label.milliseconds-lowercase")
+    }`;
 };
 
 // Returns formatted string representation of given date
 // For example:
-// MMM DD, YY, HH:MM AM/PM
+// MMM DD, YYYY, HH:MM AM/PM
 export const formatDateAndTime = (date: number): string => {
     if (!date) {
         return "";
@@ -94,7 +106,7 @@ export const formatDateAndTime = (date: number): string => {
     return dateTime.toLocaleString({
         month: "short",
         day: "2-digit",
-        year: "2-digit",
+        year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
     });
@@ -153,6 +165,22 @@ export const formatMonth = (date: number): string => {
     }
 
     return DateTime.fromMillis(date).toFormat("MMM");
+};
+
+// Returns formatted string representation of month with year in given date
+// For example:
+// MMM YYYY
+export const formatMonthOfYear = (date: number): string => {
+    if (!date) {
+        return "";
+    }
+
+    const dateTime = DateTime.fromMillis(date);
+
+    return dateTime.toLocaleString({
+        month: "short",
+        year: "numeric",
+    });
 };
 
 // Returns formatted string representation of day in given date
@@ -218,20 +246,4 @@ export const switchMeridiem = (date: number): number => {
     }
 
     return switchedDate.toMillis();
-};
-
-// Returns formatted string representation of month and day in given date
-// For example:
-// MMM DD
-export const formatMonthDayDate = (date: number): string => {
-    if (!date) {
-        return "";
-    }
-
-    const dateTime = DateTime.fromMillis(date);
-
-    return dateTime.toLocaleString({
-        month: "short",
-        day: "2-digit",
-    });
 };

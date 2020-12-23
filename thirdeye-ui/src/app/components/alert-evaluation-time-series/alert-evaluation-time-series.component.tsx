@@ -20,6 +20,7 @@ import React, {
     useMemo,
     useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import {
     formatLargeNumberForVisualization,
@@ -29,7 +30,7 @@ import {
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
 } from "../../utils/visualization-util/visualization-util";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
-import { NoDataAvailableIndicator } from "../no-data-available-indicator/no-data-available-indicator.component";
+import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { VisxCustomTimeAxisBottom } from "../visx-custom-time-axis-bottom/visx-custom-time-axis-bottom.component";
 import { AlertEvaluationTimeSeriesBaselinePlot } from "./alert-evaluation-time-series-baseline-plot/alert-evaluation-time-series-baseline-plot.component";
 import { AlertEvaluationTimeSeriesCurrentPlot } from "./alert-evaluation-time-series-current-plot/alert-evaluation-time-series-current-plot.component";
@@ -43,8 +44,8 @@ import {
 } from "./alert-evaluation-time-series.interfaces";
 import { useAlertEvaluationTimeSeriesInternalStyles } from "./alert-evaluation-time-series.styles";
 
-const WIDTH_CONTAINER_MIN = 160;
-const HEIGHT_CONTAINER_MIN = 160;
+const WIDTH_CONTAINER_MIN = 620;
+const HEIGHT_CONTAINER_MIN = 310;
 const MARGIN_LEFT = 40;
 const MARGIN_RIGHT = 40;
 const MARGIN_TOP = 30;
@@ -90,6 +91,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     const [baselineVisible, setBaselineVisible] = useState(true);
     const brushRef = createRef<BaseBrush>();
     const theme = useTheme();
+    const { t } = useTranslation();
 
     // SVG bounds
     const svgWidth = props.width; // container width
@@ -183,7 +185,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             return;
         }
         // Reset brush selection
-        brushRef.current && brushRef.current.reset();
+        brushRef && brushRef.current && brushRef.current.reset();
 
         setAlertEvaluationTimeSeriesPoints(alertEvaluationTimeSeriesPoints);
         setFilteredAlertEvaluationTimeSeriesPoints(
@@ -248,16 +250,21 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         }
     };
 
-    if (
-        loading ||
-        props.width < WIDTH_CONTAINER_MIN ||
-        props.height < HEIGHT_CONTAINER_MIN
-    ) {
+    if (loading) {
         return <LoadingIndicator />;
     }
 
     if (noDataAvailable) {
-        return <NoDataAvailableIndicator />;
+        return <NoDataIndicator />;
+    }
+
+    if (
+        props.width < WIDTH_CONTAINER_MIN ||
+        props.height < HEIGHT_CONTAINER_MIN
+    ) {
+        return (
+            <NoDataIndicator text={t("message.visualization-render-error")} />
+        );
     }
 
     return (

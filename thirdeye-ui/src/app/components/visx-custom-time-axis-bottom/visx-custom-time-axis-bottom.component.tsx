@@ -12,7 +12,7 @@ import { VisxCustomTimeAxisBottomProps } from "./visx-custom-time-axis-bottom.in
 
 export const SEPARATOR_DATE_TIME = "@";
 
-// This is a customization of visx time axis with formatted tick labels based on time range
+// Customization of visx time axis with formatted tick labels based on time range
 export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBottomProps> = (
     props: VisxCustomTimeAxisBottomProps
 ) => {
@@ -115,6 +115,7 @@ export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBotto
                 >
                     {dateString}
                 </Text>
+
                 <Text
                     textAnchor={tickRendererProps.textAnchor}
                     x={tickRendererProps.x}

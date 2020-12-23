@@ -49,12 +49,18 @@ export const TimeRangeSelectorCalendarToolbar: FunctionComponent<ToolbarComponen
 
     return (
         <Toolbar
+            className={timeRangeSelectorCalendarToolbarClasses.container}
             classes={{ dense: timeRangeSelectorCalendarToolbarClasses.dense }}
             variant="dense"
         >
             {/* Month */}
             <Link
-                className={timeRangeSelectorCalendarToolbarClasses.month}
+                className={classnames(
+                    timeRangeSelectorCalendarToolbarClasses.link,
+                    props.openView === "month"
+                        ? timeRangeSelectorCalendarToolbarClasses.selectedLink
+                        : ""
+                )}
                 component="button"
                 variant="subtitle1"
                 onClick={onMonthClick}
@@ -64,7 +70,12 @@ export const TimeRangeSelectorCalendarToolbar: FunctionComponent<ToolbarComponen
 
             {/* Day */}
             <Link
-                className={timeRangeSelectorCalendarToolbarClasses.link}
+                className={classnames(
+                    timeRangeSelectorCalendarToolbarClasses.link,
+                    props.openView === "date"
+                        ? timeRangeSelectorCalendarToolbarClasses.selectedLink
+                        : ""
+                )}
                 component="button"
                 variant="subtitle1"
                 onClick={onDayClick}
@@ -74,7 +85,12 @@ export const TimeRangeSelectorCalendarToolbar: FunctionComponent<ToolbarComponen
 
             {/* Year */}
             <Link
-                className={timeRangeSelectorCalendarToolbarClasses.link}
+                className={classnames(
+                    timeRangeSelectorCalendarToolbarClasses.link,
+                    props.openView === "year"
+                        ? timeRangeSelectorCalendarToolbarClasses.selectedLink
+                        : ""
+                )}
                 component="button"
                 variant="subtitle1"
                 onClick={onYearClick}
@@ -86,7 +102,10 @@ export const TimeRangeSelectorCalendarToolbar: FunctionComponent<ToolbarComponen
             <Link
                 className={classnames(
                     timeRangeSelectorCalendarToolbarClasses.rightAlign,
-                    timeRangeSelectorCalendarToolbarClasses.link
+                    timeRangeSelectorCalendarToolbarClasses.link,
+                    props.openView === "hours"
+                        ? timeRangeSelectorCalendarToolbarClasses.selectedLink
+                        : ""
                 )}
                 component="button"
                 variant="subtitle1"
@@ -97,7 +116,12 @@ export const TimeRangeSelectorCalendarToolbar: FunctionComponent<ToolbarComponen
 
             {/* Minute */}
             <Link
-                className={timeRangeSelectorCalendarToolbarClasses.link}
+                className={classnames(
+                    timeRangeSelectorCalendarToolbarClasses.link,
+                    props.openView === "minutes"
+                        ? timeRangeSelectorCalendarToolbarClasses.selectedLink
+                        : ""
+                )}
                 component="button"
                 variant="subtitle1"
                 onClick={onMinuteClick}
@@ -107,7 +131,7 @@ export const TimeRangeSelectorCalendarToolbar: FunctionComponent<ToolbarComponen
 
             {/* Meridiem */}
             <Link
-                className={timeRangeSelectorCalendarToolbarClasses.meridiem}
+                className={timeRangeSelectorCalendarToolbarClasses.link}
                 component="button"
                 variant="subtitle1"
                 onClick={onMeridiemClick}

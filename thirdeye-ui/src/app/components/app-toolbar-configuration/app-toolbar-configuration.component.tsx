@@ -9,10 +9,10 @@ import {
     AppRoute,
     getConfigurationSubscriptionGroupsPath,
 } from "../../utils/routes-util/routes-util";
-import { useConfigurationToolbarStyles } from "./configuration-toolbar.styles";
+import { useAppToolbarConfigurationStyles } from "./app-toolbar-configuration.styles";
 
-export const ConfigurationToolbar: FunctionComponent = () => {
-    const configurationToolbarClasses = useConfigurationToolbarStyles();
+export const AppToolbarConfiguration: FunctionComponent = () => {
+    const appToolbarConfigurationClasses = useAppToolbarConfigurationStyles();
     const history = useHistory();
     const location = useLocation();
     const { t } = useTranslation();
@@ -32,18 +32,18 @@ export const ConfigurationToolbar: FunctionComponent = () => {
             borderLeft={0}
             borderRight={0}
             borderTop={0}
-            className={configurationToolbarClasses.container}
+            className={appToolbarConfigurationClasses.container}
         >
             {/* Required to appropriately layout children in toolbar */}
             <Toolbar variant="dense">
                 {/* Subscription Groups */}
                 <Link
                     className={classnames(
-                        configurationToolbarClasses.link,
+                        appToolbarConfigurationClasses.link,
                         isRouteCurrent(
                             AppRoute.CONFIGURATION_SUBSCRIPTION_GROUPS
                         )
-                            ? configurationToolbarClasses.selected
+                            ? appToolbarConfigurationClasses.selectedLink
                             : ""
                     )}
                     component="button"

@@ -62,48 +62,6 @@ export const createAlertEvaluation = (
     } as AlertEvaluation;
 };
 
-const mapSubscriptionGroupsToAlertIds = (
-    subscriptionGroups: SubscriptionGroup[]
-): Map<number, AlertSubscriptionGroup[]> => {
-    const subscriptionGroupsToAlertIdsMap = new Map<
-        number,
-        AlertSubscriptionGroup[]
-    >();
-
-    if (isEmpty(subscriptionGroups)) {
-        // No subscription groups available, return empty result
-        return subscriptionGroupsToAlertIdsMap;
-    }
-
-    for (const subscriptionGroup of subscriptionGroups) {
-        if (isEmpty(subscriptionGroup.alerts)) {
-            // No alerts
-            continue;
-        }
-
-        const alertSubscriptionGroup = createEmptyAlertSubscriptionGroup();
-        alertSubscriptionGroup.id = subscriptionGroup.id;
-        alertSubscriptionGroup.name = subscriptionGroup.name;
-
-        for (const alert of subscriptionGroup.alerts) {
-            const subscriptionGroups = subscriptionGroupsToAlertIdsMap.get(
-                alert.id
-            );
-            if (subscriptionGroups) {
-                // Add to existing list
-                subscriptionGroups.push(alertSubscriptionGroup);
-            } else {
-                // Create and add to list
-                subscriptionGroupsToAlertIdsMap.set(alert.id, [
-                    alertSubscriptionGroup,
-                ]);
-            }
-        }
-    }
-
-    return subscriptionGroupsToAlertIdsMap;
-};
-
 export const getAlertCardData = (
     alert: Alert,
     subscriptionGroups: SubscriptionGroup[]
@@ -114,76 +72,6 @@ export const getAlertCardData = (
     );
 
     return getAlertCardDataInternal(alert, subscriptionGroupsToAlertIdsMap);
-};
-
-export const getAlertCardDataInternal = (
-    alert: Alert,
-    subscriptionGroupsToAlertIdsMap: Map<number, AlertSubscriptionGroup[]>
-): AlertCardData => {
-    const alertCardData = createEmptyAlertCardData();
-
-    if (!alert) {
-        return alertCardData;
-    }
-
-    // Basic properties
-    alertCardData.id = alert.id;
-    alertCardData.name = alert.name;
-    alertCardData.active = alert.active;
-    alertCardData.activeText = alert.active
-        ? i18n.t("label.active")
-        : i18n.t("label.inactive");
-
-    // User properties
-    if (alert.owner) {
-        alertCardData.userId = alert.owner.id;
-        alertCardData.createdBy = alert.owner.principal;
-    }
-
-    // Maintain a copy of alert, needed when updating/changing status of the alert
-    alertCardData.alert = alert;
-
-    // Subscription groups
-    if (!isEmpty(subscriptionGroupsToAlertIdsMap)) {
-        alertCardData.subscriptionGroups =
-            subscriptionGroupsToAlertIdsMap.get(alert.id) || [];
-    }
-
-    // Detection, dataset and metric properties
-    if (isEmpty(alert.nodes)) {
-        // None available
-        return alertCardData;
-    }
-
-    for (const alertNode of Object.values(alert.nodes)) {
-        // Detection properties
-        if (alertNode.type === AlertNodeType.DETECTION && alertNode.subType) {
-            alertCardData.detectionTypes.push(alertNode.subType);
-        } else if (
-            alertNode.type === AlertNodeType.FILTER &&
-            alertNode.subType
-        ) {
-            alertCardData.filteredBy.push(alertNode.subType);
-        }
-
-        // Dataset and metric properties
-        if (!alertNode.metric) {
-            // None available
-            continue;
-        }
-
-        const datasetAndMetric = createEmptyAlertDatasetAndMetric();
-        if (alertNode.metric.dataset) {
-            datasetAndMetric.datasetId = alertNode.metric.dataset.id;
-            datasetAndMetric.datasetName = alertNode.metric.dataset.name;
-        }
-        datasetAndMetric.metricId = alertNode.metric.id;
-        datasetAndMetric.metricName = alertNode.metric.name;
-
-        alertCardData.datasetAndMetrics.push(datasetAndMetric);
-    }
-
-    return alertCardData;
 };
 
 export const getAlertCardDatas = (
@@ -322,4 +210,116 @@ export const filterAlerts = (
     }
 
     return [...filteredAlerts];
+};
+
+const getAlertCardDataInternal = (
+    alert: Alert,
+    subscriptionGroupsToAlertIdsMap: Map<number, AlertSubscriptionGroup[]>
+): AlertCardData => {
+    const alertCardData = createEmptyAlertCardData();
+
+    if (!alert) {
+        return alertCardData;
+    }
+
+    // Basic properties
+    alertCardData.id = alert.id;
+    alertCardData.name = alert.name;
+    alertCardData.active = alert.active;
+    alertCardData.activeText = alert.active
+        ? i18n.t("label.active")
+        : i18n.t("label.inactive");
+
+    // User properties
+    if (alert.owner) {
+        alertCardData.userId = alert.owner.id;
+        alertCardData.createdBy = alert.owner.principal;
+    }
+
+    // Maintain a copy of alert, needed when updating/changing status of the alert
+    alertCardData.alert = alert;
+
+    // Subscription groups
+    if (!isEmpty(subscriptionGroupsToAlertIdsMap)) {
+        alertCardData.subscriptionGroups =
+            subscriptionGroupsToAlertIdsMap.get(alert.id) || [];
+    }
+
+    // Detection, dataset and metric properties
+    if (isEmpty(alert.nodes)) {
+        // None available
+        return alertCardData;
+    }
+
+    for (const alertNode of Object.values(alert.nodes)) {
+        // Detection properties
+        if (alertNode.type === AlertNodeType.DETECTION && alertNode.subType) {
+            alertCardData.detectionTypes.push(alertNode.subType);
+        } else if (
+            alertNode.type === AlertNodeType.FILTER &&
+            alertNode.subType
+        ) {
+            alertCardData.filteredBy.push(alertNode.subType);
+        }
+
+        // Dataset and metric properties
+        if (!alertNode.metric) {
+            // None available
+            continue;
+        }
+
+        const datasetAndMetric = createEmptyAlertDatasetAndMetric();
+        if (alertNode.metric.dataset) {
+            datasetAndMetric.datasetId = alertNode.metric.dataset.id;
+            datasetAndMetric.datasetName = alertNode.metric.dataset.name;
+        }
+        datasetAndMetric.metricId = alertNode.metric.id;
+        datasetAndMetric.metricName = alertNode.metric.name;
+
+        alertCardData.datasetAndMetrics.push(datasetAndMetric);
+    }
+
+    return alertCardData;
+};
+
+const mapSubscriptionGroupsToAlertIds = (
+    subscriptionGroups: SubscriptionGroup[]
+): Map<number, AlertSubscriptionGroup[]> => {
+    const subscriptionGroupsToAlertIdsMap = new Map<
+        number,
+        AlertSubscriptionGroup[]
+    >();
+
+    if (isEmpty(subscriptionGroups)) {
+        // No subscription groups available, return empty result
+        return subscriptionGroupsToAlertIdsMap;
+    }
+
+    for (const subscriptionGroup of subscriptionGroups) {
+        if (isEmpty(subscriptionGroup.alerts)) {
+            // No alerts
+            continue;
+        }
+
+        const alertSubscriptionGroup = createEmptyAlertSubscriptionGroup();
+        alertSubscriptionGroup.id = subscriptionGroup.id;
+        alertSubscriptionGroup.name = subscriptionGroup.name;
+
+        for (const alert of subscriptionGroup.alerts) {
+            const subscriptionGroups = subscriptionGroupsToAlertIdsMap.get(
+                alert.id
+            );
+            if (subscriptionGroups) {
+                // Add to existing list
+                subscriptionGroups.push(alertSubscriptionGroup);
+            } else {
+                // Create and add to list
+                subscriptionGroupsToAlertIdsMap.set(alert.id, [
+                    alertSubscriptionGroup,
+                ]);
+            }
+        }
+    }
+
+    return subscriptionGroupsToAlertIdsMap;
 };

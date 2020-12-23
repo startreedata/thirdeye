@@ -3,33 +3,26 @@ import { Palette } from "../../utils/material-ui-util/palette-util";
 
 export const useAppBarStyles = makeStyles((theme: Theme) => {
     return createStyles({
-        appBar: {
+        container: {
             backgroundColor: Palette.COLOR_BACKGROUND_APP_BAR,
             boxShadow:
                 "0px 8px 8px rgba(0, 0, 0, 0.04), 0px 16px 22px rgba(0, 0, 0, 0.04), 0px 8px 26px rgba(41, 148, 169, 0.1), 0px 0px 2px rgba(110, 196, 209, 0.12)",
-            // AppBar to be always above Drawer and Breadcrumbs
+            // AppBar to be always above drawer and breadcrumbs
             zIndex: theme.zIndex.drawer + 2,
         },
-        logo: {
-            alignItems: "center",
-            display: "flex",
-            marginRight: "8px",
-        },
         link: {
-            alignItems: "center",
             display: "flex",
-            marginLeft: "8px",
-            marginRight: "8px",
+            marginRight: "16px",
             "&:last-of-type": {
                 marginRight: "0px",
             },
         },
-        selected: {
-            color: Palette.COLOR_TEXT_DEFAULT,
-        },
         rightAlign: {
             marginLeft: "auto",
-            marginRight: "8px",
+            marginRight: "16px",
+        },
+        selectedLink: {
+            color: Palette.COLOR_TEXT_DEFAULT,
         },
     });
 });

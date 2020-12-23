@@ -2,13 +2,13 @@ import { Grid } from "@material-ui/core";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ConfigurationToolbar } from "../../components/configuration-toolbar/configuration-toolbar.component";
+import { AppToolbarConfiguration } from "../../components/app-toolbar-configuration/app-toolbar-configuration.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SearchBar } from "../../components/search-bar/search-bar.component";
 import { SubscriptionGroupCard } from "../../components/subscription-group-card/subscription-group-card.component";
-import { SubscriptionGroupCardData } from "../../components/subscription-group-card/subscription-group.interfaces";
+import { SubscriptionGroupCardData } from "../../components/subscription-group-card/subscription-group-card.interfaces";
 import { getAllAlerts } from "../../rest/alert-rest/alert-rest";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
@@ -21,18 +21,18 @@ import {
 
 export const ConfigurationSubscriptionGroupsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
+    const [
+        subscriptionGroupCardDatas,
+        setSubscriptionGroupCardDatas,
+    ] = useState<SubscriptionGroupCardData[]>([]);
+    const [
+        filteredSubscriptionGroupCardDatas,
+        setfilteredSubscriptionGroupCardDatas,
+    ] = useState<SubscriptionGroupCardData[]>([]);
+    const [searchWords, setSearchWords] = useState<string[]>([]);
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-
-    const [subscriptionGroups, setSubscriptionGroups] = useState<
-        SubscriptionGroupCardData[]
-    >([]);
-    const [
-        filteredSubscriptionGroups,
-        setfilteredSubscriptionGroups,
-    ] = useState<SubscriptionGroupCardData[]>([]);
-    const [searchWords, setSearchWords] = useState<string[]>([]);
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
@@ -47,6 +47,7 @@ export const ConfigurationSubscriptionGroupsAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
+        // Fetch data
         const init = async (): Promise<void> => {
             await fetchData();
 
@@ -56,15 +57,21 @@ export const ConfigurationSubscriptionGroupsAllPage: FunctionComponent = () => {
         init();
     }, []);
 
-    const fetchData = async (): Promise<void> => {
-        let subscriptionGroups: SubscriptionGroupCardData[] = [];
+    useEffect(() => {
+        // Fetched data, or search changed, reset
+        setfilteredSubscriptionGroupCardDatas(
+            filterSubscriptionGroups(subscriptionGroupCardDatas, searchWords)
+        );
+    }, [subscriptionGroupCardDatas, searchWords]);
 
+    const fetchData = async (): Promise<void> => {
+        let fetchedSubscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
         const [
-            alertsResponse,
             subscriptionGroupsResponse,
+            alertsResponse,
         ] = await Promise.allSettled([
-            getAllAlerts(),
             getAllSubscriptionGroups(),
+            getAllAlerts(),
         ]);
 
         if (
@@ -73,60 +80,61 @@ export const ConfigurationSubscriptionGroupsAllPage: FunctionComponent = () => {
         ) {
             enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
         } else {
-            subscriptionGroups = getSubscriptionGroupCardDatas(
+            fetchedSubscriptionGroupCardDatas = getSubscriptionGroupCardDatas(
                 subscriptionGroupsResponse.value,
                 alertsResponse.value
             );
         }
 
-        setSubscriptionGroups(subscriptionGroups);
-        setfilteredSubscriptionGroups(
-            filterSubscriptionGroups(subscriptionGroups, searchWords)
-        );
-    };
-
-    const onSearch = (searchWords: string[]): void => {
-        setSearchWords(searchWords);
-        setfilteredSubscriptionGroups(
-            filterSubscriptionGroups(subscriptionGroups, searchWords)
-        );
+        setSubscriptionGroupCardDatas(fetchedSubscriptionGroupCardDatas);
     };
 
     if (loading) {
         return (
-            <PageContainer toolbar={<ConfigurationToolbar />}>
+            <PageContainer appToolbar={<AppToolbarConfiguration />}>
                 <LoadingIndicator />
             </PageContainer>
         );
     }
 
     return (
-        <PageContainer toolbar={<ConfigurationToolbar />}>
+        <PageContainer appToolbar={<AppToolbarConfiguration />}>
             <PageContents
                 contentsCenterAlign
                 hideTimeRange
                 title={t("label.subscription-groups")}
             >
-                <Grid container>
+                <Grid container md={12}>
+                    {/* Search */}
                     <Grid item md={12}>
                         <SearchBar
                             autoFocus
                             searchStatusLabel={t("label.search-count", {
-                                count: filteredSubscriptionGroups.length,
-                                total: subscriptionGroups.length,
+                                count: filteredSubscriptionGroupCardDatas
+                                    ? filteredSubscriptionGroupCardDatas.length
+                                    : 0,
+                                total: subscriptionGroupCardDatas
+                                    ? subscriptionGroupCardDatas.length
+                                    : 0,
                             })}
-                            onChange={onSearch}
+                            onChange={setSearchWords}
                         />
                     </Grid>
 
-                    {filteredSubscriptionGroups.map((subscriptionGroup) => (
-                        <Grid item key={subscriptionGroup.id} md={12}>
-                            <SubscriptionGroupCard
-                                searchWords={searchWords}
-                                subscriptionGroup={subscriptionGroup}
-                            />
-                        </Grid>
-                    ))}
+                    {/* Subscription groups */}
+                    {filteredSubscriptionGroupCardDatas &&
+                        filteredSubscriptionGroupCardDatas.map(
+                            (filteredSubscriptionGroupCardData, index) => (
+                                <Grid item key={index} md={12}>
+                                    <SubscriptionGroupCard
+                                        searchWords={searchWords}
+                                        subscriptionGroup={
+                                            filteredSubscriptionGroupCardData
+                                        }
+                                    />
+                                </Grid>
+                            )
+                        )}
                 </Grid>
             </PageContents>
         </PageContainer>

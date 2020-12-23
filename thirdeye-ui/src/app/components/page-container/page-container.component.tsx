@@ -18,8 +18,8 @@ export const PageContainer: FunctionComponent<PageContainerProps> = (
             {/* Required to clip the subsequent container under AppBar */}
             <Toolbar />
 
-            {/* Toolbar, if provided */}
-            {props.toolbar}
+            {/* App toolbar */}
+            {props.appToolbar}
 
             {/* App breadcrumbs */}
             <AppBreadcrumbs breadcrumbs={appBreadcrumbs} />

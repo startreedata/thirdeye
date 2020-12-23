@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
 export interface PageContainerProps {
-    toolbar?: ReactNode;
+    appToolbar?: ReactNode;
     children?: ReactNode;
 }

@@ -13,7 +13,7 @@ import { appHistory } from "./utils/history-util/history-util";
 import { getInitOptions } from "./utils/i18next-util/i18next-util";
 import { theme } from "./utils/material-ui-util/theme-util";
 
-// Initialize localization
+// Initialize locale
 // i18next (language)
 i18n.use(initReactI18next).init(getInitOptions());
 // Numbro (number formatting)
@@ -31,7 +31,7 @@ ReactDOM.render(
             {/* Apply snackbar provider */}
             <AppSnackbarProvider>
                 <Router history={appHistory}>
-                    {/* App needs to be rendered by a router to allow navigation using AppBar */}
+                    {/* App needs to be rendered by a router to allow navigation using app bar */}
                     <App />
                 </Router>
             </AppSnackbarProvider>

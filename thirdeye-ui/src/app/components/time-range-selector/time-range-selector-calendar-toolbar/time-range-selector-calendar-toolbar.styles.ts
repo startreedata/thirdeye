@@ -1,24 +1,22 @@
 import { makeStyles } from "@material-ui/core";
-import { Palette } from "../../../utils/material-ui-util/palette-util";
 
 export const useTimeRangeSelectorCalendarToolbarStyles = makeStyles({
+    container: {
+        marginBottom: "-12px", // Account for whitespace space toolbar and calendar
+    },
     dense: {
         minHeight: "36px",
     },
-    selected: {
-        color: Palette.COLOR_TEXT_DEFAULT,
-    },
-    month: {
-        marginRight: "6px",
-    },
     link: {
-        marginLeft: "6px",
-        marginRight: "6px",
+        marginRight: "8px",
+        "&:last-of-type": {
+            marginRight: "0px",
+        },
     },
     rightAlign: {
         marginLeft: "auto",
     },
-    meridiem: {
-        marginLeft: "6px",
+    selectedLink: {
+        fontWeight: "bold",
     },
 });

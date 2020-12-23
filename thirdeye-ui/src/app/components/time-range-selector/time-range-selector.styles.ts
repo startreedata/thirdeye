@@ -7,26 +7,30 @@ export const useTimeRangeSelectorStyles = makeStyles({
     },
     timeRangeSelectorContainer: {
         overflow: "hidden",
-        height: "495px",
+        height: "475px",
     },
     timeRangeSelectorChildContainer: {
         padding: "16px",
     },
     timeRangeList: {
-        height: "455px",
+        height: "435px",
         width: "190px",
         overflow: "scroll",
+    },
+    timeRangeListLabel: {
+        marginBottom: "-8px", // Minimize whitespace space between label item and following list item
     },
     timeRangeListItem: {
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
     },
-    selectedTimeRange: {
+    selectedTimeRangeListItem: {
         fontWeight: "bold",
     },
     calendarLabel: {
         paddingTop: "10px",
         paddingLeft: "25px",
+        marginBottom: "-6px", // Account for whitespace space between label and calendar
     },
 });

@@ -12,11 +12,9 @@ export const AppSnackbarProvider: FunctionComponent<AppSnackbarProviderProps> = 
     const snackbarRef = createRef<SnackbarProvider>();
 
     const onCloseSnackbar = (key: SnackbarKey): void => {
-        if (!snackbarRef || !snackbarRef.current) {
-            return;
-        }
-
-        snackbarRef.current.closeSnackbar(key);
+        snackbarRef &&
+            snackbarRef.current &&
+            snackbarRef.current.closeSnackbar(key);
     };
 
     return (

@@ -85,6 +85,11 @@
         "current-/-predicted": "Current / Predicted",
         "current-/-predicted-values": "{{current}} / {{predicted}}",
         "deviation": "Deviation",
+        "edit-subscription-group": "Edit Subscription Group",
+        "application": "Application",
+        "subscribed-alerts": "Subscribed Alerts",
+        "subscribed-emails": "Subscribed Emails",
+        "subscription-group": "Subscription Group",
 
         "preview-alert": "Preview Alert",
         "reset-configuration": "Reset Configuration",
@@ -96,13 +101,7 @@
         "add-subscription-gorup": "Add to Subscription Group",
         "create-subscription-gorup": "Create Subscription Group",
         "all-detection-rules-anomalies-over-time": "All detection rules anomalies over time",
-        "alert-performance": "Alert Performance",
-
-        "subscription-group": "Subscription Group",
-        "application": "Application",
-        "subscribed-alerts": "Subscribed Alerts",
-        "subscribed-emails": "Subscribed Emails",
-        "edit-subscription-group": "Edit Subscription Group"
+        "alert-performance": "Alert Performance"
     },
     "message": {
         "url-not-found": "Requested URL not found",
@@ -110,8 +109,10 @@
         "no-data-available": "No data available",
         "invalid-id": "Invalid {{entity}} id {{id}}",
         "fetch-error": "Error fetching data",
+        "update-success": "{{entity}} updated successfully",
         "update-error": "Error updating {{entity}}",
         "create-success": "{{entity}} created successfully",
-        "create-error": "Error creating {{entity}}"
+        "create-error": "Error creating {{entity}}",
+        "visualization-render-error": "Error rendering visualization"
     }
 }

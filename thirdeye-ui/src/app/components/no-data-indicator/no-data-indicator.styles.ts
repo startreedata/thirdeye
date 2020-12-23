@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core";
 
-export const useNoDataAvailableIndicatorStyles = makeStyles({
+export const useNoDataIndicatorStyles = makeStyles({
     container: {
         height: "100%",
     },

@@ -44,8 +44,8 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
             className={classnames(
                 pageContentsClasses.container,
                 props.contentsCenterAlign
-                    ? pageContentsClasses.centeredContainer
-                    : pageContentsClasses.expandedContainer
+                    ? pageContentsClasses.containerCenterAlign
+                    : pageContentsClasses.containerExpand
             )}
         >
             <Grid container direction="column">

@@ -1,6 +1,6 @@
 import { createStyles, makeStyles } from "@material-ui/core";
 
-export const useSubscriptinoGroupStyles = makeStyles(() => {
+export const useSubscriptinoGroupCardStyles = makeStyles(() => {
     return createStyles({
         bottomRowLabel: {
             float: "left",

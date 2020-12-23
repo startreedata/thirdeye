@@ -2,7 +2,7 @@ export interface TimeRangeSelectorProps {
     timeRangeDuration: TimeRangeDuration;
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
     getTimeRangeDuration: () => TimeRangeDuration;
-    onChange: (timeRangeDuration: TimeRangeDuration) => void;
+    onChange?: (timeRangeDuration: TimeRangeDuration) => void;
 }
 
 export interface TimeRangeDuration {

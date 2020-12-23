@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ConfigurationToolbar } from "../../components/configuration-toolbar/configuration-toolbar.component";
+import { AppToolbarConfiguration } from "../../components/app-toolbar-configuration/app-toolbar-configuration.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
@@ -35,14 +35,14 @@ export const ConfigurationSubscriptionGroupsUpdatePage: FunctionComponent = () =
 
     if (loading) {
         return (
-            <PageContainer toolbar={<ConfigurationToolbar />}>
+            <PageContainer appToolbar={<AppToolbarConfiguration />}>
                 <LoadingIndicator />
             </PageContainer>
         );
     }
 
     return (
-        <PageContainer toolbar={<ConfigurationToolbar />}>
+        <PageContainer appToolbar={<AppToolbarConfiguration />}>
             <PageContents contentsCenterAlign title={t("label.update")} />
         </PageContainer>
     );

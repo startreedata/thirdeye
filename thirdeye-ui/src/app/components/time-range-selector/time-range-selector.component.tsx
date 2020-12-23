@@ -61,7 +61,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         setTimeRangeDuration(props.getTimeRangeDuration());
     };
 
-    const onRecentCustomTimeRangeDurationClick = (
+    const onRecentCustomTimeRangeClick = (
         timeRangeDuration: TimeRangeDuration
     ): void => {
         if (isEmpty(timeRangeDuration)) {
@@ -94,7 +94,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         customTimeRangeDuration.timeRange = TimeRange.CUSTOM;
         customTimeRangeDuration.startTime = date.toMillis();
 
-        // Make sure endTime is later or at least equal to the startTime
+        // Make sure end time is later or at least equal to the start time
         if (
             customTimeRangeDuration.endTime -
                 customTimeRangeDuration.startTime <
@@ -128,10 +128,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         closeTimeRangeSelector();
     };
 
-    const closeTimeRangeSelector = (): void => {
-        setTimeRangeSelectorAnchorElement(null);
-    };
-
     const initCustomTimeRange = (): void => {
         if (timeRangeDuration.timeRange === TimeRange.CUSTOM) {
             // Component state time range duration is already a custom time range, do nothing
@@ -144,6 +140,10 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
 
         // Update component state time range duration
         setTimeRangeDuration(customTimeRangeDuration);
+    };
+
+    const closeTimeRangeSelector = (): void => {
+        setTimeRangeSelectorAnchorElement(null);
     };
 
     return (
@@ -214,7 +214,11 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                 props
                                                     .recentCustomTimeRangeDurations
                                                     .length > 0 && (
-                                                    <ListItem>
+                                                    <ListItem
+                                                        className={
+                                                            timeRangeSelectorClasses.timeRangeListLabel
+                                                        }
+                                                    >
                                                         <ListItemText
                                                             primary={t(
                                                                 "label.recent-custom"
@@ -238,7 +242,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                             button
                                                             key={index}
                                                             onClick={(): void => {
-                                                                onRecentCustomTimeRangeDurationClick(
+                                                                onRecentCustomTimeRangeClick(
                                                                     recentTimeRangeDuration
                                                                 );
                                                             }}
@@ -268,7 +272,8 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                     )
                                                 )}
 
-                                            {/* Divider */}
+                                            {/* Divider, if recent custom time ranges were
+                                            rendered */}
                                             {props.recentCustomTimeRangeDurations &&
                                                 props
                                                     .recentCustomTimeRangeDurations
@@ -276,7 +281,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
 
                                             {/* Time ranges */}
                                             {Object.values(TimeRange)
-                                                // Iterate through available TimeRange values
+                                                // Iterate through available values
                                                 .filter(
                                                     // Filter string values
                                                     (timeRange) =>
@@ -306,7 +311,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                                         timeRangeDuration.timeRange ===
                                                                         timeRange
                                                                             ? classnames(
-                                                                                  timeRangeSelectorClasses.selectedTimeRange,
+                                                                                  timeRangeSelectorClasses.selectedTimeRangeListItem,
                                                                                   timeRangeSelectorClasses.timeRangeListItem
                                                                               )
                                                                             : timeRangeSelectorClasses.timeRangeListItem,
@@ -346,7 +351,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                             >
                                                 {/* Start time */}
                                                 <Grid item>
-                                                    {/* Label */}
+                                                    {/* Start time label */}
                                                     <div
                                                         className={
                                                             timeRangeSelectorClasses.calendarLabel
@@ -357,7 +362,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                         </Typography>
                                                     </div>
 
-                                                    {/* Calendar */}
+                                                    {/* Start time calendar */}
                                                     <DateTimePicker
                                                         disableFuture
                                                         hideTabs
@@ -378,7 +383,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
 
                                                 {/* End time */}
                                                 <Grid item>
-                                                    {/* Label */}
+                                                    {/* End time label */}
                                                     <div
                                                         className={
                                                             timeRangeSelectorClasses.calendarLabel
@@ -389,7 +394,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                         </Typography>
                                                     </div>
 
-                                                    {/* Calendar */}
+                                                    {/* End time calendar */}
                                                     <DateTimePicker
                                                         disableFuture
                                                         hideTabs

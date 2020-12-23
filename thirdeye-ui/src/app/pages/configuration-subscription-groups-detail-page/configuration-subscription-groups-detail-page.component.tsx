@@ -4,11 +4,11 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { ConfigurationToolbar } from "../../components/configuration-toolbar/configuration-toolbar.component";
+import { AppToolbarConfiguration } from "../../components/app-toolbar-configuration/app-toolbar-configuration.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { SubscriptionGroupCardData } from "../../components/subscription-group-card/subscription-group.interfaces";
+import { SubscriptionGroupCardData } from "../../components/subscription-group-card/subscription-group-card.interfaces";
 import { getAllAlerts } from "../../rest/alert-rest/alert-rest";
 import { getSubscriptionGroup } from "../../rest/subscription-group-rest/subscription-group-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
@@ -99,14 +99,14 @@ export const ConfigurationSubscriptionGroupsDetailPage: FunctionComponent = () =
 
     if (loading) {
         return (
-            <PageContainer toolbar={<ConfigurationToolbar />}>
+            <PageContainer appToolbar={<AppToolbarConfiguration />}>
                 <LoadingIndicator />
             </PageContainer>
         );
     }
 
     return (
-        <PageContainer toolbar={<ConfigurationToolbar />}>
+        <PageContainer appToolbar={<AppToolbarConfiguration />}>
             <PageContents
                 contentsCenterAlign
                 hideTimeRange

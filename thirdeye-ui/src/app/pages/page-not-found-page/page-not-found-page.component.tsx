@@ -29,14 +29,14 @@ export const PageNotFoundPage: FunctionComponent<PageNotFoundPageProps> = (
 
     if (loading) {
         return (
-            <PageContainer toolbar={props.pageContainerToolbar}>
+            <PageContainer appToolbar={props.appToolbar}>
                 <LoadingIndicator />
             </PageContainer>
         );
     }
 
     return (
-        <PageContainer toolbar={props.pageContainerToolbar}>
+        <PageContainer appToolbar={props.appToolbar}>
             <PageContents
                 contentsCenterAlign
                 hideTimeRange

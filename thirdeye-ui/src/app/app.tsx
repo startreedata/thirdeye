@@ -32,10 +32,18 @@ export const App: FunctionComponent = () => {
     useEffect(() => {
         setLoading(true);
 
+        init();
+
+        setLoading(false);
+    }, [accessToken]);
+
+    const init = (): void => {
         // Axios initialization
+
         // Clear existing interceptors
         axios.interceptors.request.eject(axiosRequestInterceptorId);
         axios.interceptors.response.eject(axiosResponseInterceptorId);
+
         // Set new interceptors
         const requestInterceptorId = axios.interceptors.request.use(
             getRequestInterceptor(accessToken)
@@ -46,9 +54,7 @@ export const App: FunctionComponent = () => {
         );
         setAxiosRequestInterceptorId(requestInterceptorId);
         setAxiosResponseInterceptorId(responseInterceptorId);
-
-        setLoading(false);
-    }, [accessToken]);
+    };
 
     const unauthenticatedAccessHandler = (): void => {
         // Notify

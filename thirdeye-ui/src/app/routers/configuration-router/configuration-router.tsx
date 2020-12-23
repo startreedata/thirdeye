@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, RouteComponentProps, Switch } from "react-router-dom";
-import { ConfigurationToolbar } from "../../components/configuration-toolbar/configuration-toolbar.component";
+import { AppToolbarConfiguration } from "../../components/app-toolbar-configuration/app-toolbar-configuration.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
@@ -65,7 +65,7 @@ export const ConfigurationRouter: FunctionComponent = () => {
                 render={(props: RouteComponentProps): ReactNode => (
                     <PageNotFoundPage
                         {...props}
-                        pageContainerToolbar={<ConfigurationToolbar />}
+                        appToolbar={<AppToolbarConfiguration />}
                     />
                 )}
             />

@@ -8,10 +8,10 @@ export const usePageContentsStyles = makeStyles({
         // https://material-ui.com/components/grid/#limitations
         padding: "16px",
     },
-    expandedContainer: {
+    containerExpand: {
         flexGrow: 1,
     },
-    centeredContainer: {
+    containerCenterAlign: {
         width: Dimension.WIDTH_PAGE_CONTENTS_DEFAULT,
         marginLeft: "auto",
         marginRight: "auto",

@@ -3,9 +3,71 @@ import { isEmpty } from "lodash";
 import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardData,
-} from "../../components/subscription-group-card/subscription-group.interfaces";
+} from "../../components/subscription-group-card/subscription-group-card.interfaces";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+
+export const createEmptySubscriptionGroupCardData = (): SubscriptionGroupCardData => {
+    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+
+    return {
+        id: -1,
+        name: noDataAvailableMarker,
+        application: noDataAvailableMarker,
+        alerts: [],
+        emails: [],
+    };
+};
+
+export const createEmptySubscriptionGroupAlert = (): SubscriptionGroupAlert => {
+    return {
+        id: -1,
+        name: i18n.t("label.no-data-available-marker"),
+    };
+};
+
+export const getSubscriptionGroupCardData = (
+    subscriptionGroup: SubscriptionGroup,
+    alerts: Alert[]
+): SubscriptionGroupCardData => {
+    // Map alerts to subscription group ids
+    const alertsToSubscriptionGroupIdsMap = mapAlertsToSubscriptionGroupIds(
+        [subscriptionGroup],
+        alerts
+    );
+
+    return getSubscriptionGroupCardDataInternal(
+        subscriptionGroup,
+        alertsToSubscriptionGroupIdsMap
+    );
+};
+
+export const getSubscriptionGroupCardDatas = (
+    subscriptionGroups: SubscriptionGroup[],
+    alerts: Alert[]
+): SubscriptionGroupCardData[] => {
+    const subscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
+
+    if (isEmpty(subscriptionGroups)) {
+        return subscriptionGroupCardDatas;
+    }
+
+    // Map alerts to subscription group ids
+    const alertsToSubscriptionGroupIdsMap = mapAlertsToSubscriptionGroupIds(
+        subscriptionGroups,
+        alerts
+    );
+
+    for (const subscriptionGroup of subscriptionGroups) {
+        const subscriptionGroupCardData = getSubscriptionGroupCardDataInternal(
+            subscriptionGroup,
+            alertsToSubscriptionGroupIdsMap
+        );
+        subscriptionGroupCardDatas.push(subscriptionGroupCardData);
+    }
+
+    return subscriptionGroupCardDatas;
+};
 
 export const filterSubscriptionGroups = (
     subscriptionGroups: SubscriptionGroupCardData[],
@@ -27,7 +89,7 @@ export const filterSubscriptionGroups = (
         for (const searchWord of searchWords) {
             let subscriptionGroupFiltered = false;
 
-            // Try and match alert property values to search words
+            // Try and match subscription group property values to search words
             for (const propertyValue of Object.values(subscriptionGroup)) {
                 if (!propertyValue) {
                     continue;
@@ -45,6 +107,7 @@ export const filterSubscriptionGroups = (
 
                     break;
                 }
+
                 // Check arrays
                 else if (propertyValue.length && propertyValue.length > 0) {
                     for (const arrayValue of propertyValue) {
@@ -64,25 +127,8 @@ export const filterSubscriptionGroups = (
 
                             break;
                         }
-                        // Check dataset and metric
-                        else if (arrayValue.datasetId) {
-                            if (
-                                arrayValue.datasetName
-                                    .toLowerCase()
-                                    .indexOf(searchWord.toLowerCase()) > -1 ||
-                                arrayValue.metricName
-                                    .toLowerCase()
-                                    .indexOf(searchWord.toLowerCase()) > -1
-                            ) {
-                                filteredSubscriptionGroups.add(
-                                    subscriptionGroup
-                                );
-                                subscriptionGroupFiltered = true;
 
-                                break;
-                            }
-                        }
-                        // Check alert
+                        // Check alert value
                         else if (
                             arrayValue.name &&
                             arrayValue.name
@@ -97,19 +143,19 @@ export const filterSubscriptionGroups = (
                     }
 
                     if (subscriptionGroupFiltered) {
-                        // Subscription group already filtered, check next Subscription group
+                        // Subscription group already filtered, check next subscription group
                         break;
                     }
                 }
 
                 if (subscriptionGroupFiltered) {
-                    // Subscription group already filtered, check next Subscription group
+                    // Subscription group already filtered, check next subscription group
                     break;
                 }
             }
 
             if (subscriptionGroupFiltered) {
-                // Subscription group already filtered, check next Subscription group
+                // Subscription group already filtered, check next subscription group
                 break;
             }
         }
@@ -118,58 +164,41 @@ export const filterSubscriptionGroups = (
     return [...filteredSubscriptionGroups];
 };
 
-export const getSubscriptionGroupCardData = (
+const getSubscriptionGroupCardDataInternal = (
     subscriptionGroup: SubscriptionGroup,
-    alerts: Alert[]
+    alertsToSubscriptionGroupIdsMap: Map<number, SubscriptionGroupAlert[]>
 ): SubscriptionGroupCardData => {
-    if (isEmpty(subscriptionGroup)) {
-        return {} as SubscriptionGroupCardData;
+    const subscriptionGroupCardData = createEmptySubscriptionGroupCardData();
+
+    if (!subscriptionGroup) {
+        return subscriptionGroupCardData;
     }
 
-    return getSubscriptionGroupCardDatas([subscriptionGroup], alerts)[0];
-};
+    // Basic properties
+    subscriptionGroupCardData.id = subscriptionGroup.id;
+    subscriptionGroupCardData.name = subscriptionGroup.name;
 
-export const getSubscriptionGroupCardDatas = (
-    subscriptionGroups: SubscriptionGroup[],
-    alerts: Alert[]
-): SubscriptionGroupCardData[] => {
-    const subscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
-
-    if (isEmpty(subscriptionGroups)) {
-        return subscriptionGroupCardDatas;
-    }
-
-    // Map alerts to subscription group ids
-    const subscriptionGroupsToAlertIdsMap = mapAlertsToSubscriptionGroupIds(
-        subscriptionGroups,
-        alerts
-    );
-
-    for (const subscriptionGroup of subscriptionGroups) {
-        const subscriptionGroupCardData = {} as SubscriptionGroupCardData;
-
-        // Maintain a copy of subscriptionGroup
-        subscriptionGroupCardData.subscriptionGroup = subscriptionGroup;
-
-        // Basic properties
-        subscriptionGroupCardData.id = subscriptionGroup.id;
-        subscriptionGroupCardData.name = subscriptionGroup.name
-            ? subscriptionGroup.name
-            : i18n.t("label.no-data-available-marker");
-
+    // Application properties
+    if (subscriptionGroup.application) {
         subscriptionGroupCardData.application =
             subscriptionGroup.application.name;
-        subscriptionGroupCardData.alerts =
-            subscriptionGroupsToAlertIdsMap.get(subscriptionGroup.id) || [];
-        subscriptionGroupCardData.created = subscriptionGroup.created;
-        subscriptionGroupCardData.updated = subscriptionGroup.updated;
-        subscriptionGroupCardData.emails =
-            subscriptionGroup.emailSettings?.to || [];
-
-        subscriptionGroupCardDatas.push(subscriptionGroupCardData);
     }
 
-    return subscriptionGroupCardDatas;
+    // Alerts
+    if (!isEmpty(alertsToSubscriptionGroupIdsMap)) {
+        subscriptionGroupCardData.alerts =
+            alertsToSubscriptionGroupIdsMap.get(subscriptionGroup.id) || [];
+    }
+
+    // Emails
+    if (
+        subscriptionGroup.emailSettings &&
+        !isEmpty(subscriptionGroup.emailSettings.to)
+    ) {
+        subscriptionGroupCardData.emails = subscriptionGroup.emailSettings.to;
+    }
+
+    return subscriptionGroupCardData;
 };
 
 const mapAlertsToSubscriptionGroupIds = (
@@ -186,23 +215,60 @@ const mapAlertsToSubscriptionGroupIds = (
         return alertsToSubscriptionGroupIdsMap;
     }
 
+    const alertToAlertIdsMap = mapAlertsToAlertIds(alerts);
+    if (isEmpty(alertToAlertIdsMap)) {
+        // No alerts available, return empty result
+        return alertsToSubscriptionGroupIdsMap;
+    }
+
     for (const subscriptionGroup of subscriptionGroups) {
-        const alertsMap = [] as SubscriptionGroupAlert[];
-
-        for (const alert of subscriptionGroup?.alerts || []) {
-            const alertData = alerts.find((alrt) => alrt.id === alert.id);
-
-            alertsMap.push({
-                id: alert.id,
-                name: alertData?.name
-                    ? alertData.name
-                    : i18n.t("label.no-data-available-marker"),
-            });
+        if (isEmpty(subscriptionGroup.alerts)) {
+            // No alerts
+            continue;
         }
 
-        // Create and add to list
-        alertsToSubscriptionGroupIdsMap.set(subscriptionGroup.id, alertsMap);
+        for (const alert of subscriptionGroup.alerts) {
+            const mappedAlert = alertToAlertIdsMap.get(alert.id);
+            if (!mappedAlert) {
+                // Alert not available
+                continue;
+            }
+
+            const subscriptionGroupAlerts = alertsToSubscriptionGroupIdsMap.get(
+                subscriptionGroup.id
+            );
+            if (subscriptionGroupAlerts) {
+                // Add to existing list
+                subscriptionGroupAlerts.push(mappedAlert);
+            } else {
+                // Create and add to list
+                alertsToSubscriptionGroupIdsMap.set(subscriptionGroup.id, [
+                    mappedAlert,
+                ]);
+            }
+        }
     }
 
     return alertsToSubscriptionGroupIdsMap;
+};
+
+const mapAlertsToAlertIds = (
+    alerts: Alert[]
+): Map<number, SubscriptionGroupAlert> => {
+    const alertsToAlertIdsMap = new Map<number, SubscriptionGroupAlert>();
+
+    if (isEmpty(alerts)) {
+        // No alerts available, return empty result
+        return alertsToAlertIdsMap;
+    }
+
+    for (const alert of alerts) {
+        const subscriptionGroupAlert = createEmptySubscriptionGroupAlert();
+        subscriptionGroupAlert.id = alert.id;
+        subscriptionGroupAlert.name = alert.name;
+
+        alertsToAlertIdsMap.set(alert.id, subscriptionGroupAlert);
+    }
+
+    return alertsToAlertIdsMap;
 };

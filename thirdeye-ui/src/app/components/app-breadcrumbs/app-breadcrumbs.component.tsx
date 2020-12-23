@@ -1,6 +1,5 @@
 import { Box, Breadcrumbs, Link, Toolbar } from "@material-ui/core";
 import { NavigateNext } from "@material-ui/icons";
-import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useHistory } from "react-router-dom";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
@@ -27,7 +26,7 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
             borderTop={0}
             className={appBreadcrumbsClasses.container}
         >
-            {/* Required to appropriately layout children in Breadcrumbs */}
+            {/* Required to appropriately layout children in breadcrumbs */}
             <Toolbar
                 classes={{ dense: appBreadcrumbsClasses.dense }}
                 variant="dense"
@@ -35,16 +34,16 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
                 <Breadcrumbs separator={<NavigateNext />}>
                     {props.breadcrumbs.map((breadcrumb, index) => (
                         <Link
-                            className={classnames(
-                                appBreadcrumbsClasses.link,
+                            className={
                                 index === props.breadcrumbs.length - 1
-                                    ? appBreadcrumbsClasses.selected
+                                    ? appBreadcrumbsClasses.selectedLink
                                     : ""
-                            )}
+                            }
                             component="button"
-                            disabled={index === props.breadcrumbs.length - 1}
+                            disabled={index === props.breadcrumbs.length - 1} // Last breadcrumb disabled
+                            display="block"
                             key={index}
-                            variant="subtitle2"
+                            variant="body1"
                             onClick={(): void => {
                                 onBreadcrumbClick(breadcrumb);
                             }}

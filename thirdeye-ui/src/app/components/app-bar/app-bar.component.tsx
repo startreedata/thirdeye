@@ -20,6 +20,7 @@ import {
     getAnomaliesAllPath,
     getBasePath,
     getConfigurationPath,
+    getConfigurationSubscriptionGroupsCreatePath,
     getHomePath,
     getSignInPath,
     getSignOutPath,
@@ -68,7 +69,7 @@ export const AppBar: FunctionComponent = () => {
     };
 
     const onCreateSubscriptionGroup = (): void => {
-        // TODO
+        history.push(getConfigurationSubscriptionGroupsCreatePath());
 
         closeCreateOptions();
     };
@@ -90,12 +91,12 @@ export const AppBar: FunctionComponent = () => {
     };
 
     return (
-        <MuiAppBar className={appBarClasses.appBar}>
-            {/* Required to appropriately layout children in AppBar */}
+        <MuiAppBar className={appBarClasses.container}>
+            {/* Required to appropriately layout children in app bar */}
             <Toolbar>
                 {/* ThirdEye logo */}
                 <Link
-                    className={appBarClasses.logo}
+                    className={appBarClasses.link}
                     component="button"
                     onClick={onLogoClick}
                 >
@@ -107,7 +108,7 @@ export const AppBar: FunctionComponent = () => {
                     className={classnames(
                         appBarClasses.link,
                         isRouteCurrent(AppRoute.HOME)
-                            ? appBarClasses.selected
+                            ? appBarClasses.selectedLink
                             : ""
                     )}
                     component="button"
@@ -122,7 +123,7 @@ export const AppBar: FunctionComponent = () => {
                     className={classnames(
                         appBarClasses.link,
                         isRouteCurrent(AppRoute.ALERTS)
-                            ? appBarClasses.selected
+                            ? appBarClasses.selectedLink
                             : ""
                     )}
                     component="button"
@@ -137,7 +138,7 @@ export const AppBar: FunctionComponent = () => {
                     className={classnames(
                         appBarClasses.link,
                         isRouteCurrent(AppRoute.ANOMALIES)
-                            ? appBarClasses.selected
+                            ? appBarClasses.selectedLink
                             : ""
                     )}
                     component="button"
@@ -152,7 +153,7 @@ export const AppBar: FunctionComponent = () => {
                     className={classnames(
                         appBarClasses.link,
                         isRouteCurrent(AppRoute.CONFIGURATION)
-                            ? appBarClasses.selected
+                            ? appBarClasses.selectedLink
                             : ""
                     )}
                     component="button"
@@ -162,14 +163,11 @@ export const AppBar: FunctionComponent = () => {
                     {t("label.configuration")}
                 </Link>
 
-                {(auth && (
+                {auth && (
                     <>
                         {/* Create options */}
                         <Fab
-                            className={classnames(
-                                appBarClasses.link,
-                                appBarClasses.rightAlign
-                            )}
+                            className={classnames(appBarClasses.rightAlign)}
                             color="primary"
                             size="small"
                             onClick={onCreateOptionsClick}
@@ -188,10 +186,7 @@ export const AppBar: FunctionComponent = () => {
                             </MenuItem>
 
                             {/* Create subscription group */}
-                            <MenuItem
-                                disabled
-                                onClick={onCreateSubscriptionGroup}
-                            >
+                            <MenuItem onClick={onCreateSubscriptionGroup}>
                                 {"Create Subscription Group"}
                             </MenuItem>
                         </Menu>
@@ -201,7 +196,7 @@ export const AppBar: FunctionComponent = () => {
                             className={classnames(
                                 appBarClasses.link,
                                 isRouteCurrent(AppRoute.SIGN_OUT)
-                                    ? appBarClasses.selected
+                                    ? appBarClasses.selectedLink
                                     : ""
                             )}
                             component="button"
@@ -211,14 +206,16 @@ export const AppBar: FunctionComponent = () => {
                             {t("label.sign-out")}
                         </Link>
                     </>
-                )) || (
+                )}
+
+                {!auth && (
                     // Sign in
                     <Link
                         className={classnames(
                             appBarClasses.link,
                             appBarClasses.rightAlign,
                             isRouteCurrent(AppRoute.SIGN_IN)
-                                ? appBarClasses.selected
+                                ? appBarClasses.selectedLink
                                 : ""
                         )}
                         component="button"

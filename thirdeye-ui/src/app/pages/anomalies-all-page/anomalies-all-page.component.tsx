@@ -84,7 +84,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents contentsCenterAlign title={t("label.anomalies")}>
-                <Grid container>
+                <Grid container md={12}>
                     {/* Search */}
                     <Grid item md={12}>
                         <SearchBar

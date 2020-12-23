@@ -156,7 +156,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                         : t("label.no-data-available-marker")
                 }
             >
-                <Grid container>
+                <Grid container md={12}>
                     {/* Anomaly */}
                     <Grid item md={12}>
                         <AnomalyCard

@@ -64,22 +64,28 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                     </IconButton>
                 }
                 title={
-                    (props.hideViewDetailsLinks && (
-                        <Typography variant="h6">
-                            {t("label.summary")}
-                        </Typography>
-                    )) || (
-                        <Link
-                            component="button"
-                            variant="h6"
-                            onClick={onAnomalyDetails}
-                        >
-                            <TextHighlighter
-                                searchWords={props.searchWords}
-                                textToHighlight={props.anomaly.name}
-                            />
-                        </Link>
-                    )
+                    <>
+                        {props.hideViewDetailsLinks && (
+                            // Summary
+                            <Typography variant="h6">
+                                {t("label.summary")}
+                            </Typography>
+                        )}
+
+                        {!props.hideViewDetailsLinks && (
+                            // Anomaly name
+                            <Link
+                                component="button"
+                                variant="h6"
+                                onClick={onAnomalyDetails}
+                            >
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    textToHighlight={props.anomaly.name}
+                                />
+                            </Link>
+                        )}
+                    </>
                 }
             />
 
@@ -103,7 +109,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
 
             <CardContent>
                 <Grid container>
-                    <Grid container item>
+                    <Grid container item md={12}>
                         {/* Alert */}
                         <Grid item md={4}>
                             <Typography variant="body2">
@@ -112,6 +118,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
 
                             <Link
                                 component="button"
+                                display="block"
                                 variant="body2"
                                 onClick={onAlertDetails}
                             >
@@ -170,7 +177,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                         <Divider variant="fullWidth" />
                     </Grid>
 
-                    <Grid container item>
+                    <Grid container item md={12}>
                         {/* Duration */}
                         <Grid item md={4}>
                             <Typography variant="body2">

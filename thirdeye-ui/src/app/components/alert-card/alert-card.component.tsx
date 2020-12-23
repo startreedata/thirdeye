@@ -28,7 +28,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
     props: AlertCardProps
 ) => {
     const alertCardClasses = useAlertCardStyles();
-    const [expanded, setExpanded] = useState(false);
+    const [expand, setExpand] = useState(false);
     const [
         optionsAnchorElement,
         setOptionsAnchorElement,
@@ -54,16 +54,16 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         setOptionsAnchorElement(event.currentTarget);
     };
 
+    const onExpandToggle = (): void => {
+        setExpand((expand) => !expand);
+    };
+
+    const onSubscriptionGroupDetails = (id: number): void => {
+        history.push(getConfigurationSubscriptionGroupsDetailPath(id));
+    };
+
     const closeAlertOptions = (): void => {
         setOptionsAnchorElement(null);
-    };
-
-    const onExpandToggle = (): void => {
-        setExpanded(!expanded);
-    };
-
-    const onSubscriptionGroupDetails = (id: number) => (): void => {
-        history.push(getConfigurationSubscriptionGroupsDetailPath(id));
     };
 
     return (
@@ -74,6 +74,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                 action={
                     <Grid container alignItems="center">
                         <Grid item>
+                            {/* Active/inactive indicator */}
                             <Typography
                                 className={
                                     props.alert.active
@@ -97,22 +98,28 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                     </Grid>
                 }
                 title={
-                    (props.hideViewDetailsLinks && (
-                        <Typography variant="h6">
-                            {t("label.summary")}
-                        </Typography>
-                    )) || (
-                        <Link
-                            component="button"
-                            variant="h6"
-                            onClick={onAlertDetails}
-                        >
-                            <TextHighlighter
-                                searchWords={props.searchWords}
-                                textToHighlight={props.alert.name}
-                            />
-                        </Link>
-                    )
+                    <>
+                        {props.hideViewDetailsLinks && (
+                            // Summary
+                            <Typography variant="h6">
+                                {t("label.summary")}
+                            </Typography>
+                        )}
+
+                        {!props.hideViewDetailsLinks && (
+                            // Alert name
+                            <Link
+                                component="button"
+                                variant="h6"
+                                onClick={onAlertDetails}
+                            >
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    textToHighlight={props.alert.name}
+                                />
+                            </Link>
+                        )}
+                    </>
                 }
             />
 
@@ -170,8 +177,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 </Typography>
                             </div>
 
-                            {!isEmpty(props.alert.detectionTypes) &&
+                            {props.alert.detectionTypes &&
                                 props.alert.detectionTypes.length > 1 && (
+                                    // Expand/collapse icon
                                     <div
                                         className={
                                             alertCardClasses.bottomRowIcon
@@ -181,12 +189,16 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             component="button"
                                             onClick={onExpandToggle}
                                         >
-                                            {(expanded && (
+                                            {expand && (
+                                                // Collapse
                                                 <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
-                                            )) || (
+                                            )}
+
+                                            {!expand && (
+                                                // Expand
                                                 <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
@@ -197,7 +209,8 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 )}
 
                             <div className={alertCardClasses.bottomRowValue}>
-                                {(isEmpty(props.alert.detectionTypes) && (
+                                {isEmpty(props.alert.detectionTypes) && (
+                                    // No data available
                                     <Typography variant="body2">
                                         <TextHighlighter
                                             searchWords={props.searchWords}
@@ -206,13 +219,16 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             )}
                                         />
                                     </Typography>
-                                )) ||
-                                    (expanded && (
+                                )}
+
+                                {!isEmpty(props.alert.detectionTypes) &&
+                                    expand && (
+                                        // All detection types
                                         <>
                                             {props.alert.detectionTypes.map(
-                                                (detectionType) => (
+                                                (detectionType, index) => (
                                                     <Typography
-                                                        key={detectionType}
+                                                        key={index}
                                                         variant="body2"
                                                     >
                                                         <TextHighlighter
@@ -227,7 +243,11 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                                 )
                                             )}
                                         </>
-                                    )) || (
+                                    )}
+
+                                {!isEmpty(props.alert.detectionTypes) &&
+                                    !expand && (
+                                        // First detection type
                                         <Typography variant="body2">
                                             <TextHighlighter
                                                 searchWords={props.searchWords}
@@ -251,8 +271,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 </Typography>
                             </div>
 
-                            {!isEmpty(props.alert.datasetAndMetrics) &&
+                            {props.alert.datasetAndMetrics &&
                                 props.alert.datasetAndMetrics.length > 1 && (
+                                    // Expand/collapse icon
                                     <div
                                         className={
                                             alertCardClasses.bottomRowIcon
@@ -262,12 +283,16 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             component="button"
                                             onClick={onExpandToggle}
                                         >
-                                            {(expanded && (
+                                            {expand && (
+                                                // Colapse
                                                 <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
-                                            )) || (
+                                            )}
+
+                                            {!expand && (
+                                                // Expand
                                                 <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
@@ -278,7 +303,8 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 )}
 
                             <div className={alertCardClasses.bottomRowValue}>
-                                {(isEmpty(props.alert.datasetAndMetrics) && (
+                                {isEmpty(props.alert.datasetAndMetrics) && (
+                                    // No data available
                                     <Typography variant="body2">
                                         <TextHighlighter
                                             searchWords={props.searchWords}
@@ -287,15 +313,16 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             )}
                                         />
                                     </Typography>
-                                )) ||
-                                    (expanded && (
+                                )}
+
+                                {!isEmpty(props.alert.datasetAndMetrics) &&
+                                    expand && (
+                                        // All dataset / metric
                                         <>
                                             {props.alert.datasetAndMetrics.map(
-                                                (datasetAndMetric) => (
+                                                (datasetAndMetric, index) => (
                                                     <Typography
-                                                        key={
-                                                            datasetAndMetric.metricId
-                                                        }
+                                                        key={index}
                                                         variant="body2"
                                                     >
                                                         <TextHighlighter
@@ -316,7 +343,11 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                                 )
                                             )}
                                         </>
-                                    )) || (
+                                    )}
+
+                                {!isEmpty(props.alert.datasetAndMetrics) &&
+                                    !expand && (
+                                        // First dataset / metric
                                         <Typography variant="body2">
                                             <TextHighlighter
                                                 searchWords={props.searchWords}
@@ -347,8 +378,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 </Typography>
                             </div>
 
-                            {!isEmpty(props.alert.filteredBy) &&
+                            {props.alert.filteredBy &&
                                 props.alert.filteredBy.length > 1 && (
+                                    // Expand/collapse icon
                                     <div
                                         className={
                                             alertCardClasses.bottomRowIcon
@@ -358,12 +390,16 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             component="button"
                                             onClick={onExpandToggle}
                                         >
-                                            {(expanded && (
+                                            {expand && (
+                                                // Collapse
                                                 <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
-                                            )) || (
+                                            )}
+
+                                            {!expand && (
+                                                // Expand
                                                 <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
@@ -374,7 +410,8 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 )}
 
                             <div className={alertCardClasses.bottomRowValue}>
-                                {(isEmpty(props.alert.filteredBy) && (
+                                {isEmpty(props.alert.filteredBy) && (
+                                    // No data available
                                     <Typography variant="body2">
                                         <TextHighlighter
                                             searchWords={props.searchWords}
@@ -383,37 +420,42 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             )}
                                         />
                                     </Typography>
-                                )) ||
-                                    (expanded && (
-                                        <>
-                                            {props.alert.filteredBy.map(
-                                                (filteredBy) => (
-                                                    <Typography
-                                                        key={filteredBy}
-                                                        variant="body2"
-                                                    >
-                                                        <TextHighlighter
-                                                            searchWords={
-                                                                props.searchWords
-                                                            }
-                                                            textToHighlight={
-                                                                filteredBy
-                                                            }
-                                                        />
-                                                    </Typography>
-                                                )
-                                            )}
-                                        </>
-                                    )) || (
-                                        <Typography variant="body2">
-                                            <TextHighlighter
-                                                searchWords={props.searchWords}
-                                                textToHighlight={
-                                                    props.alert.filteredBy[0]
-                                                }
-                                            />
-                                        </Typography>
-                                    )}
+                                )}
+
+                                {!isEmpty(props.alert.filteredBy) && expand && (
+                                    // All filtered by
+                                    <>
+                                        {props.alert.filteredBy.map(
+                                            (filteredBy, index) => (
+                                                <Typography
+                                                    key={index}
+                                                    variant="body2"
+                                                >
+                                                    <TextHighlighter
+                                                        searchWords={
+                                                            props.searchWords
+                                                        }
+                                                        textToHighlight={
+                                                            filteredBy
+                                                        }
+                                                    />
+                                                </Typography>
+                                            )
+                                        )}
+                                    </>
+                                )}
+
+                                {!isEmpty(props.alert.filteredBy) && !expand && (
+                                    // First filtered by
+                                    <Typography variant="body2">
+                                        <TextHighlighter
+                                            searchWords={props.searchWords}
+                                            textToHighlight={
+                                                props.alert.filteredBy[0]
+                                            }
+                                        />
+                                    </Typography>
+                                )}
                             </div>
                         </Grid>
 
@@ -427,8 +469,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 </Typography>
                             </div>
 
-                            {!isEmpty(props.alert.subscriptionGroups) &&
+                            {props.alert.subscriptionGroups &&
                                 props.alert.subscriptionGroups.length > 1 && (
+                                    // Expand/collapse icon
                                     <div
                                         className={
                                             alertCardClasses.bottomRowIcon
@@ -438,12 +481,16 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             component="button"
                                             onClick={onExpandToggle}
                                         >
-                                            {(expanded && (
+                                            {expand && (
+                                                // Collapse
                                                 <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
-                                            )) || (
+                                            )}
+
+                                            {!expand && (
+                                                // Expand
                                                 <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
@@ -454,7 +501,8 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 )}
 
                             <div className={alertCardClasses.bottomRowValue}>
-                                {(isEmpty(props.alert.subscriptionGroups) && (
+                                {isEmpty(props.alert.subscriptionGroups) && (
+                                    // No data available
                                     <Typography variant="body2">
                                         <TextHighlighter
                                             searchWords={props.searchWords}
@@ -463,21 +511,24 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             )}
                                         />
                                     </Typography>
-                                )) ||
-                                    (expanded && (
+                                )}
+
+                                {!isEmpty(props.alert.subscriptionGroups) &&
+                                    expand && (
+                                        // All subscription groups
                                         <>
                                             {props.alert.subscriptionGroups.map(
-                                                (subscriptionGroup) => (
+                                                (subscriptionGroup, index) => (
                                                     <Link
                                                         component="button"
                                                         display="block"
-                                                        key={
-                                                            subscriptionGroup.id
-                                                        }
+                                                        key={index}
                                                         variant="body2"
-                                                        onClick={onSubscriptionGroupDetails(
-                                                            subscriptionGroup.id
-                                                        )}
+                                                        onClick={(): void => {
+                                                            onSubscriptionGroupDetails(
+                                                                subscriptionGroup.id
+                                                            );
+                                                        }}
                                                     >
                                                         <TextHighlighter
                                                             searchWords={
@@ -491,14 +542,22 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                                 )
                                             )}
                                         </>
-                                    )) || (
+                                    )}
+
+                                {!isEmpty(props.alert.subscriptionGroups) &&
+                                    !expand && (
+                                        // First subscription group
                                         <Link
                                             component="button"
+                                            display="block"
                                             variant="body2"
-                                            onClick={onSubscriptionGroupDetails(
-                                                props.alert
-                                                    .subscriptionGroups[0].id
-                                            )}
+                                            onClick={(): void => {
+                                                onSubscriptionGroupDetails(
+                                                    props.alert
+                                                        .subscriptionGroups[0]
+                                                        .id
+                                                );
+                                            }}
                                         >
                                             <TextHighlighter
                                                 searchWords={props.searchWords}

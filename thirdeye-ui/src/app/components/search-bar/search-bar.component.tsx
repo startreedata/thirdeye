@@ -3,6 +3,7 @@ import { Close, Search } from "@material-ui/icons";
 import { debounce } from "lodash";
 import React, {
     ChangeEvent,
+    createRef,
     FunctionComponent,
     useCallback,
     useEffect,
@@ -24,6 +25,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     props: SearchBarProps
 ) => {
     const [searchText, setSearchText] = useState("");
+    const inputRef = createRef<HTMLInputElement>();
     const location = useLocation();
     const { t } = useTranslation();
 
@@ -51,6 +53,9 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     const onClearSearchClick = (): void => {
         // Update search text and arrange to send event immediately
         updateSearchText("", false);
+
+        // Set focus
+        inputRef && inputRef.current && inputRef.current.focus();
     };
 
     const updateSearchText = (searchText: string, debounced: boolean): void => {
@@ -115,6 +120,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
                 ),
             }}
             autoFocus={props.autoFocus}
+            inputRef={inputRef}
             label={props.label ? props.label : t("label.search")}
             value={searchText}
             variant="outlined"

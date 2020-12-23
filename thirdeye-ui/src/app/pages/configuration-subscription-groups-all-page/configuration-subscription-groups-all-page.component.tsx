@@ -104,11 +104,12 @@ export const ConfigurationSubscriptionGroupsAllPage: FunctionComponent = () => {
                 hideTimeRange
                 title={t("label.subscription-groups")}
             >
-                <Grid container md={12}>
+                <Grid container>
                     {/* Search */}
                     <Grid item md={12}>
                         <SearchBar
                             autoFocus
+                            label={t("label.search-subscription-groups")}
                             searchStatusLabel={t("label.search-count", {
                                 count: filteredSubscriptionGroupCardDatas
                                     ? filteredSubscriptionGroupCardDatas.length

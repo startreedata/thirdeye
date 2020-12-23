@@ -100,7 +100,7 @@ module.exports = {
         }),
         // Build progress bar
         new WebpackBar({
-            name: " thirdeye-ui [prod]",
+            name: "@cortexdata/thirdeye-ui [prod]",
             color: "#6EC4D1",
         }),
     ],

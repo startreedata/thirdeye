@@ -45,15 +45,15 @@ export const App: FunctionComponent = () => {
         axios.interceptors.response.eject(axiosResponseInterceptorId);
 
         // Set new interceptors
-        const requestInterceptorId = axios.interceptors.request.use(
-            getRequestInterceptor(accessToken)
+        setAxiosRequestInterceptorId(
+            axios.interceptors.request.use(getRequestInterceptor(accessToken))
         );
-        const responseInterceptorId = axios.interceptors.response.use(
-            getFulfilledResponseInterceptor(),
-            getRejectedResponseInterceptor(unauthenticatedAccessHandler)
+        setAxiosResponseInterceptorId(
+            axios.interceptors.response.use(
+                getFulfilledResponseInterceptor(),
+                getRejectedResponseInterceptor(unauthenticatedAccessHandler)
+            )
         );
-        setAxiosRequestInterceptorId(requestInterceptorId);
-        setAxiosResponseInterceptorId(responseInterceptorId);
     };
 
     const unauthenticatedAccessHandler = (): void => {

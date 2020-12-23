@@ -85,6 +85,7 @@
         "current-/-predicted": "Current / Predicted",
         "current-/-predicted-values": "{{current}} / {{predicted}}",
         "deviation": "Deviation",
+        "search-subscription-groups": "Search Subscription Groups",
         "edit-subscription-group": "Edit Subscription Group",
         "application": "Application",
         "subscribed-alerts": "Subscribed Alerts",

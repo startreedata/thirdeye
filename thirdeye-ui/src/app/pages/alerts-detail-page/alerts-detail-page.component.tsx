@@ -203,7 +203,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
                         : t("label.no-data-available-marker")
                 }
             >
-                <Grid container md={12}>
+                <Grid container>
                     {/* Alert */}
                     <Grid item md={12}>
                         <AlertCard

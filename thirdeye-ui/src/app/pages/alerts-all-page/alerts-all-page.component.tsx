@@ -145,7 +145,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents contentsCenterAlign title={t("label.alerts")}>
-                <Grid container md={12}>
+                <Grid container>
                     {/* Search */}
                     <Grid item md={12}>
                         <SearchBar

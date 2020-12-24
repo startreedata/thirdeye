@@ -1,3 +1,5 @@
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+
 export interface SubscriptionGroupCardProps {
     subscriptionGroup: SubscriptionGroupCardData;
     searchWords?: string[];
@@ -10,6 +12,7 @@ export interface SubscriptionGroupCardData {
     application: string;
     alerts: SubscriptionGroupAlert[];
     emails: string[];
+    subscriptionGroup: SubscriptionGroup | null;
 }
 
 export interface SubscriptionGroupAlert {

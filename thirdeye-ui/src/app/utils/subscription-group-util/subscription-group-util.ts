@@ -16,6 +16,7 @@ export const createEmptySubscriptionGroupCardData = (): SubscriptionGroupCardDat
         application: noDataAvailableMarker,
         alerts: [],
         emails: [],
+        subscriptionGroup: null,
     };
 };
 
@@ -183,6 +184,9 @@ const getSubscriptionGroupCardDataInternal = (
         subscriptionGroupCardData.application =
             subscriptionGroup.application.name;
     }
+
+    // Maintain a copy of subscription group, needed when updating/changing subscription group
+    subscriptionGroupCardData.subscriptionGroup = subscriptionGroup;
 
     // Alerts
     if (!isEmpty(alertsToSubscriptionGroupIdsMap)) {

@@ -1,3 +1,3 @@
-export interface SubscriptionGroupPageParams {
+export interface ConfigurationSubscriptionGroupDetailsPageParams {
     id: string;
 }

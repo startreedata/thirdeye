@@ -1,5 +1,5 @@
 import { Grid } from "@material-ui/core";
-import { isEmpty, toNumber } from "lodash";
+import { cloneDeep, toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,27 +8,38 @@ import { AppToolbarConfiguration } from "../../components/app-toolbar-configurat
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { SubscriptionGroupCardData } from "../../components/subscription-group-card/subscription-group-card.interfaces";
+import {
+    SubscriptionGroupAlert,
+    SubscriptionGroupCardData,
+} from "../../components/subscription-group-card/subscription-group-card.interfaces";
+import { TransferList } from "../../components/transfer-list/transfer-list.component";
 import { getAllAlerts } from "../../rest/alert-rest/alert-rest";
-import { getSubscriptionGroup } from "../../rest/subscription-group-rest/subscription-group-rest";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import {
+    getSubscriptionGroup,
+    updateSubscriptionGroup,
+} from "../../rest/subscription-group-rest/subscription-group-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { isValidNumberId } from "../../utils/params-util/params-util";
 import { getConfigurationSubscriptionGroupsDetailPath } from "../../utils/routes-util/routes-util";
 import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
-import { getSubscriptionGroupCardData } from "../../utils/subscription-group-util/subscription-group-util";
+import {
+    createEmptySubscriptionGroupCardData,
+    getSubscriptionGroupCardData,
+} from "../../utils/subscription-group-util/subscription-group-util";
 import { SubscriptionGroupCard } from "./../../components/subscription-group-card/subscription-group-card.component";
-import { SubscriptionGroupPageParams } from "./configuration-subscription-group-details-page.interfaces";
+import { ConfigurationSubscriptionGroupDetailsPageParams } from "./configuration-subscription-group-details-page.interfaces";
 
 export const ConfigurationSubscriptionGroupsDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
+    const [subscriptionGroupCardData, setSubscriptionGroupCardData] = useState<
+        SubscriptionGroupCardData
+    >({} as SubscriptionGroupCardData);
+    const [alerts, setAlerts] = useState<Alert[]>([]);
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const [subscriptionGroup, setSubscriptionGroup] = useState<
-        SubscriptionGroupCardData
-    >({} as SubscriptionGroupCardData);
-
-    const params = useParams<SubscriptionGroupPageParams>();
+    const params = useParams<ConfigurationSubscriptionGroupDetailsPageParams>();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
@@ -36,21 +47,22 @@ export const ConfigurationSubscriptionGroupsDetailPage: FunctionComponent = () =
         // Create page breadcrumbs
         setPageBreadcrumbs([
             {
-                text: subscriptionGroup
-                    ? subscriptionGroup.name
+                text: subscriptionGroupCardData
+                    ? subscriptionGroupCardData.name
                     : t("label.no-data-available-marker"),
                 pathFn: (): string => {
-                    return subscriptionGroup
+                    return subscriptionGroupCardData
                         ? getConfigurationSubscriptionGroupsDetailPath(
-                              subscriptionGroup.id
+                              subscriptionGroupCardData.id
                           )
                         : "";
                 },
             },
         ]);
-    }, [subscriptionGroup]);
+    }, [subscriptionGroupCardData]);
 
     useEffect(() => {
+        // Fetch data
         const init = async (): Promise<void> => {
             await fetchData();
 
@@ -61,6 +73,9 @@ export const ConfigurationSubscriptionGroupsDetailPage: FunctionComponent = () =
     }, []);
 
     const fetchData = async (): Promise<void> => {
+        let fetchedSubscriptionGroupCardData = createEmptySubscriptionGroupCardData();
+        let fetchedAlerts: Alert[] = [];
+
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
@@ -70,10 +85,11 @@ export const ConfigurationSubscriptionGroupsDetailPage: FunctionComponent = () =
                 SnackbarOption.ERROR
             );
 
+            setSubscriptionGroupCardData(fetchedSubscriptionGroupCardData);
+
             return;
         }
 
-        let subscriptionGroup = {} as SubscriptionGroupCardData;
         const [
             subscriptionGroupResponse,
             alertsResponse,
@@ -83,18 +99,75 @@ export const ConfigurationSubscriptionGroupsDetailPage: FunctionComponent = () =
         ]);
 
         if (
-            alertsResponse.status === "rejected" ||
-            subscriptionGroupResponse.status === "rejected"
+            subscriptionGroupResponse.status === "rejected" ||
+            alertsResponse.status === "rejected"
         ) {
             enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
         } else {
-            subscriptionGroup = getSubscriptionGroupCardData(
+            fetchedSubscriptionGroupCardData = getSubscriptionGroupCardData(
                 subscriptionGroupResponse.value,
                 alertsResponse.value
             );
+            fetchedAlerts = alertsResponse.value;
         }
 
-        setSubscriptionGroup(subscriptionGroup);
+        setSubscriptionGroupCardData(fetchedSubscriptionGroupCardData);
+        setAlerts(fetchedAlerts);
+    };
+
+    const onSubscriptionGroupAlertsChange = async (
+        subscriptiongroupAlerts: SubscriptionGroupAlert[]
+    ): Promise<void> => {
+        if (
+            !subscriptionGroupCardData ||
+            !subscriptionGroupCardData.subscriptionGroup
+        ) {
+            return;
+        }
+
+        let subscriptionGroupCopy = cloneDeep(
+            subscriptionGroupCardData.subscriptionGroup
+        );
+        subscriptionGroupCopy.alerts = subscriptiongroupAlerts as Alert[];
+
+        try {
+            subscriptionGroupCopy = await updateSubscriptionGroup(
+                subscriptionGroupCopy
+            );
+
+            // Replace updated subscription as fetched subscription group
+            setSubscriptionGroupCardData(
+                getSubscriptionGroupCardData(subscriptionGroupCopy, alerts)
+            );
+        } catch (error) {
+            enqueueSnackbar(
+                t("message.update-error", {
+                    entity: t("label.subscription-group"),
+                }),
+                SnackbarOption.ERROR
+            );
+
+            // Undo changes to the subscription group
+            subscriptionGroupCardData.alerts = Array.from(
+                subscriptionGroupCardData.alerts
+            );
+        }
+    };
+
+    const transferListGetKey = (alert: SubscriptionGroupAlert): number => {
+        if (!alert) {
+            return -1;
+        }
+
+        return alert.id;
+    };
+
+    const transferListRenderer = (alert: SubscriptionGroupAlert): string => {
+        if (!alert) {
+            return "";
+        }
+
+        return alert.name;
     };
 
     if (loading) {
@@ -110,19 +183,34 @@ export const ConfigurationSubscriptionGroupsDetailPage: FunctionComponent = () =
             <PageContents
                 contentsCenterAlign
                 hideTimeRange
-                title={t("label.subscription-groups")}
+                title={
+                    subscriptionGroupCardData
+                        ? subscriptionGroupCardData.name
+                        : t("label.no-data-available-marker")
+                }
             >
-                {!isEmpty(subscriptionGroup) && (
-                    <Grid container>
-                        {/* Subscription Group */}
-                        <Grid item md={12}>
-                            <SubscriptionGroupCard
-                                hideViewDetailsLinks
-                                subscriptionGroup={subscriptionGroup}
-                            />
-                        </Grid>
+                <Grid container>
+                    {/* Subscription Group */}
+                    <Grid item md={12}>
+                        <SubscriptionGroupCard
+                            hideViewDetailsLinks
+                            subscriptionGroup={subscriptionGroupCardData}
+                        />
                     </Grid>
-                )}
+
+                    {/* Alerts transfer list */}
+                    <Grid item md={12}>
+                        <TransferList<Alert>
+                            fromLabel={t("label.all-alerts")}
+                            fromList={alerts}
+                            getKey={transferListGetKey}
+                            renderer={transferListRenderer}
+                            toLabel={t("label.subscribed-alerts")}
+                            toList={subscriptionGroupCardData.alerts as Alert[]}
+                            onChange={onSubscriptionGroupAlertsChange}
+                        />
+                    </Grid>
+                </Grid>
             </PageContents>
         </PageContainer>
     );

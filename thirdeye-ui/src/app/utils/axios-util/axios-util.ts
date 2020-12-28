@@ -8,7 +8,7 @@ export const getRequestInterceptor = (
         requestConfig: AxiosRequestConfig
     ): AxiosRequestConfig => {
         if (accessToken) {
-            // If accessToken is available, attach it to the request
+            // If access token is available, attach it to the request
             requestConfig.headers = {
                 Authorization: `Bearer ${accessToken}`,
             };
@@ -25,7 +25,7 @@ export const getFulfilledResponseInterceptor = (): (<T>(
     response: T
 ) => T | Promise<T>) => {
     const fulfilledResponseInterceptor = <T>(response: T): T | Promise<T> => {
-        // Do nothing, forward the fulfilled response
+        // Forward the fulfilled response
         return response;
     };
 

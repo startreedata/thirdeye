@@ -3,24 +3,36 @@ import { Dimension } from "../../utils/material-ui-util/dimension-util";
 
 export const usePageContentsStyles = makeStyles({
     container: {
-        // Avoids the effect of Material UI Grid negative margins
-        // Padding equivalent to 2x Grid spacing in Material UI theme
+        // Avoid the effect of Material-UI Grid negative margins
+        // Padding equivalent to default Grid spacing in Material-UI theme
         // https://material-ui.com/components/grid/#limitations
-        padding: "16px",
+        padding: "8px",
     },
-    containerExpand: {
-        flexGrow: 1,
+    outerContainer: {
+        display: "flex",
+        flexDirection: "column",
     },
-    containerCenterAlign: {
+    outerContainerExpand: {
+        flexGrow: 1, // Container to occupy available area
+        paddingLeft: "16px",
+        paddingRight: "16px",
+    },
+    outerContainerCenterAlign: {
         width: Dimension.WIDTH_PAGE_CONTENTS_DEFAULT,
         marginLeft: "auto",
         marginRight: "auto",
     },
-    header: {
-        minHeight: "80px",
+    headerContainer: {
+        display: "flex",
+        height: "70px",
+        paddingTop: "16px",
+        paddingBottom: "0px",
     },
-    titleCenterAlign: {
-        flexGrow: 1,
-        textAlign: "center",
+    innerContainer: {
+        display: "flex",
+        flexDirection: "column",
+        flexGrow: 1, // Container to occupy remaining available area
+        paddingTop: "16px",
+        paddingBottom: "16px",
     },
 });

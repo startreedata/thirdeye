@@ -11,6 +11,7 @@ import {
     formatLargeNumber,
     formatPercentage,
 } from "../number-util/number-util";
+import { deepSearchStringProperty } from "../search-util/search-util";
 
 export const getAnomalyName = (anomaly: Anomaly): string => {
     if (!anomaly) {
@@ -75,7 +76,6 @@ export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
     if (anomaly.avgCurrentVal) {
         anomalyCardData.current = formatLargeNumber(anomaly.avgCurrentVal);
     }
-
     if (anomaly.avgBaselineVal) {
         anomalyCardData.predicted = formatLargeNumber(anomaly.avgBaselineVal);
     }
@@ -89,14 +89,20 @@ export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
         anomalyCardData.negativeDeviation = deviation < 0;
     }
 
-    // Duration, start and end time
+    // Start and end time
+    if (anomaly.startTime) {
+        anomalyCardData.startTime = formatDateAndTime(anomaly.startTime);
+    }
+    if (anomaly.endTime) {
+        anomalyCardData.endTime = formatDateAndTime(anomaly.endTime);
+    }
+
+    // Duration
     if (anomaly.startTime && anomaly.endTime) {
         anomalyCardData.duration = formatDuration(
             anomaly.startTime,
             anomaly.endTime
         );
-        anomalyCardData.startTime = formatDateAndTime(anomaly.startTime);
-        anomalyCardData.endTime = formatDateAndTime(anomaly.endTime);
     }
 
     return anomalyCardData;
@@ -112,58 +118,46 @@ export const getAnomalyCardDatas = (
     }
 
     for (const anomaly of anomalies) {
-        const anomalyCardData = getAnomalyCardData(anomaly);
-        anomalyCardDatas.push(anomalyCardData);
+        anomalyCardDatas.push(getAnomalyCardData(anomaly));
     }
 
     return anomalyCardDatas;
 };
 
 export const filterAnomalies = (
-    anomalies: AnomalyCardData[],
+    anomalyCardDatas: AnomalyCardData[],
     searchWords: string[]
 ): AnomalyCardData[] => {
-    const filteredAnomalies = new Set<AnomalyCardData>();
+    const filteredAnomalyCardDatas: AnomalyCardData[] = [];
 
-    if (isEmpty(anomalies)) {
+    if (isEmpty(anomalyCardDatas)) {
         // No anomalies available, return empty result
-        return [...filteredAnomalies];
+        return filteredAnomalyCardDatas;
     }
 
     if (isEmpty(searchWords)) {
         // No search words available, return original anomalies
-        return anomalies;
+        return anomalyCardDatas;
     }
 
-    for (const anomaly of anomalies) {
+    for (const anomaly of anomalyCardDatas) {
         for (const searchWord of searchWords) {
-            let anomalyFiltered = false;
+            if (
+                deepSearchStringProperty(anomaly, (value: string): boolean => {
+                    // Check if string property value contains current search word
+                    return (
+                        Boolean(value) &&
+                        value.toLowerCase().indexOf(searchWord.toLowerCase()) >
+                            -1
+                    );
+                })
+            ) {
+                filteredAnomalyCardDatas.push(anomaly);
 
-            // Try and match anomaly property values to search words
-            for (const propertyValue of Object.values(anomaly)) {
-                if (!propertyValue) {
-                    continue;
-                }
-
-                if (
-                    typeof propertyValue === "string" &&
-                    propertyValue
-                        .toLowerCase()
-                        .indexOf(searchWord.toLowerCase()) > -1
-                ) {
-                    filteredAnomalies.add(anomaly);
-                    anomalyFiltered = true;
-
-                    break;
-                }
-            }
-
-            if (anomalyFiltered) {
-                // Anomaly already filtered, check next anomaly
                 break;
             }
         }
     }
 
-    return [...filteredAnomalies];
+    return filteredAnomalyCardDatas;
 };

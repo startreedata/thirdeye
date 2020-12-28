@@ -10,7 +10,7 @@ import {
     getRejectedResponseInterceptor,
     getRequestInterceptor,
 } from "./utils/axios-util/axios-util";
-import { SnackbarOption } from "./utils/snackbar-util/snackbar-util";
+import { getWarningSnackbarOption } from "./utils/snackbar-util/snackbar-util";
 
 // ThirdEye UI app
 export const App: FunctionComponent = () => {
@@ -22,9 +22,9 @@ export const App: FunctionComponent = () => {
         axiosResponseInterceptorId,
         setAxiosResponseInterceptorId,
     ] = useState(0);
-    const [accessToken, removeAccessToken] = useAuthStore((state) => [
+    const [accessToken, clearAccessToken] = useAuthStore((state) => [
         state.accessToken,
-        state.removeAccessToken,
+        state.clearAccessToken,
     ]);
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
@@ -58,10 +58,13 @@ export const App: FunctionComponent = () => {
 
     const unauthenticatedAccessHandler = (): void => {
         // Notify
-        enqueueSnackbar(t("message.signed-out"), SnackbarOption.ERROR);
+        enqueueSnackbar(
+            t("message.signed-out"),
+            getWarningSnackbarOption(true)
+        );
 
         // Sign out
-        removeAccessToken();
+        clearAccessToken();
     };
 
     if (loading) {

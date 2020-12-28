@@ -1,6 +1,6 @@
 import numbro from "numbro";
 
-// Returns formatted string representation of given number
+// Returns formatted string representation of number
 // For example, mantissa = 2:
 // 10 -> 10
 // 1000 -> 1,000
@@ -20,7 +20,7 @@ export const formatNumber = (
     });
 };
 
-// Returns abbreviated string representation of given large number
+// Returns abbreviated string representation of number
 // For example:
 // 1 -> 1
 // 10 -> 10
@@ -44,7 +44,7 @@ export const formatLargeNumber = (num: number): string => {
     } as numbro.Format);
 };
 
-// Returns percentage string representation of given number
+// Returns percentage string representation of number
 // For example, mantissa = 2::
 // 1 -> 100%
 // 10 -> 1,000%

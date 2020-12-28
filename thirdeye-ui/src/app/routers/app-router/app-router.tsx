@@ -27,7 +27,7 @@ export const AppRouter: FunctionComponent = () => {
                     path={AppRoute.CONFIGURATION}
                 />
 
-                {/* DirectAppRoute to general authenticated router */}
+                {/* Direct all other paths to general authenticated router */}
                 <Route component={GeneralAuthenticatedRouter} />
             </Switch>
         );

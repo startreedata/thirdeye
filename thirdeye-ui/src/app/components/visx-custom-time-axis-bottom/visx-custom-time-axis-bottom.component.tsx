@@ -10,7 +10,7 @@ import {
 } from "../../utils/date-time-util/date-time-util";
 import { VisxCustomTimeAxisBottomProps } from "./visx-custom-time-axis-bottom.interfaces";
 
-export const SEPARATOR_DATE_TIME = "@";
+export const TICK_FORMAT_SEPARATOR_DATE_TIME = "@";
 
 // Customization of visx time axis with formatted tick labels based on time range
 export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBottomProps> = (
@@ -19,7 +19,7 @@ export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBotto
     const tickFormatter = (
         date: Date | number | { valueOf(): number }
     ): string => {
-        if (!date || !props.scale || isEmpty(props.scale.domain())) {
+        if (!date || isEmpty(props.scale.domain())) {
             return "";
         }
 
@@ -33,19 +33,19 @@ export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBotto
         }
 
         dateToFormat = new Date(date.valueOf());
-        const startTimeDate = props.scale.domain()[0];
-        const endTimeTimeDate = props.scale.domain()[1];
+        const startTime = props.scale.domain()[0];
+        const endTimeTime = props.scale.domain()[1];
 
-        return formatDateTime(dateToFormat, startTimeDate, endTimeTimeDate);
+        return formatDateTime(dateToFormat, startTime, endTimeTime);
     };
 
-    // Returns formatted string representation of given date based on the time interval between
-    // given start and end time
+    // Returns formatted string representation of date based on time interval between start and
+    // end time
     // For example:
     // Time interval > 2 years - YYYY
     // Time interval > 2 months - MMM YYYY
-    // Time interval > 2 days - MMM DD, YY
-    // Time interval > 2 hours - MMM DD, YY SEPARATOR_DATE_TIME HH:MM AM/PM
+    // Time interval > 2 days - MMM DD, YYYY
+    // Time interval > 2 hours - MMM DD, YY TICK_FORMAT_SEPARATOR_DATE_TIME HH:MM AM/PM
     const formatDateTime = (
         date: Date,
         startTime: Date,
@@ -67,22 +67,26 @@ export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBotto
         }
 
         if (duration.as("months") > 2) {
+            // MMM YYYY
             return formatMonthOfYear(date.getTime());
         }
 
         if (duration.as("days") > 2) {
+            // MMM DD, YYYY
             return formatDate(date.getTime());
         }
 
+        // MMM DD, YY TICK_FORMAT_SEPARATOR_DATE_TIME HH:MM AM/PM
         return (
             formatDate(date.getTime()) +
-            SEPARATOR_DATE_TIME +
+            TICK_FORMAT_SEPARATOR_DATE_TIME +
             formatTime(date.getTime())
         );
     };
 
-    // Renders date from tick renderer props based on whether or not it contains SEPARATOR_DATE_TIME
-    const renderFormattedDate = (
+    // Renders date from tick renderer props based on whether or not it contains
+    // TICK_FORMAT_SEPARATOR_DATE_TIME
+    const tickComponentRenderer = (
         tickRendererProps: TickRendererProps
     ): ReactNode => {
         let dateString = "";
@@ -96,11 +100,14 @@ export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBotto
         if (
             tickRendererProps &&
             tickRendererProps.formattedValue &&
-            tickRendererProps.formattedValue.includes(SEPARATOR_DATE_TIME)
+            tickRendererProps.formattedValue.includes(
+                TICK_FORMAT_SEPARATOR_DATE_TIME
+            )
         ) {
-            // String contains both date and time which need to be rendered in two parts
+            // String contains both date and time which need to be rendered in two parts one below
+            // the other
             const dateParts = tickRendererProps.formattedValue.split(
-                SEPARATOR_DATE_TIME
+                TICK_FORMAT_SEPARATOR_DATE_TIME
             );
             dateString = dateParts && dateParts[0] && dateParts[0];
             timeString = dateParts && dateParts[1] && dateParts[1];
@@ -130,13 +137,13 @@ export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBotto
     return (
         // Time axis
         <AxisBottom
-            left={props.left || 0}
+            left={props.left}
             numTicks={props.numTicks}
             scale={props.scale}
             tickClassName={props.tickClassName}
-            tickComponent={renderFormattedDate}
+            tickComponent={tickComponentRenderer}
             tickFormat={tickFormatter}
-            top={props.top || 0}
+            top={props.top}
         />
     );
 };

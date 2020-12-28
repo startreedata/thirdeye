@@ -4,15 +4,6 @@ import { login, logout } from "./auth-rest";
 
 jest.mock("axios");
 
-const mockAuthRequest = new URLSearchParams();
-mockAuthRequest.append("grant_type", "password");
-mockAuthRequest.append("principal", "admin");
-mockAuthRequest.append("password", "password");
-const mockAuthResponse: Auth = {
-    accessToken: "testAccessTokenResponse",
-} as Auth;
-const mockError = new Error("testErrorMessage");
-
 describe("Auth REST", () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -23,7 +14,7 @@ describe("Auth REST", () => {
     });
 
     test("login shall invoke axios.post with appropriate input and return result", async () => {
-        axios.post = jest.fn().mockResolvedValue({ data: mockAuthResponse });
+        jest.spyOn(axios, "post").mockResolvedValue({ data: mockAuthResponse });
 
         const response = await login();
 
@@ -35,13 +26,13 @@ describe("Auth REST", () => {
     });
 
     test("login shall throw encountered error", async () => {
-        axios.post = jest.fn().mockRejectedValue(mockError);
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(login()).rejects.toThrow("testErrorMessage");
     });
 
     test("logout shall invoke axios.post with appropriate input", async () => {
-        axios.post = jest.fn().mockResolvedValue({});
+        jest.spyOn(axios, "post").mockResolvedValue({});
 
         await logout();
 
@@ -49,8 +40,17 @@ describe("Auth REST", () => {
     });
 
     test("logout shall throw encountered error", async () => {
-        axios.post = jest.fn().mockRejectedValue(mockError);
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(logout()).rejects.toThrow("testErrorMessage");
     });
 });
+
+const mockAuthRequest = new URLSearchParams();
+mockAuthRequest.append("grant_type", "password");
+mockAuthRequest.append("principal", "admin");
+mockAuthRequest.append("password", "password");
+const mockAuthResponse = {
+    accessToken: "testAccessTokenResponse",
+} as Auth;
+const mockError = new Error("testErrorMessage");

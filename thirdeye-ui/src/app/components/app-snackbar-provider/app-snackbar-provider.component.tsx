@@ -9,12 +9,12 @@ export const AppSnackbarProvider: FunctionComponent<AppSnackbarProviderProps> = 
     props: AppSnackbarProviderProps
 ) => {
     const appSnackbarProviderClasses = useAppSnackbarProviderStyles();
-    const snackbarRef = createRef<SnackbarProvider>();
+    const snackbarProviderRef = createRef<SnackbarProvider>();
 
     const onCloseSnackbar = (key: SnackbarKey): void => {
-        snackbarRef &&
-            snackbarRef.current &&
-            snackbarRef.current.closeSnackbar(key);
+        snackbarProviderRef &&
+            snackbarProviderRef.current &&
+            snackbarProviderRef.current.closeSnackbar(key);
     };
 
     return (
@@ -45,9 +45,9 @@ export const AppSnackbarProvider: FunctionComponent<AppSnackbarProviderProps> = 
                 variantWarning: appSnackbarProviderClasses.warning,
                 variantInfo: appSnackbarProviderClasses.info,
             }}
-            ref={snackbarRef}
+            ref={snackbarProviderRef}
         >
-            {/* Include children */}
+            {/* Contents */}
             {props.children}
         </SnackbarProvider>
     );

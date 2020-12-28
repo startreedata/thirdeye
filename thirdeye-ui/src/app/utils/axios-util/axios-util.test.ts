@@ -5,8 +5,6 @@ import {
     getRequestInterceptor,
 } from "./axios-util";
 
-const mockUnauthenticatedAccessHandler = jest.fn();
-
 describe("Axios Util", () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -29,7 +27,7 @@ describe("Axios Util", () => {
         expect(requestConfig.headers).toBeUndefined();
     });
 
-    test("axios request interceptor shall attach valid access token to request header", () => {
+    test("axios request interceptor shall attach access token to request header", () => {
         const requestInterceptor = getRequestInterceptor("testToken");
         const requestConfig = requestInterceptor({});
 
@@ -44,7 +42,7 @@ describe("Axios Util", () => {
         expect(responseInterceptor).toBeInstanceOf(Function);
     });
 
-    test("axios fulfilled response interceptor shall return response as it is", () => {
+    test("axios fulfilled response interceptor shall return response as is", () => {
         const responseInterceptor = getFulfilledResponseInterceptor();
         const response = responseInterceptor("testResponse");
 
@@ -89,3 +87,5 @@ describe("Axios Util", () => {
         expect(mockUnauthenticatedAccessHandler).not.toHaveBeenCalled();
     });
 });
+
+const mockUnauthenticatedAccessHandler = jest.fn();

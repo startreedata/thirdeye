@@ -16,8 +16,8 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import {
     getAlertsDetailPath,
-    getConfigurationSubscriptionGroupsDetailPath,
-    getConfigurationSubscriptionGroupsUpdatePath,
+    getSubscriptionGroupsDetailPath,
+    getSubscriptionGroupsUpdatePath,
 } from "../../utils/routes-util/routes-util";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { SubscriptionGroupCardProps } from "./subscription-group-card.interfaces";
@@ -29,44 +29,46 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
     const subscriptionGroupCardClasses = useSubscriptinoGroupCardStyles();
     const [expand, setExpand] = useState(false);
     const [
-        optionsAnchorElement,
-        setOptionsAnchorElement,
+        subscriptionGroupOptionsAnchorElement,
+        setSubscriptionGroupOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
     const history = useHistory();
     const { t } = useTranslation();
 
-    const onSubscriptionGroupDetails = (): void => {
-        history.push(
-            getConfigurationSubscriptionGroupsDetailPath(
-                props.subscriptionGroup.id
-            )
-        );
-    };
-
-    const onSubscriptionGroupEdit = (): void => {
-        history.push(
-            getConfigurationSubscriptionGroupsUpdatePath(
-                props.subscriptionGroup.id
-            )
-        );
-    };
-
     const onSubscriptionGroupOptionsClick = (
         event: MouseEvent<HTMLElement>
     ): void => {
-        setOptionsAnchorElement(event.currentTarget);
+        setSubscriptionGroupOptionsAnchorElement(event.currentTarget);
+    };
+
+    const onViewSubscriptionGroupDetails = (): void => {
+        history.push(
+            getSubscriptionGroupsDetailPath(props.subscriptionGroup.id)
+        );
+    };
+
+    const onEditSubscriptionGroup = (): void => {
+        history.push(
+            getSubscriptionGroupsUpdatePath(props.subscriptionGroup.id)
+        );
+    };
+
+    const onDeleteSubscriptionGroup = (): void => {
+        props.onDelete && props.onDelete(props.subscriptionGroup);
+
+        closeSubscriptionGroupOptions();
     };
 
     const onExpandToggle = (): void => {
         setExpand((expand) => !expand);
     };
 
-    const onAlertDetails = (id: number): void => {
+    const onViewAlertDetails = (id: number): void => {
         history.push(getAlertsDetailPath(id));
     };
 
     const closeSubscriptionGroupOptions = (): void => {
-        setOptionsAnchorElement(null);
+        setSubscriptionGroupOptionsAnchorElement(null);
     };
 
     return (
@@ -75,31 +77,30 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
             <CardHeader
                 disableTypography
                 action={
+                    // Subscription group options button
                     <IconButton onClick={onSubscriptionGroupOptionsClick}>
                         <MoreVert />
                     </IconButton>
                 }
                 title={
                     <>
+                        {/* Summary */}
                         {props.hideViewDetailsLinks && (
-                            // Summary
                             <Typography variant="h6">
                                 {t("label.summary")}
                             </Typography>
                         )}
 
+                        {/* Subscription group name */}
                         {!props.hideViewDetailsLinks && (
-                            // Subscription group name
                             <Link
                                 component="button"
                                 variant="h6"
-                                onClick={onSubscriptionGroupDetails}
+                                onClick={onViewSubscriptionGroupDetails}
                             >
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    textToHighlight={
-                                        props.subscriptionGroup.name
-                                    }
+                                    text={props.subscriptionGroup.name}
                                 />
                             </Link>
                         )}
@@ -108,76 +109,61 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
             />
 
             <Menu
-                anchorEl={optionsAnchorElement}
-                open={Boolean(optionsAnchorElement)}
+                anchorEl={subscriptionGroupOptionsAnchorElement}
+                open={Boolean(subscriptionGroupOptionsAnchorElement)}
                 onClose={closeSubscriptionGroupOptions}
             >
                 {/* View details */}
                 {!props.hideViewDetailsLinks && (
-                    <MenuItem onClick={onSubscriptionGroupDetails}>
+                    <MenuItem onClick={onViewSubscriptionGroupDetails}>
                         {t("label.view-details")}
                     </MenuItem>
                 )}
 
                 {/* Edit subscription group */}
-                <MenuItem onClick={onSubscriptionGroupEdit}>
+                <MenuItem onClick={onEditSubscriptionGroup}>
                     {t("label.edit-subscription-group")}
+                </MenuItem>
+
+                {/* Delete subscription group */}
+                <MenuItem onClick={onDeleteSubscriptionGroup}>
+                    {t("label.delete-subscription-group")}
                 </MenuItem>
             </Menu>
 
             <CardContent>
                 <Grid container>
                     <Grid container item md={12}>
-                        {/* Application */}
-                        <Grid item md={4}>
-                            <Typography variant="body2">
-                                <strong>{t("label.application")}</strong>
-                            </Typography>
-
-                            <TextHighlighter
-                                searchWords={props.searchWords}
-                                textToHighlight={
-                                    props.subscriptionGroup.application
-                                }
-                            />
-                        </Grid>
-
                         {/* Subscribed alerts */}
-                        <Grid item md={4}>
-                            <div
-                                className={
-                                    subscriptionGroupCardClasses.bottomRowLabel
-                                }
-                            >
-                                <Typography variant="body2">
-                                    <strong>
-                                        {t("label.subscribed-alerts")}
-                                    </strong>
+                        <Grid item md={6}>
+                            <div className={subscriptionGroupCardClasses.label}>
+                                <Typography variant="subtitle2">
+                                    {t("label.subscribed-alerts")}
                                 </Typography>
                             </div>
 
+                            {/* Expand/collapse button */}
                             {props.subscriptionGroup.alerts &&
                                 props.subscriptionGroup.alerts.length > 1 && (
-                                    // Expand/collapse icon
                                     <div
                                         className={
-                                            subscriptionGroupCardClasses.bottomRowIcon
+                                            subscriptionGroupCardClasses.expandCollapseButton
                                         }
                                     >
                                         <Link
                                             component="button"
                                             onClick={onExpandToggle}
                                         >
+                                            {/* Collapse */}
                                             {expand && (
-                                                // Collapse
                                                 <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
                                             )}
 
+                                            {/* Expand */}
                                             {!expand && (
-                                                // Expand
                                                 <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
@@ -187,26 +173,22 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                     </div>
                                 )}
 
-                            <div
-                                className={
-                                    subscriptionGroupCardClasses.bottomRowValue
-                                }
-                            >
+                            <div className={subscriptionGroupCardClasses.value}>
+                                {/* No data available */}
                                 {isEmpty(props.subscriptionGroup.alerts) && (
-                                    // No data available
                                     <Typography variant="body2">
                                         <TextHighlighter
                                             searchWords={props.searchWords}
-                                            textToHighlight={t(
+                                            text={t(
                                                 "label.no-data-available-marker"
                                             )}
                                         />
                                     </Typography>
                                 )}
 
+                                {/* All subscribed alerts */}
                                 {!isEmpty(props.subscriptionGroup.alerts) &&
                                     expand && (
-                                        // All subscribed alerts
                                         <>
                                             {props.subscriptionGroup.alerts.map(
                                                 (alert, index) => (
@@ -216,7 +198,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                                         key={index}
                                                         variant="body2"
                                                         onClick={(): void => {
-                                                            onAlertDetails(
+                                                            onViewAlertDetails(
                                                                 alert.id
                                                             );
                                                         }}
@@ -225,9 +207,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                                             searchWords={
                                                                 props.searchWords
                                                             }
-                                                            textToHighlight={
-                                                                alert.name
-                                                            }
+                                                            text={alert.name}
                                                         />
                                                     </Link>
                                                 )
@@ -235,15 +215,15 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                         </>
                                     )}
 
+                                {/* First subscribed alert */}
                                 {!isEmpty(props.subscriptionGroup.alerts) &&
                                     !expand && (
-                                        // First subscribed email
                                         <Link
                                             component="button"
                                             display="block"
                                             variant="body2"
                                             onClick={(): void => {
-                                                onAlertDetails(
+                                                onViewAlertDetails(
                                                     props.subscriptionGroup
                                                         .alerts[0].id
                                                 );
@@ -251,7 +231,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                         >
                                             <TextHighlighter
                                                 searchWords={props.searchWords}
-                                                textToHighlight={
+                                                text={
                                                     props.subscriptionGroup
                                                         .alerts[0].name
                                                 }
@@ -262,41 +242,35 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                         </Grid>
 
                         {/* Subscribed emails */}
-                        <Grid item md={3}>
-                            <div
-                                className={
-                                    subscriptionGroupCardClasses.bottomRowLabel
-                                }
-                            >
-                                <Typography variant="body2">
-                                    <strong>
-                                        {t("label.subscribed-emails")}
-                                    </strong>
+                        <Grid item md={6}>
+                            <div className={subscriptionGroupCardClasses.label}>
+                                <Typography variant="subtitle2">
+                                    {t("label.subscribed-emails")}
                                 </Typography>
                             </div>
 
+                            {/* Expand/collapse button */}
                             {props.subscriptionGroup.emails &&
                                 props.subscriptionGroup.emails.length > 1 && (
-                                    // Expand/collapse icon
                                     <div
                                         className={
-                                            subscriptionGroupCardClasses.bottomRowIcon
+                                            subscriptionGroupCardClasses.expandCollapseButton
                                         }
                                     >
                                         <Link
                                             component="button"
                                             onClick={onExpandToggle}
                                         >
+                                            {/* Collapse */}
                                             {expand && (
-                                                // Collapse
                                                 <ExpandLess
                                                     color="primary"
                                                     fontSize="small"
                                                 />
                                             )}
 
+                                            {/* Expand */}
                                             {!expand && (
-                                                // Expand
                                                 <ExpandMore
                                                     color="primary"
                                                     fontSize="small"
@@ -306,26 +280,22 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                     </div>
                                 )}
 
-                            <div
-                                className={
-                                    subscriptionGroupCardClasses.bottomRowValue
-                                }
-                            >
+                            <div className={subscriptionGroupCardClasses.value}>
+                                {/* No data available */}
                                 {isEmpty(props.subscriptionGroup.emails) && (
-                                    // No data available
                                     <Typography variant="body2">
                                         <TextHighlighter
                                             searchWords={props.searchWords}
-                                            textToHighlight={t(
+                                            text={t(
                                                 "label.no-data-available-marker"
                                             )}
                                         />
                                     </Typography>
                                 )}
 
+                                {/* All subscribed emails */}
                                 {!isEmpty(props.subscriptionGroup.emails) &&
                                     expand && (
-                                        // All subscribed emails
                                         <>
                                             {props.subscriptionGroup.emails.map(
                                                 (email, index) => (
@@ -337,9 +307,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                                             searchWords={
                                                                 props.searchWords
                                                             }
-                                                            textToHighlight={
-                                                                email
-                                                            }
+                                                            text={email}
                                                         />
                                                     </Typography>
                                                 )
@@ -347,13 +315,13 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                         </>
                                     )}
 
+                                {/* First subscribed email */}
                                 {!isEmpty(props.subscriptionGroup.emails) &&
                                     !expand && (
-                                        // First subscribed email
                                         <Typography variant="body2">
                                             <TextHighlighter
                                                 searchWords={props.searchWords}
-                                                textToHighlight={
+                                                text={
                                                     props.subscriptionGroup
                                                         .emails[0]
                                                 }

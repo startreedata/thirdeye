@@ -26,31 +26,39 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
             borderTop={0}
             className={appBreadcrumbsClasses.container}
         >
-            {/* Required to appropriately layout children in breadcrumbs */}
             <Toolbar
                 classes={{ dense: appBreadcrumbsClasses.dense }}
                 variant="dense"
             >
                 <Breadcrumbs separator={<NavigateNext />}>
-                    {props.breadcrumbs.map((breadcrumb, index) => (
-                        <Link
-                            className={
-                                index === props.breadcrumbs.length - 1
-                                    ? appBreadcrumbsClasses.selectedLink
-                                    : ""
-                            }
-                            component="button"
-                            disabled={index === props.breadcrumbs.length - 1} // Last breadcrumb disabled
-                            display="block"
-                            key={index}
-                            variant="body1"
-                            onClick={(): void => {
-                                onBreadcrumbClick(breadcrumb);
-                            }}
-                        >
-                            {breadcrumb.text}
-                        </Link>
-                    ))}
+                    {props.breadcrumbs &&
+                        props.breadcrumbs
+                            .filter((breadcrumb) => Boolean(breadcrumb.text))
+                            .map((breadcrumb, index) => (
+                                <Link
+                                    className={
+                                        index ===
+                                            props.breadcrumbs.length - 1 ||
+                                        !breadcrumb.pathFn
+                                            ? appBreadcrumbsClasses.selectedLink
+                                            : ""
+                                    }
+                                    component="button"
+                                    disabled={
+                                        index ===
+                                            props.breadcrumbs.length - 1 ||
+                                        !breadcrumb.pathFn
+                                    }
+                                    display="block"
+                                    key={index}
+                                    variant="subtitle1"
+                                    onClick={(): void => {
+                                        onBreadcrumbClick(breadcrumb);
+                                    }}
+                                >
+                                    {breadcrumb.text}
+                                </Link>
+                            ))}
                 </Breadcrumbs>
             </Toolbar>
         </Box>

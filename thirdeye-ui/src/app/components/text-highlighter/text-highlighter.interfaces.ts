@@ -1,4 +1,4 @@
 export interface TextHighlighterProps {
     searchWords?: string[];
-    textToHighlight?: string;
+    text?: string;
 }

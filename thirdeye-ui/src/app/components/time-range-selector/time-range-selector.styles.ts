@@ -6,19 +6,19 @@ export const useTimeRangeSelectorStyles = makeStyles({
         padding: "6px",
     },
     timeRangeSelectorContainer: {
+        height: "497px",
+        width: "810px",
         overflow: "hidden",
-        height: "475px",
     },
-    timeRangeSelectorChildContainer: {
-        padding: "16px",
-    },
-    timeRangeList: {
-        height: "420px",
+    timeRangeListContainer: {
+        float: "left",
+        height: "442px",
         width: "190px",
-        overflow: "scroll",
+        overflow: "auto",
     },
     timeRangeListLabel: {
-        marginBottom: "-8px", // Minimize whitespace space between label item and following list item
+        paddingBottom: "0px",
+        marginBottom: "-4px", // Minimize whitespace space between label and next list item
     },
     timeRangeListItem: {
         whiteSpace: "nowrap",
@@ -28,9 +28,23 @@ export const useTimeRangeSelectorStyles = makeStyles({
     selectedTimeRangeListItem: {
         fontWeight: "bold",
     },
+    calendarsAndControlsContainer: {
+        float: "right",
+        height: "442px",
+        width: "620px",
+    },
+    calendarsContainer: {
+        marginBottom: "-15px", // Minimize whitespace between calendar and controls
+    },
     calendarLabel: {
-        paddingTop: "10px",
+        paddingTop: "12px",
         paddingLeft: "25px",
-        marginBottom: "-6px", // Account for whitespace space between label and calendar
+        marginBottom: "-5px", // Minimize whitespace between calendar label and calendar
+    },
+    startTimeCalendar: {
+        marginRight: "-8px", // Minimize whitespace between calendars
+    },
+    endTimeCalendar: {
+        marginLeft: "-8px", // Minimize whitespace between calendars
     },
 });

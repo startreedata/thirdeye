@@ -8,6 +8,9 @@ const WebpackBar = require("webpackbar");
 const outputPath = path.join(__dirname, "dist");
 
 module.exports = {
+    // Development mode
+    mode: "development",
+
     // Input configuration
     entry: path.join(__dirname, "src/app/index.tsx"),
 
@@ -16,7 +19,6 @@ module.exports = {
         path: outputPath,
         filename: "[name].js",
         publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
-        pathinfo: false, // Development mode optimization
     },
 
     // Loaders
@@ -36,7 +38,7 @@ module.exports = {
                 // .css and .scss files to be handled by sass-loader
                 test: /\.(css|scss)$/,
                 use: ["style-loader", "css-loader", "sass-loader"],
-                // Missing exclude, may need to handle files outside the source code
+                // No exclude, may need to handle files outside the source code
                 // (from node_modules)
             },
             {
@@ -73,7 +75,6 @@ module.exports = {
         },
     },
 
-    // Plugins
     plugins: [
         // Clean webpack output directory
         new CleanWebpackPlugin({
@@ -83,7 +84,7 @@ module.exports = {
         // main transpilation
         new ForkTsCheckerWebpackPlugin({
             eslint: {
-                files: "./src/**/*.{ts,tsx}",
+                files: "**/*.{ts,tsx,js}",
             },
         }),
         // Generate index.html from template
@@ -124,12 +125,12 @@ module.exports = {
         compress: true,
         port: 7004,
         historyApiFallback: {
-            // Required to route all requests to index.html so that React router gets to handle all
-            // copy pasted deep links
+            // Route all requests to index.html so that app gets to handle all copy pasted deep
+            // links
             disableDotRule: true,
         },
 
-        // Setup webpack-dev-server proxy context and target
+        // webpack-dev-server proxy configuration
         proxy: [
             {
                 context: "/api",
@@ -139,17 +140,13 @@ module.exports = {
         ],
     },
 
-    // Development mode
-    mode: "development",
-
-    // Use eval-cheap-module-source-map for faster rebuilds
-    devtool: "eval-cheap-module-source-map",
+    // Source map
+    devtool: "eval-cheap-source-map",
 
     // Development mode optimizations
     optimization: {
         runtimeChunk: true,
-        removeAvailableModules: false,
-        removeEmptyChunks: false,
         splitChunks: false,
+        removeEmptyChunks: false,
     },
 };

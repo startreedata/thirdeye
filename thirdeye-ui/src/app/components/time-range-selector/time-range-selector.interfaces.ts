@@ -1,7 +1,7 @@
 export interface TimeRangeSelectorProps {
     timeRangeDuration: TimeRangeDuration;
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
-    getTimeRangeDuration: () => TimeRangeDuration;
+    timeRangeDurationFn: () => TimeRangeDuration; // Function that shall return time range duration for component to use
     onChange?: (timeRangeDuration: TimeRangeDuration) => void;
 }
 

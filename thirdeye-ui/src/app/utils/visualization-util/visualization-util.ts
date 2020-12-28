@@ -3,19 +3,23 @@ import { AlertEvaluationTimeSeriesPoint } from "../../components/alert-evaluatio
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { formatLargeNumber } from "../number-util/number-util";
 
-// Returns abbreviated string representation of given large number
+// Returns abbreviated string representation of number
 // Equivalent to Number Util formatLargeNumber, but as required by D3 for visualizations
 export const formatLargeNumberForVisualization = (
     num: number | { valueOf(): number }
 ): string => {
-    if (typeof num == "number") {
+    if (!num || !num.valueOf) {
+        return "";
+    }
+
+    if (typeof num === "number") {
         return formatLargeNumber(num);
     }
 
     return formatLargeNumber(num.valueOf());
 };
 
-// Returns alert evaluation time series points from given alert evaluation
+// Returns alert evaluation time series points from alert evaluation
 export const getAlertEvaluationTimeSeriesPoints = (
     alertEvaluation: AlertEvaluation
 ): AlertEvaluationTimeSeriesPoint[] => {
@@ -25,13 +29,12 @@ export const getAlertEvaluationTimeSeriesPoints = (
         return alertEvaluationTimeSeriesPoints;
     }
 
-    // Gather only first available detection evaluation
+    // Gather only first detection evaluation
     const detectionEvaluation = Object.values(
         alertEvaluation.detectionEvaluations
     )[0];
 
     if (
-        !detectionEvaluation ||
         isEmpty(detectionEvaluation.data) ||
         isEmpty(detectionEvaluation.data.timestamp)
     ) {
@@ -51,7 +54,7 @@ export const getAlertEvaluationTimeSeriesPoints = (
     return alertEvaluationTimeSeriesPoints;
 };
 
-// Returns minimum timestamp from given alert evaluation time series points
+// Returns minimum timestamp from alert evaluation time series points
 export const getAlertEvaluationTimeSeriesPointsMinTimestamp = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {
@@ -69,7 +72,7 @@ export const getAlertEvaluationTimeSeriesPointsMinTimestamp = (
     return minTimestamp;
 };
 
-// Returns maximum timestamp from given alert evaluation time series points
+// Returns maximum timestamp from alert evaluation time series points
 export const getAlertEvaluationTimeSeriesPointsMaxTimestamp = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {
@@ -87,7 +90,7 @@ export const getAlertEvaluationTimeSeriesPointsMaxTimestamp = (
     return maxTimestamp;
 };
 
-// Returns maximum value from given alert evaluation time series points
+// Returns maximum value from alert evaluation time series points
 export const getAlertEvaluationTimeSeriesPointsMaxValue = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {

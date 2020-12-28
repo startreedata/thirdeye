@@ -6,6 +6,7 @@ import { HomePage } from "../../pages/home-page/home-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { SignOutPage } from "../../pages/sign-out-page/sign-out-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
+import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
     getBasePath,
@@ -17,10 +18,16 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumbs,
     ]);
+    const [removeAppToolbar] = useAppToolbarStore((state) => [
+        state.removeAppToolbar,
+    ]);
 
     useEffect(() => {
         // Create app section breadcrumbs
         setAppSectionBreadcrumbs([]);
+
+        // No app toolbar under this router
+        removeAppToolbar();
 
         setLoading(false);
     }, []);

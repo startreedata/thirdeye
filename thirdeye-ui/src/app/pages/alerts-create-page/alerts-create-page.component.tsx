@@ -39,7 +39,10 @@ import {
     AppRoute,
     getAlertsCreatePath,
 } from "../../utils/routes-util/routes-util";
-import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar-util/snackbar-util";
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 
@@ -126,7 +129,7 @@ export const AlertsCreatePage = withRouter(
                 }
                 enqueueSnackbar(
                     t("message.create-success", { entity: t("label.alert") }),
-                    SnackbarOption.SUCCESS
+                    getSuccessSnackbarOption()
                 );
                 props.history.push(AppRoute.ALERTS_ALL);
             } catch (err) {
@@ -136,7 +139,7 @@ export const AlertsCreatePage = withRouter(
                         err,
                         t("message.create-error", { entity: t("label.alert") })
                     ),
-                    SnackbarOption.SUCCESS
+                    getErrorSnackbarOption()
                 );
             } finally {
                 setLoading(false);
@@ -171,7 +174,10 @@ export const AlertsCreatePage = withRouter(
                     alertEvalution as AlertEvaluation
                 );
             } catch (error) {
-                enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
                 chartData = {} as AlertEvaluation;
             }
 
@@ -224,7 +230,7 @@ export const AlertsCreatePage = withRouter(
 
         return (
             <PageContainer>
-                <PageContents contentsCenterAlign hideTimeRange title="">
+                <PageContents centered hideTimeRange title="">
                     <Grid container>
                         <Grid item xs={12}>
                             <CustomStepper

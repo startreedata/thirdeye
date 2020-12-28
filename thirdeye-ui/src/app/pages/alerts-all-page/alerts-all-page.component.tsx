@@ -1,15 +1,20 @@
 import { Grid } from "@material-ui/core";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCard } from "../../components/alert-card/alert-card.component";
 import { AlertCardData } from "../../components/alert-card/alert-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SearchBar } from "../../components/search-bar/search-bar.component";
-import { getAllAlerts, updateAlert } from "../../rest/alert-rest/alert-rest";
+import {
+    deleteAlert,
+    getAllAlerts,
+    updateAlert,
+} from "../../rest/alert-rest/alert-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
@@ -20,7 +25,10 @@ import {
     getAlertCardDatas,
 } from "../../utils/alert-util/alert-util";
 import { getAlertsAllPath } from "../../utils/routes-util/routes-util";
-import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar-util/snackbar-util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -50,69 +58,101 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     useEffect(() => {
         // Fetch data
-        const init = async (): Promise<void> => {
-            await fetchData();
-
-            setLoading(false);
-        };
-
-        init();
+        fetchData();
     }, []);
 
     useEffect(() => {
-        // Fetched data, or search changed, reset
+        // Fetched data or search changed, reset
         setFilteredAlertCardDatas(filterAlerts(alertCardDatas, searchWords));
     }, [alertCardDatas, searchWords]);
 
-    const fetchData = async (): Promise<void> => {
+    const fetchData = (): void => {
         let fetchedAlertCardDatas: AlertCardData[] = [];
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
-        const [
-            alertsResponse,
-            subscriptionGroupsResponse,
-        ] = await Promise.allSettled([
-            getAllAlerts(),
-            getAllSubscriptionGroups(),
-        ]);
 
-        if (
-            alertsResponse.status === "rejected" ||
-            subscriptionGroupsResponse.status === "rejected"
-        ) {
-            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
-        } else {
-            fetchedAlertCardDatas = getAlertCardDatas(
-                alertsResponse.value,
-                subscriptionGroupsResponse.value
-            );
-            fetchedSubscriptionGroups = subscriptionGroupsResponse.value;
-        }
+        Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
+            .then(([alertsResponse, subscriptionGroupsResponse]): void => {
+                // Determine if any of the calls failed
+                if (
+                    alertsResponse.status === "rejected" ||
+                    subscriptionGroupsResponse.status === "rejected"
+                ) {
+                    enqueueSnackbar(
+                        t("message.fetch-error"),
+                        getErrorSnackbarOption()
+                    );
+                }
 
-        setAlertCardDatas(fetchedAlertCardDatas);
-        setSubscriptionGroups(fetchedSubscriptionGroups);
+                // Attempt to gather data
+                if (subscriptionGroupsResponse.status === "fulfilled") {
+                    fetchedSubscriptionGroups =
+                        subscriptionGroupsResponse.value;
+                }
+                if (alertsResponse.status === "fulfilled") {
+                    fetchedAlertCardDatas = getAlertCardDatas(
+                        alertsResponse.value,
+                        fetchedSubscriptionGroups
+                    );
+                }
+            })
+            .finally((): void => {
+                setAlertCardDatas(fetchedAlertCardDatas);
+                setSubscriptionGroups(fetchedSubscriptionGroups);
+
+                setLoading(false);
+            });
     };
 
-    const onAlertStateToggle = async (
-        alertCardData: AlertCardData
-    ): Promise<void> => {
+    const onAlertStateToggle = (alertCardData: AlertCardData): void => {
         if (!alertCardData || !alertCardData.alert) {
             return;
         }
 
-        let alertCopy = cloneDeep(alertCardData.alert);
+        // Create a copy of alert and toggle state
+        const alertCopy = cloneDeep(alertCardData.alert);
         alertCopy.active = !alertCopy.active;
 
-        try {
-            alertCopy = await updateAlert(alertCopy);
+        // Update
+        updateAlert(alertCopy)
+            .then((alert: Alert): void => {
+                // Replace updated alert in fetched alerts
+                replaceAlertCardData(alert);
 
-            // Replace updated alert in fetched alerts
-            replaceAlertCardData(alertCopy);
-        } catch (error) {
-            enqueueSnackbar(
-                t("message.update-error", { entity: t("label.alert") }),
-                SnackbarOption.ERROR
-            );
+                enqueueSnackbar(
+                    t("message.update-success", { entity: t("label.alert") }),
+                    getSuccessSnackbarOption()
+                );
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.update-error", { entity: t("label.alert") }),
+                    getErrorSnackbarOption()
+                );
+            });
+    };
+
+    const onDeleteAlert = (alertCardData: AlertCardData): void => {
+        if (!alertCardData || !alertCardData.alert) {
+            return;
         }
+
+        // Delete
+        deleteAlert(alertCardData.alert.id)
+            .then((alert: Alert): void => {
+                // Remove deleted alert from fetched alerts
+                removeAlertCardData(alert);
+
+                enqueueSnackbar(
+                    t("message.delete-success", { entity: t("label.alert") }),
+                    getSuccessSnackbarOption()
+                );
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.delete-error", { entity: t("label.alert") }),
+                    getErrorSnackbarOption()
+                );
+            });
     };
 
     const replaceAlertCardData = (alert: Alert): void => {
@@ -134,6 +174,18 @@ export const AlertsAllPage: FunctionComponent = () => {
         );
     };
 
+    const removeAlertCardData = (alert: Alert): void => {
+        if (!alert) {
+            return;
+        }
+
+        setAlertCardDatas((alertCardDatas) =>
+            alertCardDatas.filter((alertCardData: AlertCardData): boolean => {
+                return alertCardData.id !== alert.id;
+            })
+        );
+    };
+
     if (loading) {
         return (
             <PageContainer>
@@ -144,7 +196,7 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents contentsCenterAlign title={t("label.alerts")}>
+            <PageContents centered title={t("label.alerts")}>
                 <Grid container>
                     {/* Search */}
                     <Grid item md={12}>
@@ -172,12 +224,16 @@ export const AlertsAllPage: FunctionComponent = () => {
                                     <AlertCard
                                         alert={filteredAlertCardData}
                                         searchWords={searchWords}
-                                        onAlertStateToggle={onAlertStateToggle}
+                                        onDelete={onDeleteAlert}
+                                        onStateToggle={onAlertStateToggle}
                                     />
                                 </Grid>
                             )
                         )}
                 </Grid>
+
+                {/* No data available message */}
+                {isEmpty(filteredAlertCardDatas) && <NoDataIndicator />}
             </PageContents>
         </PageContainer>
     );

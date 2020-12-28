@@ -1,4 +1,4 @@
-import { isEmpty, isInteger, toNumber } from "lodash";
+import { isInteger, toNumber } from "lodash";
 import {
     TimeRange,
     TimeRangeDuration,
@@ -33,7 +33,7 @@ export const getSearchTextFromQueryString = (): string => {
 export const setTimeRangeInQueryString = (
     timeRangeDuration: TimeRangeDuration
 ): void => {
-    if (isEmpty(timeRangeDuration)) {
+    if (!timeRangeDuration) {
         return;
     }
 

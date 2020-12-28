@@ -3,6 +3,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { logout } from "../../rest/auth-rest/auth-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAuthStore } from "../../store/auth-store/auth-store";
@@ -12,8 +13,8 @@ import { useSignOutPageStyles } from "./sign-out-page.styles";
 export const SignOutPage: FunctionComponent = () => {
     const signOutPageClasses = useSignOutPageStyles();
     const [loading, setLoading] = useState(true);
-    const [removeAccessToken] = useAuthStore((state) => [
-        state.removeAccessToken,
+    const [clearAccessToken] = useAuthStore((state) => [
+        state.clearAccessToken,
     ]);
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
@@ -32,11 +33,12 @@ export const SignOutPage: FunctionComponent = () => {
         setLoading(false);
     }, []);
 
-    const performSignOut = async (): Promise<void> => {
-        await logout();
-        removeAccessToken();
+    const performSignOut = (): void => {
+        logout().then((): void => {
+            clearAccessToken();
 
-        // Let authentication state force reload
+            // Let authentication state force reload
+        });
     };
 
     if (loading) {
@@ -49,22 +51,25 @@ export const SignOutPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <Grid
-                container
-                alignItems="center"
-                className={signOutPageClasses.container}
-                justify="center"
-            >
-                <Grid item>
-                    <Button
-                        color="primary"
-                        variant="contained"
-                        onClick={performSignOut}
-                    >
-                        {t("label.sign-out")}
-                    </Button>
+            <PageContents hideTimeRange>
+                <Grid
+                    container
+                    alignItems="center"
+                    className={signOutPageClasses.buttonContainer}
+                    justify="center"
+                >
+                    <Grid item>
+                        <Button
+                            color="primary"
+                            size="large"
+                            variant="contained"
+                            onClick={performSignOut}
+                        >
+                            {t("label.sign-out")}
+                        </Button>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </PageContents>
         </PageContainer>
     );
 };

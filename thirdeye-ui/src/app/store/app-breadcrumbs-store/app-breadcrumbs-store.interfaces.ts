@@ -6,4 +6,6 @@ export type AppBreadcrumbsStore = {
     pageBreadcrumbs: Breadcrumb[];
     setAppSectionBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
     setPageBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
+    pushPageBreadcrumb: (breadcrumb: Breadcrumb) => void;
+    popPageBreadcrumb: () => void;
 };

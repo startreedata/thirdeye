@@ -7,6 +7,9 @@ const WebpackBar = require("webpackbar");
 const outputPath = path.join(__dirname, "dist");
 
 module.exports = {
+    // Production mode
+    mode: "production",
+
     // Input configuration
     entry: path.join(__dirname, "src/app/index.tsx"),
 
@@ -30,7 +33,7 @@ module.exports = {
                 // .css and .scss files to be handled by sass-loader
                 test: /\.(css|scss)$/,
                 use: ["style-loader", "css-loader", "sass-loader"],
-                // Missing exclude, may need to handle files outside the source code
+                // No exclude, may need to handle files outside the source code
                 // (from node_modules)
             },
             {
@@ -67,7 +70,6 @@ module.exports = {
         },
     },
 
-    // Plugins
     plugins: [
         // Clean webpack output directory
         new CleanWebpackPlugin({
@@ -105,9 +107,6 @@ module.exports = {
         }),
     ],
 
-    // Production mode
-    mode: "production",
-
-    // Include cheap-source map for potential debugging
+    // Source map
     devtool: "cheap-source-map",
 };

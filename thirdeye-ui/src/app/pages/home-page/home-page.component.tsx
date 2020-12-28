@@ -24,11 +24,7 @@ export const HomePage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        const init = async (): Promise<void> => {
-            setLoading(false);
-        };
-
-        init();
+        setLoading(false);
     }, []);
 
     if (loading) {
@@ -41,7 +37,7 @@ export const HomePage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents contentsCenterAlign title={t("label.home")} />
+            <PageContents centered title={t("label.home")} />
         </PageContainer>
     );
 };

@@ -11,14 +11,14 @@ import {
     getAnomaliesPath,
     getBasePath,
     getConfigurationPath,
-    getConfigurationSubscriptionGroupsAllPath,
-    getConfigurationSubscriptionGroupsCreatePath,
-    getConfigurationSubscriptionGroupsDetailPath,
-    getConfigurationSubscriptionGroupsPath,
-    getConfigurationSubscriptionGroupsUpdatePath,
     getHomePath,
     getSignInPath,
     getSignOutPath,
+    getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsCreatePath,
+    getSubscriptionGroupsDetailPath,
+    getSubscriptionGroupsPath,
+    getSubscriptionGroupsUpdatePath,
 } from "./routes-util";
 
 jest.mock("../params-util/params-util");
@@ -92,32 +92,32 @@ describe("Routes Util", () => {
         );
     });
 
-    test("getConfigurationSubscriptionGroupsPath shall return appropriate path with current query string", () => {
-        expect(getConfigurationSubscriptionGroupsPath()).toEqual(
+    test("getSubscriptionGroupsPath shall return appropriate path with current query string", () => {
+        expect(getSubscriptionGroupsPath()).toEqual(
             "/configuration/subscriptionGroups?testQueryString"
         );
     });
 
-    test("getConfigurationSubscriptionGroupsAllPath shall return appropriate path with current query string", () => {
-        expect(getConfigurationSubscriptionGroupsAllPath()).toEqual(
+    test("getSubscriptionGroupsAllPath shall return appropriate path with current query string", () => {
+        expect(getSubscriptionGroupsAllPath()).toEqual(
             "/configuration/subscriptionGroups/all?testQueryString"
         );
     });
 
-    test("getConfigurationSubscriptionGroupsDetailPath shall return appropriate path with current query string", () => {
-        expect(getConfigurationSubscriptionGroupsDetailPath(1)).toEqual(
+    test("getSubscriptionGroupsDetailPath shall return appropriate path with current query string", () => {
+        expect(getSubscriptionGroupsDetailPath(1)).toEqual(
             "/configuration/subscriptionGroups/detail/id/1?testQueryString"
         );
     });
 
-    test("getConfigurationSubscriptionGroupsCreatePath shall return appropriate path with current query string", () => {
-        expect(getConfigurationSubscriptionGroupsCreatePath()).toEqual(
+    test("getSubscriptionGroupsCreatePath shall return appropriate path with current query string", () => {
+        expect(getSubscriptionGroupsCreatePath()).toEqual(
             "/configuration/subscriptionGroups/create?testQueryString"
         );
     });
 
-    test("getConfigurationSubscriptionGroupsUpdatePath shall return appropriate path with current query string", () => {
-        expect(getConfigurationSubscriptionGroupsUpdatePath(1)).toEqual(
+    test("getSubscriptionGroupsUpdatePath shall return appropriate path with current query string", () => {
+        expect(getSubscriptionGroupsUpdatePath(1)).toEqual(
             "/configuration/subscriptionGroups/update/id/1?testQueryString"
         );
     });

@@ -7,7 +7,7 @@ import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
 import {
     AppRoute,
-    getConfigurationSubscriptionGroupsPath,
+    getSubscriptionGroupsPath,
 } from "../../utils/routes-util/routes-util";
 import { useAppToolbarConfigurationStyles } from "./app-toolbar-configuration.styles";
 
@@ -18,7 +18,7 @@ export const AppToolbarConfiguration: FunctionComponent = () => {
     const { t } = useTranslation();
 
     const onSubscriptionGroupsClick = (): void => {
-        history.push(getConfigurationSubscriptionGroupsPath());
+        history.push(getSubscriptionGroupsPath());
     };
 
     const isRouteCurrent = (route: string): boolean => {
@@ -34,15 +34,12 @@ export const AppToolbarConfiguration: FunctionComponent = () => {
             borderTop={0}
             className={appToolbarConfigurationClasses.container}
         >
-            {/* Required to appropriately layout children in toolbar */}
             <Toolbar variant="dense">
                 {/* Subscription Groups */}
                 <Link
                     className={classnames(
                         appToolbarConfigurationClasses.link,
-                        isRouteCurrent(
-                            AppRoute.CONFIGURATION_SUBSCRIPTION_GROUPS
-                        )
+                        isRouteCurrent(AppRoute.SUBSCRIPTION_GROUPS)
                             ? appToolbarConfigurationClasses.selectedLink
                             : ""
                     )}

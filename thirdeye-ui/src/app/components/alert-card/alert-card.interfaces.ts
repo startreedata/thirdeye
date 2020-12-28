@@ -4,7 +4,8 @@ export interface AlertCardProps {
     alert: AlertCardData;
     searchWords?: string[];
     hideViewDetailsLinks?: boolean;
-    onAlertStateToggle?: (alert: AlertCardData) => void;
+    onStateToggle?: (alertCardData: AlertCardData) => void;
+    onDelete?: (alertCardData: AlertCardData) => void;
 }
 
 export interface AlertCardData {

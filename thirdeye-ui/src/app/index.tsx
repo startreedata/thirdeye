@@ -21,14 +21,14 @@ numbro.registerLanguage(enUs);
 numbro.setLanguage("en-US");
 // Luxon (date, time formatting), picks up system default
 
-// Aplication entry point
+// App entry point
 ReactDOM.render(
     <StrictMode>
-        {/* Apply Meterial UI theme */}
+        {/* Material-UI theme */}
         <ThemeProvider theme={theme}>
             <CssBaseline />
 
-            {/* Apply snackbar provider */}
+            {/* Snackbar provider */}
             <AppSnackbarProvider>
                 <Router history={appHistory}>
                     {/* App needs to be rendered by a router to allow navigation using app bar */}

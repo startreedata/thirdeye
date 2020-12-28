@@ -27,30 +27,36 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
 ) => {
     const anomalyCardClasses = useAnomalyCardStyles();
     const [
-        optionsAnchorElement,
-        setOptionsAnchorElement,
+        anomalyOptionsAnchorElement,
+        setAnomalyOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
     const history = useHistory();
     const { t } = useTranslation();
 
-    const onAnomalyDetails = (): void => {
+    const onAnomalyOptionsClick = (event: MouseEvent<HTMLElement>): void => {
+        setAnomalyOptionsAnchorElement(event.currentTarget);
+    };
+
+    const onViewAnomalyDetails = (): void => {
         history.push(getAnomaliesDetailPath(props.anomaly.id));
     };
 
-    const onInvestigate = (): void => {
+    const onInvestigateAnomaly = (): void => {
         // TODO
     };
 
-    const onAlertDetails = (): void => {
+    const onDeleteAnomaly = (): void => {
+        props.onDelete && props.onDelete(props.anomaly);
+
+        closeAnomalyOptions();
+    };
+
+    const onViewAlertDetails = (): void => {
         history.push(getAlertsDetailPath(props.anomaly.alertId));
     };
 
-    const onAnomalyOptionsClick = (event: MouseEvent<HTMLElement>): void => {
-        setOptionsAnchorElement(event.currentTarget);
-    };
-
     const closeAnomalyOptions = (): void => {
-        setOptionsAnchorElement(null);
+        setAnomalyOptionsAnchorElement(null);
     };
 
     return (
@@ -59,29 +65,30 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             <CardHeader
                 disableTypography
                 action={
+                    // Anomaly options button
                     <IconButton onClick={onAnomalyOptionsClick}>
                         <MoreVert />
                     </IconButton>
                 }
                 title={
                     <>
+                        {/* Summary */}
                         {props.hideViewDetailsLinks && (
-                            // Summary
                             <Typography variant="h6">
                                 {t("label.summary")}
                             </Typography>
                         )}
 
+                        {/* Anomaly name */}
                         {!props.hideViewDetailsLinks && (
-                            // Anomaly name
                             <Link
                                 component="button"
                                 variant="h6"
-                                onClick={onAnomalyDetails}
+                                onClick={onViewAnomalyDetails}
                             >
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    textToHighlight={props.anomaly.name}
+                                    text={props.anomaly.name}
                                 />
                             </Link>
                         )}
@@ -90,20 +97,25 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             />
 
             <Menu
-                anchorEl={optionsAnchorElement}
-                open={Boolean(optionsAnchorElement)}
+                anchorEl={anomalyOptionsAnchorElement}
+                open={Boolean(anomalyOptionsAnchorElement)}
                 onClose={closeAnomalyOptions}
             >
                 {/* View details */}
                 {!props.hideViewDetailsLinks && (
-                    <MenuItem onClick={onAnomalyDetails}>
+                    <MenuItem onClick={onViewAnomalyDetails}>
                         {t("label.view-details")}
                     </MenuItem>
                 )}
 
-                {/* Investigate */}
-                <MenuItem onClick={onInvestigate}>
-                    {t("label.investigate")}
+                {/* Investigate anomaly*/}
+                <MenuItem onClick={onInvestigateAnomaly}>
+                    {t("label.investigate-anomaly")}
+                </MenuItem>
+
+                {/* Delete anomaly */}
+                <MenuItem onClick={onDeleteAnomaly}>
+                    {t("label.delete-anomaly")}
                 </MenuItem>
             </Menu>
 
@@ -112,35 +124,33 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                     <Grid container item md={12}>
                         {/* Alert */}
                         <Grid item md={4}>
-                            <Typography variant="body2">
-                                <strong>{t("label.alert")}</strong>
+                            <Typography variant="subtitle2">
+                                {t("label.alert")}
                             </Typography>
 
                             <Link
                                 component="button"
                                 display="block"
                                 variant="body2"
-                                onClick={onAlertDetails}
+                                onClick={onViewAlertDetails}
                             >
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    textToHighlight={props.anomaly.alertName}
+                                    text={props.anomaly.alertName}
                                 />
                             </Link>
                         </Grid>
 
                         {/* Current / Predicted */}
                         <Grid item md={4}>
-                            <Typography variant="body2">
-                                <strong>
-                                    {t("label.current-/-predicted")}
-                                </strong>
+                            <Typography variant="subtitle2">
+                                {t("label.current-/-predicted")}
                             </Typography>
 
                             <Typography variant="body2">
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    textToHighlight={t(
+                                    text={t(
                                         "label.current-/-predicted-values",
                                         {
                                             current: props.anomaly.current,
@@ -153,26 +163,27 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
 
                         {/* Deviation */}
                         <Grid item md={4}>
-                            <Typography variant="body2">
-                                <strong>{t("label.deviation")}</strong>
+                            <Typography variant="subtitle2">
+                                {t("label.deviation")}
                             </Typography>
 
                             <Typography
                                 className={
                                     props.anomaly.negativeDeviation
-                                        ? anomalyCardClasses.deviationError
+                                        ? anomalyCardClasses.deviation
                                         : ""
                                 }
                                 variant="body2"
                             >
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    textToHighlight={props.anomaly.deviation}
+                                    text={props.anomaly.deviation}
                                 />
                             </Typography>
                         </Grid>
                     </Grid>
 
+                    {/* Separator */}
                     <Grid item md={12}>
                         <Divider variant="fullWidth" />
                     </Grid>
@@ -180,42 +191,42 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                     <Grid container item md={12}>
                         {/* Duration */}
                         <Grid item md={4}>
-                            <Typography variant="body2">
-                                <strong>{t("label.duration")}</strong>
+                            <Typography variant="subtitle2">
+                                {t("label.duration")}
                             </Typography>
 
                             <Typography variant="body2">
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    textToHighlight={props.anomaly.duration}
+                                    text={props.anomaly.duration}
                                 />
                             </Typography>
                         </Grid>
 
                         {/* Start */}
                         <Grid item md={4}>
-                            <Typography variant="body2">
-                                <strong>{t("label.start")}</strong>
+                            <Typography variant="subtitle2">
+                                {t("label.start")}
                             </Typography>
 
                             <Typography variant="body2">
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    textToHighlight={props.anomaly.startTime}
+                                    text={props.anomaly.startTime}
                                 />
                             </Typography>
                         </Grid>
 
                         {/* End */}
                         <Grid item md={4}>
-                            <Typography variant="body2">
-                                <strong>{t("label.end")}</strong>
+                            <Typography variant="subtitle2">
+                                {t("label.end")}
                             </Typography>
 
                             <Typography variant="body2">
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    textToHighlight={props.anomaly.endTime}
+                                    text={props.anomaly.endTime}
                                 />
                             </Typography>
                         </Grid>

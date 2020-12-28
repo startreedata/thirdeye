@@ -2,7 +2,6 @@ import LuxonUtils from "@date-io/luxon";
 import {
     Box,
     Button,
-    Divider,
     Grid,
     List,
     ListItem,
@@ -11,7 +10,7 @@ import {
     Tooltip,
     Typography,
 } from "@material-ui/core";
-import { CalendarToday } from "@material-ui/icons";
+import { CalendarToday, Refresh } from "@material-ui/icons";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import classnames from "classnames";
@@ -43,9 +42,10 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     props: TimeRangeSelectorProps
 ) => {
     const timeRangeSelectorClasses = useTimeRangeSelectorStyles();
-    const [timeRangeDuration, setTimeRangeDuration] = useState<
-        TimeRangeDuration
-    >(props.getTimeRangeDuration());
+    const [
+        componentTimeRangeDuration,
+        setComponentTimeRangeDuration,
+    ] = useState<TimeRangeDuration>(props.timeRangeDurationFn());
     const [
         timeRangeSelectorAnchorElement,
         setTimeRangeSelectorAnchorElement,
@@ -56,45 +56,49 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         setTimeRangeSelectorAnchorElement(event.currentTarget);
     };
 
-    const onTimeRangeSelectorOpen = (): void => {
-        // Update component state time range duration
-        setTimeRangeDuration(props.getTimeRangeDuration());
+    const onRefresh = (): void => {
+        // Notify that component time range duration has changed, to trigger refresh
+        props.onChange && props.onChange(cloneDeep(componentTimeRangeDuration));
     };
 
-    const onRecentCustomTimeRangeClick = (
+    const onTimeRangeSelectorOpen = (): void => {
+        // Update component time range duration
+        setComponentTimeRangeDuration(props.timeRangeDurationFn());
+    };
+
+    const onRecentCustomTimeRangeDurationClick = (
         timeRangeDuration: TimeRangeDuration
     ): void => {
-        if (isEmpty(timeRangeDuration)) {
+        if (!timeRangeDuration) {
             return;
         }
 
-        // Update component state time range duration to selected custom time range
-        setTimeRangeDuration(timeRangeDuration);
+        // Update component time range duration
+        setComponentTimeRangeDuration(timeRangeDuration);
     };
 
     const onTimeRangeClick = (timeRange: TimeRange): void => {
         if (timeRange === TimeRange.CUSTOM) {
-            // Custom time range duration to be set
             initCustomTimeRange();
 
             return;
         }
 
-        // Update component state time range duration to selected time range
-        setTimeRangeDuration(getTimeRangeDuration(timeRange));
+        // Update component time range duration
+        setComponentTimeRangeDuration(getTimeRangeDuration(timeRange));
     };
 
-    const onStartDateChange = (date: MaterialUiPickersDate): void => {
+    const onStartTimeChange = (date: MaterialUiPickersDate): void => {
         if (!date) {
             return;
         }
 
         // Custom time range duration to be set
-        const customTimeRangeDuration = cloneDeep(timeRangeDuration);
+        const customTimeRangeDuration = cloneDeep(componentTimeRangeDuration);
         customTimeRangeDuration.timeRange = TimeRange.CUSTOM;
         customTimeRangeDuration.startTime = date.toMillis();
 
-        // Make sure end time is later or at least equal to the start time
+        // End time to be later than, or equal to start time
         if (
             customTimeRangeDuration.endTime -
                 customTimeRangeDuration.startTime <
@@ -103,34 +107,34 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
             customTimeRangeDuration.endTime = customTimeRangeDuration.startTime;
         }
 
-        // Update component state time range duration
-        setTimeRangeDuration(customTimeRangeDuration);
+        // Update component time range duration
+        setComponentTimeRangeDuration(customTimeRangeDuration);
     };
 
-    const onEndDateChange = (date: MaterialUiPickersDate): void => {
+    const onEndTimeChange = (date: MaterialUiPickersDate): void => {
         if (!date) {
             return;
         }
 
         // Custom time range duration to be set
-        const customTimeRangeDuration = cloneDeep(timeRangeDuration);
+        const customTimeRangeDuration = cloneDeep(componentTimeRangeDuration);
         customTimeRangeDuration.timeRange = TimeRange.CUSTOM;
         customTimeRangeDuration.endTime = date.toMillis();
 
-        // Update component state time range duration
-        setTimeRangeDuration(customTimeRangeDuration);
+        // Update component time range duration
+        setComponentTimeRangeDuration(customTimeRangeDuration);
     };
 
     const onApply = (): void => {
-        // Notify that component state time range duration has changed
-        props.onChange && props.onChange(timeRangeDuration);
+        // Notify that component time range duration has changed
+        props.onChange && props.onChange(componentTimeRangeDuration);
 
         closeTimeRangeSelector();
     };
 
     const initCustomTimeRange = (): void => {
-        if (timeRangeDuration.timeRange === TimeRange.CUSTOM) {
-            // Component state time range duration is already a custom time range, do nothing
+        if (componentTimeRangeDuration.timeRange === TimeRange.CUSTOM) {
+            // Component time range duration is already a custom time range
             return;
         }
 
@@ -138,8 +142,8 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         const customTimeRangeDuration = getDefaultTimeRangeDuration();
         customTimeRangeDuration.timeRange = TimeRange.CUSTOM;
 
-        // Update component state time range duration
-        setTimeRangeDuration(customTimeRangeDuration);
+        // Update component time range duration
+        setComponentTimeRangeDuration(customTimeRangeDuration);
     };
 
     const closeTimeRangeSelector = (): void => {
@@ -149,7 +153,19 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     return (
         <Grid container alignItems="center">
             {/* Time range */}
-            <Grid item>{formatTimeRangeDuration(props.timeRangeDuration)}</Grid>
+            <Grid item>
+                {/* Time range label*/}
+                {props.timeRangeDuration.timeRange === TimeRange.CUSTOM && (
+                    <Typography variant="overline">
+                        {formatTimeRange(props.timeRangeDuration.timeRange)}
+                    </Typography>
+                )}
+
+                {/* Time range duration */}
+                <Typography variant="body1">
+                    {formatTimeRangeDuration(props.timeRangeDuration)}
+                </Typography>
+            </Grid>
 
             {/* Time range button */}
             <Grid item>
@@ -174,28 +190,248 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                             timeRangeSelectorClasses.timeRangeSelectorContainer
                         }
                     >
-                        <Grid container direction="column" spacing={0}>
-                            {/* Header */}
-                            <Grid item>
-                                <Box
-                                    border={Dimension.WIDTH_BORDER_DEFAULT}
-                                    borderColor={Palette.COLOR_BORDER_DEFAULT}
-                                    borderLeft={0}
-                                    borderRight={0}
-                                    borderTop={0}
-                                    className={
-                                        timeRangeSelectorClasses.timeRangeSelectorChildContainer
-                                    }
-                                >
+                        {/* Header */}
+                        <Box
+                            border={Dimension.WIDTH_BORDER_DEFAULT}
+                            borderColor={Palette.COLOR_BORDER_DEFAULT}
+                            borderLeft={0}
+                            borderRight={0}
+                            borderTop={0}
+                            padding={2}
+                        >
+                            <Grid container>
+                                <Grid item>
                                     <Typography variant="h6">
                                         {t("label.customize-time-range")}
                                     </Typography>
-                                </Box>
+                                </Grid>
                             </Grid>
+                        </Box>
 
-                            <Grid container item spacing={0}>
-                                {/* Time range selection */}
-                                <Grid item>
+                        {/* Time range list */}
+                        <Box
+                            border={Dimension.WIDTH_BORDER_DEFAULT}
+                            borderBottom={0}
+                            borderColor={Palette.COLOR_BORDER_DEFAULT}
+                            borderLeft={0}
+                            borderTop={0}
+                            className={
+                                timeRangeSelectorClasses.timeRangeListContainer
+                            }
+                        >
+                            <List dense>
+                                {/* Recent custom time range durations label */}
+                                {!isEmpty(
+                                    props.recentCustomTimeRangeDurations
+                                ) && (
+                                    <ListItem
+                                        className={
+                                            timeRangeSelectorClasses.timeRangeListLabel
+                                        }
+                                    >
+                                        <ListItemText
+                                            primary={t("label.recent-custom")}
+                                            primaryTypographyProps={{
+                                                variant: "overline",
+                                            }}
+                                        />
+                                    </ListItem>
+                                )}
+
+                                {/* Recent custom time range durations */}
+                                {props.recentCustomTimeRangeDurations &&
+                                    props.recentCustomTimeRangeDurations.map(
+                                        (
+                                            recentCustomTimeRangeDuration,
+                                            index
+                                        ) => (
+                                            <Tooltip
+                                                arrow
+                                                key={index}
+                                                placement="right"
+                                                title={formatTimeRangeDuration(
+                                                    recentCustomTimeRangeDuration
+                                                )}
+                                            >
+                                                <ListItem
+                                                    button
+                                                    divider={
+                                                        (props.recentCustomTimeRangeDurations &&
+                                                            props
+                                                                .recentCustomTimeRangeDurations
+                                                                .length - 1) ===
+                                                        index
+                                                    }
+                                                    onClick={(): void => {
+                                                        onRecentCustomTimeRangeDurationClick(
+                                                            recentCustomTimeRangeDuration
+                                                        );
+                                                    }}
+                                                >
+                                                    <ListItemText
+                                                        primary={formatTimeRangeDuration(
+                                                            recentCustomTimeRangeDuration
+                                                        )}
+                                                        primaryTypographyProps={{
+                                                            variant: "button",
+                                                            color: "primary",
+                                                            className:
+                                                                timeRangeSelectorClasses.timeRangeListItem,
+                                                        }}
+                                                    />
+                                                </ListItem>
+                                            </Tooltip>
+                                        )
+                                    )}
+
+                                {/* Time ranges */}
+                                {Object.values(TimeRange)
+                                    .filter(
+                                        (timeRange) =>
+                                            typeof timeRange === "string"
+                                    )
+                                    .map((timeRange, index) => (
+                                        <Fragment key={index}>
+                                            <ListItem
+                                                button
+                                                divider={
+                                                    timeRange ===
+                                                        TimeRange.CUSTOM ||
+                                                    timeRange ===
+                                                        TimeRange.LAST_30_DAYS ||
+                                                    timeRange ===
+                                                        TimeRange.YESTERDAY ||
+                                                    timeRange ===
+                                                        TimeRange.LAST_WEEK ||
+                                                    timeRange ===
+                                                        TimeRange.LAST_MONTH
+                                                }
+                                                onClick={(): void => {
+                                                    onTimeRangeClick(timeRange);
+                                                }}
+                                            >
+                                                <ListItemText
+                                                    primary={formatTimeRange(
+                                                        timeRange
+                                                    )}
+                                                    primaryTypographyProps={{
+                                                        variant: "button",
+                                                        color: "primary",
+                                                        className:
+                                                            componentTimeRangeDuration.timeRange ===
+                                                            timeRange
+                                                                ? classnames(
+                                                                      timeRangeSelectorClasses.selectedTimeRangeListItem,
+                                                                      timeRangeSelectorClasses.timeRangeListItem
+                                                                  )
+                                                                : timeRangeSelectorClasses.timeRangeListItem,
+                                                    }}
+                                                />
+                                            </ListItem>
+                                        </Fragment>
+                                    ))}
+                            </List>
+                        </Box>
+
+                        {/* Calendars and controls */}
+                        <Box
+                            className={
+                                timeRangeSelectorClasses.calendarsAndControlsContainer
+                            }
+                        >
+                            <Grid container>
+                                {/* Calendars */}
+                                <Grid
+                                    item
+                                    className={
+                                        timeRangeSelectorClasses.calendarsContainer
+                                    }
+                                    md={12}
+                                >
+                                    <MuiPickersUtilsProvider utils={LuxonUtils}>
+                                        <Grid container>
+                                            {/* Start time calendar */}
+                                            <Grid
+                                                item
+                                                className={
+                                                    timeRangeSelectorClasses.startTimeCalendar
+                                                }
+                                                md={6}
+                                            >
+                                                {/* Calendar label */}
+                                                <div
+                                                    className={
+                                                        timeRangeSelectorClasses.calendarLabel
+                                                    }
+                                                >
+                                                    <Typography variant="overline">
+                                                        {t("label.from")}
+                                                    </Typography>
+                                                </div>
+
+                                                {/* Calendar */}
+                                                <DateTimePicker
+                                                    disableFuture
+                                                    hideTabs
+                                                    ToolbarComponent={
+                                                        TimeRangeSelectorCalendarToolbar
+                                                    }
+                                                    value={
+                                                        new Date(
+                                                            componentTimeRangeDuration.startTime
+                                                        )
+                                                    }
+                                                    variant="static"
+                                                    onChange={onStartTimeChange}
+                                                />
+                                            </Grid>
+
+                                            {/* End time calendar */}
+                                            <Grid
+                                                item
+                                                className={
+                                                    timeRangeSelectorClasses.endTimeCalendar
+                                                }
+                                                md={6}
+                                            >
+                                                {/* Calendar label */}
+                                                <div
+                                                    className={
+                                                        timeRangeSelectorClasses.calendarLabel
+                                                    }
+                                                >
+                                                    <Typography variant="overline">
+                                                        {t("label.to")}
+                                                    </Typography>
+                                                </div>
+
+                                                {/* Calendar */}
+                                                <DateTimePicker
+                                                    disableFuture
+                                                    hideTabs
+                                                    ToolbarComponent={
+                                                        TimeRangeSelectorCalendarToolbar
+                                                    }
+                                                    minDate={
+                                                        new Date(
+                                                            componentTimeRangeDuration.startTime
+                                                        )
+                                                    }
+                                                    value={
+                                                        new Date(
+                                                            componentTimeRangeDuration.endTime
+                                                        )
+                                                    }
+                                                    variant="static"
+                                                    onChange={onEndTimeChange}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </MuiPickersUtilsProvider>
+                                </Grid>
+
+                                {/* Controls */}
+                                <Grid item md={12}>
                                     <Box
                                         border={Dimension.WIDTH_BORDER_DEFAULT}
                                         borderBottom={0}
@@ -203,243 +439,11 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                             Palette.COLOR_BORDER_DEFAULT
                                         }
                                         borderLeft={0}
-                                        borderTop={0}
-                                        className={
-                                            timeRangeSelectorClasses.timeRangeList
-                                        }
+                                        borderRight={0}
+                                        margin={2}
+                                        paddingTop={2}
                                     >
-                                        <List dense>
-                                            {/* Recent custom time ranges label */}
-                                            {props.recentCustomTimeRangeDurations &&
-                                                props
-                                                    .recentCustomTimeRangeDurations
-                                                    .length > 0 && (
-                                                    <ListItem
-                                                        className={
-                                                            timeRangeSelectorClasses.timeRangeListLabel
-                                                        }
-                                                    >
-                                                        <ListItemText
-                                                            primary={t(
-                                                                "label.recent-custom"
-                                                            )}
-                                                            primaryTypographyProps={{
-                                                                variant:
-                                                                    "overline",
-                                                            }}
-                                                        />
-                                                    </ListItem>
-                                                )}
-
-                                            {/* Recent custom time ranges */}
-                                            {props.recentCustomTimeRangeDurations &&
-                                                props.recentCustomTimeRangeDurations.map(
-                                                    (
-                                                        recentTimeRangeDuration,
-                                                        index
-                                                    ) => (
-                                                        <ListItem
-                                                            button
-                                                            key={index}
-                                                            onClick={(): void => {
-                                                                onRecentCustomTimeRangeClick(
-                                                                    recentTimeRangeDuration
-                                                                );
-                                                            }}
-                                                        >
-                                                            <Tooltip
-                                                                arrow
-                                                                placement="right"
-                                                                title={formatTimeRangeDuration(
-                                                                    recentTimeRangeDuration
-                                                                )}
-                                                            >
-                                                                <ListItemText
-                                                                    primary={formatTimeRangeDuration(
-                                                                        recentTimeRangeDuration
-                                                                    )}
-                                                                    primaryTypographyProps={{
-                                                                        variant:
-                                                                            "button",
-                                                                        color:
-                                                                            "primary",
-                                                                        className:
-                                                                            timeRangeSelectorClasses.timeRangeListItem,
-                                                                    }}
-                                                                />
-                                                            </Tooltip>
-                                                        </ListItem>
-                                                    )
-                                                )}
-
-                                            {/* Divider, if recent custom time ranges were
-                                            rendered */}
-                                            {props.recentCustomTimeRangeDurations &&
-                                                props
-                                                    .recentCustomTimeRangeDurations
-                                                    .length > 0 && <Divider />}
-
-                                            {/* Time ranges */}
-                                            {Object.values(TimeRange)
-                                                // Iterate through available values
-                                                .filter(
-                                                    // Filter string values
-                                                    (timeRange) =>
-                                                        typeof timeRange ===
-                                                        "string"
-                                                )
-                                                .map((timeRange, index) => (
-                                                    <Fragment key={index}>
-                                                        <ListItem
-                                                            button
-                                                            onClick={(): void => {
-                                                                onTimeRangeClick(
-                                                                    timeRange
-                                                                );
-                                                            }}
-                                                        >
-                                                            <ListItemText
-                                                                primary={formatTimeRange(
-                                                                    timeRange
-                                                                )}
-                                                                primaryTypographyProps={{
-                                                                    variant:
-                                                                        "button",
-                                                                    color:
-                                                                        "primary",
-                                                                    className:
-                                                                        timeRangeDuration.timeRange ===
-                                                                        timeRange
-                                                                            ? classnames(
-                                                                                  timeRangeSelectorClasses.selectedTimeRangeListItem,
-                                                                                  timeRangeSelectorClasses.timeRangeListItem
-                                                                              )
-                                                                            : timeRangeSelectorClasses.timeRangeListItem,
-                                                                }}
-                                                            />
-                                                        </ListItem>
-
-                                                        {/* Place divider after certain options */}
-                                                        {(timeRange ===
-                                                            TimeRange.CUSTOM ||
-                                                            timeRange ===
-                                                                TimeRange.LAST_30_DAYS ||
-                                                            timeRange ===
-                                                                TimeRange.YESTERDAY ||
-                                                            timeRange ===
-                                                                TimeRange.LAST_WEEK ||
-                                                            timeRange ===
-                                                                TimeRange.LAST_MONTH) && (
-                                                            <Divider />
-                                                        )}
-                                                    </Fragment>
-                                                ))}
-                                        </List>
-                                    </Box>
-                                </Grid>
-
-                                <Grid item>
-                                    <Grid
-                                        container
-                                        direction="column"
-                                        spacing={0}
-                                    >
-                                        {/* Calendars */}
-                                        <Grid container item spacing={0}>
-                                            <MuiPickersUtilsProvider
-                                                utils={LuxonUtils}
-                                            >
-                                                {/* Start time */}
-                                                <Grid item>
-                                                    {/* Start time label */}
-                                                    <div
-                                                        className={
-                                                            timeRangeSelectorClasses.calendarLabel
-                                                        }
-                                                    >
-                                                        <Typography variant="overline">
-                                                            {t("label.from")}
-                                                        </Typography>
-                                                    </div>
-
-                                                    {/* Start time calendar */}
-                                                    <DateTimePicker
-                                                        disableFuture
-                                                        hideTabs
-                                                        ToolbarComponent={
-                                                            TimeRangeSelectorCalendarToolbar
-                                                        }
-                                                        value={
-                                                            new Date(
-                                                                timeRangeDuration.startTime
-                                                            )
-                                                        }
-                                                        variant="static"
-                                                        onChange={
-                                                            onStartDateChange
-                                                        }
-                                                    />
-                                                </Grid>
-
-                                                {/* End time */}
-                                                <Grid item>
-                                                    {/* End time label */}
-                                                    <div
-                                                        className={
-                                                            timeRangeSelectorClasses.calendarLabel
-                                                        }
-                                                    >
-                                                        <Typography variant="overline">
-                                                            {t("label.to")}
-                                                        </Typography>
-                                                    </div>
-
-                                                    {/* End time calendar */}
-                                                    <DateTimePicker
-                                                        disableFuture
-                                                        hideTabs
-                                                        ToolbarComponent={
-                                                            TimeRangeSelectorCalendarToolbar
-                                                        }
-                                                        minDate={
-                                                            new Date(
-                                                                timeRangeDuration.startTime
-                                                            )
-                                                        }
-                                                        value={
-                                                            new Date(
-                                                                timeRangeDuration.endTime
-                                                            )
-                                                        }
-                                                        variant="static"
-                                                        onChange={
-                                                            onEndDateChange
-                                                        }
-                                                    />
-                                                </Grid>
-                                            </MuiPickersUtilsProvider>
-                                        </Grid>
-
-                                        {/* Controls */}
-                                        <Grid
-                                            container
-                                            item
-                                            className={
-                                                timeRangeSelectorClasses.timeRangeSelectorChildContainer
-                                            }
-                                        >
-                                            {/* Apply */}
-                                            <Grid item>
-                                                <Button
-                                                    color="primary"
-                                                    size="large"
-                                                    variant="contained"
-                                                    onClick={onApply}
-                                                >
-                                                    {t("label.apply")}
-                                                </Button>
-                                            </Grid>
-
+                                        <Grid container justify="flex-end">
                                             {/* Cancel */}
                                             <Grid item>
                                                 <Button
@@ -453,13 +457,37 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                     {t("label.cancel")}
                                                 </Button>
                                             </Grid>
+
+                                            {/* Apply */}
+                                            <Grid item>
+                                                <Button
+                                                    color="primary"
+                                                    size="large"
+                                                    variant="contained"
+                                                    onClick={onApply}
+                                                >
+                                                    {t("label.apply")}
+                                                </Button>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
+                                    </Box>
                                 </Grid>
                             </Grid>
-                        </Grid>
+                        </Box>
                     </div>
                 </Popover>
+            </Grid>
+
+            {/* Refresh button */}
+            <Grid item>
+                <Button
+                    className={timeRangeSelectorClasses.timeRangeButton}
+                    color="primary"
+                    variant="outlined"
+                    onClick={onRefresh}
+                >
+                    <Refresh />
+                </Button>
             </Grid>
         </Grid>
     );

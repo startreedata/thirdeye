@@ -12,8 +12,8 @@ export const LoadingIndicator: FunctionComponent = () => {
             className={loadingIndicatorClasses.container}
             justify="center"
         >
+            {/* Loading indicator */}
             <Grid item>
-                {/* Loading indicator */}
                 <CircularProgress color="primary" />
             </Grid>
         </Grid>

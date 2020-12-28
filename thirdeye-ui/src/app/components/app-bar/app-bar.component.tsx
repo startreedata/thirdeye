@@ -20,18 +20,18 @@ import {
     getAnomaliesAllPath,
     getBasePath,
     getConfigurationPath,
-    getConfigurationSubscriptionGroupsCreatePath,
     getHomePath,
     getSignInPath,
     getSignOutPath,
+    getSubscriptionGroupsCreatePath,
 } from "../../utils/routes-util/routes-util";
 import { useAppBarStyles } from "./app-bar.styles";
 
 export const AppBar: FunctionComponent = () => {
     const appBarClasses = useAppBarStyles();
     const [
-        optionsAnchorElement,
-        setOptionsAnchorElement,
+        shortcutOptionsAnchorElement,
+        setShortcutOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
     const [auth] = useAuthStore((state) => [state.auth]);
     const history = useHistory();
@@ -58,20 +58,20 @@ export const AppBar: FunctionComponent = () => {
         history.push(getConfigurationPath());
     };
 
-    const onCreateOptionsClick = (event: MouseEvent<HTMLElement>): void => {
-        setOptionsAnchorElement(event.currentTarget);
+    const onShortcutOptionsClick = (event: MouseEvent<HTMLElement>): void => {
+        setShortcutOptionsAnchorElement(event.currentTarget);
     };
 
     const onCreateAlert = (): void => {
         history.push(getAlertsCreatePath());
 
-        closeCreateOptions();
+        closeShortcutOptions();
     };
 
     const onCreateSubscriptionGroup = (): void => {
-        history.push(getConfigurationSubscriptionGroupsCreatePath());
+        history.push(getSubscriptionGroupsCreatePath());
 
-        closeCreateOptions();
+        closeShortcutOptions();
     };
 
     const onSignInClick = (): void => {
@@ -82,8 +82,8 @@ export const AppBar: FunctionComponent = () => {
         history.push(getSignOutPath());
     };
 
-    const closeCreateOptions = (): void => {
-        setOptionsAnchorElement(null);
+    const closeShortcutOptions = (): void => {
+        setShortcutOptionsAnchorElement(null);
     };
 
     const isRouteCurrent = (route: string): boolean => {
@@ -92,7 +92,6 @@ export const AppBar: FunctionComponent = () => {
 
     return (
         <MuiAppBar className={appBarClasses.container}>
-            {/* Required to appropriately layout children in app bar */}
             <Toolbar>
                 {/* ThirdEye logo */}
                 <Link
@@ -165,20 +164,20 @@ export const AppBar: FunctionComponent = () => {
 
                 {auth && (
                     <>
-                        {/* Create options */}
+                        {/* Shortcut options */}
                         <Fab
                             className={classnames(appBarClasses.rightAlign)}
                             color="primary"
                             size="small"
-                            onClick={onCreateOptionsClick}
+                            onClick={onShortcutOptionsClick}
                         >
                             <Add />
                         </Fab>
 
                         <Menu
-                            anchorEl={optionsAnchorElement}
-                            open={Boolean(optionsAnchorElement)}
-                            onClose={closeCreateOptions}
+                            anchorEl={shortcutOptionsAnchorElement}
+                            open={Boolean(shortcutOptionsAnchorElement)}
+                            onClose={closeShortcutOptions}
                         >
                             {/* Create alert */}
                             <MenuItem onClick={onCreateAlert}>

@@ -3,8 +3,7 @@ import { round } from "lodash";
 import { DateTime, Interval } from "luxon";
 import { formatNumber } from "../number-util/number-util";
 
-// Returns most appropriate formatted string representation of interval between given start and
-// end time
+// Returns most appropriate formatted string representation of interval between start and end time
 // For example:
 // 1 second
 // 1 day
@@ -93,7 +92,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
     }`;
 };
 
-// Returns formatted string representation of given date
+// Returns formatted string representation of date
 // For example:
 // MMM DD, YYYY, HH:MM AM/PM
 export const formatDateAndTime = (date: number): string => {
@@ -112,7 +111,7 @@ export const formatDateAndTime = (date: number): string => {
     });
 };
 
-// Returns formatted string representation of date part in given date
+// Returns formatted string representation of date part of date
 // For example:
 // MMM DD, YYYY
 export const formatDate = (date: number): string => {
@@ -129,7 +128,7 @@ export const formatDate = (date: number): string => {
     });
 };
 
-// Returns formatted string representation of time part in given date
+// Returns formatted string representation of time part of date
 // For example:
 // HH:MM AM/PM
 export const formatTime = (date: number): string => {
@@ -145,7 +144,7 @@ export const formatTime = (date: number): string => {
     });
 };
 
-// Returns formatted string representation of year in given date
+// Returns formatted string representation of year in date
 // For example:
 // YYYY
 export const formatYear = (date: number): string => {
@@ -156,7 +155,7 @@ export const formatYear = (date: number): string => {
     return DateTime.fromMillis(date).toFormat("yyyy");
 };
 
-// Returns formatted string representation of month in given date
+// Returns formatted string representation of month in date
 // For example:
 // MMM
 export const formatMonth = (date: number): string => {
@@ -167,7 +166,7 @@ export const formatMonth = (date: number): string => {
     return DateTime.fromMillis(date).toFormat("MMM");
 };
 
-// Returns formatted string representation of month with year in given date
+// Returns formatted string representation of month with year in date
 // For example:
 // MMM YYYY
 export const formatMonthOfYear = (date: number): string => {
@@ -183,7 +182,7 @@ export const formatMonthOfYear = (date: number): string => {
     });
 };
 
-// Returns formatted string representation of day in given date
+// Returns formatted string representation of day in date
 // For example:
 // DD
 export const formatDay = (date: number): string => {
@@ -194,7 +193,7 @@ export const formatDay = (date: number): string => {
     return DateTime.fromMillis(date).toFormat("dd");
 };
 
-// Returns formatted string representation of hour in given date
+// Returns formatted string representation of hour in date
 // For example:
 // HH
 export const formatHour = (date: number): string => {
@@ -205,7 +204,7 @@ export const formatHour = (date: number): string => {
     return DateTime.fromMillis(date).toFormat("hh");
 };
 
-// Returns formatted string representation of minute in given date
+// Returns formatted string representation of minute in date
 // For example:
 // MM
 export const formatMinute = (date: number): string => {
@@ -216,7 +215,7 @@ export const formatMinute = (date: number): string => {
     return DateTime.fromMillis(date).toFormat("mm");
 };
 
-// Returns formatted string representation of meridiem in given date
+// Returns formatted string representation of meridiem in date
 // For example:
 // AM/PM
 export const formatMeridiem = (date: number): string => {
@@ -227,7 +226,7 @@ export const formatMeridiem = (date: number): string => {
     return DateTime.fromMillis(date).toFormat("a");
 };
 
-// Returns date with switched meridiem as compared to given date
+// Returns date with switched meridiem as compared to original date
 // For example:
 // Dec 01, 20, 12:00 PM to Dec 01, 20, 12:00 AM
 export const switchMeridiem = (date: number): number => {
@@ -241,7 +240,7 @@ export const switchMeridiem = (date: number): number => {
 
     // Verify only meridiem changed and not day
     if (switchedDate.day !== originalDate.day) {
-        // Date changed, add 12 hours instead
+        // Day changed, add 12 hours instead
         switchedDate = originalDate.plus({ hour: 12 });
     }
 

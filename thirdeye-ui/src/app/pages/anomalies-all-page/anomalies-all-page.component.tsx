@@ -1,21 +1,30 @@
 import { Grid } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnomalyCard } from "../../components/anomaly-card/anomaly-card.component";
 import { AnomalyCardData } from "../../components/anomaly-card/anomaly-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SearchBar } from "../../components/search-bar/search-bar.component";
-import { getAllAnomalies } from "../../rest/anomaly-rest/anomaly-rest";
+import {
+    deleteAnomaly,
+    getAllAnomalies,
+} from "../../rest/anomaly-rest/anomaly-rest";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     filterAnomalies,
     getAnomalyCardDatas,
 } from "../../utils/anomaly-util/anomaly-util";
 import { getAnomaliesAllPath } from "../../utils/routes-util/routes-util";
-import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar-util/snackbar-util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -44,33 +53,72 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     useEffect(() => {
         // Fetch data
-        const init = async (): Promise<void> => {
-            await fetchData();
-
-            setLoading(false);
-        };
-
-        init();
+        fetchData();
     }, []);
 
     useEffect(() => {
-        // Fetched data, or search changed, reset
+        // Fetched data or search changed, reset
         setFilteredAnomalyCardDatas(
             filterAnomalies(anomalyCardDatas, searchWords)
         );
     }, [anomalyCardDatas, searchWords]);
 
-    const fetchData = async (): Promise<void> => {
+    const fetchData = (): void => {
         let fetchedAnomalyCardDatas: AnomalyCardData[] = [];
-        try {
-            fetchedAnomalyCardDatas = getAnomalyCardDatas(
-                await getAllAnomalies()
-            );
-        } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
-        } finally {
-            setAnomalyCardDatas(fetchedAnomalyCardDatas);
+
+        getAllAnomalies()
+            .then((anomalies: Anomaly[]): void => {
+                fetchedAnomalyCardDatas = getAnomalyCardDatas(anomalies);
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setAnomalyCardDatas(fetchedAnomalyCardDatas);
+
+                setLoading(false);
+            });
+    };
+
+    const onDeleteAnomaly = (anomalyCardData: AnomalyCardData): void => {
+        if (!anomalyCardData) {
+            return;
         }
+
+        // Delete
+        deleteAnomaly(anomalyCardData.id)
+            .then((anomaly: Anomaly): void => {
+                // Remove deleted anomaly from fetched anomalies
+                removeAnomalyCardData(anomaly);
+
+                enqueueSnackbar(
+                    t("message.delete-success", { entity: t("label.anomaly") }),
+                    getSuccessSnackbarOption()
+                );
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.delete-error", { entity: t("label.anomaly") }),
+                    getErrorSnackbarOption()
+                );
+            });
+    };
+
+    const removeAnomalyCardData = (anomaly: Anomaly): void => {
+        if (!anomaly) {
+            return;
+        }
+
+        setAnomalyCardDatas((anomalyCardDatas) =>
+            anomalyCardDatas.filter(
+                (anomalyCardData: AnomalyCardData): boolean => {
+                    return anomalyCardData.id !== anomaly.id;
+                }
+            )
+        );
     };
 
     if (loading) {
@@ -83,7 +131,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents contentsCenterAlign title={t("label.anomalies")}>
+            <PageContents centered title={t("label.anomalies")}>
                 <Grid container>
                     {/* Search */}
                     <Grid item md={12}>
@@ -111,11 +159,15 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                                     <AnomalyCard
                                         anomaly={filteredAnomalyCardData}
                                         searchWords={searchWords}
+                                        onDelete={onDeleteAnomaly}
                                     />
                                 </Grid>
                             )
                         )}
                 </Grid>
+
+                {/* No data available message */}
+                {isEmpty(filteredAnomalyCardDatas) && <NoDataIndicator />}
             </PageContents>
         </PageContainer>
     );

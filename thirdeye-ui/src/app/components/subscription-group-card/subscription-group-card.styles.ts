@@ -1,15 +1,13 @@
-import { createStyles, makeStyles } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 
-export const useSubscriptinoGroupCardStyles = makeStyles(() => {
-    return createStyles({
-        bottomRowLabel: {
-            float: "left",
-        },
-        bottomRowIcon: {
-            marginBottom: "-6px",
-        },
-        bottomRowValue: {
-            clear: "both",
-        },
-    });
+export const useSubscriptinoGroupCardStyles = makeStyles({
+    label: {
+        float: "left",
+    },
+    expandCollapseButton: {
+        marginBottom: "-6px",
+    },
+    value: {
+        clear: "both",
+    },
 });

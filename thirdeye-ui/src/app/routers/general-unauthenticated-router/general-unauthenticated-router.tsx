@@ -4,6 +4,7 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { SignInPage } from "../../pages/sign-in-page/sign-in-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
+import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
 import {
     AppRoute,
@@ -16,6 +17,9 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumbs,
     ]);
+    const [removeAppToolbar] = useAppToolbarStore((state) => [
+        state.removeAppToolbar,
+    ]);
     const [setRedirectionPath] = useRedirectionPathStore((state) => [
         state.setRedirectionPath,
     ]);
@@ -25,6 +29,9 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
         // Create app section breadcrumbs
         setAppSectionBreadcrumbs([]);
 
+        // No app toolbar under this router
+        removeAppToolbar();
+
         setupRedirectionPath();
 
         setLoading(false);
@@ -32,7 +39,7 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
 
     const setupRedirectionPath = (): void => {
         // If location is anything other than the sign in/out path, store it to redirect the user
-        // after potential authentication
+        // after authentication
         if (
             location.pathname === AppRoute.SIGN_IN ||
             location.pathname === AppRoute.SIGN_OUT

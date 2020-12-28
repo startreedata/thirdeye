@@ -7,6 +7,7 @@ import { AnomaliesAllPage } from "../../pages/anomalies-all-page/anomalies-all-p
 import { AnomaliesDetailPage } from "../../pages/anomalies-detail-page/anomalies-detail-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
+import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
     getAnomaliesAllPath,
@@ -18,16 +19,22 @@ export const AnomaliesRouter: FunctionComponent = () => {
     const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumbs,
     ]);
+    const [removeAppToolbar] = useAppToolbarStore((state) => [
+        state.removeAppToolbar,
+    ]);
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create router breadcrumb
+        // Create app section breadcrumbs
         setAppSectionBreadcrumbs([
             {
                 text: t("label.anomalies"),
                 pathFn: getAnomaliesPath,
             },
         ]);
+
+        // No app toolbar under this router
+        removeAppToolbar();
 
         setLoading(false);
     }, []);

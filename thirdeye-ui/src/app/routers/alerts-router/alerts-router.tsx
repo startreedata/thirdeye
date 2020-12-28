@@ -9,6 +9,7 @@ import { AlertsDetailPage } from "../../pages/alerts-detail-page/alerts-detail-p
 import { AlertsUpdatePage } from "../../pages/alerts-update-page/alerts-update-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
+import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
     getAlertsAllPath,
@@ -20,6 +21,9 @@ export const AlertsRouter: FunctionComponent = () => {
     const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumbs,
     ]);
+    const [removeAppToolbar] = useAppToolbarStore((state) => [
+        state.removeAppToolbar,
+    ]);
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -30,6 +34,9 @@ export const AlertsRouter: FunctionComponent = () => {
                 pathFn: getAlertsPath,
             },
         ]);
+
+        // No app toolbar under this router
+        removeAppToolbar();
 
         setLoading(false);
     }, []);

@@ -10,15 +10,7 @@ import {
 
 jest.mock("axios");
 
-const mockSubscriptionGroupRequest: SubscriptionGroup = {
-    name: "testSubscriptionGroupRequest",
-} as SubscriptionGroup;
-const mockSubscriptionGroupResponse: SubscriptionGroup = {
-    name: "testSubscriptionGroupResponse",
-} as SubscriptionGroup;
-const mockError = new Error("testErrorMessage");
-
-describe("SubscriptionGroup REST", () => {
+describe("Subscription Group REST", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -28,7 +20,7 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("getSubscriptionGroup shall invoke axios.get with appropriate input and return result", async () => {
-        axios.get = jest.fn().mockResolvedValue({
+        jest.spyOn(axios, "get").mockResolvedValue({
             data: mockSubscriptionGroupResponse,
         });
 
@@ -39,7 +31,7 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("getSubscriptionGroup shall throw encountered error", async () => {
-        axios.get = jest.fn().mockRejectedValue(mockError);
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getSubscriptionGroup(1)).rejects.toThrow(
             "testErrorMessage"
@@ -47,7 +39,7 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("getAllSubscriptionGroups shall invoke axios.get with appropriate input and return result", async () => {
-        axios.get = jest.fn().mockResolvedValue({
+        jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });
 
@@ -58,7 +50,7 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("getAllSubscriptionGroups shall throw encountered error", async () => {
-        axios.get = jest.fn().mockRejectedValue(mockError);
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getAllSubscriptionGroups()).rejects.toThrow(
             "testErrorMessage"
@@ -66,7 +58,7 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("createSubscriptionGroup shall invoke axios.post with appropriate input and return result", async () => {
-        axios.post = jest.fn().mockResolvedValue({
+        jest.spyOn(axios, "post").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });
 
@@ -81,7 +73,7 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("createSubscriptionGroup shall throw encountered error", async () => {
-        axios.post = jest.fn().mockRejectedValue(mockError);
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(
             createSubscriptionGroup(mockSubscriptionGroupRequest)
@@ -89,7 +81,7 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("updateSubscriptionGroup shall invoke axios.put with appropriate input and return result", async () => {
-        axios.put = jest.fn().mockResolvedValue({
+        jest.spyOn(axios, "put").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });
 
@@ -104,7 +96,7 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("updateSubscriptionGroup shall throw encountered error", async () => {
-        axios.put = jest.fn().mockRejectedValue(mockError);
+        jest.spyOn(axios, "put").mockRejectedValue(mockError);
 
         await expect(
             updateSubscriptionGroup(mockSubscriptionGroupRequest)
@@ -112,7 +104,7 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("deleteSubscriptionGroup shall invoke axios.delete with appropriate input and return result", async () => {
-        axios.delete = jest.fn().mockResolvedValue({
+        jest.spyOn(axios, "delete").mockResolvedValue({
             data: mockSubscriptionGroupResponse,
         });
 
@@ -123,10 +115,18 @@ describe("SubscriptionGroup REST", () => {
     });
 
     test("deleteSubscriptionGroup shall throw encountered error", async () => {
-        axios.delete = jest.fn().mockRejectedValue(mockError);
+        jest.spyOn(axios, "delete").mockRejectedValue(mockError);
 
         await expect(deleteSubscriptionGroup(1)).rejects.toThrow(
             "testErrorMessage"
         );
     });
 });
+
+const mockSubscriptionGroupRequest = {
+    name: "testSubscriptionGroupRequest",
+} as SubscriptionGroup;
+const mockSubscriptionGroupResponse = {
+    name: "testSubscriptionGroupResponse",
+} as SubscriptionGroup;
+const mockError = new Error("testErrorMessage");

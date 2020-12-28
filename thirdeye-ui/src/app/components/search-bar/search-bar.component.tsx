@@ -25,7 +25,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     props: SearchBarProps
 ) => {
     const [searchText, setSearchText] = useState("");
-    const inputRef = createRef<HTMLInputElement>();
+    const searchInputRef = createRef<HTMLInputElement>();
     const location = useLocation();
     const { t } = useTranslation();
 
@@ -44,18 +44,22 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         }
     }, [location.search]);
 
-    const onChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    const onSearchInputChange = (
+        event: ChangeEvent<HTMLInputElement>
+    ): void => {
         // Update search text and arrange to send event with a delay to account for a burst of
         // change events
         updateSearchText(event.currentTarget.value, true);
     };
 
-    const onClearSearchClick = (): void => {
+    const onClearSearch = (): void => {
         // Update search text and arrange to send event immediately
         updateSearchText("", false);
 
         // Set focus
-        inputRef && inputRef.current && inputRef.current.focus();
+        searchInputRef &&
+            searchInputRef.current &&
+            searchInputRef.current.focus();
     };
 
     const updateSearchText = (searchText: string, debounced: boolean): void => {
@@ -112,7 +116,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 
                         {/* Clear search button */}
                         <InputAdornment position="end">
-                            <IconButton onClick={onClearSearchClick}>
+                            <IconButton onClick={onClearSearch}>
                                 <Close />
                             </IconButton>
                         </InputAdornment>
@@ -120,11 +124,11 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
                 ),
             }}
             autoFocus={props.autoFocus}
-            inputRef={inputRef}
+            inputRef={searchInputRef}
             label={props.label ? props.label : t("label.search")}
             value={searchText}
             variant="outlined"
-            onChange={onChange}
+            onChange={onSearchInputChange}
         />
     );
 };

@@ -20,7 +20,7 @@ export const useAuthStore = create<AuthStore>(
             },
 
             // Action for signing out
-            removeAccessToken: (): void => {
+            clearAccessToken: (): void => {
                 set({
                     auth: false,
                     accessToken: "",

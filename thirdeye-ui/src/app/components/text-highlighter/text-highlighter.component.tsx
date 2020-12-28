@@ -12,7 +12,7 @@ export const TextHighlighter: FunctionComponent<TextHighlighterProps> = (
         <Highlighter
             highlightClassName={textHighlighterClasses.highlight}
             searchWords={props.searchWords ? props.searchWords : []}
-            textToHighlight={props.textToHighlight ? props.textToHighlight : ""}
+            textToHighlight={props.text ? props.text : ""}
         />
     );
 };

@@ -1,4 +1,4 @@
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { NoDataIndicatorProps } from "./no-data-indicator.interfaces";
@@ -17,9 +17,11 @@ export const NoDataIndicator: FunctionComponent<NoDataIndicatorProps> = (
             className={noDataIndicatorClasses.container}
             justify="center"
         >
+            {/* No data available message */}
             <Grid item>
-                {/* Message */}
-                {props.text ? props.text : t("message.no-data-available")}
+                <Typography variant="body1">
+                    {props.text ? props.text : t("message.no-data-available")}
+                </Typography>
             </Grid>
         </Grid>
     );

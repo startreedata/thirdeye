@@ -16,8 +16,8 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
             const { pageBreadcrumbs } = get();
 
             set({
-                appSectionBreadcrumbs: breadcrumbs,
                 appBreadcrumbs: [...breadcrumbs, ...pageBreadcrumbs],
+                appSectionBreadcrumbs: breadcrumbs,
             });
         },
 
@@ -25,8 +25,31 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
             const { appSectionBreadcrumbs } = get();
 
             set({
-                pageBreadcrumbs: breadcrumbs,
                 appBreadcrumbs: [...appSectionBreadcrumbs, ...breadcrumbs],
+                pageBreadcrumbs: breadcrumbs,
+            });
+        },
+
+        pushPageBreadcrumb: (breadcrumb: Breadcrumb): void => {
+            const { appSectionBreadcrumbs, pageBreadcrumbs } = get();
+
+            set({
+                appBreadcrumbs: [
+                    ...appSectionBreadcrumbs,
+                    ...pageBreadcrumbs,
+                    breadcrumb,
+                ],
+                pageBreadcrumbs: [...pageBreadcrumbs, breadcrumb],
+            });
+        },
+
+        popPageBreadcrumb: (): void => {
+            const { appSectionBreadcrumbs, pageBreadcrumbs } = get();
+            pageBreadcrumbs.pop();
+
+            set({
+                appBreadcrumbs: [...appSectionBreadcrumbs, ...pageBreadcrumbs],
+                pageBreadcrumbs: [...pageBreadcrumbs],
             });
         },
     })

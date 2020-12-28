@@ -1,6 +1,7 @@
 import { Toolbar } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
+import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import { AppBreadcrumbs } from "../app-breadcrumbs/app-breadcrumbs.component";
 import { PageContainerProps } from "./page-container.interfaces";
 import { usePageContainerStyles } from "./page-container.styles";
@@ -12,20 +13,21 @@ export const PageContainer: FunctionComponent<PageContainerProps> = (
     const [appBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.appBreadcrumbs,
     ]);
+    const [appToolbar] = useAppToolbarStore((state) => [state.appToolbar]);
 
     return (
         <div className={pageContainerClasses.outerContainer}>
-            {/* Required to clip the subsequent container under AppBar */}
+            {/* Required to clip the subsequent container under app bar */}
             <Toolbar />
 
             {/* App toolbar */}
-            {props.appToolbar}
+            {appToolbar}
 
             {/* App breadcrumbs */}
             <AppBreadcrumbs breadcrumbs={appBreadcrumbs} />
 
+            {/* Contents */}
             <div className={pageContainerClasses.innerContainer}>
-                {/* Include children */}
                 {props.children}
             </div>
         </div>

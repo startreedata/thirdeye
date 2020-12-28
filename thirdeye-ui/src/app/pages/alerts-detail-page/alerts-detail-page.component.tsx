@@ -3,38 +3,43 @@ import { cloneDeep, toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { AlertCard } from "../../components/alert-card/alert-card.component";
 import { AlertCardData } from "../../components/alert-card/alert-card.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import {
+    deleteAlert,
     getAlert,
     getAlertEvaluation,
     updateAlert,
 } from "../../rest/alert-rest/alert-rest";
-import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
 import {
     createAlertEvaluation,
-    createEmptyAlertCardData,
     getAlertCardData,
 } from "../../utils/alert-util/alert-util";
 import { isValidNumberId } from "../../utils/params-util/params-util";
-import { getAlertsDetailPath } from "../../utils/routes-util/routes-util";
-import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+import {
+    getAlertsAllPath,
+    getAlertsDetailPath,
+} from "../../utils/routes-util/routes-util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar-util/snackbar-util";
 import { AlertsDetailPageParams } from "./alerts-detail-page.interfaces";
 
 export const AlertsDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [alertCardData, setAlertCardData] = useState<AlertCardData>(
-        createEmptyAlertCardData()
-    );
+    const [alertCardData, setAlertCardData] = useState<AlertCardData>();
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
@@ -53,6 +58,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
         state.getAppTimeRangeDuration,
     ]);
     const params = useParams<AlertsDetailPageParams>();
+    const history = useHistory();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
@@ -60,9 +66,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
         // Create page breadcrumbs
         setPageBreadcrumbs([
             {
-                text: alertCardData
-                    ? alertCardData.name
-                    : t("label.no-data-available-marker"),
+                text: alertCardData ? alertCardData.name : "",
                 pathFn: (): string => {
                     return alertCardData
                         ? getAlertsDetailPath(alertCardData.id)
@@ -74,70 +78,69 @@ export const AlertsDetailPage: FunctionComponent = () => {
 
     useEffect(() => {
         // Fetch data
-        const init = async (): Promise<void> => {
-            await fetchData();
-
-            setLoading(false);
-        };
-
-        init();
+        fetchData();
     }, [params.id]);
 
     useEffect(() => {
         // Fetch visualization data
-        const init = async (): Promise<void> => {
-            setAlertEvaluation(null);
+        fetchVisualizationData();
+    }, [alertCardData && alertCardData.id, appTimeRangeDuration]);
 
-            await fetchVisualizationData();
-        };
-
-        init();
-    }, [alertCardData.id, appTimeRangeDuration]);
-
-    const fetchData = async (): Promise<void> => {
-        let fetchedAlertCardData = createEmptyAlertCardData();
+    const fetchData = (): void => {
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
 
+        // Validate alert id from URL
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
                     entity: t("label.alert"),
                     id: params.id,
                 }),
-                SnackbarOption.ERROR
+                getErrorSnackbarOption()
             );
-
-            setAlertCardData(fetchedAlertCardData);
 
             return;
         }
 
-        const [
-            alertResponse,
-            subscriptionGroupsResponse,
-        ] = await Promise.allSettled([
+        Promise.allSettled([
             getAlert(toNumber(params.id)),
             getAllSubscriptionGroups(),
-        ]);
+        ])
+            .then(([alertResponse, subscriptionGroupsResponse]): void => {
+                // Determine if any of the calls failed
+                if (
+                    alertResponse.status === "rejected" ||
+                    subscriptionGroupsResponse.status === "rejected"
+                ) {
+                    enqueueSnackbar(
+                        t("message.fetch-error"),
+                        getErrorSnackbarOption()
+                    );
+                }
 
-        if (
-            alertResponse.status === "rejected" ||
-            subscriptionGroupsResponse.status === "rejected"
-        ) {
-            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
-        } else {
-            fetchedAlertCardData = getAlertCardData(
-                alertResponse.value,
-                subscriptionGroupsResponse.value
-            );
-            fetchedSubscriptionGroups = subscriptionGroupsResponse.value;
-        }
+                // Attempt to gather data
+                if (subscriptionGroupsResponse.status === "fulfilled") {
+                    fetchedSubscriptionGroups =
+                        subscriptionGroupsResponse.value;
+                }
+                if (alertResponse.status === "fulfilled") {
+                    setAlertCardData(
+                        getAlertCardData(
+                            alertResponse.value,
+                            fetchedSubscriptionGroups
+                        )
+                    );
+                }
+            })
+            .finally((): void => {
+                setSubscriptionGroups(fetchedSubscriptionGroups);
 
-        setAlertCardData(fetchedAlertCardData);
-        setSubscriptionGroups(fetchedSubscriptionGroups);
+                setLoading(false);
+            });
     };
 
-    const fetchVisualizationData = async (): Promise<void> => {
+    const fetchVisualizationData = (): void => {
+        setAlertEvaluation(null);
         let fetchedAlertEvaluation = {} as AlertEvaluation;
 
         if (!alertCardData || !alertCardData.alert) {
@@ -147,42 +150,77 @@ export const AlertsDetailPage: FunctionComponent = () => {
         }
 
         const timeRangeDuration = getAppTimeRangeDuration();
-        try {
-            fetchedAlertEvaluation = await getAlertEvaluation(
-                createAlertEvaluation(
-                    alertCardData.alert,
-                    timeRangeDuration.startTime,
-                    timeRangeDuration.endTime
-                )
-            );
-        } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
-        }
-
-        setAlertEvaluation(fetchedAlertEvaluation);
+        getAlertEvaluation(
+            createAlertEvaluation(
+                alertCardData.alert,
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            )
+        )
+            .then((alertEvaluation: AlertEvaluation): void => {
+                fetchedAlertEvaluation = alertEvaluation;
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setAlertEvaluation(fetchedAlertEvaluation);
+            });
     };
 
-    const onAlertStateToggle = async (
-        alertCardData: AlertCardData
-    ): Promise<void> => {
+    const onAlertStateToggle = (alertCardData: AlertCardData): void => {
         if (!alertCardData || !alertCardData.alert) {
             return;
         }
 
-        let alertCopy = cloneDeep(alertCardData.alert);
+        // Create a copy of alert and toggle state
+        const alertCopy = cloneDeep(alertCardData.alert);
         alertCopy.active = !alertCopy.active;
 
-        try {
-            alertCopy = await updateAlert(alertCopy);
+        // Update
+        updateAlert(alertCopy)
+            .then((alert: Alert): void => {
+                // Replace updated alert as fetched alert
+                setAlertCardData(getAlertCardData(alert, subscriptionGroups));
 
-            // Replace updated alert as fetched alert
-            setAlertCardData(getAlertCardData(alertCopy, subscriptionGroups));
-        } catch (error) {
-            enqueueSnackbar(
-                t("message.update-error", { entity: t("label.alert") }),
-                SnackbarOption.ERROR
-            );
+                enqueueSnackbar(
+                    t("message.update-success", { entity: t("label.alert") }),
+                    getSuccessSnackbarOption()
+                );
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.update-error", { entity: t("label.alert") }),
+                    getErrorSnackbarOption()
+                );
+            });
+    };
+
+    const onDeleteAlert = (alertCardData: AlertCardData): void => {
+        if (!alertCardData || !alertCardData.alert) {
+            return;
         }
+
+        // Delete
+        deleteAlert(alertCardData.alert.id)
+            .then((): void => {
+                // Redirect to alerts all path
+                history.push(getAlertsAllPath());
+
+                enqueueSnackbar(
+                    t("message.delete-success", { entity: t("label.alert") }),
+                    getSuccessSnackbarOption()
+                );
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.delete-error", { entity: t("label.alert") }),
+                    getErrorSnackbarOption()
+                );
+            });
     };
 
     if (loading) {
@@ -196,30 +234,32 @@ export const AlertsDetailPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents
-                contentsCenterAlign
-                title={
-                    alertCardData
-                        ? alertCardData.name
-                        : t("label.no-data-available-marker")
-                }
+                centered
+                title={alertCardData ? alertCardData.name : ""}
             >
-                <Grid container>
-                    {/* Alert */}
-                    <Grid item md={12}>
-                        <AlertCard
-                            hideViewDetailsLinks
-                            alert={alertCardData}
-                            onAlertStateToggle={onAlertStateToggle}
-                        />
-                    </Grid>
+                {alertCardData && (
+                    <Grid container>
+                        {/* Alert */}
+                        <Grid item md={12}>
+                            <AlertCard
+                                hideViewDetailsLinks
+                                alert={alertCardData}
+                                onDelete={onDeleteAlert}
+                                onStateToggle={onAlertStateToggle}
+                            />
+                        </Grid>
 
-                    {/* Alert evaluation time series */}
-                    <Grid item md={12}>
-                        <AlertEvaluationTimeSeriesCard
-                            alertEvaluation={alertEvaluation}
-                        />
+                        {/* Alert evaluation time series */}
+                        <Grid item md={12}>
+                            <AlertEvaluationTimeSeriesCard
+                                alertEvaluation={alertEvaluation}
+                            />
+                        </Grid>
                     </Grid>
-                </Grid>
+                )}
+
+                {/* No data available message */}
+                {!alertCardData && <NoDataIndicator />}
             </PageContents>
         </PageContainer>
     );

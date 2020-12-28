@@ -22,8 +22,8 @@ const zoneName = Settings.defaultZoneName;
 
 describe("Time Range Util", () => {
     beforeAll(() => {
-        // Make sure date time manipulations and literal results are consistent regardless of where
-        // tests are run by explicitly setting locale and time zone
+        // Explicitly set locale and time zone to make sure date time manipulations and literal
+        // results are consistent regardless of where tests are run
         Settings.defaultLocale = "en-US";
         Settings.defaultZoneName = "America/Los_Angeles";
 
@@ -49,6 +49,7 @@ describe("Time Range Util", () => {
     });
 
     afterAll(() => {
+        // Restore locale and time zone
         Settings.defaultLocale = locale;
         Settings.defaultZoneName = zoneName;
 
@@ -69,6 +70,14 @@ describe("Time Range Util", () => {
 
     test("getDefaultTimeRangeDuration shall return TimeRange.TODAY time range duration", () => {
         expect(getDefaultTimeRangeDuration()).toEqual({
+            timeRange: TimeRange.TODAY,
+            startTime: 1606809600000,
+            endTime: 1606852800000,
+        });
+    });
+
+    test("getTimeRangeDuration shall return default TimeRange.TODAY time range duration for invalid time range", () => {
+        expect(getTimeRangeDuration((null as unknown) as TimeRange)).toEqual({
             timeRange: TimeRange.TODAY,
             startTime: 1606809600000,
             endTime: 1606852800000,
@@ -187,7 +196,7 @@ describe("Time Range Util", () => {
         });
     });
 
-    test("getTimeRangeDuration shall return default TimeRange.TODAY time range duration for TimeRange.CUSTOM", () => {
+    test("getTimeRangeDuration shall return default TimeRange.TODAY time range duration for custom time range", () => {
         expect(getTimeRangeDuration(TimeRange.CUSTOM)).toEqual({
             timeRange: TimeRange.TODAY,
             startTime: 1606809600000,
@@ -211,19 +220,7 @@ describe("Time Range Util", () => {
         ).toEqual("");
     });
 
-    test("formatTimeRangeDuration shall return appropriate string for valid time range duration", () => {
-        const mockTimeRangeDuration: TimeRangeDuration = {
-            timeRange: TimeRange.LAST_12_HOURS,
-            startTime: 0,
-            endTime: 0,
-        };
-
-        expect(formatTimeRangeDuration(mockTimeRangeDuration)).toEqual(
-            "label.last-12-hours"
-        );
-    });
-
-    test("formatTimeRangeDuration shall return appropriate string for valid custom time range duration", () => {
+    test("formatTimeRangeDuration shall return appropriate string for custom time range duration", () => {
         const mockCustomTimeRangeDuration: TimeRangeDuration = {
             timeRange: TimeRange.CUSTOM,
             startTime: 1,
@@ -239,7 +236,19 @@ describe("Time Range Util", () => {
         });
     });
 
-    test("isTimeRangeDurationEqual shall return true when both given time range durations are invalid", () => {
+    test("formatTimeRangeDuration shall return appropriate string for predefined time range duration", () => {
+        const mockTimeRangeDuration: TimeRangeDuration = {
+            timeRange: TimeRange.LAST_12_HOURS,
+            startTime: 0,
+            endTime: 0,
+        };
+
+        expect(formatTimeRangeDuration(mockTimeRangeDuration)).toEqual(
+            "label.last-12-hours"
+        );
+    });
+
+    test("isTimeRangeDurationEqual shall return true when both time range durations are invalid", () => {
         expect(
             isTimeRangeDurationEqual(
                 (null as unknown) as TimeRangeDuration,
@@ -248,7 +257,7 @@ describe("Time Range Util", () => {
         ).toBeTruthy();
     });
 
-    test("isTimeRangeDurationEqual shall return false when one of the given time range durations is invalid", () => {
+    test("isTimeRangeDurationEqual shall return false when one of the time range durations is invalid", () => {
         const mockCustomTimeRangeDuration: TimeRangeDuration = {
             timeRange: TimeRange.CUSTOM,
             startTime: 1,
@@ -269,7 +278,7 @@ describe("Time Range Util", () => {
         ).toBeFalsy();
     });
 
-    test("isTimeRangeDurationEqual shall return false when both given custom time range durations are not equal", () => {
+    test("isTimeRangeDurationEqual shall return false when both custom time range durations are not equal", () => {
         const mockCustomTimeRangeDuration: TimeRangeDuration = {
             timeRange: TimeRange.CUSTOM,
             startTime: 1,
@@ -289,7 +298,7 @@ describe("Time Range Util", () => {
         ).toBeFalsy();
     });
 
-    test("isTimeRangeDurationEqual shall return true when both given custom time range durations are equal", () => {
+    test("isTimeRangeDurationEqual shall return true when both custom time range durations are equal", () => {
         const mockCustomTimeRangeDuration: TimeRangeDuration = {
             timeRange: TimeRange.CUSTOM,
             startTime: 1,
@@ -309,7 +318,7 @@ describe("Time Range Util", () => {
         ).toBeTruthy();
     });
 
-    test("isTimeRangeDurationEqual shall return false when one of the given time range durations is predefined while the other is custom", () => {
+    test("isTimeRangeDurationEqual shall return false when one of the time range durations is predefined and the other is custom", () => {
         const mockTimeRangeDuration: TimeRangeDuration = {
             timeRange: TimeRange.TODAY,
             startTime: 1,
@@ -335,7 +344,7 @@ describe("Time Range Util", () => {
         ).toBeFalsy();
     });
 
-    test("isTimeRangeDurationEqual shall return false when both given predefined time range durations are not equal", () => {
+    test("isTimeRangeDurationEqual shall return false when both predefined time range durations are not equal", () => {
         const mockTimeRangeDuration: TimeRangeDuration = {
             timeRange: TimeRange.TODAY,
             startTime: 1,
@@ -355,27 +364,7 @@ describe("Time Range Util", () => {
         ).toBeFalsy();
     });
 
-    test("isTimeRangeDurationEqual shall return false when both given predefined time range durations are of different type but have same start and end time", () => {
-        const mockTimeRangeDuration: TimeRangeDuration = {
-            timeRange: TimeRange.TODAY,
-            startTime: 1,
-            endTime: 2,
-        };
-        const mockTimeRangeDurationOther: TimeRangeDuration = {
-            timeRange: TimeRange.YESTERDAY,
-            startTime: 1,
-            endTime: 2,
-        };
-
-        expect(
-            isTimeRangeDurationEqual(
-                mockTimeRangeDuration,
-                mockTimeRangeDurationOther
-            )
-        ).toBeFalsy();
-    });
-
-    test("isTimeRangeDurationEqual shall return true when both given predefined time range durations are equal", () => {
+    test("isTimeRangeDurationEqual shall return true when both predefined time range durations are equal", () => {
         const mockTimeRangeDuration: TimeRangeDuration = {
             timeRange: TimeRange.TODAY,
             startTime: 1,
@@ -395,7 +384,27 @@ describe("Time Range Util", () => {
         ).toBeTruthy();
     });
 
-    test("isTimeRangeDurationEqual shall return true when both given predefined time range durations are of same type but have different start and end time", () => {
+    test("isTimeRangeDurationEqual shall return false when both predefined time range durations are of different type but have same start and end time", () => {
+        const mockTimeRangeDuration: TimeRangeDuration = {
+            timeRange: TimeRange.TODAY,
+            startTime: 1,
+            endTime: 2,
+        };
+        const mockTimeRangeDurationOther: TimeRangeDuration = {
+            timeRange: TimeRange.YESTERDAY,
+            startTime: 1,
+            endTime: 2,
+        };
+
+        expect(
+            isTimeRangeDurationEqual(
+                mockTimeRangeDuration,
+                mockTimeRangeDurationOther
+            )
+        ).toBeFalsy();
+    });
+
+    test("isTimeRangeDurationEqual shall return true when both predefined time range durations are of same type but have different start and end time", () => {
         const mockTimeRangeDuration: TimeRangeDuration = {
             timeRange: TimeRange.TODAY,
             startTime: 1,

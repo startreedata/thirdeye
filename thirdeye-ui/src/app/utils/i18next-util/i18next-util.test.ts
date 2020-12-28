@@ -5,11 +5,11 @@ describe("i18next Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("getInitOptions shall return appropriate InitOptions", () => {
+    test("getInitOptions shall return appropriate options", () => {
         jest.spyOn(console, "error").mockImplementation();
 
         const initOptions = getInitOptions();
-        // Also execute missingKeyHandler
+        // Also execute the missing key handler
         initOptions.missingKeyHandler &&
             initOptions.missingKeyHandler([""], "ns", "testyKey", "");
 

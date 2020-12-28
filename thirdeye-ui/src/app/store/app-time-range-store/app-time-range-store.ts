@@ -1,4 +1,3 @@
-import { isEmpty } from "lodash";
 import create, { GetState, SetState } from "zustand";
 import { persist } from "zustand/middleware";
 import {
@@ -16,9 +15,9 @@ import {
 import { AppTimeRangeStore } from "./app-time-range-store.interfaces";
 
 const LOCAL_STORAGE_KEY_APP_TIME_RANGE = "LOCAL_STORAGE_KEY_APP_TIME_RANGE";
-const MAX_ENTRIES_RECENT_TIME_RANGE = 3;
+const MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS = 3;
 
-// App store for global time range
+// App store for global time range, persisted in browser local storage
 export const useAppTimeRangeStore = create<AppTimeRangeStore>(
     persist<AppTimeRangeStore>(
         (
@@ -67,7 +66,7 @@ export const useAppTimeRangeStore = create<AppTimeRangeStore>(
             setAppTimeRangeDuration: (
                 timeRangeDuration: TimeRangeDuration
             ): void => {
-                if (isEmpty(timeRangeDuration)) {
+                if (!timeRangeDuration) {
                     return;
                 }
 
@@ -87,15 +86,15 @@ export const useAppTimeRangeStore = create<AppTimeRangeStore>(
                     // Trim recent custom time range duration entries to set threshold
                     if (
                         recentCustomTimeRangeDurations.length >
-                        MAX_ENTRIES_RECENT_TIME_RANGE
+                        MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS
                     ) {
-                        const newRecentAppTimeRangeDurations = recentCustomTimeRangeDurations.slice(
+                        const trimmedRecentCustomTimeRangeDurations = recentCustomTimeRangeDurations.slice(
                             1,
-                            MAX_ENTRIES_RECENT_TIME_RANGE + 1
+                            MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS + 1
                         );
 
                         set({
-                            recentCustomTimeRangeDurations: newRecentAppTimeRangeDurations,
+                            recentCustomTimeRangeDurations: trimmedRecentCustomTimeRangeDurations,
                         });
                     }
                 }
@@ -105,7 +104,7 @@ export const useAppTimeRangeStore = create<AppTimeRangeStore>(
                 const { appTimeRangeDuration } = get();
 
                 if (appTimeRangeDuration.timeRange === TimeRange.CUSTOM) {
-                    // Custom time range duration, return as is
+                    // Custom time range, return as is
                     return appTimeRangeDuration;
                 }
 

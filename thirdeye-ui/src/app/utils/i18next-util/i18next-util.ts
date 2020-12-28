@@ -1,7 +1,7 @@
 import { InitOptions } from "i18next";
 import en from "../../locale/languages/en-us.json";
 
-// Returns i18next InitOptions
+// Returns i18next options
 export const getInitOptions = (): InitOptions => {
     const initOptions: InitOptions = {
         interpolation: {

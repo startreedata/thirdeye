@@ -1,36 +1,41 @@
-import { Grid, Typography, useTheme } from "@material-ui/core";
+import { Box, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { ReactComponent as EmptyGlass } from "../../../assets/icons/empty-glass.svg";
+import { Dimension } from "../../utils/material-ui-util/dimension-util";
+import { Palette } from "../../utils/material-ui-util/palette-util";
 import { usePageNotFoundIndicatorStyles } from "./page-not-found-indicator.styles";
 
 export const PageNotFoundIndicator: FunctionComponent = () => {
     const pageNotFoundIndicatorClasses = usePageNotFoundIndicatorStyles();
-    const theme = useTheme();
     const { t } = useTranslation();
 
     return (
-        <Grid container alignItems="center" direction="column">
+        <Grid
+            container
+            alignItems="center"
+            className={pageNotFoundIndicatorClasses.container}
+            justify="center"
+        >
+            {/* Error code */}
             <Grid item>
-                {/* Page not found icon */}
-                <EmptyGlass fill={theme.palette.primary.main} height={100} />
-            </Grid>
-
-            <Grid item>
-                {/* Page not found error code */}
-                <Typography
-                    className={pageNotFoundIndicatorClasses.errorCode}
-                    color="primary"
-                    variant="h1"
+                <Box
+                    border={Dimension.WIDTH_BORDER_DEFAULT}
+                    borderBottom={0}
+                    borderColor={Palette.COLOR_BORDER_DEFAULT}
+                    borderLeft={0}
+                    borderTop={0}
+                    paddingRight={2}
                 >
-                    {t("label.404")}
-                </Typography>
+                    <Typography color="primary" variant="h3">
+                        {t("label.404")}
+                    </Typography>
+                </Box>
             </Grid>
 
+            {/* Error message */}
             <Grid item>
-                {/* Page not found error message */}
-                <Typography variant="subtitle1">
-                    {t("message.url-not-found")}
+                <Typography variant="body1">
+                    {t("message.page-not-found")}
                 </Typography>
             </Grid>
         </Grid>

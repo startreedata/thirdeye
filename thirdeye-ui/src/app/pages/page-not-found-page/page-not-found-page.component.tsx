@@ -5,11 +5,8 @@ import { PageContainer } from "../../components/page-container/page-container.co
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageNotFoundIndicator } from "../../components/page-not-found-indicator/page-not-found-indicator.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
-import { PageNotFoundPageProps } from "./page-not-found-page.interfaces";
 
-export const PageNotFoundPage: FunctionComponent<PageNotFoundPageProps> = (
-    props: PageNotFoundPageProps
-) => {
+export const PageNotFoundPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
@@ -29,20 +26,15 @@ export const PageNotFoundPage: FunctionComponent<PageNotFoundPageProps> = (
 
     if (loading) {
         return (
-            <PageContainer appToolbar={props.appToolbar}>
+            <PageContainer>
                 <LoadingIndicator />
             </PageContainer>
         );
     }
 
     return (
-        <PageContainer appToolbar={props.appToolbar}>
-            <PageContents
-                contentsCenterAlign
-                hideTimeRange
-                titleCenterAlign
-                title={t("label.page-not-found")}
-            >
+        <PageContainer>
+            <PageContents hideTimeRange>
                 <PageNotFoundIndicator />
             </PageContents>
         </PageContainer>

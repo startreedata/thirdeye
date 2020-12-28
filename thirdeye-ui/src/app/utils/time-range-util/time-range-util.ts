@@ -19,7 +19,7 @@ export const createTimeRangeDuration = (
     };
 };
 
-// Returns TimeRange.TODAY time range
+// Returns TimeRange.TODAY time range duration
 export const getDefaultTimeRangeDuration = (): TimeRangeDuration => {
     const now = DateTime.local();
     const today = now.startOf("day");

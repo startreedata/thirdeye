@@ -3,33 +3,41 @@ import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { AlertEvaluationTimeSeriesCard } from "../../components/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { AnomalyCard } from "../../components/anomaly-card/anomaly-card.component";
 import { AnomalyCardData } from "../../components/anomaly-card/anomaly-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { getAlertEvaluation } from "../../rest/alert-rest/alert-rest";
-import { getAnomaly } from "../../rest/anomaly-rest/anomaly-rest";
+import {
+    deleteAnomaly,
+    getAnomaly,
+} from "../../rest/anomaly-rest/anomaly-rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
 import {
     createAlertEvaluation,
-    createEmptyAnomalyCardData,
     getAnomalyCardData,
 } from "../../utils/anomaly-util/anomaly-util";
 import { isValidNumberId } from "../../utils/params-util/params-util";
-import { getAnomaliesDetailPath } from "../../utils/routes-util/routes-util";
-import { SnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+import {
+    getAnomaliesAllPath,
+    getAnomaliesDetailPath,
+} from "../../utils/routes-util/routes-util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar-util/snackbar-util";
 import { AnomaliesDetailPageParams } from "./anomalies-detail-page.interfaces";
 
 export const AnomaliesDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [anomalyCardData, setAnomalyCardData] = useState<AnomalyCardData>(
-        createEmptyAnomalyCardData()
-    );
+    const [anomalyCardData, setAnomalyCardData] = useState<AnomalyCardData>();
     const [
         alertEvaluation,
         setAlertEvaluation,
@@ -45,6 +53,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         state.getAppTimeRangeDuration,
     ]);
     const params = useParams<AnomaliesDetailPageParams>();
+    const history = useHistory();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
@@ -52,9 +61,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         // Create page breadcrumbs
         setPageBreadcrumbs([
             {
-                text: anomalyCardData
-                    ? anomalyCardData.name
-                    : t("label.no-data-available-marker"),
+                text: anomalyCardData ? anomalyCardData.name : "",
                 pathFn: (): string => {
                     return anomalyCardData
                         ? getAnomaliesDetailPath(anomalyCardData.id)
@@ -65,77 +72,98 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     }, [anomalyCardData]);
 
     useEffect(() => {
-        const init = async (): Promise<void> => {
-            await fetchData();
-
-            setLoading(false);
-        };
-
-        init();
+        // Fetch data
+        fetchData();
     }, [params.id]);
 
     useEffect(() => {
         // Fetch visualization data
-        const init = async (): Promise<void> => {
-            setAlertEvaluation(null);
+        fetchVisualizationData();
+    }, [anomalyCardData && anomalyCardData.alertId, appTimeRangeDuration]);
 
-            await fetchVisualizationData();
-        };
-
-        init();
-    }, [anomalyCardData.alertId, appTimeRangeDuration]);
-
-    const fetchData = async (): Promise<void> => {
-        let fetchedAnomalyCardData = createEmptyAnomalyCardData();
-
+    const fetchData = (): void => {
+        // Validate alert id from URL
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
                     entity: t("label.anomaly"),
                     id: params.id,
                 }),
-                SnackbarOption.ERROR
+                getErrorSnackbarOption()
             );
-
-            setAnomalyCardData(fetchedAnomalyCardData);
 
             return;
         }
 
-        try {
-            fetchedAnomalyCardData = getAnomalyCardData(
-                await getAnomaly(toNumber(params.id))
-            );
-        } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
-        } finally {
-            setAnomalyCardData(fetchedAnomalyCardData);
-        }
+        getAnomaly(toNumber(params.id))
+            .then((anomaly: Anomaly): void => {
+                setAnomalyCardData(getAnomalyCardData(anomaly));
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setLoading(false);
+            });
     };
 
-    const fetchVisualizationData = async (): Promise<void> => {
+    const fetchVisualizationData = (): void => {
+        setAlertEvaluation(null);
         let fetchedAlertEvaluation = {} as AlertEvaluation;
 
-        if (!anomalyCardData || anomalyCardData.alertId < 0) {
+        if (!anomalyCardData) {
             setAlertEvaluation(fetchedAlertEvaluation);
 
             return;
         }
 
         const timeRangeDuration = getAppTimeRangeDuration();
-        try {
-            fetchedAlertEvaluation = await getAlertEvaluation(
-                createAlertEvaluation(
-                    anomalyCardData.alertId,
-                    timeRangeDuration.startTime,
-                    timeRangeDuration.endTime
-                )
-            );
-        } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), SnackbarOption.ERROR);
+        getAlertEvaluation(
+            createAlertEvaluation(
+                anomalyCardData.alertId,
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            )
+        )
+            .then((alertEvaluation: AlertEvaluation): void => {
+                fetchedAlertEvaluation = alertEvaluation;
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setAlertEvaluation(fetchedAlertEvaluation);
+            });
+    };
+
+    const onDeleteAnomaly = (anomalyCardData: AnomalyCardData): void => {
+        if (!anomalyCardData) {
+            return;
         }
 
-        setAlertEvaluation(fetchedAlertEvaluation);
+        // Delete
+        deleteAnomaly(anomalyCardData.id)
+            .then((): void => {
+                // Redirect to anomalies all path
+                history.push(getAnomaliesAllPath());
+
+                enqueueSnackbar(
+                    t("message.delete-success", { entity: t("label.anomaly") }),
+                    getSuccessSnackbarOption()
+                );
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.delete-error", { entity: t("label.anomaly") }),
+                    getErrorSnackbarOption()
+                );
+            });
     };
 
     if (loading) {
@@ -149,29 +177,31 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents
-                contentsCenterAlign
-                title={
-                    anomalyCardData
-                        ? anomalyCardData.name
-                        : t("label.no-data-available-marker")
-                }
+                centered
+                title={anomalyCardData ? anomalyCardData.name : ""}
             >
-                <Grid container>
-                    {/* Anomaly */}
-                    <Grid item md={12}>
-                        <AnomalyCard
-                            hideViewDetailsLinks
-                            anomaly={anomalyCardData}
-                        />
-                    </Grid>
+                {anomalyCardData && (
+                    <Grid container>
+                        {/* Anomaly */}
+                        <Grid item md={12}>
+                            <AnomalyCard
+                                hideViewDetailsLinks
+                                anomaly={anomalyCardData}
+                                onDelete={onDeleteAnomaly}
+                            />
+                        </Grid>
 
-                    {/* Alert evaluation time series */}
-                    <Grid item md={12}>
-                        <AlertEvaluationTimeSeriesCard
-                            alertEvaluation={alertEvaluation}
-                        />
+                        {/* Alert evaluation time series */}
+                        <Grid item md={12}>
+                            <AlertEvaluationTimeSeriesCard
+                                alertEvaluation={alertEvaluation}
+                            />
+                        </Grid>
                     </Grid>
-                </Grid>
+                )}
+
+                {/* No data available message */}
+                {!anomalyCardData && <NoDataIndicator />}
             </PageContents>
         </PageContainer>
     );

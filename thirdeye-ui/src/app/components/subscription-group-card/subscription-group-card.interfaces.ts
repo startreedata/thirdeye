@@ -4,12 +4,12 @@ export interface SubscriptionGroupCardProps {
     subscriptionGroup: SubscriptionGroupCardData;
     searchWords?: string[];
     hideViewDetailsLinks?: boolean;
+    onDelete?: (subscriptionGroupCardData: SubscriptionGroupCardData) => void;
 }
 
 export interface SubscriptionGroupCardData {
     id: number;
     name: string;
-    application: string;
     alerts: SubscriptionGroupAlert[];
     emails: string[];
     subscriptionGroup: SubscriptionGroup | null;

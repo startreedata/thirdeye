@@ -2,7 +2,7 @@ import { makeStyles } from "@material-ui/core";
 
 export const useTimeRangeSelectorCalendarToolbarStyles = makeStyles({
     container: {
-        marginBottom: "-12px", // Account for whitespace space toolbar and calendar
+        marginBottom: "-12px", // Minimize whitespace between toolbar and calendar
     },
     dense: {
         minHeight: "36px",

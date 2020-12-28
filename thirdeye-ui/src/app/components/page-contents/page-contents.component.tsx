@@ -42,31 +42,23 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     return (
         <main
             className={classnames(
-                pageContentsClasses.container,
-                props.contentsCenterAlign
-                    ? pageContentsClasses.containerCenterAlign
-                    : pageContentsClasses.containerExpand
+                pageContentsClasses.outerContainer,
+                props.centered
+                    ? pageContentsClasses.outerContainerCenterAlign
+                    : pageContentsClasses.outerContainerExpand
             )}
         >
-            <Grid container direction="column">
-                {/* Header, only if title is provided and/or time range is to be displayed */}
-                {(props.title || !props.hideTimeRange) && (
-                    <Grid
-                        container
-                        item
-                        alignItems="center"
-                        className={pageContentsClasses.header}
-                        justify="space-between"
-                    >
+            {/* Header, only if title is provided and/or time range is to be displayed */}
+            {(props.title || !props.hideTimeRange) && (
+                <div
+                    className={classnames(
+                        pageContentsClasses.container,
+                        pageContentsClasses.headerContainer
+                    )}
+                >
+                    <Grid container alignItems="center" justify="space-between">
                         {/* Title */}
-                        <Grid
-                            item
-                            className={
-                                props.titleCenterAlign
-                                    ? pageContentsClasses.titleCenterAlign
-                                    : ""
-                            }
-                        >
+                        <Grid item>
                             <Typography variant="h5">{props.title}</Typography>
                         </Grid>
 
@@ -74,26 +66,30 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                         {!props.hideTimeRange && (
                             <Grid item>
                                 <TimeRangeSelector
-                                    getTimeRangeDuration={
-                                        getAppTimeRangeDuration
-                                    }
                                     recentCustomTimeRangeDurations={
                                         recentCustomTimeRangeDurations
                                     }
                                     timeRangeDuration={appTimeRangeDuration}
+                                    timeRangeDurationFn={
+                                        getAppTimeRangeDuration
+                                    }
                                     onChange={setAppTimeRangeDuration}
                                 />
                             </Grid>
                         )}
                     </Grid>
-                )}
+                </div>
+            )}
 
-                {/* Contents */}
-                <Grid item>
-                    {/* Include children */}
-                    {props.children}
-                </Grid>
-            </Grid>
+            {/* Contents */}
+            <div
+                className={classnames(
+                    pageContentsClasses.container,
+                    pageContentsClasses.innerContainer
+                )}
+            >
+                {props.children}
+            </div>
         </main>
     );
 };

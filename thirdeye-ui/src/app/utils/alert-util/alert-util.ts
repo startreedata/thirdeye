@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { isEmpty } from "lodash";
+import { cloneDeep, isEmpty } from "lodash";
 import {
     AlertCardData,
     AlertDatasetAndMetric,
@@ -11,6 +11,7 @@ import {
     AlertNodeType,
 } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { deepSearchStringProperty } from "../search-util/search-util";
 
 export const createEmptyAlertCardData = (): AlertCardData => {
     const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
@@ -66,6 +67,10 @@ export const getAlertCardData = (
     alert: Alert,
     subscriptionGroups: SubscriptionGroup[]
 ): AlertCardData => {
+    if (!alert) {
+        return createEmptyAlertCardData();
+    }
+
     // Map subscription groups to alert ids
     const subscriptionGroupsToAlertIdsMap = mapSubscriptionGroupsToAlertIds(
         subscriptionGroups
@@ -90,137 +95,69 @@ export const getAlertCardDatas = (
     );
 
     for (const alert of alerts) {
-        const alertCardData = getAlertCardDataInternal(
-            alert,
-            subscriptionGroupsToAlertIdsMap
+        alertCardDatas.push(
+            getAlertCardDataInternal(alert, subscriptionGroupsToAlertIdsMap)
         );
-        alertCardDatas.push(alertCardData);
     }
 
     return alertCardDatas;
 };
 
 export const filterAlerts = (
-    alerts: AlertCardData[],
+    alertCardDatas: AlertCardData[],
     searchWords: string[]
 ): AlertCardData[] => {
-    const filteredAlerts = new Set<AlertCardData>();
+    const filteredAlertCardDatas: AlertCardData[] = [];
 
-    if (isEmpty(alerts)) {
+    if (isEmpty(alertCardDatas)) {
         // No alerts available, return empty result
-        return [...filteredAlerts];
+        return filteredAlertCardDatas;
     }
 
     if (isEmpty(searchWords)) {
         // No search words available, return original alerts
-        return alerts;
+        return alertCardDatas;
     }
 
-    for (const alert of alerts) {
+    for (const alert of alertCardDatas) {
+        // Create a copy without original alert
+        const alertCardDataCopy = cloneDeep(alert);
+        alertCardDataCopy.alert = null;
+
         for (const searchWord of searchWords) {
-            let alertFiltered = false;
-
-            // Try and match alert property values to search words
-            for (const propertyValue of Object.values(alert)) {
-                if (!propertyValue) {
-                    continue;
-                }
-
-                // Check basic string value
-                if (
-                    typeof propertyValue === "string" &&
-                    propertyValue
-                        .toLowerCase()
-                        .indexOf(searchWord.toLowerCase()) > -1
-                ) {
-                    filteredAlerts.add(alert);
-                    alertFiltered = true;
-
-                    break;
-                }
-
-                // Check arrays
-                else if (propertyValue.length && propertyValue.length > 0) {
-                    for (const arrayValue of propertyValue) {
-                        if (!arrayValue) {
-                            continue;
-                        }
-
-                        // Check basic string value
-                        if (
-                            typeof arrayValue === "string" &&
-                            arrayValue
+            if (
+                deepSearchStringProperty(
+                    alertCardDataCopy,
+                    (value: string): boolean => {
+                        // Check if string property value contains current search word
+                        return (
+                            Boolean(value) &&
+                            value
                                 .toLowerCase()
                                 .indexOf(searchWord.toLowerCase()) > -1
-                        ) {
-                            filteredAlerts.add(alert);
-                            alertFiltered = true;
-
-                            break;
-                        }
-
-                        // Check dataset and metric values
-                        else if (arrayValue.datasetId) {
-                            if (
-                                arrayValue.datasetName
-                                    .toLowerCase()
-                                    .indexOf(searchWord.toLowerCase()) > -1 ||
-                                arrayValue.metricName
-                                    .toLowerCase()
-                                    .indexOf(searchWord.toLowerCase()) > -1
-                            ) {
-                                filteredAlerts.add(alert);
-                                alertFiltered = true;
-
-                                break;
-                            }
-                        }
-
-                        // Check subscription group value
-                        else if (
-                            arrayValue.name &&
-                            arrayValue.name
-                                .toLowerCase()
-                                .indexOf(searchWord.toLowerCase()) > -1
-                        ) {
-                            filteredAlerts.add(alert);
-                            alertFiltered = true;
-
-                            break;
-                        }
+                        );
                     }
+                )
+            ) {
+                filteredAlertCardDatas.push(alert);
 
-                    if (alertFiltered) {
-                        // Alert already filtered, check next alert
-                        break;
-                    }
-                }
-
-                if (alertFiltered) {
-                    // Alert already filtered, check next alert
-                    break;
-                }
-            }
-
-            if (alertFiltered) {
-                // Alert already filtered, check next alert
                 break;
             }
         }
     }
 
-    return [...filteredAlerts];
+    return filteredAlertCardDatas;
 };
 
+// Internal method, lacks appropriate validations
 const getAlertCardDataInternal = (
     alert: Alert,
     subscriptionGroupsToAlertIdsMap: Map<number, AlertSubscriptionGroup[]>
 ): AlertCardData => {
     const alertCardData = createEmptyAlertCardData();
 
-    if (!alert) {
-        return alertCardData;
-    }
+    // Maintain a copy of alert, needed when updating alert
+    alertCardData.alert = alert;
 
     // Basic properties
     alertCardData.id = alert.id;
@@ -236,14 +173,9 @@ const getAlertCardDataInternal = (
         alertCardData.createdBy = alert.owner.principal;
     }
 
-    // Maintain a copy of alert, needed when updating/changing status of the alert
-    alertCardData.alert = alert;
-
     // Subscription groups
-    if (!isEmpty(subscriptionGroupsToAlertIdsMap)) {
-        alertCardData.subscriptionGroups =
-            subscriptionGroupsToAlertIdsMap.get(alert.id) || [];
-    }
+    alertCardData.subscriptionGroups =
+        subscriptionGroupsToAlertIdsMap.get(alert.id) || [];
 
     // Detection, dataset and metric properties
     if (isEmpty(alert.nodes)) {
@@ -252,7 +184,7 @@ const getAlertCardDataInternal = (
     }
 
     for (const alertNode of Object.values(alert.nodes)) {
-        // Detection properties
+        // Detection
         if (alertNode.type === AlertNodeType.DETECTION && alertNode.subType) {
             alertCardData.detectionTypes.push(alertNode.subType);
         } else if (
@@ -262,7 +194,7 @@ const getAlertCardDataInternal = (
             alertCardData.filteredBy.push(alertNode.subType);
         }
 
-        // Dataset and metric properties
+        // Dataset and metric
         if (!alertNode.metric) {
             // None available
             continue;
@@ -282,6 +214,7 @@ const getAlertCardDataInternal = (
     return alertCardData;
 };
 
+// Internal method, lacks appropriate validations
 const mapSubscriptionGroupsToAlertIds = (
     subscriptionGroups: SubscriptionGroup[]
 ): Map<number, AlertSubscriptionGroup[]> => {

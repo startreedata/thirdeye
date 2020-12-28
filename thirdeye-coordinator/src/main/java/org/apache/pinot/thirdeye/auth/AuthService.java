@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.auth;
 
+import static org.apache.pinot.thirdeye.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.unauthenticatedException;
 
 import com.google.inject.Inject;
@@ -10,7 +11,6 @@ import java.util.Optional;
 import javax.ws.rs.NotAuthorizedException;
 import org.apache.pinot.thirdeye.resources.ResourceUtils;
 
-
 @Singleton
 public class AuthService {
 
@@ -20,12 +20,15 @@ public class AuthService {
 
   private final Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> authenticator;
   private final JwtService jwtService;
+  private final boolean enabled;
 
   @Inject
   public AuthService(final Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> authenticator,
+      final AuthConfiguration authConfiguration,
       final JwtService jwtService) {
     this.authenticator = authenticator;
     this.jwtService = jwtService;
+    this.enabled = authConfiguration.isEnabled();
   }
 
   /**
@@ -36,8 +39,8 @@ public class AuthService {
    * @throws NotAuthorizedException when credentials are invalid
    */
   public ThirdEyePrincipal authenticate(String authHeader) {
-    if (!jwtService.isEnabled()) {
-      return null;
+    if (!enabled) {
+      return new ThirdEyePrincipal(NO_AUTH_USER);
     }
     if (authHeader != null && authHeader.startsWith(OAUTH2_BEARER_PREFIX)) {
       String jwtTokenString = authHeader.substring(OAUTH2_BEARER_PREFIX.length());

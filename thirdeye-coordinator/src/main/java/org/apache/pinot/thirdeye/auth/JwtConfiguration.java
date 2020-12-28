@@ -5,9 +5,6 @@ import javax.validation.constraints.NotNull;
 
 
 public class JwtConfiguration {
-
-  private boolean enabled;
-
   @NotNull
   private String signingKey;
 
@@ -41,13 +38,5 @@ public class JwtConfiguration {
   public JwtConfiguration setAccessTokenExpiry(final Duration accessTokenExpiry) {
     this.accessTokenExpiry = accessTokenExpiry;
     return this;
-  }
-
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  public void setEnabled(boolean enabled) {
-    this.enabled = enabled;
   }
 }

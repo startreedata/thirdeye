@@ -24,7 +24,6 @@ public class JwtService {
   private static final Logger log = LoggerFactory.getLogger(JwtService.class);
   private static final String PRINCIPAL = "principal";
 
-  private boolean isEnabled;
   private final String issuer;
   private final Algorithm signingAlgorithm;
   private final JWTVerifier verifier;
@@ -32,7 +31,6 @@ public class JwtService {
 
   @Inject
   public JwtService(JwtConfiguration config) {
-    isEnabled = config.isEnabled();
     issuer = config.getIssuer();
     signingAlgorithm = Algorithm.HMAC512(config.getSigningKey());
     accessTokenExpiry = config.getAccessTokenExpiry();
@@ -70,13 +68,5 @@ public class JwtService {
       log.error(String.format("Invalid signature/claims. errorMsg: '%s' Token: %s", e.getMessage(), jwtToken));
     }
     return Optional.empty();
-  }
-
-  public boolean isEnabled() {
-    return isEnabled;
-  }
-
-  public void setEnabled(boolean enabled) {
-    isEnabled = enabled;
   }
 }

@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
@@ -24,7 +25,13 @@ public class ThirdEyeCoordinatorModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public JwtConfiguration getJwtConfiguration() {
-    return configuration.getAuthConfiguration().getJwtConfiguration();
+  public AuthConfiguration getAuthConfiguration() {
+    return configuration.getAuthConfiguration();
+  }
+
+  @Singleton
+  @Provides
+  public JwtConfiguration getJwtConfiguration(AuthConfiguration authConfiguration) {
+    return authConfiguration.getJwtConfiguration();
   }
 }

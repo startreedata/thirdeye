@@ -17,12 +17,14 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 @Singleton
 public class JwtService {
 
   private static final Logger log = LoggerFactory.getLogger(JwtService.class);
   private static final String PRINCIPAL = "principal";
 
+  private boolean isEnabled;
   private final String issuer;
   private final Algorithm signingAlgorithm;
   private final JWTVerifier verifier;
@@ -30,22 +32,19 @@ public class JwtService {
 
   @Inject
   public JwtService(JwtConfiguration config) {
+    isEnabled = config.isEnabled();
     issuer = config.getIssuer();
     signingAlgorithm = Algorithm.HMAC512(config.getSigningKey());
     accessTokenExpiry = config.getAccessTokenExpiry();
-    verifier = JWT.require(signingAlgorithm)
-        .withIssuer(issuer)
-        .build();
+    verifier = JWT.require(signingAlgorithm).withIssuer(issuer).build();
   }
 
   public String createAccessToken(String principal) {
     try {
-      final JWTCreator.Builder builder = JWT.create()
-          .withIssuer(issuer)
-          .withExpiresAt(Date.from(new Date().toInstant().plus(accessTokenExpiry)));
+      final JWTCreator.Builder builder =
+          JWT.create().withIssuer(issuer).withExpiresAt(Date.from(new Date().toInstant().plus(accessTokenExpiry)));
 
-      optional(principal)
-          .ifPresent(v -> builder.withClaim(PRINCIPAL, v));
+      optional(principal).ifPresent(v -> builder.withClaim(PRINCIPAL, v));
 
       return builder.sign(signingAlgorithm);
     } catch (JWTCreationException e) {
@@ -66,12 +65,18 @@ public class JwtService {
     }
     try {
       final DecodedJWT jwt = verifier.verify(jwtToken);
-      return optional(jwt.getClaim(PRINCIPAL))
-          .map(Claim::asString);
+      return optional(jwt.getClaim(PRINCIPAL)).map(Claim::asString);
     } catch (RuntimeException e) {
-      log.error(String.format("Invalid signature/claims. errorMsg: '%s' Token: %s",
-          e.getMessage(), jwtToken));
+      log.error(String.format("Invalid signature/claims. errorMsg: '%s' Token: %s", e.getMessage(), jwtToken));
     }
     return Optional.empty();
+  }
+
+  public boolean isEnabled() {
+    return isEnabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    isEnabled = enabled;
   }
 }

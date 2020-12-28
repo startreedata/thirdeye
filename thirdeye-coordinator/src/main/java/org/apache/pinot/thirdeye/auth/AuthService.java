@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.ws.rs.NotAuthorizedException;
 import org.apache.pinot.thirdeye.resources.ResourceUtils;
 
+
 @Singleton
 public class AuthService {
 
@@ -21,8 +22,7 @@ public class AuthService {
   private final JwtService jwtService;
 
   @Inject
-  public AuthService(
-      final Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> authenticator,
+  public AuthService(final Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> authenticator,
       final JwtService jwtService) {
     this.authenticator = authenticator;
     this.jwtService = jwtService;
@@ -36,11 +36,13 @@ public class AuthService {
    * @throws NotAuthorizedException when credentials are invalid
    */
   public ThirdEyePrincipal authenticate(String authHeader) {
+    if (!jwtService.isEnabled()) {
+      return null;
+    }
     if (authHeader != null && authHeader.startsWith(OAUTH2_BEARER_PREFIX)) {
       String jwtTokenString = authHeader.substring(OAUTH2_BEARER_PREFIX.length());
-      final Optional<ThirdEyePrincipal> principal = jwtService
-          .readPrincipal(jwtTokenString)
-          .map(p -> new ThirdEyePrincipal(p, null));
+      final Optional<ThirdEyePrincipal> principal =
+          jwtService.readPrincipal(jwtTokenString).map(p -> new ThirdEyePrincipal(p, null));
       ResourceUtils.authenticate(principal.isPresent());
       return principal.get();
     }
@@ -55,8 +57,8 @@ public class AuthService {
    */
   public ThirdEyePrincipal authenticate(String principal, String password) {
     try {
-      final Optional<ThirdEyePrincipal> thirdEyePrincipal = authenticator
-          .authenticate(new ThirdEyeCredentials(principal, password));
+      final Optional<ThirdEyePrincipal> thirdEyePrincipal =
+          authenticator.authenticate(new ThirdEyeCredentials(principal, password));
       ResourceUtils.authenticate(thirdEyePrincipal.isPresent());
       return thirdEyePrincipal.get();
     } catch (AuthenticationException e) {

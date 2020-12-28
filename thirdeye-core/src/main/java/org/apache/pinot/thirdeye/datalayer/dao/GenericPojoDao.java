@@ -561,13 +561,39 @@ public class GenericPojoDao {
           if (genericJsonEntity != null) {
             ThirdeyeMetricsUtil.dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
 
-            e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
+            e = (E) OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
             e.setId(genericJsonEntity.getId());
             e.setVersion(genericJsonEntity.getVersion());
             e.setUpdateTime(genericJsonEntity.getUpdateTime());
           }
           return e;
         }
+      }, null);
+    } finally {
+      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
+      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+    }
+  }
+
+  public Object getRaw(final Long id) {
+    long tStart = System.nanoTime();
+    try {
+      return runTask(connection -> {
+
+        GenericJsonEntity genericJsonEntity;
+        try (PreparedStatement selectStatement =
+            sqlQueryBuilder.createFindByIdStatement(connection, GenericJsonEntity.class, id)) {
+          try (ResultSet resultSet = selectStatement.executeQuery()) {
+            genericJsonEntity = genericResultSetMapper
+                .mapSingle(resultSet, GenericJsonEntity.class);
+          }
+        }
+        Object e = null;
+        if (genericJsonEntity != null) {
+          ThirdeyeMetricsUtil.dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
+          e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), Object.class);
+        }
+        return e;
       }, null);
     } finally {
       ThirdeyeMetricsUtil.dbReadCallCounter.inc();

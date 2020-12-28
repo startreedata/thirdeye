@@ -39,6 +39,10 @@ public class ResourceUtils {
     return new NotAuthorizedException("Authentication Failure.");  // throw 401
   }
 
+  public static <T> T ensureExists(T o) {
+    return ensureExists(o, ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST, "");
+  }
+
   public static <T> T ensureExists(T o, Object... args) {
     return ensureExists(o, ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST, args);
   }

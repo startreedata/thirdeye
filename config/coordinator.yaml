@@ -26,7 +26,7 @@ logging:
     org.apache.zookeeper: WARN
 
 auth:
-#  enabled: true
+  enabled: false
   jwt:
     signingKey: 9sz834jghfdglsE4sYNT4zfrU4JwLARcUhxd2
     issuer: thirdeye

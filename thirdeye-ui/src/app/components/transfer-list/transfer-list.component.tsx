@@ -29,75 +29,57 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     const [filteredToList, setFilteredToList] = useState<T[]>([]);
     const [fromSearchWords, setFromSearchWords] = useState<string[]>([]);
     const [toSearchWords, setToSearchWords] = useState<string[]>([]);
-    const [transferActivity, setTransferActivity] = useState(false);
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Input changed, populate to-list map
-        populateToListMap();
-    }, [props.toList]);
-
-    useEffect(() => {
-        // Input, or to-list map changed, populate from-list map
-        populateFromListMap();
-    }, [props.fromList, toListMap]);
+        // Input changed, populate to-list maps
+        populateListMaps();
+    }, [props.fromList, props.toList]);
 
     useEffect(() => {
         // List map or search words changed, populate filtered to-list
         setFilteredToList(populateFilteredList(toListMap, toSearchWords));
-    }, [toListMap, toSearchWords, transferActivity]);
+    }, [toListMap, toSearchWords]);
 
     useEffect(() => {
         // List map or search words changed, populate filtered from-list
         setFilteredFromList(populateFilteredList(fromListMap, fromSearchWords));
-    }, [fromListMap, fromSearchWords, transferActivity]);
+    }, [fromListMap, fromSearchWords]);
 
-    const populateToListMap = (): void => {
+    const populateListMaps = (): void => {
         const newToListMap = new Map<string | number, T>();
+        const newFromListMap = new Map<string | number, T>();
 
-        if (!props.toList) {
-            setToListMap(newToListMap);
+        if (props.toList) {
+            for (const toListItem of props.toList) {
+                const key = props.listItemKeyFn(toListItem);
+                if (!key) {
+                    // Ignore
+                    continue;
+                }
 
-            return;
+                newToListMap.set(key, toListItem);
+            }
         }
 
-        for (const toListItem of props.toList) {
-            const key = props.listItemKeyFn(toListItem);
-            if (!key) {
-                // Ignore
-                continue;
-            }
+        if (props.fromList) {
+            for (const fromListItem of props.fromList) {
+                const key = props.listItemKeyFn(fromListItem);
+                if (!key) {
+                    // Ignore
+                    continue;
+                }
 
-            newToListMap.set(key, toListItem);
+                if (newToListMap.has(key)) {
+                    // Item already added to to-list
+                    continue;
+                }
+
+                newFromListMap.set(key, fromListItem);
+            }
         }
 
         setToListMap(newToListMap);
-    };
-
-    const populateFromListMap = (): void => {
-        const newFromListMap = new Map<string | number, T>();
-
-        if (!props.fromList) {
-            setToListMap(newFromListMap);
-
-            return;
-        }
-
-        for (const fromListItem of props.fromList) {
-            const key = props.listItemKeyFn(fromListItem);
-            if (!key) {
-                // Ignore
-                continue;
-            }
-
-            if (toListMap.has(key)) {
-                // Item already moved to to-list
-                continue;
-            }
-
-            newFromListMap.set(key, fromListItem);
-        }
-
         setFromListMap(newFromListMap);
     };
 
@@ -150,8 +132,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         // Add item to to-list map
         toListMap.set(key, item);
 
-        // Activate list and map changes
-        setTransferActivity((transferActivity) => !transferActivity);
         props.onChange && props.onChange([...toListMap.values()]);
     };
 
@@ -167,8 +147,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         // Add item to from-list map
         fromListMap.set(key, item);
 
-        // Activate list and map changes
-        setTransferActivity((transferActivity) => !transferActivity);
         props.onChange && props.onChange([...toListMap.values()]);
     };
 

@@ -29,6 +29,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     const [filteredToList, setFilteredToList] = useState<T[]>([]);
     const [fromSearchWords, setFromSearchWords] = useState<string[]>([]);
     const [toSearchWords, setToSearchWords] = useState<string[]>([]);
+    const [transferActivity, setTransferActivity] = useState(false);
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -39,12 +40,12 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     useEffect(() => {
         // List map or search words changed, populate filtered to-list
         setFilteredToList(populateFilteredList(toListMap, toSearchWords));
-    }, [toListMap, toSearchWords]);
+    }, [toListMap, toSearchWords, transferActivity]);
 
     useEffect(() => {
         // List map or search words changed, populate filtered from-list
         setFilteredFromList(populateFilteredList(fromListMap, fromSearchWords));
-    }, [fromListMap, fromSearchWords]);
+    }, [fromListMap, fromSearchWords, transferActivity]);
 
     const populateListMaps = (): void => {
         const newToListMap = new Map<string | number, T>();
@@ -132,6 +133,8 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         // Add item to to-list map
         toListMap.set(key, item);
 
+        // Activate list and map changes
+        setTransferActivity((transferActivity) => !transferActivity);
         props.onChange && props.onChange([...toListMap.values()]);
     };
 
@@ -147,6 +150,8 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         // Add item to from-list map
         fromListMap.set(key, item);
 
+        // Activate list and map changes
+        setTransferActivity((transferActivity) => !transferActivity);
         props.onChange && props.onChange([...toListMap.values()]);
     };
 

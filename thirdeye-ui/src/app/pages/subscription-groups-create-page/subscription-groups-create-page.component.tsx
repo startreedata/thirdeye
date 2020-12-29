@@ -17,7 +17,10 @@ import {
     getSubscriptionGroupsCreatePath,
     getSubscriptionGroupsDetailPath,
 } from "../../utils/routes-util/routes-util";
-import { getErrorSnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar-util/snackbar-util";
 
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -55,7 +58,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const onSubscriptionGroupWizardStepChange = (
         subscriptionGroupWizardStep: SubscriptionGroupWizardStep
     ): void => {
-        // Update page breadcrubs
+        // Update page breadcrumbs
         popPageBreadcrumb();
         pushPageBreadcrumb({
             text: t(
@@ -74,6 +77,13 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                 // Redirect to subscription groups detail path
                 history.push(
                     getSubscriptionGroupsDetailPath(subscriptionGroup.id)
+                );
+
+                enqueueSnackbar(
+                    t("message.create-success", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getSuccessSnackbarOption()
                 );
             })
             .catch((): void => {

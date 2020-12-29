@@ -117,6 +117,26 @@ export const getSubscriptionGroupAlerts = (
     return subscriptionGroupAlerts;
 };
 
+export const getSubscriptionGroupAlertId = (
+    subscriptionGroupAlert: SubscriptionGroupAlert
+): number => {
+    if (!subscriptionGroupAlert) {
+        return -1;
+    }
+
+    return subscriptionGroupAlert.id;
+};
+
+export const getSubscriptionGroupAlertName = (
+    subscriptionGroupAlert: SubscriptionGroupAlert
+): string => {
+    if (!subscriptionGroupAlert) {
+        return "";
+    }
+
+    return subscriptionGroupAlert.name;
+};
+
 export const filterSubscriptionGroups = (
     subscriptionGroupCardDatas: SubscriptionGroupCardData[],
     searchWords: string[]

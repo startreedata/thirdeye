@@ -18,8 +18,14 @@ import {
 } from "../../rest/subscription-group-rest/subscription-group-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { isValidNumberId } from "../../utils/params-util/params-util";
-import { getSubscriptionGroupsDetailPath } from "../../utils/routes-util/routes-util";
-import { getErrorSnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+import {
+    getSubscriptionGroupsDetailPath,
+    getSubscriptionGroupsUpdatePath,
+} from "../../utils/routes-util/routes-util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar-util/snackbar-util";
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
@@ -49,6 +55,14 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 pathFn: (): string => {
                     return subscriptionGroup
                         ? getSubscriptionGroupsDetailPath(subscriptionGroup.id)
+                        : "";
+                },
+            },
+            {
+                text: t("label.update"),
+                pathFn: (): string => {
+                    return subscriptionGroup
+                        ? getSubscriptionGroupsUpdatePath(subscriptionGroup.id)
                         : "";
                 },
             },
@@ -96,7 +110,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const onSubscriptionGroupWizardStepChange = (
         subscriptionGroupWizardStep: SubscriptionGroupWizardStep
     ): void => {
-        // Update page breadcrubs
+        // Update page breadcrumbs
         popPageBreadcrumb();
         pushPageBreadcrumb({
             text: t(
@@ -116,10 +130,17 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 history.push(
                     getSubscriptionGroupsDetailPath(subscriptionGroup.id)
                 );
+
+                enqueueSnackbar(
+                    t("message.update-success", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getSuccessSnackbarOption()
+                );
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.create-error", {
+                    t("message.update-error", {
                         entity: t("label.subscription-group"),
                     }),
                     getErrorSnackbarOption()

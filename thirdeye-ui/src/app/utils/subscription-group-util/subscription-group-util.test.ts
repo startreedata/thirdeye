@@ -12,6 +12,8 @@ import {
     createEmptySubscriptionGroupCardData,
     filterSubscriptionGroups,
     getSubscriptionGroupAlert,
+    getSubscriptionGroupAlertId,
+    getSubscriptionGroupAlertName,
     getSubscriptionGroupAlerts,
     getSubscriptionGroupCardData,
     getSubscriptionGroupCardDatas,
@@ -209,6 +211,34 @@ describe("Subscription Group Util", () => {
         const subscriptionGroupAlerts = getSubscriptionGroupAlerts(mockAlerts);
 
         expect(subscriptionGroupAlerts).toEqual(mockSubscriptionGroupAlerts);
+    });
+
+    test("getSubscriptionGroupAlertId shall return -1 for invalid subscription group alert", () => {
+        expect(
+            getSubscriptionGroupAlertId(
+                (null as unknown) as SubscriptionGroupAlert
+            )
+        ).toEqual(-1);
+    });
+
+    test("getSubscriptionGroupAlertId shall return approopriate number for subscription group alert", () => {
+        expect(
+            getSubscriptionGroupAlertId(mockSubscriptionGroupAlert1)
+        ).toEqual(2);
+    });
+
+    test("getSubscriptionGroupAlertName shall return empty string for invalid subscription group alert", () => {
+        expect(
+            getSubscriptionGroupAlertName(
+                (null as unknown) as SubscriptionGroupAlert
+            )
+        ).toEqual("");
+    });
+
+    test("getSubscriptionGroupAlertName shall return approopriate string for subscription group alert", () => {
+        expect(
+            getSubscriptionGroupAlertName(mockSubscriptionGroupAlert1)
+        ).toEqual("testAlertName2");
     });
 
     test("filterSubscriptionGroups shall return empty array for invalid subscription group card data array", () => {

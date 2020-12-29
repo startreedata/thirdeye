@@ -1,4 +1,4 @@
-import { Grid, Typography } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import { cloneDeep, toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -8,12 +8,12 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
+import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
 import { SubscriptionGroupCard } from "../../components/subscription-group-card/subscription-group-card.component";
 import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardData,
 } from "../../components/subscription-group-card/subscription-group-card.interfaces";
-import { TransferList } from "../../components/transfer-list/transfer-list.component";
 import { getAllAlerts } from "../../rest/alert-rest/alert-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -198,26 +198,6 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
             });
     };
 
-    const getSubscriptionGroupAlertId = (
-        subscriptionGroupAlert: SubscriptionGroupAlert
-    ): number => {
-        if (!subscriptionGroupAlert) {
-            return -1;
-        }
-
-        return subscriptionGroupAlert.id;
-    };
-
-    const getSubscriptionGroupAlertName = (
-        subscriptionGroupAlert: SubscriptionGroupAlert
-    ): string => {
-        if (!subscriptionGroupAlert) {
-            return "";
-        }
-
-        return subscriptionGroupAlert.name;
-    };
-
     if (loading) {
         return (
             <PageContainer>
@@ -248,25 +228,12 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                             />
                         </Grid>
 
-                        {/* Spacer */}
-                        <Grid item md={12} />
-
                         {/* Subscribed alerts */}
                         <Grid item md={12}>
-                            <Typography variant="h6">
-                                {t("label.alerts")}
-                            </Typography>
-                        </Grid>
-
-                        {/* Alerts transfer list */}
-                        <Grid item md={12}>
-                            <TransferList<SubscriptionGroupAlert>
-                                fromLabel={t("label.all-alerts")}
-                                fromList={getSubscriptionGroupAlerts(alerts)}
-                                listItemKeyFn={getSubscriptionGroupAlertId}
-                                listItemTextFn={getSubscriptionGroupAlertName}
-                                toLabel={t("label.subscribed-alerts")}
-                                toList={subscriptionGroupCardData.alerts}
+                            <SubscriptionGroupAlertsAccordian
+                                alerts={getSubscriptionGroupAlerts(alerts)}
+                                subscriptionGroup={subscriptionGroupCardData}
+                                title={t("label.subscribed-alerts")}
                                 onChange={onSubscriptionGroupAlertsChange}
                             />
                         </Grid>

@@ -444,7 +444,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                         paddingTop={2}
                                     >
                                         <Grid container justify="flex-end">
-                                            {/* Cancel */}
+                                            {/* Cancel button */}
                                             <Grid item>
                                                 <Button
                                                     color="primary"
@@ -458,7 +458,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                 </Button>
                                             </Grid>
 
-                                            {/* Apply */}
+                                            {/* Apply button */}
                                             <Grid item>
                                                 <Button
                                                     color="primary"

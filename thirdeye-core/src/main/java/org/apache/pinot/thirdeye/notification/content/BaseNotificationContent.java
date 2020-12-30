@@ -39,6 +39,8 @@ import java.util.concurrent.TimeUnit;
 import joptsimple.internal.Strings;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.Constants.CompareMode;
+import org.apache.pinot.thirdeye.Constants.SubjectType;
 import org.apache.pinot.thirdeye.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomaly.events.EventFilter;
@@ -52,8 +54,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.COMPARE_MODE;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detector.email.filter.DummyAlertFilter;
 import org.apache.pinot.thirdeye.detector.email.filter.PrecisionRecallEvaluator;
@@ -104,7 +104,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
   /**
    * Generate subject based on configuration.
    */
-  public static String makeSubject(AlertConfigBean.SubjectType subjectType,
+  public static String makeSubject(SubjectType subjectType,
       SubscriptionGroupDTO notificationConfig, Map<String, Object> templateData) {
     String baseSubject = "Thirdeye Alert : " + notificationConfig.getName();
 
@@ -303,7 +303,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
   /**
    * Convert comparison mode to Period
    */
-  protected static Period getBaselinePeriod(COMPARE_MODE compareMode) {
+  protected static Period getBaselinePeriod(CompareMode compareMode) {
     switch (compareMode) {
       case Wo2W:
         return Weeks.TWO.toPeriod();
@@ -580,7 +580,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
       this.metricUrn = metricUrn;
     }
 
-    public void setSeasonalValues(COMPARE_MODE compareMode, double seasonalValue, double current) {
+    public void setSeasonalValues(CompareMode compareMode, double seasonalValue, double current) {
       double lift = BaseNotificationContent.getLift(current, seasonalValue);
       switch (compareMode) {
         case Wo4W:

@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.AnomalyFunctionBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 
@@ -70,24 +69,7 @@ public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunct
     if (StringUtils.isBlank(application)) {
       throw new IllegalArgumentException("application is null or empty");
     }
-
-    // get the list of function ids from the alert config under the application
-    Set<Long> applicationFunctionIds = new HashSet<>();
-    List<AlertConfigBean> alerts =
-        genericPojoDao.get(Predicate.EQ("application", application), AlertConfigBean.class);
-    for (AlertConfigBean alert : alerts) {
-      applicationFunctionIds.addAll(alert.getEmailConfig().getFunctionIds());
-    }
-
-    // Get the anomaly function dto from the function id fetched ahead
-    List<AnomalyFunctionBean> applicationAnomalyFunctionBeans = genericPojoDao
-        .get(new ArrayList<Long>(applicationFunctionIds), AnomalyFunctionBean.class);
-    List<AnomalyFunctionDTO> applicationAnomalyFunctions = new ArrayList<>();
-    for (AnomalyFunctionBean abstractBean : applicationAnomalyFunctionBeans) {
-      AnomalyFunctionDTO dto = MODEL_MAPPER.map(abstractBean, AnomalyFunctionDTO.class);
-      applicationAnomalyFunctions.add(dto);
-    }
-    return applicationAnomalyFunctions;
+    return new ArrayList<>();
   }
 
   @Override

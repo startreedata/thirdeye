@@ -59,6 +59,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
+import org.apache.pinot.thirdeye.Constants.CompareMode;
 import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
@@ -71,7 +72,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.COMPARE_MODE;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -306,7 +306,7 @@ public abstract class ThirdEyeUtils {
     return alias;
   }
 
-  public static Period getbaselineOffsetPeriodByMode(COMPARE_MODE compareMode) {
+  public static Period getbaselineOffsetPeriodByMode(CompareMode compareMode) {
     int numWeeksAgo = 1;
     switch (compareMode) {
       case Wo2W:

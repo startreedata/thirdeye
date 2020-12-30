@@ -24,11 +24,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.Constants.SubjectType;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
@@ -95,7 +95,7 @@ public class YamlDetectionAlertConfigTranslatorTest {
     Assert.assertEquals(alertConfig.getApplication(), "test_application");
     Assert.assertEquals(alertConfig.getFrom(), "thirdeye@thirdeye");
     Assert.assertEquals(alertConfig.getCronExpression(), "0 0/5 * * * ? *");
-    Assert.assertEquals(alertConfig.getSubjectType(), AlertConfigBean.SubjectType.METRICS);
+    Assert.assertEquals(alertConfig.getSubjectType(), SubjectType.METRICS);
     Assert.assertEquals(alertConfig.getReferenceLinks().size(), 1);
     Assert.assertEquals(alertConfig.getReferenceLinks().get("Test Link"), "test_url");
 

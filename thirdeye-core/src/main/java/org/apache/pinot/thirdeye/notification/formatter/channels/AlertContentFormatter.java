@@ -1,9 +1,9 @@
 package org.apache.pinot.thirdeye.notification.formatter.channels;
 
 import java.util.Properties;
+import org.apache.pinot.thirdeye.Constants.SubjectType;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 
 /**
@@ -31,11 +31,11 @@ public abstract class AlertContentFormatter {
   /**
    * Plug the appropriate subject style based on configuration
    */
-  AlertConfigBean.SubjectType getSubjectType(Properties alertSchemeClientConfigs) {
-    AlertConfigBean.SubjectType subjectType;
+  SubjectType getSubjectType(Properties alertSchemeClientConfigs) {
+    SubjectType subjectType;
     if (alertSchemeClientConfigs != null && alertSchemeClientConfigs
         .containsKey(PROP_SUBJECT_STYLE)) {
-      subjectType = AlertConfigBean.SubjectType
+      subjectType = SubjectType
           .valueOf(alertSchemeClientConfigs.get(PROP_SUBJECT_STYLE).toString());
     } else {
       // To support the legacy email subject configuration

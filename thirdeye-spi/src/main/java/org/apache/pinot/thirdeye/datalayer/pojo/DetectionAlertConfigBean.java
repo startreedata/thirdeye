@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.Constants.SubjectType;
 
 /**
  * ConfigBean holds namespaced key-value configuration values.  Values are serialized into the
@@ -44,7 +45,7 @@ public class DetectionAlertConfigBean extends AbstractBean {
 
   Map<String, Object> alertSchemes;
   Map<String, Object> alertSuppressors;
-  AlertConfigBean.SubjectType subjectType = AlertConfigBean.SubjectType.ALERT;
+  SubjectType subjectType = SubjectType.ALERT;
 
   Map<Long, Long> vectorClocks;
 
@@ -117,11 +118,11 @@ public class DetectionAlertConfigBean extends AbstractBean {
     this.application = application;
   }
 
-  public AlertConfigBean.SubjectType getSubjectType() {
+  public SubjectType getSubjectType() {
     return subjectType;
   }
 
-  public void setSubjectType(AlertConfigBean.SubjectType subjectType) {
+  public void setSubjectType(SubjectType subjectType) {
     this.subjectType = subjectType;
   }
 

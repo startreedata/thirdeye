@@ -31,4 +31,14 @@ public interface Constants {
     TIMEOUT,
     UNKNOWN
   }
+
+  enum SubjectType {
+    ALERT,
+    METRICS,
+    DATASETS
+  }
+
+  enum CompareMode {
+    WoW, Wo2W, Wo3W, Wo4W
+  }
 }

@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.io.IOUtils;
+import org.apache.pinot.thirdeye.Constants.SubjectType;
 import org.apache.pinot.thirdeye.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
@@ -59,7 +60,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
@@ -265,7 +265,7 @@ public class TestJiraContentFormatter {
     Properties jiraClientConfig = new Properties();
     jiraClientConfig.put(PROP_ASSIGNEE, "test");
     jiraClientConfig.put(PROP_LABELS, Arrays.asList("test-label-1", "test-label-2"));
-    jiraClientConfig.put(PROP_SUBJECT_STYLE, AlertConfigBean.SubjectType.METRICS);
+    jiraClientConfig.put(PROP_SUBJECT_STYLE, SubjectType.METRICS);
 
     JiraContentFormatter jiraContent = new JiraContentFormatter(
         JiraConfiguration.createFromProperties(jiraConfiguration), jiraClientConfig,
@@ -307,7 +307,7 @@ public class TestJiraContentFormatter {
     Properties jiraClientConfig = new Properties();
     jiraClientConfig.put(PROP_ASSIGNEE, "test");
     jiraClientConfig.put(PROP_LABELS, Arrays.asList("test-label-1", "test-label-2"));
-    jiraClientConfig.put(PROP_SUBJECT_STYLE, AlertConfigBean.SubjectType.METRICS);
+    jiraClientConfig.put(PROP_SUBJECT_STYLE, SubjectType.METRICS);
 
     JiraContentFormatter jiraContent = new JiraContentFormatter(
         JiraConfiguration.createFromProperties(jiraConfiguration), jiraClientConfig,

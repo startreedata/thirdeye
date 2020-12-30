@@ -31,9 +31,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.Constants.SubjectType;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -200,9 +200,9 @@ public class SubscriptionConfigTranslator extends
     alertConfigDTO.setActive(MapUtils.getBooleanValue(yamlConfigMap, PROP_ACTIVE, true));
     alertConfigDTO.setYaml(yamlConfig);
 
-    alertConfigDTO.setSubjectType(AlertConfigBean.SubjectType.valueOf(
+    alertConfigDTO.setSubjectType(SubjectType.valueOf(
         (String) MapUtils.getObject(yamlConfigMap, PROP_EMAIL_SUBJECT_TYPE,
-            AlertConfigBean.SubjectType.METRICS.name())));
+            SubjectType.METRICS.name())));
 
     Map<String, String> refLinks = ConfigUtils.getMap(yamlConfigMap.get(PROP_REFERENCE_LINKS));
     if (refLinks.isEmpty()) {

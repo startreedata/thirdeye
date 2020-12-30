@@ -35,6 +35,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.pql.parsers.utils.Pair;
+import org.apache.pinot.thirdeye.Constants.CompareMode;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
 import org.apache.pinot.thirdeye.anomaly.detection.AnomalyDetectionInputContextBuilder;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
@@ -45,7 +46,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean.COMPARE_MODE;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detector.function.AnomalyFunctionFactory;
@@ -202,7 +202,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
     String exploredDimensions = anomalyFunction.getExploreDimensions();
     // Add WoW number
     if (presentSeasonalValues) {
-      for (COMPARE_MODE compareMode : COMPARE_MODE.values()) {
+      for (CompareMode compareMode : CompareMode.values()) {
         double avgValues = Double.NaN;
         try {
           avgValues = getAvgComparisonBaseline(anomaly, compareMode, anomaly.getStartTime(),
@@ -233,7 +233,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
    * @param end the end time of the monitoring window in millis
    * @return baseline values based on compareMode
    */
-  private Double getAvgComparisonBaseline(MergedAnomalyResultDTO anomaly, COMPARE_MODE compareMode,
+  private Double getAvgComparisonBaseline(MergedAnomalyResultDTO anomaly, CompareMode compareMode,
       long start, long end) throws Exception {
     AnomalyFunctionFactory anomalyFunctionFactory = new AnomalyFunctionFactory(
         thirdEyeAnomalyConfig.getFunctionConfigPath());

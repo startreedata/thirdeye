@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Singleton;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertSnapshotManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
@@ -36,7 +35,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.RootcauseTemplateManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertSnapshotManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl;
@@ -129,7 +127,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(DataSource.class).toInstance(dataSource);
 
     bind(AnomalyFunctionManager.class).to(AnomalyFunctionManagerImpl.class).in(Scopes.SINGLETON);
-    bind(AlertConfigManager.class).to(AlertConfigManagerImpl.class).in(Scopes.SINGLETON);
     bind(RawAnomalyResultManager.class).to(RawAnomalyResultManagerImpl.class).in(Scopes.SINGLETON);
     bind(MergedAnomalyResultManager.class).to(MergedAnomalyResultManagerImpl.class).in(
         Scopes.SINGLETON);

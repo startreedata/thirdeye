@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
-import org.apache.pinot.thirdeye.datalayer.bao.AlertConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertSnapshotManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
@@ -45,7 +44,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.RootcauseTemplateManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertSnapshotManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl;
@@ -100,10 +98,6 @@ public class DAORegistry {
 
   public AnomalyFunctionManager getAnomalyFunctionDAO() {
     return DeprecatedInjectorUtil.getInstance(AnomalyFunctionManagerImpl.class);
-  }
-
-  public AlertConfigManager getAlertConfigDAO() {
-    return DeprecatedInjectorUtil.getInstance(AlertConfigManagerImpl.class);
   }
 
   public RawAnomalyResultManager getRawAnomalyResultDAO() {

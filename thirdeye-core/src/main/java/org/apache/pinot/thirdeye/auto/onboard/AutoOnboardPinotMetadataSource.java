@@ -46,7 +46,6 @@ import org.apache.pinot.spi.data.DateTimeFieldSpec.TimeFormat;
 import org.apache.pinot.spi.data.DateTimeFormatSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
 import org.apache.pinot.spi.data.Schema;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -77,7 +76,6 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
    */
   private static final String ROW_COUNT = "ROW_COUNT";
   private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
-  private final AlertConfigManager alertDAO;
   private final DatasetConfigManager datasetDAO;
   private final MetricConfigManager metricDAO;
   private final String dataSourceName;
@@ -95,7 +93,6 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     }
     this.datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
     this.metricDAO = DAO_REGISTRY.getMetricConfigDAO();
-    this.alertDAO = DAO_REGISTRY.getAlertConfigDAO();
     this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
         PinotThirdEyeDataSource.class.getSimpleName());
   }
@@ -106,9 +103,28 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     autoLoadPinotMetricsUtils = utils;
     this.datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
     this.metricDAO = DAO_REGISTRY.getMetricConfigDAO();
-    this.alertDAO = DAO_REGISTRY.getAlertConfigDAO();
     this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
         PinotThirdEyeDataSource.class.getSimpleName());
+  }
+
+  /**
+   * Returns the metric column name
+   *
+   * @param metricConfig metric config
+   * @return column name
+   */
+  private static String getColumnName(MetricConfigDTO metricConfig) {
+    // In dimensionAsMetric case, the metric name will be used in the METRIC_VALUES_COLUMN property of the metric
+    if (metricConfig.isDimensionAsMetric()) {
+      Map<String, String> metricProperties = metricConfig.getMetricProperties();
+      if (MapUtils.isNotEmpty(metricProperties)) {
+        return metricProperties.get(DimensionAsMetricProperties.METRIC_VALUES_COLUMN.toString());
+      }
+    } else {
+      return metricConfig.getName();
+    }
+    throw new IllegalArgumentException(
+        String.format("Could not resolve column name for '%s'", metricConfig));
   }
 
   public void run() {
@@ -447,26 +463,6 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
         datasetToTimeColumnMap.put(dataset, timeColumnName);
       }
     }
-  }
-
-  /**
-   * Returns the metric column name
-   *
-   * @param metricConfig metric config
-   * @return column name
-   */
-  private static String getColumnName(MetricConfigDTO metricConfig) {
-    // In dimensionAsMetric case, the metric name will be used in the METRIC_VALUES_COLUMN property of the metric
-    if (metricConfig.isDimensionAsMetric()) {
-      Map<String, String> metricProperties = metricConfig.getMetricProperties();
-      if (MapUtils.isNotEmpty(metricProperties)) {
-        return metricProperties.get(DimensionAsMetricProperties.METRIC_VALUES_COLUMN.toString());
-      }
-    } else {
-      return metricConfig.getName();
-    }
-    throw new IllegalArgumentException(
-        String.format("Could not resolve column name for '%s'", metricConfig));
   }
 
   @Override

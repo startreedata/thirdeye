@@ -41,10 +41,8 @@ import org.apache.pinot.thirdeye.alert.commons.AnomalyNotifiedStatus;
 import org.apache.pinot.thirdeye.alert.commons.AnomalySource;
 import org.apache.pinot.thirdeye.anomaly.override.OverrideConfigHelper;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.common.metric.MetricType;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
@@ -60,10 +58,8 @@ import org.apache.pinot.thirdeye.datalayer.dto.OnboardDatasetMetricDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
 import org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator;
@@ -161,29 +157,6 @@ public class DaoTestUtils {
     notificationConfigDTO.setVectorClocks(vectorClocks);
 
     return notificationConfigDTO;
-  }
-
-  public static AlertConfigDTO getTestAlertConfiguration(String name) {
-    AlertConfigDTO alertConfigDTO = new AlertConfigDTO();
-    alertConfigDTO.setName(name);
-    alertConfigDTO.setActive(true);
-    alertConfigDTO.setApplication("test");
-    alertConfigDTO.setFromAddress("te@linkedin.com");
-
-    DetectionAlertFilterRecipients recipients = new DetectionAlertFilterRecipients(
-        EmailUtils.getValidEmailAddresses("anomaly-to@linedin.com"),
-        EmailUtils.getValidEmailAddresses("anomaly-cc@linedin.com"),
-        EmailUtils.getValidEmailAddresses("anomaly-bcc@linedin.com"));
-    alertConfigDTO.setReceiverAddresses(recipients);
-    alertConfigDTO.setCronExpression("0/10 * * * * ?");
-    AlertConfigBean.EmailConfig emailConfig = new AlertConfigBean.EmailConfig();
-    emailConfig.setAnomalyWatermark(0l);
-    alertConfigDTO.setEmailConfig(emailConfig);
-    AlertConfigBean.ReportConfigCollection reportConfigCollection =
-        new AlertConfigBean.ReportConfigCollection();
-    reportConfigCollection.setEnabled(true);
-    alertConfigDTO.setReportConfigCollection(reportConfigCollection);
-    return alertConfigDTO;
   }
 
   public static ClassificationConfigDTO getTestGroupingConfiguration(

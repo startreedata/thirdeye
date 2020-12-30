@@ -49,7 +49,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.ConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DataCompletenessConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
@@ -305,14 +304,6 @@ public class DaoTestUtils {
     dto.setDatasetName(datasetName);
     dto.setMetricName(metricName);
     dto.setDataSource(dataSource);
-    return dto;
-  }
-
-  public static ConfigDTO getTestConfig(String namespace, String name, Object value) {
-    ConfigDTO dto = new ConfigDTO();
-    dto.setNamespace(namespace);
-    dto.setName(name);
-    dto.setValue(value);
     return dto;
   }
 

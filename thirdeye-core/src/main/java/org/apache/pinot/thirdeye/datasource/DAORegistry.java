@@ -26,7 +26,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DataCompletenessConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
@@ -53,7 +52,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalySubscriptionGroupNotificationManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ApplicationManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ClassificationConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataCompletenessConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
@@ -82,18 +80,18 @@ public class DAORegistry {
 
   private static final DAORegistry INSTANCE = new DAORegistry();
 
+  /**
+   * internal constructor.
+   */
+  private DAORegistry() {
+  }
+
   /****************************************************************************
    * SINGLETON
    */
 
   public static DAORegistry getInstance() {
     return INSTANCE;
-  }
-
-  /**
-   * internal constructor.
-   */
-  private DAORegistry() {
   }
 
   /****************************************************************************
@@ -162,10 +160,6 @@ public class DAORegistry {
 
   public OnboardDatasetMetricManager getOnboardDatasetMetricDAO() {
     return DeprecatedInjectorUtil.getInstance(OnboardDatasetMetricManagerImpl.class);
-  }
-
-  public ConfigManager getConfigDAO() {
-    return DeprecatedInjectorUtil.getInstance(ConfigManagerImpl.class);
   }
 
   public ApplicationManager getApplicationDAO() {

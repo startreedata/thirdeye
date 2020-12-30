@@ -17,7 +17,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ClassificationConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.ConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DataCompletenessConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
@@ -44,7 +43,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalySubscriptionGroupNotificationManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ApplicationManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ClassificationConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataCompletenessConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
@@ -152,7 +150,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
         .in(Scopes.SINGLETON);
     bind(OnboardDatasetMetricManager.class).to(OnboardDatasetMetricManagerImpl.class).in(
         Scopes.SINGLETON);
-    bind(ConfigManager.class).to(ConfigManagerImpl.class).in(Scopes.SINGLETON);
     bind(ApplicationManager.class).to(ApplicationManagerImpl.class).in(Scopes.SINGLETON);
     bind(AlertSnapshotManager.class).to(AlertSnapshotManagerImpl.class).in(Scopes.SINGLETON);
     bind(RootcauseSessionManager.class).to(RootcauseSessionManagerImpl.class).in(Scopes.SINGLETON);

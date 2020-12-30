@@ -36,7 +36,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.OnboardDatasetMetricManager;
 import org.apache.pinot.thirdeye.datalayer.bao.OnlineDetectionDataManager;
 import org.apache.pinot.thirdeye.datalayer.bao.OverrideConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.RawAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.RootcauseTemplateManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
@@ -59,7 +58,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MetricConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OnboardDatasetMetricManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OnlineDetectionDataManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OverrideConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RawAnomalyResultManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseSessionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseTemplateManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SessionManagerImpl;
@@ -94,10 +92,6 @@ public class DAORegistry {
 
   public AnomalyFunctionManager getAnomalyFunctionDAO() {
     return DeprecatedInjectorUtil.getInstance(AnomalyFunctionManagerImpl.class);
-  }
-
-  public RawAnomalyResultManager getRawAnomalyResultDAO() {
-    return DeprecatedInjectorUtil.getInstance(RawAnomalyResultManagerImpl.class);
   }
 
   public MergedAnomalyResultManager getMergedAnomalyResultDAO() {

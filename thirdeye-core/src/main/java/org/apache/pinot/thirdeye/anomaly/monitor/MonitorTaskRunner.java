@@ -58,9 +58,8 @@ public class MonitorTaskRunner implements TaskRunner {
   private static final Logger LOG = LoggerFactory.getLogger(MonitorJobRunner.class);
   private static final long MAX_TASK_TIME = TimeUnit.HOURS.toMillis(6);
   private static final long MAX_FAILED_DISABLE_DAYS = 30;
-  private ThirdEyeAnomalyConfiguration thirdeyeConfig;
-
   private final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
+  private ThirdEyeAnomalyConfiguration thirdeyeConfig;
 
   @Override
   public List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) {
@@ -241,16 +240,6 @@ public class MonitorTaskRunner implements TaskRunner {
           monitorTaskInfo.getDetectionStatusRetentionDays());
     } catch (Exception e) {
       LOG.error("Exception when expiring detection status.", e);
-    }
-
-    // Delete expired raw anomalies.
-    try {
-      int deletedRawAnomalies = DAO_REGISTRY.getRawAnomalyResultDAO()
-          .deleteRecordsOlderThanDays(monitorTaskInfo.getRawAnomalyRetentionDays());
-      LOG.info("Deleted {} raw anomalies that are older than {} days.", deletedRawAnomalies,
-          monitorTaskInfo.getRawAnomalyRetentionDays());
-    } catch (Exception e) {
-      LOG.error("Exception when expiring raw anomalies.", e);
     }
 
     // Delete old evaluations.

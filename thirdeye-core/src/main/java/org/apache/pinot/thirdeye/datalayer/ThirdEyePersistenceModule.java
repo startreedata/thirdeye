@@ -27,7 +27,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.OnboardDatasetMetricManager;
 import org.apache.pinot.thirdeye.datalayer.bao.OnlineDetectionDataManager;
 import org.apache.pinot.thirdeye.datalayer.bao.OverrideConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.RawAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.RootcauseTemplateManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
@@ -50,7 +49,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MetricConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OnboardDatasetMetricManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OnlineDetectionDataManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OverrideConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RawAnomalyResultManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseSessionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseTemplateManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SessionManagerImpl;
@@ -123,7 +121,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(DataSource.class).toInstance(dataSource);
 
     bind(AnomalyFunctionManager.class).to(AnomalyFunctionManagerImpl.class).in(Scopes.SINGLETON);
-    bind(RawAnomalyResultManager.class).to(RawAnomalyResultManagerImpl.class).in(Scopes.SINGLETON);
     bind(MergedAnomalyResultManager.class).to(MergedAnomalyResultManagerImpl.class).in(
         Scopes.SINGLETON);
     bind(JobManager.class).to(JobManagerImpl.class).in(Scopes.SINGLETON);

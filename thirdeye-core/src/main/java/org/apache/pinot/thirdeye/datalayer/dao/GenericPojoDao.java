@@ -48,15 +48,9 @@ import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractJsonEntity;
-import org.apache.pinot.thirdeye.datalayer.entity.AlertConfigIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.AlertSnapshotIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.AnomalyFunctionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.ApplicationIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.ClassificationConfigIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.ConfigIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.DataCompletenessConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.DatasetConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.DetectionConfigIndex;
@@ -65,28 +59,20 @@ import org.apache.pinot.thirdeye.datalayer.entity.EntityToEntityMappingIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.EvaluationIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.EventIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.GenericJsonEntity;
-import org.apache.pinot.thirdeye.datalayer.entity.GroupedAnomalyResultsIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.JobIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.MetricConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.OnboardDatasetMetricIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.OverrideConfigIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.RawAnomalyResultIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.RootcauseSessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.RootcauseTemplateIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.SessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.TaskIndex;
 import org.apache.pinot.thirdeye.datalayer.pojo.AbstractBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertConfigBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertSnapshotBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.AnomalyFeedbackBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.AnomalyFunctionBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.AnomalySubscriptionGroupNotificationBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.ClassificationConfigBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.ConfigBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.DataCompletenessConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.DatasetConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionAlertConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
@@ -94,14 +80,12 @@ import org.apache.pinot.thirdeye.datalayer.pojo.DetectionStatusBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.EntityToEntityMappingBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.EvaluationBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.EventBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.GroupedAnomalyResultsBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.JobBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.OnboardDatasetMetricBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.OnlineDetectionDataBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.OverrideConfigBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.RawAnomalyResultBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.RootcauseSessionBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.RootcauseTemplateBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.SessionBean;
@@ -130,16 +114,12 @@ public class GenericPojoDao {
   static {
     pojoInfoMap.put(AnomalyFeedbackBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, AnomalyFeedbackIndex.class));
-    pojoInfoMap.put(AnomalyFunctionBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, AnomalyFunctionIndex.class));
     pojoInfoMap.put(JobBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, JobIndex.class));
     pojoInfoMap.put(TaskBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, TaskIndex.class));
     pojoInfoMap.put(MergedAnomalyResultBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, MergedAnomalyResultIndex.class));
-    pojoInfoMap.put(RawAnomalyResultBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, RawAnomalyResultIndex.class));
     pojoInfoMap.put(DatasetConfigBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, DatasetConfigIndex.class));
     pojoInfoMap.put(MetricConfigBean.class,
@@ -148,26 +128,14 @@ public class GenericPojoDao {
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, OverrideConfigIndex.class));
     pojoInfoMap.put(EventBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, EventIndex.class));
-    pojoInfoMap.put(AlertConfigBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, AlertConfigIndex.class));
-    pojoInfoMap.put(DataCompletenessConfigBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, DataCompletenessConfigIndex.class));
     pojoInfoMap.put(DetectionStatusBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionStatusIndex.class));
-    pojoInfoMap.put(ClassificationConfigBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, ClassificationConfigIndex.class));
     pojoInfoMap.put(EntityToEntityMappingBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, EntityToEntityMappingIndex.class));
-    pojoInfoMap.put(GroupedAnomalyResultsBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, GroupedAnomalyResultsIndex.class));
     pojoInfoMap.put(OnboardDatasetMetricBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, OnboardDatasetMetricIndex.class));
-    pojoInfoMap.put(ConfigBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, ConfigIndex.class));
     pojoInfoMap.put(ApplicationBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, ApplicationIndex.class));
-    pojoInfoMap.put(AlertSnapshotBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, AlertSnapshotIndex.class));
     pojoInfoMap.put(RootcauseSessionBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, RootcauseSessionIndex.class));
     pojoInfoMap.put(SessionBean.class,

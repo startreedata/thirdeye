@@ -14,9 +14,13 @@ import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardData,
 } from "../../components/subscription-group-card/subscription-group-card.interfaces";
+import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
 import { getAllAlerts } from "../../rest/alert-rest/alert-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    EmailSettings,
+    SubscriptionGroup,
+} from "../../rest/dto/subscription-group.interfaces";
 import {
     deleteSubscriptionGroup,
     getSubscriptionGroup,
@@ -32,10 +36,7 @@ import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar-util/snackbar-util";
-import {
-    getSubscriptionGroupAlerts,
-    getSubscriptionGroupCardData,
-} from "../../utils/subscription-group-util/subscription-group-util";
+import { getSubscriptionGroupCardData } from "../../utils/subscription-group-util/subscription-group-util";
 import { SubscriptionGroupsDetailPageParams } from "./subscription-groups-detail-page.interfaces";
 
 export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
@@ -158,7 +159,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     };
 
     const onSubscriptionGroupAlertsChange = (
-        subscriptiongroupAlerts: SubscriptionGroupAlert[]
+        subscriptionGroupAlerts: SubscriptionGroupAlert[]
     ): void => {
         if (
             !subscriptionGroupCardData ||
@@ -171,10 +172,36 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
         const subscriptionGroupCopy = cloneDeep(
             subscriptionGroupCardData.subscriptionGroup
         );
-        subscriptionGroupCopy.alerts = subscriptiongroupAlerts as Alert[];
+        subscriptionGroupCopy.alerts = subscriptionGroupAlerts as Alert[];
 
         // Update
-        updateSubscriptionGroup(subscriptionGroupCopy)
+        saveUpdatedSubscriptionGroup(subscriptionGroupCopy);
+    };
+
+    const onSubscriptionGroupEmailsChange = (emails: string[]): void => {
+        if (
+            !subscriptionGroupCardData ||
+            !subscriptionGroupCardData.subscriptionGroup
+        ) {
+            return;
+        }
+
+        // Create a copy of subscription group and update emails
+        const subscriptionGroupCopy = cloneDeep(
+            subscriptionGroupCardData.subscriptionGroup
+        );
+        subscriptionGroupCopy.emailSettings = {
+            to: emails,
+        } as EmailSettings;
+
+        // Update
+        saveUpdatedSubscriptionGroup(subscriptionGroupCopy);
+    };
+
+    const saveUpdatedSubscriptionGroup = (
+        subscriptionGroup: SubscriptionGroup
+    ): void => {
+        updateSubscriptionGroup(subscriptionGroup)
             .then((subscriptionGroup: SubscriptionGroup): void => {
                 // Replace updated subscription group as fetched subscription group
                 setSubscriptionGroupCardData(
@@ -223,7 +250,9 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                         <Grid item md={12}>
                             <SubscriptionGroupCard
                                 hideViewDetailsLinks
-                                subscriptionGroup={subscriptionGroupCardData}
+                                subscriptionGroupCardData={
+                                    subscriptionGroupCardData
+                                }
                                 onDelete={onDeleteSubscriptionGroup}
                             />
                         </Grid>
@@ -231,10 +260,23 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                         {/* Subscribed alerts */}
                         <Grid item md={12}>
                             <SubscriptionGroupAlertsAccordian
-                                alerts={getSubscriptionGroupAlerts(alerts)}
-                                subscriptionGroup={subscriptionGroupCardData}
-                                title={t("label.subscribed-alerts")}
+                                alerts={alerts}
+                                subscriptionGroupCardData={
+                                    subscriptionGroupCardData
+                                }
+                                title={t("label.subscribe-alerts")}
                                 onChange={onSubscriptionGroupAlertsChange}
+                            />
+                        </Grid>
+
+                        {/* Subscribed emails */}
+                        <Grid item md={12}>
+                            <SubscriptionGroupEmailsAccordian
+                                subscriptionGroupCardData={
+                                    subscriptionGroupCardData
+                                }
+                                title={t("label.subscribe-emails")}
+                                onChange={onSubscriptionGroupEmailsChange}
                             />
                         </Grid>
                     </Grid>

@@ -92,10 +92,13 @@
         "delete-subscription-group": "Delete Subscription Group",
         "subscribed-alerts": "Subscribed Alerts",
         "subscribed-emails": "Subscribed Emails",
+        "add": "Add",
+        "add-email": "Add Email",
         "subscription-group": "Subscription Group",
         "all-alerts": "All Alerts",
         "subscription-group-properties": "Subscription Group Properties",
         "subscribe-alerts": "Subscribe Alerts",
+        "subscribe-emails": "Subscribe Emails",
         "review-and-submit": "Review & Submit",
         "none": "None",
         "name": "Name",
@@ -128,6 +131,7 @@
         "delete-success": "{{entity}} deleted successfully",
         "delete-error": "Error deleting {{entity}}",
         "visualization-render-error": "Error rendering visualization",
-        "field-required": "Field is required"
+        "field-required": "Field is required",
+        "invalid-email": "Invalid email"
     }
 }

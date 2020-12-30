@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import {
     getSubscriptionGroupAlertId,
     getSubscriptionGroupAlertName,
+    getSubscriptionGroupAlerts,
 } from "../../utils/subscription-group-util/subscription-group-util";
 import { SubscriptionGroupAlert } from "../subscription-group-card/subscription-group-card.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
@@ -21,9 +22,9 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
     const { t } = useTranslation();
 
     const onSubscriptionGroupAlertsChange = (
-        subscriptiongroupAlerts: SubscriptionGroupAlert[]
+        subscriptionGroupAlerts: SubscriptionGroupAlert[]
     ): void => {
-        props.onChange && props.onChange(subscriptiongroupAlerts);
+        props.onChange && props.onChange(subscriptionGroupAlerts);
     };
 
     return (
@@ -37,11 +38,15 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
             <AccordionDetails>
                 <TransferList<SubscriptionGroupAlert>
                     fromLabel={t("label.all-alerts")}
-                    fromList={props.alerts}
+                    fromList={getSubscriptionGroupAlerts(props.alerts)}
                     listItemKeyFn={getSubscriptionGroupAlertId}
                     listItemTextFn={getSubscriptionGroupAlertName}
                     toLabel={t("label.subscribed-alerts")}
-                    toList={props.subscriptionGroup.alerts}
+                    toList={
+                        (props.subscriptionGroupCardData &&
+                            props.subscriptionGroupCardData.alerts) ||
+                        []
+                    }
                     onChange={onSubscriptionGroupAlertsChange}
                 />
             </AccordionDetails>

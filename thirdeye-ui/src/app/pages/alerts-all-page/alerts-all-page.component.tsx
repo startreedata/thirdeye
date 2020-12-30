@@ -1,5 +1,5 @@
 import { Grid } from "@material-ui/core";
-import { cloneDeep, isEmpty } from "lodash";
+import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -103,17 +103,13 @@ export const AlertsAllPage: FunctionComponent = () => {
             });
     };
 
-    const onAlertStateToggle = (alertCardData: AlertCardData): void => {
+    const onAlertChange = (alertCardData: AlertCardData): void => {
         if (!alertCardData || !alertCardData.alert) {
             return;
         }
 
-        // Create a copy of alert and toggle state
-        const alertCopy = cloneDeep(alertCardData.alert);
-        alertCopy.active = !alertCopy.active;
-
         // Update
-        updateAlert(alertCopy)
+        updateAlert(alertCardData.alert)
             .then((alert: Alert): void => {
                 // Replace updated alert in fetched alerts
                 replaceAlertCardData(alert);
@@ -132,12 +128,12 @@ export const AlertsAllPage: FunctionComponent = () => {
     };
 
     const onDeleteAlert = (alertCardData: AlertCardData): void => {
-        if (!alertCardData || !alertCardData.alert) {
+        if (!alertCardData) {
             return;
         }
 
         // Delete
-        deleteAlert(alertCardData.alert.id)
+        deleteAlert(alertCardData.id)
             .then((alert: Alert): void => {
                 // Remove deleted alert from fetched alerts
                 removeAlertCardData(alert);
@@ -222,10 +218,10 @@ export const AlertsAllPage: FunctionComponent = () => {
                             (filteredAlertCardData, index) => (
                                 <Grid item key={index} md={12}>
                                     <AlertCard
-                                        alert={filteredAlertCardData}
+                                        alertCardData={filteredAlertCardData}
                                         searchWords={searchWords}
+                                        onChange={onAlertChange}
                                         onDelete={onDeleteAlert}
-                                        onStateToggle={onAlertStateToggle}
                                     />
                                 </Grid>
                             )

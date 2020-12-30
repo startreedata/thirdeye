@@ -20,6 +20,7 @@ import {
     getAlertsUpdatePath,
     getSubscriptionGroupsDetailPath,
 } from "../../utils/routes-util/routes-util";
+import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { AlertCardProps } from "./alert-card.interfaces";
 import { useAlertCardStyles } from "./alert-card.styles";
@@ -40,24 +41,37 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         setAlertOptionsAnchorElement(event.currentTarget);
     };
 
+    const onCloseAlertOptions = (): void => {
+        setAlertOptionsAnchorElement(null);
+    };
+
     const onViewAlertDetails = (): void => {
-        history.push(getAlertsDetailPath(props.alert.id));
+        history.push(getAlertsDetailPath(props.alertCardData.id));
+
+        onCloseAlertOptions();
     };
 
     const onAlertStateToggle = (): void => {
-        props.onStateToggle && props.onStateToggle(props.alert);
+        if (props.alertCardData && props.alertCardData.alert) {
+            props.alertCardData.alert.active = !props.alertCardData.alert
+                .active;
+        }
 
-        closeAlertOptions();
+        props.onChange && props.onChange(props.alertCardData);
+
+        onCloseAlertOptions();
     };
 
     const onEditAlert = (): void => {
-        history.push(getAlertsUpdatePath(props.alert.id));
+        history.push(getAlertsUpdatePath(props.alertCardData.id));
+
+        onCloseAlertOptions();
     };
 
     const onDeleteAlert = (): void => {
-        props.onDelete && props.onDelete(props.alert);
+        props.onDelete && props.onDelete(props.alertCardData);
 
-        closeAlertOptions();
+        onCloseAlertOptions();
     };
 
     const onExpandToggle = (): void => {
@@ -68,514 +82,569 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         history.push(getSubscriptionGroupsDetailPath(id));
     };
 
-    const closeAlertOptions = (): void => {
-        setAlertOptionsAnchorElement(null);
-    };
-
     return (
         <Card variant="outlined">
-            {/* Alert name */}
-            <CardHeader
-                disableTypography
-                action={
-                    <Grid container alignItems="center">
-                        {/* Active/inactive */}
-                        <Grid item>
-                            <Typography
-                                className={
-                                    props.alert.active
-                                        ? alertCardClasses.activeText
-                                        : alertCardClasses.inactiveText
-                                }
-                                variant="h6"
-                            >
-                                <TextHighlighter
-                                    searchWords={props.searchWords}
-                                    text={props.alert.activeText}
-                                />
-                            </Typography>
-                        </Grid>
+            {props.alertCardData && (
+                <>
+                    <CardHeader
+                        disableTypography
+                        action={
+                            <Grid container alignItems="center">
+                                {/* Active/inactive */}
+                                <Grid item>
+                                    <Typography
+                                        className={
+                                            props.alertCardData.active
+                                                ? alertCardClasses.activeText
+                                                : alertCardClasses.inactiveText
+                                        }
+                                        variant="h6"
+                                    >
+                                        <TextHighlighter
+                                            searchWords={props.searchWords}
+                                            text={
+                                                props.alertCardData.activeText
+                                            }
+                                        />
+                                    </Typography>
+                                </Grid>
 
-                        {/* Alert options button */}
-                        <Grid item>
-                            <IconButton onClick={onAlertOptionsClick}>
-                                <MoreVert />
-                            </IconButton>
-                        </Grid>
-                    </Grid>
-                }
-                title={
-                    <>
-                        {/* Summary */}
-                        {props.hideViewDetailsLinks && (
-                            <Typography variant="h6">
-                                {t("label.summary")}
-                            </Typography>
-                        )}
+                                {/* Alert options button */}
+                                <Grid item>
+                                    <IconButton onClick={onAlertOptionsClick}>
+                                        <MoreVert />
+                                    </IconButton>
+                                </Grid>
+                            </Grid>
+                        }
+                        title={
+                            <>
+                                {/* Summary */}
+                                {props.hideViewDetailsLinks && (
+                                    <Typography variant="h6">
+                                        {t("label.summary")}
+                                    </Typography>
+                                )}
 
-                        {/* Alert name */}
+                                {/* Alert name */}
+                                {!props.hideViewDetailsLinks && (
+                                    <Link
+                                        component="button"
+                                        variant="h6"
+                                        onClick={onViewAlertDetails}
+                                    >
+                                        <TextHighlighter
+                                            searchWords={props.searchWords}
+                                            text={props.alertCardData.name}
+                                        />
+                                    </Link>
+                                )}
+                            </>
+                        }
+                    />
+
+                    <Menu
+                        anchorEl={alertOptionsAnchorElement}
+                        open={Boolean(alertOptionsAnchorElement)}
+                        onClose={onCloseAlertOptions}
+                    >
+                        {/* View details */}
                         {!props.hideViewDetailsLinks && (
-                            <Link
-                                component="button"
-                                variant="h6"
-                                onClick={onViewAlertDetails}
-                            >
-                                <TextHighlighter
-                                    searchWords={props.searchWords}
-                                    text={props.alert.name}
-                                />
-                            </Link>
+                            <MenuItem onClick={onViewAlertDetails}>
+                                {t("label.view-details")}
+                            </MenuItem>
                         )}
-                    </>
-                }
-            />
 
-            <Menu
-                anchorEl={alertOptionsAnchorElement}
-                open={Boolean(alertOptionsAnchorElement)}
-                onClose={closeAlertOptions}
-            >
-                {/* View details */}
-                {!props.hideViewDetailsLinks && (
-                    <MenuItem onClick={onViewAlertDetails}>
-                        {t("label.view-details")}
-                    </MenuItem>
-                )}
+                        {/* Activate/deactivete alert */}
+                        <MenuItem onClick={onAlertStateToggle}>
+                            {props.alertCardData.active
+                                ? t("label.deactivate-alert")
+                                : t("label.activate-alert")}
+                        </MenuItem>
 
-                {/* Activate/deactivete alert */}
-                <MenuItem onClick={onAlertStateToggle}>
-                    {props.alert.active
-                        ? t("label.deactivate-alert")
-                        : t("label.activate-alert")}
-                </MenuItem>
+                        {/* Edit alert */}
+                        <MenuItem onClick={onEditAlert}>
+                            {t("label.edit-alert")}
+                        </MenuItem>
 
-                {/* Edit alert */}
-                <MenuItem onClick={onEditAlert}>
-                    {t("label.edit-alert")}
-                </MenuItem>
-
-                {/* Delete alert */}
-                <MenuItem onClick={onDeleteAlert}>
-                    {t("label.delete-alert")}
-                </MenuItem>
-            </Menu>
+                        {/* Delete alert */}
+                        <MenuItem onClick={onDeleteAlert}>
+                            {t("label.delete-alert")}
+                        </MenuItem>
+                    </Menu>
+                </>
+            )}
 
             <CardContent>
-                <Grid container>
-                    <Grid container item md={12}>
-                        {/* Created by */}
-                        <Grid item md={4}>
-                            <Typography variant="subtitle2">
-                                {t("label.created-by")}
-                            </Typography>
-
-                            <TextHighlighter
-                                searchWords={props.searchWords}
-                                text={props.alert.createdBy}
-                            />
-                        </Grid>
-                    </Grid>
-
-                    {/* Separator */}
-                    <Grid item md={12}>
-                        <Divider variant="fullWidth" />
-                    </Grid>
-
-                    <Grid container item md={12}>
-                        {/* Detection type */}
-                        <Grid item md={3}>
-                            <div className={alertCardClasses.label}>
+                {props.alertCardData && (
+                    <Grid container>
+                        <Grid container item md={12}>
+                            {/* Created by */}
+                            <Grid item md={4}>
                                 <Typography variant="subtitle2">
-                                    {t("label.detection-type")}
+                                    {t("label.created-by")}
                                 </Typography>
-                            </div>
 
-                            {/* Expand/collapse button */}
-                            {props.alert.detectionTypes &&
-                                props.alert.detectionTypes.length > 1 && (
-                                    <div
-                                        className={
-                                            alertCardClasses.expandCollapseButton
-                                        }
-                                    >
-                                        <Link
-                                            component="button"
-                                            onClick={onExpandToggle}
-                                        >
-                                            {/* Collapse */}
-                                            {expand && (
-                                                <ExpandLess
-                                                    color="primary"
-                                                    fontSize="small"
-                                                />
-                                            )}
-
-                                            {/* Expand */}
-                                            {!expand && (
-                                                <ExpandMore
-                                                    color="primary"
-                                                    fontSize="small"
-                                                />
-                                            )}
-                                        </Link>
-                                    </div>
-                                )}
-
-                            <div className={alertCardClasses.value}>
-                                {/* No data available */}
-                                {isEmpty(props.alert.detectionTypes) && (
-                                    <Typography variant="body2">
-                                        <TextHighlighter
-                                            searchWords={props.searchWords}
-                                            text={t(
-                                                "label.no-data-available-marker"
-                                            )}
-                                        />
-                                    </Typography>
-                                )}
-
-                                {/* All detection types */}
-                                {!isEmpty(props.alert.detectionTypes) &&
-                                    expand && (
-                                        <>
-                                            {props.alert.detectionTypes.map(
-                                                (detectionType, index) => (
-                                                    <Typography
-                                                        key={index}
-                                                        variant="body2"
-                                                    >
-                                                        <TextHighlighter
-                                                            searchWords={
-                                                                props.searchWords
-                                                            }
-                                                            text={detectionType}
-                                                        />
-                                                    </Typography>
-                                                )
-                                            )}
-                                        </>
-                                    )}
-
-                                {/* First detection type */}
-                                {!isEmpty(props.alert.detectionTypes) &&
-                                    !expand && (
-                                        <Typography variant="body2">
-                                            <TextHighlighter
-                                                searchWords={props.searchWords}
-                                                text={
-                                                    props.alert
-                                                        .detectionTypes[0]
-                                                }
-                                            />
-                                        </Typography>
-                                    )}
-                            </div>
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    text={props.alertCardData.createdBy}
+                                />
+                            </Grid>
                         </Grid>
 
-                        {/* Dataset / Metric */}
-                        <Grid item md={3}>
-                            <div className={alertCardClasses.label}>
-                                <Typography variant="subtitle2">
-                                    {t("label.dataset-/-metric")}
-                                </Typography>
-                            </div>
+                        {/* Separator */}
+                        <Grid item md={12}>
+                            <Divider variant="fullWidth" />
+                        </Grid>
 
-                            {/* Expand/collapse button */}
-                            {props.alert.datasetAndMetrics &&
-                                props.alert.datasetAndMetrics.length > 1 && (
-                                    <div
-                                        className={
-                                            alertCardClasses.expandCollapseButton
-                                        }
-                                    >
-                                        <Link
-                                            component="button"
-                                            onClick={onExpandToggle}
-                                        >
-                                            {/* Colapse */}
-                                            {expand && (
-                                                <ExpandLess
-                                                    color="primary"
-                                                    fontSize="small"
-                                                />
-                                            )}
-
-                                            {/* Expand */}
-                                            {!expand && (
-                                                <ExpandMore
-                                                    color="primary"
-                                                    fontSize="small"
-                                                />
-                                            )}
-                                        </Link>
-                                    </div>
-                                )}
-
-                            <div className={alertCardClasses.value}>
-                                {/* No data available */}
-                                {isEmpty(props.alert.datasetAndMetrics) && (
-                                    <Typography variant="body2">
-                                        <TextHighlighter
-                                            searchWords={props.searchWords}
-                                            text={t(
-                                                "label.no-data-available-marker"
-                                            )}
-                                        />
+                        <Grid container item md={12}>
+                            {/* Detection type */}
+                            <Grid item md={3}>
+                                <div className={alertCardClasses.label}>
+                                    <Typography variant="subtitle2">
+                                        {t("label.detection-type")}
                                     </Typography>
-                                )}
+                                </div>
 
-                                {/* All dataset / metric */}
-                                {!isEmpty(props.alert.datasetAndMetrics) &&
-                                    expand && (
-                                        <>
-                                            {props.alert.datasetAndMetrics.map(
-                                                (datasetAndMetric, index) => (
-                                                    <Typography
-                                                        key={index}
-                                                        variant="body2"
-                                                    >
-                                                        <TextHighlighter
-                                                            searchWords={
-                                                                props.searchWords
-                                                            }
-                                                            text={t(
-                                                                "label.dataset-/-metric-values",
-                                                                {
-                                                                    dataset:
-                                                                        datasetAndMetric.datasetName,
-                                                                    metric:
-                                                                        datasetAndMetric.metricName,
-                                                                }
-                                                            )}
-                                                        />
-                                                    </Typography>
-                                                )
-                                            )}
-                                        </>
+                                {/* Expand/collapse button */}
+                                {props.alertCardData.detectionTypes &&
+                                    props.alertCardData.detectionTypes.length >
+                                        1 && (
+                                        <div
+                                            className={
+                                                alertCardClasses.expandCollapseButton
+                                            }
+                                        >
+                                            <Link
+                                                component="button"
+                                                onClick={onExpandToggle}
+                                            >
+                                                {/* Collapse */}
+                                                {expand && (
+                                                    <ExpandLess
+                                                        color="primary"
+                                                        fontSize="small"
+                                                    />
+                                                )}
+
+                                                {/* Expand */}
+                                                {!expand && (
+                                                    <ExpandMore
+                                                        color="primary"
+                                                        fontSize="small"
+                                                    />
+                                                )}
+                                            </Link>
+                                        </div>
                                     )}
 
-                                {/* First dataset / metric */}
-                                {!isEmpty(props.alert.datasetAndMetrics) &&
-                                    !expand && (
+                                <div className={alertCardClasses.value}>
+                                    {/* No data available */}
+                                    {isEmpty(
+                                        props.alertCardData.detectionTypes
+                                    ) && (
                                         <Typography variant="body2">
                                             <TextHighlighter
                                                 searchWords={props.searchWords}
                                                 text={t(
-                                                    "label.dataset-/-metric-values",
-                                                    {
-                                                        dataset:
-                                                            props.alert
-                                                                .datasetAndMetrics[0]
-                                                                .datasetName,
-                                                        metric:
-                                                            props.alert
-                                                                .datasetAndMetrics[0]
-                                                                .metricName,
-                                                    }
+                                                    "label.no-data-available-marker"
                                                 )}
                                             />
                                         </Typography>
                                     )}
-                            </div>
-                        </Grid>
 
-                        {/* Filtered by */}
-                        <Grid item md={3}>
-                            <div className={alertCardClasses.label}>
-                                <Typography variant="subtitle2">
-                                    {t("label.filtered-by")}
-                                </Typography>
-                            </div>
-
-                            {/* Expand/collapse button */}
-                            {props.alert.filteredBy &&
-                                props.alert.filteredBy.length > 1 && (
-                                    <div
-                                        className={
-                                            alertCardClasses.expandCollapseButton
-                                        }
-                                    >
-                                        <Link
-                                            component="button"
-                                            onClick={onExpandToggle}
-                                        >
-                                            {/* Collapse */}
-                                            {expand && (
-                                                <ExpandLess
-                                                    color="primary"
-                                                    fontSize="small"
-                                                />
-                                            )}
-
-                                            {/* Expand */}
-                                            {!expand && (
-                                                <ExpandMore
-                                                    color="primary"
-                                                    fontSize="small"
-                                                />
-                                            )}
-                                        </Link>
-                                    </div>
-                                )}
-
-                            <div className={alertCardClasses.value}>
-                                {/* No data available */}
-                                {isEmpty(props.alert.filteredBy) && (
-                                    <Typography variant="body2">
-                                        <TextHighlighter
-                                            searchWords={props.searchWords}
-                                            text={t(
-                                                "label.no-data-available-marker"
-                                            )}
-                                        />
-                                    </Typography>
-                                )}
-
-                                {/* All filtered by */}
-                                {!isEmpty(props.alert.filteredBy) && expand && (
-                                    <>
-                                        {props.alert.filteredBy.map(
-                                            (filteredBy, index) => (
-                                                <Typography
-                                                    key={index}
-                                                    variant="body2"
-                                                >
-                                                    <TextHighlighter
-                                                        searchWords={
-                                                            props.searchWords
-                                                        }
-                                                        text={filteredBy}
-                                                    />
-                                                </Typography>
-                                            )
+                                    {/* All detection types */}
+                                    {!isEmpty(
+                                        props.alertCardData.detectionTypes
+                                    ) &&
+                                        expand && (
+                                            <>
+                                                {props.alertCardData.detectionTypes.map(
+                                                    (detectionType, index) => (
+                                                        <Typography
+                                                            key={index}
+                                                            variant="body2"
+                                                        >
+                                                            <TextHighlighter
+                                                                searchWords={
+                                                                    props.searchWords
+                                                                }
+                                                                text={
+                                                                    detectionType
+                                                                }
+                                                            />
+                                                        </Typography>
+                                                    )
+                                                )}
+                                            </>
                                         )}
-                                    </>
-                                )}
 
-                                {/* First filtered by */}
-                                {!isEmpty(props.alert.filteredBy) && !expand && (
-                                    <Typography variant="body2">
-                                        <TextHighlighter
-                                            searchWords={props.searchWords}
-                                            text={props.alert.filteredBy[0]}
-                                        />
+                                    {/* First detection type */}
+                                    {!isEmpty(
+                                        props.alertCardData.detectionTypes
+                                    ) &&
+                                        !expand && (
+                                            <Typography variant="body2">
+                                                <TextHighlighter
+                                                    searchWords={
+                                                        props.searchWords
+                                                    }
+                                                    text={
+                                                        props.alertCardData
+                                                            .detectionTypes[0]
+                                                    }
+                                                />
+                                            </Typography>
+                                        )}
+                                </div>
+                            </Grid>
+
+                            {/* Dataset / Metric */}
+                            <Grid item md={3}>
+                                <div className={alertCardClasses.label}>
+                                    <Typography variant="subtitle2">
+                                        {t("label.dataset-/-metric")}
                                     </Typography>
-                                )}
-                            </div>
-                        </Grid>
+                                </div>
 
-                        {/* Subscription groups */}
-                        <Grid item md={3}>
-                            <div className={alertCardClasses.label}>
-                                <Typography variant="subtitle2">
-                                    {t("label.subscription-groups")}
-                                </Typography>
-                            </div>
-
-                            {/* Expand/collapse button */}
-                            {props.alert.subscriptionGroups &&
-                                props.alert.subscriptionGroups.length > 1 && (
-                                    <div
-                                        className={
-                                            alertCardClasses.expandCollapseButton
-                                        }
-                                    >
-                                        <Link
-                                            component="button"
-                                            onClick={onExpandToggle}
+                                {/* Expand/collapse button */}
+                                {props.alertCardData.datasetAndMetrics &&
+                                    props.alertCardData.datasetAndMetrics
+                                        .length > 1 && (
+                                        <div
+                                            className={
+                                                alertCardClasses.expandCollapseButton
+                                            }
                                         >
-                                            {/* Collapse */}
-                                            {expand && (
-                                                <ExpandLess
-                                                    color="primary"
-                                                    fontSize="small"
-                                                />
-                                            )}
+                                            <Link
+                                                component="button"
+                                                onClick={onExpandToggle}
+                                            >
+                                                {/* Colapse */}
+                                                {expand && (
+                                                    <ExpandLess
+                                                        color="primary"
+                                                        fontSize="small"
+                                                    />
+                                                )}
 
-                                            {/* Expand */}
-                                            {!expand && (
-                                                <ExpandMore
-                                                    color="primary"
-                                                    fontSize="small"
-                                                />
-                                            )}
-                                        </Link>
-                                    </div>
-                                )}
-
-                            <div className={alertCardClasses.value}>
-                                {/* No data available */}
-                                {isEmpty(props.alert.subscriptionGroups) && (
-                                    <Typography variant="body2">
-                                        <TextHighlighter
-                                            searchWords={props.searchWords}
-                                            text={t(
-                                                "label.no-data-available-marker"
-                                            )}
-                                        />
-                                    </Typography>
-                                )}
-
-                                {/* All subscription groups */}
-                                {!isEmpty(props.alert.subscriptionGroups) &&
-                                    expand && (
-                                        <>
-                                            {props.alert.subscriptionGroups.map(
-                                                (subscriptionGroup, index) => (
-                                                    <Link
-                                                        component="button"
-                                                        display="block"
-                                                        key={index}
-                                                        variant="body2"
-                                                        onClick={(): void => {
-                                                            onViewSubscriptionGroupDetails(
-                                                                subscriptionGroup.id
-                                                            );
-                                                        }}
-                                                    >
-                                                        <TextHighlighter
-                                                            searchWords={
-                                                                props.searchWords
-                                                            }
-                                                            text={
-                                                                subscriptionGroup.name
-                                                            }
-                                                        />
-                                                    </Link>
-                                                )
-                                            )}
-                                        </>
+                                                {/* Expand */}
+                                                {!expand && (
+                                                    <ExpandMore
+                                                        color="primary"
+                                                        fontSize="small"
+                                                    />
+                                                )}
+                                            </Link>
+                                        </div>
                                     )}
 
-                                {/* First subscription group */}
-                                {!isEmpty(props.alert.subscriptionGroups) &&
-                                    !expand && (
-                                        <Link
-                                            component="button"
-                                            display="block"
-                                            variant="body2"
-                                            onClick={(): void => {
-                                                onViewSubscriptionGroupDetails(
-                                                    props.alert
-                                                        .subscriptionGroups[0]
-                                                        .id
-                                                );
-                                            }}
-                                        >
+                                <div className={alertCardClasses.value}>
+                                    {/* No data available */}
+                                    {isEmpty(
+                                        props.alertCardData.datasetAndMetrics
+                                    ) && (
+                                        <Typography variant="body2">
                                             <TextHighlighter
                                                 searchWords={props.searchWords}
-                                                text={
-                                                    props.alert
-                                                        .subscriptionGroups[0]
-                                                        .name
-                                                }
+                                                text={t(
+                                                    "label.no-data-available-marker"
+                                                )}
                                             />
-                                        </Link>
+                                        </Typography>
                                     )}
-                            </div>
+
+                                    {/* All dataset / metric */}
+                                    {!isEmpty(
+                                        props.alertCardData.datasetAndMetrics
+                                    ) &&
+                                        expand && (
+                                            <>
+                                                {props.alertCardData.datasetAndMetrics.map(
+                                                    (
+                                                        datasetAndMetric,
+                                                        index
+                                                    ) => (
+                                                        <Typography
+                                                            key={index}
+                                                            variant="body2"
+                                                        >
+                                                            <TextHighlighter
+                                                                searchWords={
+                                                                    props.searchWords
+                                                                }
+                                                                text={t(
+                                                                    "label.dataset-/-metric-values",
+                                                                    {
+                                                                        dataset:
+                                                                            datasetAndMetric.datasetName,
+                                                                        metric:
+                                                                            datasetAndMetric.metricName,
+                                                                    }
+                                                                )}
+                                                            />
+                                                        </Typography>
+                                                    )
+                                                )}
+                                            </>
+                                        )}
+
+                                    {/* First dataset / metric */}
+                                    {!isEmpty(
+                                        props.alertCardData.datasetAndMetrics
+                                    ) &&
+                                        !expand && (
+                                            <Typography variant="body2">
+                                                <TextHighlighter
+                                                    searchWords={
+                                                        props.searchWords
+                                                    }
+                                                    text={t(
+                                                        "label.dataset-/-metric-values",
+                                                        {
+                                                            dataset:
+                                                                props
+                                                                    .alertCardData
+                                                                    .datasetAndMetrics[0]
+                                                                    .datasetName,
+                                                            metric:
+                                                                props
+                                                                    .alertCardData
+                                                                    .datasetAndMetrics[0]
+                                                                    .metricName,
+                                                        }
+                                                    )}
+                                                />
+                                            </Typography>
+                                        )}
+                                </div>
+                            </Grid>
+
+                            {/* Filtered by */}
+                            <Grid item md={3}>
+                                <div className={alertCardClasses.label}>
+                                    <Typography variant="subtitle2">
+                                        {t("label.filtered-by")}
+                                    </Typography>
+                                </div>
+
+                                {/* Expand/collapse button */}
+                                {props.alertCardData.filteredBy &&
+                                    props.alertCardData.filteredBy.length >
+                                        1 && (
+                                        <div
+                                            className={
+                                                alertCardClasses.expandCollapseButton
+                                            }
+                                        >
+                                            <Link
+                                                component="button"
+                                                onClick={onExpandToggle}
+                                            >
+                                                {/* Collapse */}
+                                                {expand && (
+                                                    <ExpandLess
+                                                        color="primary"
+                                                        fontSize="small"
+                                                    />
+                                                )}
+
+                                                {/* Expand */}
+                                                {!expand && (
+                                                    <ExpandMore
+                                                        color="primary"
+                                                        fontSize="small"
+                                                    />
+                                                )}
+                                            </Link>
+                                        </div>
+                                    )}
+
+                                <div className={alertCardClasses.value}>
+                                    {/* No data available */}
+                                    {isEmpty(
+                                        props.alertCardData.filteredBy
+                                    ) && (
+                                        <Typography variant="body2">
+                                            <TextHighlighter
+                                                searchWords={props.searchWords}
+                                                text={t(
+                                                    "label.no-data-available-marker"
+                                                )}
+                                            />
+                                        </Typography>
+                                    )}
+
+                                    {/* All filtered by */}
+                                    {!isEmpty(props.alertCardData.filteredBy) &&
+                                        expand && (
+                                            <>
+                                                {props.alertCardData.filteredBy.map(
+                                                    (filteredBy, index) => (
+                                                        <Typography
+                                                            key={index}
+                                                            variant="body2"
+                                                        >
+                                                            <TextHighlighter
+                                                                searchWords={
+                                                                    props.searchWords
+                                                                }
+                                                                text={
+                                                                    filteredBy
+                                                                }
+                                                            />
+                                                        </Typography>
+                                                    )
+                                                )}
+                                            </>
+                                        )}
+
+                                    {/* First filtered by */}
+                                    {!isEmpty(props.alertCardData.filteredBy) &&
+                                        !expand && (
+                                            <Typography variant="body2">
+                                                <TextHighlighter
+                                                    searchWords={
+                                                        props.searchWords
+                                                    }
+                                                    text={
+                                                        props.alertCardData
+                                                            .filteredBy[0]
+                                                    }
+                                                />
+                                            </Typography>
+                                        )}
+                                </div>
+                            </Grid>
+
+                            {/* Subscription groups */}
+                            <Grid item md={3}>
+                                <div className={alertCardClasses.label}>
+                                    <Typography variant="subtitle2">
+                                        {t("label.subscription-groups")}
+                                    </Typography>
+                                </div>
+
+                                {/* Expand/collapse button */}
+                                {props.alertCardData.subscriptionGroups &&
+                                    props.alertCardData.subscriptionGroups
+                                        .length > 1 && (
+                                        <div
+                                            className={
+                                                alertCardClasses.expandCollapseButton
+                                            }
+                                        >
+                                            <Link
+                                                component="button"
+                                                onClick={onExpandToggle}
+                                            >
+                                                {/* Collapse */}
+                                                {expand && (
+                                                    <ExpandLess
+                                                        color="primary"
+                                                        fontSize="small"
+                                                    />
+                                                )}
+
+                                                {/* Expand */}
+                                                {!expand && (
+                                                    <ExpandMore
+                                                        color="primary"
+                                                        fontSize="small"
+                                                    />
+                                                )}
+                                            </Link>
+                                        </div>
+                                    )}
+
+                                <div className={alertCardClasses.value}>
+                                    {/* No data available */}
+                                    {isEmpty(
+                                        props.alertCardData.subscriptionGroups
+                                    ) && (
+                                        <Typography variant="body2">
+                                            <TextHighlighter
+                                                searchWords={props.searchWords}
+                                                text={t(
+                                                    "label.no-data-available-marker"
+                                                )}
+                                            />
+                                        </Typography>
+                                    )}
+
+                                    {/* All subscription groups */}
+                                    {!isEmpty(
+                                        props.alertCardData.subscriptionGroups
+                                    ) &&
+                                        expand && (
+                                            <>
+                                                {props.alertCardData.subscriptionGroups.map(
+                                                    (
+                                                        subscriptionGroup,
+                                                        index
+                                                    ) => (
+                                                        <Link
+                                                            component="button"
+                                                            display="block"
+                                                            key={index}
+                                                            variant="body2"
+                                                            onClick={(): void => {
+                                                                onViewSubscriptionGroupDetails(
+                                                                    subscriptionGroup.id
+                                                                );
+                                                            }}
+                                                        >
+                                                            <TextHighlighter
+                                                                searchWords={
+                                                                    props.searchWords
+                                                                }
+                                                                text={
+                                                                    subscriptionGroup.name
+                                                                }
+                                                            />
+                                                        </Link>
+                                                    )
+                                                )}
+                                            </>
+                                        )}
+
+                                    {/* First subscription group */}
+                                    {!isEmpty(
+                                        props.alertCardData.subscriptionGroups
+                                    ) &&
+                                        !expand && (
+                                            <Link
+                                                component="button"
+                                                display="block"
+                                                variant="body2"
+                                                onClick={(): void => {
+                                                    onViewSubscriptionGroupDetails(
+                                                        props.alertCardData
+                                                            .subscriptionGroups[0]
+                                                            .id
+                                                    );
+                                                }}
+                                            >
+                                                <TextHighlighter
+                                                    searchWords={
+                                                        props.searchWords
+                                                    }
+                                                    text={
+                                                        props.alertCardData
+                                                            .subscriptionGroups[0]
+                                                            .name
+                                                    }
+                                                />
+                                            </Link>
+                                        )}
+                                </div>
+                            </Grid>
                         </Grid>
                     </Grid>
-                </Grid>
+                )}
+
+                {/* No data available message */}
+                {!props.alertCardData && <NoDataIndicator />}
             </CardContent>
         </Card>
     );

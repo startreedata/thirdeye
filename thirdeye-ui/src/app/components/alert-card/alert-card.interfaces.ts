@@ -1,10 +1,10 @@
 import { Alert } from "../../rest/dto/alert.interfaces";
 
 export interface AlertCardProps {
-    alert: AlertCardData;
+    alertCardData: AlertCardData;
     searchWords?: string[];
     hideViewDetailsLinks?: boolean;
-    onStateToggle?: (alertCardData: AlertCardData) => void;
+    onChange?: (alertCardData: AlertCardData) => void;
     onDelete?: (alertCardData: AlertCardData) => void;
 }
 

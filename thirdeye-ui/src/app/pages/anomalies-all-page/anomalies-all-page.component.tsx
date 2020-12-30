@@ -157,7 +157,9 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                             (filteredAnomalyCardData, index) => (
                                 <Grid item key={index} md={12}>
                                     <AnomalyCard
-                                        anomaly={filteredAnomalyCardData}
+                                        anomalyCardData={
+                                            filteredAnomalyCardData
+                                        }
                                         searchWords={searchWords}
                                         onDelete={onDeleteAnomaly}
                                     />

@@ -1,7 +1,7 @@
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
 export interface SubscriptionGroupCardProps {
-    subscriptionGroup: SubscriptionGroupCardData;
+    subscriptionGroupCardData: SubscriptionGroupCardData;
     searchWords?: string[];
     hideViewDetailsLinks?: boolean;
     onDelete?: (subscriptionGroupCardData: SubscriptionGroupCardData) => void;

@@ -196,7 +196,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                                 <Grid item key={index} md={12}>
                                     <SubscriptionGroupCard
                                         searchWords={searchWords}
-                                        subscriptionGroup={
+                                        subscriptionGroupCardData={
                                             filteredSubscriptionGroupCardData
                                         }
                                         onDelete={onDeleteSubscriptionGroup}

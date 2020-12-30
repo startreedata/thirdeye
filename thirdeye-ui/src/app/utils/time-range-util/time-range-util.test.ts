@@ -220,7 +220,7 @@ describe("Time Range Util", () => {
         ).toEqual("");
     });
 
-    test("formatTimeRangeDuration shall return appropriate string for custom time range duration", () => {
+    test("formatTimeRangeDuration shall return appropriate string for time range duration", () => {
         const mockCustomTimeRangeDuration: TimeRangeDuration = {
             timeRange: TimeRange.CUSTOM,
             startTime: 1,
@@ -234,18 +234,6 @@ describe("Time Range Util", () => {
             startTime: "1",
             endTime: "2",
         });
-    });
-
-    test("formatTimeRangeDuration shall return appropriate string for predefined time range duration", () => {
-        const mockTimeRangeDuration: TimeRangeDuration = {
-            timeRange: TimeRange.LAST_12_HOURS,
-            startTime: 0,
-            endTime: 0,
-        };
-
-        expect(formatTimeRangeDuration(mockTimeRangeDuration)).toEqual(
-            "label.last-12-hours"
-        );
     });
 
     test("isTimeRangeDurationEqual shall return true when both time range durations are invalid", () => {

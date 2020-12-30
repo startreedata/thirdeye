@@ -193,20 +193,14 @@ export const formatTimeRange = (timeRange: TimeRange): string => {
 export const formatTimeRangeDuration = (
     timeRangeDuration: TimeRangeDuration
 ): string => {
-    if (timeRangeDuration && timeRangeDuration.timeRange === TimeRange.CUSTOM) {
-        // Custom time range duration, format start and end time
-        return i18n.t("label.start-time-end-time", {
-            startTime: formatDateAndTime(timeRangeDuration.startTime),
-            endTime: formatDateAndTime(timeRangeDuration.endTime),
-        });
+    if (!timeRangeDuration) {
+        return "";
     }
 
-    if (timeRangeDuration) {
-        // Predefined time range duration, render time range
-        return formatTimeRange(timeRangeDuration.timeRange);
-    }
-
-    return "";
+    return i18n.t("label.start-time-end-time", {
+        startTime: formatDateAndTime(timeRangeDuration.startTime),
+        endTime: formatDateAndTime(timeRangeDuration.endTime),
+    });
 };
 
 export const isTimeRangeDurationEqual = (

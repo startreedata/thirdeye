@@ -4,115 +4,148 @@ import {
     CardContent,
     Grid,
     IconButton,
+    InputAdornment,
     List,
     ListItem,
     ListItemSecondaryAction,
     ListItemText,
     TextField,
 } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
-import SubdirectoryArrowLeftIcon from "@material-ui/icons/SubdirectoryArrowLeft";
-import React, { useState } from "react";
-import { EditableListProps, ValidationError } from "./editable-list.interfaces";
+import { Close, SubdirectoryArrowLeft } from "@material-ui/icons";
+import React, {
+    ChangeEvent,
+    FunctionComponent,
+    KeyboardEvent,
+    useEffect,
+    useState,
+} from "react";
+import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";
 
-const validState = {
-    message: "",
-    valid: true,
-} as ValidationError;
+export const EditableList: FunctionComponent<EditableListProps> = (
+    props: EditableListProps
+) => {
+    const editableListClasses = useEditableListStyles();
+    const [list, setList] = useState<string[]>([]);
+    const [input, setInput] = useState("");
+    const [helperText, setHelperText] = useState("");
 
-export function EditableList({
-    list,
-    inputLabel,
-    buttonLabel,
-    onChange,
-    validate,
-}: EditableListProps): JSX.Element {
-    const [value, setValue] = useState<string>("");
-    const [isValid, setIsValid] = useState<ValidationError>(validState);
-    const listAddEditClasses = useEditableListStyles();
+    useEffect(() => {
+        // Input changed, populate list
+        setList(props.list || []);
+    }, [props.list]);
 
-    const onAdd = (): void => {
-        const valid = validate && validate(value);
-        if (!valid?.valid) {
-            setIsValid(valid as ValidationError);
+    const onInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
+        setInput(event.currentTarget.value);
+    };
+
+    const onInputKeyPress = (event: KeyboardEvent<HTMLInputElement>): void => {
+        if (event.key === "Enter") {
+            onAddListItem();
+        }
+    };
+
+    const onAddListItem = (): void => {
+        if (!input) {
+            return;
+        }
+
+        let validationResult;
+        if (
+            (validationResult = props.validateFn && props.validateFn(input)) &&
+            !validationResult.valid
+        ) {
+            // Validation failed
+            setHelperText(validationResult.message || "");
 
             return;
         }
 
-        onChange([...list, value]);
-        setValue("");
-        setIsValid(validState);
+        setHelperText("");
+        list.push(input);
+
+        // Notify
+        props.onChange && props.onChange(list);
     };
 
-    const onRemove = (idx: number) => (): void => {
-        onChange(list.filter((_t, index) => index !== idx));
+    const onRemoveListItem = (index: number) => (): void => {
+        list.splice(index, 1);
+
+        // Notify
+        props.onChange && props.onChange(list);
     };
 
     return (
         <Grid container>
+            {/* Input */}
             <Grid item md={9}>
                 <TextField
                     fullWidth
-                    error={!isValid?.valid}
-                    helperText={isValid?.message}
-                    label={inputLabel}
-                    value={value}
+                    InputProps={{
+                        endAdornment: (
+                            // Add button
+                            <InputAdornment position="end">
+                                <IconButton onClick={onAddListItem}>
+                                    <SubdirectoryArrowLeft />
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+                    error={Boolean(helperText)}
+                    helperText={helperText}
+                    label={props.inputLabel}
                     variant="outlined"
-                    onChange={(
-                        event: React.ChangeEvent<HTMLInputElement>
-                    ): void => {
-                        setIsValid(validState);
-                        setValue(event.target.value);
-                    }}
-                    onKeyPress={({
-                        key,
-                    }: React.KeyboardEvent<HTMLInputElement>): void => {
-                        if (key === "Enter") {
-                            onAdd();
-                        }
-                    }}
+                    onChange={onInputChange}
+                    onKeyPress={onInputKeyPress}
                 />
             </Grid>
+
+            {/* Add button */}
             <Grid item md={3}>
                 <Button
                     fullWidth
+                    className={editableListClasses.addButton}
                     color="primary"
-                    endIcon={<SubdirectoryArrowLeftIcon />}
                     size="large"
-                    style={{
-                        padding: "15px 0px",
-                    }}
                     variant="outlined"
-                    onClick={onAdd}
+                    onClick={onAddListItem}
                 >
-                    {buttonLabel}
+                    {props.buttonLabel}
                 </Button>
             </Grid>
+
+            {/* List */}
             <Grid item md={12}>
                 <Card variant="outlined">
-                    <CardContent className={listAddEditClasses.listContainer}>
+                    <CardContent className={editableListClasses.listContainer}>
                         <List dense>
-                            {list.map((item, idx) => (
-                                <ListItem
-                                    button
-                                    key={idx}
-                                    onClick={(): void => {
-                                        onRemove(idx);
-                                    }}
-                                >
-                                    <ListItemText primary={item} />
-                                    <ListItemSecondaryAction>
-                                        <IconButton onClick={onRemove(idx)}>
-                                            <CloseIcon />
-                                        </IconButton>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            ))}
+                            {list &&
+                                list.map((listItem, index) => (
+                                    <ListItem
+                                        button
+                                        key={index}
+                                        onClick={(): void => {
+                                            onRemoveListItem(index);
+                                        }}
+                                    >
+                                        <ListItemText primary={listItem} />
+
+                                        {/* Remove button */}
+                                        <ListItemSecondaryAction>
+                                            <IconButton
+                                                onClick={onRemoveListItem(
+                                                    index
+                                                )}
+                                            >
+                                                <Close />
+                                            </IconButton>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                ))}
                         </List>
                     </CardContent>
                 </Card>
             </Grid>
         </Grid>
     );
-}
+};

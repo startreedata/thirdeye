@@ -1,5 +1,5 @@
 import { Grid } from "@material-ui/core";
-import { cloneDeep, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -171,17 +171,13 @@ export const AlertsDetailPage: FunctionComponent = () => {
             });
     };
 
-    const onAlertStateToggle = (alertCardData: AlertCardData): void => {
+    const onAlertChange = (alertCardData: AlertCardData): void => {
         if (!alertCardData || !alertCardData.alert) {
             return;
         }
 
-        // Create a copy of alert and toggle state
-        const alertCopy = cloneDeep(alertCardData.alert);
-        alertCopy.active = !alertCopy.active;
-
         // Update
-        updateAlert(alertCopy)
+        updateAlert(alertCardData.alert)
             .then((alert: Alert): void => {
                 // Replace updated alert as fetched alert
                 setAlertCardData(getAlertCardData(alert, subscriptionGroups));
@@ -200,12 +196,12 @@ export const AlertsDetailPage: FunctionComponent = () => {
     };
 
     const onDeleteAlert = (alertCardData: AlertCardData): void => {
-        if (!alertCardData || !alertCardData.alert) {
+        if (!alertCardData) {
             return;
         }
 
         // Delete
-        deleteAlert(alertCardData.alert.id)
+        deleteAlert(alertCardData.id)
             .then((): void => {
                 // Redirect to alerts all path
                 history.push(getAlertsAllPath());
@@ -243,9 +239,9 @@ export const AlertsDetailPage: FunctionComponent = () => {
                         <Grid item md={12}>
                             <AlertCard
                                 hideViewDetailsLinks
-                                alert={alertCardData}
+                                alertCardData={alertCardData}
+                                onChange={onAlertChange}
                                 onDelete={onDeleteAlert}
-                                onStateToggle={onAlertStateToggle}
                             />
                         </Grid>
 

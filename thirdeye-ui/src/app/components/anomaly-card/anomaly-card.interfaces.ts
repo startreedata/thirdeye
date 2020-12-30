@@ -1,5 +1,5 @@
 export interface AnomalyCardProps {
-    anomaly: AnomalyCardData;
+    anomalyCardData: AnomalyCardData;
     searchWords?: string[];
     hideViewDetailsLinks?: boolean;
     onDelete?: (anomalyCardData: AnomalyCardData) => void;

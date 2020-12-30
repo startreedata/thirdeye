@@ -62,16 +62,20 @@ export const AppBar: FunctionComponent = () => {
         setShortcutOptionsAnchorElement(event.currentTarget);
     };
 
+    const onCloseShortcutOptions = (): void => {
+        setShortcutOptionsAnchorElement(null);
+    };
+
     const onCreateAlert = (): void => {
         history.push(getAlertsCreatePath());
 
-        closeShortcutOptions();
+        onCloseShortcutOptions();
     };
 
     const onCreateSubscriptionGroup = (): void => {
         history.push(getSubscriptionGroupsCreatePath());
 
-        closeShortcutOptions();
+        onCloseShortcutOptions();
     };
 
     const onSignInClick = (): void => {
@@ -80,10 +84,6 @@ export const AppBar: FunctionComponent = () => {
 
     const onSignOutClick = (): void => {
         history.push(getSignOutPath());
-    };
-
-    const closeShortcutOptions = (): void => {
-        setShortcutOptionsAnchorElement(null);
     };
 
     const isRouteCurrent = (route: string): boolean => {
@@ -177,7 +177,7 @@ export const AppBar: FunctionComponent = () => {
                         <Menu
                             anchorEl={shortcutOptionsAnchorElement}
                             open={Boolean(shortcutOptionsAnchorElement)}
-                            onClose={closeShortcutOptions}
+                            onClose={onCloseShortcutOptions}
                         >
                             {/* Create alert */}
                             <MenuItem onClick={onCreateAlert}>

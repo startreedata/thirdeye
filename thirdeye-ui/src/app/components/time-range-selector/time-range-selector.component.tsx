@@ -52,8 +52,12 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     ] = useState<HTMLElement | null>();
     const { t } = useTranslation();
 
-    const onTimeRangeButtonClick = (event: MouseEvent<HTMLElement>): void => {
+    const onTimeRangeSelectorClick = (event: MouseEvent<HTMLElement>): void => {
         setTimeRangeSelectorAnchorElement(event.currentTarget);
+    };
+
+    const onCloseTimeRangeSelector = (): void => {
+        setTimeRangeSelectorAnchorElement(null);
     };
 
     const onRefresh = (): void => {
@@ -61,7 +65,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         props.onChange && props.onChange(cloneDeep(componentTimeRangeDuration));
     };
 
-    const onTimeRangeSelectorOpen = (): void => {
+    const onOpenTimeRangeSelector = (): void => {
         // Update component time range duration
         setComponentTimeRangeDuration(props.timeRangeDurationFn());
     };
@@ -129,7 +133,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         // Notify that component time range duration has changed
         props.onChange && props.onChange(componentTimeRangeDuration);
 
-        closeTimeRangeSelector();
+        onCloseTimeRangeSelector();
     };
 
     const initCustomTimeRange = (): void => {
@@ -146,16 +150,12 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         setComponentTimeRangeDuration(customTimeRangeDuration);
     };
 
-    const closeTimeRangeSelector = (): void => {
-        setTimeRangeSelectorAnchorElement(null);
-    };
-
     return (
         <Grid container alignItems="center">
             {/* Time range */}
             <Grid item>
                 {/* Time range label*/}
-                {props.timeRangeDuration.timeRange === TimeRange.CUSTOM && (
+                {props.timeRangeDuration && (
                     <Typography variant="overline">
                         {formatTimeRange(props.timeRangeDuration.timeRange)}
                     </Typography>
@@ -173,7 +173,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                     className={timeRangeSelectorClasses.timeRangeButton}
                     color="primary"
                     variant="outlined"
-                    onClick={onTimeRangeButtonClick}
+                    onClick={onTimeRangeSelectorClick}
                 >
                     <CalendarToday />
                 </Button>
@@ -182,8 +182,8 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                 <Popover
                     anchorEl={timeRangeSelectorAnchorElement}
                     open={Boolean(timeRangeSelectorAnchorElement)}
-                    onClose={closeTimeRangeSelector}
-                    onEnter={onTimeRangeSelectorOpen}
+                    onClose={onCloseTimeRangeSelector}
+                    onEnter={onOpenTimeRangeSelector}
                 >
                     <div
                         className={
@@ -451,7 +451,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                                     size="large"
                                                     variant="outlined"
                                                     onClick={
-                                                        closeTimeRangeSelector
+                                                        onCloseTimeRangeSelector
                                                     }
                                                 >
                                                     {t("label.cancel")}

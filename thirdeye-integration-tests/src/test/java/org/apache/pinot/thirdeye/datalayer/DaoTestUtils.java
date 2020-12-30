@@ -47,7 +47,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DataCompletenessConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
@@ -224,19 +223,6 @@ public class DaoTestUtils {
     overrideConfigDTO.setTargetLevel(overrideTarget);
 
     return overrideConfigDTO;
-  }
-
-  public static DataCompletenessConfigDTO getTestDataCompletenessConfig(String dataset,
-      long dateToCheckInMS, String dateToCheckInSDF, boolean dataComplete) {
-    DataCompletenessConfigDTO dataCompletenessConfigDTO = new DataCompletenessConfigDTO();
-    dataCompletenessConfigDTO.setDataset(dataset);
-    dataCompletenessConfigDTO.setDateToCheckInMS(dateToCheckInMS);
-    dataCompletenessConfigDTO.setDateToCheckInSDF(dateToCheckInSDF);
-    dataCompletenessConfigDTO.setDataComplete(dataComplete);
-    dataCompletenessConfigDTO.setCountStar(2000);
-    dataCompletenessConfigDTO.setPercentComplete(79);
-    dataCompletenessConfigDTO.setNumAttempts(3);
-    return dataCompletenessConfigDTO;
   }
 
   public static DetectionStatusDTO getTestDetectionStatus(String dataset, long dateToCheckInMS,

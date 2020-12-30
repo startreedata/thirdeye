@@ -243,17 +243,6 @@ public class MonitorTaskRunner implements TaskRunner {
       LOG.error("Exception when expiring detection status.", e);
     }
 
-    // Delete expired data completeness entries.
-    try {
-      int deletedDetectionStatus = DAO_REGISTRY.getDataCompletenessConfigDAO()
-          .deleteRecordsOlderThanDays(monitorTaskInfo.getDefaultRetentionDays());
-      LOG.info("Deleted {} data completeness entries that are older than {} days.",
-          deletedDetectionStatus,
-          monitorTaskInfo.getDefaultRetentionDays());
-    } catch (Exception e) {
-      LOG.error("Exception when expiring data completeness entries.", e);
-    }
-
     // Delete expired raw anomalies.
     try {
       int deletedRawAnomalies = DAO_REGISTRY.getRawAnomalyResultDAO()

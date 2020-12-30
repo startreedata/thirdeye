@@ -46,7 +46,6 @@ import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.ClassificationConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
@@ -158,16 +157,6 @@ public class DaoTestUtils {
     return notificationConfigDTO;
   }
 
-  public static ClassificationConfigDTO getTestGroupingConfiguration(
-      List<Long> mainFunctionIdList) {
-    ClassificationConfigDTO configDTO = new ClassificationConfigDTO();
-    configDTO.setName("classificationJob");
-    configDTO.setMainFunctionIdList(mainFunctionIdList);
-    configDTO.setAuxFunctionIdList(mainFunctionIdList);
-    configDTO.setActive(true);
-    return configDTO;
-  }
-
   public static JobDTO getTestJobSpec() {
     JobDTO jobSpec = new JobDTO();
     jobSpec.setJobName("Test_Anomaly_Job");
@@ -234,17 +223,6 @@ public class DaoTestUtils {
     detectionStatusDTO.setDateToCheckInSDF(dateToCheckInSDF);
     detectionStatusDTO.setDetectionRun(detectionRun);
     return detectionStatusDTO;
-  }
-
-  public static ClassificationConfigDTO getTestClassificationConfig(String name,
-      List<Long> mainFunctionIdList,
-      List<Long> functionIds) {
-    ClassificationConfigDTO classificationConfigDTO = new ClassificationConfigDTO();
-    classificationConfigDTO.setName(name);
-    classificationConfigDTO.setMainFunctionIdList(mainFunctionIdList);
-    classificationConfigDTO.setAuxFunctionIdList(functionIds);
-    classificationConfigDTO.setActive(true);
-    return classificationConfigDTO;
   }
 
   public static EntityToEntityMappingDTO getTestEntityToEntityMapping(String fromURN, String toURN,

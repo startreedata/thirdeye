@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 
@@ -12,6 +13,7 @@ public class ApiResource {
   private final AlertResource alertResource;
   private final SubscriptionGroupResource subscriptionGroupResource;
   private final AnomalyResource anomalyResource;
+  private EntityResource entityResource;
 
   @Inject
   public ApiResource(final AuthResource authResource,
@@ -20,7 +22,8 @@ public class ApiResource {
       final MetricResource metricResource,
       final AlertResource alertResource,
       final SubscriptionGroupResource subscriptionGroupResource,
-      final AnomalyResource anomalyResource) {
+      final AnomalyResource anomalyResource,
+      final EntityResource entityResource) {
     this.authResource = authResource;
     this.applicationResource = applicationResource;
     this.datasetResource = datasetResource;
@@ -28,6 +31,7 @@ public class ApiResource {
     this.alertResource = alertResource;
     this.subscriptionGroupResource = subscriptionGroupResource;
     this.anomalyResource = anomalyResource;
+    this.entityResource = entityResource;
   }
 
   @Path("auth")
@@ -63,5 +67,10 @@ public class ApiResource {
   @Path("anomalies")
   public AnomalyResource getAnomalyResource() {
     return anomalyResource;
+  }
+
+  @Path("entity")
+  public EntityResource getEntityResource() {
+    return entityResource;
   }
 }

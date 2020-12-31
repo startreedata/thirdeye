@@ -28,8 +28,6 @@ import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 @Api(tags = "Entity")
 public class EntityResource {
 
-  private static final Package PACKAGE = EntityResource.class.getPackage();
-
   private final GenericPojoDao genericPojoDao;
 
   @Inject
@@ -97,8 +95,7 @@ public class EntityResource {
       List<? extends AbstractBean> abstractBeans;
 
       if (!predicates.isEmpty()) {
-        final DaoFilter daoFilter = new DaoFilter();
-        daoFilter
+        final DaoFilter daoFilter = new DaoFilter()
             .setBeanClass(beanClass)
             .setPredicate(Predicate.AND(predicates.toArray(new Predicate[]{})));
         abstractBeans = genericPojoDao.filter(daoFilter);

@@ -30,6 +30,7 @@ import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
+    const [alerts, setAlerts] = useState<Alert[]>([]);
     const [subscriptionGroup, setSubscriptionGroup] = useState<
         SubscriptionGroup
     >();
@@ -92,15 +93,29 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             return;
         }
 
-        getSubscriptionGroup(toNumber(params.id))
-            .then((subscriptionGroup: SubscriptionGroup): void => {
-                setSubscriptionGroup(subscriptionGroup);
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
+        Promise.allSettled([
+            getSubscriptionGroup(toNumber(params.id)),
+            getAllAlerts(),
+        ])
+            .then(([subscriptionGroupResponse, alertsResponse]): void => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupResponse.status === "rejected" ||
+                    alertsResponse.status === "rejected"
+                ) {
+                    enqueueSnackbar(
+                        t("message.fetch-error"),
+                        getErrorSnackbarOption()
+                    );
+                }
+
+                // Attempt to gather data
+                if (subscriptionGroupResponse.status === "fulfilled") {
+                    setSubscriptionGroup(subscriptionGroupResponse.value);
+                }
+                if (alertsResponse.status === "fulfilled") {
+                    setAlerts(alertsResponse.value);
+                }
             })
             .finally((): void => {
                 setLoading(false);
@@ -148,23 +163,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             });
     };
 
-    const fetchAlerts = (): Promise<Alert[]> => {
-        return new Promise<Alert[]>((resolve, reject): void => {
-            getAllAlerts()
-                .then((alerts: Alert[]): void => {
-                    resolve(alerts);
-                })
-                .catch((error): void => {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-
-                    reject(error);
-                });
-        });
-    };
-
     if (loading) {
         return (
             <PageContainer>
@@ -178,7 +176,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             <PageContents centered hideTimeRange>
                 {subscriptionGroup && (
                     <SubscriptionGroupWizard
-                        getAlerts={fetchAlerts}
+                        alerts={alerts}
                         subscriptionGroup={subscriptionGroup}
                         onChange={onSubscriptionGroupWizardStepChange}
                         onFinish={onSubscriptionGroupWizardFinish}

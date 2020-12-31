@@ -24,6 +24,7 @@ import {
 
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
+    const [alerts, setAlerts] = useState<Alert[]>([]);
     const [
         setPageBreadcrumbs,
         pushPageBreadcrumb,
@@ -52,8 +53,25 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        setLoading(false);
+        // Fetch data
+        fetchData();
     }, []);
+
+    const fetchData = (): void => {
+        getAllAlerts()
+            .then((alerts: Alert[]): void => {
+                setAlerts(alerts);
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setLoading(false);
+            });
+    };
 
     const onSubscriptionGroupWizardStepChange = (
         subscriptionGroupWizardStep: SubscriptionGroupWizardStep
@@ -96,23 +114,6 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
             });
     };
 
-    const fetchAlerts = (): Promise<Alert[]> => {
-        return new Promise<Alert[]>((resolve, reject): void => {
-            getAllAlerts()
-                .then((alerts: Alert[]): void => {
-                    resolve(alerts);
-                })
-                .catch((error): void => {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-
-                    reject(error);
-                });
-        });
-    };
-
     if (loading) {
         return (
             <PageContainer>
@@ -125,7 +126,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
         <PageContainer>
             <PageContents centered hideTimeRange>
                 <SubscriptionGroupWizard
-                    getAlerts={fetchAlerts}
+                    alerts={alerts}
                     onChange={onSubscriptionGroupWizardStepChange}
                     onFinish={onSubscriptionGroupWizardFinish}
                 />

@@ -7,22 +7,29 @@ import {
     Stepper,
     Typography,
 } from "@material-ui/core";
-import { isEmpty, kebabCase } from "lodash";
+import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    EmailSettings,
+    SubscriptionGroup,
+} from "../../rest/dto/subscription-group.interfaces";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
 import {
     createEmptySubscriptionGroup,
     getSubscriptionGroupAlertId,
     getSubscriptionGroupAlertName,
+    getSubscriptionGroupAlerts,
     getSubscriptionGroupCardData,
 } from "../../utils/subscription-group-util/subscription-group-util";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
+import { validateEmail } from "../../utils/validation-util/validation-util";
+import { EditableList } from "../editable-list/editable-list.component";
+import { SubscriptionGroupAlert } from "../subscription-group-card/subscription-group-card.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { SubscriptionGroupPropertiesForm } from "./subscription-group-properties-form/subscription-group-properties-form.component";
+import { SubscriptionGroupRenderer } from "./subscription-group-renderer/subscription-group-renderer.component";
 import {
     SubscriptionGroupWizardProps,
     SubscriptionGroupWizardStep,
@@ -36,19 +43,26 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
     props: SubscriptionGroupWizardProps
 ) => {
     const subscriptionGroupWizardClasses = useSubscriptionGroupWizardStyles();
-    const [loading, setLoading] = useState(false);
     const [newSubscriptionGroup, setNewSubscriptionGroup] = useState<
         SubscriptionGroup
     >(props.subscriptionGroup || createEmptySubscriptionGroup());
-    const [alerts, setAlerts] = useState<Alert[]>([]);
     const [currentWizardStep, setCurrentWizardStep] = useState<
         SubscriptionGroupWizardStep
     >(SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES);
     const { t } = useTranslation();
 
     useEffect(() => {
-        initWizardStep();
+        // In case of input subscription group, alerts need to be configured for included alerts
+        // don't carry name
+        if (props.subscriptionGroup) {
+            newSubscriptionGroup.alerts = getSubscriptionGroupCardData(
+                props.subscriptionGroup,
+                props.alerts
+            ).alerts as Alert[];
+        }
+    }, []);
 
+    useEffect(() => {
         // Notify
         props.onChange && props.onChange(currentWizardStep);
     }, [currentWizardStep]);
@@ -65,11 +79,32 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         onNext();
     };
 
-    const onSubscriptionGroupAlertsChange = (alerts: Alert[]): void => {
+    const onSubscriptionGroupAlertsChange = (
+        subscriptionGroupAlerts: SubscriptionGroupAlert[]
+    ): void => {
         // Update subscription group with subscribed alerts
         setNewSubscriptionGroup(
             (newSubscriptionGroup): SubscriptionGroup => {
-                newSubscriptionGroup.alerts = alerts;
+                newSubscriptionGroup.alerts = subscriptionGroupAlerts as Alert[];
+
+                return newSubscriptionGroup;
+            }
+        );
+    };
+
+    const onSubscriptionGroupEmailsChange = (emails: string[]): void => {
+        // Update subscription group with subscribed emails
+        setNewSubscriptionGroup(
+            (newSubscriptionGroup): SubscriptionGroup => {
+                if (newSubscriptionGroup.emailSettings) {
+                    // Add to existing email settings
+                    newSubscriptionGroup.emailSettings.to = emails;
+                } else {
+                    // Create and add to email settings
+                    newSubscriptionGroup.emailSettings = {
+                        to: emails,
+                    } as EmailSettings;
+                }
 
                 return newSubscriptionGroup;
             }
@@ -119,40 +154,6 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         );
     };
 
-    const initWizardStep = (): void => {
-        switch (currentWizardStep) {
-            case SubscriptionGroupWizardStep.SUBSCRIBE_ALERTS: {
-                if (!isEmpty(alerts)) {
-                    // Alerts already received
-                    break;
-                }
-
-                // Get alerts to subscribe to
-                setLoading(true);
-                props.getAlerts &&
-                    props
-                        .getAlerts()
-                        .then((alerts: Alert[]): void => {
-                            setAlerts(alerts);
-
-                            // Associate alerts with subscription group
-                            const subscriptionGroupCardData = getSubscriptionGroupCardData(
-                                newSubscriptionGroup,
-                                alerts
-                            );
-                            onSubscriptionGroupAlertsChange(
-                                subscriptionGroupCardData.alerts as Alert[]
-                            );
-                        })
-                        .finally((): void => {
-                            setLoading(false);
-                        });
-
-                break;
-            }
-        }
-    };
-
     return (
         <>
             <Grid container>
@@ -179,20 +180,24 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                     </Stepper>
                 </Grid>
 
+                {/* Step label */}
+                <Grid item md={12}>
+                    <Typography variant="h5">
+                        {t(
+                            `label.${kebabCase(
+                                SubscriptionGroupWizardStep[currentWizardStep]
+                            )}`
+                        )}
+                    </Typography>
+                </Grid>
+
+                {/* Spacer */}
+                <Grid item md={12} />
+
                 {/* Subscription group properties */}
                 {currentWizardStep ===
                     SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (
                     <>
-                        {/* Step label */}
-                        <Grid item md={12}>
-                            <Typography variant="h5">
-                                {t("label.subscription-group-properties")}
-                            </Typography>
-                        </Grid>
-
-                        {/* Spacer */}
-                        <Grid item md={12} />
-
                         {/* Subscription group properties form */}
                         <Grid item md={12}>
                             <SubscriptionGroupPropertiesForm
@@ -203,112 +208,75 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                                 }
                             />
                         </Grid>
-                    </>
-                )}
 
-                {/* Subscribe alerts */}
-                {currentWizardStep ===
-                    SubscriptionGroupWizardStep.SUBSCRIBE_ALERTS &&
-                    !loading && (
-                        <>
-                            {/* Step label */}
-                            <Grid item md={12}>
-                                <Typography variant="h5">
-                                    {t("label.subscribe-alerts")}
-                                </Typography>
-                            </Grid>
+                        {/* Spacer */}
+                        <Grid item md={12} />
 
-                            {/* Spacer */}
-                            <Grid item md={12} />
-
-                            <Grid item md={12}>
-                                <TransferList<Alert>
-                                    fromLabel={t("label.all-alerts")}
-                                    fromList={alerts}
-                                    listItemKeyFn={getSubscriptionGroupAlertId}
-                                    listItemTextFn={
-                                        getSubscriptionGroupAlertName
-                                    }
-                                    toLabel={t("label.subscribed-alerts")}
-                                    toList={newSubscriptionGroup.alerts}
-                                    onChange={onSubscriptionGroupAlertsChange}
-                                />
-                            </Grid>
-                        </>
-                    )}
-
-                {/* Review and submit */}
-                {currentWizardStep ===
-                    SubscriptionGroupWizardStep.REVIEW_AND_SUBMIT && (
-                    <>
-                        {/* Step label */}
+                        {/* Subscribe alerts */}
                         <Grid item md={12}>
                             <Typography variant="h5">
-                                {t("label.review-and-submit")}
+                                {t("label.subscribe-alerts")}
                             </Typography>
+                        </Grid>
+
+                        <Grid item md={12}>
+                            <TransferList<SubscriptionGroupAlert>
+                                fromLabel={t("label.all-alerts")}
+                                fromList={getSubscriptionGroupAlerts(
+                                    props.alerts
+                                )}
+                                listItemKeyFn={getSubscriptionGroupAlertId}
+                                listItemTextFn={getSubscriptionGroupAlertName}
+                                toLabel={t("label.subscribed-alerts")}
+                                toList={
+                                    getSubscriptionGroupCardData(
+                                        newSubscriptionGroup,
+                                        props.alerts
+                                    ).alerts
+                                }
+                                onChange={onSubscriptionGroupAlertsChange}
+                            />
                         </Grid>
 
                         {/* Spacer */}
                         <Grid item md={12} />
 
-                        {/* Subscription group information */}
+                        {/* Subscribe emails */}
                         <Grid item md={12}>
-                            <Grid container justify="flex-end">
-                                {/* Name */}
-                                <Grid item md={2}>
-                                    <Typography variant="subtitle1">
-                                        <strong>{t("label.name")}</strong>
-                                    </Typography>
-                                </Grid>
+                            <Typography variant="h5">
+                                {t("label.subscribe-emails")}
+                            </Typography>
+                        </Grid>
 
-                                <Grid item md={10}>
-                                    <Typography variant="body1">
-                                        {newSubscriptionGroup.name}
-                                    </Typography>
-                                </Grid>
-
-                                {/* Subscribed alerts */}
-                                <Grid item md={2}>
-                                    <Typography variant="subtitle1">
-                                        <strong>
-                                            {t("label.subscribed-alerts")}
-                                        </strong>
-                                    </Typography>
-                                </Grid>
-
-                                {isEmpty(newSubscriptionGroup.alerts) && (
-                                    // No subscribed alerts
-                                    <Grid item md={10}>
-                                        <Typography variant="body1">
-                                            {t(
-                                                "label.no-data-available-marker"
-                                            )}
-                                        </Typography>
-                                    </Grid>
-                                )}
-
-                                {!isEmpty(newSubscriptionGroup.alerts) && (
-                                    // All subscribed alerts
-                                    <Grid item md={10}>
-                                        {newSubscriptionGroup.alerts.map(
-                                            (alert, index) => (
-                                                <Typography
-                                                    key={index}
-                                                    variant="body1"
-                                                >
-                                                    {alert.name}
-                                                </Typography>
-                                            )
-                                        )}
-                                    </Grid>
-                                )}
-                            </Grid>
+                        <Grid item md={12}>
+                            <EditableList
+                                buttonLabel={t("label.add")}
+                                inputLabel={t("label.add-email")}
+                                list={
+                                    (newSubscriptionGroup &&
+                                        newSubscriptionGroup.emailSettings &&
+                                        newSubscriptionGroup.emailSettings
+                                            .to) ||
+                                    []
+                                }
+                                validateFn={validateEmail}
+                                onChange={onSubscriptionGroupEmailsChange}
+                            />
                         </Grid>
                     </>
                 )}
-            </Grid>
 
-            {loading && <LoadingIndicator />}
+                {/* Review and submit */}
+                {currentWizardStep ===
+                    SubscriptionGroupWizardStep.REVIEW_AND_SUBMIT && (
+                    <>
+                        {/* Subscription group information */}
+                        <SubscriptionGroupRenderer
+                            subscriptionGroup={newSubscriptionGroup}
+                        />
+                    </>
+                )}
+            </Grid>
 
             {/* Spacer */}
             <Box padding={2} />
@@ -368,7 +336,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
 
                                 {/* Next button */}
                                 <Grid item>
-                                    {/* Submit button for subscription group properties form in for
+                                    {/* Submit button for subscription group properties form in 
                                     first step */}
                                     {currentWizardStep ===
                                         SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (

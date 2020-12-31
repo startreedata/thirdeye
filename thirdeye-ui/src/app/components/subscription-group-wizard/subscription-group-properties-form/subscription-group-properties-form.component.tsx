@@ -24,12 +24,18 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<SubscriptionGrou
         ),
     });
 
-    const onSubmit = (subscriptionGroup: SubscriptionGroup): void => {
+    const onSubmitSusbcriptionGroupPropertiesForm = (
+        subscriptionGroup: SubscriptionGroup
+    ): void => {
         props.onSubmit && props.onSubmit(subscriptionGroup);
     };
 
     return (
-        <form noValidate id={props.id} onSubmit={handleSubmit(onSubmit)}>
+        <form
+            noValidate
+            id={props.id}
+            onSubmit={handleSubmit(onSubmitSusbcriptionGroupPropertiesForm)}
+        >
             <Grid container>
                 <Grid item md={4}>
                     {/* Name */}

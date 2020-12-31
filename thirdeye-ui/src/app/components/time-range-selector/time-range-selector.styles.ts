@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 
 export const useTimeRangeSelectorStyles = makeStyles({
-    timeRangeButton: {
+    timeRangeSelectorButton: {
         minWidth: "0px",
         padding: "6px",
     },

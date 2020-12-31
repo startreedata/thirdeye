@@ -170,7 +170,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
             {/* Time range button */}
             <Grid item>
                 <Button
-                    className={timeRangeSelectorClasses.timeRangeButton}
+                    className={timeRangeSelectorClasses.timeRangeSelectorButton}
                     color="primary"
                     variant="outlined"
                     onClick={onTimeRangeSelectorClick}
@@ -481,7 +481,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
             {/* Refresh button */}
             <Grid item>
                 <Button
-                    className={timeRangeSelectorClasses.timeRangeButton}
+                    className={timeRangeSelectorClasses.timeRangeSelectorButton}
                     color="primary"
                     variant="outlined"
                     onClick={onRefresh}

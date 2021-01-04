@@ -17,9 +17,9 @@ import { useHistory } from "react-router-dom";
 import {
     getAlertsDetailPath,
     getAnomaliesDetailPath,
-} from "../../utils/routes-util/routes-util";
-import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
-import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
+} from "../../../utils/routes-util/routes-util";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
 import { useAnomalyCardStyles } from "./anomaly-card.styles";
 

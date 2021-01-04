@@ -1,5 +1,5 @@
 import { makeStyles, Theme } from "@material-ui/core";
-import { Palette } from "../../utils/material-ui-util/palette-util";
+import { Palette } from "../../../utils/material-ui-util/palette-util";
 
 export const useAlertCardStyles = makeStyles((theme: Theme) => ({
     activeText: {
@@ -7,14 +7,5 @@ export const useAlertCardStyles = makeStyles((theme: Theme) => ({
     },
     inactiveText: {
         color: Palette.COLOR_TEXT_GREY,
-    },
-    label: {
-        float: "left",
-    },
-    expandCollapseButton: {
-        marginBottom: "-6px",
-    },
-    value: {
-        clear: "both",
     },
 }));

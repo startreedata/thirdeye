@@ -1,4 +1,4 @@
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { Alert } from "../../../rest/dto/alert.interfaces";
 
 export interface AlertCardProps {
     alertCardData: AlertCardData;

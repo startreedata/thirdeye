@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { AnomalyCardData } from "../../components/anomaly-card/anomaly-card.interfaces";
+import { AnomalyCardData } from "../../components/entity-card/anomaly-card/anomaly-card.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import * as dateTimeUtil from "../date-time-util/date-time-util";
 import * as numberUtil from "../number-util/number-util";

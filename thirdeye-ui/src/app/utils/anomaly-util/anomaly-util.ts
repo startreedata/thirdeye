@@ -1,6 +1,6 @@
 import i18n from "i18next";
 import { isEmpty } from "lodash";
-import { AnomalyCardData } from "../../components/anomaly-card/anomaly-card.interfaces";
+import { AnomalyCardData } from "../../components/entity-card/anomaly-card/anomaly-card.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {

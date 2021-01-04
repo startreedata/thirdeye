@@ -4,16 +4,16 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
+import { SubscriptionGroupCard } from "../../components/entity-card/subscription-group-card/subscription-group-card.component";
+import {
+    SubscriptionGroupAlert,
+    SubscriptionGroupCardData,
+} from "../../components/entity-card/subscription-group-card/subscription-group-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
-import { SubscriptionGroupCard } from "../../components/subscription-group-card/subscription-group-card.component";
-import {
-    SubscriptionGroupAlert,
-    SubscriptionGroupCardData,
-} from "../../components/subscription-group-card/subscription-group-card.interfaces";
 import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
 import { getAllAlerts } from "../../rest/alert-rest/alert-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";

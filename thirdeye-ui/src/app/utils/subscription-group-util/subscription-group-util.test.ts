@@ -3,7 +3,7 @@ import { cloneDeep } from "lodash";
 import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardData,
-} from "../../components/subscription-group-card/subscription-group-card.interfaces";
+} from "../../components/entity-card/subscription-group-card/subscription-group-card.interfaces";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {

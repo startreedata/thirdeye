@@ -4,7 +4,7 @@ import {
     AlertCardData,
     AlertDatasetAndMetric,
     AlertSubscriptionGroup,
-} from "../../components/alert-card/alert-card.interfaces";
+} from "../../components/entity-card/alert-card/alert-card.interfaces";
 import {
     Alert,
     AlertEvaluation,

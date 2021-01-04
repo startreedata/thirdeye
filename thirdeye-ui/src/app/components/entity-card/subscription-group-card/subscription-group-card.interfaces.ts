@@ -1,4 +1,4 @@
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
 export interface SubscriptionGroupCardProps {
     subscriptionGroupCardData: SubscriptionGroupCardData;

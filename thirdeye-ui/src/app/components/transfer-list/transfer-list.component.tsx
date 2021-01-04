@@ -14,6 +14,7 @@ import { isEmpty } from "lodash";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SearchBar } from "../search-bar/search-bar.component";
+import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { TransferListProps } from "./transfer-list.interfaces";
 import { useTransferListStyles } from "./transfer-list.styles";
 
@@ -29,7 +30,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     const [filteredToList, setFilteredToList] = useState<T[]>([]);
     const [fromSearchWords, setFromSearchWords] = useState<string[]>([]);
     const [toSearchWords, setToSearchWords] = useState<string[]>([]);
-    const [transferActivity, setTransferActivity] = useState(false);
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -40,12 +40,12 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     useEffect(() => {
         // List map or search words changed, populate filtered to-list
         setFilteredToList(populateFilteredList(toListMap, toSearchWords));
-    }, [toListMap, toSearchWords, transferActivity]);
+    }, [toListMap, toSearchWords]);
 
     useEffect(() => {
         // List map or search words changed, populate filtered from-list
         setFilteredFromList(populateFilteredList(fromListMap, fromSearchWords));
-    }, [fromListMap, fromSearchWords, transferActivity]);
+    }, [fromListMap, fromSearchWords]);
 
     const populateListMaps = (): void => {
         const newToListMap = new Map<string | number, T>();
@@ -118,7 +118,8 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             }
         }
 
-        return newFilteredList;
+        // Reverse the list so that latest addition to the map will be at the top of the list
+        return newFilteredList.reverse();
     };
 
     const onTransferListItem = (item: T): void => {
@@ -128,13 +129,20 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         }
 
         // Remove item from from-list map
-        fromListMap.delete(key);
+        setFromListMap((fromListMap) => {
+            fromListMap.delete(key);
+
+            return new Map(fromListMap);
+        });
 
         // Add item to to-list map
-        toListMap.set(key, item);
+        setToListMap((toListMap) => {
+            toListMap.set(key, item);
 
-        // Activate list and map changes
-        setTransferActivity((transferActivity) => !transferActivity);
+            return new Map(toListMap);
+        });
+
+        // Notify
         props.onChange && props.onChange([...toListMap.values()]);
     };
 
@@ -145,13 +153,20 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         }
 
         // Remove item from to-list map
-        toListMap.delete(key);
+        setToListMap((toListMap) => {
+            toListMap.delete(key);
+
+            return new Map(toListMap);
+        });
 
         // Add item to from-list map
-        fromListMap.set(key, item);
+        setFromListMap((fromListMap) => {
+            fromListMap.set(key, item);
 
-        // Activate list and map changes
-        setTransferActivity((transferActivity) => !transferActivity);
+            return new Map(fromListMap);
+        });
+
+        // Notify
         props.onChange && props.onChange([...toListMap.values()]);
     };
 
@@ -202,12 +217,19 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                 >
                                                     <ListItemText
                                                         primary={
-                                                            props.listItemTextFn(
-                                                                fromListItem
-                                                            ) ||
-                                                            props.listItemKeyFn(
-                                                                fromListItem
-                                                            )
+                                                            <TextHighlighter
+                                                                searchWords={
+                                                                    fromSearchWords
+                                                                }
+                                                                text={
+                                                                    (props.listItemTextFn(
+                                                                        fromListItem
+                                                                    ) ||
+                                                                        props.listItemKeyFn(
+                                                                            fromListItem
+                                                                        )) as string
+                                                                }
+                                                            />
                                                         }
                                                         primaryTypographyProps={{
                                                             variant: "body1",
@@ -278,12 +300,19 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                             >
                                                 <ListItemText
                                                     primary={
-                                                        props.listItemTextFn(
-                                                            toItem
-                                                        ) ||
-                                                        props.listItemKeyFn(
-                                                            toItem
-                                                        )
+                                                        <TextHighlighter
+                                                            searchWords={
+                                                                toSearchWords
+                                                            }
+                                                            text={
+                                                                (props.listItemTextFn(
+                                                                    toItem
+                                                                ) ||
+                                                                    props.listItemKeyFn(
+                                                                        toItem
+                                                                    )) as string
+                                                            }
+                                                        />
                                                     }
                                                     primaryTypographyProps={{
                                                         variant: "body1",

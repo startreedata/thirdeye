@@ -62,14 +62,18 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         }
 
         setHelperText("");
-        list.push(input);
+        setList((list) => [input, ...list]);
 
         // Notify
         props.onChange && props.onChange(list);
     };
 
     const onRemoveListItem = (index: number) => (): void => {
-        list.splice(index, 1);
+        setList((list) => {
+            list.splice(index, 1);
+
+            return [...list];
+        });
 
         // Notify
         props.onChange && props.onChange(list);

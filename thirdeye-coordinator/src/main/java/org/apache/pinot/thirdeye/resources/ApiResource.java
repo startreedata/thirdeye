@@ -1,6 +1,5 @@
 package org.apache.pinot.thirdeye.resources;
 
-import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 
@@ -69,7 +68,7 @@ public class ApiResource {
     return anomalyResource;
   }
 
-  @Path("entity")
+  @Path("entities")
   public EntityResource getEntityResource() {
     return entityResource;
   }

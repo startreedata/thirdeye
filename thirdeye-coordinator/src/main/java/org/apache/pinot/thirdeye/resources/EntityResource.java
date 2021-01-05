@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.serverError;
 
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
@@ -42,31 +43,35 @@ public class EntityResource {
   }
 
   @GET
-  @Path("entity_types")
+  @Path("types")
   public Response listEntities() {
-    Map<String, Long> entityCountMap = new TreeMap<>();
-    Set<Class<? extends AbstractBean>> beanClasses = genericPojoDao.getAllBeanClasses();
+    final Map<String, Long> entityCountMap = new TreeMap<>();
+    final Set<Class<? extends AbstractBean>> beanClasses = genericPojoDao.getAllBeanClasses();
     for (Class<? extends AbstractBean> beanClass : beanClasses) {
-      long count = genericPojoDao.count(beanClass);
+      final long count = genericPojoDao.count(beanClass);
       entityCountMap.put(beanClass.getName(), count);
     }
     return Response.ok(entityCountMap).build();
   }
 
   @GET
-  @Path("entity_types/{entity_type}/info")
-  public Response getEntityInfo(@PathParam("entity_type") String entityType) {
+  @Path("types/{bean_class}/info")
+  public Response getEntityInfo(@PathParam("bean_class") String beanClass) {
     try {
-      List<String> indexedColumns = genericPojoDao.getIndexedColumns(Class.forName(entityType));
+      List<String> indexedColumns = genericPojoDao.getIndexedColumns(Class.forName(beanClass));
       return Response.ok(indexedColumns).build();
     } catch (Exception e) {
-      throw ResourceUtils.serverError(ThirdEyeStatus.ERR_UNKNOWN, e);
+      throw serverError(ThirdEyeStatus.ERR_UNKNOWN, e);
     }
   }
 
+  @SuppressWarnings("unchecked")
   @GET
-  @Path("entities/{entity_type}")
-  public Response getEntity(@PathParam("entity_type") String entityType, @Context UriInfo uriInfo) {
+  @Path("types/{bean_class}")
+  public Response getEntity(
+      @PathParam("bean_class") String beanClassRef,
+      @Context UriInfo uriInfo
+  ) {
     try {
       final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
       int limit = 10;
@@ -79,11 +84,11 @@ public class EntityResource {
         offset = Integer.parseInt(queryParameters.getFirst("offset"));
       }
 
-      Class<? extends AbstractBean> beanClass = (Class<? extends AbstractBean>) Class
-          .forName(entityType);
-      List<String> indexedColumns = genericPojoDao.getIndexedColumns(beanClass);
+      final Class<? extends AbstractBean> beanClass =
+          (Class<? extends AbstractBean>) Class.forName(beanClassRef);
+      final List<String> indexedColumns = genericPojoDao.getIndexedColumns(beanClass);
 
-      List<Predicate> predicates = new ArrayList<>();
+      final List<Predicate> predicates = new ArrayList<>();
       for (Map.Entry<String, List<String>> e : queryParameters.entrySet()) {
         final String qParam = e.getKey();
         if (indexedColumns.contains(qParam)) {
@@ -92,8 +97,7 @@ public class EntityResource {
         }
       }
 
-      List<? extends AbstractBean> abstractBeans;
-
+      final List<? extends AbstractBean> abstractBeans;
       if (!predicates.isEmpty()) {
         final DaoFilter daoFilter = new DaoFilter()
             .setBeanClass(beanClass)
@@ -104,7 +108,7 @@ public class EntityResource {
       }
       return Response.ok(abstractBeans).build();
     } catch (Exception e) {
-      throw ResourceUtils.serverError(ThirdEyeStatus.ERR_UNKNOWN, e);
+      throw serverError(ThirdEyeStatus.ERR_UNKNOWN, e);
     }
   }
 }

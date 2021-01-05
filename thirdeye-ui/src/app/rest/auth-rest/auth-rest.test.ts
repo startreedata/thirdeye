@@ -13,25 +13,23 @@ describe("Auth REST", () => {
         jest.restoreAllMocks();
     });
 
-    test("login shall invoke axios.post with appropriate input and return result", async () => {
+    test("login should invoke axios.post with appropriate input and return result", async () => {
         jest.spyOn(axios, "post").mockResolvedValue({ data: mockAuthResponse });
 
-        const response = await login();
-
+        expect(await login()).toEqual(mockAuthResponse);
         expect(axios.post).toHaveBeenCalledWith(
             "/api/auth/login",
             mockAuthRequest
         );
-        expect(response).toEqual(mockAuthResponse);
     });
 
-    test("login shall throw encountered error", async () => {
+    test("login should throw encountered error", async () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(login()).rejects.toThrow("testErrorMessage");
     });
 
-    test("logout shall invoke axios.post with appropriate input", async () => {
+    test("logout should invoke axios.post with appropriate input", async () => {
         jest.spyOn(axios, "post").mockResolvedValue({});
 
         await logout();
@@ -39,7 +37,7 @@ describe("Auth REST", () => {
         expect(axios.post).toHaveBeenCalledWith("/api/auth/logout");
     });
 
-    test("logout shall throw encountered error", async () => {
+    test("logout should throw encountered error", async () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(logout()).rejects.toThrow("testErrorMessage");
@@ -50,7 +48,9 @@ const mockAuthRequest = new URLSearchParams();
 mockAuthRequest.append("grant_type", "password");
 mockAuthRequest.append("principal", "admin");
 mockAuthRequest.append("password", "password");
+
 const mockAuthResponse = {
     accessToken: "testAccessTokenResponse",
 } as Auth;
+
 const mockError = new Error("testErrorMessage");

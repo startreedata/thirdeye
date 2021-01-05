@@ -25,13 +25,13 @@ import { CustomStepper } from "../../components/stepper/stepper.component";
 import {
     createAlert,
     getAlertEvaluation,
-} from "../../rest/alert-rest/alert-rest";
+} from "../../rest/alerts-rest/alerts-rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     getAllSubscriptionGroups,
     updateSubscriptionGroup,
-} from "../../rest/subscription-group-rest/subscription-group-rest";
+} from "../../rest/subscription-groups-rest/subscription-groups-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";

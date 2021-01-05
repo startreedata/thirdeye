@@ -1,10 +1,10 @@
 import axios from "axios";
 import { Anomaly } from "../dto/anomaly.interfaces";
-import { deleteAnomaly, getAllAnomalies, getAnomaly } from "./anomaly-rest";
+import { deleteAnomaly, getAllAnomalies, getAnomaly } from "./anomalies-rest";
 
 jest.mock("axios");
 
-describe("Anomaly REST", () => {
+describe("Anomalies REST", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -13,59 +13,54 @@ describe("Anomaly REST", () => {
         jest.restoreAllMocks();
     });
 
-    test("getAnomaly shall invoke axios.get with appropriate input and return result", async () => {
+    test("getAnomaly should invoke axios.get with appropriate input and return result", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: mockAnomalyResponse,
         });
 
-        const response = await getAnomaly(1);
-
+        expect(await getAnomaly(1)).toEqual(mockAnomalyResponse);
         expect(axios.get).toHaveBeenCalledWith("/api/anomalies/1");
-        expect(response).toEqual(mockAnomalyResponse);
     });
 
-    test("getAnomaly shall throw encountered error", async () => {
+    test("getAnomaly should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getAnomaly(1)).rejects.toThrow("testErrorMessage");
     });
 
-    test("getAllAnomalies shall invoke axios.get with appropriate input and return result", async () => {
+    test("getAllAnomalies should invoke axios.get with appropriate input and return result", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockAnomalyResponse],
         });
 
-        const response = await getAllAnomalies();
-
+        expect(await getAllAnomalies()).toEqual([mockAnomalyResponse]);
         expect(axios.get).toHaveBeenCalledWith("/api/anomalies");
-        expect(response).toEqual([mockAnomalyResponse]);
     });
 
-    test("getAllAnomalies shall throw encountered error", async () => {
+    test("getAllAnomalies should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getAllAnomalies()).rejects.toThrow("testErrorMessage");
     });
 
-    test("deleteAnomaly shall invoke axios.delete with appropriate input and return result", async () => {
+    test("deleteAnomaly should invoke axios.delete with appropriate input and return result", async () => {
         jest.spyOn(axios, "delete").mockResolvedValue({
             data: mockAnomalyResponse,
         });
 
-        const response = await deleteAnomaly(1);
-
+        expect(await deleteAnomaly(1)).toEqual(mockAnomalyResponse);
         expect(axios.delete).toHaveBeenCalledWith("/api/anomalies/1");
-        expect(response).toEqual(mockAnomalyResponse);
     });
 
-    test("deleteAnomaly shall throw encountered error", async () => {
+    test("deleteAnomaly should throw encountered error", async () => {
         jest.spyOn(axios, "delete").mockRejectedValue(mockError);
 
         await expect(deleteAnomaly(1)).rejects.toThrow("testErrorMessage");
     });
 });
 
-const mockAnomalyResponse = {
-    id: 2,
+const mockAnomalyResponse: Anomaly = {
+    id: 1,
 } as Anomaly;
+
 const mockError = new Error("testErrorMessage");

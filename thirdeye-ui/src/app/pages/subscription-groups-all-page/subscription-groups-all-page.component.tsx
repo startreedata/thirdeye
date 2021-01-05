@@ -10,13 +10,13 @@ import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indi
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SearchBar } from "../../components/search-bar/search-bar.component";
-import { getAllAlerts } from "../../rest/alert-rest/alert-rest";
+import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
-} from "../../rest/subscription-group-rest/subscription-group-rest";
+} from "../../rest/subscription-groups-rest/subscription-groups-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { getSubscriptionGroupsAllPath } from "../../utils/routes-util/routes-util";
 import {

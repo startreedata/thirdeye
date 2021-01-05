@@ -14,10 +14,10 @@ import {
     deleteAlert,
     getAllAlerts,
     updateAlert,
-} from "../../rest/alert-rest/alert-rest";
+} from "../../rest/alerts-rest/alerts-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { getAllSubscriptionGroups } from "../../rest/subscription-group-rest/subscription-group-rest";
+import { getAllSubscriptionGroups } from "../../rest/subscription-groups-rest/subscription-groups-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     filterAlerts,

@@ -11,11 +11,11 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { getAlertEvaluation } from "../../rest/alert-rest/alert-rest";
+import { getAlertEvaluation } from "../../rest/alerts-rest/alerts-rest";
 import {
     deleteAnomaly,
     getAnomaly,
-} from "../../rest/anomaly-rest/anomaly-rest";
+} from "../../rest/anomalies-rest/anomalies-rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";

@@ -13,7 +13,7 @@ import { SearchBar } from "../../components/search-bar/search-bar.component";
 import {
     deleteAnomaly,
     getAllAnomalies,
-} from "../../rest/anomaly-rest/anomaly-rest";
+} from "../../rest/anomalies-rest/anomalies-rest";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {

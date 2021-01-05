@@ -9,13 +9,13 @@ import { PageContainer } from "../../components/page-container/page-container.co
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../../components/subscription-group-wizard/subscription-group-wizard.interfaces";
-import { getAllAlerts } from "../../rest/alert-rest/alert-rest";
+import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
-} from "../../rest/subscription-group-rest/subscription-group-rest";
+} from "../../rest/subscription-groups-rest/subscription-groups-rest";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { isValidNumberId } from "../../utils/params-util/params-util";
 import {

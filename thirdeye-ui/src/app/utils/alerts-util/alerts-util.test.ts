@@ -26,7 +26,7 @@ jest.mock("i18next", () => ({
     }),
 }));
 
-describe("Alert Util", () => {
+describe("Alerts Util", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -35,23 +35,23 @@ describe("Alert Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("createEmptyAlertCardData shall create appropriate alert card data", () => {
+    test("createEmptyAlertCardData should create appropriate alert card data", () => {
         expect(createEmptyAlertCardData()).toEqual(mockEmptyAlertCardData);
     });
 
-    test("createEmptyAlertDatasetAndMetric shall create appropriate alert dataset and metric", () => {
+    test("createEmptyAlertDatasetAndMetric should create appropriate alert dataset and metric", () => {
         expect(createEmptyAlertDatasetAndMetric()).toEqual(
             mockEmptyAlertDatasetAndMetric
         );
     });
 
-    test("createEmptyAlertSubscriptionGroup shall create appropriate alert subscription group", () => {
+    test("createEmptyAlertSubscriptionGroup should create appropriate alert subscription group", () => {
         expect(createEmptyAlertSubscriptionGroup()).toEqual(
             mockEmptyAlertSubscriptionGroup
         );
     });
 
-    test("createAlertEvaluation shall create appropriate alert evaluation", () => {
+    test("createAlertEvaluation should create appropriate alert evaluation", () => {
         expect(
             createAlertEvaluation(
                 {
@@ -69,13 +69,13 @@ describe("Alert Util", () => {
         });
     });
 
-    test("getAlertCardData shall return empty alert card data for invalid alert", () => {
+    test("getAlertCardData should return empty alert card data for invalid alert", () => {
         expect(
             getAlertCardData((null as unknown) as Alert, mockSubscriptionGroups)
         ).toEqual(mockEmptyAlertCardData);
     });
 
-    test("getAlertCardData shall return appropriate alert card data for alert and invalid subscription groups", () => {
+    test("getAlertCardData should return appropriate alert card data for alert and invalid subscription groups", () => {
         const expectedAlertCardData = cloneDeep(mockAlertCardData1);
         expectedAlertCardData.subscriptionGroups = [];
 
@@ -87,20 +87,20 @@ describe("Alert Util", () => {
         ).toEqual(expectedAlertCardData);
     });
 
-    test("getAlertCardData shall return appropriate alert card data for alert and empty subscription groups", () => {
+    test("getAlertCardData should return appropriate alert card data for alert and empty subscription groups", () => {
         const expectedAlertCardData = cloneDeep(mockAlertCardData1);
         expectedAlertCardData.subscriptionGroups = [];
 
         expect(getAlertCardData(mockAlert1, [])).toEqual(expectedAlertCardData);
     });
 
-    test("getAlertCardData shall return appropriate alert card data for alert and subscription groups", () => {
+    test("getAlertCardData should return appropriate alert card data for alert and subscription groups", () => {
         expect(getAlertCardData(mockAlert1, mockSubscriptionGroups)).toEqual(
             mockAlertCardData1
         );
     });
 
-    test("getAlertCardDatas shall return empty array for invalid alerts", () => {
+    test("getAlertCardDatas should return empty array for invalid alerts", () => {
         expect(
             getAlertCardDatas(
                 (null as unknown) as Alert[],
@@ -109,11 +109,11 @@ describe("Alert Util", () => {
         ).toEqual([]);
     });
 
-    test("getAlertCardDatas shall return empty array for empty alerts", () => {
+    test("getAlertCardDatas should return empty array for empty alerts", () => {
         expect(getAlertCardDatas([], mockSubscriptionGroups)).toEqual([]);
     });
 
-    test("getAlertCardDatas shall return appropriate alert card data array for alerts and invalid subscription groups", () => {
+    test("getAlertCardDatas should return appropriate alert card data array for alerts and invalid subscription groups", () => {
         const expectedAlertCardData1 = cloneDeep(mockAlertCardData1);
         expectedAlertCardData1.subscriptionGroups = [];
         const expectedAlertCardData2 = cloneDeep(mockAlertCardData2);
@@ -127,7 +127,7 @@ describe("Alert Util", () => {
         ).toEqual([expectedAlertCardData1, expectedAlertCardData2]);
     });
 
-    test("getAlertCardDatas shall return appropriate alert card data array for alerts and empty subscription groups", () => {
+    test("getAlertCardDatas should return appropriate alert card data array for alerts and empty subscription groups", () => {
         const expectedAlertCardData1 = cloneDeep(mockAlertCardData1);
         expectedAlertCardData1.subscriptionGroups = [];
         const expectedAlertCardData2 = cloneDeep(mockAlertCardData2);
@@ -139,35 +139,35 @@ describe("Alert Util", () => {
         ]);
     });
 
-    test("getAlertCardDatas shall return appropriate alert card data array for alerts and subscription groups", () => {
+    test("getAlertCardDatas should return appropriate alert card data array for alerts and subscription groups", () => {
         expect(getAlertCardDatas(mockAlerts, mockSubscriptionGroups)).toEqual(
             mockAlertCardDatas
         );
     });
 
-    test("filterAlerts shall return empty array for invalid alert card data array", () => {
+    test("filterAlerts should return empty array for invalid alert card data array", () => {
         expect(
             filterAlerts((null as unknown) as AlertCardData[], mockSearchWords)
         ).toEqual([]);
     });
 
-    test("filterAlerts shall return empty array for empty alert card data array", () => {
+    test("filterAlerts should return empty array for empty alert card data array", () => {
         expect(filterAlerts([], mockSearchWords)).toEqual([]);
     });
 
-    test("filterAlerts shall return appropriate alert card data array for alert card data array and invalid search words", () => {
+    test("filterAlerts should return appropriate alert card data array for alert card data array and invalid search words", () => {
         expect(
             filterAlerts(mockAlertCardDatas, (null as unknown) as string[])
         ).toEqual(mockAlertCardDatas);
     });
 
-    test("filterAlerts shall return appropriate alert card data array for alert card data array and empty search words", () => {
+    test("filterAlerts should return appropriate alert card data array for alert card data array and empty search words", () => {
         expect(filterAlerts(mockAlertCardDatas, [])).toEqual(
             mockAlertCardDatas
         );
     });
 
-    test("filterAlerts shall return appropriate alert card data array for alert card data array and search words", () => {
+    test("filterAlerts should return appropriate alert card data array for alert card data array and search words", () => {
         expect(filterAlerts(mockAlertCardDatas, mockSearchWords)).toEqual([
             mockAlertCardData1,
         ]);

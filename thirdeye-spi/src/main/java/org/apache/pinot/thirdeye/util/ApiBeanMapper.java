@@ -151,7 +151,7 @@ public abstract class ApiBeanMapper {
         ;
   }
 
-  private static MetricConfigDTO toMetricConfigDto(final MetricApi api) {
+  public static MetricConfigDTO toMetricConfigDto(final MetricApi api) {
     final MetricConfigDTO dto = new MetricConfigDTO();
 
     dto.setId(api.getId());
@@ -179,7 +179,7 @@ public abstract class ApiBeanMapper {
 
   public static MetricApi toMetricApi(final String metricUrn) {
     final String[] parts = metricUrn.split(":");
-    checkState(parts.length == 3);
+    checkState(parts.length >= 3);
     return new MetricApi()
         .setId(Long.parseLong(parts[2]))
         .setUrn(metricUrn);

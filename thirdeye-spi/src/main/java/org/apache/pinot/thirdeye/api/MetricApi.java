@@ -3,7 +3,9 @@ package org.apache.pinot.thirdeye.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
+import java.util.List;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.datalayer.pojo.LogicalView;
 
 @JsonInclude(Include.NON_NULL)
 public class MetricApi implements ThirdEyeApi {
@@ -19,6 +21,7 @@ public class MetricApi implements ThirdEyeApi {
   private String derivedMetricExpression;
   private MetricAggFunction aggregationFunction;
   private Double rollupThreshold;
+  private List<LogicalView> views;
 
   public Long getId() {
     return id;
@@ -105,8 +108,7 @@ public class MetricApi implements ThirdEyeApi {
     return aggregationFunction;
   }
 
-  public MetricApi setAggregationFunction(
-      final MetricAggFunction aggregationFunction) {
+  public MetricApi setAggregationFunction(final MetricAggFunction aggregationFunction) {
     this.aggregationFunction = aggregationFunction;
     return this;
   }
@@ -117,6 +119,15 @@ public class MetricApi implements ThirdEyeApi {
 
   public MetricApi setRollupThreshold(final Double rollupThreshold) {
     this.rollupThreshold = rollupThreshold;
+    return this;
+  }
+
+  public List<LogicalView> getViews() {
+    return views;
+  }
+
+  public MetricApi setViews(List<LogicalView> views) {
+    this.views = views;
     return this;
   }
 }

@@ -21,6 +21,7 @@
 package org.apache.pinot.thirdeye.datalayer.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -115,6 +116,7 @@ public class MetricConfigBean extends AbstractBean {
   private Map<String, String> extSourceLinkTimeGranularity;
   private Map<String, String> metricProperties = null;
   private boolean dimensionAsMetric = false;
+  private List<LogicalView> views;
 
   public String getName() {
     return name;
@@ -261,6 +263,15 @@ public class MetricConfigBean extends AbstractBean {
 
   public MetricConfigBean setDimensionAsMetric(final boolean dimensionAsMetric) {
     this.dimensionAsMetric = dimensionAsMetric;
+    return this;
+  }
+
+  public List<LogicalView> getViews() {
+    return views;
+  }
+
+  public MetricConfigBean setViews(List<LogicalView> views) {
+    this.views = views;
     return this;
   }
 

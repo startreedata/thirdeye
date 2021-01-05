@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.datasource.pinot;
 
 import com.google.common.cache.CacheLoader;
 import java.util.Map;
+import org.apache.pinot.client.Connection;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 
 public abstract class PinotResponseCacheLoader extends
@@ -34,4 +35,6 @@ public abstract class PinotResponseCacheLoader extends
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
   public abstract void init(Map<String, Object> properties) throws Exception;
+
+  public abstract Connection getConnection();
 }

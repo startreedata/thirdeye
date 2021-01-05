@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.constant;
 
 public enum MetricAggFunction {
-  SUM, AVG, COUNT, MAX, PCT50, PCT90, PCT95, PCT99;
+  SUM, AVG, COUNT, COUNT_DISTINCT, MAX, PCT50, PCT90, PCT95, PCT99;
 
   public static final String PERCENTILE_PREFIX = "PCT";
 

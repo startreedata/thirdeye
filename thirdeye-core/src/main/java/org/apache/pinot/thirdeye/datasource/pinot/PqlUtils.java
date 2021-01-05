@@ -36,7 +36,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.pql.parsers.PQL2Lexer;
+import org.apache.pinot.pql.parsers.PQL2Parser;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
@@ -62,6 +66,7 @@ public class PqlUtils {
 
   private static final Joiner AND = Joiner.on(" AND ");
   private static final Joiner COMMA = Joiner.on(", ");
+  private static final String DISTINCT = "DISTINCT";
 
   private static final String PREFIX_NOT_EQUALS = "!";
   private static final String PREFIX_LESS_THAN = "<";
@@ -137,11 +142,23 @@ public class PqlUtils {
     } else {
       metricName = metricConfig.getName();
     }
-    builder.append(convertAggFunction(metricFunction.getFunctionName())).append("(")
-        .append(metricName).append(")");
+    if (metricFunction.getFunctionName() == MetricAggFunction.COUNT_DISTINCT) {
+      builder.append(MetricAggFunction.COUNT.name())
+              .append("(")
+              .append(DISTINCT)
+              .append("(")
+              .append(metricName)
+              .append(")")
+              .append(")");
+    } else {
+      builder.append(convertAggFunction(metricFunction.getFunctionName()))
+              .append("(")
+              .append(metricName)
+              .append(")");
+    }
     return builder.toString();
   }
-
+  
   /**
    * Returns pqls to handle tables where metric names are a single dimension column,
    * and the metric values are all in a single value column

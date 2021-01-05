@@ -198,6 +198,8 @@ public class ThirdEyeResultSetUtils {
       return Math.max(aggregate, value);
     } else if (aggFunction.equals(MetricAggFunction.COUNT)) { // For all COUNT cases
       return aggregate + value;
+    } else if (aggFunction.equals(MetricAggFunction.COUNT_DISTINCT)) { // For all COUNT cases
+      return aggregate + value;
     } else {
       throw new IllegalArgumentException(
           String.format("Unknown aggregation function '%s'", aggFunction));

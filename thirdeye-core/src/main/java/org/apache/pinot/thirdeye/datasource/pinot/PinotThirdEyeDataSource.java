@@ -21,9 +21,12 @@ package org.apache.pinot.thirdeye.datasource.pinot;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,17 +34,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.helix.manager.zk.ZNRecordSerializer;
 import org.apache.helix.manager.zk.ZkClient;
 import org.apache.http.HttpHost;
+import org.apache.http.RequestLine;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.pinot.client.Request;
+import org.apache.pinot.client.ResultSet;
+import org.apache.pinot.client.ResultSetGroup;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.pojo.LogicalView;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
@@ -51,6 +60,8 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
+import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.rootcause.util.FilterPredicate;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
@@ -58,8 +69,11 @@ import org.slf4j.LoggerFactory;
 
 public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
+  private static final String EQUALS = "=";
   private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
   private static final String PINOT = "Pinot";
+  private static final String PINOT_QUERY_FORMAT = "pql";
+
   private String name;
 
   private static final long CONNECTION_TIMEOUT = 60000;
@@ -69,6 +83,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   protected PinotDataSourceTimeQuery pinotDataSourceTimeQuery;
   protected PinotDataSourceDimensionFilters pinotDataSourceDimensionFilters;
+  private PinotResponseCacheLoader pinotResponseCacheLoader;
 
   /**
    * Construct a Pinot data source, which connects to a Pinot controller, using {@link
@@ -80,7 +95,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    */
   public PinotThirdEyeDataSource(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig)
       throws Exception {
-    PinotResponseCacheLoader pinotResponseCacheLoader = new PinotControllerResponseCacheLoader(
+    pinotResponseCacheLoader = new PinotControllerResponseCacheLoader(
         pinotThirdEyeDataSourceConfig);
     pinotResponseCache = ThirdEyeUtils.buildResponseCache(pinotResponseCacheLoader);
 
@@ -98,7 +113,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public PinotThirdEyeDataSource(Map<String, Object> properties) throws Exception {
     Preconditions.checkNotNull(properties, "Data source property cannot be empty.");
 
-    PinotResponseCacheLoader pinotResponseCacheLoader = getCacheLoaderInstance(properties);
+    pinotResponseCacheLoader = getCacheLoaderInstance(properties);
     pinotResponseCacheLoader.init(properties);
     pinotResponseCache = ThirdEyeUtils.buildResponseCache(pinotResponseCacheLoader);
 
@@ -163,20 +178,27 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
           timeSpec = dataTimeSpec;
         }
 
-        Multimap<String, String> decoratedFilterSet = request.getFilterSet();
+        MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
+        Multimap<String, String> filterSetFromView;
+        if(metricConfig != null && metricConfig.getViews() != null && metricConfig.getViews().size() > 0) {
+          Map<String, ResultSetGroup> viewToTEResultSet = constructViews(metricConfig.getViews());
+          filterSetFromView = resolveFilterSetFromView(viewToTEResultSet, request.getFilterSet());
+        } else {
+          filterSetFromView = request.getFilterSet();
+        }
+
+        Multimap<String, String> decoratedFilterSet = filterSetFromView;
         // Decorate filter set for pre-computed (non-additive) dataset
         // NOTE: We do not decorate the filter if the metric name is '*', which is used by count(*) query, because
         // the results are usually meta-data and should be shown regardless the filter setting.
         if (!datasetConfig.isAdditive() && !"*".equals(metricFunction.getMetricName())) {
           decoratedFilterSet =
-              generateFilterSetWithPreAggregatedDimensionValue(request.getFilterSet(),
-                  request.getGroupBy(),
-                  datasetConfig.getDimensions(), datasetConfig.getDimensionsHaveNoPreAggregation(),
-                  datasetConfig.getPreAggregatedKeyword());
+                  generateFilterSetWithPreAggregatedDimensionValue(filterSetFromView,
+                          request.getGroupBy(),
+                          datasetConfig.getDimensions(), datasetConfig.getDimensionsHaveNoPreAggregation(),
+                          datasetConfig.getPreAggregatedKeyword());
         }
-
         String pql;
-        MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
         if (metricConfig != null && metricConfig.isDimensionAsMetric()) {
           pql = PqlUtils
               .getDimensionAsMetricPql(request, metricFunction, decoratedFilterSet, dataTimeSpec,
@@ -217,6 +239,62 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       ThirdeyeMetricsUtil.pinotCallCounter.inc();
       ThirdeyeMetricsUtil.pinotDurationCounter.inc(System.nanoTime() - tStart);
     }
+  }
+
+  private Map<String, ResultSetGroup> constructViews(List<LogicalView> views) throws Exception {
+    Map<String, ResultSetGroup> viewToTEResultSet = new HashMap<>();
+    for(LogicalView view : views) {
+      ResultSetGroup thirdEyeResultSetGroup = this.pinotResponseCacheLoader
+              .getConnection()
+              .execute(new Request(PINOT_QUERY_FORMAT, view.getQuery()));
+      viewToTEResultSet.put(view.getName(), thirdEyeResultSetGroup);
+    }
+    return viewToTEResultSet;
+  }
+
+  private Multimap<String, String> resolveFilterSetFromView(Map<String, ResultSetGroup> viewToTEResultSet, Multimap<String, String> unresolvedFilterSet) {
+    Multimap<String, String> resolvedFilterSet =  ArrayListMultimap.create();
+    for(Map.Entry<String, String> filterEntry : unresolvedFilterSet.entries()) {
+      String value = filterEntry.getValue();
+      boolean isFilterOpExists = EntityUtils.isFilterOperatorExists(value);
+      if(!isFilterOpExists) {
+        value = EQUALS + value;
+      }
+      FilterPredicate filterPredicate = EntityUtils.extractFilterPredicate(filterEntry.getKey() + value);
+      String[] fullyQualifiedColumnNameTokens = extractView(filterPredicate.getValue());
+
+      assert fullyQualifiedColumnNameTokens.length == 2;
+      String tableOrViewName = fullyQualifiedColumnNameTokens[0];
+      String columnName = fullyQualifiedColumnNameTokens[1];
+      
+      if(viewToTEResultSet.containsKey(tableOrViewName)) {
+        ResultSet thirdEyeResultSet = viewToTEResultSet.get(tableOrViewName).getResultSet(0);
+        int columnIndex = getIndexOfColumnName(thirdEyeResultSet, columnName);
+
+        assert columnIndex >= 0;
+        for(int i=0; i<thirdEyeResultSet.getRowCount(); i++) {
+          resolvedFilterSet.put(filterPredicate.getKey(), thirdEyeResultSet.getString(i, columnIndex));
+        }
+      } else {
+          resolvedFilterSet.put(filterPredicate.getKey(), value);
+      }
+    }
+    return resolvedFilterSet;
+  }
+
+  private int getIndexOfColumnName(ResultSet thirdEyeResultSet, String columnName) {
+    int count = 0;
+    while (count < thirdEyeResultSet.getColumnCount()) {
+      if (thirdEyeResultSet.getColumnName(count).equalsIgnoreCase(columnName)) {
+        return count;
+      }
+      count++;
+    }
+    return -1;
+  }
+
+  private  String[] extractView(String filterOrProjectExpression) {
+    return filterOrProjectExpression.split(Pattern.quote("."));
   }
 
   /**

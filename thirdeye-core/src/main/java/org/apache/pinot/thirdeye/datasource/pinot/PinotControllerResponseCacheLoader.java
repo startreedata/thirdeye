@@ -163,7 +163,8 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
     }
   }
 
-  private Connection getConnection() {
+  @Override
+  public Connection getConnection() {
     return connections[(int) (Thread.currentThread().getId() % MAX_CONNECTIONS)];
   }
 

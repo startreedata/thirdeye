@@ -46,6 +46,7 @@ public class DetectionConfigBean extends AbstractBean {
   long taskTriggerFallBackTimeInSec;
   String yaml;
 
+  Map<String, Objects> filters;
   List<String> owners;
   Map<String, Object> properties;
   Map<String, Object> componentSpecs;
@@ -63,6 +64,15 @@ public class DetectionConfigBean extends AbstractBean {
 
   public void setOwners(List<String> owners) {
     this.owners = owners;
+  }
+
+  public Map<String, Objects> getFilters() {
+    return filters;
+  }
+
+  public DetectionConfigBean setFilters(Map<String, Objects> filters) {
+    this.filters = filters;
+    return this;
   }
 
   public Map<String, Object> getComponentSpecs() {

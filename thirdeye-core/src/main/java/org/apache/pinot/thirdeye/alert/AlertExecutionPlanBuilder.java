@@ -24,6 +24,7 @@ import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertNodeType;
+import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyFilterWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
@@ -85,7 +86,7 @@ public class AlertExecutionPlanBuilder {
         detectionMetricProperties.getDatasetConfigDTO());
     timeGranularity = datasetConfigDTO.bucketTimeGranularity();
 
-    final Map<String, Collection<String>> dimensionFiltersMap = Collections.emptyMap();
+    final Map<String, Collection<String>> dimensionFiltersMap = ConfigUtils.getMap(api.getFilters());
     final Map<String, Object> mergerProperties = Collections.emptyMap();
     this.metricUrn = MetricEntity
         .fromMetric(dimensionFiltersMap, metricConfigDTO.getId())

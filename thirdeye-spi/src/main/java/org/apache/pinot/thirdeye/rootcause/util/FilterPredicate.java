@@ -52,4 +52,16 @@ public final class FilterPredicate {
 
     return Objects.hash(key, operator, value);
   }
+
+  public String getKey() {
+    return key;
+  }
+
+  public String getOperator() {
+    return operator;
+  }
+
+  public String getValue() {
+    return value;
+  }
 }

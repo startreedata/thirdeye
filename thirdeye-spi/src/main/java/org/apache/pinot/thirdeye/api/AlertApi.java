@@ -18,6 +18,7 @@ public class AlertApi implements ThirdEyeApi {
   private Date created;
   private Date updated;
   private UserApi owner;
+  private Map<String, Object> filters;
   private Map<String, AlertNodeApi> nodes;
   private List<SubscriptionGroupApi> subscriptionGroups;
 
@@ -99,6 +100,15 @@ public class AlertApi implements ThirdEyeApi {
 
   public AlertApi setOwner(final UserApi owner) {
     this.owner = owner;
+    return this;
+  }
+
+  public Map<String, Object> getFilters() {
+    return filters;
+  }
+
+  public AlertApi setFilters(Map<String, Object> filters) {
+    this.filters = filters;
     return this;
   }
 

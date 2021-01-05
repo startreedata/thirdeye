@@ -554,4 +554,9 @@ public class EntityUtils {
 
     return new FilterPredicate(key, operator, value);
   }
+
+  public static boolean isFilterOperatorExists(String any) {
+    Matcher m = PATTERN_FILTER_OPERATOR.matcher(any);
+    return m.find();
+  }
 }

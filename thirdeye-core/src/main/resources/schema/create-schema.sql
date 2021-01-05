@@ -183,14 +183,14 @@ create index autotune_config_performanceEval_idx on autotune_config_index(perfor
 create index autotune_config_start_time_idx on autotune_config_index(start_time);
 create index autotune_config_base_id_idx ON autotune_config_index(base_id);
 
-create table if not exists entity_to_entity_mapping_index (
-    from_urn varchar(500) not null,
-    to_urn varchar(500) not null,
-    mapping_type varchar(500) not null,
-    base_id bigint(20) not null,
-    create_time timestamp,
-    update_time timestamp default current_timestamp,
-    version int(10)
+create table if not exists entity_to_entity_mapping_index(
+                                                             from_urn     varchar(255) NOT NULL,
+                                                             to_urn       varchar(255) NOT NULL,
+                                                             mapping_type varchar(400) NOT NULL,
+                                                             base_id      bigint(20)   NOT NULL,
+                                                             create_time  timestamp,
+                                                             update_time  timestamp DEFAULT current_timestamp,
+                                                             version      int(10)
 ) ENGINE=InnoDB;
 ALTER TABLE `entity_to_entity_mapping_index` ADD UNIQUE `entity_mapping_unique_index`(`from_urn`, `to_urn`);
 create index entity_mapping_from_urn_idx on entity_to_entity_mapping_index(from_urn);

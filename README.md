@@ -47,6 +47,27 @@ Detailed documentation can be found at [ThirdEye documentation](https://thirdeye
 
 ## Build
 
+### Prerequisite
+Thirdeye requires MySQL with the recommended version being MySQL 5.7
+
+### Database setup
+If you have installed MySQL, run `"${TE_REPO}"/db-setup.sh`. This script uses the `root` user.
+
+Alternatively, you can manually do the setup with these commands.
+
+Create the db using this command
+```
+# Create a database called thirdeye_test for use with thirdeye
+mysql -u root -p < "${TE_REPO}/thirdeye-core/src/main/resources/schema/db-init.sql"
+```
+
+Setup the tables using
+```
+# Create the schema
+mysql -u root thirdeye_test -p < "${TE_REPO}/thirdeye-core/src/main/resources/schema/create-schema.sql"
+```
+
+### Build with Maven
 ThirdEye is a maven project and uses standard maven commands
 ```
 # Build ThirdEye from source

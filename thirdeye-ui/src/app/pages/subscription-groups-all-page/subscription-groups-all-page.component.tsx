@@ -26,7 +26,7 @@ import {
 import {
     filterSubscriptionGroups,
     getSubscriptionGroupCardDatas,
-} from "../../utils/subscription-group-util/subscription-group-util";
+} from "../../utils/subscription-groups-util/subscription-groups-util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

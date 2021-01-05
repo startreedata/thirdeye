@@ -11,7 +11,7 @@ import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
-import { ReactComponent as ThirdEye } from "../../../assets/icons/third-eye.svg";
+import { ReactComponent as ThirdEye } from "../../../assets/images/third-eye.svg";
 import { useAuthStore } from "../../store/auth-store/auth-store";
 import {
     AppRoute,

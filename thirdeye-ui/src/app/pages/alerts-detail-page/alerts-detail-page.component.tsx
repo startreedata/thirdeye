@@ -25,7 +25,7 @@ import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-
 import {
     createAlertEvaluation,
     getAlertCardData,
-} from "../../utils/alert-util/alert-util";
+} from "../../utils/alerts-util/alerts-util";
 import { isValidNumberId } from "../../utils/params-util/params-util";
 import {
     getAlertsAllPath,

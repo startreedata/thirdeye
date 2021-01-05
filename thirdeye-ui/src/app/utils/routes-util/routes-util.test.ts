@@ -1,4 +1,3 @@
-import * as paramsUtil from "../params-util/params-util";
 import {
     createPathWithRecognizedQueryString,
     getAlertsAllPath,
@@ -21,17 +20,13 @@ import {
     getSubscriptionGroupsUpdatePath,
 } from "./routes-util";
 
-jest.mock("../params-util/params-util");
+jest.mock("../params-util/params-util", () => ({
+    getRecognizedQueryString: jest.fn().mockImplementation((): string => {
+        return "testQueryString";
+    }),
+}));
 
 describe("Routes Util", () => {
-    beforeAll(() => {
-        jest.spyOn(paramsUtil, "getRecognizedQueryString").mockImplementation(
-            (): string => {
-                return "testQueryString";
-            }
-        );
-    });
-
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -40,97 +35,97 @@ describe("Routes Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("getBasePath shall return appropriate path with current query string", () => {
+    test("getBasePath should return appropriate path with current query string", () => {
         expect(getBasePath()).toEqual("/?testQueryString");
     });
 
-    test("getHomePath shall return appropriate path with current query string", () => {
+    test("getHomePath should return appropriate path with current query string", () => {
         expect(getHomePath()).toEqual("/home?testQueryString");
     });
 
-    test("getAlertsPath shall return appropriate path with current query string", () => {
+    test("getAlertsPath should return appropriate path with current query string", () => {
         expect(getAlertsPath()).toEqual("/alerts?testQueryString");
     });
 
-    test("getAlertsAllPath shall return appropriate path with current query string", () => {
+    test("getAlertsAllPath should return appropriate path with current query string", () => {
         expect(getAlertsAllPath()).toEqual("/alerts/all?testQueryString");
     });
 
-    test("getAlertsDetailPath shall return appropriate path with current query string", () => {
+    test("getAlertsDetailPath should return appropriate path with current query string", () => {
         expect(getAlertsDetailPath(1)).toEqual(
             "/alerts/detail/id/1?testQueryString"
         );
     });
 
-    test("getAlertsCreatePath shall return appropriate path with current query string", () => {
+    test("getAlertsCreatePath should return appropriate path with current query string", () => {
         expect(getAlertsCreatePath()).toEqual("/alerts/create?testQueryString");
     });
 
-    test("getAlertsUpdatePath shall return appropriate path with current query string", () => {
+    test("getAlertsUpdatePath should return appropriate path with current query string", () => {
         expect(getAlertsUpdatePath(1)).toEqual(
             "/alerts/update/id/1?testQueryString"
         );
     });
 
-    test("getAnomaliesPath shall return appropriate path with current query string", () => {
+    test("getAnomaliesPath should return appropriate path with current query string", () => {
         expect(getAnomaliesPath()).toEqual("/anomalies?testQueryString");
     });
 
-    test("getAnomaliesAllPath shall return appropriate path with current query string", () => {
+    test("getAnomaliesAllPath should return appropriate path with current query string", () => {
         expect(getAnomaliesAllPath()).toEqual("/anomalies/all?testQueryString");
     });
 
-    test("getAnomaliesDetailPath shall return appropriate path with current query string", () => {
+    test("getAnomaliesDetailPath should return appropriate path with current query string", () => {
         expect(getAnomaliesDetailPath(1)).toEqual(
             "/anomalies/detail/id/1?testQueryString"
         );
     });
 
-    test("getConfigurationPath shall return appropriate path with current query string", () => {
+    test("getConfigurationPath should return appropriate path with current query string", () => {
         expect(getConfigurationPath()).toEqual(
             "/configuration?testQueryString"
         );
     });
 
-    test("getSubscriptionGroupsPath shall return appropriate path with current query string", () => {
+    test("getSubscriptionGroupsPath should return appropriate path with current query string", () => {
         expect(getSubscriptionGroupsPath()).toEqual(
             "/configuration/subscriptionGroups?testQueryString"
         );
     });
 
-    test("getSubscriptionGroupsAllPath shall return appropriate path with current query string", () => {
+    test("getSubscriptionGroupsAllPath should return appropriate path with current query string", () => {
         expect(getSubscriptionGroupsAllPath()).toEqual(
             "/configuration/subscriptionGroups/all?testQueryString"
         );
     });
 
-    test("getSubscriptionGroupsDetailPath shall return appropriate path with current query string", () => {
+    test("getSubscriptionGroupsDetailPath should return appropriate path with current query string", () => {
         expect(getSubscriptionGroupsDetailPath(1)).toEqual(
             "/configuration/subscriptionGroups/detail/id/1?testQueryString"
         );
     });
 
-    test("getSubscriptionGroupsCreatePath shall return appropriate path with current query string", () => {
+    test("getSubscriptionGroupsCreatePath should return appropriate path with current query string", () => {
         expect(getSubscriptionGroupsCreatePath()).toEqual(
             "/configuration/subscriptionGroups/create?testQueryString"
         );
     });
 
-    test("getSubscriptionGroupsUpdatePath shall return appropriate path with current query string", () => {
+    test("getSubscriptionGroupsUpdatePath should return appropriate path with current query string", () => {
         expect(getSubscriptionGroupsUpdatePath(1)).toEqual(
             "/configuration/subscriptionGroups/update/id/1?testQueryString"
         );
     });
 
-    test("getSignInPath shall return appropriate path with current query string", () => {
+    test("getSignInPath should return appropriate path with current query string", () => {
         expect(getSignInPath()).toEqual("/signIn?testQueryString");
     });
 
-    test("getSignOutPath shall return appropriate path with current query string", () => {
+    test("getSignOutPath should return appropriate path with current query string", () => {
         expect(getSignOutPath()).toEqual("/signOut?testQueryString");
     });
 
-    test("createPathWithTimeRangeQueryString shall return input path with current query string", () => {
+    test("createPathWithTimeRangeQueryString should return input path with current query string", () => {
         expect(createPathWithRecognizedQueryString("/testPath")).toEqual(
             "/testPath?testQueryString"
         );

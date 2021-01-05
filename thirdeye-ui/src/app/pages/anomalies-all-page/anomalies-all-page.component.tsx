@@ -19,7 +19,7 @@ import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-br
 import {
     filterAnomalies,
     getAnomalyCardDatas,
-} from "../../utils/anomaly-util/anomaly-util";
+} from "../../utils/anomalies-util/anomalies-util";
 import { getAnomaliesAllPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,

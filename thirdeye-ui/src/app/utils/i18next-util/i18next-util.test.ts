@@ -1,11 +1,15 @@
 import { getInitOptions } from "./i18next-util";
 
 describe("i18next Util", () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     afterAll(() => {
         jest.restoreAllMocks();
     });
 
-    test("getInitOptions shall return appropriate options", () => {
+    test("getInitOptions should return appropriate options", () => {
         jest.spyOn(console, "error").mockImplementation();
 
         const initOptions = getInitOptions();

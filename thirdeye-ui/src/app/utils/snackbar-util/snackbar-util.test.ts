@@ -6,79 +6,75 @@ import {
 } from "./snackbar-util";
 
 describe("Snackbar Util", () => {
-    test("getErrorSnackbarOption shall return appropriate snackbar option with default prevent duplicate behavior", () => {
-        const snackbarOption = getErrorSnackbarOption();
-
-        expect(snackbarOption.variant).toEqual("error");
-        expect(snackbarOption.preventDuplicate).toBeFalsy();
+    test("getErrorSnackbarOption should return appropriate snackbar option with default prevent duplicate behavior", () => {
+        expect(getErrorSnackbarOption()).toEqual({
+            variant: "error",
+            preventDuplicate: false,
+        });
     });
 
-    test("getErrorSnackbarOption shall return appropriate snackbar option", () => {
-        let snackbarOption = getErrorSnackbarOption(true);
-
-        expect(snackbarOption.variant).toEqual("error");
-        expect(snackbarOption.preventDuplicate).toBeTruthy();
-
-        snackbarOption = getErrorSnackbarOption(false);
-
-        expect(snackbarOption.variant).toEqual("error");
-        expect(snackbarOption.preventDuplicate).toBeFalsy();
+    test("getErrorSnackbarOption should return appropriate snackbar option", () => {
+        expect(getErrorSnackbarOption(true)).toEqual({
+            variant: "error",
+            preventDuplicate: true,
+        });
+        expect(getErrorSnackbarOption(false)).toEqual({
+            variant: "error",
+            preventDuplicate: false,
+        });
     });
 
-    test("getSuccessSnackbarOption shall return appropriate snackbar option with default prevent duplicate behavior", () => {
-        const snackbarOption = getSuccessSnackbarOption();
-
-        expect(snackbarOption.variant).toEqual("success");
-        expect(snackbarOption.preventDuplicate).toBeFalsy();
+    test("getSuccessSnackbarOption should return appropriate snackbar option with default prevent duplicate behavior", () => {
+        expect(getSuccessSnackbarOption()).toEqual({
+            variant: "success",
+            preventDuplicate: false,
+        });
     });
 
-    test("getSuccessSnackbarOption shall return appropriate snackbar option", () => {
-        let snackbarOption = getSuccessSnackbarOption(true);
-
-        expect(snackbarOption.variant).toEqual("success");
-        expect(snackbarOption.preventDuplicate).toBeTruthy();
-
-        snackbarOption = getSuccessSnackbarOption(false);
-
-        expect(snackbarOption.variant).toEqual("success");
-        expect(snackbarOption.preventDuplicate).toBeFalsy();
+    test("getSuccessSnackbarOption should return appropriate snackbar option", () => {
+        expect(getSuccessSnackbarOption(true)).toEqual({
+            variant: "success",
+            preventDuplicate: true,
+        });
+        expect(getSuccessSnackbarOption(false)).toEqual({
+            variant: "success",
+            preventDuplicate: false,
+        });
     });
 
-    test("getWarningSnackbarOption shall return appropriate snackbar option with default prevent duplicate behavior", () => {
-        const snackbarOption = getWarningSnackbarOption();
-
-        expect(snackbarOption.variant).toEqual("warning");
-        expect(snackbarOption.preventDuplicate).toBeFalsy();
+    test("getWarningSnackbarOption should return appropriate snackbar option with default prevent duplicate behavior", () => {
+        expect(getWarningSnackbarOption()).toEqual({
+            variant: "warning",
+            preventDuplicate: false,
+        });
     });
 
-    test("getWarningSnackbarOption shall return appropriate snackbar option", () => {
-        let snackbarOption = getWarningSnackbarOption(true);
-
-        expect(snackbarOption.variant).toEqual("warning");
-        expect(snackbarOption.preventDuplicate).toBeTruthy();
-
-        snackbarOption = getWarningSnackbarOption(false);
-
-        expect(snackbarOption.variant).toEqual("warning");
-        expect(snackbarOption.preventDuplicate).toBeFalsy();
+    test("getWarningSnackbarOption should return appropriate snackbar option", () => {
+        expect(getWarningSnackbarOption(true)).toEqual({
+            variant: "warning",
+            preventDuplicate: true,
+        });
+        expect(getWarningSnackbarOption(false)).toEqual({
+            variant: "warning",
+            preventDuplicate: false,
+        });
     });
 
-    test("getInfoSnackbarOption shall return appropriate snackbar option with default prevent duplicate behavior", () => {
-        const snackbarOption = getInfoSnackbarOption();
-
-        expect(snackbarOption.variant).toEqual("info");
-        expect(snackbarOption.preventDuplicate).toBeFalsy();
+    test("getInfoSnackbarOption should return appropriate snackbar option with default prevent duplicate behavior", () => {
+        expect(getInfoSnackbarOption()).toEqual({
+            variant: "info",
+            preventDuplicate: false,
+        });
     });
 
-    test("getInfoSnackbarOption shall return appropriate snackbar option", () => {
-        let snackbarOption = getInfoSnackbarOption(true);
-
-        expect(snackbarOption.variant).toEqual("info");
-        expect(snackbarOption.preventDuplicate).toBeTruthy();
-
-        snackbarOption = getInfoSnackbarOption(false);
-
-        expect(snackbarOption.variant).toEqual("info");
-        expect(snackbarOption.preventDuplicate).toBeFalsy();
+    test("getInfoSnackbarOption should return appropriate snackbar option", () => {
+        expect(getInfoSnackbarOption(true)).toEqual({
+            variant: "info",
+            preventDuplicate: true,
+        });
+        expect(getInfoSnackbarOption(false)).toEqual({
+            variant: "info",
+            preventDuplicate: false,
+        });
     });
 });

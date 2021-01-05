@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from "react";
 import { Route, Switch } from "react-router-dom";
-import { PrototypeRouter } from "../../prototype/prototype-router";
 import { useAuthStore } from "../../store/auth-store/auth-store";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { AlertsRouter } from "../alerts-router/alerts-router";
@@ -27,9 +26,6 @@ export const AppRouter: FunctionComponent = () => {
                     component={ConfigurationRouter}
                     path={AppRoute.CONFIGURATION}
                 />
-
-                {/* Direct all prototype paths to prototype router */}
-                <Route component={PrototypeRouter} path={"/prototype"} />
 
                 {/* Direct all other paths to general authenticated router */}
                 <Route component={GeneralAuthenticatedRouter} />

@@ -22,8 +22,10 @@ describe("Params Util", () => {
 
         // jsdom doesn't support navigation, workaround is to mock URLSearchParams
         jest.spyOn(URLSearchParams.prototype, "set").mockImplementation();
-        jest.spyOn(URLSearchParams.prototype, "get").mockReturnValue(
-            "testUrlSearchParam"
+        jest.spyOn(URLSearchParams.prototype, "get").mockImplementation(
+            (key: string): string => {
+                return key;
+            }
         );
         jest.spyOn(URLSearchParams.prototype, "delete").mockImplementation();
         jest.spyOn(URLSearchParams.prototype, "toString").mockReturnValue(
@@ -39,7 +41,7 @@ describe("Params Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("setSearchInQueryString shall set appropriate search in query string", () => {
+    test("setSearchInQueryString should set appropriate search in query string", () => {
         setSearchInQueryString("testSearch");
 
         expect(URLSearchParams.prototype.set).toHaveBeenCalledWith(
@@ -51,21 +53,21 @@ describe("Params Util", () => {
         });
     });
 
-    test("getSearchFromQueryString shall return empty string if search is not found in query string", () => {
+    test("getSearchFromQueryString should return empty string when search is not found in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(false);
 
         expect(getSearchFromQueryString()).toEqual("");
         expect(URLSearchParams.prototype.has).toHaveBeenCalledWith("search");
+        expect(URLSearchParams.prototype.get).not.toHaveBeenCalled();
     });
 
-    test("getSearchFromQueryString shall return appropriate search from query string", () => {
+    test("getSearchFromQueryString should return appropriate search from query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(true);
 
-        expect(getSearchFromQueryString()).toEqual("testUrlSearchParam");
-        expect(URLSearchParams.prototype.get).toHaveBeenCalledWith("search");
+        expect(getSearchFromQueryString()).toEqual("search");
     });
 
-    test("setSearchTextInQueryString shall set appropriate search text in query string", () => {
+    test("setSearchTextInQueryString should set appropriate search text in query string", () => {
         setSearchTextInQueryString("testSearchText");
 
         expect(URLSearchParams.prototype.set).toHaveBeenCalledWith(
@@ -77,38 +79,35 @@ describe("Params Util", () => {
         });
     });
 
-    test("getSearchTextFromQueryString shall return empty string if search text is not found in query string", () => {
+    test("getSearchTextFromQueryString should return empty string when search text is not found in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(false);
 
         expect(getSearchTextFromQueryString()).toEqual("");
         expect(URLSearchParams.prototype.has).toHaveBeenCalledWith(
             "search_text"
         );
+        expect(URLSearchParams.prototype.get).not.toHaveBeenCalled();
     });
 
-    test("getSearchTextFromQueryString shall return appropriate search text from query string", () => {
+    test("getSearchTextFromQueryString should return appropriate search text from query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(true);
 
-        expect(getSearchTextFromQueryString()).toEqual("testUrlSearchParam");
-        expect(URLSearchParams.prototype.get).toHaveBeenCalledWith(
-            "search_text"
-        );
+        expect(getSearchTextFromQueryString()).toEqual("search_text");
     });
 
-    test("setTimeRangeInQueryString shall not set invalid time range in query string", () => {
+    test("setTimeRangeInQueryString should not set invalid time range in query string", () => {
         setTimeRangeInQueryString((null as unknown) as TimeRangeDuration);
 
         expect(URLSearchParams.prototype.set).not.toHaveBeenCalled();
         expect(appHistory.replace).not.toHaveBeenCalled();
     });
 
-    test("setTimeRangeInQueryString shall set appropriate time range in query string", () => {
-        const mockTimeRangeDuration: TimeRangeDuration = {
+    test("setTimeRangeInQueryString should set appropriate time range in query string", () => {
+        setTimeRangeInQueryString({
             timeRange: TimeRange.CUSTOM,
             startTime: 1,
             endTime: 2,
-        };
-        setTimeRangeInQueryString(mockTimeRangeDuration);
+        });
 
         expect(URLSearchParams.prototype.set).toHaveBeenNthCalledWith(
             1,
@@ -136,7 +135,7 @@ describe("Params Util", () => {
         });
     });
 
-    test("getTimeRangeFromQueryString shall return null if time range is not found in query string", () => {
+    test("getTimeRangeFromQueryString should return null when time range is not found in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(false);
 
         expect(getTimeRangeFromQueryString()).toBeNull();
@@ -154,7 +153,7 @@ describe("Params Util", () => {
         );
     });
 
-    test("getTimeRangeFromQueryString shall return null if time range key is not found in query string", () => {
+    test("getTimeRangeFromQueryString should return null when time range key is not found in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has")
             .mockReturnValueOnce(false)
             .mockReturnValueOnce(true)
@@ -163,7 +162,7 @@ describe("Params Util", () => {
         expect(getTimeRangeFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeFromQueryString shall return null if start time key is not found in query string", () => {
+    test("getTimeRangeFromQueryString should return null when start time key is not found in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has")
             .mockReturnValueOnce(true)
             .mockReturnValueOnce(false)
@@ -172,7 +171,7 @@ describe("Params Util", () => {
         expect(getTimeRangeFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeFromQueryString shall return null if end time key is not found in query string", () => {
+    test("getTimeRangeFromQueryString should return null when end time key is not found in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has")
             .mockReturnValueOnce(true)
             .mockReturnValueOnce(true)
@@ -181,7 +180,7 @@ describe("Params Util", () => {
         expect(getTimeRangeFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeFromQueryString shall return null if time range in query string is invalid", () => {
+    test("getTimeRangeFromQueryString should return null for invalid time range in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(true);
         jest.spyOn(URLSearchParams.prototype, "get")
             .mockReturnValueOnce("invalidTimeRange")
@@ -203,7 +202,7 @@ describe("Params Util", () => {
         );
     });
 
-    test("getTimeRangeFromQueryString shall return null if start time in query string is invalid", () => {
+    test("getTimeRangeFromQueryString should return null for invalid start time in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(true);
         jest.spyOn(URLSearchParams.prototype, "get")
             .mockReturnValueOnce("TODAY")
@@ -213,7 +212,7 @@ describe("Params Util", () => {
         expect(getTimeRangeFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeFromQueryString shall return null if end time in query string is invalid", () => {
+    test("getTimeRangeFromQueryString should return null for invalid end time in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(true);
         jest.spyOn(URLSearchParams.prototype, "get")
             .mockReturnValueOnce("TODAY")
@@ -223,7 +222,7 @@ describe("Params Util", () => {
         expect(getTimeRangeFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeFromQueryString shall return appropriate time range from query string", () => {
+    test("getTimeRangeFromQueryString should return appropriate time range from query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(true);
         jest.spyOn(URLSearchParams.prototype, "get")
             .mockReturnValueOnce("TODAY")
@@ -237,21 +236,21 @@ describe("Params Util", () => {
         });
     });
 
-    test("setQueryString shall not set query string if key is invalid", () => {
+    test("setQueryString should not set query string for invalid key", () => {
         setQueryString((null as unknown) as string, "testValue");
 
         expect(URLSearchParams.prototype.set).not.toHaveBeenCalled();
         expect(appHistory.replace).not.toHaveBeenCalled();
     });
 
-    test("setQueryString shall not set query string if key is empty", () => {
+    test("setQueryString should not set query string for empty key", () => {
         setQueryString("", "testValue");
 
         expect(URLSearchParams.prototype.set).not.toHaveBeenCalled();
         expect(appHistory.replace).not.toHaveBeenCalled();
     });
 
-    test("setQueryString shall set appropriate query string", () => {
+    test("setQueryString should set appropriate query string for key", () => {
         setQueryString("testKey", "testValue");
 
         expect(URLSearchParams.prototype.set).toHaveBeenCalledWith(
@@ -263,7 +262,7 @@ describe("Params Util", () => {
         });
     });
 
-    test("getQueryString shall return empty string if key is not found in query string", () => {
+    test("getQueryString should return empty string for key not found in query string", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(false);
 
         expect(getQueryString("testKey")).toEqual("");
@@ -271,15 +270,13 @@ describe("Params Util", () => {
         expect(URLSearchParams.prototype.get).not.toHaveBeenCalled();
     });
 
-    test("getQueryString shall return appropriate string if key is found in query string", () => {
+    test("getQueryString should return appropriate string for key", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(true);
 
-        expect(getQueryString("testKey")).toEqual("testUrlSearchParam");
-        expect(URLSearchParams.prototype.has).toHaveBeenCalledWith("testKey");
-        expect(URLSearchParams.prototype.get).toHaveBeenCalledWith("testKey");
+        expect(getQueryString("testKey")).toEqual("testKey");
     });
 
-    test("getRecognizedQueryString shall return query string with recognized key value pairs", () => {
+    test("getRecognizedQueryString should return query string with recognized and allowed key value pairs", () => {
         jest.spyOn(URLSearchParams.prototype, "forEach").mockImplementation(
             (
                 callbackFn: (
@@ -288,47 +285,57 @@ describe("Params Util", () => {
                     parent: URLSearchParams
                 ) => void
             ): void => {
-                // Iterate with a recognized and an unrecognized query string
-                callbackFn("searchValue", "search", {} as URLSearchParams);
+                // Iterate with a recognized, an unrecognized and a not-allowed query string
+                callbackFn(
+                    "testTimeRangeValue",
+                    "time_range",
+                    {} as URLSearchParams
+                );
                 callbackFn(
                     "testUnrecognizedValue",
                     "testUnrecognizedKey",
                     {} as URLSearchParams
                 );
+                callbackFn("testSearchValue", "search", {} as URLSearchParams);
             }
         );
 
         expect(getRecognizedQueryString()).toEqual("testUrlSearchParams");
-        expect(URLSearchParams.prototype.delete).toHaveBeenCalledWith(
+        expect(URLSearchParams.prototype.delete).toHaveBeenNthCalledWith(
+            1,
             "testUnrecognizedKey"
+        );
+        expect(URLSearchParams.prototype.delete).toHaveBeenNthCalledWith(
+            2,
+            "search"
         );
     });
 
-    test("isValidNumberId shall return false if string is invalid", () => {
+    test("isValidNumberId should return false for invalid string", () => {
         expect(isValidNumberId((null as unknown) as string)).toBeFalsy();
     });
 
-    test("isValidNumberId shall return false if string is empty", () => {
+    test("isValidNumberId should return false for empty string", () => {
         expect(isValidNumberId("")).toBeFalsy();
     });
 
-    test("isValidNumberId shall return false if string is non-numeric", () => {
+    test("isValidNumberId should return false for non-numeric string", () => {
         expect(isValidNumberId("testString")).toBeFalsy();
     });
 
-    test("isValidNumberId shall return true if string is a positive integer", () => {
+    test("isValidNumberId should return true for positive integer string", () => {
         expect(isValidNumberId("1")).toBeTruthy();
     });
 
-    test("isValidNumberId shall return true if string is 0", () => {
+    test("isValidNumberId should return true for 0 string", () => {
         expect(isValidNumberId("0")).toBeTruthy();
     });
 
-    test("isValidNumberId shall return false if string is a negative integer", () => {
+    test("isValidNumberId should return false for negative integer string", () => {
         expect(isValidNumberId("-1")).toBeFalsy();
     });
 
-    test("isValidNumberId shall return false if string is a decimal number", () => {
+    test("isValidNumberId should return false for decimal number string", () => {
         expect(isValidNumberId("1.1")).toBeFalsy();
     });
 });

@@ -23,7 +23,7 @@ import {
     filterAlerts,
     getAlertCardData,
     getAlertCardDatas,
-} from "../../utils/alert-util/alert-util";
+} from "../../utils/alerts-util/alerts-util";
 import { getAlertsAllPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,

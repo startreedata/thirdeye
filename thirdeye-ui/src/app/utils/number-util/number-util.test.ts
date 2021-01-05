@@ -5,13 +5,17 @@ import {
     formatPercentage,
 } from "./number-util";
 
-jest.mock("numbro");
+jest.mock("numbro", () =>
+    jest.fn().mockImplementation(
+        (num: number): numbro.Numbro => {
+            return ({
+                format: mockFormat.mockReturnValue(num.toString()),
+            } as unknown) as numbro.Numbro;
+        }
+    )
+);
 
 describe("Number Util", () => {
-    beforeAll(() => {
-        ((numbro as unknown) as jest.Mock).mockReturnValue(mockNumbro);
-    });
-
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -20,47 +24,35 @@ describe("Number Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("formatNumber shall invoke numbro.format with appropriate default input and return result", () => {
-        const numberString = formatNumber(1);
-
-        expect(numberString).toEqual("testNumberFormat");
-        expect(numbro).toHaveBeenCalledWith(1);
-        expect(mockNumbro.format).toHaveBeenCalledWith({
+    test("formatNumber should invoke numbro.format with appropriate default input and return result", () => {
+        expect(formatNumber(1)).toEqual("1");
+        expect(mockFormat).toHaveBeenCalledWith({
             thousandSeparated: true,
             mantissa: 2,
             optionalMantissa: true,
         });
     });
 
-    test("formatNumber shall invoke numbro.format with appropriate input and return result", () => {
-        const numberString = formatNumber(1, 1, false);
-
-        expect(numberString).toEqual("testNumberFormat");
-        expect(numbro).toHaveBeenCalledWith(1);
-        expect(mockNumbro.format).toHaveBeenCalledWith({
+    test("formatNumber should invoke numbro.format with appropriate input and return result", () => {
+        expect(formatNumber(1, 1, false)).toEqual("1");
+        expect(mockFormat).toHaveBeenCalledWith({
             thousandSeparated: true,
             mantissa: 1,
             optionalMantissa: false,
         });
     });
 
-    test("formatLargeNumber shall invoke numbro.format with appropriate input and return result", () => {
-        const numberString = formatLargeNumber(1);
-
-        expect(numberString).toEqual("testNumberFormat");
-        expect(numbro).toHaveBeenCalledWith(1);
-        expect(mockNumbro.format).toHaveBeenCalledWith({
+    test("formatLargeNumber should invoke numbro.format with appropriate input and return result", () => {
+        expect(formatLargeNumber(1)).toEqual("1");
+        expect(mockFormat).toHaveBeenCalledWith({
             average: true,
             lowPrecision: false,
         });
     });
 
-    test("formatPercentage shall invoke numbro.format with appropriate default input and return result", () => {
-        const numberString = formatPercentage(1);
-
-        expect(numberString).toEqual("testNumberFormat");
-        expect(numbro).toHaveBeenCalledWith(1);
-        expect(mockNumbro.format).toHaveBeenCalledWith({
+    test("formatPercentage should invoke numbro.format with appropriate default input and return result", () => {
+        expect(formatPercentage(1)).toEqual("1");
+        expect(mockFormat).toHaveBeenCalledWith({
             output: "percent",
             thousandSeparated: true,
             mantissa: 2,
@@ -68,12 +60,9 @@ describe("Number Util", () => {
         });
     });
 
-    test("formatPercentage shall invoke numbro.format with appropriate input and return result", () => {
-        const numberString = formatPercentage(1, 1, false);
-
-        expect(numberString).toEqual("testNumberFormat");
-        expect(numbro).toHaveBeenCalledWith(1);
-        expect(mockNumbro.format).toHaveBeenCalledWith({
+    test("formatPercentage should invoke numbro.format with appropriate input and return result", () => {
+        expect(formatPercentage(1, 1, false)).toEqual("1");
+        expect(mockFormat).toHaveBeenCalledWith({
             output: "percent",
             thousandSeparated: true,
             mantissa: 1,
@@ -82,6 +71,4 @@ describe("Number Util", () => {
     });
 });
 
-const mockNumbro = {
-    format: jest.fn().mockReturnValue("testNumberFormat"),
-};
+const mockFormat = jest.fn();

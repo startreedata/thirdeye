@@ -1,40 +1,39 @@
-import i18n from "i18next";
 import { validateEmail } from "./validation-util";
 
-jest.mock("i18next");
+jest.mock("i18next", () => ({
+    t: jest.fn().mockImplementation((key: string): string => {
+        return key;
+    }),
+}));
 
 describe("Validation Util", () => {
-    beforeAll(() => {
-        i18n.t = jest.fn().mockImplementation((key: string): string => {
-            return key;
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("validateEmail should return appropriate validation result for invalid email", () => {
+        expect(validateEmail("")).toEqual({
+            valid: false,
+            message: "message.field-required",
+        });
+        expect(validateEmail("testInvalidEmail")).toEqual({
+            valid: false,
+            message: "message.invalid-email",
         });
     });
 
-    test("validateEmail shall return appropriate validation result for invalid email", () => {
-        let validationResult = validateEmail("");
-
-        expect(validationResult).toBeDefined();
-        expect(validationResult.valid).toBeFalsy();
-        expect(validationResult.message).toEqual("message.field-required");
-
-        validationResult = validateEmail("testInvalidEmail");
-
-        expect(validationResult).toBeDefined();
-        expect(validationResult.valid).toBeFalsy();
-        expect(validationResult.message).toEqual("message.invalid-email");
-    });
-
-    test("validateEmail shall return appropriate validation result for valid email", () => {
-        let validationResult = validateEmail("test@valid.email");
-
-        expect(validationResult).toBeDefined();
-        expect(validationResult.valid).toBeTruthy();
-        expect(validationResult.message).toEqual("");
-
-        validationResult = validateEmail(" test@valid.email ");
-
-        expect(validationResult).toBeDefined();
-        expect(validationResult.valid).toBeTruthy();
-        expect(validationResult.message).toEqual("");
+    test("validateEmail should return appropriate validation result for valid email", () => {
+        expect(validateEmail("test@valid.email")).toEqual({
+            valid: true,
+            message: "",
+        });
+        expect(validateEmail(" test@valid.email ")).toEqual({
+            valid: true,
+            message: "",
+        });
     });
 });

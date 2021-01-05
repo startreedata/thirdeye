@@ -23,7 +23,7 @@ import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-
 import {
     createAlertEvaluation,
     getAnomalyCardData,
-} from "../../utils/anomaly-util/anomaly-util";
+} from "../../utils/anomalies-util/anomalies-util";
 import { isValidNumberId } from "../../utils/params-util/params-util";
 import {
     getAnomaliesAllPath,

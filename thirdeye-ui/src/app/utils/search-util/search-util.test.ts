@@ -9,20 +9,20 @@ describe("Search Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("deepSearchStringProperty shall return null for an invalid object", () => {
+    test("deepSearchStringProperty should return null for invalid object", () => {
         expect(deepSearchStringProperty(null, mockMatchFn)).toBeNull();
     });
 
-    test("deepSearchStringProperty shall return null for an empty object", () => {
+    test("deepSearchStringProperty should return null for empty object", () => {
         expect(deepSearchStringProperty({}, mockMatchFn)).toBeNull();
     });
 
-    test("deepSearchStringProperty shall return null for any primitive", () => {
+    test("deepSearchStringProperty should return null for any primitive", () => {
         expect(deepSearchStringProperty(1, mockMatchFn)).toBeNull();
         expect(deepSearchStringProperty("testString", mockMatchFn)).toBeNull();
     });
 
-    test("deepSearchStringProperty shall invoke match function on all string properties of object", () => {
+    test("deepSearchStringProperty should invoke match function on all string properties of object", () => {
         deepSearchStringProperty(mockObject, mockMatchFn);
 
         expect(mockMatchFn.mock.calls).toHaveLength(9);
@@ -37,7 +37,7 @@ describe("Search Util", () => {
         expect(mockMatchFn).toHaveBeenNthCalledWith(9, "testString9");
     });
 
-    test("deepSearchStringProperty shall invoke match function on all string properties of object until it returns true", () => {
+    test("deepSearchStringProperty should invoke match function on all string properties of object until it returns true", () => {
         mockMatchFn
             .mockReturnValueOnce(false)
             .mockReturnValueOnce(false)

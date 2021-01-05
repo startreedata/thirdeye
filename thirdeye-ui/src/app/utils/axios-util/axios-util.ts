@@ -39,7 +39,7 @@ export const getRejectedResponseInterceptor = (
     const rejectedResponseInterceptor = (error: AxiosError): void => {
         if (error && error.response && error.response.status === 401) {
             // Unauthenticated access
-            unauthenticatedAccessHandler();
+            unauthenticatedAccessHandler && unauthenticatedAccessHandler();
         }
 
         throw error;

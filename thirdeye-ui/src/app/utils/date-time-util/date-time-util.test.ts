@@ -1,4 +1,3 @@
-import i18n from "i18next";
 import { Settings } from "luxon";
 import {
     formatDate,
@@ -15,7 +14,11 @@ import {
     switchMeridiem,
 } from "./date-time-util";
 
-jest.mock("i18next");
+jest.mock("i18next", () => ({
+    t: jest.fn().mockImplementation((key: string): string => {
+        return key;
+    }),
+}));
 
 const locale = Settings.defaultLocale;
 const zoneName = Settings.defaultZoneName;
@@ -26,10 +29,6 @@ describe("Date Time Util", () => {
         // results are consistent regardless of where tests are run
         Settings.defaultLocale = "en-US";
         Settings.defaultZoneName = "America/Los_Angeles";
-
-        i18n.t = jest.fn().mockImplementation((key: string): string => {
-            return key;
-        });
     });
 
     beforeEach(() => {
@@ -44,7 +43,7 @@ describe("Date Time Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("formatDuration shall return empty string for invalid dates", () => {
+    test("formatDuration should return empty string for invalid dates", () => {
         expect(formatDuration((null as unknown) as number, 2)).toEqual("");
         expect(formatDuration(1, (null as unknown) as number)).toEqual("");
         expect(
@@ -55,7 +54,7 @@ describe("Date Time Util", () => {
         ).toEqual("");
     });
 
-    test("formatDuration shall return appropriate duration in years", () => {
+    test("formatDuration should return appropriate duration in years", () => {
         expect(formatDuration(1575230400000, 1606852800000)).toEqual(
             "1 label.year-lowercase"
         );
@@ -64,7 +63,7 @@ describe("Date Time Util", () => {
         );
     });
 
-    test("formatDuration shall return appropriate duration in months", () => {
+    test("formatDuration should return appropriate duration in months", () => {
         expect(formatDuration(1604260800000, 1606852800000)).toEqual(
             "1 label.month-lowercase"
         );
@@ -73,7 +72,7 @@ describe("Date Time Util", () => {
         );
     });
 
-    test("formatDuration shall return appropriate duration in weeks", () => {
+    test("formatDuration should return appropriate duration in weeks", () => {
         expect(formatDuration(1606248000000, 1606852800000)).toEqual(
             "1 label.week-lowercase"
         );
@@ -82,7 +81,7 @@ describe("Date Time Util", () => {
         );
     });
 
-    test("formatDuration shall return appropriate duration in days", () => {
+    test("formatDuration should return appropriate duration in days", () => {
         expect(formatDuration(1606766400000, 1606852800000)).toEqual(
             "1 label.day-lowercase"
         );
@@ -91,7 +90,7 @@ describe("Date Time Util", () => {
         );
     });
 
-    test("formatDuration shall return appropriate duration in hours", () => {
+    test("formatDuration should return appropriate duration in hours", () => {
         expect(formatDuration(1606849200000, 1606852800000)).toEqual(
             "1 label.hour-lowercase"
         );
@@ -100,7 +99,7 @@ describe("Date Time Util", () => {
         );
     });
 
-    test("formatDuration shall return appropriate duration in minutes", () => {
+    test("formatDuration should return appropriate duration in minutes", () => {
         expect(formatDuration(1606852740000, 1606852800000)).toEqual(
             "1 label.minute-lowercase"
         );
@@ -109,7 +108,7 @@ describe("Date Time Util", () => {
         );
     });
 
-    test("formatDuration shall return appropriate duration in seconds", () => {
+    test("formatDuration should return appropriate duration in seconds", () => {
         expect(formatDuration(1606852799000, 1606852800000)).toEqual(
             "1 label.second-lowercase"
         );
@@ -118,7 +117,7 @@ describe("Date Time Util", () => {
         );
     });
 
-    test("formatDuration shall return appropriate duration in milliseconds", () => {
+    test("formatDuration should return appropriate duration in milliseconds", () => {
         expect(formatDuration(1606852799999, 1606852800000)).toEqual(
             "1 label.millisecond-lowercase"
         );
@@ -130,93 +129,93 @@ describe("Date Time Util", () => {
         );
     });
 
-    test("formatDateAndTime shall return empty string for invalid date", () => {
+    test("formatDateAndTime should return empty string for invalid date", () => {
         expect(formatDateAndTime((null as unknown) as number)).toEqual("");
     });
 
-    test("formatDateAndTime shall return appropriate formatted date and time", () => {
+    test("formatDateAndTime should return appropriate formatted date and time", () => {
         expect(formatDateAndTime(1606852800000)).toEqual(
             "Dec 01, 2020, 12:00 PM"
         );
     });
 
-    test("formatDate shall return empty string for invalid date", () => {
+    test("formatDate should return empty string for invalid date", () => {
         expect(formatDate((null as unknown) as number)).toEqual("");
     });
 
-    test("formatDate shall return appropriate formatted date part of date", () => {
+    test("formatDate should return appropriate formatted date part of date", () => {
         expect(formatDate(1606852800000)).toEqual("Dec 01, 2020");
     });
 
-    test("formatTime shall return empty string for invalid date", () => {
+    test("formatTime should return empty string for invalid date", () => {
         expect(formatTime((null as unknown) as number)).toEqual("");
     });
 
-    test("formatTime shall return appropriate formatted time part of date", () => {
+    test("formatTime should return appropriate formatted time part of date", () => {
         expect(formatTime(1606852800000)).toEqual("12:00 PM");
     });
 
-    test("formatYear shall return empty string for invalid date", () => {
+    test("formatYear should return empty string for invalid date", () => {
         expect(formatYear((null as unknown) as number)).toEqual("");
     });
 
-    test("formatYear shall return appropriate formatted year in date", () => {
+    test("formatYear should return appropriate formatted year in date", () => {
         expect(formatYear(1606852800000)).toEqual("2020");
     });
 
-    test("formatMonth shall return empty string for invalid date", () => {
+    test("formatMonth should return empty string for invalid date", () => {
         expect(formatMonth((null as unknown) as number)).toEqual("");
     });
 
-    test("formatMonth shall return appropriate formatted month in date", () => {
+    test("formatMonth should return appropriate formatted month in date", () => {
         expect(formatMonth(1606852800000)).toEqual("Dec");
     });
 
-    test("formatMonthOfYear shall return empty string for invalid date", () => {
+    test("formatMonthOfYear should return empty string for invalid date", () => {
         expect(formatMonthOfYear((null as unknown) as number)).toEqual("");
     });
 
-    test("formatMonthOfYear shall return appropriate formatted month with year in date", () => {
+    test("formatMonthOfYear should return appropriate formatted month with year in date", () => {
         expect(formatMonthOfYear(1606852800000)).toEqual("Dec 2020");
     });
 
-    test("formatDay shall return empty string for invalid date", () => {
+    test("formatDay should return empty string for invalid date", () => {
         expect(formatDay((null as unknown) as number)).toEqual("");
     });
 
-    test("formatDay shall return appropriate formatted day in date", () => {
+    test("formatDay should return appropriate formatted day in date", () => {
         expect(formatDay(1606852800000)).toEqual("01");
     });
 
-    test("formatHour shall return empty string for invalid date", () => {
+    test("formatHour should return empty string for invalid date", () => {
         expect(formatHour((null as unknown) as number)).toEqual("");
     });
 
-    test("formatHour shall return appropriate formatted hour in date", () => {
+    test("formatHour should return appropriate formatted hour in date", () => {
         expect(formatHour(1606852800000)).toEqual("12");
     });
 
-    test("formatMinute shall return empty string for invalid date", () => {
+    test("formatMinute should return empty string for invalid date", () => {
         expect(formatMinute((null as unknown) as number)).toEqual("");
     });
 
-    test("formatMinute shall return appropriate formatted minute in date", () => {
+    test("formatMinute should return appropriate formatted minute in date", () => {
         expect(formatMinute(1606852800000)).toEqual("00");
     });
 
-    test("formatMeridiem shall return empty string for invalid date", () => {
+    test("formatMeridiem should return empty string for invalid date", () => {
         expect(formatMeridiem((null as unknown) as number)).toEqual("");
     });
 
-    test("formatMeridiem shall return appropriate formatted time period in date", () => {
+    test("formatMeridiem should return appropriate formatted time period in date", () => {
         expect(formatMeridiem(1606852800000)).toEqual("PM");
     });
 
-    test("switchMeridiem shall return -1 for invalid date", () => {
+    test("switchMeridiem should return -1 for invalid date", () => {
         expect(switchMeridiem((null as unknown) as number)).toEqual(-1);
     });
 
-    test("switchMeridiem shall return date with switched meridiem as compared to original date", () => {
+    test("switchMeridiem should return date with switched meridiem as compared to original date", () => {
         expect(switchMeridiem(1606813200000)).toEqual(1606856400000);
         expect(switchMeridiem(1606856400000)).toEqual(1606813200000);
     });

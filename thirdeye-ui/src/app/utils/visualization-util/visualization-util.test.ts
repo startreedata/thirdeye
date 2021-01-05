@@ -5,7 +5,6 @@ import {
     DetectionData,
     DetectionEvaluation,
 } from "../../rest/dto/detection.interfaces";
-import * as numberUtil from "../number-util/number-util";
 import {
     formatLargeNumberForVisualization,
     getAlertEvaluationTimeSeriesPoints,
@@ -14,17 +13,13 @@ import {
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
 } from "./visualization-util";
 
-jest.mock("../number-util/number-util");
+jest.mock("../number-util/number-util", () => ({
+    formatLargeNumber: jest.fn().mockImplementation((num: number): string => {
+        return num.toString();
+    }),
+}));
 
 describe("Visualization Util", () => {
-    beforeAll(() => {
-        jest.spyOn(numberUtil, "formatLargeNumber").mockImplementation(
-            (): string => {
-                return "testLargeNumberFormat";
-            }
-        );
-    });
-
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -33,125 +28,105 @@ describe("Visualization Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("formatLargeNumberForVisualization shall return empty string for invalid input", () => {
+    test("formatLargeNumberForVisualization should return empty string for invalid input", () => {
         expect(
             formatLargeNumberForVisualization((null as unknown) as number)
         ).toEqual("");
     });
 
-    test("formatLargeNumberForVisualization shall invoke numberUtil.formatLargeNumber with appropriate input and return appropriate string for number", () => {
-        expect(formatLargeNumberForVisualization(1)).toEqual(
-            "testLargeNumberFormat"
-        );
-        expect(numberUtil.formatLargeNumber).toHaveBeenCalledWith(1);
+    test("formatLargeNumberForVisualization should return appropriate string for number", () => {
+        expect(formatLargeNumberForVisualization(1)).toEqual("1");
     });
 
-    test("formatLargeNumberForVisualization shall invoke numberUtil.formatLargeNumber with appropriate input and return appropriate string for object", () => {
+    test("formatLargeNumberForVisualization should return appropriate string for object", () => {
         expect(
             formatLargeNumberForVisualization({ valueOf: (): number => 1 })
-        ).toEqual("testLargeNumberFormat");
-        expect(numberUtil.formatLargeNumber).toHaveBeenCalledWith(1);
+        ).toEqual("1");
     });
 
-    test("getAlertEvaluationTimeSeriesPoints shall return empty alert evaluation time series points for invalid alert evaluation", () => {
-        const alertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
-            (null as unknown) as AlertEvaluation
-        );
-
-        expect(alertEvaluationTimeSeriesPoints).toEqual([]);
+    test("getAlertEvaluationTimeSeriesPoints should return empty alert evaluation time series points for invalid alert evaluation", () => {
+        expect(
+            getAlertEvaluationTimeSeriesPoints(
+                (null as unknown) as AlertEvaluation
+            )
+        ).toEqual([]);
     });
 
-    test("getAlertEvaluationTimeSeriesPoints shall return empty alert evaluation time series points for invalid detection evaluation", () => {
+    test("getAlertEvaluationTimeSeriesPoints should return empty alert evaluation time series points for invalid detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations = (null as unknown) as {
             [index: string]: DetectionEvaluation;
         };
 
-        const alertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
-            mockAlertEvaluationCopy
-        );
-
-        expect(alertEvaluationTimeSeriesPoints).toEqual([]);
+        expect(
+            getAlertEvaluationTimeSeriesPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
     });
 
-    test("getAlertEvaluationTimeSeriesPoints shall return empty alert evaluation time series points for empty detection evaluation", () => {
+    test("getAlertEvaluationTimeSeriesPoints should return empty alert evaluation time series points for empty detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations = {};
 
-        const alertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
-            mockAlertEvaluationCopy
-        );
-
-        expect(alertEvaluationTimeSeriesPoints).toEqual([]);
+        expect(
+            getAlertEvaluationTimeSeriesPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
     });
 
-    test("getAlertEvaluationTimeSeriesPoints shall return empty alert evaluation time series points for invalid data in detection evaluation", () => {
+    test("getAlertEvaluationTimeSeriesPoints should return empty alert evaluation time series points for invalid data in detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
             data: (null as unknown) as DetectionData,
         } as DetectionEvaluation;
 
-        const alertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
-            mockAlertEvaluationCopy
-        );
-
-        expect(alertEvaluationTimeSeriesPoints).toEqual([]);
+        expect(
+            getAlertEvaluationTimeSeriesPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
     });
 
-    test("getAlertEvaluationTimeSeriesPoints shall return empty alert evaluation time series points for empty data in detection evaluation", () => {
+    test("getAlertEvaluationTimeSeriesPoints should return empty alert evaluation time series points for empty data in detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
-            data: {} as DetectionData,
+            data: {},
         } as DetectionEvaluation;
 
-        const alertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
-            mockAlertEvaluationCopy
-        );
-
-        expect(alertEvaluationTimeSeriesPoints).toEqual([]);
+        expect(
+            getAlertEvaluationTimeSeriesPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
     });
 
-    test("getAlertEvaluationTimeSeriesPoints shall return empty alert evaluation time series points for invalid timestamps in detection evaluation", () => {
+    test("getAlertEvaluationTimeSeriesPoints should return empty alert evaluation time series points for invalid timestamps in detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
             data: {
                 timestamp: (null as unknown) as number[],
-            } as DetectionData,
+            },
         } as DetectionEvaluation;
 
-        const alertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
-            mockAlertEvaluationCopy
-        );
-
-        expect(alertEvaluationTimeSeriesPoints).toEqual([]);
+        expect(
+            getAlertEvaluationTimeSeriesPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
     });
 
-    test("getAlertEvaluationTimeSeriesPoints shall return empty alert evaluation time series points for empty timestamps in detection evaluation", () => {
+    test("getAlertEvaluationTimeSeriesPoints should return empty alert evaluation time series points for empty timestamps in detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
             data: {
                 timestamp: [] as number[],
-            } as DetectionData,
+            },
         } as DetectionEvaluation;
 
-        const alertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
-            mockAlertEvaluationCopy
-        );
-
-        expect(alertEvaluationTimeSeriesPoints).toEqual([]);
+        expect(
+            getAlertEvaluationTimeSeriesPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
     });
 
-    test("getAlertEvaluationTimeSeriesPoints shall return appropriate alert evaluation time series points for alert evaluation", () => {
-        const alertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
-            mockAlertEvaluation
-        );
-
-        expect(alertEvaluationTimeSeriesPoints).toEqual(
+    test("getAlertEvaluationTimeSeriesPoints should return appropriate alert evaluation time series points for alert evaluation", () => {
+        expect(getAlertEvaluationTimeSeriesPoints(mockAlertEvaluation)).toEqual(
             mockAlertEvaluationTimeSeriesPoints
         );
     });
 
-    test("getAlertEvaluationTimeSeriesPointsMinTimestamp shall return 0 for invalid alert evaluation time series points", () => {
+    test("getAlertEvaluationTimeSeriesPointsMinTimestamp should return 0 for invalid alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointsMinTimestamp(
                 (null as unknown) as AlertEvaluationTimeSeriesPoint[]
@@ -159,11 +134,11 @@ describe("Visualization Util", () => {
         ).toEqual(0);
     });
 
-    test("getAlertEvaluationTimeSeriesPointsMinTimestamp shall return 0 for empty alert evaluation time series points", () => {
+    test("getAlertEvaluationTimeSeriesPointsMinTimestamp should return 0 for empty alert evaluation time series points", () => {
         expect(getAlertEvaluationTimeSeriesPointsMinTimestamp([])).toEqual(0);
     });
 
-    test("getAlertEvaluationTimeSeriesPointsMinTimestamp shall return appropriate timestamp for alert evaluation time series points", () => {
+    test("getAlertEvaluationTimeSeriesPointsMinTimestamp should return appropriate timestamp for alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointsMinTimestamp(
                 mockAlertEvaluationTimeSeriesPoints
@@ -183,7 +158,7 @@ describe("Visualization Util", () => {
         ).toEqual(Number.MIN_VALUE);
     });
 
-    test("getAlertEvaluationTimeSeriesPointsMaxTimestamp shall return 0 for invalid alert evaluation time series points", () => {
+    test("getAlertEvaluationTimeSeriesPointsMaxTimestamp should return 0 for invalid alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointsMaxTimestamp(
                 (null as unknown) as AlertEvaluationTimeSeriesPoint[]
@@ -191,11 +166,11 @@ describe("Visualization Util", () => {
         ).toEqual(0);
     });
 
-    test("getAlertEvaluationTimeSeriesPointsMaxTimestamp shall return 0 for empty alert evaluation time series points", () => {
+    test("getAlertEvaluationTimeSeriesPointsMaxTimestamp should return 0 for empty alert evaluation time series points", () => {
         expect(getAlertEvaluationTimeSeriesPointsMaxTimestamp([])).toEqual(0);
     });
 
-    test("getAlertEvaluationTimeSeriesPointsMaxTimestamp shall return appropriate timestamp for alert evaluation time series points", () => {
+    test("getAlertEvaluationTimeSeriesPointsMaxTimestamp should return appropriate timestamp for alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointsMaxTimestamp(
                 mockAlertEvaluationTimeSeriesPoints
@@ -215,7 +190,7 @@ describe("Visualization Util", () => {
         ).toEqual(Number.MAX_VALUE);
     });
 
-    test("getAlertEvaluationTimeSeriesPointsMaxValue shall return 0 for invalid alert evaluation time series points", () => {
+    test("getAlertEvaluationTimeSeriesPointsMaxValue should return 0 for invalid alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointsMaxValue(
                 (null as unknown) as AlertEvaluationTimeSeriesPoint[]
@@ -223,11 +198,11 @@ describe("Visualization Util", () => {
         ).toEqual(0);
     });
 
-    test("getAlertEvaluationTimeSeriesPointsMaxValue shall return 0 for empty alert evaluation time series points", () => {
+    test("getAlertEvaluationTimeSeriesPointsMaxValue should return 0 for empty alert evaluation time series points", () => {
         expect(getAlertEvaluationTimeSeriesPointsMaxValue([])).toEqual(0);
     });
 
-    test("getAlertEvaluationTimeSeriesPointsMaxValue shall return appropriate value for alert evaluation time series points", () => {
+    test("getAlertEvaluationTimeSeriesPointsMaxValue should return appropriate value for alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointsMaxValue(
                 mockAlertEvaluationTimeSeriesPoints

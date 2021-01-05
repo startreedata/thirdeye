@@ -36,7 +36,7 @@ import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar-util/snackbar-util";
-import { getSubscriptionGroupCardData } from "../../utils/subscription-group-util/subscription-group-util";
+import { getSubscriptionGroupCardData } from "../../utils/subscription-groups-util/subscription-groups-util";
 import { SubscriptionGroupsDetailPageParams } from "./subscription-groups-detail-page.interfaces";
 
 export const SubscriptionGroupsDetailPage: FunctionComponent = () => {

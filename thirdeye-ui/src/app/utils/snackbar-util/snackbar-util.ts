@@ -37,6 +37,6 @@ const getSnackbarOption = (
 ): OptionsObject => {
     return {
         variant: snackbarOption.toLowerCase() as VariantType,
-        preventDuplicate: preventDuplicate,
+        preventDuplicate: Boolean(preventDuplicate),
     };
 };

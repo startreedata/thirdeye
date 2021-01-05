@@ -106,16 +106,24 @@ export const getQueryString = (key: string): string => {
     return value;
 };
 
-// Returns current query string from URL with all the recognized key value pairs
+// Returns current query string from URL with all the recognized and allowed key value pairs
 export const getRecognizedQueryString = (): string => {
     const urlSearchParams = new URLSearchParams(location.search);
     urlSearchParams.forEach((_value: string, key: string): void => {
-        if (
-            !AppQueryStringKey[
+        const queryStringKey =
+            AppQueryStringKey[
                 key.toUpperCase() as keyof typeof AppQueryStringKey
-            ]
-        ) {
+            ];
+        if (!queryStringKey) {
             // Unrecognized query string key
+            urlSearchParams.delete(key);
+        }
+
+        if (
+            queryStringKey === AppQueryStringKey.SEARCH ||
+            queryStringKey === AppQueryStringKey.SEARCH_TEXT
+        ) {
+            // Search not allowed in query string
             urlSearchParams.delete(key);
         }
     });

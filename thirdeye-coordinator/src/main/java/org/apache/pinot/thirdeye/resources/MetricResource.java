@@ -1,21 +1,13 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
 
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
@@ -59,15 +51,5 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
   @Override
   protected MetricApi toApi(final MetricConfigDTO dto) {
     return ApiBeanMapper.toApi(dto);
-  }
-
-  @DELETE
-  @Path("{id}")
-  @Override
-  public Response delete(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      @PathParam("id") Long id) {
-    authService.authenticate(authHeader);
-    throw badRequest(ERR_OPERATION_UNSUPPORTED);
   }
 }

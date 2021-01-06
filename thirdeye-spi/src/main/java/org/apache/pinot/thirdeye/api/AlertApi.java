@@ -103,11 +103,12 @@ public class AlertApi implements ThirdEyeApi {
     return this;
   }
 
-  public Map<String, Object> getFilters() {
+  public Map<String, List<String>> getFilters() {
     return filters;
   }
 
-  public AlertApi setFilters(Map<String, Object> filters) {
+  public AlertApi setFilters(
+      final Map<String, List<String>> filters) {
     this.filters = filters;
     return this;
   }

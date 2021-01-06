@@ -169,14 +169,19 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   }
 
   private static String format(ResultSetGroup result) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < result.getResultSetCount(); i++) {
-      ResultSet resultSet = result.getResultSet(i);
-      for (int c = 0; c < resultSet.getColumnCount(); c++) {
-        sb.append(resultSet.getColumnName(c)).append("=").append(resultSet.getDouble(c));
+    try {
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < result.getResultSetCount(); i++) {
+        ResultSet resultSet = result.getResultSet(i);
+        for (int c = 0; c < resultSet.getColumnCount(); c++) {
+          sb.append(resultSet.getColumnName(c)).append("=").append(resultSet.getDouble(c));
+        }
       }
+      return sb.toString();
+    } catch (Exception e) {
+      // ignoring exception in debug code.
+      return "";
     }
-    return sb.toString();
   }
 
   private static Connection[] fromHostList(final String[] thirdeyeBrokers) throws Exception {

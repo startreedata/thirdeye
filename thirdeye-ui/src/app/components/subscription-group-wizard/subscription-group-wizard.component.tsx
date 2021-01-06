@@ -43,12 +43,18 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
     props: SubscriptionGroupWizardProps
 ) => {
     const subscriptionGroupWizardClasses = useSubscriptionGroupWizardStyles();
-    const [newSubscriptionGroup, setNewSubscriptionGroup] = useState<
-        SubscriptionGroup
-    >(props.subscriptionGroup || createEmptySubscriptionGroup());
-    const [currentWizardStep, setCurrentWizardStep] = useState<
-        SubscriptionGroupWizardStep
-    >(SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES);
+    const [
+        newSubscriptionGroup,
+        setNewSubscriptionGroup,
+    ] = useState<SubscriptionGroup>(
+        props.subscriptionGroup || createEmptySubscriptionGroup()
+    );
+    const [
+        currentWizardStep,
+        setCurrentWizardStep,
+    ] = useState<SubscriptionGroupWizardStep>(
+        SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES
+    );
     const { t } = useTranslation();
 
     useEffect(() => {

@@ -41,9 +41,10 @@ import { SubscriptionGroupsDetailPageParams } from "./subscription-groups-detail
 
 export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [subscriptionGroupCardData, setSubscriptionGroupCardData] = useState<
-        SubscriptionGroupCardData
-    >();
+    const [
+        subscriptionGroupCardData,
+        setSubscriptionGroupCardData,
+    ] = useState<SubscriptionGroupCardData>();
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,

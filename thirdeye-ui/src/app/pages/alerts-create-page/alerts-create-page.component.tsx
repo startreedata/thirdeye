@@ -14,7 +14,7 @@ import _ from "lodash";
 import { useSnackbar } from "notistack";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RouteComponentProps, withRouter } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { Button } from "../../components/button/button.component";
 import { ConfigurationStep } from "../../components/configuration-step/configuration-step.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
@@ -46,319 +46,303 @@ import {
 
 const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 
-export const AlertsCreatePage = withRouter(
-    (props: RouteComponentProps): ReactElement => {
-        const [loading, setLoading] = useState(false);
-        const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-            state.setPageBreadcrumbs,
+export const AlertsCreatePage = (): ReactElement => {
+    const [loading, setLoading] = useState(false);
+    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
+        state.setPageBreadcrumbs,
+    ]);
+    const [detectionConfig, setDetectionConfig] = useState(DETECTION_CONFIG);
+    const [subscriptionConfig, setSubscriptionConfig] = useState(
+        DEFAULT_SUBSCRIPTION
+    );
+    const [subscriptionGroup, setSubscriptionGroup] = useState(-1);
+    const [activeStep, setActiveStep] = useState(0);
+    const { enqueueSnackbar } = useSnackbar();
+    const [chartData, setChartData] = useState<AlertEvaluation | null>();
+    const [subscriptionGroups, setSubscriptionGroups] = useState<
+        SubscriptionGroup[]
+    >([]);
+    const history = useHistory();
+
+    const [isFirstTime, setIsFirstTime] = useState(true);
+
+    const [
+        appTimeRangeDuration,
+        getAppTimeRangeDuration,
+    ] = useAppTimeRangeStore((state) => [
+        state.appTimeRangeDuration,
+        state.getAppTimeRangeDuration,
+    ]);
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        // Create page breadcrumbs
+        setPageBreadcrumbs([
+            {
+                text: t("label.create"),
+                pathFn: getAlertsCreatePath,
+            },
         ]);
-        const [detectionConfig, setDetectionConfig] = useState(
-            DETECTION_CONFIG
-        );
-        const [subscriptionConfig, setSubscriptionConfig] = useState(
-            DEFAULT_SUBSCRIPTION
-        );
-        const [subscriptionGroup, setSubscriptionGroup] = useState(-1);
-        const [activeStep, setActiveStep] = useState(0);
-        const { enqueueSnackbar } = useSnackbar();
-        const [chartData, setChartData] = useState<AlertEvaluation | null>();
-        const [subscriptionGroups, setSubscriptionGroups] = useState<
-            SubscriptionGroup[]
-        >([]);
 
-        const [isFirstTime, setIsFirstTime] = useState(true);
+        setLoading(false);
+    }, [setPageBreadcrumbs, t]);
 
-        const [
-            appTimeRangeDuration,
-            getAppTimeRangeDuration,
-        ] = useAppTimeRangeStore((state) => [
-            state.appTimeRangeDuration,
-            state.getAppTimeRangeDuration,
-        ]);
-        const { t } = useTranslation();
+    useEffect(() => {
+        async function fetchData(): Promise<void> {
+            setSubscriptionGroups(await getAllSubscriptionGroups());
+        }
+        fetchData();
+    }, []);
 
-        useEffect(() => {
-            // Create page breadcrumbs
-            setPageBreadcrumbs([
-                {
-                    text: t("label.create"),
-                    pathFn: getAlertsCreatePath,
-                },
-            ]);
+    const handleStepChange = (step: number): void => {
+        if (step > 2) {
+            handleCreateAlert();
+        } else {
+            setActiveStep(step < 0 ? 0 : step > 2 ? 2 : step);
+        }
+    };
 
-            setLoading(false);
-        }, [setPageBreadcrumbs, t]);
-
-        useEffect(() => {
-            async function fetchData(): Promise<void> {
-                setSubscriptionGroups(await getAllSubscriptionGroups());
-            }
-            fetchData();
-        }, []);
-
-        const handleStepChange = (step: number): void => {
-            if (step > 2) {
-                handleCreateAlert();
-            } else {
-                setActiveStep(step < 0 ? 0 : step > 2 ? 2 : step);
-            }
-        };
-
-        const handleCreateAlert = async (): Promise<void> => {
-            setLoading(true);
-            try {
-                const alert = await createAlert(
-                    yaml.load(detectionConfig) as Alert
-                );
-
-                if (subscriptionGroup !== -1) {
-                    const updatedScubscriptionGroup = subscriptionGroups.find(
-                        (sg) => sg.id === subscriptionGroup
-                    );
-                    try {
-                        await updateSubscriptionGroup({
-                            ...(updatedScubscriptionGroup as SubscriptionGroup),
-                            alerts: [
-                                ...(updatedScubscriptionGroup?.alerts || []),
-                                { id: alert.id },
-                            ] as Alert[],
-                        });
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-                enqueueSnackbar(
-                    t("message.create-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
-                props.history.push(AppRoute.ALERTS_ALL);
-            } catch (err) {
-                console.log(err);
-                enqueueSnackbar(
-                    _.get(
-                        err,
-                        t("message.create-error", { entity: t("label.alert") })
-                    ),
-                    getErrorSnackbarOption()
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        useEffect(() => {
-            handlePreviewAlert();
-        }, [appTimeRangeDuration]);
-
-        const handlePreviewAlert = async (): Promise<void> => {
-            if (isFirstTime) {
-                setIsFirstTime(false);
-
-                return;
-            }
-            setChartData(null);
-            setChartData(await fetchChartData());
-        };
-
-        const fetchChartData = async (): Promise<AlertEvaluation | null> => {
-            const { startTime, endTime } = getAppTimeRangeDuration();
-            const alertEvalution = {
-                alert: yaml.load(detectionConfig) as Alert,
-                start: startTime,
-                end: endTime,
-            };
-
-            let chartData = null;
-            try {
-                chartData = await getAlertEvaluation(
-                    alertEvalution as AlertEvaluation
-                );
-            } catch (error) {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-                chartData = {} as AlertEvaluation;
-            }
-
-            return chartData;
-        };
-
-        const selectionGroupComp = (
-            <FormControl
-                style={{ margin: "8px 0", minWidth: 250, borderRadius: 8 }}
-                variant="outlined"
-            >
-                <InputLabel id="select-group">
-                    {t("label.add-subscription-gorup")}
-                </InputLabel>
-                <Select
-                    label={t("label.add-subscription-gorup")}
-                    labelId="select-group"
-                    style={{ borderRadius: 8 }}
-                    value={subscriptionGroup}
-                    onChange={(
-                        e: React.ChangeEvent<{
-                            name?: string;
-                            value: unknown;
-                        }>
-                    ): void => setSubscriptionGroup(e.target.value as number)}
-                >
-                    <MenuItem key={-1} value={-1}>
-                        {t("label.create-subscription-gorup")}
-                    </MenuItem>
-                    {subscriptionGroups.map(({ id, name }) => (
-                        <MenuItem key={id} value={id}>
-                            {name}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-        );
-
-        if (loading) {
-            return (
-                <PageContainer>
-                    <LoadingIndicator />
-                </PageContainer>
+    const handleCreateAlert = async (): Promise<void> => {
+        setLoading(true);
+        try {
+            const alert = await createAlert(
+                yaml.load(detectionConfig) as Alert
             );
+
+            if (subscriptionGroup !== -1) {
+                const updatedScubscriptionGroup = subscriptionGroups.find(
+                    (sg) => sg.id === subscriptionGroup
+                );
+                try {
+                    await updateSubscriptionGroup({
+                        ...(updatedScubscriptionGroup as SubscriptionGroup),
+                        alerts: [
+                            ...(updatedScubscriptionGroup?.alerts || []),
+                            { id: alert.id },
+                        ] as Alert[],
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+            enqueueSnackbar(
+                t("message.create-success", { entity: t("label.alert") }),
+                getSuccessSnackbarOption()
+            );
+            history.push(AppRoute.ALERTS_ALL);
+        } catch (err) {
+            console.log(err);
+            enqueueSnackbar(
+                _.get(
+                    err,
+                    t("message.create-error", { entity: t("label.alert") })
+                ),
+                getErrorSnackbarOption()
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        handlePreviewAlert();
+    }, [appTimeRangeDuration]);
+
+    const handlePreviewAlert = async (): Promise<void> => {
+        if (isFirstTime) {
+            setIsFirstTime(false);
+
+            return;
+        }
+        setChartData(null);
+        setChartData(await fetchChartData());
+    };
+
+    const fetchChartData = async (): Promise<AlertEvaluation | null> => {
+        const { startTime, endTime } = getAppTimeRangeDuration();
+        const alertEvalution = {
+            alert: yaml.load(detectionConfig) as Alert,
+            start: startTime,
+            end: endTime,
+        };
+
+        let chartData = null;
+        try {
+            chartData = await getAlertEvaluation(
+                alertEvalution as AlertEvaluation
+            );
+        } catch (error) {
+            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+            chartData = {} as AlertEvaluation;
         }
 
-        if (loading) {
-            return <LoadingIndicator />;
-        }
+        return chartData;
+    };
 
+    const selectionGroupComp = (
+        <FormControl
+            style={{ margin: "8px 0", minWidth: 250, borderRadius: 8 }}
+            variant="outlined"
+        >
+            <InputLabel id="select-group">
+                {t("label.add-subscription-gorup")}
+            </InputLabel>
+            <Select
+                label={t("label.add-subscription-gorup")}
+                labelId="select-group"
+                style={{ borderRadius: 8 }}
+                value={subscriptionGroup}
+                onChange={(
+                    e: React.ChangeEvent<{
+                        name?: string;
+                        value: unknown;
+                    }>
+                ): void => setSubscriptionGroup(e.target.value as number)}
+            >
+                <MenuItem key={-1} value={-1}>
+                    {t("label.create-subscription-gorup")}
+                </MenuItem>
+                {subscriptionGroups.map(({ id, name }) => (
+                    <MenuItem key={id} value={id}>
+                        {name}
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
+    );
+
+    if (loading) {
         return (
             <PageContainer>
-                <PageContents centered hideTimeRange title="">
-                    <Grid container>
-                        <Grid item xs={12}>
-                            <CustomStepper
-                                currentStep={activeStep}
-                                steps={[
-                                    {
-                                        label: t(
-                                            "label.detection-configuration"
-                                        ),
-                                        // eslint-disable-next-line react/display-name
-                                        content: (
-                                            <ConfigurationStep
-                                                config={detectionConfig}
-                                                extraFields={
-                                                    <Typography variant="h6">
-                                                        {t(
-                                                            "label.general-details"
-                                                        )}
-                                                    </Typography>
-                                                }
-                                                name={"Define Detection"}
-                                                previewData={
-                                                    chartData as AlertEvaluation
-                                                }
-                                                showPreviewButton={true}
-                                                onConfigChange={
-                                                    setDetectionConfig
-                                                }
-                                                onPreviewAlert={
-                                                    handlePreviewAlert
-                                                }
-                                                onResetConfig={(): void =>
-                                                    setDetectionConfig(
-                                                        DETECTION_CONFIG
-                                                    )
-                                                }
-                                            />
-                                        ),
-                                    },
-                                    {
-                                        label: t(
-                                            "label.subscription-configuration"
-                                        ),
-                                        // eslint-disable-next-line react/display-name
-                                        content: (
-                                            <ConfigurationStep
-                                                config={subscriptionConfig}
-                                                editorProps={{
-                                                    options: {
-                                                        readOnly:
-                                                            subscriptionGroup !==
-                                                            -1,
-                                                    },
-                                                }}
-                                                extraFields={selectionGroupComp}
-                                                name={"Subscription"}
-                                                onConfigChange={
-                                                    setSubscriptionConfig
-                                                }
-                                                onResetConfig={(): void =>
-                                                    setDetectionConfig(
-                                                        DEFAULT_SUBSCRIPTION
-                                                    )
-                                                }
-                                            />
-                                        ),
-                                    },
-                                    {
-                                        label: t("label.review-submit"),
-                                        // eslint-disable-next-line react/display-name
-                                        content: (
-                                            <ReviewStep
-                                                detectionConfig={
-                                                    detectionConfig
-                                                }
-                                                subscriptionConfig={
-                                                    subscriptionConfig
-                                                }
-                                                subscriptionGroup={
-                                                    subscriptionGroup !== -1
-                                                        ? subscriptionGroups.find(
-                                                              (sg) =>
-                                                                  sg.id ===
-                                                                  subscriptionGroup
-                                                          )?.name || ""
-                                                        : "-"
-                                                }
-                                            />
-                                        ),
-                                    },
-                                ]}
-                                onStepChange={handleStepChange}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Box>
-                                {activeStep !== 0 && (
-                                    <Button
-                                        color="primary"
-                                        startIcon={<ArrowBackIcon />}
-                                        style={{ marginRight: 10 }}
-                                        variant="outlined"
-                                        onClick={(): void =>
-                                            handleStepChange(activeStep - 1)
-                                        }
-                                    >
-                                        Prev
-                                    </Button>
-                                )}
-                                <Button
-                                    color="primary"
-                                    endIcon={
-                                        activeStep >= 2 ? null : (
-                                            <ArrowForwardIcon />
-                                        )
-                                    }
-                                    variant="contained"
-                                    onClick={(): void =>
-                                        handleStepChange(activeStep + 1)
-                                    }
-                                >
-                                    {activeStep >= 2 ? "Finish" : "Next"}
-                                </Button>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </PageContents>
+                <LoadingIndicator />
             </PageContainer>
         );
     }
-);
+
+    if (loading) {
+        return <LoadingIndicator />;
+    }
+
+    return (
+        <PageContainer>
+            <PageContents centered hideTimeRange title="">
+                <Grid container>
+                    <Grid item xs={12}>
+                        <CustomStepper
+                            currentStep={activeStep}
+                            steps={[
+                                {
+                                    label: t("label.detection-configuration"),
+                                    // eslint-disable-next-line react/display-name
+                                    content: (
+                                        <ConfigurationStep
+                                            config={detectionConfig}
+                                            extraFields={
+                                                <Typography variant="h6">
+                                                    {t("label.general-details")}
+                                                </Typography>
+                                            }
+                                            name={"Define Detection"}
+                                            previewData={
+                                                chartData as AlertEvaluation
+                                            }
+                                            showPreviewButton={true}
+                                            onConfigChange={setDetectionConfig}
+                                            onPreviewAlert={handlePreviewAlert}
+                                            onResetConfig={(): void =>
+                                                setDetectionConfig(
+                                                    DETECTION_CONFIG
+                                                )
+                                            }
+                                        />
+                                    ),
+                                },
+                                {
+                                    label: t(
+                                        "label.subscription-configuration"
+                                    ),
+                                    // eslint-disable-next-line react/display-name
+                                    content: (
+                                        <ConfigurationStep
+                                            config={subscriptionConfig}
+                                            editorProps={{
+                                                options: {
+                                                    readOnly:
+                                                        subscriptionGroup !==
+                                                        -1,
+                                                },
+                                            }}
+                                            extraFields={selectionGroupComp}
+                                            name={"Subscription"}
+                                            onConfigChange={
+                                                setSubscriptionConfig
+                                            }
+                                            onResetConfig={(): void =>
+                                                setDetectionConfig(
+                                                    DEFAULT_SUBSCRIPTION
+                                                )
+                                            }
+                                        />
+                                    ),
+                                },
+                                {
+                                    label: t("label.review-submit"),
+                                    // eslint-disable-next-line react/display-name
+                                    content: (
+                                        <ReviewStep
+                                            detectionConfig={detectionConfig}
+                                            subscriptionConfig={
+                                                subscriptionConfig
+                                            }
+                                            subscriptionGroup={
+                                                subscriptionGroup !== -1
+                                                    ? subscriptionGroups.find(
+                                                          (sg) =>
+                                                              sg.id ===
+                                                              subscriptionGroup
+                                                      )?.name || ""
+                                                    : "-"
+                                            }
+                                        />
+                                    ),
+                                },
+                            ]}
+                            onStepChange={handleStepChange}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box>
+                            {activeStep !== 0 && (
+                                <Button
+                                    color="primary"
+                                    startIcon={<ArrowBackIcon />}
+                                    style={{ marginRight: 10 }}
+                                    variant="outlined"
+                                    onClick={(): void =>
+                                        handleStepChange(activeStep - 1)
+                                    }
+                                >
+                                    Prev
+                                </Button>
+                            )}
+                            <Button
+                                color="primary"
+                                endIcon={
+                                    activeStep >= 2 ? null : (
+                                        <ArrowForwardIcon />
+                                    )
+                                }
+                                variant="contained"
+                                onClick={(): void =>
+                                    handleStepChange(activeStep + 1)
+                                }
+                            >
+                                {activeStep >= 2 ? "Finish" : "Next"}
+                            </Button>
+                        </Box>
+                    </Grid>
+                </Grid>
+            </PageContents>
+        </PageContainer>
+    );
+};

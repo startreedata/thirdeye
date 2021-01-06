@@ -108,7 +108,7 @@ export const AlertsCreatePage = withRouter(
             setLoading(true);
             try {
                 const alert = await createAlert(
-                    yaml.safeLoad(detectionConfig) as Alert
+                    yaml.load(detectionConfig) as Alert
                 );
 
                 if (subscriptionGroup !== -1) {
@@ -163,7 +163,7 @@ export const AlertsCreatePage = withRouter(
         const fetchChartData = async (): Promise<AlertEvaluation | null> => {
             const { startTime, endTime } = getAppTimeRangeDuration();
             const alertEvalution = {
-                alert: yaml.safeLoad(detectionConfig) as Alert,
+                alert: yaml.load(detectionConfig) as Alert,
                 start: startTime,
                 end: endTime,
             };

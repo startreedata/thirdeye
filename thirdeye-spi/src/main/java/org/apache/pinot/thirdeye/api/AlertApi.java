@@ -18,7 +18,7 @@ public class AlertApi implements ThirdEyeApi {
   private Date created;
   private Date updated;
   private UserApi owner;
-  private Map<String, Object> filters;
+  private Map<String, List<String>> filters;
   private Map<String, AlertNodeApi> nodes;
   private List<SubscriptionGroupApi> subscriptionGroups;
 

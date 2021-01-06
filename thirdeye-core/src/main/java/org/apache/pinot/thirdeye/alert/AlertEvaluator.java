@@ -4,8 +4,10 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_TIMEOUT;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_UNKNOWN;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.serverError;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusListApi;
 
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
@@ -18,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.apache.pinot.thirdeye.ThirdEyeException;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.api.DetectionDataApi;
@@ -77,6 +80,8 @@ public class AlertEvaluator {
     try {
       final DetectionPipelineResult result = runPipeline(request);
       return toApi(result);
+    } catch (ThirdEyeException e) {
+      throw badRequest(statusListApi(e.getStatus(), e.getMessage()));
     } catch (InterruptedException e) {
       LOG.error("Error occurred during evaluate", e);
       throw serverError(ERR_UNKNOWN, e.getMessage());

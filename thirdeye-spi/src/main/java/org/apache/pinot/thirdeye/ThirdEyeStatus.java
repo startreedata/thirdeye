@@ -2,6 +2,9 @@ package org.apache.pinot.thirdeye;
 
 public enum ThirdEyeStatus {
 
+  ERR_DATASET_NOT_FOUND("Dataset not found! %s"),
+  ERR_MULTIPLE_DATASETS_FOUND(
+      "Multiple datasets found based on the dataset's display name %s, candidates: %s"),
   ERR_DATA_UNAVAILABLE("Data not available! %s"),
   ERR_DUPLICATE_NAME("Name must be unique!"),
   ERR_MISSING_ID("ID is null!"),

@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_MULTIPLE_DATASETS_FOUND;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -30,6 +33,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.pinot.thirdeye.ThirdEyeException;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DatasetConfigBean;
 import org.joda.time.Period;
@@ -263,13 +267,15 @@ public class ConfigUtils {
     if (datasetConfig == null) {
       List<DatasetConfigDTO> datasetConfigs = provider.fetchDatasetByDisplayName(datasetName);
       if (datasetConfigs.isEmpty()) {
-        throw new RuntimeException("Dataset doesn't exist in our records: " + datasetName);
+        throw new ThirdEyeException(ERR_DATASET_NOT_FOUND, datasetName);
       }
       if (datasetConfigs.size() > 1) {
-        throw new RuntimeException(String.format(
-            "multiple datasets found based on the dataset's display name %s, please specify which one to use. candidates: %s",
-            datasetName, datasetConfigs.stream().map(DatasetConfigBean::getDataset)
-                .collect(Collectors.joining(", "))));
+        throw new ThirdEyeException(ERR_MULTIPLE_DATASETS_FOUND,
+            datasetName,
+            datasetConfigs.stream()
+                .map(DatasetConfigBean::getDataset)
+                .collect(Collectors.joining(", "))
+        );
       }
       datasetConfig = datasetConfigs.get(0);
     }

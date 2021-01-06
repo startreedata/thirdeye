@@ -71,10 +71,14 @@ public class ResourceUtils {
   }
 
   public static StatusListApi statusResponse(ThirdEyeStatus status, Object... args) {
+    return statusListApi(status, String.format(status.getMessage(), args));
+  }
+
+  public static StatusListApi statusListApi(ThirdEyeStatus status, String msg) {
     return new StatusListApi()
         .setList(ImmutableList.of(new StatusApi()
             .setCode(status)
-            .setMsg(String.format(status.getMessage(), args))
+            .setMsg(msg)
         ));
   }
 

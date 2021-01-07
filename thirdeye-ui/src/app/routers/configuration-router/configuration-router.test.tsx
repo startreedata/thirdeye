@@ -1,12 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
+import { AppToolbarConfiguration } from "../../components/app-toolbar-configuration/app-toolbar-configuration.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import {
     AppRoute,
-    getAnomaliesPath,
+    getConfigurationPath,
 } from "../../utils/routes-util/routes-util";
-import { AnomaliesRouter } from "./anomalies-router";
+import { ConfigurationRouter } from "./configuration-router";
 
 jest.mock("../../store/app-breadcrumbs-store/app-breadcrumbs-store", () => ({
     useAppBreadcrumbsStore: jest.fn().mockImplementation((selector) => {
@@ -19,7 +20,7 @@ jest.mock("../../store/app-breadcrumbs-store/app-breadcrumbs-store", () => ({
 jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
     useAppToolbarStore: jest.fn().mockImplementation((selector) => {
         return selector({
-            removeAppToolbar: mockRemoveAppToolbar,
+            setAppToolbar: mockSetAppToolbar,
         });
     }),
 }));
@@ -32,27 +33,24 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
+jest.mock(
+    "../../components/app-toolbar-configuration/app-toolbar-configuration.component",
+    () => ({
+        AppToolbarConfiguration: jest
+            .fn()
+            .mockImplementation(() => <>testAppToolbarConfiguration</>),
+    })
+);
+
 jest.mock("../../components/page-container/page-container.component", () => ({
     PageContainer: jest.fn().mockImplementation(() => <>testPageContainer</>),
 }));
 
-jest.mock(
-    "../../pages/anomalies-all-page/anomalies-all-page.component",
-    () => ({
-        AnomaliesAllPage: jest
-            .fn()
-            .mockImplementation(() => <>testAnomaliesAllPage</>),
-    })
-);
-
-jest.mock(
-    "../../pages/anomalies-detail-page/anomalies-detail-page.component",
-    () => ({
-        AnomaliesDetailPage: jest
-            .fn()
-            .mockImplementation(() => <>testAnomaliesDetailPage</>),
-    })
-);
+jest.mock("../subscription-groups-router/subscription-groups-router", () => ({
+    SubscriptionGroupsRouter: jest
+        .fn()
+        .mockImplementation(() => <>testSubscriptionGroupsRouter</>),
+}));
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
@@ -63,7 +61,7 @@ jest.mock(
     })
 );
 
-describe("Anomalies Router", () => {
+describe("Configuration Router", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -75,7 +73,7 @@ describe("Anomalies Router", () => {
     test("should have rendered page container while loading", () => {
         render(
             <MemoryRouter>
-                <AnomaliesRouter />
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
@@ -85,96 +83,84 @@ describe("Anomalies Router", () => {
     test("should set appropriate app section breadcrumbs", () => {
         render(
             <MemoryRouter>
-                <AnomaliesRouter />
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
         expect(mockSetAppSectionBreadcrumbs).toHaveBeenCalledWith([
             {
-                text: "label.anomalies",
-                pathFn: getAnomaliesPath,
+                text: "label.configuration",
+                pathFn: getConfigurationPath,
             },
         ]);
     });
 
-    test("should remove app toolbar", () => {
+    test("should set appropriate app toolbar", () => {
         render(
             <MemoryRouter>
-                <AnomaliesRouter />
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
-        expect(mockRemoveAppToolbar).toHaveBeenCalled();
+        expect(mockSetAppToolbar).toHaveBeenCalledWith(
+            <AppToolbarConfiguration />
+        );
     });
 
-    test("should render anomalies all page at exact anomalies path", () => {
+    test("should direct exact configuration path to subscription groups router", () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.ANOMALIES]}>
-                <AnomaliesRouter />
+            <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesAllPage")).toBeInTheDocument();
+        expect(
+            screen.getByText("testSubscriptionGroupsRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies path", () => {
-        render(
-            <MemoryRouter initialEntries={[`${AppRoute.ANOMALIES}/testPath`]}>
-                <AnomaliesRouter />
-            </MemoryRouter>
-        );
-
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
-    });
-
-    test("should render anomalies all page at exact anomalies all path", () => {
-        render(
-            <MemoryRouter initialEntries={[AppRoute.ANOMALIES_ALL]}>
-                <AnomaliesRouter />
-            </MemoryRouter>
-        );
-
-        expect(screen.getByText("testAnomaliesAllPage")).toBeInTheDocument();
-    });
-
-    test("should render page not found page at invalid anomalies all path", () => {
+    test("should render page not found page at invalid configuration path", () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.ANOMALIES_ALL}/testPath`]}
+                initialEntries={[`${AppRoute.CONFIGURATION}/testPath`]}
             >
-                <AnomaliesRouter />
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
         expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
     });
 
-    test("should render anomalies detail page at exact anomalies detail path", () => {
+    test("should direct exact subscription groups path to subscription groups router", () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.ANOMALIES_DETAIL]}>
-                <AnomaliesRouter />
+            <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS]}>
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesDetailPage")).toBeInTheDocument();
+        expect(
+            screen.getByText("testSubscriptionGroupsRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies detail path", () => {
+    test("should direct subscription groups path to subscription groups router", () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.ANOMALIES_DETAIL}/testPath`]}
+                initialEntries={[`${AppRoute.SUBSCRIPTION_GROUPS}/testPath`]}
             >
-                <AnomaliesRouter />
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            screen.getByText("testSubscriptionGroupsRouter")
+        ).toBeInTheDocument();
     });
 
     test("should render page not found page at any other path", () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
-                <AnomaliesRouter />
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
@@ -184,7 +170,7 @@ describe("Anomalies Router", () => {
     test("should render page not found page by default", () => {
         render(
             <MemoryRouter>
-                <AnomaliesRouter />
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
@@ -194,4 +180,4 @@ describe("Anomalies Router", () => {
 
 const mockSetAppSectionBreadcrumbs = jest.fn();
 
-const mockRemoveAppToolbar = jest.fn();
+const mockSetAppToolbar = jest.fn();

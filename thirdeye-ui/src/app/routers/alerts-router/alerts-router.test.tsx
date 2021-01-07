@@ -127,7 +127,7 @@ describe("Alerts Router", () => {
         expect(screen.getByText("testAlertsAllPage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at non-exact alerts path", () => {
+    test("should render page not found page at invalid alerts path", () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS}/testPath`]}>
                 <AlertsRouter />
@@ -147,7 +147,7 @@ describe("Alerts Router", () => {
         expect(screen.getByText("testAlertsAllPage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at non-exact alerts all path", () => {
+    test("should render page not found page at invalid alerts all path", () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS_ALL}/testPath`]}>
                 <AlertsRouter />
@@ -167,7 +167,7 @@ describe("Alerts Router", () => {
         expect(screen.getByText("testAlertsDetailPage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at non-exact alerts detail path", () => {
+    test("should render page not found page at invalid alerts detail path", () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_DETAIL}/testPath`]}
@@ -189,7 +189,7 @@ describe("Alerts Router", () => {
         expect(screen.getByText("testAlertsCreatePage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at non-exact alerts create path", () => {
+    test("should render page not found page at invalid alerts create path", () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_CREATE}/testPath`]}
@@ -211,7 +211,7 @@ describe("Alerts Router", () => {
         expect(screen.getByText("testAlertsUpdatePage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at non-exact alerts update path", () => {
+    test("should render page not found page at invalid alerts update path", () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_UPDATE}/testPath`]}
@@ -225,7 +225,7 @@ describe("Alerts Router", () => {
 
     test("should render page not found page at any other path", () => {
         render(
-            <MemoryRouter>
+            <MemoryRouter initialEntries={["/testPath"]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
@@ -235,7 +235,7 @@ describe("Alerts Router", () => {
 
     test("should render page not found page by default", () => {
         render(
-            <MemoryRouter initialEntries={["/testPath"]}>
+            <MemoryRouter>
                 <AlertsRouter />
             </MemoryRouter>
         );

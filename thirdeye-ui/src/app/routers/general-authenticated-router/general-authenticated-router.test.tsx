@@ -2,11 +2,8 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import {
-    AppRoute,
-    getAnomaliesPath,
-} from "../../utils/routes-util/routes-util";
-import { AnomaliesRouter } from "./anomalies-router";
+import { AppRoute } from "../../utils/routes-util/routes-util";
+import { GeneralAuthenticatedRouter } from "./general-authenticated-router";
 
 jest.mock("../../store/app-breadcrumbs-store/app-breadcrumbs-store", () => ({
     useAppBreadcrumbsStore: jest.fn().mockImplementation((selector) => {
@@ -24,35 +21,17 @@ jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
     }),
 }));
 
-jest.mock("react-i18next", () => ({
-    useTranslation: jest.fn().mockReturnValue({
-        t: (key: string): string => {
-            return key;
-        },
-    }),
-}));
-
 jest.mock("../../components/page-container/page-container.component", () => ({
     PageContainer: jest.fn().mockImplementation(() => <>testPageContainer</>),
 }));
 
-jest.mock(
-    "../../pages/anomalies-all-page/anomalies-all-page.component",
-    () => ({
-        AnomaliesAllPage: jest
-            .fn()
-            .mockImplementation(() => <>testAnomaliesAllPage</>),
-    })
-);
+jest.mock("../../pages/home-page/home-page.component", () => ({
+    HomePage: jest.fn().mockImplementation(() => <>testHomePage</>),
+}));
 
-jest.mock(
-    "../../pages/anomalies-detail-page/anomalies-detail-page.component",
-    () => ({
-        AnomaliesDetailPage: jest
-            .fn()
-            .mockImplementation(() => <>testAnomaliesDetailPage</>),
-    })
-);
+jest.mock("../../pages/sign-out-page/sign-out-page.component", () => ({
+    SignOutPage: jest.fn().mockImplementation(() => <>testSignOutPage</>),
+}));
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
@@ -63,7 +42,7 @@ jest.mock(
     })
 );
 
-describe("Anomalies Router", () => {
+describe("General Authenticated Router", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -75,7 +54,7 @@ describe("Anomalies Router", () => {
     test("should have rendered page container while loading", () => {
         render(
             <MemoryRouter>
-                <AnomaliesRouter />
+                <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
@@ -85,86 +64,77 @@ describe("Anomalies Router", () => {
     test("should set appropriate app section breadcrumbs", () => {
         render(
             <MemoryRouter>
-                <AnomaliesRouter />
+                <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(mockSetAppSectionBreadcrumbs).toHaveBeenCalledWith([
-            {
-                text: "label.anomalies",
-                pathFn: getAnomaliesPath,
-            },
-        ]);
+        expect(mockSetAppSectionBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
     test("should remove app toolbar", () => {
         render(
             <MemoryRouter>
-                <AnomaliesRouter />
+                <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
         expect(mockRemoveAppToolbar).toHaveBeenCalled();
     });
 
-    test("should render anomalies all page at exact anomalies path", () => {
+    test("should render home page at exact base path", () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.ANOMALIES]}>
-                <AnomaliesRouter />
+            <MemoryRouter initialEntries={[AppRoute.BASE]}>
+                <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesAllPage")).toBeInTheDocument();
+        expect(screen.getByText("testHomePage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies path", () => {
+    test("should render page not found page at invalid base path", () => {
         render(
-            <MemoryRouter initialEntries={[`${AppRoute.ANOMALIES}/testPath`]}>
-                <AnomaliesRouter />
-            </MemoryRouter>
-        );
-
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
-    });
-
-    test("should render anomalies all page at exact anomalies all path", () => {
-        render(
-            <MemoryRouter initialEntries={[AppRoute.ANOMALIES_ALL]}>
-                <AnomaliesRouter />
-            </MemoryRouter>
-        );
-
-        expect(screen.getByText("testAnomaliesAllPage")).toBeInTheDocument();
-    });
-
-    test("should render page not found page at invalid anomalies all path", () => {
-        render(
-            <MemoryRouter
-                initialEntries={[`${AppRoute.ANOMALIES_ALL}/testPath`]}
-            >
-                <AnomaliesRouter />
+            <MemoryRouter initialEntries={[`${AppRoute.BASE}/testPath`]}>
+                <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
         expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
     });
 
-    test("should render anomalies detail page at exact anomalies detail path", () => {
+    test("should render home page at exact sign in path", () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.ANOMALIES_DETAIL]}>
-                <AnomaliesRouter />
+            <MemoryRouter initialEntries={[AppRoute.SIGN_IN]}>
+                <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesDetailPage")).toBeInTheDocument();
+        expect(screen.getByText("testHomePage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies detail path", () => {
+    test("should render page not found page at invalid sign in path", () => {
         render(
-            <MemoryRouter
-                initialEntries={[`${AppRoute.ANOMALIES_DETAIL}/testPath`]}
-            >
-                <AnomaliesRouter />
+            <MemoryRouter initialEntries={[`${AppRoute.SIGN_IN}/testPath`]}>
+                <GeneralAuthenticatedRouter />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+    });
+
+    test("should render sign out page at exact sign out path", () => {
+        render(
+            <MemoryRouter initialEntries={[AppRoute.SIGN_OUT]}>
+                <GeneralAuthenticatedRouter />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText("testSignOutPage")).toBeInTheDocument();
+    });
+
+    test("should render page not found page at invalid sign out path", () => {
+        render(
+            <MemoryRouter initialEntries={[`${AppRoute.SIGN_OUT}/testPath`]}>
+                <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
@@ -174,21 +144,21 @@ describe("Anomalies Router", () => {
     test("should render page not found page at any other path", () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
-                <AnomaliesRouter />
+                <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
         expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
     });
 
-    test("should render page not found page by default", () => {
+    test("should render home page by default", () => {
         render(
             <MemoryRouter>
-                <AnomaliesRouter />
+                <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(screen.getByText("testHomePage")).toBeInTheDocument();
     });
 });
 

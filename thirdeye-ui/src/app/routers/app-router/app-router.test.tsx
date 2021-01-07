@@ -47,15 +47,8 @@ jest.mock(
 );
 
 describe("App Router", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.resetAllMocks();
-    });
-
     test("should direct exact alerts path to alerts router when authenticated", () => {
+        mockAuth = true;
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS]}>
                 <AppRouter />
@@ -66,6 +59,7 @@ describe("App Router", () => {
     });
 
     test("should direct alerts path to alerts router when authenticated", () => {
+        mockAuth = true;
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS}/testPath`]}>
                 <AppRouter />
@@ -76,6 +70,7 @@ describe("App Router", () => {
     });
 
     test("should direct exact anomalies path to anomalies router when authenticated", () => {
+        mockAuth = true;
         render(
             <MemoryRouter initialEntries={[AppRoute.ANOMALIES]}>
                 <AppRouter />
@@ -86,6 +81,7 @@ describe("App Router", () => {
     });
 
     test("should direct anomalies path to anomalies router when authenticated", () => {
+        mockAuth = true;
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ANOMALIES}/testPath`]}>
                 <AppRouter />
@@ -96,6 +92,7 @@ describe("App Router", () => {
     });
 
     test("should direct exact configuration path to configuration router when authenticated", () => {
+        mockAuth = true;
         render(
             <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
                 <AppRouter />
@@ -106,6 +103,7 @@ describe("App Router", () => {
     });
 
     test("should direct configuration path to configuration router when authenticated", () => {
+        mockAuth = true;
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.CONFIGURATION}/testPath`]}
@@ -118,6 +116,7 @@ describe("App Router", () => {
     });
 
     test("should direct any other path to general authenticated router when authenticated", () => {
+        mockAuth = true;
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <AppRouter />
@@ -130,6 +129,7 @@ describe("App Router", () => {
     });
 
     test("should direct to general authenticated router by default when authenticated", () => {
+        mockAuth = true;
         render(
             <MemoryRouter>
                 <AppRouter />
@@ -143,7 +143,6 @@ describe("App Router", () => {
 
     test("should direct any path to general unauthenticated router when not authenticated", () => {
         mockAuth = false;
-
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <AppRouter />
@@ -157,7 +156,6 @@ describe("App Router", () => {
 
     test("should direct to general unauthenticated router by default when not authenticated", () => {
         mockAuth = false;
-
         render(
             <MemoryRouter>
                 <AppRouter />

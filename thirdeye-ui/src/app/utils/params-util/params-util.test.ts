@@ -16,10 +16,14 @@ import {
     setTimeRangeInQueryString,
 } from "./params-util";
 
-describe("Params Util", () => {
-    beforeAll(() => {
-        jest.spyOn(appHistory, "replace").mockImplementation();
+jest.mock("../history-util/history-util", () => ({
+    appHistory: {
+        replace: jest.fn(),
+    },
+}));
 
+describe("Params Util", () => {
+    beforeEach(() => {
         // jsdom doesn't support navigation, workaround is to mock URLSearchParams
         jest.spyOn(URLSearchParams.prototype, "set").mockImplementation();
         jest.spyOn(URLSearchParams.prototype, "get").mockImplementation(
@@ -33,11 +37,7 @@ describe("Params Util", () => {
         );
     });
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
+    afterEach(() => {
         jest.restoreAllMocks();
     });
 
@@ -109,6 +109,7 @@ describe("Params Util", () => {
             endTime: 2,
         });
 
+        expect(URLSearchParams.prototype.set).toHaveBeenCalledTimes(3);
         expect(URLSearchParams.prototype.set).toHaveBeenNthCalledWith(
             1,
             "time_range",
@@ -124,6 +125,7 @@ describe("Params Util", () => {
             "end_time",
             "2"
         );
+        expect(appHistory.replace).toHaveBeenCalledTimes(3);
         expect(appHistory.replace).toHaveBeenNthCalledWith(1, {
             search: "testUrlSearchParams",
         });
@@ -139,6 +141,7 @@ describe("Params Util", () => {
         jest.spyOn(URLSearchParams.prototype, "has").mockReturnValue(false);
 
         expect(getTimeRangeFromQueryString()).toBeNull();
+        expect(URLSearchParams.prototype.has).toHaveBeenCalledTimes(3);
         expect(URLSearchParams.prototype.has).toHaveBeenNthCalledWith(
             1,
             "time_range"
@@ -188,6 +191,7 @@ describe("Params Util", () => {
             .mockReturnValueOnce("2");
 
         expect(getTimeRangeFromQueryString()).toBeNull();
+        expect(URLSearchParams.prototype.get).toHaveBeenCalledTimes(3);
         expect(URLSearchParams.prototype.get).toHaveBeenNthCalledWith(
             1,
             "time_range"
@@ -276,7 +280,7 @@ describe("Params Util", () => {
         expect(getQueryString("testKey")).toEqual("testKey");
     });
 
-    test("getRecognizedQueryString should return query string with recognized and allowed key value pairs", () => {
+    test("getRecognizedQueryString should return query string with only the recognized and allowed key value pairs", () => {
         jest.spyOn(URLSearchParams.prototype, "forEach").mockImplementation(
             (
                 callbackFn: (
@@ -285,7 +289,7 @@ describe("Params Util", () => {
                     parent: URLSearchParams
                 ) => void
             ): void => {
-                // Iterate with a recognized, an unrecognized and a not-allowed query string
+                // Iterate with a recognized, an unrecognized and a query string that is not allowed
                 callbackFn(
                     "testTimeRangeValue",
                     "time_range",
@@ -301,6 +305,7 @@ describe("Params Util", () => {
         );
 
         expect(getRecognizedQueryString()).toEqual("testUrlSearchParams");
+        expect(URLSearchParams.prototype.delete).toHaveBeenCalledTimes(2);
         expect(URLSearchParams.prototype.delete).toHaveBeenNthCalledWith(
             1,
             "testUnrecognizedKey"

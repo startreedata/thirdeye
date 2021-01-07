@@ -7,9 +7,8 @@ export interface ValidationResult {
 }
 
 export const validateEmail = (email: string): ValidationResult => {
-    const validationResult = {
+    const validationResult: ValidationResult = {
         valid: true,
-        message: "",
     };
 
     const emailSchema = yup.object().shape({
@@ -20,7 +19,9 @@ export const validateEmail = (email: string): ValidationResult => {
             .email(i18n.t("message.invalid-email")),
     });
     try {
-        emailSchema.validateSync({ email: email });
+        emailSchema.validateSync({
+            email: email,
+        });
     } catch (error) {
         validationResult.valid = false;
         validationResult.message = error && error.message;

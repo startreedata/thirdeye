@@ -27,14 +27,6 @@ jest.mock("i18next", () => ({
 }));
 
 describe("Alerts Util", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
-
     test("createEmptyAlertCardData should create appropriate alert card data", () => {
         expect(createEmptyAlertCardData()).toEqual(mockEmptyAlertCardData);
     });

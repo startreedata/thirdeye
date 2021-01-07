@@ -5,15 +5,11 @@ import { deleteAnomaly, getAllAnomalies, getAnomaly } from "./anomalies-rest";
 jest.mock("axios");
 
 describe("Anomalies REST", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
+    afterEach(() => {
         jest.restoreAllMocks();
     });
 
-    test("getAnomaly should invoke axios.get with appropriate input and return result", async () => {
+    test("getAnomaly should invoke axios.get with appropriate input and return appropriate anomaly", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: mockAnomalyResponse,
         });
@@ -28,7 +24,7 @@ describe("Anomalies REST", () => {
         await expect(getAnomaly(1)).rejects.toThrow("testErrorMessage");
     });
 
-    test("getAllAnomalies should invoke axios.get with appropriate input and return result", async () => {
+    test("getAllAnomalies should invoke axios.get with appropriate input and return appropriate anomaly array", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockAnomalyResponse],
         });
@@ -43,7 +39,7 @@ describe("Anomalies REST", () => {
         await expect(getAllAnomalies()).rejects.toThrow("testErrorMessage");
     });
 
-    test("deleteAnomaly should invoke axios.delete with appropriate input and return result", async () => {
+    test("deleteAnomaly should invoke axios.delete with appropriate input and return appropriate anomaly", async () => {
         jest.spyOn(axios, "delete").mockResolvedValue({
             data: mockAnomalyResponse,
         });

@@ -37,21 +37,13 @@ jest.mock("../number-util/number-util", () => ({
 }));
 
 describe("Anomalies Util", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
-
     test("getAnomalyName should return no data available marker for invalid anomaly", () => {
         expect(getAnomalyName((null as unknown) as Anomaly)).toEqual(
             "label.no-data-available-marker"
         );
     });
 
-    test("getAnomalyName should return appropriate string for anomaly", () => {
+    test("getAnomalyName should return appropriate name for anomaly", () => {
         expect(getAnomalyName(mockAnomaly)).toEqual(
             "label.anomaly label.anomaly-id"
         );

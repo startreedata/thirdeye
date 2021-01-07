@@ -1,11 +1,7 @@
 import { getInitOptions } from "./i18next-util";
 
 describe("i18next Util", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
+    afterEach(() => {
         jest.restoreAllMocks();
     });
 

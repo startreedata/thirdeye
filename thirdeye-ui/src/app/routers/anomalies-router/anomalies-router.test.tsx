@@ -64,14 +64,6 @@ jest.mock(
 );
 
 describe("Anomalies Router", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.resetAllMocks();
-    });
-
     test("should have rendered page container while loading", () => {
         render(
             <MemoryRouter>

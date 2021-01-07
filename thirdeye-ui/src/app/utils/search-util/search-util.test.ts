@@ -1,14 +1,6 @@
 import { deepSearchStringProperty } from "./search-util";
 
 describe("Search Util", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
-
     test("deepSearchStringProperty should return null for invalid object", () => {
         expect(deepSearchStringProperty(null, mockMatchFn)).toBeNull();
     });
@@ -17,7 +9,7 @@ describe("Search Util", () => {
         expect(deepSearchStringProperty({}, mockMatchFn)).toBeNull();
     });
 
-    test("deepSearchStringProperty should return null for any primitive", () => {
+    test("deepSearchStringProperty should return null for primitive", () => {
         expect(deepSearchStringProperty(1, mockMatchFn)).toBeNull();
         expect(deepSearchStringProperty("testString", mockMatchFn)).toBeNull();
     });

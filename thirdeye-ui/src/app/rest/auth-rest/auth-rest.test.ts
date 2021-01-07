@@ -5,15 +5,11 @@ import { login, logout } from "./auth-rest";
 jest.mock("axios");
 
 describe("Auth REST", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
+    afterEach(() => {
         jest.restoreAllMocks();
     });
 
-    test("login should invoke axios.post with appropriate input and return result", async () => {
+    test("login should invoke axios.post with appropriate input and return appropriate auth", async () => {
         jest.spyOn(axios, "post").mockResolvedValue({ data: mockAuthResponse });
 
         expect(await login()).toEqual(mockAuthResponse);
@@ -49,7 +45,7 @@ mockAuthRequest.append("grant_type", "password");
 mockAuthRequest.append("principal", "admin");
 mockAuthRequest.append("password", "password");
 
-const mockAuthResponse = {
+const mockAuthResponse: Auth = {
     accessToken: "testAccessTokenResponse",
 } as Auth;
 

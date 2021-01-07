@@ -20,15 +20,7 @@ jest.mock("../number-util/number-util", () => ({
 }));
 
 describe("Visualization Util", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
-
-    test("formatLargeNumberForVisualization should return empty string for invalid input", () => {
+    test("formatLargeNumberForVisualization should return empty string for invalid number", () => {
         expect(
             formatLargeNumberForVisualization((null as unknown) as number)
         ).toEqual("");
@@ -38,7 +30,7 @@ describe("Visualization Util", () => {
         expect(formatLargeNumberForVisualization(1)).toEqual("1");
     });
 
-    test("formatLargeNumberForVisualization should return appropriate string for object", () => {
+    test("formatLargeNumberForVisualization should return appropriate string for number object", () => {
         expect(
             formatLargeNumberForVisualization({ valueOf: (): number => 1 })
         ).toEqual("1");

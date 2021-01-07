@@ -7,14 +7,6 @@ jest.mock("i18next", () => ({
 }));
 
 describe("Validation Util", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
-
     test("validateEmail should return appropriate validation result for invalid email", () => {
         expect(validateEmail("")).toEqual({
             valid: false,
@@ -29,11 +21,9 @@ describe("Validation Util", () => {
     test("validateEmail should return appropriate validation result for valid email", () => {
         expect(validateEmail("test@valid.email")).toEqual({
             valid: true,
-            message: "",
         });
         expect(validateEmail(" test@valid.email ")).toEqual({
             valid: true,
-            message: "",
         });
     });
 });

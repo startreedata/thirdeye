@@ -21,20 +21,10 @@ import {
 } from "./routes-util";
 
 jest.mock("../params-util/params-util", () => ({
-    getRecognizedQueryString: jest.fn().mockImplementation((): string => {
-        return "testQueryString";
-    }),
+    getRecognizedQueryString: jest.fn().mockReturnValue("testQueryString"),
 }));
 
 describe("Routes Util", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
-
     test("getBasePath should return appropriate path with current query string", () => {
         expect(getBasePath()).toEqual("/?testQueryString");
     });
@@ -125,7 +115,7 @@ describe("Routes Util", () => {
         expect(getSignOutPath()).toEqual("/signOut?testQueryString");
     });
 
-    test("createPathWithTimeRangeQueryString should return input path with current query string", () => {
+    test("createPathWithTimeRangeQueryString should return path with current query string", () => {
         expect(createPathWithRecognizedQueryString("/testPath")).toEqual(
             "/testPath?testQueryString"
         );

@@ -25,14 +25,6 @@ jest.mock("i18next", () => ({
 }));
 
 describe("Subscription Groups Util", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
-
     test("createEmptySubscriptionGroup should create appropriate subscription group", () => {
         expect(createEmptySubscriptionGroup()).toEqual(
             mockEmptySubscriptionGroup
@@ -185,7 +177,7 @@ describe("Subscription Groups Util", () => {
         ).toEqual(-1);
     });
 
-    test("getSubscriptionGroupAlertId should return approopriate number for subscription group alert", () => {
+    test("getSubscriptionGroupAlertId should return approopriate id for subscription group alert", () => {
         expect(
             getSubscriptionGroupAlertId(mockSubscriptionGroupAlert1)
         ).toEqual(2);
@@ -199,7 +191,7 @@ describe("Subscription Groups Util", () => {
         ).toEqual("");
     });
 
-    test("getSubscriptionGroupAlertName should return approopriate string for subscription group alert", () => {
+    test("getSubscriptionGroupAlertName should return approopriate name for subscription group alert", () => {
         expect(
             getSubscriptionGroupAlertName(mockSubscriptionGroupAlert1)
         ).toEqual("testAlertName2");

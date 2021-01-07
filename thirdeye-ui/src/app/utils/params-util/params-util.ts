@@ -106,7 +106,7 @@ export const getQueryString = (key: string): string => {
     return value;
 };
 
-// Returns current query string from URL with all the recognized and allowed key value pairs
+// Returns current query string from URL with only the recognized and allowed key value pairs
 export const getRecognizedQueryString = (): string => {
     const urlSearchParams = new URLSearchParams(location.search);
     urlSearchParams.forEach((_value: string, key: string): void => {
@@ -117,6 +117,8 @@ export const getRecognizedQueryString = (): string => {
         if (!queryStringKey) {
             // Unrecognized query string key
             urlSearchParams.delete(key);
+
+            return;
         }
 
         if (
@@ -125,6 +127,8 @@ export const getRecognizedQueryString = (): string => {
         ) {
             // Search not allowed in query string
             urlSearchParams.delete(key);
+
+            return;
         }
     });
 

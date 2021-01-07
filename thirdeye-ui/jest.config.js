@@ -21,6 +21,7 @@ module.exports = {
     // Test Environment
     testEnvironment: "jest-environment-jsdom-fourteen",
     setupFilesAfterEnv: ["@testing-library/jest-dom/extend-expect"],
+    clearMocks: true,
     moduleNameMapper: {
         "\\.svg": "<rootDir>/src/test/mocks/svgr-mock.js", // Mock SVG imports
         "\\.(css|scss)$": "identity-obj-proxy", // Mock stylesheet imports

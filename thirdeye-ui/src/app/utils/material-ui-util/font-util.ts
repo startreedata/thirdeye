@@ -4,7 +4,7 @@ import SourceSansProRegular from "../../../assets/fonts/source-sans-pro/source-s
 import SourceSansProSemiBold from "../../../assets/fonts/source-sans-pro/source-sans-pro-semi-bold.ttf";
 
 // CortexData Material-UI theme fonts
-// Recommended 300, 400, 500 and 700 font weights in a given font family
+// Recommended 300, 400, 500 and 700 font weights in a font family
 export const sourceSansProLight = {
     fontFamily: "Source Sans Pro",
     fontStyle: "normal",

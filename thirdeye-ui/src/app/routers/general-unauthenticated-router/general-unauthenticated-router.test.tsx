@@ -57,14 +57,6 @@ jest.mock("../../pages/sign-in-page/sign-in-page.component", () => ({
 }));
 
 describe("General Unauthenticated Router", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.resetAllMocks();
-    });
-
     test("should have rendered page container while loading", () => {
         render(
             <MemoryRouter>
@@ -97,7 +89,6 @@ describe("General Unauthenticated Router", () => {
 
     test("should not set redirection path if location is sign in path", () => {
         mockLocation.pathname = AppRoute.SIGN_IN;
-
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />
@@ -109,7 +100,6 @@ describe("General Unauthenticated Router", () => {
 
     test("should not set redirection path if location is sign out path", () => {
         mockLocation.pathname = AppRoute.SIGN_OUT;
-
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />
@@ -121,7 +111,6 @@ describe("General Unauthenticated Router", () => {
 
     test("should set redirection path if location is other than sign in/out path", () => {
         mockLocation.pathname = "testPath";
-
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />

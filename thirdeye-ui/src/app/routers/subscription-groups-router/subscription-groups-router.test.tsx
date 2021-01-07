@@ -75,14 +75,6 @@ jest.mock(
 );
 
 describe("Subscription Groups Router", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.resetAllMocks();
-    });
-
     test("should have rendered page container while loading", () => {
         render(
             <MemoryRouter>

@@ -6,14 +6,6 @@ import {
 } from "./axios-util";
 
 describe("Axios Util", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
-
     test("getRequestInterceptor should return an axios request interceptor", () => {
         expect(getRequestInterceptor("testToken")).toBeInstanceOf(Function);
     });

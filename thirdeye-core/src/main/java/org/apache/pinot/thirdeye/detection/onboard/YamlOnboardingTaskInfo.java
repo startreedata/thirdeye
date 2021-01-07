@@ -31,15 +31,17 @@ public class YamlOnboardingTaskInfo extends DetectionPipelineTaskInfo {
     return tuningWindowStart;
   }
 
-  public void setTuningWindowStart(long tuningWindowStart) {
+  public YamlOnboardingTaskInfo setTuningWindowStart(final long tuningWindowStart) {
     this.tuningWindowStart = tuningWindowStart;
+    return this;
   }
 
   public long getTuningWindowEnd() {
     return tuningWindowEnd;
   }
 
-  public void setTuningWindowEnd(long tuningWindowEnd) {
+  public YamlOnboardingTaskInfo setTuningWindowEnd(final long tuningWindowEnd) {
     this.tuningWindowEnd = tuningWindowEnd;
+    return this;
   }
 }

@@ -45,39 +45,45 @@ public class DetectionPipelineTaskInfo implements TaskInfo {
     return configId;
   }
 
-  public void setConfigId(long configId) {
+  public DetectionPipelineTaskInfo setConfigId(final long configId) {
     this.configId = configId;
+    return this;
   }
 
   public long getStart() {
     return start;
   }
 
-  public void setStart(long start) {
+  public DetectionPipelineTaskInfo setStart(final long start) {
     this.start = start;
+    return this;
   }
 
   public long getEnd() {
     return end;
   }
 
-  public void setEnd(long end) {
+  public DetectionPipelineTaskInfo setEnd(final long end) {
     this.end = end;
+    return this;
   }
 
   public boolean isOnline() {
     return online;
   }
 
-  public void setOnline(boolean online) {
+  public DetectionPipelineTaskInfo setOnline(final boolean online) {
     this.online = online;
+    return this;
   }
 
   public DetectionConfigBean getDetectionConfigBean() {
     return detectionConfigBean;
   }
 
-  public void setDetectionConfigBean(DetectionConfigBean detectionConfigBean) {
+  public DetectionPipelineTaskInfo setDetectionConfigBean(
+      final DetectionConfigBean detectionConfigBean) {
     this.detectionConfigBean = detectionConfigBean;
+    return this;
   }
 }

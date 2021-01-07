@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.alert;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.CoreConstants.ONBOARDING_REPLAY_LOOKBACK;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
@@ -50,12 +51,29 @@ public class AlertCreater {
     final Long id = alertManager.save(dto);
     dto.setId(id);
 
-    createOnboardingTask(dto, 0, 0);
+    createOnboardingTask(dto);
     return dto;
+  }
+
+  private void createOnboardingTask(final AlertDTO dto) {
+    long end = System.currentTimeMillis();
+    long start = dto.getLastTimestamp();
+    // If no value is present, set the default lookback
+    if (start < 0) {
+      start = end - ONBOARDING_REPLAY_LOOKBACK;
+    }
+
+    createOnboardingTask(dto, start, end);
+  }
+
+  public void createOnboardingTask(final AlertDTO dto, final long start, final long end) {
+    createOnboardingTask(dto, start, end, 0, 0);
   }
 
   private void createOnboardingTask(
       final AlertDTO alertDTO,
+      long start,
+      long end,
       long tuningWindowStart,
       long tuningWindowEnd
   ) {
@@ -66,18 +84,18 @@ public class AlertCreater {
       tuningWindowEnd = System.currentTimeMillis();
       tuningWindowStart = tuningWindowEnd - TimeUnit.DAYS.toMillis(28);
     }
-    info.setTuningWindowStart(tuningWindowStart);
-    info.setTuningWindowEnd(tuningWindowEnd);
-    info.setEnd(System.currentTimeMillis());
 
-    long lastTimestamp = alertDTO.getLastTimestamp();
-    // If no value is present, set the default lookback
-    if (lastTimestamp < 0) {
-      lastTimestamp = info.getEnd() - ONBOARDING_REPLAY_LOOKBACK;
-    }
-    info.setStart(lastTimestamp);
+    checkArgument(start <= end);
+    checkArgument(tuningWindowStart <= tuningWindowEnd);
 
-    String taskInfoJson;
+    info
+        .setTuningWindowStart(tuningWindowStart)
+        .setTuningWindowEnd(tuningWindowEnd)
+        .setStart(start)
+        .setEnd(end)
+    ;
+
+    final String taskInfoJson;
     try {
       taskInfoJson = new ObjectMapper().writeValueAsString(info);
     } catch (JsonProcessingException e) {
@@ -85,9 +103,9 @@ public class AlertCreater {
           YamlOnboardingTaskInfo.class.getSimpleName(), info), e);
     }
 
-    TaskDTO taskDTO = TaskUtils.buildTask(alertDTO.getId(), taskInfoJson,
+    final TaskDTO taskDTO = TaskUtils.buildTask(alertDTO.getId(), taskInfoJson,
         TaskConstants.TaskType.YAML_DETECTION_ONBOARD);
-    long taskId = taskManager.save(taskDTO);
+    final long taskId = taskManager.save(taskDTO);
     LOG.info("Created {} task {} with taskId {}", TaskConstants.TaskType.YAML_DETECTION_ONBOARD,
         taskDTO, taskId);
   }

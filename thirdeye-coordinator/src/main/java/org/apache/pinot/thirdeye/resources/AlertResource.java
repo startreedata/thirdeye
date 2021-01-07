@@ -9,12 +9,13 @@ import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -112,13 +113,35 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return api;
   }
 
+  @Path("{id}/run")
+  @POST
+  @Timed
+  public Response runTask(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @PathParam("id") Long id,
+      @FormParam("start") Long startTime,
+      @FormParam("end") Long endTime
+  ) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+
+    ensureExists(startTime, "start");
+
+    final AlertDTO dto = get(id);
+    alertCreater.createOnboardingTask(dto,
+        startTime,
+        optional(endTime).orElse(System.currentTimeMillis())
+    );
+
+    return Response.ok().build();
+  }
+
   @Path("evaluate")
   @POST
   @Timed
   public Response evaluate(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      AlertEvaluationApi request)
-      throws InterruptedException, ExecutionException, TimeoutException {
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      final AlertEvaluationApi request
+  ) throws ExecutionException {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
     ensureExists(request.getStart(), "start");

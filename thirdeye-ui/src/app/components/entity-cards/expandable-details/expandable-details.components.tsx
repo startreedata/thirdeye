@@ -59,7 +59,7 @@ export function ExpandableDetails<T>(
                     <Typography variant="body2">
                         <TextHighlighter
                             searchWords={props.searchWords}
-                            text={t("label.no-data-available-marker")}
+                            text={t("label.no-data-marker")}
                         />
                     </Typography>
                 )}

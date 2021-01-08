@@ -3,7 +3,7 @@ import { cloneDeep, isEmpty } from "lodash";
 import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardData,
-} from "../../components/entity-card/subscription-group-card/subscription-group-card.interfaces";
+} from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { deepSearchStringProperty } from "../search-util/search-util";
@@ -19,7 +19,7 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
 };
 
 export const createEmptySubscriptionGroupCardData = (): SubscriptionGroupCardData => {
-    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+    const noDataAvailableMarker = i18n.t("label.no-data-marker");
 
     return {
         id: -1,
@@ -33,7 +33,7 @@ export const createEmptySubscriptionGroupCardData = (): SubscriptionGroupCardDat
 export const createEmptySubscriptionGroupAlert = (): SubscriptionGroupAlert => {
     return {
         id: -1,
-        name: i18n.t("label.no-data-available-marker"),
+        name: i18n.t("label.no-data-marker"),
     };
 };
 

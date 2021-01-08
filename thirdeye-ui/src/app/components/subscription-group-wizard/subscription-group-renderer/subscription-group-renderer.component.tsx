@@ -22,7 +22,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                 <Typography variant="body1">
                     {(props.subscriptionGroup &&
                         props.subscriptionGroup.name) ||
-                        t("label.no-data-available-marker")}
+                        t("label.no-data-marker")}
                 </Typography>
             </Grid>
 
@@ -38,7 +38,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                 (isEmpty(props.subscriptionGroup.alerts) && (
                     <Grid item md={10}>
                         <Typography variant="body1">
-                            {t("label.no-data-available-marker")}
+                            {t("label.no-data-marker")}
                         </Typography>
                     </Grid>
                 ))}
@@ -68,7 +68,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                 (isEmpty(props.subscriptionGroup.emailSettings.to) && (
                     <Grid item md={10}>
                         <Typography variant="body1">
-                            {t("label.no-data-available-marker")}
+                            {t("label.no-data-marker")}
                         </Typography>
                     </Grid>
                 ))}

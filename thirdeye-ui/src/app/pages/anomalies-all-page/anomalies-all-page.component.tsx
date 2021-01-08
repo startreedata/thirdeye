@@ -3,8 +3,8 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AnomalyCard } from "../../components/entity-card/anomaly-card/anomaly-card.component";
-import { AnomalyCardData } from "../../components/entity-card/anomaly-card/anomaly-card.interfaces";
+import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
@@ -169,7 +169,14 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 </Grid>
 
                 {/* No data available message */}
-                {isEmpty(filteredAnomalyCardDatas) && <NoDataIndicator />}
+                {isEmpty(filteredAnomalyCardDatas) && isEmpty(searchWords) && (
+                    <NoDataIndicator />
+                )}
+
+                {/* No search results available message */}
+                {isEmpty(filteredAnomalyCardDatas) && !isEmpty(searchWords) && (
+                    <NoDataIndicator text={t("message.no-search-results")} />
+                )}
             </PageContents>
         </PageContainer>
     );

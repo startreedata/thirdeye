@@ -3,7 +3,7 @@ import {
     AlertCardData,
     AlertDatasetAndMetric,
     AlertSubscriptionGroup,
-} from "../../components/entity-card/alert-card/alert-card.interfaces";
+} from "../../components/entity-cards/alert-card/alert-card.interfaces";
 import {
     Alert,
     AlertNode,
@@ -168,11 +168,11 @@ describe("Alerts Util", () => {
 
 const mockEmptyAlertCardData: AlertCardData = {
     id: -1,
-    name: "label.no-data-available-marker",
+    name: "label.no-data-marker",
     active: false,
-    activeText: "label.no-data-available-marker",
+    activeText: "label.no-data-marker",
     userId: -1,
-    createdBy: "label.no-data-available-marker",
+    createdBy: "label.no-data-marker",
     detectionTypes: [],
     filteredBy: [],
     datasetAndMetrics: [],
@@ -182,14 +182,14 @@ const mockEmptyAlertCardData: AlertCardData = {
 
 const mockEmptyAlertDatasetAndMetric: AlertDatasetAndMetric = {
     datasetId: -1,
-    datasetName: "label.no-data-available-marker",
+    datasetName: "label.no-data-marker",
     metricId: -1,
-    metricName: "label.no-data-available-marker",
+    metricName: "label.no-data-marker",
 };
 
 const mockEmptyAlertSubscriptionGroup: AlertSubscriptionGroup = {
     id: -1,
-    name: "label.no-data-available-marker",
+    name: "label.no-data-marker",
 };
 
 const mockAlert1: Alert = {
@@ -288,7 +288,7 @@ const mockAlertCardData1: AlertCardData = {
         },
         {
             datasetId: -1,
-            datasetName: "label.no-data-available-marker",
+            datasetName: "label.no-data-marker",
             metricId: 5,
             metricName: "testMetricName5",
         },
@@ -312,7 +312,7 @@ const mockAlertCardData2: AlertCardData = {
     active: false,
     activeText: "label.inactive",
     userId: -1,
-    createdBy: "label.no-data-available-marker",
+    createdBy: "label.no-data-marker",
     detectionTypes: [],
     filteredBy: [],
     datasetAndMetrics: [],

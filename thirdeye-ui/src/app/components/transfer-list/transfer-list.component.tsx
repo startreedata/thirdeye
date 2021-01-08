@@ -13,6 +13,7 @@ import { ArrowForward, Close } from "@material-ui/icons";
 import { isEmpty } from "lodash";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { TransferListProps } from "./transfer-list.interfaces";
@@ -196,12 +197,12 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                         />
                     </Grid>
 
-                    {/* List */}
                     <Grid item md={12}>
                         <Card variant="outlined">
                             <CardContent
                                 className={transferListClasses.listContainer}
                             >
+                                {/* List */}
                                 <List dense>
                                     {filteredFromList &&
                                         filteredFromList.map(
@@ -252,6 +253,22 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                             )
                                         )}
                                 </List>
+
+                                {/* No data available message */}
+                                {isEmpty(props.fromList) &&
+                                    isEmpty(fromSearchWords) && (
+                                        <NoDataIndicator />
+                                    )}
+
+                                {/* No search results available message */}
+                                {isEmpty(filteredFromList) &&
+                                    !isEmpty(fromSearchWords) && (
+                                        <NoDataIndicator
+                                            text={t(
+                                                "message.no-search-results"
+                                            )}
+                                        />
+                                    )}
                             </CardContent>
                         </Card>
                     </Grid>
@@ -282,12 +299,12 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                         />
                     </Grid>
 
-                    {/* List */}
                     <Grid item md={12}>
                         <Card variant="outlined">
                             <CardContent
                                 className={transferListClasses.listContainer}
                             >
+                                {/* List */}
                                 <List dense>
                                     {filteredToList &&
                                         filteredToList.map((toItem, index) => (
@@ -334,6 +351,16 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                             </ListItem>
                                         ))}
                                 </List>
+
+                                {/* No search results available message */}
+                                {isEmpty(filteredToList) &&
+                                    !isEmpty(toSearchWords) && (
+                                        <NoDataIndicator
+                                            text={t(
+                                                "message.no-search-results"
+                                            )}
+                                        />
+                                    )}
                             </CardContent>
                         </Card>
                     </Grid>

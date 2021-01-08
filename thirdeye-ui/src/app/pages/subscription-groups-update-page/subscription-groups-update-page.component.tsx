@@ -78,7 +78,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     useEffect(() => {
         // Fetch data
         fetchData();
-    }, [params.id]);
+    }, []);
 
     const fetchData = (): void => {
         // Validate alert id from URL

@@ -4,7 +4,7 @@ import {
     AlertCardData,
     AlertDatasetAndMetric,
     AlertSubscriptionGroup,
-} from "../../components/entity-card/alert-card/alert-card.interfaces";
+} from "../../components/entity-cards/alert-card/alert-card.interfaces";
 import {
     Alert,
     AlertEvaluation,
@@ -14,7 +14,7 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 import { deepSearchStringProperty } from "../search-util/search-util";
 
 export const createEmptyAlertCardData = (): AlertCardData => {
-    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+    const noDataAvailableMarker = i18n.t("label.no-data-marker");
 
     return {
         id: -1,
@@ -32,7 +32,7 @@ export const createEmptyAlertCardData = (): AlertCardData => {
 };
 
 export const createEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
-    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+    const noDataAvailableMarker = i18n.t("label.no-data-marker");
 
     return {
         datasetId: -1,
@@ -43,7 +43,7 @@ export const createEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
 };
 
 export const createEmptyAlertSubscriptionGroup = (): AlertSubscriptionGroup => {
-    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+    const noDataAvailableMarker = i18n.t("label.no-data-marker");
 
     return {
         id: -1,

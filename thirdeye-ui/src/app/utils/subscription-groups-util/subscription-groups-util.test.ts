@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardData,
-} from "../../components/entity-card/subscription-group-card/subscription-group-card.interfaces";
+} from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
@@ -245,7 +245,7 @@ const mockEmptySubscriptionGroup: SubscriptionGroup = ({
 
 const mockEmptySubscriptionGroupCardData: SubscriptionGroupCardData = {
     id: -1,
-    name: "label.no-data-available-marker",
+    name: "label.no-data-marker",
     alerts: [],
     emails: [],
     subscriptionGroup: null,
@@ -253,7 +253,7 @@ const mockEmptySubscriptionGroupCardData: SubscriptionGroupCardData = {
 
 const mockEmptySubscriptionGroupAlert: SubscriptionGroupAlert = {
     id: -1,
-    name: "label.no-data-available-marker",
+    name: "label.no-data-marker",
 };
 
 const mockSubscriptionGroup1: SubscriptionGroup = {

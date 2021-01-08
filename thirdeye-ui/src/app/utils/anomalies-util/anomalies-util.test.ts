@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { AnomalyCardData } from "../../components/entity-card/anomaly-card/anomaly-card.interfaces";
+import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
     createAlertEvaluation,
@@ -39,7 +39,7 @@ jest.mock("../number-util/number-util", () => ({
 describe("Anomalies Util", () => {
     test("getAnomalyName should return no data available marker for invalid anomaly", () => {
         expect(getAnomalyName((null as unknown) as Anomaly)).toEqual(
-            "label.no-data-available-marker"
+            "label.no-data-marker"
         );
     });
 
@@ -126,16 +126,16 @@ const mockAnomaly: Anomaly = {
 
 const mockEmptyAnomalyCardData: AnomalyCardData = {
     id: -1,
-    name: "label.no-data-available-marker",
-    alertName: "label.no-data-available-marker",
+    name: "label.no-data-marker",
+    alertName: "label.no-data-marker",
     alertId: -1,
-    current: "label.no-data-available-marker",
-    predicted: "label.no-data-available-marker",
-    deviation: "label.no-data-available-marker",
+    current: "label.no-data-marker",
+    predicted: "label.no-data-marker",
+    deviation: "label.no-data-marker",
     negativeDeviation: false,
-    duration: "label.no-data-available-marker",
-    startTime: "label.no-data-available-marker",
-    endTime: "label.no-data-available-marker",
+    duration: "label.no-data-marker",
+    startTime: "label.no-data-marker",
+    endTime: "label.no-data-marker",
 };
 
 const mockAnomaly1: Anomaly = {
@@ -173,15 +173,15 @@ const mockAnomalyCardData1: AnomalyCardData = {
 const mockAnomalyCardData2: AnomalyCardData = {
     id: 8,
     name: "label.anomaly label.anomaly-id",
-    alertName: "label.no-data-available-marker",
+    alertName: "label.no-data-marker",
     alertId: -1,
-    current: "label.no-data-available-marker",
-    predicted: "label.no-data-available-marker",
-    deviation: "label.no-data-available-marker",
+    current: "label.no-data-marker",
+    predicted: "label.no-data-marker",
+    deviation: "label.no-data-marker",
     negativeDeviation: false,
-    duration: "label.no-data-available-marker",
-    startTime: "label.no-data-available-marker",
-    endTime: "label.no-data-available-marker",
+    duration: "label.no-data-marker",
+    startTime: "label.no-data-marker",
+    endTime: "label.no-data-marker",
 };
 
 const mockAnomalyCardDatas = [mockAnomalyCardData1, mockAnomalyCardData2];

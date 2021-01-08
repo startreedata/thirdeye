@@ -3,8 +3,8 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { SubscriptionGroupCard } from "../../components/entity-card/subscription-group-card/subscription-group-card.component";
-import { SubscriptionGroupCardData } from "../../components/entity-card/subscription-group-card/subscription-group-card.interfaces";
+import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
+import { SubscriptionGroupCardData } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
@@ -207,9 +207,16 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                 </Grid>
 
                 {/* No data available message */}
-                {isEmpty(filteredSubscriptionGroupCardDatas) && (
-                    <NoDataIndicator />
-                )}
+                {isEmpty(filteredSubscriptionGroupCardDatas) &&
+                    isEmpty(searchWords) && <NoDataIndicator />}
+
+                {/* No search results available message */}
+                {isEmpty(filteredSubscriptionGroupCardDatas) &&
+                    !isEmpty(searchWords) && (
+                        <NoDataIndicator
+                            text={t("message.no-search-results")}
+                        />
+                    )}
             </PageContents>
         </PageContainer>
     );

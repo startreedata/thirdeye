@@ -12,7 +12,7 @@ import {
     getSubscriptionGroupAlertName,
     getSubscriptionGroupAlerts,
 } from "../../utils/subscription-groups-util/subscription-groups-util";
-import { SubscriptionGroupAlert } from "../entity-card/subscription-group-card/subscription-group-card.interfaces";
+import { SubscriptionGroupAlert } from "../entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { SubscriptionGroupAlertsAccordianProps } from "./subscription-group-alerts-accordian.interfaces";
 

@@ -1,7 +1,6 @@
 import { Grid, Typography } from "@material-ui/core";
 import classnames from "classnames";
 import React, { FunctionComponent, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
 import { getTimeRangeFromQueryString } from "../../utils/params-util/params-util";
 import { isTimeRangeDurationEqual } from "../../utils/time-range-util/time-range-util";
@@ -24,10 +23,9 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
         state.setAppTimeRangeDuration,
         state.getAppTimeRangeDuration,
     ]);
-    const location = useLocation();
 
     useEffect(() => {
-        // Query string changed, set time range from time range query string if available
+        // Set time range from time range query string if available
         const timeRageDuration = getTimeRangeFromQueryString();
         if (
             !timeRageDuration ||
@@ -37,7 +35,7 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
         }
 
         setAppTimeRangeDuration(timeRageDuration);
-    }, [location.search]);
+    }, []);
 
     return (
         <main

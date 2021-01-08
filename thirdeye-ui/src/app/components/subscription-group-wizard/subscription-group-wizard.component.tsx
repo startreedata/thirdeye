@@ -26,7 +26,7 @@ import {
 } from "../../utils/subscription-groups-util/subscription-groups-util";
 import { validateEmail } from "../../utils/validation-util/validation-util";
 import { EditableList } from "../editable-list/editable-list.component";
-import { SubscriptionGroupAlert } from "../entity-card/subscription-group-card/subscription-group-card.interfaces";
+import { SubscriptionGroupAlert } from "../entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { SubscriptionGroupPropertiesForm } from "./subscription-group-properties-form/subscription-group-properties-form.component";
 import { SubscriptionGroupRenderer } from "./subscription-group-renderer/subscription-group-renderer.component";

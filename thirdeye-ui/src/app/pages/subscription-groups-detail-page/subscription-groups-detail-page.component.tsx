@@ -4,11 +4,11 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
-import { SubscriptionGroupCard } from "../../components/entity-card/subscription-group-card/subscription-group-card.component";
+import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
 import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardData,
-} from "../../components/entity-card/subscription-group-card/subscription-group-card.interfaces";
+} from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
@@ -75,7 +75,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     useEffect(() => {
         // Fetch data
         fetchData();
-    }, [params.id]);
+    }, []);
 
     const fetchData = (): void => {
         let fetchedAlerts: Alert[] = [];

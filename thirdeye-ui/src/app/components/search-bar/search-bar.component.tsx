@@ -10,7 +10,6 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
 import {
     getSearchFromQueryString,
     getSearchTextFromQueryString,
@@ -25,12 +24,11 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     props: SearchBarProps
 ) => {
     const [searchText, setSearchText] = useState("");
-    const searchInputRef = createRef<HTMLInputElement>();
-    const location = useLocation();
+    const inputRef = createRef<HTMLInputElement>();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Query string changed
+        // Pick up search from search query string if required
         if (!props.setSearchQueryString) {
             return;
         }
@@ -42,7 +40,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
             // search
             updateSearchText(getSearchTextFromQueryString(), true);
         }
-    }, [location.search]);
+    }, []);
 
     const onSearchInputChange = (
         event: ChangeEvent<HTMLInputElement>
@@ -57,9 +55,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         updateSearchText("", false);
 
         // Set focus
-        searchInputRef &&
-            searchInputRef.current &&
-            searchInputRef.current.focus();
+        inputRef && inputRef.current && inputRef.current.focus();
     };
 
     const updateSearchText = (searchText: string, debounced: boolean): void => {
@@ -124,7 +120,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
                 ),
             }}
             autoFocus={props.autoFocus}
-            inputRef={searchInputRef}
+            inputRef={inputRef}
             label={props.label ? props.label : t("label.search")}
             value={searchText}
             variant="outlined"

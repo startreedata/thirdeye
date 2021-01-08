@@ -1,6 +1,6 @@
 import i18n from "i18next";
 import { isEmpty } from "lodash";
-import { AnomalyCardData } from "../../components/entity-card/anomaly-card/anomaly-card.interfaces";
+import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
@@ -15,7 +15,7 @@ import { deepSearchStringProperty } from "../search-util/search-util";
 
 export const getAnomalyName = (anomaly: Anomaly): string => {
     if (!anomaly) {
-        return i18n.t("label.no-data-available-marker");
+        return i18n.t("label.no-data-marker");
     }
 
     return `${i18n.t("label.anomaly")} ${i18n.t("label.anomaly-id", {
@@ -24,7 +24,7 @@ export const getAnomalyName = (anomaly: Anomaly): string => {
 };
 
 export const createEmptyAnomalyCardData = (): AnomalyCardData => {
-    const noDataAvailableMarker = i18n.t("label.no-data-available-marker");
+    const noDataAvailableMarker = i18n.t("label.no-data-marker");
 
     return {
         id: -1,

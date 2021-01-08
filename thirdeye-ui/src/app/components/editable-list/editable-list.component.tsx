@@ -13,7 +13,7 @@ import {
 } from "@material-ui/core";
 import { Close, SubdirectoryArrowLeft } from "@material-ui/icons";
 import React, {
-    ChangeEvent,
+    createRef,
     FunctionComponent,
     KeyboardEvent,
     useEffect,
@@ -27,17 +27,13 @@ export const EditableList: FunctionComponent<EditableListProps> = (
 ) => {
     const editableListClasses = useEditableListStyles();
     const [list, setList] = useState<string[]>([]);
-    const [input, setInput] = useState("");
     const [helperText, setHelperText] = useState("");
+    const inputRef = createRef<HTMLInputElement>();
 
     useEffect(() => {
         // Input changed, populate list
         setList(props.list || []);
     }, [props.list]);
-
-    const onInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
-        setInput(event.currentTarget.value);
-    };
 
     const onInputKeyPress = (event: KeyboardEvent<HTMLInputElement>): void => {
         if (event.key === "Enter") {
@@ -46,10 +42,11 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     };
 
     const onAddListItem = (): void => {
-        if (!input) {
+        if (!inputRef || !inputRef.current || !inputRef.current.value) {
             return;
         }
 
+        const input = inputRef.current.value;
         let validationResult;
         if (
             (validationResult = props.validateFn && props.validateFn(input)) &&
@@ -61,8 +58,8 @@ export const EditableList: FunctionComponent<EditableListProps> = (
             return;
         }
 
-        setHelperText("");
         setList((list) => [input, ...list]);
+        reset();
 
         // Notify
         props.onChange && props.onChange(list);
@@ -77,6 +74,19 @@ export const EditableList: FunctionComponent<EditableListProps> = (
 
         // Notify
         props.onChange && props.onChange(list);
+    };
+
+    const reset = (): void => {
+        if (!inputRef || !inputRef.current || !inputRef.current.value) {
+            return;
+        }
+
+        // Clear input
+        setHelperText("");
+        inputRef.current.value = "";
+
+        // Set focus
+        inputRef.current.focus();
     };
 
     return (
@@ -97,9 +107,9 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                     }}
                     error={Boolean(helperText)}
                     helperText={helperText}
+                    inputRef={inputRef}
                     label={props.inputLabel}
                     variant="outlined"
-                    onChange={onInputChange}
                     onKeyPress={onInputKeyPress}
                 />
             </Grid>

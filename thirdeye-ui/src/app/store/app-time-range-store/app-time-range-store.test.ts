@@ -1,0 +1,166 @@
+import { act, renderHook } from "@testing-library/react-hooks";
+import {
+    TimeRange,
+    TimeRangeDuration,
+} from "../../components/time-range-selector/time-range-selector.interfaces";
+import { useAppTimeRangeStore } from "./app-time-range-store";
+
+jest.mock("../../utils/params-util/params-util", () => ({
+    getTimeRangeFromQueryString: jest.fn(),
+    setTimeRangeInQueryString: jest.fn(),
+}));
+
+jest.mock("../../utils/time-range-util/time-range-util", () => ({
+    getDefaultTimeRangeDuration: jest.fn().mockReturnValue(
+        (mockTimeRangeDuration1 = {
+            timeRange: TimeRange.TODAY,
+            startTime: 1,
+            endTime: 2,
+        })
+    ),
+    getTimeRangeDuration: jest.fn().mockImplementation(() => {
+        return mockTimeRangeDuration6;
+    }),
+}));
+
+describe("App Time Range Store", () => {
+    test("should initialize default values", () => {
+        const { result } = renderHook(() => useAppTimeRangeStore());
+
+        expect(result.current.appTimeRangeDuration).toEqual(
+            mockTimeRangeDuration1
+        );
+        expect(result.current.recentCustomTimeRangeDurations).toEqual([]);
+    });
+
+    test("setAppTimeRangeDuration should not update store for invalid time range duration", () => {
+        const { result } = renderHook(() => useAppTimeRangeStore());
+
+        expect(result.current.appTimeRangeDuration).toEqual(
+            mockTimeRangeDuration1
+        );
+        expect(result.current.recentCustomTimeRangeDurations).toEqual([]);
+
+        act(() => {
+            result.current.setAppTimeRangeDuration(
+                (null as unknown) as TimeRangeDuration
+            );
+        });
+
+        expect(result.current.appTimeRangeDuration).toEqual(
+            mockTimeRangeDuration1
+        );
+        expect(result.current.recentCustomTimeRangeDurations).toEqual([]);
+    });
+
+    test("setAppTimeRangeDuration should update store appropriately for time range duration", () => {
+        const { result } = renderHook(() => useAppTimeRangeStore());
+        act(() => {
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration2);
+        });
+
+        expect(result.current.appTimeRangeDuration).toEqual(
+            mockTimeRangeDuration2
+        );
+        expect(result.current.recentCustomTimeRangeDurations).toEqual([
+            mockTimeRangeDuration2,
+        ]);
+    });
+
+    test("setAppTimeRangeDuration should update store appropriately for custom time range duration", () => {
+        const { result } = renderHook(() => useAppTimeRangeStore());
+        act(() => {
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration2);
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration3);
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration4);
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration5);
+        });
+
+        expect(result.current.appTimeRangeDuration).toEqual(
+            mockTimeRangeDuration5
+        );
+        expect(result.current.recentCustomTimeRangeDurations).toEqual([
+            mockTimeRangeDuration3,
+            mockTimeRangeDuration4,
+            mockTimeRangeDuration5,
+        ]);
+    });
+
+    test("getAppTimeRangeDuration should return appropriate time range duration for custom time range", () => {
+        const { result } = renderHook(() => useAppTimeRangeStore());
+        act(() => {
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration2);
+        });
+
+        expect(result.current.getAppTimeRangeDuration()).toEqual(
+            mockTimeRangeDuration2
+        );
+    });
+
+    test("getAppTimeRangeDuration should return appropriate time range duration for predefined time range", () => {
+        const { result } = renderHook(() => useAppTimeRangeStore());
+        act(() => {
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration1);
+        });
+
+        expect(result.current.getAppTimeRangeDuration()).toEqual(
+            mockTimeRangeDuration6
+        );
+    });
+
+    test("should persist in local storage", async () => {
+        const { result, waitFor } = renderHook(() => useAppTimeRangeStore());
+        act(() => {
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration2);
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration3);
+            result.current.setAppTimeRangeDuration(mockTimeRangeDuration4);
+        });
+
+        await waitFor(() => Boolean(result.current.appTimeRangeDuration));
+
+        expect(
+            localStorage.getItem("LOCAL_STORAGE_KEY_APP_TIME_RANGE")
+        ).toEqual(
+            `{` +
+                `"appTimeRangeDuration":{"timeRange":"CUSTOM","startTime":7,"endTime":8},` +
+                `"recentCustomTimeRangeDurations":[` +
+                `{"timeRange":"CUSTOM","startTime":3,"endTime":4},` +
+                `{"timeRange":"CUSTOM","startTime":5,"endTime":6},` +
+                `{"timeRange":"CUSTOM","startTime":7,"endTime":8}` +
+                `]` +
+                `}`
+        );
+    });
+});
+
+let mockTimeRangeDuration1: TimeRangeDuration;
+
+const mockTimeRangeDuration2: TimeRangeDuration = {
+    timeRange: TimeRange.CUSTOM,
+    startTime: 3,
+    endTime: 4,
+};
+
+const mockTimeRangeDuration3: TimeRangeDuration = {
+    timeRange: TimeRange.CUSTOM,
+    startTime: 5,
+    endTime: 6,
+};
+
+const mockTimeRangeDuration4: TimeRangeDuration = {
+    timeRange: TimeRange.CUSTOM,
+    startTime: 7,
+    endTime: 8,
+};
+
+const mockTimeRangeDuration5: TimeRangeDuration = {
+    timeRange: TimeRange.CUSTOM,
+    startTime: 9,
+    endTime: 10,
+};
+
+const mockTimeRangeDuration6: TimeRangeDuration = {
+    timeRange: TimeRange.YESTERDAY,
+    startTime: 11,
+    endTime: 12,
+};

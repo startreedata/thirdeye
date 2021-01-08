@@ -14,7 +14,7 @@ export const useAuthStore = create<AuthStore>(
             // Action for signing in
             setAccessToken: (token: string): void => {
                 set({
-                    auth: true,
+                    auth: Boolean(token),
                     accessToken: token,
                 });
             },

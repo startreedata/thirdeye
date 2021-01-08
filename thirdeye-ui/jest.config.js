@@ -10,6 +10,7 @@ module.exports = {
     collectCoverageFrom: [
         "<rootDir>/src/app/**/*.{ts,tsx}", // All subdirectories under src/app
         "!<rootDir>/src/app/*.{ts,tsx}", // No files directly under src/app
+        "!<rootDir>/src/app/locale/**", // No files under src/app/locale
     ],
 
     // Test files

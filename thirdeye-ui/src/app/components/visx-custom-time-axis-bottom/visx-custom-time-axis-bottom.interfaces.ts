@@ -1,4 +1,4 @@
-import { ScaleTime } from "d3";
+import { ScaleTime } from "d3-scale";
 
 export interface VisxCustomTimeAxisBottomProps {
     left?: number;

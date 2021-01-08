@@ -9,7 +9,6 @@ import {
     scaleLinear,
     scaleTime,
 } from "@visx/visx";
-import { ScaleLinear, ScaleTime } from "d3";
 import { debounce, isEmpty } from "lodash";
 import React, {
     createRef,
@@ -109,7 +108,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     const brushYMax = brushHeight; // Brush height
 
     // Time series scales
-    const timeSeriesXScale = useMemo((): ScaleTime<number, number> => {
+    const timeSeriesXScale = useMemo(() => {
         return scaleTime<number>({
             range: [0, timeSeriesXMax],
             domain: [
@@ -123,7 +122,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             nice: true,
         });
     }, [props.width, filteredAlertEvaluationTimeSeriesPoints]);
-    const timeSeriesYScale = useMemo((): ScaleLinear<number, number> => {
+    const timeSeriesYScale = useMemo(() => {
         return scaleLinear<number>({
             range: [timeSeriesYMax, 0],
             domain: [
@@ -137,7 +136,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     }, [props.height, filteredAlertEvaluationTimeSeriesPoints]);
 
     // Brush scales
-    const brushXScale = useMemo((): ScaleTime<number, number> => {
+    const brushXScale = useMemo(() => {
         return scaleTime<number>({
             range: [0, brushXMax],
             domain: [
@@ -151,7 +150,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             nice: true,
         });
     }, [props.width, alertEvaluationTimeSeriesPoints]);
-    const brushYScale = useMemo((): ScaleLinear<number, number> => {
+    const brushYScale = useMemo(() => {
         return scaleLinear<number>({
             range: [brushYMax, 0],
             domain: [

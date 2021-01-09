@@ -43,9 +43,8 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
                     listItemTextFn={getSubscriptionGroupAlertName}
                     toLabel={t("label.subscribed-alerts")}
                     toList={
-                        (props.subscriptionGroupCardData &&
-                            props.subscriptionGroupCardData.alerts) ||
-                        []
+                        props.subscriptionGroupCardData &&
+                        props.subscriptionGroupCardData.alerts
                     }
                     onChange={onSubscriptionGroupAlertsChange}
                 />

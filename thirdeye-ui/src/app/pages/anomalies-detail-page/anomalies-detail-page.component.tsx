@@ -45,12 +45,8 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const [
-        appTimeRangeDuration,
-        getAppTimeRangeDuration,
-    ] = useAppTimeRangeStore((state) => [
+    const [appTimeRangeDuration] = useAppTimeRangeStore((state) => [
         state.appTimeRangeDuration,
-        state.getAppTimeRangeDuration,
     ]);
     const params = useParams<AnomaliesDetailPageParams>();
     const history = useHistory();
@@ -120,12 +116,11 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
             return;
         }
 
-        const timeRangeDuration = getAppTimeRangeDuration();
         getAlertEvaluation(
             createAlertEvaluation(
                 anomalyCardData.alertId,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
+                appTimeRangeDuration.startTime,
+                appTimeRangeDuration.endTime
             )
         )
             .then((alertEvaluation: AlertEvaluation): void => {

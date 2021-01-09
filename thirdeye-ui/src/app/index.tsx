@@ -30,8 +30,8 @@ ReactDOM.render(
 
             {/* Snackbar provider */}
             <AppSnackbarProvider>
+                {/* App rendered by a router to allow navigation using app bar */}
                 <Router history={appHistory}>
-                    {/* App needs to be rendered by a router to allow navigation using app bar */}
                     <App />
                 </Router>
             </AppSnackbarProvider>

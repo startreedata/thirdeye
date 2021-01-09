@@ -13,8 +13,11 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
         pageBreadcrumbs: [],
 
         setAppSectionBreadcrumbs: (breadcrumbs: Breadcrumb[]): void => {
-            const { pageBreadcrumbs } = get();
+            if (!breadcrumbs) {
+                return;
+            }
 
+            const { pageBreadcrumbs } = get();
             set({
                 appBreadcrumbs: [...breadcrumbs, ...pageBreadcrumbs],
                 appSectionBreadcrumbs: breadcrumbs,
@@ -22,8 +25,11 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
         },
 
         setPageBreadcrumbs: (breadcrumbs: Breadcrumb[]): void => {
-            const { appSectionBreadcrumbs } = get();
+            if (!breadcrumbs) {
+                return;
+            }
 
+            const { appSectionBreadcrumbs } = get();
             set({
                 appBreadcrumbs: [...appSectionBreadcrumbs, ...breadcrumbs],
                 pageBreadcrumbs: breadcrumbs,
@@ -31,8 +37,11 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
         },
 
         pushPageBreadcrumb: (breadcrumb: Breadcrumb): void => {
-            const { appSectionBreadcrumbs, pageBreadcrumbs } = get();
+            if (!breadcrumb) {
+                return;
+            }
 
+            const { appSectionBreadcrumbs, pageBreadcrumbs } = get();
             set({
                 appBreadcrumbs: [
                     ...appSectionBreadcrumbs,
@@ -45,11 +54,16 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
 
         popPageBreadcrumb: (): void => {
             const { appSectionBreadcrumbs, pageBreadcrumbs } = get();
-            pageBreadcrumbs.pop();
-
+            const newPageBreadcrumbs = pageBreadcrumbs.slice(
+                0,
+                pageBreadcrumbs.length - 1
+            );
             set({
-                appBreadcrumbs: [...appSectionBreadcrumbs, ...pageBreadcrumbs],
-                pageBreadcrumbs: [...pageBreadcrumbs],
+                appBreadcrumbs: [
+                    ...appSectionBreadcrumbs,
+                    ...newPageBreadcrumbs,
+                ],
+                pageBreadcrumbs: [...newPageBreadcrumbs],
             });
         },
     })

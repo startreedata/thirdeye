@@ -9,7 +9,6 @@ export const getInitOptions = (): InitOptions => {
         },
         lng: "en",
         missingKeyHandler: (_lng: string[], _ns: string, key: string): void => {
-            // Key not found
             console.error(`i18next: key not found "${key}"`);
         },
         resources: {
@@ -17,7 +16,7 @@ export const getInitOptions = (): InitOptions => {
                 translation: en,
             },
         },
-        saveMissing: true, // Required for missingKeyHandler
+        saveMissing: true, // Required for missing key handler
     };
 
     return initOptions;

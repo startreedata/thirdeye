@@ -19,24 +19,27 @@ export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBotto
     const tickFormatter = (
         date: Date | number | { valueOf(): number }
     ): string => {
-        if (!date || isEmpty(props.scale.domain())) {
+        if (
+            !date ||
+            !props.scale ||
+            !!props.scale.domain ||
+            isEmpty(props.scale.domain())
+        ) {
             return "";
         }
 
-        let dateToFormat;
-        if (date instanceof Date) {
-            dateToFormat = date;
-        }
-
-        if (typeof date === "number") {
-            dateToFormat = new Date(date);
-        }
-
-        dateToFormat = new Date(date.valueOf());
         const startTime = props.scale.domain()[0];
         const endTimeTime = props.scale.domain()[1];
 
-        return formatDateTime(dateToFormat, startTime, endTimeTime);
+        if (date instanceof Date) {
+            return formatDateTime(date, startTime, endTimeTime);
+        }
+
+        if (typeof date === "number") {
+            return formatDateTime(new Date(date), startTime, endTimeTime);
+        }
+
+        return formatDateTime(new Date(date.valueOf()), startTime, endTimeTime);
     };
 
     // Returns formatted string representation of date based on time interval between start and

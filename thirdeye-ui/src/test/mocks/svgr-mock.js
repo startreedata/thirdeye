@@ -1,4 +1,4 @@
-// SVG mock for Jest
+// SVG file import mock
 module.exports = {
-    ReactComponent: "icon-mock",
+    ReactComponent: "image-mock",
 };

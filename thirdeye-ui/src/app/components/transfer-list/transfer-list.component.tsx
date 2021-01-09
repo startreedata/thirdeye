@@ -56,7 +56,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             for (const toListItem of props.toList) {
                 const key = props.listItemKeyFn(toListItem);
                 if (!key) {
-                    // Ignore
                     continue;
                 }
 
@@ -68,7 +67,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             for (const fromListItem of props.fromList) {
                 const key = props.listItemKeyFn(fromListItem);
                 if (!key) {
-                    // Ignore
                     continue;
                 }
 
@@ -90,13 +88,13 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         searchWords: string[]
     ): T[] => {
         const newFilteredList: T[] = [];
+
         if (isEmpty(listMap)) {
             return newFilteredList;
         }
 
         for (const item of listMap.values()) {
             if (isEmpty(searchWords)) {
-                // No search words
                 newFilteredList.push(item);
 
                 continue;

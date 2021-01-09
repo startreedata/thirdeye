@@ -28,13 +28,12 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Pick up search from search query string if required
+        // Pick up search from query string if required
         if (!props.setSearchQueryString) {
             return;
         }
 
-        // If search label matches search query string, set search text from search text query
-        // string
+        // If search label matches search query string, set search text from query string
         if (props.label === getSearchFromQueryString()) {
             // Update search text and arrange to send event with a delay to allow user to notice
             // search

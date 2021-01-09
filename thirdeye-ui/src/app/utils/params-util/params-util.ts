@@ -30,7 +30,7 @@ export const getSearchTextFromQueryString = (): string => {
     return getQueryString(AppQueryStringKey.SEARCH_TEXT.toLowerCase());
 };
 
-export const setTimeRangeInQueryString = (
+export const setTimeRangeDurationInQueryString = (
     timeRangeDuration: TimeRangeDuration
 ): void => {
     if (!timeRangeDuration) {
@@ -51,18 +51,18 @@ export const setTimeRangeInQueryString = (
     );
 };
 
-export const getTimeRangeFromQueryString = (): TimeRangeDuration | null => {
+export const getTimeRangeDurationFromQueryString = (): TimeRangeDuration | null => {
     const timeRange = getQueryString(
         AppQueryStringKey.TIME_RANGE.toLowerCase()
     );
-    const startTime = toNumber(
+    const startTime = parseInt(
         getQueryString(AppQueryStringKey.START_TIME.toLowerCase())
     );
-    const endTime = toNumber(
+    const endTime = parseInt(
         getQueryString(AppQueryStringKey.END_TIME.toLowerCase())
     );
 
-    // Validate time range
+    // Validate time range duration
     if (
         !TimeRange[timeRange as keyof typeof TimeRange] ||
         !isFinite(startTime) ||
@@ -106,33 +106,25 @@ export const getQueryString = (key: string): string => {
     return value;
 };
 
-// Returns current query string from URL with only the recognized and allowed key value pairs
+// Returns current query string from URL with only the recognized app query string key-value pairs
+// that are allowed to be carried forward when navigating
 export const getRecognizedQueryString = (): string => {
-    const urlSearchParams = new URLSearchParams(location.search);
-    urlSearchParams.forEach((_value: string, key: string): void => {
-        const queryStringKey =
-            AppQueryStringKey[
-                key.toUpperCase() as keyof typeof AppQueryStringKey
-            ];
-        if (!queryStringKey) {
-            // Unrecognized query string key
-            urlSearchParams.delete(key);
-
-            return;
-        }
-
+    const currentUrlSearchParams = new URLSearchParams(location.search);
+    const recognizedURLSearchParams = new URLSearchParams();
+    for (const allowedAppQueryStringKey of allowedAppQueryStringKeys) {
         if (
-            queryStringKey === AppQueryStringKey.SEARCH ||
-            queryStringKey === AppQueryStringKey.SEARCH_TEXT
+            currentUrlSearchParams.has(allowedAppQueryStringKey.toLowerCase())
         ) {
-            // Search not allowed in query string
-            urlSearchParams.delete(key);
-
-            return;
+            recognizedURLSearchParams.set(
+                allowedAppQueryStringKey.toLowerCase(),
+                currentUrlSearchParams.get(
+                    allowedAppQueryStringKey.toLowerCase()
+                ) as string
+            );
         }
-    });
+    }
 
-    return urlSearchParams.toString();
+    return recognizedURLSearchParams.toString();
 };
 
 export const isValidNumberId = (param: string): boolean => {
@@ -144,3 +136,10 @@ export const isValidNumberId = (param: string): boolean => {
 
     return isInteger(numberId) && numberId >= 0;
 };
+
+// List of app query string keys that are allowed to be carried forward when navigating
+const allowedAppQueryStringKeys = [
+    AppQueryStringKey.TIME_RANGE,
+    AppQueryStringKey.START_TIME,
+    AppQueryStringKey.END_TIME,
+];

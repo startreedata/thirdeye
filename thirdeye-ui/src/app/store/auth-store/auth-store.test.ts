@@ -26,7 +26,7 @@ describe("Auth Store", () => {
         expect(result.current.accessToken).toEqual("");
     });
 
-    test("setAccessToken should update store appropriately for token", () => {
+    test("setAccessToken should update store appropriately", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
             result.current.setAccessToken("testToken1");

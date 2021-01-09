@@ -3,6 +3,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppBar } from "./components/app-bar/app-bar.component";
+import { AppTimeRangeHousekeeper } from "./components/app-time-range-housekeeper/app-time-range-housekeeper.component";
 import { AppRouter } from "./routers/app-router/app-router";
 import { useAuthStore } from "./store/auth-store/auth-store";
 import {
@@ -32,14 +33,12 @@ export const App: FunctionComponent = () => {
     useEffect(() => {
         setLoading(true);
 
-        init();
+        initAxios();
 
         setLoading(false);
     }, [accessToken]);
 
-    const init = (): void => {
-        // Axios initialization
-
+    const initAxios = (): void => {
         // Clear existing interceptors
         axios.interceptors.request.eject(axiosRequestInterceptorId);
         axios.interceptors.response.eject(axiosResponseInterceptorId);
@@ -68,17 +67,18 @@ export const App: FunctionComponent = () => {
     };
 
     if (loading) {
-        // Wait until initialization completes
         return <></>;
     }
 
     return (
         <>
-            {/* App bar */}
             <AppBar />
 
-            {/* App router */}
-            <AppRouter />
+            {/* App time range housekeeper to render app contents once app time range is
+            initialized */}
+            <AppTimeRangeHousekeeper>
+                <AppRouter />
+            </AppTimeRangeHousekeeper>
         </>
     );
 };

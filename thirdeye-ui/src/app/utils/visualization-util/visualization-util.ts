@@ -4,7 +4,7 @@ import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { formatLargeNumber } from "../number-util/number-util";
 
 // Returns abbreviated string representation of number
-// Equivalent to Number Util formatLargeNumber, but as required by D3 for visualizations
+// Equivalent to Number Util formatLargeNumber, but as required by visualizations
 export const formatLargeNumberForVisualization = (
     num: number | { valueOf(): number }
 ): string => {

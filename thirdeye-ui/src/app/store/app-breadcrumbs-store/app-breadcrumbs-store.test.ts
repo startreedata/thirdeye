@@ -9,6 +9,46 @@ describe("App Breadcrumbs Store", () => {
         expect(result.current.appBreadcrumbs).toEqual([]);
     });
 
+    test("setAppSectionBreadcrumbs should not update store for invalid breadcrumbs", () => {
+        const { result } = renderHook(() => useAppBreadcrumbsStore());
+
+        expect(result.current.appBreadcrumbs).toEqual([]);
+
+        act(() => {
+            result.current.setAppSectionBreadcrumbs(
+                (null as unknown) as Breadcrumb[]
+            );
+        });
+
+        expect(result.current.appBreadcrumbs).toEqual([]);
+    });
+
+    test("setPageBreadcrumbs should not update store for invalid breadcrumbs", () => {
+        const { result } = renderHook(() => useAppBreadcrumbsStore());
+
+        expect(result.current.appBreadcrumbs).toEqual([]);
+
+        act(() => {
+            result.current.setPageBreadcrumbs(
+                (null as unknown) as Breadcrumb[]
+            );
+        });
+
+        expect(result.current.appBreadcrumbs).toEqual([]);
+    });
+
+    test("pushPageBreadcrumb should not update store for invalid breadcrumb", () => {
+        const { result } = renderHook(() => useAppBreadcrumbsStore());
+
+        expect(result.current.appBreadcrumbs).toEqual([]);
+
+        act(() => {
+            result.current.pushPageBreadcrumb((null as unknown) as Breadcrumb);
+        });
+
+        expect(result.current.appBreadcrumbs).toEqual([]);
+    });
+
     test("setAppSectionBreadcrumbs should update store appropriately with empty page breadcrumbs", () => {
         const { result } = renderHook(() => useAppBreadcrumbsStore());
         act(() => {

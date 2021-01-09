@@ -1,13 +1,10 @@
+import { cloneDeep } from "lodash";
 import create, { GetState, SetState } from "zustand";
 import { persist } from "zustand/middleware";
 import {
     TimeRange,
     TimeRangeDuration,
 } from "../../components/time-range-selector/time-range-selector.interfaces";
-import {
-    getTimeRangeFromQueryString,
-    setTimeRangeInQueryString,
-} from "../../utils/params-util/params-util";
 import {
     getDefaultTimeRangeDuration,
     getTimeRangeDuration,
@@ -17,50 +14,14 @@ import { AppTimeRangeStore } from "./app-time-range-store.interfaces";
 const LOCAL_STORAGE_KEY_APP_TIME_RANGE = "LOCAL_STORAGE_KEY_APP_TIME_RANGE";
 const MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS = 3;
 
-// App store for global time range, persisted in browser local storage
+// App store for app time range, persisted in browser local storage
 export const useAppTimeRangeStore = create<AppTimeRangeStore>(
     persist<AppTimeRangeStore>(
         (
             set: SetState<AppTimeRangeStore>,
             get: GetState<AppTimeRangeStore>
         ) => ({
-            // Initialize app time range duration to
-            // - time range from query string or
-            // - time range from persisted browser local storage or
-            // - default
-            // in that order of availability
-            appTimeRangeDuration: ((): TimeRangeDuration => {
-                // From query string
-                const timeRangeDurationQueryString = getTimeRangeFromQueryString();
-                if (timeRangeDurationQueryString) {
-                    return timeRangeDurationQueryString;
-                }
-
-                // From persisted browser local storage
-                let appTimeRangeStore;
-                const appTimeRangeStoreString = localStorage.getItem(
-                    LOCAL_STORAGE_KEY_APP_TIME_RANGE
-                );
-                if (
-                    appTimeRangeStoreString &&
-                    (appTimeRangeStore = JSON.parse(appTimeRangeStoreString))
-                ) {
-                    // Also set in query string
-                    setTimeRangeInQueryString(
-                        appTimeRangeStore.appTimeRangeDuration
-                    );
-
-                    return appTimeRangeStore.appTimeRangeDuration;
-                }
-
-                // Default
-                const timeRangeDurationDefault = getDefaultTimeRangeDuration();
-
-                // Also set in query string
-                setTimeRangeInQueryString(timeRangeDurationDefault);
-
-                return timeRangeDurationDefault;
-            })(),
+            appTimeRangeDuration: getDefaultTimeRangeDuration(),
             recentCustomTimeRangeDurations: [],
 
             setAppTimeRangeDuration: (
@@ -70,65 +31,58 @@ export const useAppTimeRangeStore = create<AppTimeRangeStore>(
                     return;
                 }
 
-                // Set time range duration
                 set({
                     appTimeRangeDuration: timeRangeDuration,
                 });
 
-                // Also set in query string
-                setTimeRangeInQueryString(timeRangeDuration);
-
                 if (timeRangeDuration.timeRange === TimeRange.CUSTOM) {
                     // Add to recent custom time range durations
                     const { recentCustomTimeRangeDurations } = get();
-                    recentCustomTimeRangeDurations.push(timeRangeDuration);
+                    const newRecentCustomTimeRangeDurations = [
+                        ...recentCustomTimeRangeDurations,
+                        timeRangeDuration,
+                    ];
 
                     // Trim recent custom time range duration entries to set threshold
                     if (
-                        recentCustomTimeRangeDurations.length >
+                        newRecentCustomTimeRangeDurations.length >
                         MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS
                     ) {
-                        const trimmedRecentCustomTimeRangeDurations = recentCustomTimeRangeDurations.slice(
-                            1,
-                            MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS + 1
+                        newRecentCustomTimeRangeDurations.splice(
+                            0,
+                            newRecentCustomTimeRangeDurations.length -
+                                MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS
                         );
-
-                        set({
-                            recentCustomTimeRangeDurations: trimmedRecentCustomTimeRangeDurations,
-                        });
                     }
+
+                    set({
+                        recentCustomTimeRangeDurations: newRecentCustomTimeRangeDurations,
+                    });
                 }
             },
 
-            getAppTimeRangeDuration: (): TimeRangeDuration => {
+            refreshAppTimeRangeDuration: (): void => {
                 const { appTimeRangeDuration } = get();
 
                 if (appTimeRangeDuration.timeRange === TimeRange.CUSTOM) {
-                    // Custom time range, return as is
-                    return appTimeRangeDuration;
+                    // Custom time range, set as is
+                    set({
+                        appTimeRangeDuration: cloneDeep(appTimeRangeDuration),
+                    });
+
+                    return;
                 }
 
-                // Predefined time range duration, return current calculated duration
-                return getTimeRangeDuration(appTimeRangeDuration.timeRange);
+                // Predefined time range, set current calculated duration
+                set({
+                    appTimeRangeDuration: getTimeRangeDuration(
+                        appTimeRangeDuration.timeRange
+                    ),
+                });
             },
         }),
         {
             name: LOCAL_STORAGE_KEY_APP_TIME_RANGE, // Persist in browser local storage
-
-            // Initial value for app time range duration could be fetched from persisted browser
-            // local storage
-            // To ensure that persisted value is serialized and deserialized in a familiar manner,
-            // serialize and deserialize methods of the Persist middleware are overridden
-
-            serialize: (appTimeRangeStore: AppTimeRangeStore): string => {
-                return JSON.stringify(appTimeRangeStore);
-            },
-
-            deserialize: (
-                appTimeRangeStoreString: string
-            ): AppTimeRangeStore => {
-                return JSON.parse(appTimeRangeStoreString);
-            },
         }
     )
 );

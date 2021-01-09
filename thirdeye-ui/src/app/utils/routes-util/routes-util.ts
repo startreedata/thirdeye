@@ -114,7 +114,8 @@ export const getSignOutPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.SIGN_OUT);
 };
 
-// Picks up current query string from URL with all the recognized key value pairs
+// Picks up current query string from URL with only the recognized app query string key-value pairs
+// that are allowed to be carried forward when navigating
 export const createPathWithRecognizedQueryString = (path: string): string => {
     return `${path}?${getRecognizedQueryString()}`;
 };

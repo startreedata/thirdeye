@@ -43,11 +43,9 @@ export const createEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
 };
 
 export const createEmptyAlertSubscriptionGroup = (): AlertSubscriptionGroup => {
-    const noDataAvailableMarker = i18n.t("label.no-data-marker");
-
     return {
         id: -1,
-        name: noDataAvailableMarker,
+        name: i18n.t("label.no-data-marker"),
     };
 };
 
@@ -179,7 +177,6 @@ const getAlertCardDataInternal = (
 
     // Detection, dataset and metric properties
     if (isEmpty(alert.nodes)) {
-        // None available
         return alertCardData;
     }
 
@@ -196,7 +193,6 @@ const getAlertCardDataInternal = (
 
         // Dataset and metric
         if (!alertNode.metric) {
-            // None available
             continue;
         }
 
@@ -230,7 +226,6 @@ const mapSubscriptionGroupsToAlertIds = (
 
     for (const subscriptionGroup of subscriptionGroups) {
         if (isEmpty(subscriptionGroup.alerts)) {
-            // No alerts
             continue;
         }
 

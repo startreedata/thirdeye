@@ -50,12 +50,8 @@ export const AlertsDetailPage: FunctionComponent = () => {
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
-    const [
-        appTimeRangeDuration,
-        getAppTimeRangeDuration,
-    ] = useAppTimeRangeStore((state) => [
+    const [appTimeRangeDuration] = useAppTimeRangeStore((state) => [
         state.appTimeRangeDuration,
-        state.getAppTimeRangeDuration,
     ]);
     const params = useParams<AlertsDetailPageParams>();
     const history = useHistory();
@@ -149,12 +145,11 @@ export const AlertsDetailPage: FunctionComponent = () => {
             return;
         }
 
-        const timeRangeDuration = getAppTimeRangeDuration();
         getAlertEvaluation(
             createAlertEvaluation(
                 alertCardData.alert,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
+                appTimeRangeDuration.startTime,
+                appTimeRangeDuration.endTime
             )
         )
             .then((alertEvaluation: AlertEvaluation): void => {

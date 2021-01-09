@@ -9,7 +9,7 @@ describe("i18next Util", () => {
         jest.spyOn(console, "error").mockImplementation();
 
         const initOptions = getInitOptions();
-        // Also execute the missing key handler
+        // Also invoke the missing key handler
         initOptions.missingKeyHandler &&
             initOptions.missingKeyHandler([""], "ns", "testyKey", "");
 

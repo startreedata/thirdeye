@@ -19,11 +19,9 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
 };
 
 export const createEmptySubscriptionGroupCardData = (): SubscriptionGroupCardData => {
-    const noDataAvailableMarker = i18n.t("label.no-data-marker");
-
     return {
         id: -1,
-        name: noDataAvailableMarker,
+        name: i18n.t("label.no-data-marker"),
         alerts: [],
         emails: [],
         subscriptionGroup: null,
@@ -232,7 +230,6 @@ const mapAlertsToSubscriptionGroupIds = (
 
     for (const subscriptionGroup of subscriptionGroups) {
         if (isEmpty(subscriptionGroup.alerts)) {
-            // No alerts
             continue;
         }
 

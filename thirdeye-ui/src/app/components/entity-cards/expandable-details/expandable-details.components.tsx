@@ -17,7 +17,6 @@ export function ExpandableDetails<T>(
 
     return (
         <Grid container direction="column" spacing={0}>
-            {/* Label */}
             <Grid item>
                 <Grid container spacing={0}>
                     {/* Label */}
@@ -52,7 +51,6 @@ export function ExpandableDetails<T>(
                 </Grid>
             </Grid>
 
-            {/* Values */}
             <Grid item>
                 {/* No data available */}
                 {isEmpty(props.values) && (

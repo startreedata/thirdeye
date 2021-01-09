@@ -9,21 +9,21 @@ export const useAppSnackbarProviderStyles = makeStyles((theme: Theme) => ({
     success: {
         color: `${Palette.COLOR_TEXT_DEFAULT} !important`,
         backgroundColor: `${Palette.COLOR_BACKGROUND_ALERT_SUCCESS} !important`,
-        ...theme.typography.body1,
+        ...theme.typography.body2,
     },
     error: {
         color: `${Palette.COLOR_TEXT_DEFAULT} !important`,
         backgroundColor: `${Palette.COLOR_BACKGROUND_ALERT_ERROR} !important`,
-        ...theme.typography.body1,
+        ...theme.typography.body2,
     },
     warning: {
         color: `${Palette.COLOR_TEXT_DEFAULT} !important`,
         backgroundColor: `${Palette.COLOR_BACKGROUND_ALERT_WARNING} !important`,
-        ...theme.typography.body1,
+        ...theme.typography.body2,
     },
     info: {
         color: `${Palette.COLOR_TEXT_DEFAULT} !important`,
         backgroundColor: `${Palette.COLOR_BACKGROUND_ALERT_INFO} !important`,
-        ...theme.typography.body1,
+        ...theme.typography.body2,
     },
 }));

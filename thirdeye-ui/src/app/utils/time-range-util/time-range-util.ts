@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { isEqual, kebabCase } from "lodash";
+import { kebabCase } from "lodash";
 import { DateTime } from "luxon";
 import {
     TimeRange,
@@ -201,30 +201,4 @@ export const formatTimeRangeDuration = (
         startTime: formatDateAndTime(timeRangeDuration.startTime),
         endTime: formatDateAndTime(timeRangeDuration.endTime),
     });
-};
-
-export const isTimeRangeDurationEqual = (
-    timeRangeDuration: TimeRangeDuration,
-    timeRangeDurationOther: TimeRangeDuration
-): boolean => {
-    if (!timeRangeDuration && !timeRangeDurationOther) {
-        // Technically, both the values are equal
-        return true;
-    }
-
-    if (!timeRangeDuration || !timeRangeDurationOther) {
-        // Either of the values is null/undefined
-        return false;
-    }
-
-    if (
-        timeRangeDuration.timeRange === TimeRange.CUSTOM ||
-        timeRangeDurationOther.timeRange === TimeRange.CUSTOM
-    ) {
-        // Either of the time range durations is custom time range
-        return isEqual(timeRangeDuration, timeRangeDurationOther);
-    }
-
-    // Either of the time range durations is predefined time range
-    return timeRangeDuration.timeRange === timeRangeDurationOther.timeRange;
 };

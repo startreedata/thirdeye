@@ -228,11 +228,12 @@ export const formatMeridiem = (date: number): string => {
 
 // Returns date with switched meridiem as compared to original date
 // For example:
-// Dec 01, 20, 12:00 PM to Dec 01, 20, 12:00 AM
+// Dec 01, 2020, 12:00 PM to Dec 01, 2020, 12:00 AM
 export const switchMeridiem = (date: number): number => {
     if (!date) {
         return -1;
     }
+
     const originalDate = DateTime.fromMillis(date);
 
     // Subtract 12 hours from original date

@@ -1,8 +1,8 @@
 import flatten from "flat";
 import { isEmpty } from "lodash";
 
-// Traverses all the properties of object, including those nested until it finds a string property
-// for which match function returns true
+// Traverses all the properties of object, including those nested, in arrays and maps until it finds
+// a string property for which match function returns true
 export const deepSearchStringProperty = <T>(
     object: T,
     matchFn: (value: string) => boolean

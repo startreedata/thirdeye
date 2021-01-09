@@ -42,7 +42,7 @@ describe("Axios Util", () => {
         ).toBeInstanceOf(Function);
     });
 
-    test("axios rejected response interceptor should invoke unauthenticatedAccessHandler and throw 401 error", () => {
+    test("axios rejected response interceptor should throw 401 error and invoke unauthenticated access handler", () => {
         const mockError = {
             response: {
                 status: 401,
@@ -57,7 +57,7 @@ describe("Axios Util", () => {
         expect(mockUnauthenticatedAccessHandler).toHaveBeenCalled();
     });
 
-    test("axios rejected response interceptor should not invoke unauthenticatedAccessHandler and throw any error other than 401", () => {
+    test("axios rejected response interceptor should throw any error other than 401 but not invoke unauthenticated access handler", () => {
         const mockError = {
             response: {
                 status: 500,

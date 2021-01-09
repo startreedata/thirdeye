@@ -33,9 +33,8 @@ export const SubscriptionGroupEmailsAccordian: FunctionComponent<SubscriptionGro
                     buttonLabel={t("label.add")}
                     inputLabel={t("label.add-email")}
                     list={
-                        (props.subscriptionGroupCardData &&
-                            props.subscriptionGroupCardData.emails) ||
-                        []
+                        props.subscriptionGroupCardData &&
+                        props.subscriptionGroupCardData.emails
                     }
                     validateFn={validateEmail}
                     onChange={onSubscriptionGroupEmailsChange}

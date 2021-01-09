@@ -66,12 +66,8 @@ export const AlertsCreatePage = (): ReactElement => {
 
     const [isFirstTime, setIsFirstTime] = useState(true);
 
-    const [
-        appTimeRangeDuration,
-        getAppTimeRangeDuration,
-    ] = useAppTimeRangeStore((state) => [
+    const [appTimeRangeDuration] = useAppTimeRangeStore((state) => [
         state.appTimeRangeDuration,
-        state.getAppTimeRangeDuration,
     ]);
     const { t } = useTranslation();
 
@@ -159,11 +155,10 @@ export const AlertsCreatePage = (): ReactElement => {
     };
 
     const fetchChartData = async (): Promise<AlertEvaluation | null> => {
-        const { startTime, endTime } = getAppTimeRangeDuration();
         const alertEvalution = {
             alert: yaml.load(detectionConfig) as Alert,
-            start: startTime,
-            end: endTime,
+            start: appTimeRangeDuration.startTime,
+            end: appTimeRangeDuration.endTime,
         };
 
         let chartData = null;

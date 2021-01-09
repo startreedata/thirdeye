@@ -1,2 +1,2 @@
-// Module declaration to allow importing TTF font files
+// Module declaration to allow importing TTF files
 declare module "*.ttf";

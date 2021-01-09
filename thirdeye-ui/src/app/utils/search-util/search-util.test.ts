@@ -17,7 +17,7 @@ describe("Search Util", () => {
     test("deepSearchStringProperty should invoke match function on all string properties of object", () => {
         deepSearchStringProperty(mockObject, mockMatchFn);
 
-        expect(mockMatchFn.mock.calls).toHaveLength(9);
+        expect(mockMatchFn).toHaveBeenCalledTimes(9);
         expect(mockMatchFn).toHaveBeenNthCalledWith(1, "testString1");
         expect(mockMatchFn).toHaveBeenNthCalledWith(2, "testString2");
         expect(mockMatchFn).toHaveBeenNthCalledWith(3, "testString3");
@@ -36,7 +36,7 @@ describe("Search Util", () => {
             .mockReturnValueOnce(true);
         deepSearchStringProperty(mockObject, mockMatchFn);
 
-        expect(mockMatchFn.mock.calls).toHaveLength(3);
+        expect(mockMatchFn).toHaveBeenCalledTimes(3);
         expect(mockMatchFn).toHaveBeenNthCalledWith(1, "testString1");
         expect(mockMatchFn).toHaveBeenNthCalledWith(2, "testString2");
         expect(mockMatchFn).toHaveBeenNthCalledWith(3, "testString3");

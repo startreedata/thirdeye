@@ -124,13 +124,12 @@ module.exports = {
         contentBase: outputPath,
         compress: true,
         port: 7004,
+        // Route all requests to index.html so that app gets to handle all copy pasted deep links
         historyApiFallback: {
-            // Route all requests to index.html so that app gets to handle all copy pasted deep
-            // links
             disableDotRule: true,
         },
 
-        // webpack-dev-server proxy configuration
+        // Proxy configuration
         proxy: [
             {
                 context: "/api",

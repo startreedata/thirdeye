@@ -45,7 +45,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     const [
         componentTimeRangeDuration,
         setComponentTimeRangeDuration,
-    ] = useState<TimeRangeDuration>(props.timeRangeDurationFn());
+    ] = useState<TimeRangeDuration>(getDefaultTimeRangeDuration());
     const [
         timeRangeSelectorAnchorElement,
         setTimeRangeSelectorAnchorElement,
@@ -60,25 +60,22 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         setTimeRangeSelectorAnchorElement(null);
     };
 
-    const onRefresh = (): void => {
-        // Notify that component time range duration has changed, to trigger refresh
-        props.onChange && props.onChange(cloneDeep(componentTimeRangeDuration));
-    };
-
     const onOpenTimeRangeSelector = (): void => {
         // Update component time range duration
-        setComponentTimeRangeDuration(props.timeRangeDurationFn());
+        setComponentTimeRangeDuration(
+            props.timeRangeDuration || getDefaultTimeRangeDuration()
+        );
     };
 
     const onRecentCustomTimeRangeDurationClick = (
-        timeRangeDuration: TimeRangeDuration
+        customTimeRangeDuration: TimeRangeDuration
     ): void => {
-        if (!timeRangeDuration) {
+        if (!customTimeRangeDuration) {
             return;
         }
 
         // Update component time range duration
-        setComponentTimeRangeDuration(timeRangeDuration);
+        setComponentTimeRangeDuration(customTimeRangeDuration);
     };
 
     const onTimeRangeClick = (timeRange: TimeRange): void => {
@@ -484,7 +481,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                     className={timeRangeSelectorClasses.timeRangeSelectorButton}
                     color="primary"
                     variant="outlined"
-                    onClick={onRefresh}
+                    onClick={props.onRefresh}
                 >
                     <Refresh />
                 </Button>

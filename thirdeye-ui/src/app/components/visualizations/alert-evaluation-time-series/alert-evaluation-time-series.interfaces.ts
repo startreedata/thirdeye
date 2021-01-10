@@ -1,4 +1,4 @@
-import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 
 export interface AlertEvaluationTimeSeriesProps {
     alertEvaluation: AlertEvaluation | null;
@@ -23,4 +23,11 @@ export interface AlertEvaluationTimeSeriesPoint {
     lowerBound: number;
     current: number;
     expected: number;
+}
+
+export interface AlertEvaluationAnomalyPoint {
+    startTime: number;
+    endTime: number;
+    current: number;
+    baseline: number;
 }

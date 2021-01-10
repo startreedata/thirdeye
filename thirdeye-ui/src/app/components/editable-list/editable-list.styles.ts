@@ -10,6 +10,11 @@ export const useEditableListStyles = makeStyles({
         },
         overflow: "auto",
     },
+    listItem: {
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+    },
     addButton: {
         height: Dimension.HEIGHT_INPUT_DEFAULT,
     },

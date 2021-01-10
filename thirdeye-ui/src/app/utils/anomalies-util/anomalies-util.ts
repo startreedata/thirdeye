@@ -24,20 +24,20 @@ export const getAnomalyName = (anomaly: Anomaly): string => {
 };
 
 export const createEmptyAnomalyCardData = (): AnomalyCardData => {
-    const noDataAvailableMarker = i18n.t("label.no-data-marker");
+    const noDataMarker = i18n.t("label.no-data-marker");
 
     return {
         id: -1,
-        name: noDataAvailableMarker,
-        alertName: noDataAvailableMarker,
+        name: noDataMarker,
+        alertName: noDataMarker,
         alertId: -1,
-        current: noDataAvailableMarker,
-        predicted: noDataAvailableMarker,
-        deviation: noDataAvailableMarker,
+        current: noDataMarker,
+        predicted: noDataMarker,
+        deviation: noDataMarker,
         negativeDeviation: false,
-        duration: noDataAvailableMarker,
-        startTime: noDataAvailableMarker,
-        endTime: noDataAvailableMarker,
+        duration: noDataMarker,
+        startTime: noDataMarker,
+        endTime: noDataMarker,
     };
 };
 

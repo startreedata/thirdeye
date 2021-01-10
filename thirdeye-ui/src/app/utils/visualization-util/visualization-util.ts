@@ -1,5 +1,8 @@
 import { isEmpty } from "lodash";
-import { AlertEvaluationTimeSeriesPoint } from "../../components/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
+import {
+    AlertEvaluationAnomalyPoint,
+    AlertEvaluationTimeSeriesPoint,
+} from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { formatLargeNumber } from "../number-util/number-util";
 
@@ -52,6 +55,37 @@ export const getAlertEvaluationTimeSeriesPoints = (
     }
 
     return alertEvaluationTimeSeriesPoints;
+};
+
+// Returns alert evaluation anomaly points from given alert evaluation
+export const getAlertEvaluationAnomalyPoints = (
+    alertEvaluation: AlertEvaluation
+): AlertEvaluationAnomalyPoint[] => {
+    const alertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[] = [];
+
+    if (!alertEvaluation || isEmpty(alertEvaluation.detectionEvaluations)) {
+        return alertEvaluationAnomalyPoints;
+    }
+
+    // Gather only first detection evaluation
+    const detectionEvaluation = Object.values(
+        alertEvaluation.detectionEvaluations
+    )[0];
+
+    if (isEmpty(detectionEvaluation.anomalies)) {
+        return alertEvaluationAnomalyPoints;
+    }
+
+    for (const index in detectionEvaluation.anomalies) {
+        alertEvaluationAnomalyPoints.push({
+            startTime: detectionEvaluation.anomalies[index].startTime,
+            endTime: detectionEvaluation.anomalies[index].endTime,
+            current: detectionEvaluation.anomalies[index].avgCurrentVal,
+            baseline: detectionEvaluation.anomalies[index].avgBaselineVal,
+        });
+    }
+
+    return alertEvaluationAnomalyPoints;
 };
 
 // Returns minimum timestamp from alert evaluation time series points

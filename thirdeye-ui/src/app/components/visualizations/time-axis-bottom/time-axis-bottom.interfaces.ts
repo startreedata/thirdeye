@@ -1,6 +1,6 @@
 import { ScaleTime } from "d3-scale";
 
-export interface VisxCustomTimeAxisBottomProps {
+export interface TimeAxisBottomProps {
     left?: number;
     top?: number;
     numTicks?: number;

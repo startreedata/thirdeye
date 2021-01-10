@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core";
 
-export const useTimeRangeSelectorCalendarToolbarStyles = makeStyles({
+export const useDateTimePickerToolbarStyles = makeStyles({
     container: {
         marginBottom: "-12px", // Minimize whitespace between toolbar and calendar
     },

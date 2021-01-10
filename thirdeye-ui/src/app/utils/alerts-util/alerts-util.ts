@@ -14,15 +14,15 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 import { deepSearchStringProperty } from "../search-util/search-util";
 
 export const createEmptyAlertCardData = (): AlertCardData => {
-    const noDataAvailableMarker = i18n.t("label.no-data-marker");
+    const noDataMarker = i18n.t("label.no-data-marker");
 
     return {
         id: -1,
-        name: noDataAvailableMarker,
+        name: noDataMarker,
         active: false,
-        activeText: noDataAvailableMarker,
+        activeText: noDataMarker,
         userId: -1,
-        createdBy: noDataAvailableMarker,
+        createdBy: noDataMarker,
         detectionTypes: [],
         filteredBy: [],
         datasetAndMetrics: [],
@@ -32,13 +32,13 @@ export const createEmptyAlertCardData = (): AlertCardData => {
 };
 
 export const createEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
-    const noDataAvailableMarker = i18n.t("label.no-data-marker");
+    const noDataMarker = i18n.t("label.no-data-marker");
 
     return {
         datasetId: -1,
-        datasetName: noDataAvailableMarker,
+        datasetName: noDataMarker,
         metricId: -1,
-        metricName: noDataAvailableMarker,
+        metricName: noDataMarker,
     };
 };
 

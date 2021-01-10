@@ -1,12 +1,17 @@
 import { cloneDeep } from "lodash";
-import { AlertEvaluationTimeSeriesPoint } from "../../components/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
+import {
+    AlertEvaluationAnomalyPoint,
+    AlertEvaluationTimeSeriesPoint,
+} from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
     DetectionData,
     DetectionEvaluation,
 } from "../../rest/dto/detection.interfaces";
 import {
     formatLargeNumberForVisualization,
+    getAlertEvaluationAnomalyPoints,
     getAlertEvaluationTimeSeriesPoints,
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
@@ -115,6 +120,62 @@ describe("Visualization Util", () => {
     test("getAlertEvaluationTimeSeriesPoints should return appropriate alert evaluation time series points for alert evaluation", () => {
         expect(getAlertEvaluationTimeSeriesPoints(mockAlertEvaluation)).toEqual(
             mockAlertEvaluationTimeSeriesPoints
+        );
+    });
+
+    test("getAlertEvaluationAnomalyPoints should return empty alert evaluation anomaly points for invalid alert evaluation", () => {
+        expect(
+            getAlertEvaluationAnomalyPoints(
+                (null as unknown) as AlertEvaluation
+            )
+        ).toEqual([]);
+    });
+
+    test("getAlertEvaluationAnomalyPoints should return empty alert evaluation anomaly points for invalid detection evaluation", () => {
+        const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
+        mockAlertEvaluationCopy.detectionEvaluations = (null as unknown) as {
+            [index: string]: DetectionEvaluation;
+        };
+
+        expect(
+            getAlertEvaluationAnomalyPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
+    });
+
+    test("getAlertEvaluationAnomalyPoints should return empty alert evaluation anonmaly points for empty detection evaluation", () => {
+        const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
+        mockAlertEvaluationCopy.detectionEvaluations = {};
+
+        expect(
+            getAlertEvaluationAnomalyPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
+    });
+
+    test("getAlertEvaluationAnomalyPoints should return empty alert evaluation anomaly points for invalid anomalies in detection evaluation", () => {
+        const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
+        mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
+            anomalies: (null as unknown) as Anomaly[],
+        } as DetectionEvaluation;
+
+        expect(
+            getAlertEvaluationAnomalyPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
+    });
+
+    test("getAlertEvaluationAnomalyPoints should return empty alert evaluation anomaly points for empty anomalies in detection evaluation", () => {
+        const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
+        mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
+            anomalies: [] as Anomaly[],
+        } as DetectionEvaluation;
+
+        expect(
+            getAlertEvaluationAnomalyPoints(mockAlertEvaluationCopy)
+        ).toEqual([]);
+    });
+
+    test("getAlertEvaluationAnomalyPoints should return appropriate alert evaluation anomaly points for alert evaluation", () => {
+        expect(getAlertEvaluationAnomalyPoints(mockAlertEvaluation)).toEqual(
+            mockAlertEvaluationAnomalyPoints
         );
     });
 
@@ -293,5 +354,20 @@ const mockAlertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[] = [
         lowerBound: 9,
         current: 12,
         expected: 15,
+    },
+];
+
+const mockAlertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[] = [
+    {
+        startTime: 16,
+        endTime: 17,
+        current: 18,
+        baseline: 19,
+    },
+    {
+        startTime: 20,
+        endTime: 21,
+        current: 22,
+        baseline: 23,
     },
 ];

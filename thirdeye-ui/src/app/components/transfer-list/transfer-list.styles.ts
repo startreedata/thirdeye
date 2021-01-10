@@ -9,4 +9,9 @@ export const useTransferListStyles = makeStyles({
         },
         overflow: "auto",
     },
+    listItem: {
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+    },
 });

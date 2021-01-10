@@ -7,14 +7,14 @@ import {
     formatMonthOfYear,
     formatTime,
     formatYear,
-} from "../../utils/date-time-util/date-time-util";
-import { VisxCustomTimeAxisBottomProps } from "./visx-custom-time-axis-bottom.interfaces";
+} from "../../../utils/date-time-util/date-time-util";
+import { TimeAxisBottomProps } from "./time-axis-bottom.interfaces";
 
 export const TICK_FORMAT_SEPARATOR_DATE_TIME = "@";
 
 // Customization of visx time axis with formatted tick labels based on time range
-export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBottomProps> = (
-    props: VisxCustomTimeAxisBottomProps
+export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
+    props: TimeAxisBottomProps
 ) => {
     const tickFormatter = (
         date: Date | number | { valueOf(): number }
@@ -138,7 +138,6 @@ export const VisxCustomTimeAxisBottom: FunctionComponent<VisxCustomTimeAxisBotto
     };
 
     return (
-        // Time axis
         <AxisBottom
             left={props.left}
             numTicks={props.numTicks}

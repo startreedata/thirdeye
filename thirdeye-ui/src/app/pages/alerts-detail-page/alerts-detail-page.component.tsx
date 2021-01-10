@@ -4,13 +4,13 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
-import { AlertEvaluationTimeSeriesCard } from "../../components/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
 import { AlertCardData } from "../../components/entity-cards/alert-card/alert-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
+import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     deleteAlert,
     getAlert,

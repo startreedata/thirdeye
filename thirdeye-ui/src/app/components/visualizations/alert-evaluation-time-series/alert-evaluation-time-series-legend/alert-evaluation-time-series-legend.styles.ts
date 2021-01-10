@@ -1,10 +1,12 @@
 import { makeStyles } from "@material-ui/core";
-import { Palette } from "../../../utils/material-ui-util/palette-util";
+import { Palette } from "../../../../utils/material-ui-util/palette-util";
 
 export const useAlertEvaluationTimeSeriesLegendStyles = makeStyles({
     legendContainer: {
         display: "flex",
-        justifyContent: "space-evenly",
+        justifyContent: "space-between",
+        marginLeft: "10px",
+        marginRight: "10px",
     },
     legendItem: {
         cursor: "pointer",

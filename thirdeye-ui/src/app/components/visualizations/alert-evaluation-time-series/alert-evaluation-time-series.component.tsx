@@ -20,22 +20,25 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
+import { Dimension } from "../../../utils/material-ui-util/dimension-util";
 import {
     formatLargeNumberForVisualization,
+    getAlertEvaluationAnomalyPoints,
     getAlertEvaluationTimeSeriesPoints,
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
-} from "../../utils/visualization-util/visualization-util";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
-import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
-import { VisxCustomTimeAxisBottom } from "../visx-custom-time-axis-bottom/visx-custom-time-axis-bottom.component";
+} from "../../../utils/visualization-util/visualization-util";
+import { LoadingIndicator } from "../../loading-indicator/loading-indicator.component";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { TimeAxisBottom } from "../time-axis-bottom/time-axis-bottom.component";
+import { AlertEvaluationTimeSeriesAnomaliesPlot } from "./alert-evaluation-time-series-anomalies-plot/alert-evaluation-time-series-anomalies-plot.component";
 import { AlertEvaluationTimeSeriesBaselinePlot } from "./alert-evaluation-time-series-baseline-plot/alert-evaluation-time-series-baseline-plot.component";
 import { AlertEvaluationTimeSeriesCurrentPlot } from "./alert-evaluation-time-series-current-plot/alert-evaluation-time-series-current-plot.component";
 import { AlertEvaluationTimeSeriesLegend } from "./alert-evaluation-time-series-legend/alert-evaluation-time-series-legend.component";
 import { AlertEvaluationTimeSeriesUpperAndLowerBoundPlot } from "./alert-evaluation-time-series-upper-and-lower-bound-plot/alert-evaluation-time-series-upper-and-lower-bound-plot.component";
 import {
+    AlertEvaluationAnomalyPoint,
     AlertEvaluationTimeSeriesInternalProps,
     AlertEvaluationTimeSeriesPlot,
     AlertEvaluationTimeSeriesPoint,
@@ -43,8 +46,8 @@ import {
 } from "./alert-evaluation-time-series.interfaces";
 import { useAlertEvaluationTimeSeriesInternalStyles } from "./alert-evaluation-time-series.styles";
 
-const WIDTH_CONTAINER_MIN = 620;
 const HEIGHT_CONTAINER_MIN = 310;
+const WIDTH_CONTAINER_MIN = 620;
 const MARGIN_LEFT = 40;
 const MARGIN_RIGHT = 40;
 const MARGIN_TOP = 30;
@@ -74,7 +77,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
 ) => {
     const alertEvaluationTimeSeriesInternalClasses = useAlertEvaluationTimeSeriesInternalStyles();
     const [loading, setLoading] = useState(true);
-    const [noDataAvailable, setNoDataAvailable] = useState(false);
+    const [noData, setNoData] = useState(false);
     const [
         alertEvaluationTimeSeriesPoints,
         setAlertEvaluationTimeSeriesPoints,
@@ -83,11 +86,16 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         filteredAlertEvaluationTimeSeriesPoints,
         setFilteredAlertEvaluationTimeSeriesPoints,
     ] = useState<AlertEvaluationTimeSeriesPoint[]>([]);
+    const [
+        alertEvaluationAnomalyPoints,
+        setAlertEvaluationAnomalyPoints,
+    ] = useState<AlertEvaluationAnomalyPoint[]>([]);
     const [upperAndLowerBoundVisible, setUpperAndLowerBoundVisible] = useState(
         true
     );
     const [currentVisible, setCurrentVisible] = useState(true);
     const [baselineVisible, setBaselineVisible] = useState(true);
+    const [anomaliesVisible, setAnomaliesVisible] = useState(true);
     const brushRef = createRef<BaseBrush>();
     const theme = useTheme();
     const { t } = useTranslation();
@@ -166,7 +174,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     useEffect(() => {
         // Input changed, reset
         setLoading(true);
-        setNoDataAvailable(false);
+        setNoData(false);
         setAlertEvaluationTimeSeriesPoints([]);
         setFilteredAlertEvaluationTimeSeriesPoints([]);
 
@@ -179,10 +187,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         );
         if (isEmpty(alertEvaluationTimeSeriesPoints)) {
             setLoading(false);
-            setNoDataAvailable(true);
+            setNoData(true);
 
             return;
         }
+
         // Reset brush selection
         brushRef && brushRef.current && brushRef.current.reset();
 
@@ -190,9 +199,12 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         setFilteredAlertEvaluationTimeSeriesPoints(
             alertEvaluationTimeSeriesPoints
         );
+        setAlertEvaluationAnomalyPoints(
+            getAlertEvaluationAnomalyPoints(props.alertEvaluation)
+        );
 
         setLoading(false);
-        setNoDataAvailable(false);
+        setNoData(false);
     }, [props.alertEvaluation]);
 
     const onBrushChange = useCallback(
@@ -226,9 +238,9 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     );
 
     const onLegendChange = (
-        alertEvaluationTimeSeries: AlertEvaluationTimeSeriesPlot
+        alertEvaluationTimeSeriesPlot: AlertEvaluationTimeSeriesPlot
     ): void => {
-        switch (alertEvaluationTimeSeries) {
+        switch (alertEvaluationTimeSeriesPlot) {
             case AlertEvaluationTimeSeriesPlot.UPPER_AND_LOWER_BOUND: {
                 setUpperAndLowerBoundVisible(
                     (showUpperAndLowerBound) => !showUpperAndLowerBound
@@ -246,6 +258,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
 
                 break;
             }
+            case AlertEvaluationTimeSeriesPlot.ANOMALIES: {
+                setAnomaliesVisible((showAnomalies) => !showAnomalies);
+
+                break;
+            }
         }
     };
 
@@ -253,13 +270,13 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         return <LoadingIndicator />;
     }
 
-    if (noDataAvailable) {
+    if (noData) {
         return <NoDataIndicator />;
     }
 
     if (
-        props.width < WIDTH_CONTAINER_MIN ||
-        props.height < HEIGHT_CONTAINER_MIN
+        props.height < HEIGHT_CONTAINER_MIN ||
+        props.width < WIDTH_CONTAINER_MIN
     ) {
         return (
             <NoDataIndicator text={t("message.visualization-render-error")} />
@@ -305,8 +322,19 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                         />
                     )}
 
+                    {/* Anomalies */}
+                    {anomaliesVisible && (
+                        <AlertEvaluationTimeSeriesAnomaliesPlot
+                            alertEvaluationAnomalyPoints={
+                                alertEvaluationAnomalyPoints
+                            }
+                            xScale={timeSeriesXScale}
+                            yScale={timeSeriesYScale}
+                        />
+                    )}
+
                     {/* X axis */}
-                    <VisxCustomTimeAxisBottom
+                    <TimeAxisBottom
                         numTicks={5}
                         scale={timeSeriesXScale}
                         tickClassName={
@@ -355,6 +383,15 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                             xScale={brushXScale}
                             yScale={brushYScale}
                         />
+
+                        {/* Anomalies */}
+                        <AlertEvaluationTimeSeriesAnomaliesPlot
+                            alertEvaluationAnomalyPoints={
+                                alertEvaluationAnomalyPoints
+                            }
+                            xScale={timeSeriesXScale}
+                            yScale={timeSeriesYScale}
+                        />
                     </Group>
 
                     {/* Brush */}
@@ -381,7 +418,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     />
 
                     {/* X axis */}
-                    <VisxCustomTimeAxisBottom
+                    <TimeAxisBottom
                         numTicks={5}
                         scale={brushXScale}
                         tickClassName={

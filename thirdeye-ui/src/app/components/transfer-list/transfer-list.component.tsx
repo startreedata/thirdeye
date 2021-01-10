@@ -232,6 +232,8 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                         }
                                                         primaryTypographyProps={{
                                                             variant: "body1",
+                                                            className:
+                                                                transferListClasses.listItem,
                                                         }}
                                                     />
 
@@ -331,6 +333,8 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                     }
                                                     primaryTypographyProps={{
                                                         variant: "body1",
+                                                        className:
+                                                            transferListClasses.listItem,
                                                     }}
                                                 />
 

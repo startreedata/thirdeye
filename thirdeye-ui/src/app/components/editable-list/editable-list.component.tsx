@@ -142,7 +142,14 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                                             onRemoveListItem(index);
                                         }}
                                     >
-                                        <ListItemText primary={listItem} />
+                                        <ListItemText
+                                            primary={listItem}
+                                            primaryTypographyProps={{
+                                                variant: "body1",
+                                                className:
+                                                    editableListClasses.listItem,
+                                            }}
+                                        />
 
                                         {/* Remove button */}
                                         <ListItemSecondaryAction>

@@ -3,6 +3,8 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
 import { AlertCardData } from "../../components/entity-cards/alert-card/alert-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
@@ -43,6 +45,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setPageBreadcrumbs,
     ]);
+    const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
@@ -132,20 +135,40 @@ export const AlertsAllPage: FunctionComponent = () => {
             return;
         }
 
-        // Delete
+        showDialog({
+            type: DialogType.ALERT,
+            text: t("message.delete-confirmation", {
+                name: alertCardData.name,
+            }),
+            okButtonLabel: t("label.delete"),
+            onOk: (): void => {
+                onDeleteConfirmation(alertCardData);
+            },
+        });
+    };
+
+    const onDeleteConfirmation = (alertCardData: AlertCardData): void => {
+        if (!alertCardData) {
+            return;
+        }
+
         deleteAlert(alertCardData.id)
             .then((alert: Alert): void => {
                 // Remove deleted alert from fetched alerts
                 removeAlertCardData(alert);
 
                 enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.alert") }),
+                    t("message.delete-success", {
+                        entity: t("label.alert"),
+                    }),
                     getSuccessSnackbarOption()
                 );
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.alert") }),
+                    t("message.delete-error", {
+                        entity: t("label.alert"),
+                    }),
                     getErrorSnackbarOption()
                 );
             });

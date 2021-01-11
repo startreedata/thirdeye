@@ -82,11 +82,6 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
   }
 
   @Override
-  public String getName() {
-    return "Thirdeye Worker";
-  }
-
-  @Override
   public void initialize(final Bootstrap<ThirdEyeAnomalyConfiguration> bootstrap) {
     bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
     bootstrap.addBundle(new ThirdEyeSwaggerBundle());

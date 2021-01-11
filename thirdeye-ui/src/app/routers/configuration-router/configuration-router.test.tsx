@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { AppToolbarConfiguration } from "../../components/app-toolbar-configuration/app-toolbar-configuration.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import {
     AppRoute,
     getConfigurationPath,
@@ -42,10 +41,6 @@ jest.mock(
     })
 );
 
-jest.mock("../../components/page-container/page-container.component", () => ({
-    PageContainer: jest.fn().mockImplementation(() => <>testPageContainer</>),
-}));
-
 jest.mock("../subscription-groups-router/subscription-groups-router", () => ({
     SubscriptionGroupsRouter: jest
         .fn()
@@ -62,16 +57,6 @@ jest.mock(
 );
 
 describe("Configuration Router", () => {
-    test("should have rendered page container while loading", () => {
-        render(
-            <MemoryRouter>
-                <ConfigurationRouter />
-            </MemoryRouter>
-        );
-
-        expect(PageContainer).toHaveBeenCalled();
-    });
-
     test("should set appropriate app section breadcrumbs", () => {
         render(
             <MemoryRouter>

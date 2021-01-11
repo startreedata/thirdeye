@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { AppRoute, getAlertsPath } from "../../utils/routes-util/routes-util";
 import { AlertsRouter } from "./alerts-router";
 
@@ -27,10 +26,6 @@ jest.mock("react-i18next", () => ({
             return key;
         },
     }),
-}));
-
-jest.mock("../../components/page-container/page-container.component", () => ({
-    PageContainer: jest.fn().mockImplementation(() => <>testPageContainer</>),
 }));
 
 jest.mock("../../pages/alerts-all-page/alerts-all-page.component", () => ({
@@ -74,16 +69,6 @@ jest.mock(
 );
 
 describe("Alerts Router", () => {
-    test("should have rendered page container while loading", () => {
-        render(
-            <MemoryRouter>
-                <AlertsRouter />
-            </MemoryRouter>
-        );
-
-        expect(PageContainer).toHaveBeenCalled();
-    });
-
     test("should set appropriate app section breadcrumbs", () => {
         render(
             <MemoryRouter>

@@ -1,8 +1,6 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { AnomaliesAllPage } from "../../pages/anomalies-all-page/anomalies-all-page.component";
 import { AnomaliesDetailPage } from "../../pages/anomalies-detail-page/anomalies-detail-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
@@ -15,7 +13,6 @@ import {
 } from "../../utils/routes-util/routes-util";
 
 export const AnomaliesRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
     const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumbs,
     ]);
@@ -35,17 +32,7 @@ export const AnomaliesRouter: FunctionComponent = () => {
 
         // No app toolbar under this router
         removeAppToolbar();
-
-        setLoading(false);
     }, []);
-
-    if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
-    }
 
     return (
         <Switch>

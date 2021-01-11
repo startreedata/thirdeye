@@ -1,7 +1,5 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { SignInPage } from "../../pages/sign-in-page/sign-in-page.component";
 import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
@@ -13,7 +11,6 @@ import {
 } from "../../utils/routes-util/routes-util";
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
     const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumbs,
     ]);
@@ -33,8 +30,6 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
         removeAppToolbar();
 
         setupRedirectionPath();
-
-        setLoading(false);
     }, []);
 
     const setupRedirectionPath = (): void => {
@@ -51,14 +46,6 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
             createPathWithRecognizedQueryString(location.pathname)
         );
     };
-
-    if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
-    }
 
     return (
         <Switch>

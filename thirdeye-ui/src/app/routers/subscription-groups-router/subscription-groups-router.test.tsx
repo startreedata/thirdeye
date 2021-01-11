@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import {
     AppRoute,
     getConfigurationPath,
@@ -23,10 +22,6 @@ jest.mock("react-i18next", () => ({
             return key;
         },
     }),
-}));
-
-jest.mock("../../components/page-container/page-container.component", () => ({
-    PageContainer: jest.fn().mockImplementation(() => <>testPageContainer</>),
 }));
 
 jest.mock(
@@ -75,16 +70,6 @@ jest.mock(
 );
 
 describe("Subscription Groups Router", () => {
-    test("should have rendered page container while loading", () => {
-        render(
-            <MemoryRouter>
-                <SubscriptionGroupsRouter />
-            </MemoryRouter>
-        );
-
-        expect(PageContainer).toHaveBeenCalled();
-    });
-
     test("should set appropriate app section breadcrumbs", () => {
         render(
             <MemoryRouter>

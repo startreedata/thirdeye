@@ -1,7 +1,5 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { HomePage } from "../../pages/home-page/home-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { SignOutPage } from "../../pages/sign-out-page/sign-out-page.component";
@@ -14,7 +12,6 @@ import {
 } from "../../utils/routes-util/routes-util";
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
     const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
         state.setAppSectionBreadcrumbs,
     ]);
@@ -28,17 +25,7 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
 
         // No app toolbar under this router
         removeAppToolbar();
-
-        setLoading(false);
     }, []);
-
-    if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
-    }
 
     return (
         <Switch>

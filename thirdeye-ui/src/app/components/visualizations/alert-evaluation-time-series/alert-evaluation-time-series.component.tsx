@@ -389,8 +389,8 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                             alertEvaluationAnomalyPoints={
                                 alertEvaluationAnomalyPoints
                             }
-                            xScale={timeSeriesXScale}
-                            yScale={timeSeriesYScale}
+                            xScale={brushXScale}
+                            yScale={brushYScale}
                         />
                     </Group>
 

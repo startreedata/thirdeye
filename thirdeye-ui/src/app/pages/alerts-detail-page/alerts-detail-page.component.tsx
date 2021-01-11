@@ -4,6 +4,8 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
 import { AlertCardData } from "../../components/entity-cards/alert-card/alert-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
@@ -56,6 +58,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
     const params = useParams<AlertsDetailPageParams>();
     const history = useHistory();
     const { enqueueSnackbar } = useSnackbar();
+    const { showDialog } = useDialog();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -178,19 +181,40 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 setAlertCardData(getAlertCardData(alert, subscriptionGroups));
 
                 enqueueSnackbar(
-                    t("message.update-success", { entity: t("label.alert") }),
+                    t("message.update-success", {
+                        entity: t("label.alert"),
+                    }),
                     getSuccessSnackbarOption()
                 );
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.update-error", { entity: t("label.alert") }),
+                    t("message.update-error", {
+                        entity: t("label.alert"),
+                    }),
                     getErrorSnackbarOption()
                 );
             });
     };
 
     const onDeleteAlert = (alertCardData: AlertCardData): void => {
+        if (!alertCardData) {
+            return;
+        }
+
+        showDialog({
+            type: DialogType.ALERT,
+            text: t("message.delete-confirmation", {
+                name: alertCardData.name,
+            }),
+            okButtonLabel: t("label.delete"),
+            onOk: (): void => {
+                onDeleteAlertConfirmation(alertCardData);
+            },
+        });
+    };
+
+    const onDeleteAlertConfirmation = (alertCardData: AlertCardData): void => {
         if (!alertCardData) {
             return;
         }
@@ -202,13 +226,17 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 history.push(getAlertsAllPath());
 
                 enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.alert") }),
+                    t("message.delete-success", {
+                        entity: t("label.alert"),
+                    }),
                     getSuccessSnackbarOption()
                 );
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.alert") }),
+                    t("message.delete-error", {
+                        entity: t("label.alert"),
+                    }),
                     getErrorSnackbarOption()
                 );
             });

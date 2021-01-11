@@ -3,6 +3,8 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
 import { SubscriptionGroupCardData } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
@@ -43,6 +45,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         state.setPageBreadcrumbs,
     ]);
     const { enqueueSnackbar } = useSnackbar();
+    const { showDialog } = useDialog();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -105,6 +108,27 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     };
 
     const onDeleteSubscriptionGroup = (
+        subscriptionGroupCardData: SubscriptionGroupCardData
+    ): void => {
+        if (!subscriptionGroupCardData) {
+            return;
+        }
+
+        showDialog({
+            type: DialogType.ALERT,
+            text: t("message.delete-confirmation", {
+                name: subscriptionGroupCardData.name,
+            }),
+            okButtonLabel: t("label.delete"),
+            onOk: (): void => {
+                onDeleteSubscriptionGroupConfirmation(
+                    subscriptionGroupCardData
+                );
+            },
+        });
+    };
+
+    const onDeleteSubscriptionGroupConfirmation = (
         subscriptionGroupCardData: SubscriptionGroupCardData
     ): void => {
         if (!subscriptionGroupCardData) {

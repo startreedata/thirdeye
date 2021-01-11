@@ -118,13 +118,17 @@ export const AlertsAllPage: FunctionComponent = () => {
                 replaceAlertCardData(alert);
 
                 enqueueSnackbar(
-                    t("message.update-success", { entity: t("label.alert") }),
+                    t("message.update-success", {
+                        entity: t("label.alert"),
+                    }),
                     getSuccessSnackbarOption()
                 );
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.update-error", { entity: t("label.alert") }),
+                    t("message.update-error", {
+                        entity: t("label.alert"),
+                    }),
                     getErrorSnackbarOption()
                 );
             });
@@ -142,12 +146,12 @@ export const AlertsAllPage: FunctionComponent = () => {
             }),
             okButtonLabel: t("label.delete"),
             onOk: (): void => {
-                onDeleteConfirmation(alertCardData);
+                onDeleteAlertConfirmation(alertCardData);
             },
         });
     };
 
-    const onDeleteConfirmation = (alertCardData: AlertCardData): void => {
+    const onDeleteAlertConfirmation = (alertCardData: AlertCardData): void => {
         if (!alertCardData) {
             return;
         }

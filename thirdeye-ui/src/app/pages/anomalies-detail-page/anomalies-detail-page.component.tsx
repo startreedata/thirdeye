@@ -4,6 +4,8 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
@@ -51,6 +53,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     const params = useParams<AnomaliesDetailPageParams>();
     const history = useHistory();
     const { enqueueSnackbar } = useSnackbar();
+    const { showDialog } = useDialog();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -142,6 +145,25 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
             return;
         }
 
+        showDialog({
+            type: DialogType.ALERT,
+            text: t("message.delete-confirmation", {
+                name: anomalyCardData.name,
+            }),
+            okButtonLabel: t("label.delete"),
+            onOk: (): void => {
+                onDeleteAnomalyConfirmation(anomalyCardData);
+            },
+        });
+    };
+
+    const onDeleteAnomalyConfirmation = (
+        anomalyCardData: AnomalyCardData
+    ): void => {
+        if (!anomalyCardData) {
+            return;
+        }
+
         // Delete
         deleteAnomaly(anomalyCardData.id)
             .then((): void => {
@@ -149,13 +171,17 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                 history.push(getAnomaliesAllPath());
 
                 enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.anomaly") }),
+                    t("message.delete-success", {
+                        entity: t("label.anomaly"),
+                    }),
                     getSuccessSnackbarOption()
                 );
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.anomaly") }),
+                    t("message.delete-error", {
+                        entity: t("label.anomaly"),
+                    }),
                     getErrorSnackbarOption()
                 );
             });

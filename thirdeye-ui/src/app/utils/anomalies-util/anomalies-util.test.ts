@@ -47,7 +47,9 @@ describe("Anomalies Util", () => {
         expect(getAnomalyName(mockAnomaly)).toEqual(
             "label.anomaly label.anomaly-id"
         );
-        expect(i18n.t).toHaveBeenCalledWith("label.anomaly-id", { id: 1 });
+        expect(i18n.t).toHaveBeenCalledWith("label.anomaly-id", {
+            id: 1,
+        });
     });
 
     test("createEmptyAnomalyCardData should create appropriate anomaly card data", () => {

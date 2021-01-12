@@ -1,8 +1,18 @@
-export interface TimeRangeSelectorProps {
+import { ReactNode } from "react";
+
+export interface TimeRangeProviderProps {
+    children?: ReactNode;
+}
+
+export interface UseTimeRangeProps {
+    // Current app time range duration
     timeRangeDuration: TimeRangeDuration;
-    recentCustomTimeRangeDurations?: TimeRangeDuration[];
-    onChange?: (timeRangeDuration: TimeRangeDuration) => void;
-    onRefresh?: () => void;
+    // An ordered list of last few used custom time range durations
+    recentCustomTimeRangeDurations: TimeRangeDuration[];
+    // Sets app time range duration
+    setTimeRangeDuration: (timeRangeDuration: TimeRangeDuration) => void;
+    // Refreshes app time range so that listeners pick up the latest app time range duration
+    refreshTimeRange: () => void;
 }
 
 export interface TimeRangeDuration {

@@ -6,7 +6,7 @@ import {
     MenuItem,
     Toolbar,
 } from "@material-ui/core";
-import { Add } from "@material-ui/icons";
+import { Add, Person } from "@material-ui/icons";
 import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,6 +33,10 @@ export const AppBar: FunctionComponent = () => {
         shortcutOptionsAnchorElement,
         setShortcutOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
+    const [
+        accountOptionsAnchorElement,
+        setAccountOptionsAnchorElement,
+    ] = useState<HTMLElement | null>();
     const [auth] = useAuthStore((state) => [state.auth]);
     const history = useHistory();
     const location = useLocation();
@@ -58,6 +62,10 @@ export const AppBar: FunctionComponent = () => {
         history.push(getConfigurationPath());
     };
 
+    const onSignInClick = (): void => {
+        history.push(getSignInPath());
+    };
+
     const onShortcutOptionsClick = (event: MouseEvent<HTMLElement>): void => {
         setShortcutOptionsAnchorElement(event.currentTarget);
     };
@@ -78,11 +86,15 @@ export const AppBar: FunctionComponent = () => {
         onCloseShortcutOptions();
     };
 
-    const onSignInClick = (): void => {
-        history.push(getSignInPath());
+    const onAccountOptionsClick = (event: MouseEvent<HTMLElement>): void => {
+        setAccountOptionsAnchorElement(event.currentTarget);
     };
 
-    const onSignOutClick = (): void => {
+    const onCloseAccountOptions = (): void => {
+        setAccountOptionsAnchorElement(null);
+    };
+
+    const onSignOut = (): void => {
         history.push(getSignOutPath());
     };
 
@@ -162,6 +174,24 @@ export const AppBar: FunctionComponent = () => {
                     {t("label.configuration")}
                 </Link>
 
+                {!auth && (
+                    // Sign in
+                    <Link
+                        className={classnames(
+                            appBarClasses.link,
+                            appBarClasses.rightAlign,
+                            isRouteCurrent(AppRoute.SIGN_IN)
+                                ? appBarClasses.selectedLink
+                                : ""
+                        )}
+                        component="button"
+                        variant="subtitle2"
+                        onClick={onSignInClick}
+                    >
+                        {t("label.sign-in")}
+                    </Link>
+                )}
+
                 {auth && (
                     <>
                         {/* Shortcut options */}
@@ -190,39 +220,26 @@ export const AppBar: FunctionComponent = () => {
                             </MenuItem>
                         </Menu>
 
-                        {/* Sign out */}
-                        <Link
-                            className={classnames(
-                                appBarClasses.link,
-                                isRouteCurrent(AppRoute.SIGN_OUT)
-                                    ? appBarClasses.selectedLink
-                                    : ""
-                            )}
-                            component="button"
-                            variant="subtitle2"
-                            onClick={onSignOutClick}
+                        {/* Account options */}
+                        <Fab
+                            color="primary"
+                            size="small"
+                            onClick={onAccountOptionsClick}
                         >
-                            {t("label.sign-out")}
-                        </Link>
-                    </>
-                )}
+                            <Person />
+                        </Fab>
 
-                {!auth && (
-                    // Sign in
-                    <Link
-                        className={classnames(
-                            appBarClasses.link,
-                            appBarClasses.rightAlign,
-                            isRouteCurrent(AppRoute.SIGN_IN)
-                                ? appBarClasses.selectedLink
-                                : ""
-                        )}
-                        component="button"
-                        variant="subtitle2"
-                        onClick={onSignInClick}
-                    >
-                        {t("label.sign-in")}
-                    </Link>
+                        <Menu
+                            anchorEl={accountOptionsAnchorElement}
+                            open={Boolean(accountOptionsAnchorElement)}
+                            onClose={onCloseAccountOptions}
+                        >
+                            {/* Sign out */}
+                            <MenuItem onClick={onSignOut}>
+                                {t("label.sign-out")}
+                            </MenuItem>
+                        </Menu>
+                    </>
                 )}
             </Toolbar>
         </MuiAppBar>

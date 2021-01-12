@@ -3,6 +3,8 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
@@ -17,7 +19,6 @@ import {
     getAllAnomalies,
 } from "../../rest/anomalies-rest/anomalies-rest";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     filterAnomalies,
     getAnomalyCardDatas,
@@ -37,19 +38,20 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         AnomalyCardData[]
     >([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
-    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-    ]);
-    const { enqueueSnackbar } = useSnackbar();
-    const { t } = useTranslation();
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { showDialog } = useDialog();
+    const { enqueueSnackbar } = useSnackbar();
+    const history = useHistory();
+    const { t } = useTranslation();
 
     useEffect(() => {
         // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.all"),
-                pathFn: getAnomaliesAllPath,
+                onClick: (): void => {
+                    history.push(getAnomaliesAllPath());
+                },
             },
         ]);
     }, []);

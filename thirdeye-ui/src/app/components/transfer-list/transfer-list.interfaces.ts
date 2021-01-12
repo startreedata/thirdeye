@@ -3,7 +3,7 @@ export interface TransferListProps<T> {
     toList?: T[];
     fromLabel?: string;
     toLabel?: string;
-    listItemTextFn: (item: T) => string; // Function that shall return text to be displayed for list item
-    listItemKeyFn: (item: T) => string | number; // Function that shall return unique identifier for list item
+    listItemTextFn: (item: T) => string; // Function that returns text to be displayed for list item
+    listItemKeyFn: (item: T) => string | number; // Function that returns unique identifier for list item
     onChange?: (toList: T[]) => void;
 }

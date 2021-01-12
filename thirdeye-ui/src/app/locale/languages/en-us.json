@@ -135,6 +135,7 @@
         "delete-error": "Error deleting {{entity}}",
         "visualization-render-error": "Error rendering visualization",
         "field-required": "Field is required",
+        "validation-failed": "Validation failed",
         "invalid-email": "Invalid email"
     }
 }

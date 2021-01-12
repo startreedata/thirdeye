@@ -1,10 +1,10 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { AnomaliesAllPage } from "../../pages/anomalies-all-page/anomalies-all-page.component";
 import { AnomaliesDetailPage } from "../../pages/anomalies-detail-page/anomalies-detail-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
@@ -13,20 +13,21 @@ import {
 } from "../../utils/routes-util/routes-util";
 
 export const AnomaliesRouter: FunctionComponent = () => {
-    const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setAppSectionBreadcrumbs,
-    ]);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
     const [removeAppToolbar] = useAppToolbarStore((state) => [
         state.removeAppToolbar,
     ]);
+    const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create app section breadcrumbs
-        setAppSectionBreadcrumbs([
+        // Create router breadcrumbs
+        setRouterBreadcrumbs([
             {
                 text: t("label.anomalies"),
-                pathFn: getAnomaliesPath,
+                onClick: (): void => {
+                    history.push(getAnomaliesPath());
+                },
             },
         ]);
 

@@ -1,12 +1,12 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { SubscriptionGroupsAllPage } from "../../pages/subscription-groups-all-page/subscription-groups-all-page.component";
 import { SubscriptionGroupsCreatePage } from "../../pages/subscription-groups-create-page/subscription-groups-create-page.component";
 import { SubscriptionGroupsDetailPage } from "../../pages/subscription-groups-detail-page/subscription-groups-detail-page.component";
 import { SubscriptionGroupsUpdatePage } from "../../pages/subscription-groups-update-page/subscription-groups-update-page.component";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     AppRoute,
     getConfigurationPath,
@@ -15,21 +15,24 @@ import {
 } from "../../utils/routes-util/routes-util";
 
 export const SubscriptionGroupsRouter: FunctionComponent = () => {
-    const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setAppSectionBreadcrumbs,
-    ]);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
+    const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create app section breadcrumbs
-        setAppSectionBreadcrumbs([
+        // Create router breadcrumbs
+        setRouterBreadcrumbs([
             {
                 text: t("label.configuration"),
-                pathFn: getConfigurationPath,
+                onClick: (): void => {
+                    history.push(getConfigurationPath());
+                },
             },
             {
                 text: t("label.subscription-groups"),
-                pathFn: getSubscriptionGroupsPath,
+                onClick: (): void => {
+                    history.push(getSubscriptionGroupsPath());
+                },
             },
         ]);
 

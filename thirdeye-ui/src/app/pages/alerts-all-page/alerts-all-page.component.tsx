@@ -3,6 +3,8 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
@@ -20,7 +22,6 @@ import {
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import {
     filterAlerts,
     getAlertCardData,
@@ -42,11 +43,10 @@ export const AlertsAllPage: FunctionComponent = () => {
         SubscriptionGroup[]
     >([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
-    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-    ]);
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
+    const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -54,7 +54,9 @@ export const AlertsAllPage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: t("label.all"),
-                pathFn: getAlertsAllPath,
+                onClick: (): void => {
+                    history.push(getAlertsAllPath());
+                },
             },
         ]);
     }, []);

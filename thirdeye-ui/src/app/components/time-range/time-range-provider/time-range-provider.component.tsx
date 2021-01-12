@@ -1,26 +1,29 @@
 import { isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
+import { useTimeRangeStore } from "../../../store/time-range-store/time-range-store";
 import {
     getTimeRangeDurationFromQueryString,
     setTimeRangeDurationInQueryString,
-} from "../../utils/params-util/params-util";
-import { TimeRange } from "../time-range-selector/time-range-selector.interfaces";
-import { AppTimeRangeHousekeeperProps } from "./app-time-range-housekeeper.interfaces";
+} from "../../../utils/params-util/params-util";
+import {
+    TimeRange,
+    TimeRangeProviderProps,
+    UseTimeRangeProps,
+} from "./time-range-provider.interfaces";
 
-export const AppTimeRangeHousekeeper: FunctionComponent<AppTimeRangeHousekeeperProps> = (
-    props: AppTimeRangeHousekeeperProps
+export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
+    props: TimeRangeProviderProps
 ) => {
     const [loading, setLoading] = useState(true);
     const [
-        appTimeRangeDuration,
-        setAppTimeRangeDuration,
-        refreshAppTimeRangeDuration,
-    ] = useAppTimeRangeStore((state) => [
-        state.appTimeRangeDuration,
-        state.setAppTimeRangeDuration,
-        state.refreshAppTimeRangeDuration,
+        timeRangeDuration,
+        setTimeRangeDuration,
+        refreshTimeRange,
+    ] = useTimeRangeStore((state) => [
+        state.timeRangeDuration,
+        state.setTimeRangeDuration,
+        state.refreshTimeRange,
     ]);
     const location = useLocation();
 
@@ -37,8 +40,8 @@ export const AppTimeRangeHousekeeper: FunctionComponent<AppTimeRangeHousekeeperP
         }
 
         // App time range changed, add app time range durtion to query string
-        setTimeRangeDurationInQueryString(appTimeRangeDuration);
-    }, [appTimeRangeDuration]);
+        setTimeRangeDurationInQueryString(timeRangeDuration);
+    }, [timeRangeDuration]);
 
     useEffect(() => {
         if (loading) {
@@ -46,7 +49,7 @@ export const AppTimeRangeHousekeeper: FunctionComponent<AppTimeRangeHousekeeperP
         }
 
         // Use any navigation opportunity to refresh app time range
-        refreshAppTimeRangeDuration();
+        refreshTimeRange();
     }, [location.pathname]);
 
     const initAppTimeRange = (): void => {
@@ -55,19 +58,16 @@ export const AppTimeRangeHousekeeper: FunctionComponent<AppTimeRangeHousekeeperP
 
         // If time range duration from query string is available and different from current app
         // time range duration, update it to app time range store as a custom time range duration
-        if (
-            timeRageDuration &&
-            !isEqual(timeRageDuration, appTimeRangeDuration)
-        ) {
+        if (timeRageDuration && !isEqual(timeRageDuration, timeRangeDuration)) {
             timeRageDuration.timeRange = TimeRange.CUSTOM;
-            setAppTimeRangeDuration(timeRageDuration);
+            setTimeRangeDuration(timeRageDuration);
 
             return;
         }
 
         // If time range duration from query string is not available, refresh existing app time
-        // range duration
-        refreshAppTimeRangeDuration();
+        // range
+        refreshTimeRange();
     };
 
     if (loading) {
@@ -80,4 +80,13 @@ export const AppTimeRangeHousekeeper: FunctionComponent<AppTimeRangeHousekeeperP
             {props.children}
         </>
     );
+};
+
+export const useTimeRange = (): UseTimeRangeProps => {
+    return useTimeRangeStore((store) => ({
+        timeRangeDuration: store.timeRangeDuration,
+        recentCustomTimeRangeDurations: store.recentCustomTimeRangeDurations,
+        setTimeRangeDuration: store.setTimeRangeDuration,
+        refreshTimeRange: store.refreshTimeRange,
+    }));
 };

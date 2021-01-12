@@ -1,15 +1,18 @@
 import { IconButton } from "@material-ui/core";
 import { Close } from "@material-ui/icons";
-import { SnackbarKey, SnackbarProvider } from "notistack";
+import {
+    SnackbarKey,
+    SnackbarProvider as NotistackSnackbarProvider,
+} from "notistack";
 import React, { createRef, FunctionComponent, ReactNode } from "react";
-import { AppSnackbarProviderProps } from "./app-snackbar-provider.interfaces";
-import { useAppSnackbarProviderStyles } from "./app-snackbar-provider.styles";
+import { SnackbarProviderProps } from "./snackbar-provider.interfaces";
+import { useSnackbarProviderStyles } from "./snackbar-provider.styles";
 
-export const AppSnackbarProvider: FunctionComponent<AppSnackbarProviderProps> = (
-    props: AppSnackbarProviderProps
+export const SnackbarProvider: FunctionComponent<SnackbarProviderProps> = (
+    props: SnackbarProviderProps
 ) => {
-    const appSnackbarProviderClasses = useAppSnackbarProviderStyles();
-    const snackbarProviderRef = createRef<SnackbarProvider>();
+    const snackbarProviderClasses = useSnackbarProviderStyles();
+    const snackbarProviderRef = createRef<NotistackSnackbarProvider>();
 
     const onCloseSnackbar = (key: SnackbarKey): void => {
         snackbarProviderRef &&
@@ -18,7 +21,7 @@ export const AppSnackbarProvider: FunctionComponent<AppSnackbarProviderProps> = 
     };
 
     return (
-        <SnackbarProvider
+        <NotistackSnackbarProvider
             hideIconVariant
             action={(key: SnackbarKey): ReactNode => {
                 // Close button
@@ -38,17 +41,17 @@ export const AppSnackbarProvider: FunctionComponent<AppSnackbarProviderProps> = 
                 vertical: "top",
             }}
             autoHideDuration={3500}
-            className={appSnackbarProviderClasses.container}
+            className={snackbarProviderClasses.container}
             classes={{
-                variantSuccess: appSnackbarProviderClasses.success,
-                variantError: appSnackbarProviderClasses.error,
-                variantWarning: appSnackbarProviderClasses.warning,
-                variantInfo: appSnackbarProviderClasses.info,
+                variantSuccess: snackbarProviderClasses.success,
+                variantError: snackbarProviderClasses.error,
+                variantWarning: snackbarProviderClasses.warning,
+                variantInfo: snackbarProviderClasses.info,
             }}
             ref={snackbarProviderRef}
         >
             {/* Contents */}
             {props.children}
-        </SnackbarProvider>
+        </NotistackSnackbarProvider>
     );
 };

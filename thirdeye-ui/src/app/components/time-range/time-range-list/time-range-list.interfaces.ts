@@ -1,7 +1,7 @@
 import {
     TimeRange,
     TimeRangeDuration,
-} from "../time-range-selector.interfaces";
+} from "../time-range-provider/time-range-provider.interfaces";
 
 export interface TimeRangeListProps {
     recentCustomTimeRangeDurations?: TimeRangeDuration[];

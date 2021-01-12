@@ -1,12 +1,12 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { AlertsAllPage } from "../../pages/alerts-all-page/alerts-all-page.component";
 import { AlertsCreatePage } from "../../pages/alerts-create-page/alerts-create-page.component";
 import { AlertsDetailPage } from "../../pages/alerts-detail-page/alerts-detail-page.component";
 import { AlertsUpdatePage } from "../../pages/alerts-update-page/alerts-update-page.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
@@ -15,20 +15,21 @@ import {
 } from "../../utils/routes-util/routes-util";
 
 export const AlertsRouter: FunctionComponent = () => {
-    const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setAppSectionBreadcrumbs,
-    ]);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
     const [removeAppToolbar] = useAppToolbarStore((state) => [
         state.removeAppToolbar,
     ]);
+    const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create app section breadcrumbs
-        setAppSectionBreadcrumbs([
+        // Create router breadcrumbs
+        setRouterBreadcrumbs([
             {
                 text: t("label.alerts"),
-                pathFn: getAlertsPath,
+                onClick: (): void => {
+                    history.push(getAlertsPath());
+                },
             },
         ]);
 

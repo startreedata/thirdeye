@@ -4,12 +4,10 @@ import { MemoryRouter } from "react-router-dom";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { GeneralAuthenticatedRouter } from "./general-authenticated-router";
 
-jest.mock("../../store/app-breadcrumbs-store/app-breadcrumbs-store", () => ({
-    useAppBreadcrumbsStore: jest.fn().mockImplementation((selector) => {
-        return selector({
-            setAppSectionBreadcrumbs: mockSetAppSectionBreadcrumbs,
-        });
-    }),
+jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
+    useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
+        setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
+    })),
 }));
 
 jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
@@ -17,6 +15,14 @@ jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
         return selector({
             removeAppToolbar: mockRemoveAppToolbar,
         });
+    }),
+}));
+
+jest.mock("react-i18next", () => ({
+    useTranslation: jest.fn().mockReturnValue({
+        t: (key: string): string => {
+            return key;
+        },
     }),
 }));
 
@@ -38,14 +44,14 @@ jest.mock(
 );
 
 describe("General Authenticated Router", () => {
-    test("should set appropriate app section breadcrumbs", () => {
+    test("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(mockSetAppSectionBreadcrumbs).toHaveBeenCalledWith([]);
+        expect(mockSetRouterBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
     test("should remove app toolbar", () => {
@@ -139,6 +145,6 @@ describe("General Authenticated Router", () => {
     });
 });
 
-const mockSetAppSectionBreadcrumbs = jest.fn();
+const mockSetRouterBreadcrumbs = jest.fn();
 
 const mockRemoveAppToolbar = jest.fn();

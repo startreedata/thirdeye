@@ -1,7 +1,8 @@
-export interface AppBreadcrumbsProps {
-    breadcrumbs: Breadcrumb[];
-}
-export interface Breadcrumb {
-    text: string;
-    pathFn?: () => string; // Function that shall return path to be routed to
+import { Breadcrumb } from "../breadcrumbs/breadcrumbs.interfaces";
+
+export interface UseAppBreadcrumbsProps {
+    setRouterBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
+    setPageBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
+    pushPageBreadcrumb: (breadcrumb: Breadcrumb) => void;
+    popPageBreadcrumb: () => void;
 }

@@ -1,18 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import {
-    AppRoute,
-    getAnomaliesPath,
-} from "../../utils/routes-util/routes-util";
+import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
+import { AppRoute } from "../../utils/routes-util/routes-util";
 import { AnomaliesRouter } from "./anomalies-router";
 
-jest.mock("../../store/app-breadcrumbs-store/app-breadcrumbs-store", () => ({
-    useAppBreadcrumbsStore: jest.fn().mockImplementation((selector) => {
-        return selector({
-            setAppSectionBreadcrumbs: mockSetAppSectionBreadcrumbs,
-        });
-    }),
+jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
+    useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
+        setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
+    })),
 }));
 
 jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
@@ -23,12 +19,27 @@ jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
     }),
 }));
 
+jest.mock("react-router-dom", () => ({
+    ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
+    useHistory: jest.fn().mockImplementation(() => ({
+        push: mockPush,
+    })),
+}));
+
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockReturnValue({
         t: (key: string): string => {
             return key;
         },
     }),
+}));
+
+jest.mock("../../utils/routes-util/routes-util", () => ({
+    ...(jest.requireActual("../../utils/routes-util/routes-util") as Record<
+        string,
+        unknown
+    >),
+    getAnomaliesPath: jest.fn().mockReturnValue("testAnomaliesPath"),
 }));
 
 jest.mock(
@@ -59,19 +70,26 @@ jest.mock(
 );
 
 describe("Anomalies Router", () => {
-    test("should set appropriate app section breadcrumbs", () => {
+    test("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
 
-        expect(mockSetAppSectionBreadcrumbs).toHaveBeenCalledWith([
-            {
-                text: "label.anomalies",
-                pathFn: getAnomaliesPath,
-            },
-        ]);
+        // Get router breadcrumbs
+        const breadcrumbs: Breadcrumb[] =
+            mockSetRouterBreadcrumbs.mock.calls[0][0];
+        // Also invoke the click handlers
+        breadcrumbs &&
+            breadcrumbs[0] &&
+            breadcrumbs[0].onClick &&
+            breadcrumbs[0].onClick();
+
+        expect(breadcrumbs).toHaveLength(1);
+        expect(breadcrumbs[0].text).toEqual("label.anomalies");
+        expect(breadcrumbs[0].onClick).toBeDefined();
+        expect(mockPush).toHaveBeenCalledWith("testAnomaliesPath");
     });
 
     test("should remove app toolbar", () => {
@@ -169,6 +187,8 @@ describe("Anomalies Router", () => {
     });
 });
 
-const mockSetAppSectionBreadcrumbs = jest.fn();
+const mockSetRouterBreadcrumbs = jest.fn();
 
 const mockRemoveAppToolbar = jest.fn();
+
+const mockPush = jest.fn();

@@ -4,6 +4,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
@@ -12,6 +13,7 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { getAlertEvaluation } from "../../rest/alerts-rest/alerts-rest";
 import {
@@ -20,8 +22,6 @@ import {
 } from "../../rest/anomalies-rest/anomalies-rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
-import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
 import {
     createAlertEvaluation,
     getAnomalyCardData,
@@ -44,16 +44,12 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         alertEvaluation,
         setAlertEvaluation,
     ] = useState<AlertEvaluation | null>(null);
-    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-    ]);
-    const [appTimeRangeDuration] = useAppTimeRangeStore((state) => [
-        state.appTimeRangeDuration,
-    ]);
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { timeRangeDuration: appTimeRangeDuration } = useTimeRange();
+    const { showDialog } = useDialog();
+    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<AnomaliesDetailPageParams>();
     const history = useHistory();
-    const { enqueueSnackbar } = useSnackbar();
-    const { showDialog } = useDialog();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -61,10 +57,12 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: anomalyCardData ? anomalyCardData.name : "",
-                pathFn: (): string => {
-                    return anomalyCardData
-                        ? getAnomaliesDetailPath(anomalyCardData.id)
-                        : "";
+                onClick: (): void => {
+                    if (anomalyCardData) {
+                        history.push(
+                            getAnomaliesDetailPath(anomalyCardData.id)
+                        );
+                    }
                 },
             },
         ]);

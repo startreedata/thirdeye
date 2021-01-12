@@ -2,7 +2,7 @@ import { isInteger, toNumber } from "lodash";
 import {
     TimeRange,
     TimeRangeDuration,
-} from "../../components/time-range-selector/time-range-selector.interfaces";
+} from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { appHistory } from "../history-util/history-util";
 import { createTimeRangeDuration } from "../time-range-util/time-range-util";
 

@@ -3,7 +3,7 @@ import { DateTime, Settings } from "luxon";
 import {
     TimeRange,
     TimeRangeDuration,
-} from "../../components/time-range-selector/time-range-selector.interfaces";
+} from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     createTimeRangeDuration,
     formatTimeRange,

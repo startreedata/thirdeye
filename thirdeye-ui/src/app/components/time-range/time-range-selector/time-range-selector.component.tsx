@@ -6,21 +6,21 @@ import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { cloneDeep } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
+import { Dimension } from "../../../utils/material-ui-util/dimension-util";
+import { Palette } from "../../../utils/material-ui-util/palette-util";
 import {
     formatTimeRange,
     formatTimeRangeDuration,
     getDefaultTimeRangeDuration,
     getTimeRangeDuration,
-} from "../../utils/time-range-util/time-range-util";
-import { DateTimePickerToolbar } from "./date-time-picker-toolbar/date-time-picker-toolbar.component";
-import { TimeRangeList } from "./time-range-list/time-range-list.component";
+} from "../../../utils/time-range-util/time-range-util";
+import { TimeRangeList } from "../time-range-list/time-range-list.component";
 import {
     TimeRange,
     TimeRangeDuration,
-    TimeRangeSelectorProps,
-} from "./time-range-selector.interfaces";
+} from "../time-range-provider/time-range-provider.interfaces";
+import { DateTimePickerToolbar } from "./date-time-picker-toolbar/date-time-picker-toolbar.component";
+import { TimeRangeSelectorProps } from "./time-range-selector.interfaces";
 import { useTimeRangeSelectorStyles } from "./time-range-selector.styles";
 
 export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (

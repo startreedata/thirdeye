@@ -1,15 +1,13 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 
 export const AlertsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-    ]);
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { t } = useTranslation();
 
     useEffect(() => {

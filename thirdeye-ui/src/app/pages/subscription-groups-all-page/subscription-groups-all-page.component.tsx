@@ -3,6 +3,8 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
@@ -19,7 +21,6 @@ import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
 } from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { getSubscriptionGroupsAllPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
@@ -41,11 +42,10 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         setfilteredSubscriptionGroupCardDatas,
     ] = useState<SubscriptionGroupCardData[]>([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
-    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-    ]);
-    const { enqueueSnackbar } = useSnackbar();
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { showDialog } = useDialog();
+    const { enqueueSnackbar } = useSnackbar();
+    const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -53,7 +53,9 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: t("label.all"),
-                pathFn: getSubscriptionGroupsAllPath,
+                onClick: (): void => {
+                    history.push(getSubscriptionGroupsAllPath());
+                },
             },
         ]);
     }, []);

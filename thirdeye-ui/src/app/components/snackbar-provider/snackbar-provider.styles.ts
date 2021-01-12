@@ -2,7 +2,7 @@ import { makeStyles, Theme } from "@material-ui/core";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
 
-export const useAppSnackbarProviderStyles = makeStyles((theme: Theme) => ({
+export const useSnackbarProviderStyles = makeStyles((theme: Theme) => ({
     container: {
         width: Dimension.WIDTH_SNACKBAR_DEFAULT,
     },

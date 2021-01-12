@@ -19,6 +19,7 @@ import React, {
     useEffect,
     useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";
 
@@ -29,6 +30,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     const [list, setList] = useState<string[]>([]);
     const [helperText, setHelperText] = useState("");
     const inputRef = createRef<HTMLInputElement>();
+    const { t } = useTranslation();
 
     useEffect(() => {
         // Input changed, populate list
@@ -53,7 +55,9 @@ export const EditableList: FunctionComponent<EditableListProps> = (
             !validationResult.valid
         ) {
             // Validation failed
-            setHelperText(validationResult.message || "");
+            setHelperText(
+                validationResult.message || t("message.validation-failed")
+            );
 
             return;
         }
@@ -135,13 +139,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                         <List dense>
                             {list &&
                                 list.map((listItem, index) => (
-                                    <ListItem
-                                        button
-                                        key={index}
-                                        onClick={(): void => {
-                                            onRemoveListItem(index);
-                                        }}
-                                    >
+                                    <ListItem button key={index}>
                                         <ListItemText
                                             primary={listItem}
                                             primaryTypographyProps={{

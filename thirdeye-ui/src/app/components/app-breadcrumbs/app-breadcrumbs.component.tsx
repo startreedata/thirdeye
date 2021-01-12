@@ -1,21 +1,21 @@
-import { Box, Breadcrumbs, Link, Toolbar } from "@material-ui/core";
-import { NavigateNext } from "@material-ui/icons";
+import { Box, Toolbar } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { useHistory } from "react-router-dom";
+import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
-import { AppBreadcrumbsProps, Breadcrumb } from "./app-breadcrumbs.interfaces";
+import { Breadcrumbs } from "../breadcrumbs/breadcrumbs.component";
+import { UseAppBreadcrumbsProps } from "./app-breadcrumbs.interfaces";
 import { useAppBreadcrumbsStyles } from "./app-breadcrumbs.styles";
 
-export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
-    props: AppBreadcrumbsProps
-) => {
+export const AppBreadcrumbs: FunctionComponent = () => {
     const appBreadcrumbsClasses = useAppBreadcrumbsStyles();
-    const history = useHistory();
-
-    const onBreadcrumbClick = (breadcrumb: Breadcrumb): void => {
-        breadcrumb && breadcrumb.pathFn && history.push(breadcrumb.pathFn());
-    };
+    const [
+        routerBreadcrumbs,
+        pageBreadcrumbs,
+    ] = useAppBreadcrumbsStore((store) => [
+        store.routerBreadcrumbs,
+        store.pageBreadcrumbs,
+    ]);
 
     return (
         <Box
@@ -30,37 +30,20 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
                 classes={{ dense: appBreadcrumbsClasses.dense }}
                 variant="dense"
             >
-                <Breadcrumbs separator={<NavigateNext />}>
-                    {props.breadcrumbs &&
-                        props.breadcrumbs
-                            .filter((breadcrumb) => Boolean(breadcrumb.text))
-                            .map((breadcrumb, index) => (
-                                <Link
-                                    className={
-                                        index ===
-                                            props.breadcrumbs.length - 1 ||
-                                        !breadcrumb.pathFn
-                                            ? appBreadcrumbsClasses.selectedLink
-                                            : ""
-                                    }
-                                    component="button"
-                                    disabled={
-                                        index ===
-                                            props.breadcrumbs.length - 1 ||
-                                        !breadcrumb.pathFn
-                                    }
-                                    display="block"
-                                    key={index}
-                                    variant="subtitle1"
-                                    onClick={(): void => {
-                                        onBreadcrumbClick(breadcrumb);
-                                    }}
-                                >
-                                    {breadcrumb.text}
-                                </Link>
-                            ))}
-                </Breadcrumbs>
+                {/* Breadcrumbs */}
+                <Breadcrumbs
+                    breadcrumbs={[...routerBreadcrumbs, ...pageBreadcrumbs]}
+                />
             </Toolbar>
         </Box>
     );
+};
+
+export const useAppBreadcrumbs = (): UseAppBreadcrumbsProps => {
+    return useAppBreadcrumbsStore((store) => ({
+        setRouterBreadcrumbs: store.setRouterBreadcrumbs,
+        setPageBreadcrumbs: store.setPageBreadcrumbs,
+        pushPageBreadcrumb: store.pushPageBreadcrumb,
+        popPageBreadcrumb: store.popPageBreadcrumb,
+    }));
 };

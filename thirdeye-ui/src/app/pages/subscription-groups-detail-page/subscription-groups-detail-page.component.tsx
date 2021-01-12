@@ -4,6 +4,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
@@ -28,7 +29,6 @@ import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { isValidNumberId } from "../../utils/params-util/params-util";
 import {
     getSubscriptionGroupsAllPath,
@@ -48,13 +48,11 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
         setSubscriptionGroupCardData,
     ] = useState<SubscriptionGroupCardData>();
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-    ]);
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { showDialog } = useDialog();
+    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<SubscriptionGroupsDetailPageParams>();
     const history = useHistory();
-    const { enqueueSnackbar } = useSnackbar();
-    const { showDialog } = useDialog();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -64,12 +62,14 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 text: subscriptionGroupCardData
                     ? subscriptionGroupCardData.name
                     : "",
-                pathFn: (): string => {
-                    return subscriptionGroupCardData
-                        ? getSubscriptionGroupsDetailPath(
-                              subscriptionGroupCardData.id
-                          )
-                        : "";
+                onClick: (): void => {
+                    if (subscriptionGroupCardData) {
+                        history.push(
+                            getSubscriptionGroupsDetailPath(
+                                subscriptionGroupCardData.id
+                            )
+                        );
+                    }
                 },
             },
         ]);

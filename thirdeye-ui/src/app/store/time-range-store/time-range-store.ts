@@ -4,27 +4,24 @@ import { persist } from "zustand/middleware";
 import {
     TimeRange,
     TimeRangeDuration,
-} from "../../components/time-range-selector/time-range-selector.interfaces";
+} from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     getDefaultTimeRangeDuration,
     getTimeRangeDuration,
 } from "../../utils/time-range-util/time-range-util";
-import { AppTimeRangeStore } from "./app-time-range-store.interfaces";
+import { TimeRangeStore } from "./time-range-store.interfaces";
 
-const LOCAL_STORAGE_KEY_APP_TIME_RANGE = "LOCAL_STORAGE_KEY_APP_TIME_RANGE";
+const LOCAL_STORAGE_KEY_TIME_RANGE = "LOCAL_STORAGE_KEY_TIME_RANGE";
 const MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS = 3;
 
-// App store for app time range, persisted in browser local storage
-export const useAppTimeRangeStore = create<AppTimeRangeStore>(
-    persist<AppTimeRangeStore>(
-        (
-            set: SetState<AppTimeRangeStore>,
-            get: GetState<AppTimeRangeStore>
-        ) => ({
-            appTimeRangeDuration: getDefaultTimeRangeDuration(),
+// App store for time range, persisted in browser local storage
+export const useTimeRangeStore = create<TimeRangeStore>(
+    persist<TimeRangeStore>(
+        (set: SetState<TimeRangeStore>, get: GetState<TimeRangeStore>) => ({
+            timeRangeDuration: getDefaultTimeRangeDuration(),
             recentCustomTimeRangeDurations: [],
 
-            setAppTimeRangeDuration: (
+            setTimeRangeDuration: (
                 timeRangeDuration: TimeRangeDuration
             ): void => {
                 if (!timeRangeDuration) {
@@ -32,7 +29,7 @@ export const useAppTimeRangeStore = create<AppTimeRangeStore>(
                 }
 
                 set({
-                    appTimeRangeDuration: timeRangeDuration,
+                    timeRangeDuration: timeRangeDuration,
                 });
 
                 if (timeRangeDuration.timeRange === TimeRange.CUSTOM) {
@@ -61,28 +58,28 @@ export const useAppTimeRangeStore = create<AppTimeRangeStore>(
                 }
             },
 
-            refreshAppTimeRangeDuration: (): void => {
-                const { appTimeRangeDuration } = get();
+            refreshTimeRange: (): void => {
+                const { timeRangeDuration: appTimeRangeDuration } = get();
 
                 if (appTimeRangeDuration.timeRange === TimeRange.CUSTOM) {
                     // Custom time range, set as is
                     set({
-                        appTimeRangeDuration: cloneDeep(appTimeRangeDuration),
+                        timeRangeDuration: cloneDeep(appTimeRangeDuration),
                     });
 
                     return;
                 }
 
-                // Predefined time range, set current calculated duration
+                // Predefined time range, set current calculated time range duration
                 set({
-                    appTimeRangeDuration: getTimeRangeDuration(
+                    timeRangeDuration: getTimeRangeDuration(
                         appTimeRangeDuration.timeRange
                     ),
                 });
             },
         }),
         {
-            name: LOCAL_STORAGE_KEY_APP_TIME_RANGE, // Persist in browser local storage
+            name: LOCAL_STORAGE_KEY_TIME_RANGE, // Persist in browser local storage
         }
     )
 );

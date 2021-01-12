@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import {
     TimeRange,
     TimeRangeDuration,
-} from "../../components/time-range-selector/time-range-selector.interfaces";
+} from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { formatDateAndTime } from "../date-time-util/date-time-util";
 
 export const createTimeRangeDuration = (

@@ -4,6 +4,6 @@ export interface EditableListProps {
     list?: string[];
     inputLabel: string;
     buttonLabel: string;
-    validateFn?: (listItem: string) => ValidationResult; // Function that shall validate list item
+    validateFn?: (listItem: string) => ValidationResult; // Function that validates list item
     onChange?: (list: string[]) => void;
 }

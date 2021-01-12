@@ -2,12 +2,12 @@ import { Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { login } from "../../rest/auth-rest/auth-rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAuthStore } from "../../store/auth-store/auth-store";
 import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
 import { getSignInPath } from "../../utils/routes-util/routes-util";
@@ -17,9 +17,7 @@ export const SignInPage: FunctionComponent = () => {
     const signInPageClasses = useSignInPageStyles();
     const [loading, setLoading] = useState(true);
     const [setAccessToken] = useAuthStore((state) => [state.setAccessToken]);
-    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-    ]);
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const [
         redirectionPath,
         clearRedirectionPath,
@@ -35,7 +33,9 @@ export const SignInPage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: t("label.sign-in"),
-                pathFn: getSignInPath,
+                onClick: (): void => {
+                    history.push(getSignInPath());
+                },
             },
         ]);
 

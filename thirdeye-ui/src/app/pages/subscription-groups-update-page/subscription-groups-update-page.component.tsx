@@ -3,6 +3,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
@@ -16,7 +17,6 @@ import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { isValidNumberId } from "../../utils/params-util/params-util";
 import {
     getSubscriptionGroupsDetailPath,
@@ -35,18 +35,14 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
         subscriptionGroup,
         setSubscriptionGroup,
     ] = useState<SubscriptionGroup>();
-    const [
+    const {
         setPageBreadcrumbs,
         pushPageBreadcrumb,
         popPageBreadcrumb,
-    ] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-        state.pushPageBreadcrumb,
-        state.popPageBreadcrumb,
-    ]);
+    } = useAppBreadcrumbs();
+    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<SubscriptionGroupsUpdatePageParams>();
     const history = useHistory();
-    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -54,18 +50,26 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
         setPageBreadcrumbs([
             {
                 text: subscriptionGroup ? subscriptionGroup.name : "",
-                pathFn: (): string => {
-                    return subscriptionGroup
-                        ? getSubscriptionGroupsDetailPath(subscriptionGroup.id)
-                        : "";
+                onClick: (): void => {
+                    if (subscriptionGroup) {
+                        history.push(
+                            getSubscriptionGroupsDetailPath(
+                                subscriptionGroup.id
+                            )
+                        );
+                    }
                 },
             },
             {
                 text: t("label.update"),
-                pathFn: (): string => {
-                    return subscriptionGroup
-                        ? getSubscriptionGroupsUpdatePath(subscriptionGroup.id)
-                        : "";
+                onClick: (): void => {
+                    if (subscriptionGroup) {
+                        history.push(
+                            getSubscriptionGroupsUpdatePath(
+                                subscriptionGroup.id
+                            )
+                        );
+                    }
                 },
             },
             // Empty page breadcrumb as a placeholder for subscription group wizard step

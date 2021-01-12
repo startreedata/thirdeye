@@ -1,8 +1,8 @@
 import { Grid, Typography } from "@material-ui/core";
 import classnames from "classnames";
 import React, { FunctionComponent } from "react";
-import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
-import { TimeRangeSelector } from "../time-range-selector/time-range-selector.component";
+import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.style";
 
@@ -10,17 +10,12 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     props: PageContentsProps
 ) => {
     const pageContentsClasses = usePageContentsStyles();
-    const [
-        appTimeRangeDuration,
+    const {
+        timeRangeDuration,
         recentCustomTimeRangeDurations,
-        setAppTimeRangeDuration,
-        refreshAppTimeRangeDuration,
-    ] = useAppTimeRangeStore((state) => [
-        state.appTimeRangeDuration,
-        state.recentCustomTimeRangeDurations,
-        state.setAppTimeRangeDuration,
-        state.refreshAppTimeRangeDuration,
-    ]);
+        setTimeRangeDuration,
+        refreshTimeRange,
+    } = useTimeRange();
 
     return (
         <main
@@ -52,9 +47,9 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                                     recentCustomTimeRangeDurations={
                                         recentCustomTimeRangeDurations
                                     }
-                                    timeRangeDuration={appTimeRangeDuration}
-                                    onChange={setAppTimeRangeDuration}
-                                    onRefresh={refreshAppTimeRangeDuration}
+                                    timeRangeDuration={timeRangeDuration}
+                                    onChange={setTimeRangeDuration}
+                                    onRefresh={refreshTimeRange}
                                 />
                             </Grid>
                         )}

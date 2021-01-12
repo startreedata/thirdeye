@@ -15,6 +15,7 @@ import { useSnackbar } from "notistack";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { Button } from "../../components/button/button.component";
 import { ConfigurationStep } from "../../components/configuration-step/configuration-step.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
@@ -22,6 +23,7 @@ import { PageContainer } from "../../components/page-container/page-container.co
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { ReviewStep } from "../../components/review-step/review-step.component";
 import { CustomStepper } from "../../components/stepper/stepper.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     createAlert,
     getAlertEvaluation,
@@ -32,8 +34,6 @@ import {
     getAllSubscriptionGroups,
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
-import { useAppTimeRangeStore } from "../../store/app-time-range-store/app-time-range-store";
 import DETECTION_CONFIG from "../../utils/defaults/detection-config";
 import {
     AppRoute,
@@ -48,9 +48,7 @@ const DEFAULT_SUBSCRIPTION = "This is default subscription config";
 
 export const AlertsCreatePage = (): ReactElement => {
     const [loading, setLoading] = useState(false);
-    const [setPageBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setPageBreadcrumbs,
-    ]);
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const [detectionConfig, setDetectionConfig] = useState(DETECTION_CONFIG);
     const [subscriptionConfig, setSubscriptionConfig] = useState(
         DEFAULT_SUBSCRIPTION
@@ -66,9 +64,7 @@ export const AlertsCreatePage = (): ReactElement => {
 
     const [isFirstTime, setIsFirstTime] = useState(true);
 
-    const [appTimeRangeDuration] = useAppTimeRangeStore((state) => [
-        state.appTimeRangeDuration,
-    ]);
+    const { timeRangeDuration: appTimeRangeDuration } = useTimeRange();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -76,7 +72,9 @@ export const AlertsCreatePage = (): ReactElement => {
         setPageBreadcrumbs([
             {
                 text: t("label.create"),
-                pathFn: getAlertsCreatePath,
+                onClick: (): void => {
+                    history.push(getAlertsCreatePath());
+                },
             },
         ]);
 

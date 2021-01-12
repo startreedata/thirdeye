@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { SignInPage } from "../../pages/sign-in-page/sign-in-page.component";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
 import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
 import {
@@ -11,9 +11,7 @@ import {
 } from "../../utils/routes-util/routes-util";
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
-    const [setAppSectionBreadcrumbs] = useAppBreadcrumbsStore((state) => [
-        state.setAppSectionBreadcrumbs,
-    ]);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
     const [removeAppToolbar] = useAppToolbarStore((state) => [
         state.removeAppToolbar,
     ]);
@@ -23,8 +21,8 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const location = useLocation();
 
     useEffect(() => {
-        // Create app section breadcrumbs
-        setAppSectionBreadcrumbs([]);
+        // Create router breadcrumbs
+        setRouterBreadcrumbs([]);
 
         // No app toolbar under this router
         removeAppToolbar();

@@ -51,11 +51,6 @@ public class ThirdEyeConfiguration extends Configuration {
   private List<ModelDownloaderConfiguration> modelDownloaderConfig;
 
   /**
-   * allow cross request for local development
-   */
-  private boolean cors = false;
-
-  /**
    * Convert relative path to absolute URL
    *
    * Supported cases:
@@ -110,14 +105,6 @@ public class ThirdEyeConfiguration extends Configuration {
   public ThirdEyeConfiguration setRootDir(final String rootDir) {
     this.rootDir = rootDir;
     return this;
-  }
-
-  public boolean isCors() {
-    return cors;
-  }
-
-  public void setCors(boolean cors) {
-    this.cors = cors;
   }
 
   public String getFunctionConfigPath() {

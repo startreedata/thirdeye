@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { Route, Switch } from "react-router-dom";
-import { useAuthStore } from "../../store/auth-store/auth-store";
+import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { AlertsRouter } from "../alerts-router/alerts-router";
 import { AnomaliesRouter } from "../anomalies-router/anomalies-router";
@@ -9,7 +9,7 @@ import { GeneralAuthenticatedRouter } from "../general-authenticated-router/gene
 import { GeneralUnauthenticatedRouter } from "../general-unauthenticated-router/general-unauthenticated-router";
 
 export const AppRouter: FunctionComponent = () => {
-    const [auth] = useAuthStore((state) => [state.auth]);
+    const { auth } = useAuth();
 
     if (auth) {
         // Authenticated

@@ -6,6 +6,7 @@ import ReactDOM from "react-dom";
 import { initReactI18next } from "react-i18next";
 import { Router } from "react-router-dom";
 import { App } from "./app";
+import { AuthProvider } from "./components/auth-provider/auth-provider.component";
 import { DialogProvider } from "./components/dialogs/dialog-provider/dialog-provider.component";
 import { SnackbarProvider } from "./components/snackbar-provider/snackbar-provider.component";
 import { TimeRangeProvider } from "./components/time-range/time-range-provider/time-range-provider.component";
@@ -33,11 +34,13 @@ ReactDOM.render(
             {/* App rendered by a router to allow navigation using app bar */}
             <Router history={appHistory}>
                 <SnackbarProvider>
-                    <DialogProvider>
+                    <AuthProvider>
                         <TimeRangeProvider>
-                            <App />
+                            <DialogProvider>
+                                <App />
+                            </DialogProvider>
                         </TimeRangeProvider>
-                    </DialogProvider>
+                    </AuthProvider>
                 </SnackbarProvider>
             </Router>
         </ThemeProvider>

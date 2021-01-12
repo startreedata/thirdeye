@@ -12,7 +12,6 @@ import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { ReactComponent as ThirdEye } from "../../../assets/images/third-eye.svg";
-import { useAuthStore } from "../../store/auth-store/auth-store";
 import {
     AppRoute,
     getAlertsCreatePath,
@@ -25,6 +24,7 @@ import {
     getSignOutPath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes-util/routes-util";
+import { useAuth } from "../auth-provider/auth-provider.component";
 import { useAppBarStyles } from "./app-bar.styles";
 
 export const AppBar: FunctionComponent = () => {
@@ -37,7 +37,7 @@ export const AppBar: FunctionComponent = () => {
         accountOptionsAnchorElement,
         setAccountOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
-    const [auth] = useAuthStore((state) => [state.auth]);
+    const { auth } = useAuth();
     const history = useHistory();
     const location = useLocation();
     const { t } = useTranslation();

@@ -4,12 +4,10 @@ import { MemoryRouter } from "react-router-dom";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { AppRouter } from "./app-router";
 
-jest.mock("../../store/auth-store/auth-store", () => ({
-    useAuthStore: jest.fn().mockImplementation((selector) => {
-        return selector({
-            auth: mockAuth,
-        });
-    }),
+jest.mock("../../components/auth-provider/auth-provider.component", () => ({
+    useAuth: jest.fn().mockImplementation(() => ({
+        auth: mockAuth,
+    })),
 }));
 
 jest.mock("../alerts-router/alerts-router", () => ({

@@ -3,12 +3,12 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { login } from "../../rest/auth-rest/auth-rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
-import { useAuthStore } from "../../store/auth-store/auth-store";
 import { getSignInPath } from "../../utils/routes-util/routes-util";
 import { SignInPageProps } from "./sign-in-page.interfaces";
 import { useSignInPageStyles } from "./sign-in-page.styles";
@@ -18,7 +18,7 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
 ) => {
     const signInPageClasses = useSignInPageStyles();
     const [loading, setLoading] = useState(true);
-    const [setAccessToken] = useAuthStore((state) => [state.setAccessToken]);
+    const { signIn } = useAuth();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const history = useHistory();
     const { t } = useTranslation();
@@ -39,7 +39,7 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
 
     const performSignIn = (): void => {
         login().then((auth: Auth): void => {
-            setAccessToken(auth.accessToken);
+            signIn(auth.accessToken);
 
             // Redirect
             history.push(props.redirectionURL);

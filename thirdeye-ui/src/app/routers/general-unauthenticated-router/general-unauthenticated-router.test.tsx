@@ -18,14 +18,6 @@ jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
     }),
 }));
 
-jest.mock("../../store/redirection-path-store/redirection-path-store", () => ({
-    useRedirectionPathStore: jest.fn().mockImplementation((selector) => {
-        return selector({
-            setRedirectionPath: mockSetRedirectionPath,
-        });
-    }),
-}));
-
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
     useLocation: jest.fn().mockImplementation(() => ({
@@ -38,6 +30,7 @@ jest.mock("../../utils/routes-util/routes-util", () => ({
         string,
         unknown
     >),
+    getBasePath: jest.fn().mockReturnValue("testBasePath"),
     createPathWithRecognizedQueryString: jest
         .fn()
         .mockImplementation((path: string): string => {
@@ -46,11 +39,16 @@ jest.mock("../../utils/routes-util/routes-util", () => ({
 }));
 
 jest.mock("../../pages/sign-in-page/sign-in-page.component", () => ({
-    SignInPage: jest.fn().mockImplementation(() => <>testSignInPage</>),
+    SignInPage: jest
+        .fn()
+        .mockImplementation((props) => (
+            <>{`testSignInPage:${props.redirectionURL}`}</>
+        )),
 }));
 
 describe("General Unauthenticated Router", () => {
     test("should set appropriate router breadcrumbs", () => {
+        mockPathname = "";
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />
@@ -61,6 +59,7 @@ describe("General Unauthenticated Router", () => {
     });
 
     test("should remove app toolbar", () => {
+        mockPathname = "";
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />
@@ -70,18 +69,42 @@ describe("General Unauthenticated Router", () => {
         expect(mockRemoveAppToolbar).toHaveBeenCalled();
     });
 
-    test("should not set redirection path if location is sign in path", () => {
-        mockPathname = AppRoute.SIGN_IN;
+    test("should render sign in page at exact sign in path", () => {
+        mockPathname = "";
         render(
             <MemoryRouter initialEntries={[AppRoute.SIGN_IN]}>
                 <GeneralUnauthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(mockSetRedirectionPath).not.toHaveBeenCalled();
+        expect(screen.getByText("testSignInPage:")).toBeInTheDocument();
     });
 
-    test("should not set redirection path if location is sign out path", () => {
+    test("should render sign in page at invalid sign in path", () => {
+        mockPathname = "";
+        render(
+            <MemoryRouter initialEntries={[`${AppRoute.SIGN_IN}/testPath`]}>
+                <GeneralUnauthenticatedRouter />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText("testSignInPage:")).toBeInTheDocument();
+    });
+
+    test("should render sign in page with base path as redirection URL if location is sign in path", () => {
+        mockPathname = AppRoute.SIGN_IN;
+        render(
+            <MemoryRouter>
+                <GeneralUnauthenticatedRouter />
+            </MemoryRouter>
+        );
+
+        expect(
+            screen.getByText("testSignInPage:testBasePath")
+        ).toBeInTheDocument();
+    });
+
+    test("should render sign in page with base path as redirection URL if location is sign out path", () => {
         mockPathname = AppRoute.SIGN_OUT;
         render(
             <MemoryRouter>
@@ -89,10 +112,12 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(mockSetRedirectionPath).not.toHaveBeenCalled();
+        expect(
+            screen.getByText("testSignInPage:testBasePath")
+        ).toBeInTheDocument();
     });
 
-    test("should set redirection path if location is other than sign in/out path", () => {
+    test("should render sign in page with appropriate redirection URL if location is anything other than sign in/out path", () => {
         mockPathname = "testPath";
         render(
             <MemoryRouter>
@@ -100,44 +125,23 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(mockSetRedirectionPath).toHaveBeenCalledWith("testPath");
-    });
-
-    test("should render sign in page at exact sign in path", () => {
-        render(
-            <MemoryRouter initialEntries={[AppRoute.SIGN_IN]}>
-                <GeneralUnauthenticatedRouter />
-            </MemoryRouter>
-        );
-
-        expect(screen.getByText("testSignInPage")).toBeInTheDocument();
-    });
-
-    test("should render sign in page at invalid sign in path", () => {
-        render(
-            <MemoryRouter initialEntries={[`${AppRoute.SIGN_IN}/testPath`]}>
-                <GeneralUnauthenticatedRouter />
-            </MemoryRouter>
-        );
-
-        expect(screen.getByText("testSignInPage")).toBeInTheDocument();
+        expect(screen.getByText("testSignInPage:testPath")).toBeInTheDocument();
     });
 
     test("should render sign in page by default", () => {
+        mockPathname = "";
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testSignInPage")).toBeInTheDocument();
+        expect(screen.getByText("testSignInPage:")).toBeInTheDocument();
     });
 });
 
 const mockSetRouterBreadcrumbs = jest.fn();
 
 const mockRemoveAppToolbar = jest.fn();
-
-const mockSetRedirectionPath = jest.fn();
 
 let mockPathname = "";

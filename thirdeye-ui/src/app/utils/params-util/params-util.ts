@@ -109,15 +109,15 @@ export const getQueryString = (key: string): string => {
 // Returns current query string from URL with only the recognized app query string key-value pairs
 // that are allowed to be carried forward when navigating
 export const getRecognizedQueryString = (): string => {
-    const currentUrlSearchParams = new URLSearchParams(location.search);
+    const currentURLSearchParams = new URLSearchParams(location.search);
     const recognizedURLSearchParams = new URLSearchParams();
     for (const allowedAppQueryStringKey of allowedAppQueryStringKeys) {
         if (
-            currentUrlSearchParams.has(allowedAppQueryStringKey.toLowerCase())
+            currentURLSearchParams.has(allowedAppQueryStringKey.toLowerCase())
         ) {
             recognizedURLSearchParams.set(
                 allowedAppQueryStringKey.toLowerCase(),
-                currentUrlSearchParams.get(
+                currentURLSearchParams.get(
                     allowedAppQueryStringKey.toLowerCase()
                 ) as string
             );

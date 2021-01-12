@@ -83,10 +83,10 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
 };
 
 export const useTimeRange = (): UseTimeRangeProps => {
-    return useTimeRangeStore((store) => ({
-        timeRangeDuration: store.timeRangeDuration,
-        recentCustomTimeRangeDurations: store.recentCustomTimeRangeDurations,
-        setTimeRangeDuration: store.setTimeRangeDuration,
-        refreshTimeRange: store.refreshTimeRange,
+    return useTimeRangeStore((state) => ({
+        timeRangeDuration: state.timeRangeDuration,
+        recentCustomTimeRangeDurations: state.recentCustomTimeRangeDurations,
+        setTimeRangeDuration: state.setTimeRangeDuration,
+        refreshTimeRange: state.refreshTimeRange,
     }));
 };

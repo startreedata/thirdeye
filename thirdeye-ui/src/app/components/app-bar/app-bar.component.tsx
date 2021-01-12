@@ -96,6 +96,8 @@ export const AppBar: FunctionComponent = () => {
 
     const onSignOut = (): void => {
         history.push(getSignOutPath());
+
+        onCloseAccountOptions();
     };
 
     const isRouteCurrent = (route: string): boolean => {

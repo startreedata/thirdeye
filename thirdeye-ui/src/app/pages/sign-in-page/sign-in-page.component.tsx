@@ -9,22 +9,17 @@ import { PageContents } from "../../components/page-contents/page-contents.compo
 import { login } from "../../rest/auth-rest/auth-rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
 import { useAuthStore } from "../../store/auth-store/auth-store";
-import { useRedirectionPathStore } from "../../store/redirection-path-store/redirection-path-store";
 import { getSignInPath } from "../../utils/routes-util/routes-util";
+import { SignInPageProps } from "./sign-in-page.interfaces";
 import { useSignInPageStyles } from "./sign-in-page.styles";
 
-export const SignInPage: FunctionComponent = () => {
+export const SignInPage: FunctionComponent<SignInPageProps> = (
+    props: SignInPageProps
+) => {
     const signInPageClasses = useSignInPageStyles();
     const [loading, setLoading] = useState(true);
     const [setAccessToken] = useAuthStore((state) => [state.setAccessToken]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const [
-        redirectionPath,
-        clearRedirectionPath,
-    ] = useRedirectionPathStore((state) => [
-        state.redirectionPath,
-        state.clearRedirectionPath,
-    ]);
     const history = useHistory();
     const { t } = useTranslation();
 
@@ -46,13 +41,8 @@ export const SignInPage: FunctionComponent = () => {
         login().then((auth: Auth): void => {
             setAccessToken(auth.accessToken);
 
-            // Redirect if a path to redirect to is available or let authentication state force
-            // reload
-            if (redirectionPath) {
-                history.push(redirectionPath);
-
-                clearRedirectionPath();
-            }
+            // Redirect
+            history.push(props.redirectionURL);
         });
     };
 

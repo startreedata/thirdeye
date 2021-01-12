@@ -12,9 +12,9 @@ export const AppBreadcrumbs: FunctionComponent = () => {
     const [
         routerBreadcrumbs,
         pageBreadcrumbs,
-    ] = useAppBreadcrumbsStore((store) => [
-        store.routerBreadcrumbs,
-        store.pageBreadcrumbs,
+    ] = useAppBreadcrumbsStore((state) => [
+        state.routerBreadcrumbs,
+        state.pageBreadcrumbs,
     ]);
 
     return (
@@ -40,10 +40,10 @@ export const AppBreadcrumbs: FunctionComponent = () => {
 };
 
 export const useAppBreadcrumbs = (): UseAppBreadcrumbsProps => {
-    return useAppBreadcrumbsStore((store) => ({
-        setRouterBreadcrumbs: store.setRouterBreadcrumbs,
-        setPageBreadcrumbs: store.setPageBreadcrumbs,
-        pushPageBreadcrumb: store.pushPageBreadcrumb,
-        popPageBreadcrumb: store.popPageBreadcrumb,
+    return useAppBreadcrumbsStore((state) => ({
+        setRouterBreadcrumbs: state.setRouterBreadcrumbs,
+        setPageBreadcrumbs: state.setPageBreadcrumbs,
+        pushPageBreadcrumb: state.pushPageBreadcrumb,
+        popPageBreadcrumb: state.popPageBreadcrumb,
     }));
 };

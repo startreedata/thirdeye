@@ -127,22 +127,19 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             return;
         }
 
-        // Remove item from from-list map
-        setFromListMap((fromListMap) => {
-            fromListMap.delete(key);
+        // Clone fromListMap & delete `item` with given `key`
+        const newFromListMap = new Map(fromListMap);
+        newFromListMap.delete(key);
 
-            return new Map(fromListMap);
-        });
+        // Clone toListMap & add new `item`
+        const newToListMap = new Map(toListMap);
+        newToListMap.set(key, item);
 
-        // Add item to to-list map
-        setToListMap((toListMap) => {
-            toListMap.set(key, item);
-
-            return new Map(toListMap);
-        });
+        setFromListMap(newFromListMap);
+        setToListMap(newToListMap);
 
         // Notify
-        props.onChange && props.onChange([...toListMap.values()]);
+        props.onChange && props.onChange([...newToListMap.values()]);
     };
 
     const onRemoveListItem = (item: T): void => {
@@ -151,22 +148,20 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             return;
         }
 
-        // Remove item from to-list map
-        setToListMap((toListMap) => {
-            toListMap.delete(key);
+        // Clone toListMap & delete `item` with given `key`
+        const newToListMap = new Map(toListMap);
+        newToListMap.delete(key);
 
-            return new Map(toListMap);
-        });
+        // Clone fromListMap & add new `item`
+        const newFromListMap = new Map(fromListMap);
+        newFromListMap.set(key, item);
 
-        // Add item to from-list map
-        setFromListMap((fromListMap) => {
-            fromListMap.set(key, item);
-
-            return new Map(fromListMap);
-        });
+        // Update local state
+        setToListMap(newToListMap);
+        setFromListMap(newFromListMap);
 
         // Notify
-        props.onChange && props.onChange([...toListMap.values()]);
+        props.onChange && props.onChange([...newToListMap.values()]);
     };
 
     return (

@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
@@ -44,13 +46,14 @@ public class DataSourcesLoader {
    * @return DataSources
    */
   public DataSources fromDataSourcesUrl(URL dataSourcesUrl) {
-    DataSources dataSources = null;
+    requireNonNull(dataSourcesUrl, "dataSourcesUrl is null!");
     try {
-      dataSources = OBJECT_MAPPER.readValue(dataSourcesUrl, DataSources.class);
+      return requireNonNull(OBJECT_MAPPER.readValue(dataSourcesUrl, DataSources.class),
+          "dataSources is null");
     } catch (IOException e) {
       LOG.error("Exception in reading data sources file {}", dataSourcesUrl, e);
+      throw new RuntimeException(e);
     }
-    return dataSources;
   }
 
   /**

@@ -94,13 +94,10 @@ public class ThirdEyeCacheRegistry {
    * Initializes the adaptor to data sources such as Pinot, MySQL, etc.
    */
   private void initDataSources(final URL dataSourcesUrl) {
-    try {
-      // Initialize adaptors to time series databases.
-      DataSourceCache dataSourceCache = buildQueryCache(dataSourcesUrl);
-      registerQueryCache(dataSourceCache);
-    } catch (Exception e) {
-      LOG.info("Caught exception while initializing caches", e);
-    }
+    // Initialize adaptors to time series databases.
+    final DataSourceCache dataSourceCache = requireNonNull(buildQueryCache(dataSourcesUrl),
+        "dataSourceCache is null");
+    registerQueryCache(dataSourceCache);
   }
 
   public DataSourceCache buildQueryCache(final URL dataSourcesUrl) {

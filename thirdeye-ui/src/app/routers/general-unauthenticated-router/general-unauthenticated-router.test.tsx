@@ -91,7 +91,7 @@ describe("General Unauthenticated Router", () => {
         expect(screen.getByText("testSignInPage:")).toBeInTheDocument();
     });
 
-    test("should render sign in page with base path as redirection URL if location is sign in path", () => {
+    test("should render sign in page with base path as redirection URL when location is sign in path", () => {
         mockPathname = AppRoute.SIGN_IN;
         render(
             <MemoryRouter>
@@ -104,7 +104,7 @@ describe("General Unauthenticated Router", () => {
         ).toBeInTheDocument();
     });
 
-    test("should render sign in page with base path as redirection URL if location is sign out path", () => {
+    test("should render sign in page with base path as redirection URL when location is sign out path", () => {
         mockPathname = AppRoute.SIGN_OUT;
         render(
             <MemoryRouter>
@@ -117,7 +117,7 @@ describe("General Unauthenticated Router", () => {
         ).toBeInTheDocument();
     });
 
-    test("should render sign in page with appropriate redirection URL if location is anything other than sign in/out path", () => {
+    test("should render sign in page with appropriate redirection URL when location is anything other than sign in/out path", () => {
         mockPathname = "testPath";
         render(
             <MemoryRouter>

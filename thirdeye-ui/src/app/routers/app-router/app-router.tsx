@@ -9,10 +9,9 @@ import { GeneralAuthenticatedRouter } from "../general-authenticated-router/gene
 import { GeneralUnauthenticatedRouter } from "../general-unauthenticated-router/general-unauthenticated-router";
 
 export const AppRouter: FunctionComponent = () => {
-    const { auth } = useAuth();
+    const { authDisabled, authenticated } = useAuth();
 
-    if (auth) {
-        // Authenticated
+    if (authDisabled || authenticated) {
         return (
             <Switch>
                 {/* Direct all alerts paths to alerts router */}

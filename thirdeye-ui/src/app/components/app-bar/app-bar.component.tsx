@@ -37,7 +37,7 @@ export const AppBar: FunctionComponent = () => {
         accountOptionsAnchorElement,
         setAccountOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
-    const { auth } = useAuth();
+    const { authDisabled, authenticated } = useAuth();
     const history = useHistory();
     const location = useLocation();
     const { t } = useTranslation();
@@ -176,7 +176,7 @@ export const AppBar: FunctionComponent = () => {
                     {t("label.configuration")}
                 </Link>
 
-                {!auth && (
+                {!authDisabled && !authenticated && (
                     // Sign in
                     <Link
                         className={classnames(
@@ -194,11 +194,14 @@ export const AppBar: FunctionComponent = () => {
                     </Link>
                 )}
 
-                {auth && (
+                {(authDisabled || authenticated) && (
                     <>
                         {/* Shortcut options */}
                         <Fab
-                            className={classnames(appBarClasses.rightAlign)}
+                            className={classnames(
+                                appBarClasses.link,
+                                appBarClasses.rightAlign
+                            )}
                             color="primary"
                             size="small"
                             onClick={onShortcutOptionsClick}
@@ -221,9 +224,14 @@ export const AppBar: FunctionComponent = () => {
                                 {"Create Subscription Group"}
                             </MenuItem>
                         </Menu>
+                    </>
+                )}
 
+                {!authDisabled && authenticated && (
+                    <>
                         {/* Account options */}
                         <Fab
+                            className={appBarClasses.link}
                             color="primary"
                             size="small"
                             onClick={onAccountOptionsClick}

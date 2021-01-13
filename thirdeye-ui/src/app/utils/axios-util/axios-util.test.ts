@@ -6,11 +6,19 @@ import {
 } from "./axios-util";
 
 describe("Axios Util", () => {
-    test("getRequestInterceptor should return an axios request interceptor", () => {
+    test("getRequestInterceptor should return axios request interceptor", () => {
         expect(getRequestInterceptor("testToken")).toBeInstanceOf(Function);
     });
 
     test("axios request interceptor should not attach invalid access token to request header", () => {
+        const requestInterceptor = getRequestInterceptor(
+            (null as unknown) as string
+        );
+
+        expect(requestInterceptor({})).toEqual({});
+    });
+
+    test("axios request interceptor should not attach empty access token to request header", () => {
         const requestInterceptor = getRequestInterceptor("");
 
         expect(requestInterceptor({})).toEqual({});
@@ -26,7 +34,7 @@ describe("Axios Util", () => {
         });
     });
 
-    test("getFulfilledResponseInterceptor should return an axios response interceptor", () => {
+    test("getFulfilledResponseInterceptor should return axios response interceptor", () => {
         expect(getFulfilledResponseInterceptor()).toBeInstanceOf(Function);
     });
 
@@ -36,41 +44,39 @@ describe("Axios Util", () => {
         expect(responseInterceptor("testResponse")).toEqual("testResponse");
     });
 
-    test("getRejectedResponseInterceptor should return an axios rejected response interceptor", () => {
+    test("getRejectedResponseInterceptor should return axios rejected response interceptor", () => {
         expect(
-            getRejectedResponseInterceptor(mockUnauthenticatedAccessHandler)
+            getRejectedResponseInterceptor(mockUnauthenticatedAccessFn)
         ).toBeInstanceOf(Function);
     });
 
-    test("axios rejected response interceptor should throw 401 error and invoke unauthenticated access handler", () => {
-        const mockError = {
+    test("axios rejected response interceptor should throw 401 error and invoke unauthenticated access function", () => {
+        const mockError: AxiosError = {
             response: {
                 status: 401,
             },
         } as AxiosError;
-
         const responseInterceptor = getRejectedResponseInterceptor(
-            mockUnauthenticatedAccessHandler
+            mockUnauthenticatedAccessFn
         );
 
         expect(() => responseInterceptor(mockError)).toThrow();
-        expect(mockUnauthenticatedAccessHandler).toHaveBeenCalled();
+        expect(mockUnauthenticatedAccessFn).toHaveBeenCalled();
     });
 
-    test("axios rejected response interceptor should throw any error other than 401 but not invoke unauthenticated access handler", () => {
-        const mockError = {
+    test("axios rejected response interceptor should throw any error other than 401 but not invoke unauthenticated access function", () => {
+        const mockError: AxiosError = {
             response: {
                 status: 500,
             },
         } as AxiosError;
-
         const responseInterceptor = getRejectedResponseInterceptor(
-            mockUnauthenticatedAccessHandler
+            mockUnauthenticatedAccessFn
         );
 
         expect(() => responseInterceptor(mockError)).toThrow();
-        expect(mockUnauthenticatedAccessHandler).not.toHaveBeenCalled();
+        expect(mockUnauthenticatedAccessFn).not.toHaveBeenCalled();
     });
 });
 
-const mockUnauthenticatedAccessHandler = jest.fn();
+const mockUnauthenticatedAccessFn = jest.fn();

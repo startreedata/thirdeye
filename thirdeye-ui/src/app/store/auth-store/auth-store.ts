@@ -8,21 +8,30 @@ const LOCAL_STORAGE_KEY_AUTH = "LOCAL_STORAGE_KEY_AUTH";
 export const useAuthStore = create<AuthStore>(
     persist<AuthStore>(
         (set: SetState<AuthStore>) => ({
-            auth: false,
+            authDisabled: false,
+            authenticated: false,
             accessToken: "",
 
-            // Action for signing in
-            setAccessToken: (token: string): void => {
+            disableAuth: (): void => {
                 set({
-                    auth: Boolean(token),
-                    accessToken: token,
+                    authDisabled: true,
+                    authenticated: false,
+                    accessToken: "",
                 });
             },
 
-            // Action for signing out
+            setAccessToken: (token: string): void => {
+                set({
+                    authDisabled: false,
+                    authenticated: Boolean(token),
+                    accessToken: token || "",
+                });
+            },
+
             clearAccessToken: (): void => {
                 set({
-                    auth: false,
+                    authDisabled: false,
+                    authenticated: false,
                     accessToken: "",
                 });
             },

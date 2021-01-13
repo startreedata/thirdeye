@@ -19,7 +19,7 @@ const systemLocation = location;
 
 jest.mock("../history-util/history-util", () => ({
     appHistory: {
-        replace: jest.fn().mockImplementation((locationObject) => {
+        replace: jest.fn().mockImplementation((locationObject): void => {
             location.search = locationObject.search;
         }),
     },

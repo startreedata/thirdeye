@@ -37,7 +37,9 @@ describe("Visualization Util", () => {
 
     test("formatLargeNumberForVisualization should return appropriate string for number object", () => {
         expect(
-            formatLargeNumberForVisualization({ valueOf: (): number => 1 })
+            formatLargeNumberForVisualization({
+                valueOf: (): number => 1,
+            })
         ).toEqual("1");
     });
 

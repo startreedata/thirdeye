@@ -5,8 +5,10 @@ export interface AuthProviderProps {
 }
 
 export interface UseAuthProps {
-    auth: boolean;
+    authDisabled: boolean;
+    authenticated: boolean;
     accessToken: string;
+    disableAuth: () => void;
     signIn: (accessToken: string) => void;
     signOut: () => void;
 }

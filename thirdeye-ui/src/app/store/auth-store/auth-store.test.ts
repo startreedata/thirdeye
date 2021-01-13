@@ -5,7 +5,19 @@ describe("Auth Store", () => {
     test("should initialize default values", () => {
         const { result } = renderHook(() => useAuthStore());
 
-        expect(result.current.auth).toBeFalsy();
+        expect(result.current.authDisabled).toBeFalsy();
+        expect(result.current.authenticated).toBeFalsy();
+        expect(result.current.accessToken).toEqual("");
+    });
+
+    test("disableAuth should update store appropriately", () => {
+        const { result } = renderHook(() => useAuthStore());
+        act(() => {
+            result.current.disableAuth();
+        });
+
+        expect(result.current.authDisabled).toBeTruthy();
+        expect(result.current.authenticated).toBeFalsy();
         expect(result.current.accessToken).toEqual("");
     });
 
@@ -15,54 +27,51 @@ describe("Auth Store", () => {
             result.current.setAccessToken((null as unknown) as string);
         });
 
-        expect(result.current.auth).toBeFalsy();
-        expect(result.current.accessToken).toBeNull();
+        expect(result.current.authDisabled).toBeFalsy();
+        expect(result.current.authenticated).toBeFalsy();
+        expect(result.current.accessToken).toEqual("");
 
         act(() => {
             result.current.setAccessToken("");
         });
 
-        expect(result.current.auth).toBeFalsy();
+        expect(result.current.authDisabled).toBeFalsy();
+        expect(result.current.authenticated).toBeFalsy();
         expect(result.current.accessToken).toEqual("");
     });
 
-    test("setAccessToken should update store appropriately", () => {
+    test("setAccessToken should update store appropriately for token", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
-            result.current.setAccessToken("testToken1");
+            result.current.setAccessToken("testToken");
         });
 
-        expect(result.current.auth).toBeTruthy();
-        expect(result.current.accessToken).toEqual("testToken1");
+        expect(result.current.authDisabled).toBeFalsy();
+        expect(result.current.authenticated).toBeTruthy();
+        expect(result.current.accessToken).toEqual("testToken");
     });
 
     test("clearAccessToken should update store appropriately", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
-            result.current.setAccessToken("testToken2");
-        });
-
-        expect(result.current.auth).toBeTruthy();
-        expect(result.current.accessToken).toEqual("testToken2");
-
-        act(() => {
             result.current.clearAccessToken();
         });
 
-        expect(result.current.auth).toBeFalsy();
+        expect(result.current.authDisabled).toBeFalsy();
+        expect(result.current.authenticated).toBeFalsy();
         expect(result.current.accessToken).toEqual("");
     });
 
     test("should persist in local storage", async () => {
         const { result, waitFor } = renderHook(() => useAuthStore());
         act(() => {
-            result.current.setAccessToken("testToken3");
+            result.current.setAccessToken("testToken");
         });
 
         await waitFor(() => Boolean(result.current.accessToken));
 
         expect(localStorage.getItem("LOCAL_STORAGE_KEY_AUTH")).toEqual(
-            `{"auth":true,"accessToken":"testToken3"}`
+            `{"authDisabled":false,"authenticated":true,"accessToken":"testToken"}`
         );
     });
 });

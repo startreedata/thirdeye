@@ -17,7 +17,9 @@ describe("Alerts REST", () => {
     });
 
     test("getAlert should invoke axios.get with appropriate input and return appropriate alert", async () => {
-        jest.spyOn(axios, "get").mockResolvedValue({ data: mockAlertResponse });
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: mockAlertResponse,
+        });
 
         expect(await getAlert(1)).toEqual(mockAlertResponse);
         expect(axios.get).toHaveBeenCalledWith("/api/alerts/1");

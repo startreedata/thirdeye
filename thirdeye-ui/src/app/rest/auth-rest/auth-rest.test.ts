@@ -10,7 +10,9 @@ describe("Auth REST", () => {
     });
 
     test("login should invoke axios.post with appropriate input and return appropriate auth", async () => {
-        jest.spyOn(axios, "post").mockResolvedValue({ data: mockAuthResponse });
+        jest.spyOn(axios, "post").mockResolvedValue({
+            data: mockAuthResponse,
+        });
 
         expect(await login()).toEqual(mockAuthResponse);
         expect(axios.post).toHaveBeenCalledWith(

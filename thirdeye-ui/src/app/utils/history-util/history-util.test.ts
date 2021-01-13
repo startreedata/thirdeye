@@ -1,7 +1,7 @@
 import { appHistory } from "./history-util";
 
 describe("History Util", () => {
-    test("appHistory should be appropriately defined", () => {
+    test("appHistory should be defined", () => {
         expect(appHistory).toBeDefined();
     });
 });

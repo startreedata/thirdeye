@@ -34,10 +34,8 @@ describe("Time Range Util", () => {
         Settings.defaultLocale = "en-US";
         Settings.defaultZoneName = "America/Los_Angeles";
 
-        jest.spyOn(DateTime, "local").mockImplementation(
-            (): DateTime => {
-                return DateTime.fromMillis(1606852800000); // December 1, 2020, 12:00:00 PM
-            }
+        jest.spyOn(DateTime, "local").mockReturnValue(
+            DateTime.fromMillis(1606852800000) // December 1, 2020, 12:00:00 PM
         );
     });
 
@@ -195,7 +193,7 @@ describe("Time Range Util", () => {
         expect(formatTimeRange((null as unknown) as TimeRange)).toEqual("");
     });
 
-    test("formatTimeRange should return appropriate string for valid time range", () => {
+    test("formatTimeRange should return appropriate string for time range", () => {
         expect(formatTimeRange(TimeRange.LAST_12_HOURS)).toEqual(
             "label.last-12-hours"
         );

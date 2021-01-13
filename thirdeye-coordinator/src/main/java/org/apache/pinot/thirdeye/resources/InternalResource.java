@@ -26,6 +26,12 @@ public class InternalResource {
     this.pinotDataSourceResource = pinotDataSourceResource;
   }
 
+  @GET
+  @Path("ping")
+  public Response ping() {
+    return Response.ok("pong").build();
+  }
+
   @Path("pinot-data-source")
   public PinotDataSourceResource getPinotDataSourceResource() {
     return pinotDataSourceResource;

@@ -106,12 +106,12 @@
         "back": "Back",
         "next": "Next",
         "finish": "Finish",
+        "detection-configuration": "Detection Configuration",
 
         "preview-alert": "Preview Alert",
         "reset-configuration": "Reset Configuration",
         "general-details": "General Details",
         "review-submit": "Review & Submit",
-        "detection-configuration": "Detection Configuration",
         "subscription-configuration": "Subscription Configuration",
         "add-subscription-group": "Add to Subscription Group",
         "add-subscription-gorup": "Add to Subscription Group",
@@ -134,8 +134,11 @@
         "delete-success": "{{entity}} deleted successfully",
         "delete-error": "Error deleting {{entity}}",
         "visualization-render-error": "Error rendering visualization",
-        "field-required": "Field is required",
         "validation-failed": "Validation failed",
-        "invalid-email": "Invalid email"
+        "subscription-group-name-required": "Subscription Group name is required",
+        "email-required": "Email is required",
+        "invalid-email": "Invalid email",
+        "json-input-required": "JSON input is required",
+        "invalid-json": "Invalid JSON"
     }
 }

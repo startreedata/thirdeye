@@ -19,7 +19,10 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<SubscriptionGrou
             props.subscriptionGroup || createEmptySubscriptionGroup(),
         resolver: yupResolver(
             yup.object().shape({
-                name: yup.string().trim().required(t("message.field-required")),
+                name: yup
+                    .string()
+                    .trim()
+                    .required(t("message.subscription-group-name-required")),
             })
         ),
     });

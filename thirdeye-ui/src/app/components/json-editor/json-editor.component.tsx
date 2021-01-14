@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@material-ui/core";
+import { Box, FormHelperText, useTheme } from "@material-ui/core";
 import { Editor, EditorChange, EditorConfiguration } from "codemirror";
 import "codemirror/addon/edit/closebrackets.js";
 import "codemirror/addon/edit/matchbrackets.js";
@@ -15,16 +15,19 @@ import { Palette } from "../../utils/material-ui-util/palette-util";
 import { JSONEditorProps } from "./json-editor.interfaces";
 import { useJSONEditorStyles } from "./json-editor.styles";
 
+const TAB_SIZE = 2;
+
 export const JSONEditor: FunctionComponent<JSONEditorProps> = (
     props: JSONEditorProps
 ) => {
     const jsonEditorClasses = useJSONEditorStyles();
-    const [value, setValue] = useState(props.value || "");
+    const [value, setValue] = useState("");
     const theme = useTheme();
 
     useEffect(() => {
         // Input changed, reset
-        setValue(props.value || "");
+        console.log("cage");
+        initJSONInput();
     }, [props.value]);
 
     const onBeforeCodeMirrorInputChange = (
@@ -43,40 +46,68 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
         props.onChange && props.onChange(value);
     };
 
+    const initJSONInput = (): void => {
+        if (typeof props.value === "string") {
+            setValue(props.value);
+
+            return;
+        }
+
+        if (typeof props.value === "object") {
+            setValue(JSON.stringify(props.value, null, TAB_SIZE));
+
+            return;
+        }
+
+        setValue("");
+    };
+
     return (
-        <Box
-            border={Dimension.WIDTH_BORDER_DEFAULT}
-            borderColor={Palette.COLOR_BORDER_DEFAULT}
-            borderRadius={theme.shape.borderRadius}
-        >
-            <CodeMirror
-                className={jsonEditorClasses.container}
-                options={
-                    {
-                        tabSize: 2,
-                        indentUnit: 2,
-                        indentWithTabs: false,
-                        lineNumbers: props.lineNumbers,
-                        lineWrapping: true,
-                        styleActiveLine: true,
-                        matchBrackets: true,
-                        autoCloseBrackets: true,
-                        foldGutter: true,
-                        gutters: [
-                            "CodeMirror-linenumbers",
-                            "CodeMirror-foldgutter",
-                        ],
-                        mode: {
-                            name: "javascript",
-                            json: true,
-                        },
-                        readOnly: props.readOnly,
-                    } as EditorConfiguration
+        <>
+            {/* Editor */}
+            <Box
+                border={Dimension.WIDTH_BORDER_DEFAULT}
+                borderColor={
+                    props.error
+                        ? theme.palette.error.main
+                        : Palette.COLOR_BORDER_DEFAULT
                 }
-                value={value}
-                onBeforeChange={onBeforeCodeMirrorInputChange}
-                onChange={onCodeMirrorInputChange}
-            />
-        </Box>
+                borderRadius={theme.shape.borderRadius}
+            >
+                <CodeMirror
+                    className={jsonEditorClasses.container}
+                    options={
+                        {
+                            tabSize: 2,
+                            indentUnit: 2,
+                            indentWithTabs: false,
+                            lineNumbers: true,
+                            lineWrapping: true,
+                            styleActiveLine: true,
+                            matchBrackets: true,
+                            autoCloseBrackets: true,
+                            foldGutter: true,
+                            gutters: [
+                                "CodeMirror-linenumbers",
+                                "CodeMirror-foldgutter",
+                            ],
+                            mode: {
+                                name: "javascript",
+                                json: true,
+                            },
+                            readOnly: props.readOnly,
+                        } as EditorConfiguration
+                    }
+                    value={value}
+                    onBeforeChange={onBeforeCodeMirrorInputChange}
+                    onChange={onCodeMirrorInputChange}
+                />
+            </Box>
+
+            {/* Helper text */}
+            <FormHelperText error={props.error}>
+                {props.helperText || ""}
+            </FormHelperText>
+        </>
     );
 };

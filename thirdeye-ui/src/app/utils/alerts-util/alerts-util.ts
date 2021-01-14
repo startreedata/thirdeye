@@ -8,10 +8,34 @@ import {
 import {
     Alert,
     AlertEvaluation,
+    AlertNode,
     AlertNodeType,
 } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { deepSearchStringProperty } from "../search-util/search-util";
+
+export const createDefaultAlert = (): Alert => {
+    return {
+        name: "new-alert",
+        description: "This is the detection used by online service",
+        nodes: {
+            "detection-1": {
+                type: AlertNodeType.DETECTION,
+                subType: "PERCENTAGE_RULE",
+                metric: {
+                    name: "views",
+                    dataset: {
+                        name: "pageviews",
+                    },
+                },
+                params: {
+                    offset: "wo1w",
+                    percentageChange: 0.2,
+                } as { [index: string]: unknown },
+            } as AlertNode,
+        } as { [index: string]: AlertNode },
+    } as Alert;
+};
 
 export const createEmptyAlertCardData = (): AlertCardData => {
     const noDataMarker = i18n.t("label.no-data-marker");

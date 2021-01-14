@@ -15,7 +15,7 @@ export const validateEmail = (email: string): ValidationResult => {
         email: yup
             .string()
             .trim()
-            .required(i18n.t("message.field-required"))
+            .required(i18n.t("message.email-required"))
             .email(i18n.t("message.invalid-email")),
     });
     try {
@@ -25,6 +25,28 @@ export const validateEmail = (email: string): ValidationResult => {
     } catch (error) {
         validationResult.valid = false;
         validationResult.message = error && error.message;
+    }
+
+    return validationResult;
+};
+
+export const validateJSON = (json: string): ValidationResult => {
+    const validationResult: ValidationResult = {
+        valid: true,
+    };
+
+    if (!json) {
+        validationResult.valid = false;
+        validationResult.message = i18n.t("message.json-input-required");
+
+        return validationResult;
+    }
+
+    try {
+        JSON.parse(json);
+    } catch (error) {
+        validationResult.valid = false;
+        validationResult.message = i18n.t("message.invalid-json");
     }
 
     return validationResult;

@@ -12,6 +12,7 @@ import {
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     createAlertEvaluation,
+    createDefaultAlert,
     createEmptyAlertCardData,
     createEmptyAlertDatasetAndMetric,
     createEmptyAlertSubscriptionGroup,
@@ -27,6 +28,10 @@ jest.mock("i18next", () => ({
 }));
 
 describe("Alerts Util", () => {
+    test("createDefaultAlert should create appropriate default alert", () => {
+        expect(createDefaultAlert()).toEqual(mockDefaultAlert);
+    });
+
     test("createEmptyAlertCardData should create appropriate alert card data", () => {
         expect(createEmptyAlertCardData()).toEqual(mockEmptyAlertCardData);
     });
@@ -165,6 +170,27 @@ describe("Alerts Util", () => {
         ]);
     });
 });
+
+const mockDefaultAlert: Alert = {
+    name: "new-alert",
+    description: "This is the detection used by online service",
+    nodes: {
+        "detection-1": {
+            type: AlertNodeType.DETECTION,
+            subType: "PERCENTAGE_RULE",
+            metric: {
+                name: "views",
+                dataset: {
+                    name: "pageviews",
+                },
+            },
+            params: {
+                offset: "wo1w",
+                percentageChange: 0.2,
+            } as { [index: string]: unknown },
+        } as AlertNode,
+    } as { [index: string]: AlertNode },
+} as Alert;
 
 const mockEmptyAlertCardData: AlertCardData = {
     id: -1,

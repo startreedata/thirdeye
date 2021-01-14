@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
+import { PageContainer } from "../../components/page-container/page-container.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { AnomaliesRouter } from "./anomalies-router";
 
@@ -42,12 +43,14 @@ jest.mock("../../utils/routes-util/routes-util", () => ({
     getAnomaliesPath: jest.fn().mockReturnValue("testAnomaliesPath"),
 }));
 
+jest.mock("../../components/page-container/page-container.component", () => ({
+    PageContainer: jest.fn().mockReturnValue(<>testPageContainer</>),
+}));
+
 jest.mock(
     "../../pages/anomalies-all-page/anomalies-all-page.component",
     () => ({
-        AnomaliesAllPage: jest
-            .fn()
-            .mockImplementation(() => <>testAnomaliesAllPage</>),
+        AnomaliesAllPage: jest.fn().mockReturnValue(<>testAnomaliesAllPage</>),
     })
 );
 
@@ -56,20 +59,28 @@ jest.mock(
     () => ({
         AnomaliesDetailPage: jest
             .fn()
-            .mockImplementation(() => <>testAnomaliesDetailPage</>),
+            .mockReturnValue(<>testAnomaliesDetailPage</>),
     })
 );
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest
-            .fn()
-            .mockImplementation(() => <>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
     })
 );
 
 describe("Anomalies Router", () => {
+    test("should have rendered page container while loading", () => {
+        render(
+            <MemoryRouter>
+                <AnomaliesRouter />
+            </MemoryRouter>
+        );
+
+        expect(PageContainer).toHaveBeenCalled();
+    });
+
     test("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>

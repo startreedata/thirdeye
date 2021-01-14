@@ -12,6 +12,8 @@ import {
     useLocation,
 } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
+import { PageContainer } from "../../components/page-container/page-container.component";
 import { SignInPage } from "../../pages/sign-in-page/sign-in-page.component";
 import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
@@ -22,6 +24,7 @@ import {
 } from "../../utils/routes-util/routes-util";
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
     const [redirectionURL, setRedirectionURL] = useState(getBasePath());
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
     const [removeAppToolbar] = useAppToolbarStore((state) => [
@@ -37,6 +40,8 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
         removeAppToolbar();
 
         initRedirectionURL();
+
+        setLoading(false);
     }, []);
 
     const initRedirectionURL = (): void => {
@@ -55,6 +60,14 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
             createPathWithRecognizedQueryString(location.pathname)
         );
     };
+
+    if (loading) {
+        return (
+            <PageContainer>
+                <LoadingIndicator />
+            </PageContainer>
+        );
+    }
 
     return (
         <Switch>

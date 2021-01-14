@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
+import { PageContainer } from "../../components/page-container/page-container.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { AlertsRouter } from "./alerts-router";
 
@@ -42,47 +43,53 @@ jest.mock("../../utils/routes-util/routes-util", () => ({
     getAlertsPath: jest.fn().mockReturnValue("testAlertsPath"),
 }));
 
+jest.mock("../../components/page-container/page-container.component", () => ({
+    PageContainer: jest.fn().mockReturnValue(<>testPageContainer</>),
+}));
+
 jest.mock("../../pages/alerts-all-page/alerts-all-page.component", () => ({
-    AlertsAllPage: jest.fn().mockImplementation(() => <>testAlertsAllPage</>),
+    AlertsAllPage: jest.fn().mockReturnValue(<>testAlertsAllPage</>),
 }));
 
 jest.mock(
     "../../pages/alerts-detail-page/alerts-detail-page.component",
     () => ({
-        AlertsDetailPage: jest
-            .fn()
-            .mockImplementation(() => <>testAlertsDetailPage</>),
+        AlertsDetailPage: jest.fn().mockReturnValue(<>testAlertsDetailPage</>),
     })
 );
 
 jest.mock(
     "../../pages/alerts-create-page/alerts-create-page.component",
     () => ({
-        AlertsCreatePage: jest
-            .fn()
-            .mockImplementation(() => <>testAlertsCreatePage</>),
+        AlertsCreatePage: jest.fn().mockReturnValue(<>testAlertsCreatePage</>),
     })
 );
 
 jest.mock(
     "../../pages/alerts-update-page/alerts-update-page.component",
     () => ({
-        AlertsUpdatePage: jest
-            .fn()
-            .mockImplementation(() => <>testAlertsUpdatePage</>),
+        AlertsUpdatePage: jest.fn().mockReturnValue(<>testAlertsUpdatePage</>),
     })
 );
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest
-            .fn()
-            .mockImplementation(() => <>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
     })
 );
 
 describe("Alerts Router", () => {
+    test("should have rendered page container while loading", () => {
+        render(
+            <MemoryRouter>
+                <AlertsRouter />
+            </MemoryRouter>
+        );
+
+        expect(PageContainer).toHaveBeenCalled();
+    });
+
     test("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>

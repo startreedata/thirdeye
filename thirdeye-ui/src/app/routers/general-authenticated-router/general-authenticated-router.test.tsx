@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
+import { PageContainer } from "../../components/page-container/page-container.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { GeneralAuthenticatedRouter } from "./general-authenticated-router";
 
@@ -26,24 +27,36 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
+jest.mock("../../components/page-container/page-container.component", () => ({
+    PageContainer: jest.fn().mockReturnValue(<>testPageContainer</>),
+}));
+
 jest.mock("../../pages/home-page/home-page.component", () => ({
-    HomePage: jest.fn().mockImplementation(() => <>testHomePage</>),
+    HomePage: jest.fn().mockReturnValue(<>testHomePage</>),
 }));
 
 jest.mock("../../pages/sign-out-page/sign-out-page.component", () => ({
-    SignOutPage: jest.fn().mockImplementation(() => <>testSignOutPage</>),
+    SignOutPage: jest.fn().mockReturnValue(<>testSignOutPage</>),
 }));
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest
-            .fn()
-            .mockImplementation(() => <>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
     })
 );
 
 describe("General Authenticated Router", () => {
+    test("should have rendered page container while loading", () => {
+        render(
+            <MemoryRouter>
+                <GeneralAuthenticatedRouter />
+            </MemoryRouter>
+        );
+
+        expect(PageContainer).toHaveBeenCalled();
+    });
+
     test("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>

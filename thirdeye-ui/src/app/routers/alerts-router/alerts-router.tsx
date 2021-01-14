@@ -1,7 +1,9 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
+import { PageContainer } from "../../components/page-container/page-container.component";
 import { AlertsAllPage } from "../../pages/alerts-all-page/alerts-all-page.component";
 import { AlertsCreatePage } from "../../pages/alerts-create-page/alerts-create-page.component";
 import { AlertsDetailPage } from "../../pages/alerts-detail-page/alerts-detail-page.component";
@@ -15,6 +17,7 @@ import {
 } from "../../utils/routes-util/routes-util";
 
 export const AlertsRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
     const [removeAppToolbar] = useAppToolbarStore((state) => [
         state.removeAppToolbar,
@@ -35,7 +38,17 @@ export const AlertsRouter: FunctionComponent = () => {
 
         // No app toolbar under this router
         removeAppToolbar();
+
+        setLoading(false);
     }, []);
+
+    if (loading) {
+        return (
+            <PageContainer>
+                <LoadingIndicator />
+            </PageContainer>
+        );
+    }
 
     return (
         <Switch>

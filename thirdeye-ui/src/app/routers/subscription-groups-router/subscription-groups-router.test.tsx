@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
+import { PageContainer } from "../../components/page-container/page-container.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { SubscriptionGroupsRouter } from "./subscription-groups-router";
 
@@ -37,12 +38,16 @@ jest.mock("../../utils/routes-util/routes-util", () => ({
         .mockReturnValue("testSubscriptionGroupsPath"),
 }));
 
+jest.mock("../../components/page-container/page-container.component", () => ({
+    PageContainer: jest.fn().mockReturnValue(<>testPageContainer</>),
+}));
+
 jest.mock(
     "../../pages/subscription-groups-all-page/subscription-groups-all-page.component",
     () => ({
         SubscriptionGroupsAllPage: jest
             .fn()
-            .mockImplementation(() => <>testSubscriptionGroupsAllPage</>),
+            .mockReturnValue(<>testSubscriptionGroupsAllPage</>),
     })
 );
 
@@ -51,7 +56,7 @@ jest.mock(
     () => ({
         SubscriptionGroupsDetailPage: jest
             .fn()
-            .mockImplementation(() => <>testSubscriptionGroupsDetailPage</>),
+            .mockReturnValue(<>testSubscriptionGroupsDetailPage</>),
     })
 );
 
@@ -60,7 +65,7 @@ jest.mock(
     () => ({
         SubscriptionGroupsCreatePage: jest
             .fn()
-            .mockImplementation(() => <>testSubscriptionGroupsCreatePage</>),
+            .mockReturnValue(<>testSubscriptionGroupsCreatePage</>),
     })
 );
 
@@ -69,20 +74,28 @@ jest.mock(
     () => ({
         SubscriptionGroupsUpdatePage: jest
             .fn()
-            .mockImplementation(() => <>testSubscriptionGroupsUpdatePage</>),
+            .mockReturnValue(<>testSubscriptionGroupsUpdatePage</>),
     })
 );
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest
-            .fn()
-            .mockImplementation(() => <>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
     })
 );
 
 describe("Subscription Groups Router", () => {
+    test("should have rendered page container while loading", () => {
+        render(
+            <MemoryRouter>
+                <SubscriptionGroupsRouter />
+            </MemoryRouter>
+        );
+
+        expect(PageContainer).toHaveBeenCalled();
+    });
+
     test("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>

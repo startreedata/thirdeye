@@ -3,6 +3,7 @@ import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { AppToolbarConfiguration } from "../../components/app-toolbar-configuration/app-toolbar-configuration.component";
 import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
+import { PageContainer } from "../../components/page-container/page-container.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { ConfigurationRouter } from "./configuration-router";
 
@@ -43,31 +44,43 @@ jest.mock("../../utils/routes-util/routes-util", () => ({
     getConfigurationPath: jest.fn().mockReturnValue("testConfigurationPath"),
 }));
 
+jest.mock("../../components/page-container/page-container.component", () => ({
+    PageContainer: jest.fn().mockReturnValue(<>testPageContainer</>),
+}));
+
 jest.mock(
     "../../components/app-toolbar-configuration/app-toolbar-configuration.component",
     () => ({
         AppToolbarConfiguration: jest
             .fn()
-            .mockImplementation(() => <>testAppToolbarConfiguration</>),
+            .mockReturnValue(<>testAppToolbarConfiguration</>),
     })
 );
 
 jest.mock("../subscription-groups-router/subscription-groups-router", () => ({
     SubscriptionGroupsRouter: jest
         .fn()
-        .mockImplementation(() => <>testSubscriptionGroupsRouter</>),
+        .mockReturnValue(<>testSubscriptionGroupsRouter</>),
 }));
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest
-            .fn()
-            .mockImplementation(() => <>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
     })
 );
 
 describe("Configuration Router", () => {
+    test("should have rendered page container while loading", () => {
+        render(
+            <MemoryRouter>
+                <ConfigurationRouter />
+            </MemoryRouter>
+        );
+
+        expect(PageContainer).toHaveBeenCalled();
+    });
+
     test("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>

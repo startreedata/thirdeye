@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
+import { PageContainer } from "../../components/page-container/page-container.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { GeneralUnauthenticatedRouter } from "./general-unauthenticated-router";
 
@@ -38,6 +39,10 @@ jest.mock("../../utils/routes-util/routes-util", () => ({
         }),
 }));
 
+jest.mock("../../components/page-container/page-container.component", () => ({
+    PageContainer: jest.fn().mockReturnValue(<>testPageContainer</>),
+}));
+
 jest.mock("../../pages/sign-in-page/sign-in-page.component", () => ({
     SignInPage: jest
         .fn()
@@ -47,6 +52,16 @@ jest.mock("../../pages/sign-in-page/sign-in-page.component", () => ({
 }));
 
 describe("General Unauthenticated Router", () => {
+    test("should have rendered page container while loading", () => {
+        render(
+            <MemoryRouter>
+                <GeneralUnauthenticatedRouter />
+            </MemoryRouter>
+        );
+
+        expect(PageContainer).toHaveBeenCalled();
+    });
+
     test("should set appropriate router breadcrumbs", () => {
         mockPathname = "";
         render(

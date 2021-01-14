@@ -57,7 +57,6 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        // Fetch data
         fetchData();
     }, []);
 
@@ -69,11 +68,9 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }, [anomalyCardDatas, searchWords]);
 
     const fetchData = (): void => {
-        let fetchedAnomalyCardDatas: AnomalyCardData[] = [];
-
         getAllAnomalies()
             .then((anomalies: Anomaly[]): void => {
-                fetchedAnomalyCardDatas = getAnomalyCardDatas(anomalies);
+                setAnomalyCardDatas(getAnomalyCardDatas(anomalies));
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -82,8 +79,6 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 );
             })
             .finally((): void => {
-                setAnomalyCardDatas(fetchedAnomalyCardDatas);
-
                 setLoading(false);
             });
     };
@@ -112,18 +107,17 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             return;
         }
 
-        // Delete
         deleteAnomaly(anomalyCardData.id)
             .then((anomaly: Anomaly): void => {
-                // Remove deleted anomaly from fetched anomalies
-                removeAnomalyCardData(anomaly);
-
                 enqueueSnackbar(
                     t("message.delete-success", {
                         entity: t("label.anomaly"),
                     }),
                     getSuccessSnackbarOption()
                 );
+
+                // Remove deleted anomaly from fetched anomalies
+                removeAnomalyCardData(anomaly);
             })
             .catch((): void => {
                 enqueueSnackbar(

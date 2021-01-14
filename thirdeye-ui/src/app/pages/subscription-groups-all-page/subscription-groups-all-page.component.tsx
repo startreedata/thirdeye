@@ -61,21 +61,17 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        // Fetch data
         fetchData();
     }, []);
 
     useEffect(() => {
-        // Fetched data, or search changed, reset
+        // Fetched data or search changed, reset
         setfilteredSubscriptionGroupCardDatas(
             filterSubscriptionGroups(subscriptionGroupCardDatas, searchWords)
         );
     }, [subscriptionGroupCardDatas, searchWords]);
 
     const fetchData = (): void => {
-        let fetchedSubscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
-        let fetchedAlerts: Alert[] = [];
-
         Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
             .then(([subscriptionGroupsResponse, alertsResponse]): void => {
                 // Determine if any of the calls failed
@@ -90,21 +86,20 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
+                let fetchedAlerts: Alert[] = [];
                 if (alertsResponse.status === "fulfilled") {
                     fetchedAlerts = alertsResponse.value;
                 }
                 if (subscriptionGroupsResponse.status === "fulfilled") {
-                    fetchedSubscriptionGroupCardDatas = getSubscriptionGroupCardDatas(
-                        subscriptionGroupsResponse.value,
-                        fetchedAlerts
+                    setSubscriptionGroupCardDatas(
+                        getSubscriptionGroupCardDatas(
+                            subscriptionGroupsResponse.value,
+                            fetchedAlerts
+                        )
                     );
                 }
             })
             .finally((): void => {
-                setSubscriptionGroupCardDatas(
-                    fetchedSubscriptionGroupCardDatas
-                );
-
                 setLoading(false);
             });
     };
@@ -137,19 +132,18 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             return;
         }
 
-        // Delete
         deleteSubscriptionGroup(subscriptionGroupCardData.id)
             .then((subscriptionGroup: SubscriptionGroup): void => {
-                // Remove deleted subscription group from fetched subscription
-                // groups
-                removeSubscriptionGroupCardData(subscriptionGroup);
-
                 enqueueSnackbar(
                     t("message.delete-success", {
                         entity: t("label.subscription-group"),
                     }),
                     getSuccessSnackbarOption()
                 );
+
+                // Remove deleted subscription group from fetched subscription
+                // groups
+                removeSubscriptionGroupCardData(subscriptionGroup);
             })
             .catch((): void => {
                 enqueueSnackbar(

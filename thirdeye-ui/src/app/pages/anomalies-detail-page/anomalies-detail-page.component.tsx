@@ -45,7 +45,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         setAlertEvaluation,
     ] = useState<AlertEvaluation | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration: appTimeRangeDuration } = useTimeRange();
+    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const params = useParams<AnomaliesDetailPageParams>();
@@ -69,17 +69,15 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     }, [anomalyCardData]);
 
     useEffect(() => {
-        // Fetch data
         fetchData();
     }, []);
 
     useEffect(() => {
-        // Fetch visualization data
         fetchVisualizationData();
-    }, [anomalyCardData && anomalyCardData.alertId, appTimeRangeDuration]);
+    }, [anomalyCardData && anomalyCardData.alertId, timeRangeDuration]);
 
     const fetchData = (): void => {
-        // Validate alert id from URL
+        // Validate id from URL
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
@@ -88,6 +86,8 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                 }),
                 getErrorSnackbarOption()
             );
+
+            setLoading(false);
 
             return;
         }
@@ -120,8 +120,8 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         getAlertEvaluation(
             createAlertEvaluation(
                 anomalyCardData.alertId,
-                appTimeRangeDuration.startTime,
-                appTimeRangeDuration.endTime
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
             )
         )
             .then((alertEvaluation: AlertEvaluation): void => {
@@ -162,18 +162,17 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
             return;
         }
 
-        // Delete
         deleteAnomaly(anomalyCardData.id)
             .then((): void => {
-                // Redirect to anomalies all path
-                history.push(getAnomaliesAllPath());
-
                 enqueueSnackbar(
                     t("message.delete-success", {
                         entity: t("label.anomaly"),
                     }),
                     getSuccessSnackbarOption()
                 );
+
+                // Redirect to anomalies all path
+                history.push(getAnomaliesAllPath());
             })
             .catch((): void => {
                 enqueueSnackbar(

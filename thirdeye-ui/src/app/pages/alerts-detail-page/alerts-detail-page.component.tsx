@@ -72,19 +72,15 @@ export const AlertsDetailPage: FunctionComponent = () => {
     }, [alertCardData]);
 
     useEffect(() => {
-        // Fetch data
         fetchData();
     }, []);
 
     useEffect(() => {
-        // Fetch visualization data
         fetchVisualizationData();
     }, [alertCardData && alertCardData.id, appTimeRangeDuration]);
 
     const fetchData = (): void => {
-        let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
-
-        // Validate alert id from URL
+        // Validate id from URL
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
@@ -93,6 +89,8 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 }),
                 getErrorSnackbarOption()
             );
+
+            setLoading(false);
 
             return;
         }
@@ -114,9 +112,11 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
+                let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
                 if (subscriptionGroupsResponse.status === "fulfilled") {
                     fetchedSubscriptionGroups =
                         subscriptionGroupsResponse.value;
+                    setSubscriptionGroups(fetchedSubscriptionGroups);
                 }
                 if (alertResponse.status === "fulfilled") {
                     setAlertCardData(
@@ -128,8 +128,6 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 }
             })
             .finally((): void => {
-                setSubscriptionGroups(fetchedSubscriptionGroups);
-
                 setLoading(false);
             });
     };
@@ -170,18 +168,17 @@ export const AlertsDetailPage: FunctionComponent = () => {
             return;
         }
 
-        // Update
         updateAlert(alertCardData.alert)
             .then((alert: Alert): void => {
-                // Replace updated alert as fetched alert
-                setAlertCardData(getAlertCardData(alert, subscriptionGroups));
-
                 enqueueSnackbar(
                     t("message.update-success", {
                         entity: t("label.alert"),
                     }),
                     getSuccessSnackbarOption()
                 );
+
+                // Replace updated alert as fetched alert
+                setAlertCardData(getAlertCardData(alert, subscriptionGroups));
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -215,18 +212,17 @@ export const AlertsDetailPage: FunctionComponent = () => {
             return;
         }
 
-        // Delete
         deleteAlert(alertCardData.id)
             .then((): void => {
-                // Redirect to alerts all path
-                history.push(getAlertsAllPath());
-
                 enqueueSnackbar(
                     t("message.delete-success", {
                         entity: t("label.alert"),
                     }),
                     getSuccessSnackbarOption()
                 );
+
+                // Redirect to alerts all path
+                history.push(getAlertsAllPath());
             })
             .catch((): void => {
                 enqueueSnackbar(

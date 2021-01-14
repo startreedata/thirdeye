@@ -51,7 +51,6 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        // Fetch data
         fetchData();
     }, []);
 
@@ -90,16 +89,16 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     ): void => {
         createSubscriptionGroup(subscriptionGroup)
             .then((subscriptionGroup: SubscriptionGroup): void => {
-                // Redirect to subscription groups detail path
-                history.push(
-                    getSubscriptionGroupsDetailPath(subscriptionGroup.id)
-                );
-
                 enqueueSnackbar(
                     t("message.create-success", {
                         entity: t("label.subscription-group"),
                     }),
                     getSuccessSnackbarOption()
+                );
+
+                // Redirect to subscription groups detail path
+                history.push(
+                    getSubscriptionGroupsDetailPath(subscriptionGroup.id)
                 );
             })
             .catch((): void => {

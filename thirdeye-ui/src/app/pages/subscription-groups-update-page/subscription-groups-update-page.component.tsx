@@ -80,12 +80,11 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     }, [subscriptionGroup]);
 
     useEffect(() => {
-        // Fetch data
         fetchData();
     }, []);
 
     const fetchData = (): void => {
-        // Validate alert id from URL
+        // Validate id from URL
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
@@ -94,6 +93,8 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 }),
                 getErrorSnackbarOption()
             );
+
+            setLoading(false);
 
             return;
         }
@@ -146,16 +147,16 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     ): void => {
         updateSubscriptionGroup(subscriptionGroup)
             .then((subscriptionGroup: SubscriptionGroup): void => {
-                // Redirect to subscription groups detail path
-                history.push(
-                    getSubscriptionGroupsDetailPath(subscriptionGroup.id)
-                );
-
                 enqueueSnackbar(
                     t("message.update-success", {
                         entity: t("label.subscription-group"),
                     }),
                     getSuccessSnackbarOption()
+                );
+
+                // Redirect to subscription groups detail path
+                history.push(
+                    getSubscriptionGroupsDetailPath(subscriptionGroup.id)
                 );
             })
             .catch((): void => {

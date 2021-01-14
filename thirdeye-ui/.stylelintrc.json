@@ -10,7 +10,7 @@
         "rule-empty-line-before": [
             "always",
             {
-                "ignore": ["after-comment"]
+                "ignore": ["after-comment", "first-nested"]
             }
         ],
         "property-case": "lower",

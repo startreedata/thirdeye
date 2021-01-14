@@ -76,14 +76,11 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     }, [subscriptionGroupCardData]);
 
     useEffect(() => {
-        // Fetch data
         fetchData();
     }, []);
 
     const fetchData = (): void => {
-        let fetchedAlerts: Alert[] = [];
-
-        // Validate alert id from URL
+        // Validate id from URL
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
@@ -92,6 +89,8 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 }),
                 getErrorSnackbarOption()
             );
+
+            setLoading(false);
 
             return;
         }
@@ -113,8 +112,10 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
+                let fetchedAlerts: Alert[] = [];
                 if (alertsResponse.status === "fulfilled") {
                     fetchedAlerts = alertsResponse.value;
+                    setAlerts(fetchedAlerts);
                 }
                 if (subscriptionGroupResponse.status === "fulfilled") {
                     setSubscriptionGroupCardData(
@@ -126,8 +127,6 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 }
             })
             .finally((): void => {
-                setAlerts(fetchedAlerts);
-
                 setLoading(false);
             });
     };
@@ -160,18 +159,17 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
             return;
         }
 
-        // Delete
         deleteSubscriptionGroup(subscriptionGroupCardData.id)
             .then((): void => {
-                // Redirect to subscription groups all path
-                history.push(getSubscriptionGroupsAllPath());
-
                 enqueueSnackbar(
                     t("message.delete-success", {
                         entity: t("label.subscription-group"),
                     }),
                     getSuccessSnackbarOption()
                 );
+
+                // Redirect to subscription groups all path
+                history.push(getSubscriptionGroupsAllPath());
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -198,8 +196,6 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
             subscriptionGroupCardData.subscriptionGroup
         );
         subscriptionGroupCopy.alerts = subscriptionGroupAlerts as Alert[];
-
-        // Update
         saveUpdatedSubscriptionGroup(subscriptionGroupCopy);
     };
 
@@ -218,8 +214,6 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
         subscriptionGroupCopy.emailSettings = {
             to: emails,
         } as EmailSettings;
-
-        // Update
         saveUpdatedSubscriptionGroup(subscriptionGroupCopy);
     };
 
@@ -228,16 +222,16 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     ): void => {
         updateSubscriptionGroup(subscriptionGroup)
             .then((subscriptionGroup: SubscriptionGroup): void => {
-                // Replace updated subscription group as fetched subscription group
-                setSubscriptionGroupCardData(
-                    getSubscriptionGroupCardData(subscriptionGroup, alerts)
-                );
-
                 enqueueSnackbar(
                     t("message.update-success", {
                         entity: t("label.subscription-group"),
                     }),
                     getSuccessSnackbarOption()
+                );
+
+                // Replace updated subscription group as fetched subscription group
+                setSubscriptionGroupCardData(
+                    getSubscriptionGroupCardData(subscriptionGroup, alerts)
                 );
             })
             .catch((): void => {

@@ -62,7 +62,6 @@ export const AlertsAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        // Fetch data
         fetchData();
     }, []);
 
@@ -72,9 +71,6 @@ export const AlertsAllPage: FunctionComponent = () => {
     }, [alertCardDatas, searchWords]);
 
     const fetchData = (): void => {
-        let fetchedAlertCardDatas: AlertCardData[] = [];
-        let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
-
         Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
             .then(([alertsResponse, subscriptionGroupsResponse]): void => {
                 // Determine if any of the calls failed
@@ -89,21 +85,22 @@ export const AlertsAllPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
+                let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
                 if (subscriptionGroupsResponse.status === "fulfilled") {
                     fetchedSubscriptionGroups =
                         subscriptionGroupsResponse.value;
+                    setSubscriptionGroups(fetchedSubscriptionGroups);
                 }
                 if (alertsResponse.status === "fulfilled") {
-                    fetchedAlertCardDatas = getAlertCardDatas(
-                        alertsResponse.value,
-                        fetchedSubscriptionGroups
+                    setAlertCardDatas(
+                        getAlertCardDatas(
+                            alertsResponse.value,
+                            fetchedSubscriptionGroups
+                        )
                     );
                 }
             })
             .finally((): void => {
-                setAlertCardDatas(fetchedAlertCardDatas);
-                setSubscriptionGroups(fetchedSubscriptionGroups);
-
                 setLoading(false);
             });
     };
@@ -113,18 +110,17 @@ export const AlertsAllPage: FunctionComponent = () => {
             return;
         }
 
-        // Update
         updateAlert(alertCardData.alert)
             .then((alert: Alert): void => {
-                // Replace updated alert in fetched alerts
-                replaceAlertCardData(alert);
-
                 enqueueSnackbar(
                     t("message.update-success", {
                         entity: t("label.alert"),
                     }),
                     getSuccessSnackbarOption()
                 );
+
+                // Replace updated alert in fetched alerts
+                replaceAlertCardData(alert);
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -160,15 +156,15 @@ export const AlertsAllPage: FunctionComponent = () => {
 
         deleteAlert(alertCardData.id)
             .then((alert: Alert): void => {
-                // Remove deleted alert from fetched alerts
-                removeAlertCardData(alert);
-
                 enqueueSnackbar(
                     t("message.delete-success", {
                         entity: t("label.alert"),
                     }),
                     getSuccessSnackbarOption()
                 );
+
+                // Remove deleted alert from fetched alerts
+                removeAlertCardData(alert);
             })
             .catch((): void => {
                 enqueueSnackbar(

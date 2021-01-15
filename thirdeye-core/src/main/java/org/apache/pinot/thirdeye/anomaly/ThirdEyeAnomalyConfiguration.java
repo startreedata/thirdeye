@@ -54,182 +54,211 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
       dataAvailabilitySchedulingConfiguration = new DataAvailabilitySchedulingConfiguration();
   private List<String> holidayCountriesWhitelist;
 
-  public ThirdEyeRestClientConfiguration getThirdEyeRestClientConfiguration() {
-    return teRestConfig;
-  }
-
-  public void setThirdEyeRestClientConfiguration(ThirdEyeRestClientConfiguration teRestConfig) {
-    this.teRestConfig = teRestConfig;
-  }
-
-  public HolidayEventsLoaderConfiguration getHolidayEventsLoaderConfiguration() {
-    return holidayEventsLoaderConfiguration;
-  }
-
-  public void setHolidayEventsLoaderConfiguration(
-      HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration) {
-    this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
-  }
-
-  public boolean isMockEventsLoader() {
-    return mockEventsLoader;
-  }
-
-  public void setMockEventsLoader(boolean mockEventsLoader) {
-    this.mockEventsLoader = mockEventsLoader;
-  }
-
-  public MockEventsLoaderConfiguration getMockEventsLoaderConfiguration() {
-    return mockEventsLoaderConfiguration;
-  }
-
-  public void setMockEventsLoaderConfiguration(
-      MockEventsLoaderConfiguration mockEventsLoaderConfiguration) {
-    this.mockEventsLoaderConfiguration = mockEventsLoaderConfiguration;
-  }
-
-  public boolean isDetectionAlert() {
-    return detectionAlert;
-  }
-
-  public void setDetectionAlert(boolean detectionAlert) {
-    this.detectionAlert = detectionAlert;
-  }
-
-  public boolean isDetectionPipeline() {
-    return detectionPipeline;
-  }
-
-  public void setDetectionPipeline(boolean detectionPipeline) {
-    this.detectionPipeline = detectionPipeline;
-  }
-
-  public boolean isHolidayEventsLoader() {
-    return holidayEventsLoader;
-  }
-
-  public void setHolidayEventsLoader(boolean holidayEventsLoader) {
-    this.holidayEventsLoader = holidayEventsLoader;
-  }
-
-  public long getId() {
-    return id;
-  }
-
-  public void setId(long id) {
-    this.id = id;
-  }
-
-  public boolean isScheduler() {
-    return scheduler;
-  }
-
-  public void setScheduler(boolean scheduler) {
-    this.scheduler = scheduler;
-  }
-
-  public boolean isWorker() {
-    return worker;
-  }
-
-  public void setWorker(boolean worker) {
-    this.worker = worker;
-  }
-
-  public boolean isOnlineWorker() {
-    return onlineWorker;
-  }
-
-  public void setOnlineWorker(boolean onlineWorker) {
-    this.onlineWorker = onlineWorker;
-  }
-
-  public boolean isMonitor() {
-    return monitor;
-  }
-
-  public void setMonitor(boolean monitor) {
-    this.monitor = monitor;
-  }
-
-  public boolean isDataAvailabilityEventListener() {
-    return dataAvailabilityEventListener;
-  }
-
-  public void setDataAvailabilityEventListener(boolean dataAvailabilityEventListener) {
-    this.dataAvailabilityEventListener = dataAvailabilityEventListener;
-  }
-
-  public boolean isDataAvailabilityTaskScheduler() {
-    return dataAvailabilityTaskScheduler;
-  }
-
-  public void setDataAvailabilityEventScheduler(boolean dataAvailabilityEventScheduler) {
-    this.dataAvailabilityTaskScheduler = dataAvailabilityEventScheduler;
-  }
-
-  public MonitorConfiguration getMonitorConfiguration() {
-    return monitorConfiguration;
-  }
-
-  public void setMonitorConfiguration(MonitorConfiguration monitorConfiguration) {
-    this.monitorConfiguration = monitorConfiguration;
-  }
-
-  public AutoOnboardConfiguration getAutoOnboardConfiguration() {
-    return autoOnboardConfiguration;
-  }
-
-  public void setAutoOnboardConfiguration(AutoOnboardConfiguration autoOnboardConfiguration) {
-    this.autoOnboardConfiguration = autoOnboardConfiguration;
-  }
-
-  public TaskDriverConfiguration getTaskDriverConfiguration() {
-    return taskDriverConfiguration;
-  }
-
-  public void setTaskDriverConfiguration(TaskDriverConfiguration taskDriverConfiguration) {
-    this.taskDriverConfiguration = taskDriverConfiguration;
-  }
-
   public boolean isAlert() {
     return alert;
   }
 
-  public void setAlert(boolean alert) {
+  public ThirdEyeAnomalyConfiguration setAlert(final boolean alert) {
     this.alert = alert;
+    return this;
   }
 
   public boolean isAutoload() {
     return autoload;
   }
 
-  public void setAutoload(boolean autoload) {
+  public ThirdEyeAnomalyConfiguration setAutoload(final boolean autoload) {
     this.autoload = autoload;
+    return this;
+  }
+
+  public boolean isHolidayEventsLoader() {
+    return holidayEventsLoader;
+  }
+
+  public ThirdEyeAnomalyConfiguration setHolidayEventsLoader(final boolean holidayEventsLoader) {
+    this.holidayEventsLoader = holidayEventsLoader;
+    return this;
+  }
+
+  public boolean isMockEventsLoader() {
+    return mockEventsLoader;
+  }
+
+  public ThirdEyeAnomalyConfiguration setMockEventsLoader(final boolean mockEventsLoader) {
+    this.mockEventsLoader = mockEventsLoader;
+    return this;
+  }
+
+  public boolean isMonitor() {
+    return monitor;
+  }
+
+  public ThirdEyeAnomalyConfiguration setMonitor(final boolean monitor) {
+    this.monitor = monitor;
+    return this;
   }
 
   public boolean isPinotProxy() {
     return pinotProxy;
   }
 
-  public void setPinotProxy(boolean pinotProxy) {
+  public ThirdEyeAnomalyConfiguration setPinotProxy(final boolean pinotProxy) {
     this.pinotProxy = pinotProxy;
+    return this;
   }
 
-  public List<String> getHolidayCountriesWhitelist() {
-    return holidayCountriesWhitelist;
+  public boolean isScheduler() {
+    return scheduler;
   }
 
-  public void setHolidayCountriesWhitelist(List<String> holidayCountriesWhitelist) {
-    this.holidayCountriesWhitelist = holidayCountriesWhitelist;
+  public ThirdEyeAnomalyConfiguration setScheduler(final boolean scheduler) {
+    this.scheduler = scheduler;
+    return this;
+  }
+
+  public boolean isWorker() {
+    return worker;
+  }
+
+  public ThirdEyeAnomalyConfiguration setWorker(final boolean worker) {
+    this.worker = worker;
+    return this;
+  }
+
+  public boolean isOnlineWorker() {
+    return onlineWorker;
+  }
+
+  public ThirdEyeAnomalyConfiguration setOnlineWorker(final boolean onlineWorker) {
+    this.onlineWorker = onlineWorker;
+    return this;
+  }
+
+  public boolean isDetectionPipeline() {
+    return detectionPipeline;
+  }
+
+  public ThirdEyeAnomalyConfiguration setDetectionPipeline(final boolean detectionPipeline) {
+    this.detectionPipeline = detectionPipeline;
+    return this;
+  }
+
+  public boolean isDetectionAlert() {
+    return detectionAlert;
+  }
+
+  public ThirdEyeAnomalyConfiguration setDetectionAlert(final boolean detectionAlert) {
+    this.detectionAlert = detectionAlert;
+    return this;
+  }
+
+  public boolean isDataAvailabilityEventListener() {
+    return dataAvailabilityEventListener;
+  }
+
+  public ThirdEyeAnomalyConfiguration setDataAvailabilityEventListener(
+      final boolean dataAvailabilityEventListener) {
+    this.dataAvailabilityEventListener = dataAvailabilityEventListener;
+    return this;
+  }
+
+  public boolean isDataAvailabilityTaskScheduler() {
+    return dataAvailabilityTaskScheduler;
+  }
+
+  public ThirdEyeAnomalyConfiguration setDataAvailabilityTaskScheduler(
+      final boolean dataAvailabilityTaskScheduler) {
+    this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
+    return this;
+  }
+
+  public long getId() {
+    return id;
+  }
+
+  public ThirdEyeAnomalyConfiguration setId(final long id) {
+    this.id = id;
+    return this;
+  }
+
+  public HolidayEventsLoaderConfiguration getHolidayEventsLoaderConfiguration() {
+    return holidayEventsLoaderConfiguration;
+  }
+
+  public ThirdEyeAnomalyConfiguration setHolidayEventsLoaderConfiguration(
+      final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration) {
+    this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
+    return this;
+  }
+
+  public MockEventsLoaderConfiguration getMockEventsLoaderConfiguration() {
+    return mockEventsLoaderConfiguration;
+  }
+
+  public ThirdEyeAnomalyConfiguration setMockEventsLoaderConfiguration(
+      final MockEventsLoaderConfiguration mockEventsLoaderConfiguration) {
+    this.mockEventsLoaderConfiguration = mockEventsLoaderConfiguration;
+    return this;
+  }
+
+  public MonitorConfiguration getMonitorConfiguration() {
+    return monitorConfiguration;
+  }
+
+  public ThirdEyeAnomalyConfiguration setMonitorConfiguration(
+      final MonitorConfiguration monitorConfiguration) {
+    this.monitorConfiguration = monitorConfiguration;
+    return this;
+  }
+
+  public AutoOnboardConfiguration getAutoOnboardConfiguration() {
+    return autoOnboardConfiguration;
+  }
+
+  public ThirdEyeAnomalyConfiguration setAutoOnboardConfiguration(
+      final AutoOnboardConfiguration autoOnboardConfiguration) {
+    this.autoOnboardConfiguration = autoOnboardConfiguration;
+    return this;
+  }
+
+  public TaskDriverConfiguration getTaskDriverConfiguration() {
+    return taskDriverConfiguration;
+  }
+
+  public ThirdEyeAnomalyConfiguration setTaskDriverConfiguration(
+      final TaskDriverConfiguration taskDriverConfiguration) {
+    this.taskDriverConfiguration = taskDriverConfiguration;
+    return this;
+  }
+
+  public ThirdEyeRestClientConfiguration getTeRestConfig() {
+    return teRestConfig;
+  }
+
+  public ThirdEyeAnomalyConfiguration setTeRestConfig(
+      final ThirdEyeRestClientConfiguration teRestConfig) {
+    this.teRestConfig = teRestConfig;
+    return this;
   }
 
   public DataAvailabilitySchedulingConfiguration getDataAvailabilitySchedulingConfiguration() {
     return dataAvailabilitySchedulingConfiguration;
   }
 
-  public void setDataAvailabilitySchedulingConfiguration(
-      DataAvailabilitySchedulingConfiguration dataAvailabilitySchedulingConfiguration) {
+  public ThirdEyeAnomalyConfiguration setDataAvailabilitySchedulingConfiguration(
+      final DataAvailabilitySchedulingConfiguration dataAvailabilitySchedulingConfiguration) {
     this.dataAvailabilitySchedulingConfiguration = dataAvailabilitySchedulingConfiguration;
+    return this;
+  }
+
+  public List<String> getHolidayCountriesWhitelist() {
+    return holidayCountriesWhitelist;
+  }
+
+  public ThirdEyeAnomalyConfiguration setHolidayCountriesWhitelist(
+      final List<String> holidayCountriesWhitelist) {
+    this.holidayCountriesWhitelist = holidayCountriesWhitelist;
+    return this;
   }
 }

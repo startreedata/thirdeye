@@ -123,9 +123,8 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
         }
         schedulerService.start();
 
-        if (config.getThirdEyeRestClientConfiguration() != null) {
-          ThirdEyeRestClientConfiguration restClientConfig = config
-              .getThirdEyeRestClientConfiguration();
+        if (config.getTeRestConfig() != null) {
+          ThirdEyeRestClientConfiguration restClientConfig = config.getTeRestConfig();
           updateAdminSession(restClientConfig.getAdminUser(), restClientConfig.getSessionKey());
         }
       }

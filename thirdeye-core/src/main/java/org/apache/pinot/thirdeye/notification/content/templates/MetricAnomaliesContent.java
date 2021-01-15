@@ -75,8 +75,8 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
 
     if (this.rcaClient == null) {
       final ThirdEyePrincipal principal = new ThirdEyePrincipal(
-          this.thirdEyeAnomalyConfig.getThirdEyeRestClientConfiguration().getAdminUser(),
-          this.thirdEyeAnomalyConfig.getThirdEyeRestClientConfiguration().getSessionKey()
+          this.thirdEyeAnomalyConfig.getTeRestConfig().getAdminUser(),
+          this.thirdEyeAnomalyConfig.getTeRestConfig().getSessionKey()
       );
       this.rcaClient = new ThirdEyeRcaRestClient(principal,
           this.thirdEyeAnomalyConfig.getDashboardHost());

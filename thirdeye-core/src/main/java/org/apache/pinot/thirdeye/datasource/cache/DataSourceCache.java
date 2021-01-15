@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datasource.cache;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,7 @@ public class DataSourceCache {
   }
 
   public ThirdEyeDataSource getDataSource(String dataSource) {
+    checkState(dataSourceMap.size() > 0, "No data sources loaded!");
     return dataSourceMap.get(dataSource);
   }
 

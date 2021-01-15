@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datasource;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -61,6 +62,9 @@ public class DataSourcesLoader {
    */
   public Map<String, ThirdEyeDataSource> getDataSourceMap(DataSources dataSources) {
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
+    if (!optional(dataSources.getDataSourceConfigs()).filter(l -> l.size() > 0).isPresent()) {
+      return dataSourceMap;
+    }
     for (DataSourceConfig dataSourceConfig : dataSources.getDataSourceConfigs()) {
       String className = dataSourceConfig.getClassName();
       Map<String, Object> properties = dataSourceConfig.getProperties();

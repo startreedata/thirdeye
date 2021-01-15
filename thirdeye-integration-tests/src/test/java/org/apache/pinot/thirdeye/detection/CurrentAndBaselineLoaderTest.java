@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,74 +50,92 @@ import org.testng.annotations.Test;
 
 public class CurrentAndBaselineLoaderTest {
 
+  public static final String MY_DATA_SOURCE = "myDataSource";
   private static final String COLLECTION_VALUE = "test_dataset";
   private static final String DETECTION_NAME_VALUE = "test detection";
   private static final String METRIC_VALUE = "test_metric";
-
   private DAOTestBase testDAOProvider;
-  private MergedAnomalyResultManager anomalyDAO;
-  private AlertManager detectionDAO;
   private MetricConfigManager metricDAO;
-  private DatasetConfigManager dataSetDAO;
   private Long detectionConfigId;
-  private AggregationLoader aggregationLoader;
   private CurrentAndBaselineLoader currentAndBaselineLoader;
 
   @BeforeMethod
   public void beforeMethod() {
     this.testDAOProvider = DAOTestBase.getInstance();
     DAORegistry daoRegistry = DAORegistry.getInstance();
-    this.anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
-    this.detectionDAO = daoRegistry.getDetectionConfigManager();
+    final MergedAnomalyResultManager anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
+    final AlertManager detectionDAO = daoRegistry.getDetectionConfigManager();
+    final DatasetConfigManager dataSetDAO = daoRegistry.getDatasetConfigDAO();
+
     this.metricDAO = daoRegistry.getMetricConfigDAO();
-    this.dataSetDAO = daoRegistry.getDatasetConfigDAO();
 
-    MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
-    metricConfigDTO.setName(METRIC_VALUE);
-    metricConfigDTO.setDataset(COLLECTION_VALUE);
-    metricConfigDTO.setAlias("test");
-    long metricId = this.metricDAO.save(metricConfigDTO);
+    final ThirdEyeCacheRegistry cacheRegistry = DeprecatedInjectorUtil
+        .getInstance(ThirdEyeCacheRegistry.class);
+    cacheRegistry.registerQueryCache(buildDataSourceCache());
+    cacheRegistry.initMetaDataCaches();
 
-    Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
+    this.detectionConfigId = detectionDAO.save(createAlertDTO());
+    anomalyDAO.save(createMergedAnomalyResultDTO());
+    dataSetDAO.save(createDatasetConfigDTO());
 
-    DataFrame data = new DataFrame();
-    data.addSeries("timestamp", 1526414678000L, 1527019478000L);
-    data.addSeries("value", 100, 200);
-    Map<String, DataFrame> datasets = new HashMap<>();
-    datasets.put(COLLECTION_VALUE, data);
+    final AggregationLoader aggregationLoader = new DefaultAggregationLoader(this.metricDAO,
+        dataSetDAO,
+        cacheRegistry.getQueryCache(),
+        cacheRegistry.getDatasetMaxDataTimeCache());
 
-    Map<Long, String> id2name = new HashMap<>();
-    id2name.put(metricId, "value");
+    this.currentAndBaselineLoader = new CurrentAndBaselineLoader(this.metricDAO, dataSetDAO,
+        aggregationLoader);
+  }
 
-    dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
-    DataSourceCache cache = new DataSourceCache(dataSourceMap, Executors.newSingleThreadExecutor());
-    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).registerQueryCache(cache);
-    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).initMetaDataCaches();
-
-    AlertDTO detectionConfig = new AlertDTO();
+  private AlertDTO createAlertDTO() {
+    final AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName(DETECTION_NAME_VALUE);
-    this.detectionConfigId = this.detectionDAO.save(detectionConfig);
+    return detectionConfig;
+  }
 
+  private DatasetConfigDTO createDatasetConfigDTO() {
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
+    datasetConfigDTO.setDataset(COLLECTION_VALUE);
+    datasetConfigDTO.setDataSource(MY_DATA_SOURCE);
+    return datasetConfigDTO;
+  }
+
+  private MergedAnomalyResultDTO createMergedAnomalyResultDTO() {
     MergedAnomalyResultDTO anomalyResultDTO = new MergedAnomalyResultDTO();
     anomalyResultDTO.setStartTime(1000L);
     anomalyResultDTO.setEndTime(2000L);
     anomalyResultDTO.setDetectionConfigId(this.detectionConfigId);
     anomalyResultDTO.setCollection(COLLECTION_VALUE);
     anomalyResultDTO.setMetric(METRIC_VALUE);
-    this.anomalyDAO.save(anomalyResultDTO);
+    return anomalyResultDTO;
+  }
 
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(COLLECTION_VALUE);
-    datasetConfigDTO.setDataSource("myDataSource");
-    this.dataSetDAO.save(datasetConfigDTO);
+  private DataSourceCache buildDataSourceCache() {
+    long metricId = createMetric();
 
-    this.aggregationLoader = new DefaultAggregationLoader(this.metricDAO, this.dataSetDAO,
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-            .getDatasetMaxDataTimeCache());
+    final Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
+    dataSourceMap.put(MY_DATA_SOURCE, CSVThirdEyeDataSource.fromDataFrame(
+        buildDatasetsMap(),
+        ImmutableMap.of(metricId, "value")));
+    return new DataSourceCache(dataSourceMap, Executors.newSingleThreadExecutor());
+  }
 
-    this.currentAndBaselineLoader = new CurrentAndBaselineLoader(this.metricDAO, this.dataSetDAO,
-        this.aggregationLoader);
+  private long createMetric() {
+    MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
+    metricConfigDTO.setName(METRIC_VALUE);
+    metricConfigDTO.setDataset(COLLECTION_VALUE);
+    metricConfigDTO.setAlias("test");
+    long metricId = this.metricDAO.save(metricConfigDTO);
+    return metricId;
+  }
+
+  private Map<String, DataFrame> buildDatasetsMap() {
+    DataFrame data = new DataFrame();
+    data.addSeries("timestamp", 1526414678000L, 1527019478000L);
+    data.addSeries("value", 100, 200);
+    Map<String, DataFrame> datasets = new HashMap<>();
+    datasets.put(COLLECTION_VALUE, data);
+    return datasets;
   }
 
   @AfterMethod

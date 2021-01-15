@@ -17,6 +17,8 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   @JsonProperty("swagger")
   private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
+  private String configPath = "config";
+
   public AuthConfiguration getAuthConfiguration() {
     return authConfiguration;
   }
@@ -43,6 +45,15 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   public ThirdEyeCoordinatorConfiguration setDatabaseConfiguration(
       final DatabaseConfiguration databaseConfiguration) {
     this.databaseConfiguration = databaseConfiguration;
+    return this;
+  }
+
+  public String getConfigPath() {
+    return configPath;
+  }
+
+  public ThirdEyeCoordinatorConfiguration setConfigPath(final String configPath) {
+    this.configPath = configPath;
     return this;
   }
 }

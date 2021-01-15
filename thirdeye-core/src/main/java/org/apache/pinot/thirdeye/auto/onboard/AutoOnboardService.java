@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +55,7 @@ public class AutoOnboardService implements Runnable {
 
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
         .getDataSourceToAutoOnboardMap(
-            config.getDataSourcesAsUrl());
+            requireNonNull(config.getDataSourcesAsUrl()));
     for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {
       autoOnboardServices.addAll(autoOnboards);
     }

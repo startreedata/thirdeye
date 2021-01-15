@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.datasource.cache;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
@@ -62,12 +61,7 @@ public class DataSourceCache {
 
   public Future<ThirdEyeResponse> getQueryResultAsync(final ThirdEyeRequest request)
       throws Exception {
-    return executorService.submit(new Callable<ThirdEyeResponse>() {
-      @Override
-      public ThirdEyeResponse call() throws Exception {
-        return getQueryResult(request);
-      }
-    });
+    return executorService.submit(() -> getQueryResult(request));
   }
 
   public Map<ThirdEyeRequest, Future<ThirdEyeResponse>> getQueryResultsAsync(
@@ -75,12 +69,7 @@ public class DataSourceCache {
     Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();
     for (final ThirdEyeRequest request : requests) {
       Future<ThirdEyeResponse> responseFuture =
-          executorService.submit(new Callable<ThirdEyeResponse>() {
-            @Override
-            public ThirdEyeResponse call() throws Exception {
-              return getQueryResult(request);
-            }
-          });
+          executorService.submit(() -> getQueryResult(request));
       responseFuturesMap.put(request, responseFuture);
     }
     return responseFuturesMap;

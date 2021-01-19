@@ -1,15 +1,15 @@
 {
   "alert": {
-    "name": "pc5",
+    "name": "alert-test-1d",
     "description": "Percentage drop",
     "nodes": {
       "detection_rule_1": {
         "type": "DETECTION",
         "subType": "PERCENTAGE_RULE",
         "metric": {
-          "name": "views",
+          "name": "purchases",
           "dataset": {
-            "name": "pageviews"
+            "name": "business"
           }
         },
         "params": {

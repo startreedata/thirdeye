@@ -169,3 +169,25 @@ export const getAlertEvaluationTimeSeriesPointsMaxValue = (
 
     return maxValue;
 };
+
+// Returns maximum value from alert evaluation time series points
+export const getAlertEvaluationAnomalyPointsMaxValue = (
+    alertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[]
+): number => {
+    if (isEmpty(alertEvaluationAnomalyPoints)) {
+        return 0;
+    }
+
+    let maxValue = Number.MIN_VALUE;
+    for (const alertEvaluationAnomalyPoint of alertEvaluationAnomalyPoints) {
+        // Current
+        if (
+            isFinite(alertEvaluationAnomalyPoint.current) &&
+            maxValue < alertEvaluationAnomalyPoint.current
+        ) {
+            maxValue = alertEvaluationAnomalyPoint.current;
+        }
+    }
+
+    return maxValue;
+};

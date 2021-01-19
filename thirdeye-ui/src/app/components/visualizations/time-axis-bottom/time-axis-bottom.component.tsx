@@ -22,7 +22,7 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
         if (
             !date ||
             !props.scale ||
-            !!props.scale.domain ||
+            !props.scale.domain ||
             isEmpty(props.scale.domain())
         ) {
             return "";

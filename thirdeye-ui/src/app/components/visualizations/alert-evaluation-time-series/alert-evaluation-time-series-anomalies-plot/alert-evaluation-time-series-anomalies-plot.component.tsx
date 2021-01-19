@@ -23,7 +23,7 @@ export const AlertEvaluationTimeSeriesAnomaliesPlot: FunctionComponent<AlertEval
                             )}
                             fill={theme.palette.error.main}
                             key={index}
-                            r={5}
+                            r={props.radius || 5}
                         />
                     )
                 )}

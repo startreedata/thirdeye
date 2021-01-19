@@ -9,7 +9,7 @@ import {
     scaleLinear,
     scaleTime,
 } from "@visx/visx";
-import { debounce, isEmpty } from "lodash";
+import { debounce, isEmpty, max } from "lodash";
 import React, {
     createRef,
     FunctionComponent,
@@ -24,6 +24,7 @@ import { Dimension } from "../../../utils/material-ui-util/dimension-util";
 import {
     formatLargeNumberForVisualization,
     getAlertEvaluationAnomalyPoints,
+    getAlertEvaluationAnomalyPointsMaxValue,
     getAlertEvaluationTimeSeriesPoints,
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
@@ -86,6 +87,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         filteredAlertEvaluationTimeSeriesPoints,
         setFilteredAlertEvaluationTimeSeriesPoints,
     ] = useState<AlertEvaluationTimeSeriesPoint[]>([]);
+
+    const [
+        filteredAlertEvaluationAnomalyPoints,
+        setFilteredAlertEvaluationAnomalyPoints,
+    ] = useState<AlertEvaluationAnomalyPoint[]>([]);
     const [
         alertEvaluationAnomalyPoints,
         setAlertEvaluationAnomalyPoints,
@@ -135,13 +141,22 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             range: [timeSeriesYMax, 0],
             domain: [
                 0,
-                getAlertEvaluationTimeSeriesPointsMaxValue(
-                    filteredAlertEvaluationTimeSeriesPoints
-                ),
+                max([
+                    getAlertEvaluationTimeSeriesPointsMaxValue(
+                        filteredAlertEvaluationTimeSeriesPoints
+                    ),
+                    getAlertEvaluationAnomalyPointsMaxValue(
+                        filteredAlertEvaluationAnomalyPoints
+                    ),
+                ]) || 0,
             ],
             nice: true,
         });
-    }, [props.height, filteredAlertEvaluationTimeSeriesPoints]);
+    }, [
+        props.height,
+        filteredAlertEvaluationTimeSeriesPoints,
+        filteredAlertEvaluationAnomalyPoints,
+    ]);
 
     // Brush scales
     const brushXScale = useMemo(() => {
@@ -163,9 +178,14 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             range: [brushYMax, 0],
             domain: [
                 0,
-                getAlertEvaluationTimeSeriesPointsMaxValue(
-                    alertEvaluationTimeSeriesPoints
-                ),
+                max([
+                    getAlertEvaluationTimeSeriesPointsMaxValue(
+                        alertEvaluationTimeSeriesPoints
+                    ),
+                    getAlertEvaluationAnomalyPointsMaxValue(
+                        alertEvaluationAnomalyPoints
+                    ),
+                ]) || 0,
             ],
             nice: true,
         });
@@ -230,8 +250,24 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 }
             );
 
+            // Filter anomaly based on brush selection
+            const filteredAlertEvaluationAnomalyPoints = alertEvaluationAnomalyPoints.filter(
+                (
+                    alertEvaluationAnomalyPoint: AlertEvaluationAnomalyPoint
+                ): boolean => {
+                    return (
+                        alertEvaluationAnomalyPoint.startTime >= domain.x0 &&
+                        alertEvaluationAnomalyPoint.startTime <= domain.x1
+                    );
+                }
+            );
+
             setFilteredAlertEvaluationTimeSeriesPoints(
                 filteredAlertEvaluationTimeSeriesPoints
+            );
+
+            setFilteredAlertEvaluationAnomalyPoints(
+                filteredAlertEvaluationAnomalyPoints
             );
         }, 1),
         [alertEvaluationTimeSeriesPoints]
@@ -326,7 +362,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     {anomaliesVisible && (
                         <AlertEvaluationTimeSeriesAnomaliesPlot
                             alertEvaluationAnomalyPoints={
-                                alertEvaluationAnomalyPoints
+                                filteredAlertEvaluationAnomalyPoints
                             }
                             xScale={timeSeriesXScale}
                             yScale={timeSeriesYScale}
@@ -389,6 +425,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                             alertEvaluationAnomalyPoints={
                                 alertEvaluationAnomalyPoints
                             }
+                            radius={2}
                             xScale={brushXScale}
                             yScale={brushYScale}
                         />

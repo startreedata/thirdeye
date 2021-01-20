@@ -15,6 +15,7 @@ public class DatasetApi implements ThirdEyeApi {
   private List<String> dimensions;
   private TimeColumnApi timeColumn;
   private Duration expectedDelay;
+  private String dataSource;
 
   public Long getId() {
     return id;
@@ -76,6 +77,15 @@ public class DatasetApi implements ThirdEyeApi {
 
   public DatasetApi setExpectedDelay(final Duration expectedDelay) {
     this.expectedDelay = expectedDelay;
+    return this;
+  }
+
+  public String getDataSource() {
+    return dataSource;
+  }
+
+  public DatasetApi setDataSource(String dataSource) {
+    this.dataSource = dataSource;
     return this;
   }
 }

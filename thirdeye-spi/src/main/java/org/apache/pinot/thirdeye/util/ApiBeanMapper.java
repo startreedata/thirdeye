@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.api.AlertApi;
@@ -25,6 +26,7 @@ import org.apache.pinot.thirdeye.api.NotificationSchemesApi;
 import org.apache.pinot.thirdeye.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.api.UserApi;
+import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -69,6 +71,7 @@ public abstract class ApiBeanMapper {
             .setTimezone(dto.getTimezone())
         )
         .setExpectedDelay(dto.getExpectedDelay().toDuration())
+        .setDataSource(dto.getDataSource())
         ;
   }
 
@@ -151,6 +154,23 @@ public abstract class ApiBeanMapper {
             .orElse(null)
         )
         ;
+  }
+
+  public static DatasetConfigDTO toDatasetConfigDto(final DatasetApi api) {
+    final DatasetConfigDTO dto = new DatasetConfigDTO();
+    optional(api.getDataSource()).ifPresent(dto::setDataSource);
+    dto.setDataset(api.getName());
+    dto.setDisplayName(api.getName());
+    optional(api.getDimensions()).ifPresent(dto::setDimensions);
+    optional(api.getTimeColumn()).ifPresent(timeColumn -> {
+      dto.setTimeColumn(timeColumn.getName());
+      dto.setTimeDuration(TimeGranularity.fromDuration(timeColumn.getInterval()).getSize());
+      dto.setTimeUnit(TimeUnit.MILLISECONDS);
+      optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
+      optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
+    });
+
+    return dto;
   }
 
   public static MetricConfigDTO toMetricConfigDto(final MetricApi api) {

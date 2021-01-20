@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
@@ -11,7 +12,9 @@ import javax.ws.rs.core.MediaType;
 import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
@@ -21,16 +24,24 @@ import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 @Produces(MediaType.APPLICATION_JSON)
 public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
 
+  private final DatasetConfigManager datasetConfigManager;
+
   @Inject
-  public MetricResource(final AuthService authService, final MetricConfigManager metricConfigManager) {
+  public MetricResource(final AuthService authService, final MetricConfigManager metricConfigManager, final DatasetConfigManager datasetConfigManager) {
     super(authService, metricConfigManager, ImmutableMap.of());
+    this.datasetConfigManager = datasetConfigManager;
   }
 
   @Override
   protected MetricConfigDTO createDto(final ThirdEyePrincipal principal, final MetricApi api) {
+    ensureExists(this.datasetConfigManager.findByDataset(api.getDataset().getName()));
     final MetricConfigDTO dto = ApiBeanMapper.toMetricConfigDto(api);
     dto.setAlias(ThirdEyeUtils.constructMetricAlias(api.getDataset().getName(), api.getName()));
     dto.setCreatedBy(principal.getName());
+
+    DatasetConfigDTO datasetConfigDTO =  ApiBeanMapper.toDatasetConfigDto(api.getDataset());
+
+    dto.setDatasetConfig(datasetConfigDTO);
     dto.setViews(api.getViews());
     return dto;
   }

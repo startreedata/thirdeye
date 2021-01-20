@@ -50,7 +50,7 @@ public class DatasetConfigBean extends AbstractBean {
   private Integer timeDuration;
   private String timeFormat = TimeSpec.SINCE_EPOCH_FORMAT;
   private String timezone = TimeSpec.DEFAULT_TIMEZONE;
-  private String dataSource;
+  private String dataSource = "PinotThirdEyeDataSource";
   private Set<String> owners;
   private boolean active = true;
 

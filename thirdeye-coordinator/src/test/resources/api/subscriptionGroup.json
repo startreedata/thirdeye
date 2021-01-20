@@ -16,10 +16,10 @@
       "email": {
         "from": "from@thirdeye.com",
         "to": [
-          "to@thirdeye@com"
+          "to@thirdeye.com"
         ],
         "cc": [
-          "cc@thirdeye@com"
+          "cc@thirdeye.com"
         ]
       }
     }

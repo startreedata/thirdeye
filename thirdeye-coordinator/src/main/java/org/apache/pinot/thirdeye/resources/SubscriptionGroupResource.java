@@ -5,6 +5,7 @@ import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREA
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
+import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toAlertSchemes;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toSubscriptionGroupDTO;
 
 import com.google.common.collect.ImmutableMap;
@@ -63,6 +64,9 @@ public class SubscriptionGroupResource extends
             .map(AlertApi::getId)
             .collect(Collectors.toList()))
         .ifPresent(l -> dto.getProperties().put("detectionConfigIds", l));
+
+    optional(api.getNotificationSchemes())
+        .ifPresent(notificationSchemes -> dto.setAlertSchemes(toAlertSchemes(notificationSchemes)));
 
     return dto;
   }

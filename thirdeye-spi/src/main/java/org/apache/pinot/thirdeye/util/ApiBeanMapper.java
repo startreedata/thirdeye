@@ -249,17 +249,22 @@ public abstract class ApiBeanMapper {
     dto.getProperties().put("detectionConfigIds", alertIds);
 
     if (api.getNotificationSchemes() != null) {
-      final EmailSchemeApi email = api.getNotificationSchemes().getEmail();
-      dto.setAlertSchemes(ImmutableMap.of(
-          "emailScheme", ImmutableMap.of(
-              "recipients", ImmutableMap.of(
-                  "to", optional(email.getTo()).orElse(Collections.emptyList()),
-                  "cc", optional(email.getCc()).orElse(Collections.emptyList()),
-                  "bcc", optional(email.getBcc()).orElse(Collections.emptyList())
-              ))));
+      dto.setAlertSchemes(toAlertSchemes(api.getNotificationSchemes()));
     }
 
     return dto;
+  }
+
+  public static ImmutableMap<String, Object> toAlertSchemes(
+      final NotificationSchemesApi notificationSchemes) {
+    final EmailSchemeApi email = notificationSchemes.getEmail();
+    return ImmutableMap.of(
+        "emailScheme", ImmutableMap.of(
+            "recipients", ImmutableMap.of(
+                "to", optional(email.getTo()).orElse(Collections.emptyList()),
+                "cc", optional(email.getCc()).orElse(Collections.emptyList()),
+                "bcc", optional(email.getBcc()).orElse(Collections.emptyList())
+            )));
   }
 
   public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {

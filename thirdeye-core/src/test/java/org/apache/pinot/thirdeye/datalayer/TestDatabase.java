@@ -1,7 +1,5 @@
 package org.apache.pinot.thirdeye.datalayer;
 
-import com.google.common.io.Files;
-import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -17,15 +15,15 @@ import org.slf4j.LoggerFactory;
 public class TestDatabase {
 
   private static final Logger log = LoggerFactory.getLogger(TestDatabase.class);
+  private static int counter = 0;
 
   public void cleanup() {
     /* tmp file gets deleted automatically */
   }
 
   public PersistenceConfig testPersistenceConfig() {
-    final File tempDir = Files.createTempDir();
     final DatabaseConfiguration databaseConfiguration = new DatabaseConfiguration()
-        .setUrl("jdbc:h2:" + tempDir.getAbsolutePath())
+        .setUrl(String.format("jdbc:h2:mem:testdb%d;DB_CLOSE_DELAY=-1", counter++))
         .setUser("ignoreUser")
         .setPassword("ignorePassword")
         .setDriver("org.h2.Driver");
@@ -35,10 +33,9 @@ public class TestDatabase {
 
   public DataSource createDataSource(PersistenceConfig config) throws Exception {
     final DatabaseConfiguration dbConfig = config.getDatabaseConfiguration();
-    final String dbUrlId = dbConfig.getUrl() + System.currentTimeMillis() + "" + Math.random();
 
     final DataSource ds = new DataSource();
-    ds.setUrl(dbUrlId);
+    ds.setUrl(dbConfig.getUrl());
     log.debug("Creating db with connection url : " + ds.getUrl());
     ds.setPassword(dbConfig.getPassword());
     ds.setUsername(dbConfig.getUser());

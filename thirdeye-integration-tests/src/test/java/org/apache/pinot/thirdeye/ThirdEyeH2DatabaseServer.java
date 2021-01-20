@@ -13,7 +13,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
-import org.h2.tools.DeleteDbFiles;
 import org.h2.tools.Server;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -27,7 +26,7 @@ public class ThirdEyeH2DatabaseServer {
   public static final String DB_NAME = "thirdeye";
   public static final String DB_PORT = "9124";
   public static final DatabaseConfiguration DB_CONFIG = new DatabaseConfiguration()
-      .setUrl(String.format("jdbc:h2:tcp:localhost:%s/%s", DB_PORT, DB_NAME))
+      .setUrl(String.format("jdbc:h2:tcp:localhost:%s/mem:%s;DB_CLOSE_DELAY=-1", DB_PORT, DB_NAME))
       .setUser("user")
       .setPassword("password")
       .setDriver("org.h2.Driver");
@@ -77,8 +76,6 @@ public class ThirdEyeH2DatabaseServer {
   public void start() {
     log.info(String.format("Working Dir: %s", System.getProperty("user.dir")));
     try {
-      cleanUp();
-
       server.start();
       checkState(new File(CREATE_SCHEMA_SQL).canRead());
       checkState(server.isRunning(true));
@@ -122,10 +119,5 @@ public class ThirdEyeH2DatabaseServer {
     if (server != null) {
       server.shutdown();
     }
-    cleanUp();
-  }
-
-  private void cleanUp() {
-    DeleteDbFiles.execute(BASE_DIR, DB_NAME, false);
   }
 }

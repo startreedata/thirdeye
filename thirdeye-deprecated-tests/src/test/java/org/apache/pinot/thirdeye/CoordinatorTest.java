@@ -100,6 +100,8 @@ public class CoordinatorTest {
         .post(Entity.json(entity));
 
     assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(response.getEntity()).isNotNull();
+
+    final AlertEvaluationApi alertEvaluationApi = response.readEntity(AlertEvaluationApi.class);
+    assertThat(alertEvaluationApi).isNotNull();
   }
 }

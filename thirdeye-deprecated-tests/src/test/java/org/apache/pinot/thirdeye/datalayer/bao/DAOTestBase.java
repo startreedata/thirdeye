@@ -29,8 +29,6 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class DAOTestBase {
 
-  //  protected TestDBResources testDBResources;
-//  protected DAORegistry daoRegistry;
   DataSource ds;
   String dbUrlId;
 
@@ -50,8 +48,6 @@ public class DAOTestBase {
       initializeDs(configuration);
 
       DeprecatedInjectorUtil.init(ds);
-
-//      daoRegistry = DAORegistry.getInstance();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

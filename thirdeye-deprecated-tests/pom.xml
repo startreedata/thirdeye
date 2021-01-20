@@ -27,7 +27,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>thirdeye-integration-tests</artifactId>
+  <artifactId>thirdeye-deprecated-tests</artifactId>
 
   <dependencies>
     <dependency>

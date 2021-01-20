@@ -23,6 +23,7 @@ package org.apache.pinot.thirdeye.datalayer.pojo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.pinot.thirdeye.Constants.SubjectType;
 
 /**
@@ -174,5 +175,33 @@ public class DetectionAlertConfigBean extends AbstractBean {
   public DetectionAlertConfigBean setOwners(final List<String> owners) {
     this.owners = owners;
     return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DetectionAlertConfigBean that = (DetectionAlertConfigBean) o;
+    return active == that.active && Objects.equals(name, that.name) && Objects
+        .equals(from, that.from)
+        && Objects.equals(cronExpression, that.cronExpression) && Objects
+        .equals(application, that.application)
+        && subjectType == that.subjectType && Objects.equals(vectorClocks, that.vectorClocks)
+        && Objects.equals(properties, that.properties) && Objects
+        .equals(alertSchemes, that.alertSchemes)
+        && Objects.equals(alertSuppressors, that.alertSuppressors) && Objects
+        .equals(refLinks, that.refLinks)
+        && Objects.equals(yaml, that.yaml);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(active, name, from, cronExpression, application, subjectType, vectorClocks,
+        properties,
+        alertSchemes, alertSuppressors, refLinks, yaml);
   }
 }

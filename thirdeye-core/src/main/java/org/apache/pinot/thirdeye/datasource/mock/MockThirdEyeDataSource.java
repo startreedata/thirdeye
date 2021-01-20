@@ -134,8 +134,6 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
         Collection<Tuple> paths = makeTuples(dataset.metrics.get(metric), basePrefix,
             dataset.dimensions.size() + basePrefix.length);
         for (Tuple path : paths) {
-          LOG.info("Generating '{}'", Arrays.asList(path.values));
-
           Map<String, Object> metricConfig = resolveTuple(config, path);
           rawData.put(path, makeData(metricConfig,
               new DateTime(tStart, dataset.timezone),

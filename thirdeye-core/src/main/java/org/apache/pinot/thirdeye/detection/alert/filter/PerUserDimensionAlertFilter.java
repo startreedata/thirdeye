@@ -121,7 +121,7 @@ public class PerUserDimensionAlertFilter extends StatefulDetectionAlertFilter {
             new HashSet<>(ConfigUtils.getList(recipients.get(PROP_BCC))));
 
         SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
-            this.config, generatedAlertSchemes, this.config.getReferenceLinks());
+            this.config, generatedAlertSchemes, this.config.getRefLinks());
 
         result.addMapping(new DetectionAlertFilterNotification(subsConfig),
             new HashSet<>(userAnomalyMapping.getValue()));

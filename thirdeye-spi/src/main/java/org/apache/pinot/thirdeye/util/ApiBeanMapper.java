@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.datalayer.pojo.AlertNodeType.DETECTION;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -18,8 +19,9 @@ import org.apache.pinot.thirdeye.api.AnomalyApi;
 import org.apache.pinot.thirdeye.api.AnomalyFeedbackApi;
 import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.api.DatasetApi;
-import org.apache.pinot.thirdeye.api.EmailSettingsApi;
+import org.apache.pinot.thirdeye.api.EmailSchemeApi;
 import org.apache.pinot.thirdeye.api.MetricApi;
+import org.apache.pinot.thirdeye.api.NotificationSchemesApi;
 import org.apache.pinot.thirdeye.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.api.UserApi;
@@ -195,11 +197,11 @@ public abstract class ApiBeanMapper {
         .orElse(null);
 
     // TODO spyne This entire bean to be refactored, current optimistic conversion is a hack.
-    final EmailSettingsApi emailSettings = optional(dto.getAlertSchemes())
+    final EmailSchemeApi emailSchemeApi = optional(dto.getAlertSchemes())
         .map(o -> o.get("emailScheme"))
         .map(o -> ((Map) o).get("recipients"))
         .map(m -> (Map) m)
-        .map(m -> new EmailSettingsApi()
+        .map(m -> new EmailSchemeApi()
             .setTo(optional(m.get("to"))
                 .map(l -> new ArrayList<>((List<String>) l))
                 .orElse(null)
@@ -220,7 +222,8 @@ public abstract class ApiBeanMapper {
         .setApplication(new ApplicationApi()
             .setName(dto.getApplication()))
         .setAlerts(alertApis)
-        .setEmailSettings(emailSettings)
+        .setNotificationSchemes(new NotificationSchemesApi()
+            .setEmail(emailSchemeApi))
         ;
   }
 
@@ -244,6 +247,17 @@ public abstract class ApiBeanMapper {
         .collect(Collectors.toList());
 
     dto.getProperties().put("detectionConfigIds", alertIds);
+
+    if (api.getNotificationSchemes() != null) {
+      final EmailSchemeApi email = api.getNotificationSchemes().getEmail();
+      dto.setAlertSchemes(ImmutableMap.of(
+          "emailScheme", ImmutableMap.of(
+              "recipients", ImmutableMap.of(
+                  "to", optional(email.getTo()).orElse(Collections.emptyList()),
+                  "cc", optional(email.getCc()).orElse(Collections.emptyList()),
+                  "bcc", optional(email.getBcc()).orElse(Collections.emptyList())
+              ))));
+    }
 
     return dto;
   }

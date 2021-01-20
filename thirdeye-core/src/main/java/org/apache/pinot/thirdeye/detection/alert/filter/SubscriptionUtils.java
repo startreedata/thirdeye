@@ -53,7 +53,7 @@ public class SubscriptionUtils {
     subsConfig.setVectorClocks(parentConfig.getVectorClocks());
 
     subsConfig.setAlertSchemes(alertSchemes);
-    subsConfig.setReferenceLinks(refLinks);
+    subsConfig.setRefLinks(refLinks);
 
     return subsConfig;
   }

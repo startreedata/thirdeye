@@ -211,7 +211,7 @@ public class DimensionsRecipientAlertFilterTest {
 
     Map<String, String> refLinks = new HashMap<>();
     refLinks.put("global_key", "global_value");
-    alertConfig.setReferenceLinks(refLinks);
+    alertConfig.setRefLinks(refLinks);
 
     return alertConfig;
   }
@@ -241,7 +241,7 @@ public class DimensionsRecipientAlertFilterTest {
     recValue.setDimensionFilters(dimFilters);
     Map<String, String> refLinks = new HashMap<>();
     refLinks.put("link1", "value1");
-    recValue.getSubscriptionConfig().setReferenceLinks(refLinks);
+    recValue.getSubscriptionConfig().setRefLinks(refLinks);
     Assert.assertTrue(result.getResult().containsKey(recValue));
     Assert.assertEquals(result.getResult().get(recValue).size(), 2);
     Assert.assertEquals(result.getResult().get(recValue), makeSet(0, 4));
@@ -256,7 +256,7 @@ public class DimensionsRecipientAlertFilterTest {
     recAnotherValue.setDimensionFilters(dimFilters);
     refLinks.clear();
     refLinks.put("link2", "value2");
-    recAnotherValue.getSubscriptionConfig().setReferenceLinks(refLinks);
+    recAnotherValue.getSubscriptionConfig().setRefLinks(refLinks);
     Assert.assertTrue(result.getResult().containsKey(recAnotherValue));
     Assert.assertEquals(result.getResult().get(recAnotherValue).size(), 1);
     Assert.assertEquals(result.getResult().get(recAnotherValue), makeSet(1));
@@ -283,7 +283,7 @@ public class DimensionsRecipientAlertFilterTest {
     recValue.setDimensionFilters(dimFilters);
     Map<String, String> refLinks = new HashMap<>();
     refLinks.put("link1", "value1");
-    recValue.getSubscriptionConfig().setReferenceLinks(refLinks);
+    recValue.getSubscriptionConfig().setRefLinks(refLinks);
 
     // Let's convert one of them to a child
     MergedAnomalyResultDTO anomalyResultDTO = this.detectedAnomalies.get(3);
@@ -344,7 +344,7 @@ public class DimensionsRecipientAlertFilterTest {
     recValue.setDimensionFilters(dimFilters);
     Map<String, String> refLinks = new HashMap<>();
     refLinks.put("link1", "value1");
-    recValue.getSubscriptionConfig().setReferenceLinks(refLinks);
+    recValue.getSubscriptionConfig().setRefLinks(refLinks);
     Assert.assertTrue(result.getResult().containsKey(recValue));
     Assert.assertEquals(result.getResult().get(recValue).size(), 1);
     Assert.assertTrue(result.getResult().get(recValue).contains(this.detectedAnomalies.get(7)));

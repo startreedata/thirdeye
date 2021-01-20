@@ -210,7 +210,7 @@ public class SubscriptionConfigTranslator extends
       refLinks.put("ThirdEye User Guide", "https://go/thirdeyeuserguide");
       refLinks.put("See how to add links", "https://go/thirdeyealertreflink");
     }
-    alertConfigDTO.setReferenceLinks(ConfigUtils.getMap(yamlConfigMap.get(PROP_REFERENCE_LINKS)));
+    alertConfigDTO.setRefLinks(ConfigUtils.getMap(yamlConfigMap.get(PROP_REFERENCE_LINKS)));
 
     alertConfigDTO.setAlertSchemes(buildAlertSchemes(yamlConfigMap));
     alertConfigDTO.setAlertSuppressors(buildAlertSuppressors(yamlConfigMap));

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
-public class EmailSettingsApi {
+public class EmailSchemeApi {
 
   private String from;
   private List<String> to;
@@ -16,7 +16,7 @@ public class EmailSettingsApi {
     return from;
   }
 
-  public EmailSettingsApi setFrom(final String from) {
+  public EmailSchemeApi setFrom(final String from) {
     this.from = from;
     return this;
   }
@@ -25,7 +25,7 @@ public class EmailSettingsApi {
     return to;
   }
 
-  public EmailSettingsApi setTo(final List<String> to) {
+  public EmailSchemeApi setTo(final List<String> to) {
     this.to = to;
     return this;
   }
@@ -34,7 +34,7 @@ public class EmailSettingsApi {
     return cc;
   }
 
-  public EmailSettingsApi setCc(final List<String> cc) {
+  public EmailSchemeApi setCc(final List<String> cc) {
     this.cc = cc;
     return this;
   }
@@ -43,7 +43,7 @@ public class EmailSettingsApi {
     return bcc;
   }
 
-  public EmailSettingsApi setBcc(final List<String> bcc) {
+  public EmailSchemeApi setBcc(final List<String> bcc) {
     this.bcc = bcc;
     return this;
   }

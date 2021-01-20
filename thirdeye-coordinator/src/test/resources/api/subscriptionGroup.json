@@ -11,6 +11,17 @@
       {
         "id": 7597
       }
-    ]
+    ],
+    "notificationSchemes": {
+      "email": {
+        "from": "from@thirdeye.com",
+        "to": [
+          "to@thirdeye@com"
+        ],
+        "cc": [
+          "cc@thirdeye@com"
+        ]
+      }
+    }
   }
 ]

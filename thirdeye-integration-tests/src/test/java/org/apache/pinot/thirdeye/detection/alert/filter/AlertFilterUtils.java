@@ -73,7 +73,7 @@ public class AlertFilterUtils {
     alertProps.put(PROP_JIRA_SCHEME, jiraParams);
 
     SubscriptionGroupDTO subsConfig = SubscriptionUtils
-        .makeChildSubscriptionConfig(config, alertProps, config.getReferenceLinks());
+        .makeChildSubscriptionConfig(config, alertProps, config.getRefLinks());
     return new DetectionAlertFilterNotification(subsConfig);
   }
 
@@ -92,7 +92,7 @@ public class AlertFilterUtils {
     alertProps.put(PROP_EMAIL_SCHEME, emailRecipients);
 
     SubscriptionGroupDTO subsConfig = SubscriptionUtils
-        .makeChildSubscriptionConfig(config, alertProps, config.getReferenceLinks());
+        .makeChildSubscriptionConfig(config, alertProps, config.getRefLinks());
 
     return new DetectionAlertFilterNotification(subsConfig);
   }

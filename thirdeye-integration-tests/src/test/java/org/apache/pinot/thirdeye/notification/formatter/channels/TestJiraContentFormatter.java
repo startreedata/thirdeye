@@ -188,7 +188,7 @@ public class TestJiraContentFormatter {
     alertConfig.setVectorClocks(new HashMap<>());
     Map<String, String> refLinks = new HashMap<>();
     refLinks.put("test_ref_key", "test_ref_value");
-    alertConfig.setReferenceLinks(refLinks);
+    alertConfig.setRefLinks(refLinks);
 
     return alertConfig;
   }
@@ -238,7 +238,7 @@ public class TestJiraContentFormatter {
     alertConfig.setVectorClocks(new HashMap<>());
     Map<String, String> refLinks = new HashMap<>();
     refLinks.put("test_ref_key", "test_ref_value");
-    alertConfig.setReferenceLinks(refLinks);
+    alertConfig.setRefLinks(refLinks);
 
     Map<Long, Long> vectorClocks = new HashMap<>();
     vectorClocks.put(detectionConfigId, 0L);

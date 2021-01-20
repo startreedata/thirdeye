@@ -18,7 +18,7 @@ public class SubscriptionGroupApi implements ThirdEyeApi {
   private Date updated;
   private UserApi owner;
 
-  private EmailSettingsApi emailSettings;
+  private NotificationSchemesApi notificationSchemes;
 
   public Long getId() {
     return id;
@@ -85,13 +85,13 @@ public class SubscriptionGroupApi implements ThirdEyeApi {
     return this;
   }
 
-  public EmailSettingsApi getEmailSettings() {
-    return emailSettings;
+  public NotificationSchemesApi getNotificationSchemes() {
+    return notificationSchemes;
   }
 
-  public SubscriptionGroupApi setEmailSettings(
-      final EmailSettingsApi emailSettings) {
-    this.emailSettings = emailSettings;
+  public SubscriptionGroupApi setNotificationSchemes(
+      final NotificationSchemesApi notificationSchemes) {
+    this.notificationSchemes = notificationSchemes;
     return this;
   }
 }

@@ -23,7 +23,6 @@ package org.apache.pinot.thirdeye.datalayer.pojo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.apache.pinot.thirdeye.Constants.SubjectType;
 
 /**
@@ -54,135 +53,126 @@ public class DetectionAlertConfigBean extends AbstractBean {
   Map<String, String> refLinks;
   List<String> owners;
 
-  public List<String> getOwners() {
-    return owners;
-  }
-
-  public void setOwners(List<String> owners) {
-    this.owners = owners;
-  }
-
   public boolean isActive() {
     return active;
   }
 
-  public void setActive(boolean active) {
+  public DetectionAlertConfigBean setActive(final boolean active) {
     this.active = active;
+    return this;
   }
 
   public String getName() {
     return name;
   }
 
-  public void setName(String name) {
+  public DetectionAlertConfigBean setName(final String name) {
     this.name = name;
-  }
-
-  public String getCronExpression() {
-    return cronExpression;
-  }
-
-  public void setCronExpression(String cronExpression) {
-    this.cronExpression = cronExpression;
+    return this;
   }
 
   public String getFrom() {
     return from;
   }
 
-  public void setFrom(String fromAddress) {
-    this.from = fromAddress;
+  public DetectionAlertConfigBean setFrom(final String from) {
+    this.from = from;
+    return this;
   }
 
-  public Map<String, Object> getProperties() {
-    return properties;
+  public String getCronExpression() {
+    return cronExpression;
   }
 
-  public void setProperties(Map<String, Object> properties) {
-    this.properties = properties;
-  }
-
-  public Map<Long, Long> getVectorClocks() {
-    return vectorClocks;
-  }
-
-  public void setVectorClocks(Map<Long, Long> vectorClocks) {
-    this.vectorClocks = vectorClocks;
+  public DetectionAlertConfigBean setCronExpression(final String cronExpression) {
+    this.cronExpression = cronExpression;
+    return this;
   }
 
   public String getApplication() {
     return application;
   }
 
-  public void setApplication(String application) {
+  public DetectionAlertConfigBean setApplication(final String application) {
     this.application = application;
-  }
-
-  public SubjectType getSubjectType() {
-    return subjectType;
-  }
-
-  public void setSubjectType(SubjectType subjectType) {
-    this.subjectType = subjectType;
-  }
-
-  public Map<String, Object> getAlertSchemes() {
-    return alertSchemes;
-  }
-
-  public void setAlertSchemes(Map<String, Object> alertSchemes) {
-    this.alertSchemes = alertSchemes;
-  }
-
-  public Map<String, Object> getAlertSuppressors() {
-    return alertSuppressors;
-  }
-
-  public void setAlertSuppressors(Map<String, Object> alertSuppressors) {
-    this.alertSuppressors = alertSuppressors;
-  }
-
-  public Map<String, String> getReferenceLinks() {
-    return refLinks;
-  }
-
-  public void setReferenceLinks(Map<String, String> refLinks) {
-    this.refLinks = refLinks;
+    return this;
   }
 
   public String getYaml() {
     return yaml;
   }
 
-  public void setYaml(String yaml) {
+  public DetectionAlertConfigBean setYaml(final String yaml) {
     this.yaml = yaml;
+    return this;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    DetectionAlertConfigBean that = (DetectionAlertConfigBean) o;
-    return active == that.active && Objects.equals(name, that.name) && Objects
-        .equals(from, that.from)
-        && Objects.equals(cronExpression, that.cronExpression) && Objects
-        .equals(application, that.application)
-        && subjectType == that.subjectType && Objects.equals(vectorClocks, that.vectorClocks)
-        && Objects.equals(properties, that.properties) && Objects
-        .equals(alertSchemes, that.alertSchemes)
-        && Objects.equals(alertSuppressors, that.alertSuppressors) && Objects
-        .equals(refLinks, that.refLinks)
-        && Objects.equals(yaml, that.yaml);
+  public Map<String, Object> getAlertSchemes() {
+    return alertSchemes;
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(active, name, from, cronExpression, application, subjectType, vectorClocks,
-        properties,
-        alertSchemes, alertSuppressors, refLinks, yaml);
+  public DetectionAlertConfigBean setAlertSchemes(
+      final Map<String, Object> alertSchemes) {
+    this.alertSchemes = alertSchemes;
+    return this;
+  }
+
+  public Map<String, Object> getAlertSuppressors() {
+    return alertSuppressors;
+  }
+
+  public DetectionAlertConfigBean setAlertSuppressors(
+      final Map<String, Object> alertSuppressors) {
+    this.alertSuppressors = alertSuppressors;
+    return this;
+  }
+
+  public SubjectType getSubjectType() {
+    return subjectType;
+  }
+
+  public DetectionAlertConfigBean setSubjectType(
+      final SubjectType subjectType) {
+    this.subjectType = subjectType;
+    return this;
+  }
+
+  public Map<Long, Long> getVectorClocks() {
+    return vectorClocks;
+  }
+
+  public DetectionAlertConfigBean setVectorClocks(
+      final Map<Long, Long> vectorClocks) {
+    this.vectorClocks = vectorClocks;
+    return this;
+  }
+
+  public Map<String, Object> getProperties() {
+    return properties;
+  }
+
+  public DetectionAlertConfigBean setProperties(
+      final Map<String, Object> properties) {
+    this.properties = properties;
+    return this;
+  }
+
+  public Map<String, String> getRefLinks() {
+    return refLinks;
+  }
+
+  public DetectionAlertConfigBean setRefLinks(
+      final Map<String, String> refLinks) {
+    this.refLinks = refLinks;
+    return this;
+  }
+
+  public List<String> getOwners() {
+    return owners;
+  }
+
+  public DetectionAlertConfigBean setOwners(final List<String> owners) {
+    this.owners = owners;
+    return this;
   }
 }

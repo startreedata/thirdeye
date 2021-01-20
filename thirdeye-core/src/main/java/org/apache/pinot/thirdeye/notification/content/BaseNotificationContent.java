@@ -425,8 +425,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
       templateData.put("recall", precisionRecallEvaluator.getRecall());
       templateData.put("falseNegative", precisionRecallEvaluator.getFalseNegativeRate());
     }
-    if (notificationConfig.getReferenceLinks() != null) {
-      templateData.put("referenceLinks", notificationConfig.getReferenceLinks());
+    if (notificationConfig.getRefLinks() != null) {
+      templateData.put("referenceLinks", notificationConfig.getRefLinks());
     }
 
     return templateData;

@@ -3,13 +3,13 @@ package org.apache.pinot.thirdeye;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.ThirdEyeH2DatabaseServer.DB_CONFIG;
 import static org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil.getInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.io.Resources;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
+import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.util.Duration;
 import java.io.IOException;
@@ -19,6 +19,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.assertj.core.api.Assertions;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +37,11 @@ public class CoordinatorTest {
           resourceFilePath("e2e/config/coordinator.yaml"),
           config("configPath", THIRDEYE_CONFIG),
           config("server.connector.port", "0"), // port: 0 implies any port
-          config("database.url", DB_CONFIG.getUrl()),
-          config("database.user", DB_CONFIG.getUser()),
-          config("database.password", DB_CONFIG.getPassword()),
-          config("database.driver", DB_CONFIG.getDriver())
+          ConfigOverride.config("database.url", ThirdEyeH2DatabaseServer.DB_CONFIG.getUrl()),
+          ConfigOverride.config("database.user", ThirdEyeH2DatabaseServer.DB_CONFIG.getUser()),
+          ConfigOverride
+              .config("database.password", ThirdEyeH2DatabaseServer.DB_CONFIG.getPassword()),
+          ConfigOverride.config("database.driver", ThirdEyeH2DatabaseServer.DB_CONFIG.getDriver())
       );
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -83,13 +85,14 @@ public class CoordinatorTest {
   public void testDataSourcesLoaded() {
     final ThirdEyeCacheRegistry instance = getInstance(ThirdEyeCacheRegistry.class);
     // A single datasource must exist in the db for the tests to proceed
-    assertThat(db.executeSql("SELECT * From dataset_config_index").length()).isGreaterThan(0);
+    Assertions.assertThat(db.executeSql("SELECT * From dataset_config_index").length())
+        .isGreaterThan(0);
 
     assertThat(instance).isNotNull();
     assertThat(instance.getQueryCache()).isNotNull();
   }
 
-  @Test(dependsOnMethods = "testDataSourcesLoaded", enabled = false)
+  @Test(dependsOnMethods = "testDataSourcesLoaded")
   public void testEvaluate() throws IOException {
     final URL url = Resources.getResource("e2e/payload_alerts_evaluate.json");
     final AlertEvaluationApi entity = requireNonNull(

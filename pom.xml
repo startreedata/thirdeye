@@ -30,6 +30,7 @@
     <module>thirdeye-coordinator</module>
     <module>thirdeye-distribution</module>
     <module>thirdeye-deprecated-tests</module>
+    <module>thirdeye-integration-tests</module>
     <module>thirdeye-worker</module>
   </modules>
 

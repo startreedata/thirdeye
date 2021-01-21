@@ -33,6 +33,8 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
 
   public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
       .put("alert.id", "detectionConfigId")
+      .put("startTime", "startTime")
+      .put("endTime", "endTime")
       .build();
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
 

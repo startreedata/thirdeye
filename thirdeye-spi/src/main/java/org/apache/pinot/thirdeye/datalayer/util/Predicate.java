@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.datalayer.util;
 
+import com.google.common.base.MoreObjects;
+import java.util.Arrays;
+import java.util.Objects;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class Predicate {
@@ -28,7 +31,7 @@ public class Predicate {
   private String lhs;
   private Object rhs;
   private Predicate[] childPredicates;
-  private Predicate(String lhs, OPER oper, Object rhs) {
+  public Predicate(String lhs, OPER oper, Object rhs) {
     this.lhs = lhs;
     this.oper = oper;
     this.rhs = rhs;
@@ -100,7 +103,7 @@ public class Predicate {
     return childPredicates;
   }
 
-  enum OPER {
+  public enum OPER {
     AND("AND"),
     OR("OR"),
     EQ("="),
@@ -123,5 +126,37 @@ public class Predicate {
     public String toString() {
       return sign;
     }
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final Predicate predicate = (Predicate) o;
+    return oper == predicate.oper &&
+        Objects.equals(lhs, predicate.lhs) &&
+        Objects.equals(rhs, predicate.rhs) &&
+        Arrays.equals(childPredicates, predicate.childPredicates);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hash(oper, lhs, rhs);
+    result = 31 * result + Arrays.hashCode(childPredicates);
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("oper", oper)
+        .add("lhs", lhs)
+        .add("rhs", rhs)
+        .add("childPredicates", childPredicates)
+        .toString();
   }
 }

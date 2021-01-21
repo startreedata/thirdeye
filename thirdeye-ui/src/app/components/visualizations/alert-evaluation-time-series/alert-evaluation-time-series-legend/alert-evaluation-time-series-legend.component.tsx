@@ -1,8 +1,13 @@
 import { Typography, useTheme } from "@material-ui/core";
 import { Legend, LegendItem, LegendLabel, scaleOrdinal } from "@visx/visx";
 import classnames from "classnames";
-import { kebabCase } from "lodash";
-import React, { FunctionComponent, ReactNode, useState } from "react";
+import { isUndefined, kebabCase } from "lodash";
+import React, {
+    FunctionComponent,
+    ReactNode,
+    useEffect,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { Dimension } from "../../../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../../../utils/material-ui-util/palette-util";
@@ -22,6 +27,38 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationT
     const [anomaliesVisible, setAnomaliesVisible] = useState(true);
     const theme = useTheme();
     const { t } = useTranslation();
+
+    useEffect(() => {
+        if (isUndefined(props.upperAndLowerBoundVisible)) {
+            return;
+        }
+
+        setUpperAndLowerBoundVisible(props.upperAndLowerBoundVisible);
+    }, [props.upperAndLowerBoundVisible]);
+
+    useEffect(() => {
+        if (isUndefined(props.currentVisible)) {
+            return;
+        }
+
+        setCurrentVisible(props.currentVisible);
+    }, [props.currentVisible]);
+
+    useEffect(() => {
+        if (isUndefined(props.baselineVisible)) {
+            return;
+        }
+
+        setBaselineVisible(props.baselineVisible);
+    }, [props.baselineVisible]);
+
+    useEffect(() => {
+        if (isUndefined(props.anomaliesVisible)) {
+            return;
+        }
+
+        setAnomaliesVisible(props.anomaliesVisible);
+    }, [props.anomaliesVisible]);
 
     // Legend scale
     const legendOrdinalScale = scaleOrdinal({

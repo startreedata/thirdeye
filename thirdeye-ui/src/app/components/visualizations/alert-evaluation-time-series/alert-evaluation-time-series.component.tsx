@@ -467,7 +467,13 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             </svg>
 
             {/* Legend */}
-            <AlertEvaluationTimeSeriesLegend onChange={onLegendChange} />
+            <AlertEvaluationTimeSeriesLegend
+                anomaliesVisible={anomaliesVisible}
+                baselineVisible={baselineVisible}
+                currentVisible={currentVisible}
+                upperAndLowerBoundVisible={upperAndLowerBoundVisible}
+                onChange={onLegendChange}
+            />
         </>
     );
 };

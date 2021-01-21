@@ -185,7 +185,10 @@ public abstract class ApiBeanMapper {
         .setRollupThreshold(api.getRollupThreshold())
         .setDefaultAggFunction(api.getAggregationFunction())
         // TODO suvodeep Revisit this: Assume false if active is not set.
-        .setActive(optional(api.getActive()).orElse(false));
+        .setActive(optional(api.getActive()).orElse(false))
+        .setViews(api.getViews())
+        .setDerivedMetricExpression(api.getDerivedMetricExpression());
+
     return dto;
   }
 

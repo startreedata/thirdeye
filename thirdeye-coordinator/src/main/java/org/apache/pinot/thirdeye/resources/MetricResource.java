@@ -34,15 +34,14 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
 
   @Override
   protected MetricConfigDTO createDto(final ThirdEyePrincipal principal, final MetricApi api) {
+    ensureExists(api.getDataset(), "dataset");
     ensureExists(this.datasetConfigManager.findByDataset(api.getDataset().getName()));
+
     final MetricConfigDTO dto = ApiBeanMapper.toMetricConfigDto(api);
     dto.setAlias(ThirdEyeUtils.constructMetricAlias(api.getDataset().getName(), api.getName()));
     dto.setCreatedBy(principal.getName());
+    dto.setDatasetConfig(ApiBeanMapper.toDatasetConfigDto(api.getDataset()));
 
-    DatasetConfigDTO datasetConfigDTO =  ApiBeanMapper.toDatasetConfigDto(api.getDataset());
-
-    dto.setDatasetConfig(datasetConfigDTO);
-    dto.setViews(api.getViews());
     return dto;
   }
 

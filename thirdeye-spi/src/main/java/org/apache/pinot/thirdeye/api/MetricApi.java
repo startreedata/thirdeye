@@ -22,6 +22,7 @@ public class MetricApi implements ThirdEyeApi {
   private MetricAggFunction aggregationFunction;
   private Double rollupThreshold;
   private List<LogicalView> views;
+  private String where;
 
   public Long getId() {
     return id;
@@ -128,6 +129,15 @@ public class MetricApi implements ThirdEyeApi {
 
   public MetricApi setViews(List<LogicalView> views) {
     this.views = views;
+    return this;
+  }
+
+  public String getWhere() {
+    return where;
+  }
+
+  public MetricApi setWhere(String where) {
+    this.where = where;
     return this;
   }
 }

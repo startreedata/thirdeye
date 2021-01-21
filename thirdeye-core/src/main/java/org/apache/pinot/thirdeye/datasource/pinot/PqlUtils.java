@@ -120,6 +120,10 @@ public class PqlUtils {
       sb.append(" AND ").append(dimensionWhereClause);
     }
 
+    if (StringUtils.isNotBlank(metricConfig.getWhere())) {
+      sb.append(" AND ").append(metricConfig.getWhere());
+    }
+
     if (limit <= 0) {
       limit = DEFAULT_TOP;
     }
@@ -228,6 +232,10 @@ public class PqlUtils {
     String dimensionWhereClause = getDimensionWhereClause(filterSet);
     if (StringUtils.isNotBlank(dimensionWhereClause)) {
       sb.append(" AND ").append(dimensionWhereClause);
+    }
+
+    if (StringUtils.isNotBlank(metricConfig.getWhere())) {
+      sb.append(" AND ").append(metricConfig.getWhere());
     }
 
     if (limit <= 0) {

@@ -187,6 +187,7 @@ public abstract class ApiBeanMapper {
         // TODO suvodeep Revisit this: Assume false if active is not set.
         .setActive(optional(api.getActive()).orElse(false))
         .setViews(api.getViews())
+        .setWhere(api.getWhere())
         .setDerivedMetricExpression(api.getDerivedMetricExpression());
 
     return dto;

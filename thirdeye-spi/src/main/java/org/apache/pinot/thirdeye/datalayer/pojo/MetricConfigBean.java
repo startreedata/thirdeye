@@ -117,6 +117,7 @@ public class MetricConfigBean extends AbstractBean {
   private Map<String, String> metricProperties = null;
   private boolean dimensionAsMetric = false;
   private List<LogicalView> views;
+  private String where;
 
   public String getName() {
     return name;
@@ -275,6 +276,15 @@ public class MetricConfigBean extends AbstractBean {
     return this;
   }
 
+  public String getWhere() {
+    return where;
+  }
+
+  public MetricConfigBean setWhere(String where) {
+    this.where = where;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof MetricConfigBean)) {
@@ -294,7 +304,9 @@ public class MetricConfigBean extends AbstractBean {
         && Objects.equals(cellSizeExpression, mc.getCellSizeExpression())
         && Objects.equals(active, mc.isActive())
         && Objects.equals(extSourceLinkInfo, mc.getExtSourceLinkInfo())
-        && Objects.equals(metricProperties, mc.getMetricProperties());
+        && Objects.equals(metricProperties, mc.getMetricProperties())
+        && Objects.equals(views, mc.getViews())
+        && Objects.equals(where, mc.getWhere());
   }
 
   @Override
@@ -302,6 +314,7 @@ public class MetricConfigBean extends AbstractBean {
     return Objects
         .hash(getId(), dataset, alias, derived, derivedMetricExpression, defaultAggFunction,
             rollupThreshold,
-            inverseMetric, cellSizeExpression, active, extSourceLinkInfo, metricProperties);
+            inverseMetric, cellSizeExpression, active, extSourceLinkInfo, metricProperties,
+            views, where);
   }
 }

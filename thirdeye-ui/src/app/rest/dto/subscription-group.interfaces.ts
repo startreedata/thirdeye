@@ -10,7 +10,9 @@ export interface SubscriptionGroup {
     created: number;
     updated: number;
     owner: User;
-    emailSettings: EmailSettings;
+    notificationSchemes: {
+        email: EmailSettings;
+    };
 }
 
 export interface EmailSettings {

@@ -211,9 +211,14 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
         const subscriptionGroupCopy = cloneDeep(
             subscriptionGroupCardData.subscriptionGroup
         );
-        subscriptionGroupCopy.emailSettings = {
-            to: emails,
-        } as EmailSettings;
+
+        if (subscriptionGroupCopy.notificationSchemes.email) {
+            subscriptionGroupCopy.notificationSchemes.email.to = emails;
+        } else {
+            subscriptionGroupCopy.notificationSchemes = {
+                email: { to: emails } as EmailSettings,
+            };
+        }
         saveUpdatedSubscriptionGroup(subscriptionGroupCopy);
     };
 

@@ -102,12 +102,12 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         // Update subscription group with subscribed emails
         setNewSubscriptionGroup(
             (newSubscriptionGroup): SubscriptionGroup => {
-                if (newSubscriptionGroup.emailSettings) {
+                if (newSubscriptionGroup.notificationSchemes.email) {
                     // Add to existing email settings
-                    newSubscriptionGroup.emailSettings.to = emails;
+                    newSubscriptionGroup.notificationSchemes.email.to = emails;
                 } else {
                     // Create and add to email settings
-                    newSubscriptionGroup.emailSettings = {
+                    newSubscriptionGroup.notificationSchemes.email = {
                         to: emails,
                     } as EmailSettings;
                 }
@@ -260,9 +260,10 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                                 inputLabel={t("label.add-email")}
                                 list={
                                     (newSubscriptionGroup &&
-                                        newSubscriptionGroup.emailSettings &&
-                                        newSubscriptionGroup.emailSettings
-                                            .to) ||
+                                        newSubscriptionGroup.notificationSchemes
+                                            .email &&
+                                        newSubscriptionGroup.notificationSchemes
+                                            .email.to) ||
                                     []
                                 }
                                 validateFn={validateEmail}

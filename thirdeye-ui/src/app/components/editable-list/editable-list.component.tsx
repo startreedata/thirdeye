@@ -62,11 +62,13 @@ export const EditableList: FunctionComponent<EditableListProps> = (
             return;
         }
 
-        setList((list) => [input, ...list]);
+        const newList = [input, ...list];
+
+        setList(newList);
         reset();
 
         // Notify
-        props.onChange && props.onChange(list);
+        props.onChange && props.onChange(newList);
     };
 
     const onRemoveListItem = (index: number) => (): void => {

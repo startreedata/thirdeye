@@ -238,8 +238,10 @@ describe("Subscription Groups Util", () => {
 const mockEmptySubscriptionGroup: SubscriptionGroup = ({
     name: "",
     alerts: [],
-    emailSettings: {
-        to: [],
+    notificationSchemes: {
+        email: {
+            to: [],
+        },
     },
 } as unknown) as SubscriptionGroup;
 
@@ -270,8 +272,10 @@ const mockSubscriptionGroup1: SubscriptionGroup = {
             id: 4,
         },
     ],
-    emailSettings: {
-        to: ["testEmail1", "testEmail2"],
+    notificationSchemes: {
+        email: {
+            to: ["testEmail1", "testEmail2"],
+        },
     },
 } as SubscriptionGroup;
 
@@ -279,7 +283,7 @@ const mockSubscriptionGroup2: SubscriptionGroup = {
     id: 5,
     name: "testSubscriptionGroupName5",
     alerts: [] as Alert[],
-    emailSettings: {},
+    notificationSchemes: {},
 } as SubscriptionGroup;
 
 const mockSubscriptionGroups = [mockSubscriptionGroup1, mockSubscriptionGroup2];

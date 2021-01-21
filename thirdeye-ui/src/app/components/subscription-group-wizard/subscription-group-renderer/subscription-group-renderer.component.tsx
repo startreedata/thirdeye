@@ -64,8 +64,10 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
 
             {/* No subscribed emails */}
             {!props.subscriptionGroup ||
-                !props.subscriptionGroup.emailSettings ||
-                (isEmpty(props.subscriptionGroup.emailSettings.to) && (
+                !props.subscriptionGroup.notificationSchemes.email ||
+                (isEmpty(
+                    props.subscriptionGroup.notificationSchemes.email.to
+                ) && (
                     <Grid item md={10}>
                         <Typography variant="body1">
                             {t("label.no-data-marker")}
@@ -75,10 +77,12 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
 
             {/* All subscribed emails */}
             {props.subscriptionGroup &&
-                props.subscriptionGroup.emailSettings &&
-                !isEmpty(props.subscriptionGroup.emailSettings.to) && (
+                props.subscriptionGroup.notificationSchemes.email &&
+                !isEmpty(
+                    props.subscriptionGroup.notificationSchemes.email.to
+                ) && (
                     <Grid item md={10}>
-                        {props.subscriptionGroup.emailSettings.to.map(
+                        {props.subscriptionGroup.notificationSchemes.email.to.map(
                             (email, index) => (
                                 <Typography key={index} variant="body1">
                                     {email}

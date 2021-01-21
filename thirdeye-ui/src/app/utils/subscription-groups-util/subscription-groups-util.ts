@@ -12,8 +12,10 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
     return ({
         name: "",
         alerts: [],
-        emailSettings: {
-            to: [],
+        notificationSchemes: {
+            email: {
+                to: [],
+            },
         },
     } as unknown) as SubscriptionGroup;
 };
@@ -205,8 +207,8 @@ const getSubscriptionGroupCardDataInternal = (
 
     // Emails
     subscriptionGroupCardData.emails =
-        (subscriptionGroup.emailSettings &&
-            subscriptionGroup.emailSettings.to) ||
+        (subscriptionGroup.notificationSchemes.email &&
+            subscriptionGroup.notificationSchemes.email.to) ||
         [];
 
     return subscriptionGroupCardData;

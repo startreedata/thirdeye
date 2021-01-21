@@ -16,21 +16,21 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.SQLException;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.pinot.thirdeye.datalayer.ScriptRunner;
-import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
+import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class DAOTestBase {
 
-  DataSource ds;
-  String dbUrlId;
+  private static int counter;
 
   private DAOTestBase() {
     init();
@@ -41,69 +41,56 @@ public class DAOTestBase {
   }
 
   protected void init() {
+    final DatabaseConfiguration dbConfig = new DatabaseConfiguration()
+        .setUrl(String.format("jdbc:h2:mem:testdb%d;DB_CLOSE_DELAY=-1", counter++))
+        .setUser("ignoreUser")
+        .setPassword("ignorePassword")
+        .setDriver("org.h2.Driver");
+    final DataSource dataSource = createDataSource(dbConfig);
     try {
-      URL url = DAOTestBase.class.getResource("/persistence-local.yml");
-      File configFile = new File(url.toURI());
-      PersistenceConfig configuration = PersistenceConfig.readPersistenceConfig(configFile);
-      initializeDs(configuration);
-
-      DeprecatedInjectorUtil.init(ds);
-    } catch (Exception e) {
+      setupSchema(dataSource);
+    } catch (SQLException  | IOException e) {
       throw new RuntimeException(e);
     }
+    DeprecatedInjectorUtil.init(dataSource);
   }
 
   public void cleanup() {
-    try {
-      cleanUpJDBC();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    // using in memory DB. Nothing to cleanup here.
   }
 
-  private void initializeDs(PersistenceConfig configuration) throws Exception {
-    ds = new DataSource();
-    dbUrlId =
-        configuration.getDatabaseConfiguration().getUrl() + System.currentTimeMillis() + "" + Math
-            .random();
-    ds.setUrl(dbUrlId);
-    System.out.println("Creating db with connection url : " + ds.getUrl());
-    ds.setPassword(configuration.getDatabaseConfiguration().getPassword());
-    ds.setUsername(configuration.getDatabaseConfiguration().getUser());
-    ds.setDriverClassName(configuration.getDatabaseConfiguration().getProperties()
+  private DataSource createDataSource(final DatabaseConfiguration dbConfig) {
+    final DataSource dataSource = new DataSource();
+    dataSource.setUrl(dbConfig.getUrl());
+    System.out.println("Creating db with connection url : " + dataSource.getUrl());
+    dataSource.setPassword(dbConfig.getPassword());
+    dataSource.setUsername(dbConfig.getUser());
+    dataSource.setDriverClassName(dbConfig.getProperties()
         .get("hibernate.connection.driver_class"));
 
     // pool size configurations
-    ds.setMaxActive(200);
-    ds.setMinIdle(10);
-    ds.setInitialSize(10);
+    dataSource.setMaxActive(200);
+    dataSource.setMinIdle(10);
+    dataSource.setInitialSize(10);
 
     // when returning connection to pool
-    ds.setTestOnReturn(true);
-    ds.setRollbackOnReturn(true);
+    dataSource.setTestOnReturn(true);
+    dataSource.setRollbackOnReturn(true);
 
     // Timeout before an abandoned(in use) connection can be removed.
-    ds.setRemoveAbandonedTimeout(600_000);
-    ds.setRemoveAbandoned(true);
+    dataSource.setRemoveAbandonedTimeout(600_000);
+    dataSource.setRemoveAbandoned(true);
+    return dataSource;
+  }
 
-    Connection conn = ds.getConnection();
+  private void setupSchema(final DataSource ds) throws SQLException, IOException {
+    final Connection conn = ds.getConnection();
+
     // create schema
-    URL createSchemaUrl = getClass().getResource("/schema/create-schema.sql");
-    ScriptRunner scriptRunner = new ScriptRunner(conn, true);
+    final URL createSchemaUrl = getClass().getResource("/schema/create-schema.sql");
+    final ScriptRunner scriptRunner = new ScriptRunner(conn, true);
     scriptRunner.setDelimiter(";");
     scriptRunner.setLogWriter(new PrintWriter(new NullWriter()));
     scriptRunner.runScript(new FileReader(createSchemaUrl.getFile()));
-  }
-
-  private void cleanUpJDBC() throws Exception {
-    System.out.println("Cleaning database: start");
-    try (Connection conn = ds.getConnection()) {
-      URL deleteSchemaUrl = getClass().getResource("/schema/drop-tables.sql");
-      ScriptRunner scriptRunner = new ScriptRunner(conn, false);
-      scriptRunner.setLogWriter(new PrintWriter(new NullWriter()));
-      scriptRunner.runScript(new FileReader(deleteSchemaUrl.getFile()));
-    }
-    new File(dbUrlId).delete();
-    System.out.println("Cleaning database: done!");
   }
 }

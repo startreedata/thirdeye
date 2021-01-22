@@ -32,7 +32,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
@@ -71,7 +71,7 @@ public class DetectionJiraAlerterTest {
   private AlertManager detectionDAO;
   private SubscriptionGroupDTO alertConfigDTO;
   private Long detectionConfigId;
-  private ThirdEyeAnomalyConfiguration thirdEyeConfig;
+  private ThirdEyeWorkerConfiguration thirdEyeConfig;
 
   @BeforeMethod
   public void beforeMethod() {
@@ -112,7 +112,7 @@ public class DetectionJiraAlerterTest {
     anomalyResultDTO2.setMetric(METRIC_VALUE);
     this.anomalyDAO.save(anomalyResultDTO2);
 
-    this.thirdEyeConfig = new ThirdEyeAnomalyConfiguration();
+    this.thirdEyeConfig = new ThirdEyeWorkerConfiguration();
     thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
     Map<String, Object> jiraProperties = new HashMap<>();
     jiraProperties.put("jiraUser", "test");

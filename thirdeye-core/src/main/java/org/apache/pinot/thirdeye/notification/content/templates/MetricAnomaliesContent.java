@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.alert.util.AlertScreenshotHelper;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
@@ -69,7 +69,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
   }
 
   @Override
-  public void init(Properties properties, ThirdEyeAnomalyConfiguration configuration) {
+  public void init(Properties properties, ThirdEyeWorkerConfiguration configuration) {
     super.init(properties, configuration);
     this.configDAO = DAORegistry.getInstance().getDetectionConfigManager();
 

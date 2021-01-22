@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.alert.util.AlertScreenshotHelper;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
@@ -83,7 +83,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
   }
 
   @Override
-  public void init(Properties properties, ThirdEyeAnomalyConfiguration config) {
+  public void init(Properties properties, ThirdEyeWorkerConfiguration config) {
     super.init(properties, config);
     this.configDAO = DAORegistry.getInstance().getDetectionConfigManager();
     if (properties.containsKey(PROP_ENTITY_WHITELIST)) {

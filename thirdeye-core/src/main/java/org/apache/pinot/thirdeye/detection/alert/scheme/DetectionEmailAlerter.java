@@ -37,7 +37,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -79,11 +79,11 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   private static final Comparator<AnomalyResult> COMPARATOR_DESC =
       (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime());
 
-  private final ThirdEyeAnomalyConfiguration teConfig;
+  private final ThirdEyeWorkerConfiguration teConfig;
   private final SmtpConfiguration smtpConfig;
 
   public DetectionEmailAlerter(SubscriptionGroupDTO subsConfig,
-      ThirdEyeAnomalyConfiguration thirdeyeConfig,
+      ThirdEyeWorkerConfiguration thirdeyeConfig,
       DetectionAlertFilterResult result) {
     super(subsConfig, result);
     this.teConfig = thirdeyeConfig;

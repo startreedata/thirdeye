@@ -37,11 +37,10 @@ public class CoordinatorTest {
           resourceFilePath("e2e/config/coordinator.yaml"),
           config("configPath", THIRDEYE_CONFIG),
           config("server.connector.port", "0"), // port: 0 implies any port
-          ConfigOverride.config("database.url", ThirdEyeH2DatabaseServer.DB_CONFIG.getUrl()),
-          ConfigOverride.config("database.user", ThirdEyeH2DatabaseServer.DB_CONFIG.getUser()),
-          ConfigOverride
-              .config("database.password", ThirdEyeH2DatabaseServer.DB_CONFIG.getPassword()),
-          ConfigOverride.config("database.driver", ThirdEyeH2DatabaseServer.DB_CONFIG.getDriver())
+          config("database.url", ThirdEyeH2DatabaseServer.DB_CONFIG.getUrl()),
+          config("database.user", ThirdEyeH2DatabaseServer.DB_CONFIG.getUser()),
+          config("database.password", ThirdEyeH2DatabaseServer.DB_CONFIG.getPassword()),
+          config("database.driver", ThirdEyeH2DatabaseServer.DB_CONFIG.getDriver())
       );
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 

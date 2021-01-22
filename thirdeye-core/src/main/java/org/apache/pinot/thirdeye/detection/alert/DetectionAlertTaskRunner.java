@@ -111,7 +111,7 @@ public class DetectionAlertTaskRunner implements TaskRunner {
       // Send out alert notifications (email and/or iris)
       Set<DetectionAlertScheme> alertSchemes =
           detAlertTaskFactory
-              .loadAlertSchemes(alertConfig, taskContext.getThirdEyeAnomalyConfiguration(), result);
+              .loadAlertSchemes(alertConfig, taskContext.getThirdEyeWorkerConfiguration(), result);
       for (DetectionAlertScheme alertScheme : alertSchemes) {
         alertScheme.run();
         alertScheme.destroy();

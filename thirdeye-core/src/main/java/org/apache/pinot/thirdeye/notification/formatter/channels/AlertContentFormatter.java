@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.notification.formatter.channels;
 
 import java.util.Properties;
 import org.apache.pinot.thirdeye.Constants.SubjectType;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 
@@ -15,11 +15,11 @@ public abstract class AlertContentFormatter {
 
   protected Properties alertClientConfig;
   protected SubscriptionGroupDTO subsConfig;
-  protected ThirdEyeAnomalyConfiguration teConfig;
+  protected ThirdEyeWorkerConfiguration teConfig;
   protected BaseNotificationContent notificationContent;
 
   public AlertContentFormatter(Properties alertClientConfig, BaseNotificationContent content,
-      ThirdEyeAnomalyConfiguration teConfig, SubscriptionGroupDTO subsConfig) {
+      ThirdEyeWorkerConfiguration teConfig, SubscriptionGroupDTO subsConfig) {
     this.alertClientConfig = alertClientConfig;
     this.teConfig = teConfig;
     this.notificationContent = content;

@@ -34,7 +34,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.Constants.JobStatus;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.alert.util.EmailHelper;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConstants.MonitorType;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
@@ -59,14 +59,14 @@ public class MonitorTaskRunner implements TaskRunner {
   private static final long MAX_TASK_TIME = TimeUnit.HOURS.toMillis(6);
   private static final long MAX_FAILED_DISABLE_DAYS = 30;
   private final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
-  private ThirdEyeAnomalyConfiguration thirdeyeConfig;
+  private ThirdEyeWorkerConfiguration thirdeyeConfig;
 
   @Override
   public List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) {
 
     MonitorTaskInfo monitorTaskInfo = (MonitorTaskInfo) taskInfo;
     MonitorType monitorType = monitorTaskInfo.getMonitorType();
-    thirdeyeConfig = taskContext.getThirdEyeAnomalyConfiguration();
+    thirdeyeConfig = taskContext.getThirdEyeWorkerConfiguration();
     if (monitorType.equals(MonitorType.UPDATE)) {
       executeMonitorUpdate(monitorTaskInfo);
     } else if (monitorType.equals(MonitorType.EXPIRE)) {

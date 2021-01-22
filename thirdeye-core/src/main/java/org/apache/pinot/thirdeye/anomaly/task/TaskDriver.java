@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
@@ -64,9 +64,9 @@ public class TaskDriver {
 
   private volatile boolean shutdown = false;
 
-  public TaskDriver(ThirdEyeAnomalyConfiguration thirdEyeAnomalyConfiguration, boolean isOnline) {
-    driverConfiguration = thirdEyeAnomalyConfiguration.getTaskDriverConfiguration();
-    workerId = thirdEyeAnomalyConfiguration.getId();
+  public TaskDriver(ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration, boolean isOnline) {
+    driverConfiguration = thirdEyeWorkerConfiguration.getTaskDriverConfiguration();
+    workerId = thirdEyeWorkerConfiguration.getId();
     taskDAO = DAO_REGISTRY.getTaskDAO();
     String threadNamePrefix = isOnline ? "online-" : "";
     taskExecutorService = Executors.newFixedThreadPool(
@@ -77,7 +77,7 @@ public class TaskDriver {
         new ThreadFactoryBuilder().setNameFormat(threadNamePrefix + "task-watcher-%d")
             .setDaemon(true).build());
     taskContext = new TaskContext();
-    taskContext.setThirdEyeAnomalyConfiguration(thirdEyeAnomalyConfiguration);
+    taskContext.setThirdEyeWorkerConfiguration(thirdEyeWorkerConfiguration);
     allowedOldTaskStatus.add(TaskStatus.FAILED);
     allowedOldTaskStatus.add(TaskStatus.WAITING);
     this.isOnline = isOnline;

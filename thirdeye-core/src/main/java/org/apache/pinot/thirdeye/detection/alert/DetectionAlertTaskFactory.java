@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
@@ -86,7 +86,7 @@ public class DetectionAlertTaskFactory {
   }
 
   public Set<DetectionAlertScheme> loadAlertSchemes(SubscriptionGroupDTO alertConfig,
-      ThirdEyeAnomalyConfiguration thirdeyeConfig, DetectionAlertFilterResult result)
+      ThirdEyeWorkerConfiguration thirdeyeConfig, DetectionAlertFilterResult result)
       throws Exception {
     Preconditions.checkNotNull(alertConfig);
     Map<String, Object> alertSchemes = alertConfig.getAlertSchemes();
@@ -104,7 +104,7 @@ public class DetectionAlertTaskFactory {
       Constructor<?> constructor = Class
           .forName(ConfigUtils.getMap(alertSchemes.get(alertSchemeType))
               .get(PROP_CLASS_NAME).toString().trim())
-          .getConstructor(SubscriptionGroupDTO.class, ThirdEyeAnomalyConfiguration.class,
+          .getConstructor(SubscriptionGroupDTO.class, ThirdEyeWorkerConfiguration.class,
               DetectionAlertFilterResult.class);
       detectionAlertSchemeSet
           .add((DetectionAlertScheme) constructor.newInstance(alertConfig, thirdeyeConfig, result));

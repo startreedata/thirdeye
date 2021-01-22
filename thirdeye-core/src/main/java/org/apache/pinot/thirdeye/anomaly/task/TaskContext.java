@@ -19,18 +19,18 @@
 
 package org.apache.pinot.thirdeye.anomaly.task;
 
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 
 public class TaskContext {
 
-  private ThirdEyeAnomalyConfiguration thirdEyeAnomalyConfiguration;
+  private ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration;
 
-  public ThirdEyeAnomalyConfiguration getThirdEyeAnomalyConfiguration() {
-    return thirdEyeAnomalyConfiguration;
+  public ThirdEyeWorkerConfiguration getThirdEyeWorkerConfiguration() {
+    return thirdEyeWorkerConfiguration;
   }
 
-  public void setThirdEyeAnomalyConfiguration(
-      ThirdEyeAnomalyConfiguration thirdEyeAnomalyConfiguration) {
-    this.thirdEyeAnomalyConfiguration = thirdEyeAnomalyConfiguration;
+  public void setThirdEyeWorkerConfiguration(
+      ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration) {
+    this.thirdEyeWorkerConfiguration = thirdEyeWorkerConfiguration;
   }
 }

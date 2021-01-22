@@ -27,7 +27,7 @@ import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardConfiguration;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 
-public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
+public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
 
   private boolean alert = false;
   private boolean autoload = false;
@@ -58,7 +58,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return alert;
   }
 
-  public ThirdEyeAnomalyConfiguration setAlert(final boolean alert) {
+  public ThirdEyeWorkerConfiguration setAlert(final boolean alert) {
     this.alert = alert;
     return this;
   }
@@ -67,7 +67,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return autoload;
   }
 
-  public ThirdEyeAnomalyConfiguration setAutoload(final boolean autoload) {
+  public ThirdEyeWorkerConfiguration setAutoload(final boolean autoload) {
     this.autoload = autoload;
     return this;
   }
@@ -76,7 +76,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return holidayEventsLoader;
   }
 
-  public ThirdEyeAnomalyConfiguration setHolidayEventsLoader(final boolean holidayEventsLoader) {
+  public ThirdEyeWorkerConfiguration setHolidayEventsLoader(final boolean holidayEventsLoader) {
     this.holidayEventsLoader = holidayEventsLoader;
     return this;
   }
@@ -85,7 +85,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return mockEventsLoader;
   }
 
-  public ThirdEyeAnomalyConfiguration setMockEventsLoader(final boolean mockEventsLoader) {
+  public ThirdEyeWorkerConfiguration setMockEventsLoader(final boolean mockEventsLoader) {
     this.mockEventsLoader = mockEventsLoader;
     return this;
   }
@@ -94,7 +94,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return monitor;
   }
 
-  public ThirdEyeAnomalyConfiguration setMonitor(final boolean monitor) {
+  public ThirdEyeWorkerConfiguration setMonitor(final boolean monitor) {
     this.monitor = monitor;
     return this;
   }
@@ -103,7 +103,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return pinotProxy;
   }
 
-  public ThirdEyeAnomalyConfiguration setPinotProxy(final boolean pinotProxy) {
+  public ThirdEyeWorkerConfiguration setPinotProxy(final boolean pinotProxy) {
     this.pinotProxy = pinotProxy;
     return this;
   }
@@ -112,7 +112,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return scheduler;
   }
 
-  public ThirdEyeAnomalyConfiguration setScheduler(final boolean scheduler) {
+  public ThirdEyeWorkerConfiguration setScheduler(final boolean scheduler) {
     this.scheduler = scheduler;
     return this;
   }
@@ -121,7 +121,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return worker;
   }
 
-  public ThirdEyeAnomalyConfiguration setWorker(final boolean worker) {
+  public ThirdEyeWorkerConfiguration setWorker(final boolean worker) {
     this.worker = worker;
     return this;
   }
@@ -130,7 +130,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return onlineWorker;
   }
 
-  public ThirdEyeAnomalyConfiguration setOnlineWorker(final boolean onlineWorker) {
+  public ThirdEyeWorkerConfiguration setOnlineWorker(final boolean onlineWorker) {
     this.onlineWorker = onlineWorker;
     return this;
   }
@@ -139,7 +139,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return detectionPipeline;
   }
 
-  public ThirdEyeAnomalyConfiguration setDetectionPipeline(final boolean detectionPipeline) {
+  public ThirdEyeWorkerConfiguration setDetectionPipeline(final boolean detectionPipeline) {
     this.detectionPipeline = detectionPipeline;
     return this;
   }
@@ -148,7 +148,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return detectionAlert;
   }
 
-  public ThirdEyeAnomalyConfiguration setDetectionAlert(final boolean detectionAlert) {
+  public ThirdEyeWorkerConfiguration setDetectionAlert(final boolean detectionAlert) {
     this.detectionAlert = detectionAlert;
     return this;
   }
@@ -157,7 +157,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return dataAvailabilityEventListener;
   }
 
-  public ThirdEyeAnomalyConfiguration setDataAvailabilityEventListener(
+  public ThirdEyeWorkerConfiguration setDataAvailabilityEventListener(
       final boolean dataAvailabilityEventListener) {
     this.dataAvailabilityEventListener = dataAvailabilityEventListener;
     return this;
@@ -167,7 +167,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return dataAvailabilityTaskScheduler;
   }
 
-  public ThirdEyeAnomalyConfiguration setDataAvailabilityTaskScheduler(
+  public ThirdEyeWorkerConfiguration setDataAvailabilityTaskScheduler(
       final boolean dataAvailabilityTaskScheduler) {
     this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
     return this;
@@ -177,7 +177,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return id;
   }
 
-  public ThirdEyeAnomalyConfiguration setId(final long id) {
+  public ThirdEyeWorkerConfiguration setId(final long id) {
     this.id = id;
     return this;
   }
@@ -186,7 +186,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return holidayEventsLoaderConfiguration;
   }
 
-  public ThirdEyeAnomalyConfiguration setHolidayEventsLoaderConfiguration(
+  public ThirdEyeWorkerConfiguration setHolidayEventsLoaderConfiguration(
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration) {
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     return this;
@@ -196,7 +196,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return mockEventsLoaderConfiguration;
   }
 
-  public ThirdEyeAnomalyConfiguration setMockEventsLoaderConfiguration(
+  public ThirdEyeWorkerConfiguration setMockEventsLoaderConfiguration(
       final MockEventsLoaderConfiguration mockEventsLoaderConfiguration) {
     this.mockEventsLoaderConfiguration = mockEventsLoaderConfiguration;
     return this;
@@ -206,7 +206,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return monitorConfiguration;
   }
 
-  public ThirdEyeAnomalyConfiguration setMonitorConfiguration(
+  public ThirdEyeWorkerConfiguration setMonitorConfiguration(
       final MonitorConfiguration monitorConfiguration) {
     this.monitorConfiguration = monitorConfiguration;
     return this;
@@ -216,7 +216,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return autoOnboardConfiguration;
   }
 
-  public ThirdEyeAnomalyConfiguration setAutoOnboardConfiguration(
+  public ThirdEyeWorkerConfiguration setAutoOnboardConfiguration(
       final AutoOnboardConfiguration autoOnboardConfiguration) {
     this.autoOnboardConfiguration = autoOnboardConfiguration;
     return this;
@@ -226,7 +226,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return taskDriverConfiguration;
   }
 
-  public ThirdEyeAnomalyConfiguration setTaskDriverConfiguration(
+  public ThirdEyeWorkerConfiguration setTaskDriverConfiguration(
       final TaskDriverConfiguration taskDriverConfiguration) {
     this.taskDriverConfiguration = taskDriverConfiguration;
     return this;
@@ -236,7 +236,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return teRestConfig;
   }
 
-  public ThirdEyeAnomalyConfiguration setTeRestConfig(
+  public ThirdEyeWorkerConfiguration setTeRestConfig(
       final ThirdEyeRestClientConfiguration teRestConfig) {
     this.teRestConfig = teRestConfig;
     return this;
@@ -246,7 +246,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return dataAvailabilitySchedulingConfiguration;
   }
 
-  public ThirdEyeAnomalyConfiguration setDataAvailabilitySchedulingConfiguration(
+  public ThirdEyeWorkerConfiguration setDataAvailabilitySchedulingConfiguration(
       final DataAvailabilitySchedulingConfiguration dataAvailabilitySchedulingConfiguration) {
     this.dataAvailabilitySchedulingConfiguration = dataAvailabilitySchedulingConfiguration;
     return this;
@@ -256,7 +256,7 @@ public class ThirdEyeAnomalyConfiguration extends ThirdEyeConfiguration {
     return holidayCountriesWhitelist;
   }
 
-  public ThirdEyeAnomalyConfiguration setHolidayCountriesWhitelist(
+  public ThirdEyeWorkerConfiguration setHolidayCountriesWhitelist(
       final List<String> holidayCountriesWhitelist) {
     this.holidayCountriesWhitelist = holidayCountriesWhitelist;
     return this;

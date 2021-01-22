@@ -3,7 +3,7 @@ package org.apache.pinot.thirdeye.scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.lifecycle.Managed;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityEventListenerDriver;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityTaskScheduler;
 import org.apache.pinot.thirdeye.anomaly.events.HolidayEventsLoader;
@@ -16,7 +16,7 @@ import org.apache.pinot.thirdeye.model.download.ModelDownloaderManager;
 @Singleton
 public class SchedulerService implements Managed {
 
-  private final ThirdEyeAnomalyConfiguration config;
+  private final ThirdEyeWorkerConfiguration config;
   private MonitorJobScheduler monitorJobScheduler = null;
   private DetectionCronScheduler detectionScheduler = null;
   private AutoOnboardService autoOnboardService = null;
@@ -25,7 +25,7 @@ public class SchedulerService implements Managed {
   private ModelDownloaderManager modelDownloaderManager = null;
 
   @Inject
-  public SchedulerService(final ThirdEyeAnomalyConfiguration config) {
+  public SchedulerService(final ThirdEyeWorkerConfiguration config) {
     this.config = config;
   }
 

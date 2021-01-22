@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class AutoOnboardService implements Runnable {
    * Reads data sources configs and instantiates the constructors for auto load of all data sources,
    * if availble
    */
-  public AutoOnboardService(ThirdEyeAnomalyConfiguration config) {
+  public AutoOnboardService(ThirdEyeWorkerConfiguration config) {
     frequency = config.getAutoOnboardConfiguration().getFrequency();
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 

@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriver;
 import org.apache.pinot.thirdeye.common.ThirdEyeSwaggerBundle;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
@@ -52,7 +52,7 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
+public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
 
   protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
@@ -82,13 +82,13 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
   }
 
   @Override
-  public void initialize(final Bootstrap<ThirdEyeAnomalyConfiguration> bootstrap) {
+  public void initialize(final Bootstrap<ThirdEyeWorkerConfiguration> bootstrap) {
     bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
     bootstrap.addBundle(new ThirdEyeSwaggerBundle());
   }
 
   @Override
-  public void run(final ThirdEyeAnomalyConfiguration config, final Environment env) {
+  public void run(final ThirdEyeWorkerConfiguration config, final Environment env) {
     LOG.info("Starting ThirdEye Worker : Scheduler {} Worker {}", config.isScheduler(),
         config.isWorker());
     final DatabaseConfiguration dbConfig = getDatabaseConfiguration();
@@ -103,7 +103,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeAnomalyConfiguration> {
     env.lifecycle().manage(lifecycleManager(config, env));
   }
 
-  private Managed lifecycleManager(ThirdEyeAnomalyConfiguration config, Environment env) {
+  private Managed lifecycleManager(ThirdEyeWorkerConfiguration config, Environment env) {
     return new Managed() {
       @Override
       public void start() throws Exception {

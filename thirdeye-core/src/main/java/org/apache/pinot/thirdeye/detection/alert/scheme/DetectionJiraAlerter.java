@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -70,7 +70,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionJiraAlerter.class);
 
-  private final ThirdEyeAnomalyConfiguration teConfig;
+  private final ThirdEyeWorkerConfiguration teConfig;
   private final ThirdEyeJiraClient jiraClient;
   private final JiraConfiguration jiraAdminConfig;
 
@@ -79,7 +79,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
   public static final int JIRA_ONE_LINE_COMMENT_LENGTH = 250;
 
   public DetectionJiraAlerter(SubscriptionGroupDTO subsConfig,
-      ThirdEyeAnomalyConfiguration thirdeyeConfig,
+      ThirdEyeWorkerConfiguration thirdeyeConfig,
       DetectionAlertFilterResult result, ThirdEyeJiraClient jiraClient) {
     super(subsConfig, result);
     this.teConfig = thirdeyeConfig;
@@ -90,7 +90,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
   }
 
   public DetectionJiraAlerter(SubscriptionGroupDTO subsConfig,
-      ThirdEyeAnomalyConfiguration thirdeyeConfig,
+      ThirdEyeWorkerConfiguration thirdeyeConfig,
       DetectionAlertFilterResult result) throws Exception {
     this(subsConfig, thirdeyeConfig, result, new ThirdEyeJiraClient(JiraConfiguration
         .createFromProperties(thirdeyeConfig.getAlerterConfiguration().get(JIRA_CONFIG_KEY))));

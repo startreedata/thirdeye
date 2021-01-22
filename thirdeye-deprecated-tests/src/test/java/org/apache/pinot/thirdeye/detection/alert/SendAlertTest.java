@@ -19,7 +19,7 @@ package org.apache.pinot.thirdeye.detection.alert;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
@@ -129,12 +129,12 @@ public class SendAlertTest {
     Map<String, Map<String, Object>> alerterProps = new HashMap<>();
     alerterProps.put("smtpConfiguration", smtpProperties);
 
-    ThirdEyeAnomalyConfiguration thirdEyeConfig = new ThirdEyeAnomalyConfiguration();
+    ThirdEyeWorkerConfiguration thirdEyeConfig = new ThirdEyeWorkerConfiguration();
     thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
     thirdEyeConfig.setAlerterConfiguration(alerterProps);
 
     TaskContext taskContext = new TaskContext();
-    taskContext.setThirdEyeAnomalyConfiguration(thirdEyeConfig);
+    taskContext.setThirdEyeWorkerConfiguration(thirdEyeConfig);
 
     taskRunner.execute(alertTaskInfo, taskContext);
 

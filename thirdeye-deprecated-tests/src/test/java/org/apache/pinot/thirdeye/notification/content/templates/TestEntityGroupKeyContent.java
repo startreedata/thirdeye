@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
@@ -94,7 +94,7 @@ public class TestEntityGroupKeyContent {
     metric.setAlias(TEST + "::" + TEST);
     metricDAO.save(metric);
 
-    ThirdEyeAnomalyConfiguration thirdeyeAnomalyConfig = new ThirdEyeAnomalyConfiguration();
+    ThirdEyeWorkerConfiguration thirdeyeAnomalyConfig = new ThirdEyeWorkerConfiguration();
     thirdeyeAnomalyConfig.setId(id);
     thirdeyeAnomalyConfig.setDashboardHost(dashboardHost);
     MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
@@ -188,7 +188,7 @@ public class TestEntityGroupKeyContent {
     metric.setAlias(TEST + "::" + TEST);
     metricDAO.save(metric);
 
-    ThirdEyeAnomalyConfiguration thirdeyeAnomalyConfig = new ThirdEyeAnomalyConfiguration();
+    ThirdEyeWorkerConfiguration thirdeyeAnomalyConfig = new ThirdEyeWorkerConfiguration();
     thirdeyeAnomalyConfig.setId(id);
     thirdeyeAnomalyConfig.setDashboardHost(dashboardHost);
     MonitorConfiguration monitorConfiguration = new MonitorConfiguration();

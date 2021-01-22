@@ -42,7 +42,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.rootcause.Entity;
@@ -123,7 +123,7 @@ public class RCAFrameworkRunner {
     File daoConfig = new File(config.getAbsolutePath() + "/persistence.yml");
     DeprecatedInjectorUtil.init(daoConfig);
 
-    ThirdEyeConfiguration thirdEyeConfig = new ThirdEyeAnomalyConfiguration();
+    ThirdEyeConfiguration thirdEyeConfig = new ThirdEyeWorkerConfiguration();
     thirdEyeConfig.setRootDir(config.getAbsolutePath());
 
     DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)

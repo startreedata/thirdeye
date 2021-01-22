@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -93,7 +93,7 @@ public class DetectionAlertTaskFactoryTest {
     DetectionAlertTaskFactory detectionAlertTaskFactory = new DetectionAlertTaskFactory();
     Set<DetectionAlertScheme> detectionAlertSchemes = detectionAlertTaskFactory
         .loadAlertSchemes(alertConfig,
-            new ThirdEyeAnomalyConfiguration(), null);
+            new ThirdEyeWorkerConfiguration(), null);
 
     Assert.assertEquals(detectionAlertSchemes.size(), 2);
     Iterator<DetectionAlertScheme> alertSchemeIterator = detectionAlertSchemes.iterator();
@@ -110,7 +110,7 @@ public class DetectionAlertTaskFactoryTest {
   public void testDefaultAlertSchemes() throws Exception {
     DetectionAlertTaskFactory detectionAlertTaskFactory = new DetectionAlertTaskFactory();
 
-    ThirdEyeAnomalyConfiguration teConfig = new ThirdEyeAnomalyConfiguration();
+    ThirdEyeWorkerConfiguration teConfig = new ThirdEyeWorkerConfiguration();
     teConfig.setAlerterConfiguration(new HashMap<>());
 
     detectionAlertTaskFactory.loadAlertSchemes(null, teConfig, null);
@@ -125,7 +125,7 @@ public class DetectionAlertTaskFactoryTest {
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     DetectionAlertTaskFactory detectionAlertTaskFactory = new DetectionAlertTaskFactory();
 
-    ThirdEyeAnomalyConfiguration teConfig = new ThirdEyeAnomalyConfiguration();
+    ThirdEyeWorkerConfiguration teConfig = new ThirdEyeWorkerConfiguration();
     teConfig.setAlerterConfiguration(new HashMap<>());
 
     Set<DetectionAlertScheme> detectionAlertSchemes = detectionAlertTaskFactory

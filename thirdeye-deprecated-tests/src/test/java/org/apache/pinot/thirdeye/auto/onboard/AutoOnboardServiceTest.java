@@ -18,23 +18,23 @@ package org.apache.pinot.thirdeye.auto.onboard;
 
 import java.net.URL;
 import java.time.Duration;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.testng.annotations.Test;
 
 public class AutoOnboardServiceTest {
 
   @Test
   public void testAutoOnboardService() throws Exception {
-    ThirdEyeAnomalyConfiguration thirdEyeAnomalyConfiguration = new ThirdEyeAnomalyConfiguration();
+    ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration = new ThirdEyeWorkerConfiguration();
 
     AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
     autoOnboardConfiguration.setFrequency(Duration.ofSeconds(1));
-    thirdEyeAnomalyConfiguration.setAutoOnboardConfiguration(autoOnboardConfiguration);
+    thirdEyeWorkerConfiguration.setAutoOnboardConfiguration(autoOnboardConfiguration);
 
     URL url = AutoOnboardServiceTest.class.getResource("/data-sources/data-sources-config-1.yml");
-    thirdEyeAnomalyConfiguration.setDataSources(url.getPath());
+    thirdEyeWorkerConfiguration.setDataSources(url.getPath());
 
-    AutoOnboardService autoOnboardService = new AutoOnboardService(thirdEyeAnomalyConfiguration);
+    AutoOnboardService autoOnboardService = new AutoOnboardService(thirdEyeWorkerConfiguration);
     autoOnboardService.start();
 
     Thread.sleep(2000);

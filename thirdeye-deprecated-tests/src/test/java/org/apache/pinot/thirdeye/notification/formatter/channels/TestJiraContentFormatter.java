@@ -44,7 +44,7 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.apache.pinot.thirdeye.Constants.SubjectType;
 import org.apache.pinot.thirdeye.anomaly.AnomalyType;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeAnomalyConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
@@ -258,7 +258,7 @@ public class TestJiraContentFormatter {
 
     Map<String, Map<String, Object>> alerterConfigurations = new HashMap<>();
     alerterConfigurations.put(JIRA_CONFIG_KEY, jiraConfiguration);
-    ThirdEyeAnomalyConfiguration teConfig = new ThirdEyeAnomalyConfiguration();
+    ThirdEyeWorkerConfiguration teConfig = new ThirdEyeWorkerConfiguration();
     teConfig.setAlerterConfiguration(alerterConfigurations);
     teConfig.setDashboardHost("test");
 
@@ -300,7 +300,7 @@ public class TestJiraContentFormatter {
 
     Map<String, Map<String, Object>> alerterConfigurations = new HashMap<>();
     alerterConfigurations.put(JIRA_CONFIG_KEY, jiraConfiguration);
-    ThirdEyeAnomalyConfiguration teConfig = new ThirdEyeAnomalyConfiguration();
+    ThirdEyeWorkerConfiguration teConfig = new ThirdEyeWorkerConfiguration();
     teConfig.setAlerterConfiguration(alerterConfigurations);
     teConfig.setDashboardHost("test");
 

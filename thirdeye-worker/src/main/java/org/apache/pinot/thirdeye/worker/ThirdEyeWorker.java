@@ -40,6 +40,7 @@ import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfigurati
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
+import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
@@ -61,6 +62,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
   private TaskDriver taskDriver = null;
   private SchedulerService schedulerService;
   private RequestStatisticsLogger requestStatisticsLogger = null;
+  private Injector injector;
 
   public static void main(final String[] args) throws Exception {
     List<String> argList = new ArrayList<>(Arrays.asList(args));
@@ -94,16 +96,16 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     final DatabaseConfiguration dbConfig = getDatabaseConfiguration();
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
 
-    final Injector injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource));
+    injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource));
     DeprecatedInjectorUtil.setInjector(injector);
 
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
     schedulerService = new SchedulerService(config);
 
-    env.lifecycle().manage(lifecycleManager(config, env));
+    env.lifecycle().manage(lifecycleManager(config));
   }
 
-  private Managed lifecycleManager(ThirdEyeWorkerConfiguration config, Environment env) {
+  private Managed lifecycleManager(ThirdEyeWorkerConfiguration config) {
     return new Managed() {
       @Override
       public void start() throws Exception {
@@ -113,12 +115,12 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
         requestStatisticsLogger.start();
 
         if (config.isWorker()) {
-          taskDriver = new TaskDriver(config, false);
+          taskDriver = new TaskDriver(config, injector.getInstance(TaskManager.class), false);
           taskDriver.start();
         }
 
         if (config.isOnlineWorker()) {
-          taskDriver = new TaskDriver(config, true);
+          taskDriver = new TaskDriver(config, injector.getInstance(TaskManager.class), true);
           taskDriver.start();
         }
         schedulerService.start();

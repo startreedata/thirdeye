@@ -86,6 +86,7 @@ public abstract class ApiBeanMapper {
         )
         .setDerived(boolApi(dto.isDerived()))
         .setDerivedMetricExpression(dto.getDerivedMetricExpression())
+        .setAggregationColumn(dto.getAggregationColumn())
         .setAggregationFunction(dto.getDefaultAggFunction())
         .setRollupThreshold(dto.getRollupThreshold())
         ;
@@ -183,6 +184,7 @@ public abstract class ApiBeanMapper {
             .map(DatasetApi::getName)
             .orElse(null))
         .setRollupThreshold(api.getRollupThreshold())
+        .setAggregationColumn(optional(api.getAggregationColumn()).orElse(api.getName()))
         .setDefaultAggFunction(api.getAggregationFunction())
         // TODO suvodeep Revisit this: Assume false if active is not set.
         .setActive(optional(api.getActive()).orElse(false))

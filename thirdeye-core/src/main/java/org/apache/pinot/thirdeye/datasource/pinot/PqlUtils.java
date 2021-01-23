@@ -36,11 +36,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.pql.parsers.PQL2Lexer;
-import org.apache.pinot.pql.parsers.PQL2Parser;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
@@ -144,7 +140,7 @@ public class PqlUtils {
     if (metricFunction.getMetricName().equals("*")) {
       metricName = "*";
     } else {
-      metricName = metricConfig.getName();
+      metricName = metricConfig.getAggregationColumn() == null? metricConfig.getName(): metricConfig.getAggregationColumn();
     }
     if (metricFunction.getFunctionName() == MetricAggFunction.COUNT_DISTINCT) {
       builder.append(MetricAggFunction.COUNT.name())

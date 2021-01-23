@@ -19,6 +19,7 @@ public class MetricApi implements ThirdEyeApi {
   private Date updated;
   private Boolean derived;
   private String derivedMetricExpression;
+  private String aggregationColumn;
   private MetricAggFunction aggregationFunction;
   private Double rollupThreshold;
   private List<LogicalView> views;
@@ -102,6 +103,15 @@ public class MetricApi implements ThirdEyeApi {
 
   public MetricApi setDerivedMetricExpression(final String derivedMetricExpression) {
     this.derivedMetricExpression = derivedMetricExpression;
+    return this;
+  }
+
+  public String getAggregationColumn() {
+    return aggregationColumn;
+  }
+
+  public MetricApi setAggregationColumn(String aggregationColumn) {
+    this.aggregationColumn = aggregationColumn;
     return this;
   }
 

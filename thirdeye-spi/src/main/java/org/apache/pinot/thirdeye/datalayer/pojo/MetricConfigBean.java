@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.apache.pinot.thirdeye.common.metric.MetricType;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetricConfigBean extends AbstractBean {
@@ -107,6 +108,7 @@ public class MetricConfigBean extends AbstractBean {
   private MetricType datatype;
   private boolean derived = false;
   private String derivedMetricExpression;
+  private String aggregationColumn;
   private MetricAggFunction defaultAggFunction = DEFAULT_AGG_FUNCTION;
   private Double rollupThreshold = DEFAULT_THRESHOLD;
   private boolean inverseMetric = false;
@@ -179,6 +181,15 @@ public class MetricConfigBean extends AbstractBean {
 
   public MetricConfigBean setDerivedMetricExpression(final String derivedMetricExpression) {
     this.derivedMetricExpression = derivedMetricExpression;
+    return this;
+  }
+
+  public String getAggregationColumn() {
+    return aggregationColumn;
+  }
+
+  public MetricConfigBean setAggregationColumn(String aggregationColumn) {
+    this.aggregationColumn = aggregationColumn;
     return this;
   }
 

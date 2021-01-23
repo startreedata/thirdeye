@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -54,6 +56,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * Util class for generated PQL queries (pinot).
@@ -140,7 +143,7 @@ public class PqlUtils {
     if (metricFunction.getMetricName().equals("*")) {
       metricName = "*";
     } else {
-      metricName = metricConfig.getAggregationColumn() == null? metricConfig.getName(): metricConfig.getAggregationColumn();
+      metricName = optional(metricConfig.getAggregationColumn()).orElse(metricConfig.getName());
     }
     if (metricFunction.getFunctionName() == MetricAggFunction.COUNT_DISTINCT) {
       builder.append(MetricAggFunction.COUNT.name())

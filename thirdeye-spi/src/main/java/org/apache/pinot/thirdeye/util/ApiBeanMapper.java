@@ -184,7 +184,7 @@ public abstract class ApiBeanMapper {
             .map(DatasetApi::getName)
             .orElse(null))
         .setRollupThreshold(api.getRollupThreshold())
-        .setAggregationColumn(optional(api.getAggregationColumn()).orElse(api.getName()))
+        .setAggregationColumn(api.getAggregationColumn())
         .setDefaultAggFunction(api.getAggregationFunction())
         // TODO suvodeep Revisit this: Assume false if active is not set.
         .setActive(optional(api.getActive()).orElse(false))

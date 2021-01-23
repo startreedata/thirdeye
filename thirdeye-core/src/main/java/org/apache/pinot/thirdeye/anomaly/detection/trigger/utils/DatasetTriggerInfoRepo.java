@@ -46,7 +46,6 @@ public class DatasetTriggerInfoRepo {
 
   private static final Logger LOG = LoggerFactory.getLogger(DatasetTriggerInfoRepo.class);
   private static DatasetTriggerInfoRepo _instance = null;
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private static Set<String> dataSourceWhitelist = new HashSet<>();
   private static int refreshFreqInMin = 30;
   private final Map<String, Long> datasetRefreshTimeMap;
@@ -54,7 +53,7 @@ public class DatasetTriggerInfoRepo {
   private final AlertManager detectionConfigDAO;
 
   private DatasetTriggerInfoRepo() {
-    this.detectionConfigDAO = DAO_REGISTRY.getDetectionConfigManager();
+    this.detectionConfigDAO = DAORegistry.getInstance().getDetectionConfigManager();
     this.datasetRefreshTimeMap = new ConcurrentHashMap<>();
     this.updateFreshTimeMap(); // initial refresh
     this.executorService = new ScheduledThreadPoolExecutor(1, r -> {

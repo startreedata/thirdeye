@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(BaseAnomalyFetcher.class);
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public static final String ANOMALY_SOURCE_TYPE = "anomalySourceType";
@@ -56,7 +55,7 @@ public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
 
   @Override
   public void init(AnomalyFetcherConfig anomalyFetcherConfig) {
-    mergedAnomalyResultDAO = DAO_REGISTRY.getMergedAnomalyResultDAO();
+    mergedAnomalyResultDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
     this.anomalyFetcherConfig = anomalyFetcherConfig;
     this.properties = ThirdEyeSpiUtils
         .decodeCompactedProperties(anomalyFetcherConfig.getProperties());

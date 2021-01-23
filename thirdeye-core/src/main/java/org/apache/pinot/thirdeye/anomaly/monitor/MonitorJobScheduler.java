@@ -35,10 +35,9 @@ public class MonitorJobScheduler {
   private final MonitorConfiguration monitorConfiguration;
   private MonitorJobRunner monitorJobRunner;
   private MonitorJobContext monitorJobContext;
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
   public MonitorJobScheduler(MonitorConfiguration monitorConfiguration) {
-    this.anomalyTaskDAO = DAO_REGISTRY.getTaskDAO();
+    this.anomalyTaskDAO = DAORegistry.getInstance().getTaskDAO();
     this.monitorConfiguration = monitorConfiguration;
     scheduledExecutorService = Executors.newScheduledThreadPool(10);
   }
@@ -49,7 +48,7 @@ public class MonitorJobScheduler {
     monitorJobContext = new MonitorJobContext();
     monitorJobContext.setTaskDAO(anomalyTaskDAO);
     monitorJobContext.setMonitorConfiguration(monitorConfiguration);
-    monitorJobContext.setJobDAO(DAO_REGISTRY.getJobDAO());
+    monitorJobContext.setJobDAO(DAORegistry.getInstance().getJobDAO());
 
     monitorJobRunner = new MonitorJobRunner(monitorJobContext);
     scheduledExecutorService

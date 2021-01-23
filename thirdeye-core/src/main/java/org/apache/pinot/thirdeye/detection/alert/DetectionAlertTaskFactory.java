@@ -55,15 +55,14 @@ public class DetectionAlertTaskFactory {
   private static final String PROP_CLASS_NAME = "className";
   private static final String PROP_EMAIL_SCHEME = "emailScheme";
   private static final String DEFAULT_ALERT_SCHEME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
   private final DataProvider provider;
 
   public DetectionAlertTaskFactory() {
-    EventManager eventDAO = DAO_REGISTRY.getEventDAO();
-    MetricConfigManager metricDAO = DAO_REGISTRY.getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
-    EvaluationManager evaluationDAO = DAO_REGISTRY.getEvaluationManager();
+    EventManager eventDAO = DAORegistry.getInstance().getEventDAO();
+    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
+    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    EvaluationManager evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
     AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO, datasetDAO,
         DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
         DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)

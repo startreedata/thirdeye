@@ -38,7 +38,6 @@ public class DataAvailabilityEventListener implements Runnable {
   private static final Logger LOG = LoggerFactory.getLogger(DataAvailabilityEventListener.class);
   private final DataAvailabilityKafkaConsumer consumer;
   private final List<DataAvailabilityEventFilter> filters;
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private final DatasetTriggerInfoRepo datasetTriggerInfoRepo;
   private final DatasetConfigManager datasetConfigManager;
   private final long sleepTimeInMilli;
@@ -49,7 +48,7 @@ public class DataAvailabilityEventListener implements Runnable {
       long sleepTimeInMilli, long pollTimeInMilli) {
     this.consumer = consumer;
     this.filters = filters;
-    this.datasetConfigManager = DAO_REGISTRY.getDatasetConfigDAO();
+    this.datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
     this.datasetTriggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
     this.sleepTimeInMilli = sleepTimeInMilli;
     this.pollTimeInMilli = pollTimeInMilli;

@@ -92,7 +92,6 @@ public abstract class ThirdEyeUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
   /**
    * Returns or modifies a filter that can be for querying the results corresponding to the given
@@ -249,7 +248,7 @@ public abstract class ThirdEyeUtils {
 
   // TODO: Write parser instead of looking for occurrence of every metric
   public static String substituteMetricIdsForMetrics(String metricExpression, String dataset) {
-    MetricConfigManager metricConfigDAO = DAO_REGISTRY.getMetricConfigDAO();
+    MetricConfigManager metricConfigDAO = DAORegistry.getInstance().getMetricConfigDAO();
     List<MetricConfigDTO> metricConfigs = metricConfigDAO.findByDataset(dataset);
     for (MetricConfigDTO metricConfig : metricConfigs) {
       if (metricConfig.isDerived()) {
@@ -286,7 +285,7 @@ public abstract class ThirdEyeUtils {
       String derivedMetricExpression = metricFunction.getMetricName();
       String metricId = derivedMetricExpression
           .replaceAll(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, "");
-      MetricConfigDTO metricConfig = DAO_REGISTRY.getMetricConfigDAO()
+      MetricConfigDTO metricConfig = DAORegistry.getInstance().getMetricConfigDAO()
           .findById(Long.valueOf(metricId));
       metricThresholds.put(derivedMetricExpression, metricConfig.getRollupThreshold());
     }
@@ -296,7 +295,7 @@ public abstract class ThirdEyeUtils {
   public static String getMetricNameFromFunction(MetricFunction metricFunction) {
     String metricId = metricFunction.getMetricName()
         .replace(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, "");
-    MetricConfigDTO metricConfig = DAO_REGISTRY.getMetricConfigDAO()
+    MetricConfigDTO metricConfig = DAORegistry.getInstance().getMetricConfigDAO()
         .findById(Long.valueOf(metricId));
     return metricConfig.getName();
   }
@@ -380,7 +379,7 @@ public abstract class ThirdEyeUtils {
   public static MetricConfigDTO getMetricConfigFromId(Long metricId) {
     MetricConfigDTO metricConfig = null;
     if (metricId != null) {
-      metricConfig = DAO_REGISTRY.getMetricConfigDAO().findById(metricId);
+      metricConfig = DAORegistry.getInstance().getMetricConfigDAO().findById(metricId);
     }
     return metricConfig;
   }

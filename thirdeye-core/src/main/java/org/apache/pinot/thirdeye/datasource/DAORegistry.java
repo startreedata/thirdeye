@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertSnapshotManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
@@ -41,141 +43,176 @@ import org.apache.pinot.thirdeye.datalayer.bao.RootcauseTemplateManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertSnapshotManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalySubscriptionGroupNotificationManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ApplicationManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EntityToEntityMappingManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EvaluationManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EventManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.GroupedAnomalyResultsManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.JobManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MergedAnomalyResultManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MetricConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OnboardDatasetMetricManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OnlineDetectionDataManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OverrideConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseSessionManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseTemplateManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SessionManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.TaskManagerImpl;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 
-/**
- * Singleton service registry for Data Access Objects (DAOs)
- */
+@Singleton
 public class DAORegistry {
 
-  private static final DAORegistry INSTANCE = new DAORegistry();
+  private final AnomalyFunctionManager anomalyFunctionManager;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final JobManager jobManager;
+  private final TaskManager taskManager;
+  private final DatasetConfigManager datasetConfigManager;
+  private final MetricConfigManager metricConfigManager;
+  private final OverrideConfigManager overrideConfigManager;
+  private final EventManager eventManager;
+  private final DetectionStatusManager detectionStatusManager;
+  private final EntityToEntityMappingManager entityToEntityMappingManager;
+  private final GroupedAnomalyResultsManager groupedAnomalyResultsManager;
+  private final OnboardDatasetMetricManager onboardDatasetMetricManager;
+  private final ApplicationManager applicationManager;
+  private final AlertSnapshotManager alertSnapshotManager;
+  private final RootcauseSessionManager rootcauseSessionManager;
+  private final RootcauseTemplateManager rootcauseTemplateManager;
+  private final SessionManager sessionManager;
+  private final AlertManager alertManager;
+  private final SubscriptionGroupManager subscriptionGroupManager;
+  private final EvaluationManager evaluationManager;
+  private final OnlineDetectionDataManager onlineDetectionDataManager;
+  private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
+
+  @Inject
+  public DAORegistry(
+      final AnomalyFunctionManager anomalyFunctionManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final JobManager jobManager,
+      final TaskManager taskManager,
+      final DatasetConfigManager datasetConfigManager,
+      final MetricConfigManager metricConfigManager,
+      final OverrideConfigManager overrideConfigManager,
+      final EventManager eventManager,
+      final DetectionStatusManager detectionStatusManager,
+      final EntityToEntityMappingManager entityToEntityMappingManager,
+      final GroupedAnomalyResultsManager groupedAnomalyResultsManager,
+      final OnboardDatasetMetricManager onboardDatasetMetricManager,
+      final ApplicationManager applicationManager,
+      final AlertSnapshotManager alertSnapshotManager,
+      final RootcauseSessionManager rootcauseSessionManager,
+      final RootcauseTemplateManager rootcauseTemplateManager,
+      final SessionManager sessionManager,
+      final AlertManager alertManager,
+      final SubscriptionGroupManager subscriptionGroupManager,
+      final EvaluationManager evaluationManager,
+      final OnlineDetectionDataManager onlineDetectionDataManager,
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
+    this.anomalyFunctionManager = anomalyFunctionManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.jobManager = jobManager;
+    this.taskManager = taskManager;
+    this.datasetConfigManager = datasetConfigManager;
+    this.metricConfigManager = metricConfigManager;
+    this.overrideConfigManager = overrideConfigManager;
+    this.eventManager = eventManager;
+    this.detectionStatusManager = detectionStatusManager;
+    this.entityToEntityMappingManager = entityToEntityMappingManager;
+    this.groupedAnomalyResultsManager = groupedAnomalyResultsManager;
+    this.onboardDatasetMetricManager = onboardDatasetMetricManager;
+    this.applicationManager = applicationManager;
+    this.alertSnapshotManager = alertSnapshotManager;
+    this.rootcauseSessionManager = rootcauseSessionManager;
+    this.rootcauseTemplateManager = rootcauseTemplateManager;
+    this.sessionManager = sessionManager;
+    this.alertManager = alertManager;
+    this.subscriptionGroupManager = subscriptionGroupManager;
+    this.evaluationManager = evaluationManager;
+    this.onlineDetectionDataManager = onlineDetectionDataManager;
+    this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
+  }
 
   /**
-   * internal constructor.
+   * Use dependency injection instead of using this as a singleton instance.
+   * @return the singleton instance maintained by the {@link DeprecatedInjectorUtil} class
    */
-  private DAORegistry() {
-  }
-
-  /****************************************************************************
-   * SINGLETON
-   */
-
+  @Deprecated
   public static DAORegistry getInstance() {
-    return INSTANCE;
+    return DeprecatedInjectorUtil.getInstance(DAORegistry.class);
   }
-
-  /****************************************************************************
-   * GETTERS/SETTERS
-   */
 
   public AnomalyFunctionManager getAnomalyFunctionDAO() {
-    return DeprecatedInjectorUtil.getInstance(AnomalyFunctionManagerImpl.class);
+    return anomalyFunctionManager;
   }
 
   public MergedAnomalyResultManager getMergedAnomalyResultDAO() {
-    return DeprecatedInjectorUtil.getInstance(MergedAnomalyResultManagerImpl.class);
+    return mergedAnomalyResultManager;
   }
 
   public JobManager getJobDAO() {
-    return DeprecatedInjectorUtil.getInstance(JobManagerImpl.class);
+    return jobManager;
   }
 
   public TaskManager getTaskDAO() {
-    return DeprecatedInjectorUtil.getInstance(TaskManagerImpl.class);
+    return taskManager;
   }
 
   public DatasetConfigManager getDatasetConfigDAO() {
-    return DeprecatedInjectorUtil.getInstance(DatasetConfigManagerImpl.class);
+    return datasetConfigManager;
   }
 
   public MetricConfigManager getMetricConfigDAO() {
-    return DeprecatedInjectorUtil.getInstance(MetricConfigManagerImpl.class);
+    return metricConfigManager;
   }
 
   public OverrideConfigManager getOverrideConfigDAO() {
-    return DeprecatedInjectorUtil.getInstance(OverrideConfigManagerImpl.class);
+    return overrideConfigManager;
   }
 
   public EventManager getEventDAO() {
-    return DeprecatedInjectorUtil.getInstance(EventManagerImpl.class);
+    return eventManager;
   }
 
   public DetectionStatusManager getDetectionStatusDAO() {
-    return DeprecatedInjectorUtil.getInstance(DetectionStatusManagerImpl.class);
+    return detectionStatusManager;
   }
 
   public EntityToEntityMappingManager getEntityToEntityMappingDAO() {
-    return DeprecatedInjectorUtil.getInstance(EntityToEntityMappingManagerImpl.class);
+    return entityToEntityMappingManager;
   }
 
   public GroupedAnomalyResultsManager getGroupedAnomalyResultsDAO() {
-    return DeprecatedInjectorUtil.getInstance(GroupedAnomalyResultsManagerImpl.class);
+    return groupedAnomalyResultsManager;
   }
 
   public OnboardDatasetMetricManager getOnboardDatasetMetricDAO() {
-    return DeprecatedInjectorUtil.getInstance(OnboardDatasetMetricManagerImpl.class);
+    return onboardDatasetMetricManager;
   }
 
   public ApplicationManager getApplicationDAO() {
-    return DeprecatedInjectorUtil.getInstance(ApplicationManagerImpl.class);
+    return applicationManager;
   }
 
   public AlertSnapshotManager getAlertSnapshotDAO() {
-    return DeprecatedInjectorUtil.getInstance(AlertSnapshotManagerImpl.class);
+    return alertSnapshotManager;
   }
 
   public RootcauseSessionManager getRootcauseSessionDAO() {
-    return DeprecatedInjectorUtil.getInstance(RootcauseSessionManagerImpl.class);
+    return rootcauseSessionManager;
   }
 
   public RootcauseTemplateManager getRootcauseTemplateDao() {
-    return DeprecatedInjectorUtil.getInstance(RootcauseTemplateManagerImpl.class);
+    return rootcauseTemplateManager;
   }
 
   public SessionManager getSessionDAO() {
-    return DeprecatedInjectorUtil.getInstance(SessionManagerImpl.class);
+    return sessionManager;
   }
 
   public AlertManager getDetectionConfigManager() {
-    return DeprecatedInjectorUtil.getInstance(AlertManagerImpl.class);
+    return alertManager;
   }
 
   public SubscriptionGroupManager getDetectionAlertConfigManager() {
-    return DeprecatedInjectorUtil.getInstance(SubscriptionGroupManagerImpl.class);
+    return subscriptionGroupManager;
   }
 
   public EvaluationManager getEvaluationManager() {
-    return DeprecatedInjectorUtil.getInstance(EvaluationManagerImpl.class);
+    return evaluationManager;
   }
 
   public OnlineDetectionDataManager getOnlineDetectionDataManager() {
-    return DeprecatedInjectorUtil.getInstance(OnlineDetectionDataManagerImpl.class);
+    return onlineDetectionDataManager;
   }
 
   public AnomalySubscriptionGroupNotificationManager getAnomalySubscriptionGroupNotificationManager() {
-    return DeprecatedInjectorUtil
-        .getInstance(AnomalySubscriptionGroupNotificationManagerImpl.class);
+    return anomalySubscriptionGroupNotificationManager;
   }
 }

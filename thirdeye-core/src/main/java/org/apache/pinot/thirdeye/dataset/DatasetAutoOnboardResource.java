@@ -38,15 +38,14 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 @Singleton
 public class DatasetAutoOnboardResource {
 
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private final MetricConfigManager metricDAO;
   private final AlertManager detectionDAO;
   private final DatasetConfigManager datasetDAO;
 
   public DatasetAutoOnboardResource() {
-    this.metricDAO = DAO_REGISTRY.getMetricConfigDAO();
-    this.detectionDAO = DAO_REGISTRY.getDetectionConfigManager();
-    this.datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
+    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
+    this.detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
+    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
   }
 
   @GET

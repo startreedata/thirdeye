@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 public class PinotDataSourceTimeQuery {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PinotDataSourceTimeQuery.class);
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
 
   private final static String TIME_QUERY_TEMPLATE = "SELECT %s(%s) FROM %s WHERE %s";
 
@@ -79,7 +78,7 @@ public class PinotDataSourceTimeQuery {
   private long queryTimeSpecFromPinot(final String dataset, final String functionName) {
     long maxTime = 0;
     try {
-      DatasetConfigDTO datasetConfig = DAO_REGISTRY.getDatasetConfigDAO().findByDataset(dataset);
+      DatasetConfigDTO datasetConfig = DAORegistry.getInstance().getDatasetConfigDAO().findByDataset(dataset);
       // By default, query only offline, unless dataset has been marked as realtime
       TimeSpec timeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 

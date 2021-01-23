@@ -72,8 +72,6 @@ public class AnomalyDetectionInputContextBuilder {
   private static final Logger LOG = LoggerFactory
       .getLogger(AnomalyDetectionInputContextBuilder.class);
 
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
-
   private AnomalyDetectionInputContext anomalyDetectionInputContext;
   private AnomalyFunctionDTO anomalyFunctionSpec;
   private BaseAnomalyFunction anomalyFunction;
@@ -97,7 +95,7 @@ public class AnomalyDetectionInputContextBuilder {
     this.anomalyFunction = anomalyFunctionFactory.fromSpec(anomalyFunctionSpec);
     this.anomalyDetectionInputContext = anomalyDetectionInputContext;
     this.dataset = this.anomalyFunctionSpec.getCollection();
-    DatasetConfigDTO datasetConfig = DAO_REGISTRY.getDatasetConfigDAO().findByDataset(dataset);
+    DatasetConfigDTO datasetConfig = DAORegistry.getInstance().getDatasetConfigDAO().findByDataset(dataset);
     if (datasetConfig == null) {
       LOG.error("Dataset [" + dataset + "] is not found");
       throw new IllegalArgumentException(
@@ -371,7 +369,7 @@ public class AnomalyDetectionInputContextBuilder {
   public AnomalyDetectionInputContextBuilder fetchScalingFactors(
       List<Pair<Long, Long>> dataRangeIntervals) {
     List<ScalingFactor> scalingFactors = OverrideConfigHelper
-        .getTimeSeriesScalingFactors(DAO_REGISTRY.getOverrideConfigDAO(),
+        .getTimeSeriesScalingFactors(DAORegistry.getInstance().getOverrideConfigDAO(),
             anomalyFunctionSpec.getCollection(),
             anomalyFunctionSpec.getMetric(), anomalyFunctionSpec.getId(),
             dataRangeIntervals);
@@ -395,7 +393,7 @@ public class AnomalyDetectionInputContextBuilder {
     for (Pair<Long, Long> startEndTimeRange : startEndTimeRanges) {
       try {
         results.addAll(
-            DAO_REGISTRY.getMergedAnomalyResultDAO()
+            DAORegistry.getInstance().getMergedAnomalyResultDAO()
                 .findOverlappingByFunctionId(functionId, startEndTimeRange.getFirst(),
                     startEndTimeRange.getSecond()));
       } catch (Exception e) {
@@ -422,7 +420,7 @@ public class AnomalyDetectionInputContextBuilder {
     for (Pair<Long, Long> startEndTimeRange : startEndTimeRanges) {
       try {
         results.addAll(
-            DAO_REGISTRY.getMergedAnomalyResultDAO()
+            DAORegistry.getInstance().getMergedAnomalyResultDAO()
                 .findOverlappingByFunctionIdDimensions(functionId,
                     startEndTimeRange.getFirst(), startEndTimeRange.getSecond(),
                     dimensions.toString()));

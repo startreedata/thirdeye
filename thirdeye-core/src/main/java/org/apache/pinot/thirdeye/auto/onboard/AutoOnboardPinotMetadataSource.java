@@ -75,7 +75,6 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
    * Use "ROW_COUNT" as the special token for the count(*) metric for a pinot table
    */
   private static final String ROW_COUNT = "ROW_COUNT";
-  private static final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
   private final DatasetConfigManager datasetDAO;
   private final MetricConfigManager metricDAO;
   private final String dataSourceName;
@@ -91,8 +90,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
       throw e;
     }
-    this.datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
-    this.metricDAO = DAO_REGISTRY.getMetricConfigDAO();
+    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
         PinotThirdEyeDataSource.class.getSimpleName());
   }
@@ -101,8 +100,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
       AutoOnboardPinotMetricsUtils utils) {
     super(metadataSourceConfig);
     autoLoadPinotMetricsUtils = utils;
-    this.datasetDAO = DAO_REGISTRY.getDatasetConfigDAO();
-    this.metricDAO = DAO_REGISTRY.getMetricConfigDAO();
+    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
         PinotThirdEyeDataSource.class.getSimpleName());
   }
@@ -261,7 +260,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
 
     // in dimensionAsMetric case, the dimension name will be used in the METRIC_NAMES_COLUMNS property of the metric
     List<String> dimensionsAsMetrics = new ArrayList<>();
-    List<MetricConfigDTO> metricConfigs = DAO_REGISTRY.getMetricConfigDAO().findByDataset(dataset);
+    List<MetricConfigDTO> metricConfigs = DAORegistry.getInstance().getMetricConfigDAO().findByDataset(dataset);
     for (MetricConfigDTO metricConfig : metricConfigs) {
       if (metricConfig.isDimensionAsMetric()) {
         Map<String, String> metricProperties = metricConfig.getMetricProperties();
@@ -310,7 +309,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
         datasetConfig.setDimensionsHaveNoPreAggregation(dimensionsHaveNoPreAggregation);
       }
       LOG.info("Added dimensions {}, removed {}", dimensionsToAdd, dimensionsToRemove);
-      DAO_REGISTRY.getDatasetConfigDAO().update(datasetConfig);
+      DAORegistry.getInstance().getDatasetConfigDAO().update(datasetConfig);
     }
   }
 
@@ -318,7 +317,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     LOG.info("Checking for metric changes in {}", dataset);
 
     // Fetch metrics from Thirdeye
-    List<MetricConfigDTO> datasetMetricConfigs = DAO_REGISTRY.getMetricConfigDAO()
+    List<MetricConfigDTO> datasetMetricConfigs = DAORegistry.getInstance().getMetricConfigDAO()
         .findByDataset(dataset);
 
     // Fetch metrics from Pinot
@@ -386,7 +385,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
       ConfigGenerator.setDateTimeSpecs(datasetConfig, timeColumnName, timeFormatStr,
           formatSpec.getColumnSize(),
           formatSpec.getColumnUnit());
-      DAO_REGISTRY.getDatasetConfigDAO().update(datasetConfig);
+      DAORegistry.getInstance().getDatasetConfigDAO().update(datasetConfig);
       LOG.info("Refreshed time field. name = {}, format = {}, type = {}, unit size = {}.",
           timeColumnName, timeFormatStr, formatSpec.getColumnUnit(), formatSpec.getColumnSize());
     }
@@ -422,7 +421,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
       }
       if (hasUpdate) {
         datasetConfig.setProperties(properties);
-        DAO_REGISTRY.getDatasetConfigDAO().update(datasetConfig);
+        DAORegistry.getInstance().getDatasetConfigDAO().update(datasetConfig);
       }
     }
   }

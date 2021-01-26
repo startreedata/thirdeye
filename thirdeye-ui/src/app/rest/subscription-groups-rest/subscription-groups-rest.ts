@@ -39,6 +39,17 @@ export const updateSubscriptionGroup = async (
     return response.data[0];
 };
 
+export const updateSubscriptionGroups = async (
+    subscriptionGroups: SubscriptionGroup[]
+): Promise<SubscriptionGroup[]> => {
+    const response = await axios.put(
+        BASE_URL_SUBSCRIPTION_GROUPS,
+        subscriptionGroups
+    );
+
+    return response.data;
+};
+
 export const deleteSubscriptionGroup = async (
     id: number
 ): Promise<SubscriptionGroup> => {

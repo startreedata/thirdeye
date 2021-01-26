@@ -3,11 +3,14 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 
 export interface AlertWizardProps {
     alert?: Alert;
-    subscriptionGroups: SubscriptionGroup[];
     showCancel?: boolean;
-    onChange?: (alertWizardStep: AlertWizardStep) => void;
+    getAllSubscriptionGroups: () => Promise<SubscriptionGroup[]>;
+    getAllAlerts: () => Promise<Alert[]>;
     onCancel?: () => void;
-    onFinish?: (alert: Alert) => void;
+    onSubscriptionGroupWizardFinish: (
+        sub: SubscriptionGroup
+    ) => Promise<SubscriptionGroup>;
+    onFinish?: (alert: Alert, subscriptionGroups: SubscriptionGroup[]) => void;
 }
 
 export enum AlertWizardStep {

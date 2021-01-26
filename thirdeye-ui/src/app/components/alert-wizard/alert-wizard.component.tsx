@@ -7,15 +7,24 @@ import {
     Stepper,
     Typography,
 } from "@material-ui/core";
-import { kebabCase } from "lodash";
+import { Alert as MuiAlert } from "@material-ui/lab";
+import { cloneDeep, isEmpty, kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { createDefaultAlert } from "../../utils/alerts-util/alerts-util";
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    createDefaultAlert,
+    getAlertCardData,
+} from "../../utils/alerts-util/alerts-util";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
 import { validateJSON } from "../../utils/validation-util/validation-util";
 import { JSONEditor } from "../json-editor/json-editor.component";
+import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
+import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
+import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
+import { TransferList } from "../transfer-list/transfer-list.component";
 import { AlertWizardProps, AlertWizardStep } from "./alert-wizard.interfaces";
 import { useAlertWizardStyles } from "./alert-wizard.styles";
 
@@ -23,9 +32,14 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
     props: AlertWizardProps
 ) => {
     const alertWizardClasses = useAlertWizardStyles();
+    const [loading, setLoading] = useState(true);
     const [newAlert, setNewAlert] = useState<Alert>(
         props.alert || createDefaultAlert()
     );
+    const [newAlertJSON, setNewAlertJSON] = useState(
+        JSON.stringify(createDefaultAlert())
+    );
+    const [alerts, setAlerts] = useState<Alert[]>([]);
     const [
         detectionConfigurationError,
         setDetectionConfigurationError,
@@ -34,32 +48,39 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
         detectionConfigurationHelperText,
         setDetectionConfigurationHelperText,
     ] = useState("");
+    const [subs, setSubs] = useState<SubscriptionGroup[]>([]);
+    const [selecteddSubs, setSelectedSubs] = useState<SubscriptionGroup[]>([]);
     const [currentWizardStep, setCurrentWizardStep] = useState<AlertWizardStep>(
         AlertWizardStep.DETECTION_CONFIGURATION
     );
+    const [wizard, setWizard] = useState("");
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Notify
-        props.onChange && props.onChange(currentWizardStep);
+        initSubs();
+    }, [subs]);
+
+    useEffect(() => {
+        if (currentWizardStep === AlertWizardStep.SUBSCRIPTION_GROUPS) {
+            props.getAllSubscriptionGroups &&
+                props
+                    .getAllSubscriptionGroups()
+                    .then((subs: SubscriptionGroup[]): void => {
+                        setSubs(subs);
+                    });
+        }
     }, [currentWizardStep]);
 
     const onDetectionConfigurationChange = (value: string): void => {
-        let validationResult;
-        if (
-            (validationResult = validateJSON(value)) &&
-            !validationResult.valid
-        ) {
-            // Validation failed
-            setDetectionConfigurationError(true);
-            setDetectionConfigurationHelperText(validationResult.message || "");
+        setNewAlertJSON(value);
+    };
 
-            return;
-        }
-
-        setDetectionConfigurationError(false);
-        setDetectionConfigurationHelperText("");
-        setNewAlert(JSON.parse(value));
+    const onCreateNew = (): void => {
+        setLoading(true);
+        props.getAllAlerts().then((alerts: Alert[]): void => {
+            setAlerts(alerts);
+            setWizard("sub");
+        });
     };
 
     const onCancel = (): void => {
@@ -83,13 +104,16 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
     };
 
     const onNext = (): void => {
-        if (detectionConfigurationError) {
+        if (
+            currentWizardStep === AlertWizardStep.DETECTION_CONFIGURATION &&
+            !validateDetectionConfiguration()
+        ) {
             return;
         }
 
         if (currentWizardStep === AlertWizardStep.REVIEW_AND_SUBMIT) {
             // On last step
-            props.onFinish && props.onFinish(newAlert);
+            props.onFinish && props.onFinish(newAlert, selecteddSubs);
 
             return;
         }
@@ -104,148 +128,371 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
         );
     };
 
+    const initSubs = (): void => {
+        if (!props.alert) {
+            setLoading(false);
+
+            return;
+        }
+
+        const alertcard = getAlertCardData(props.alert, subs);
+        if (isEmpty(alertcard.subscriptionGroups)) {
+            // No groups sub
+            return;
+        }
+
+        const selsubs: SubscriptionGroup[] = [];
+        for (const sub of alertcard.subscriptionGroups) {
+            for (const group of subs) {
+                if (sub.id === group.id) {
+                    // Duplicates?
+                    selsubs.push(group);
+
+                    break;
+                }
+            }
+        }
+
+        setSelectedSubs(selsubs);
+        setLoading(false);
+    };
+
+    const validateDetectionConfiguration = (): boolean => {
+        let validationResult;
+        if (
+            (validationResult = validateJSON(newAlertJSON)) &&
+            !validationResult.valid
+        ) {
+            // Validation failed
+            setDetectionConfigurationError(true);
+            setDetectionConfigurationHelperText(validationResult.message || "");
+
+            return false;
+        }
+
+        setDetectionConfigurationError(false);
+        setDetectionConfigurationHelperText("");
+        setNewAlert(JSON.parse(newAlertJSON));
+
+        return true;
+    };
+
+    const onSubWizardFinish = (subscriptionGroup: SubscriptionGroup): void => {
+        props
+            .onSubscriptionGroupWizardFinish(subscriptionGroup)
+            .then((newSub: SubscriptionGroup): void => {
+                setSubs((s) => {
+                    const a = cloneDeep(s);
+                    a.push(newSub);
+
+                    return a;
+                });
+                setLoading(false);
+                setWizard("");
+            });
+    };
+
+    const onSubWizardC = (): void => {
+        setLoading(false);
+        setWizard("");
+    };
+
+    const onSubscriptionGroupWizardStepChange = (
+        step: SubscriptionGroupWizardStep
+    ): void => {
+        step;
+    };
+
     return (
         <>
-            <Grid container>
-                {/* Stepper */}
-                <Grid item md={12}>
-                    <Stepper alternativeLabel activeStep={currentWizardStep}>
-                        {Object.values(AlertWizardStep)
-                            .filter(
-                                (alertWizardStep) =>
-                                    typeof alertWizardStep === "string"
-                            )
-                            .map((alertWizardStep, index) => (
-                                <Step key={index}>
-                                    <StepLabel>
-                                        {t(
-                                            `label.${kebabCase(
-                                                alertWizardStep as string
-                                            )}`
-                                        )}
-                                    </StepLabel>
-                                </Step>
-                            ))}
-                    </Stepper>
-                </Grid>
-
-                {/* Step label */}
-                <Grid item md={12}>
-                    <Typography variant="h5">
-                        {t(
-                            `label.${kebabCase(
-                                AlertWizardStep[currentWizardStep]
-                            )}`
-                        )}
-                    </Typography>
-                </Grid>
-
-                {/* Spacer */}
-                <Grid item md={12} />
-
-                {/* Detection configuration */}
-                {currentWizardStep ===
-                    AlertWizardStep.DETECTION_CONFIGURATION && (
-                    <>
-                        {/* Detection configuration editor */}
+            {wizard !== "sub" && (
+                <>
+                    <Grid container>
+                        {/* Stepper */}
                         <Grid item md={12}>
-                            <JSONEditor
-                                error={detectionConfigurationError}
-                                helperText={detectionConfigurationHelperText}
-                                value={
-                                    (newAlert as unknown) as Record<
-                                        string,
-                                        unknown
-                                    >
-                                }
-                                onChange={onDetectionConfigurationChange}
-                            />
-                        </Grid>
-                    </>
-                )}
-
-                {/* Review and submit */}
-                {currentWizardStep === AlertWizardStep.REVIEW_AND_SUBMIT && (
-                    <>{/* Alert information */}</>
-                )}
-            </Grid>
-
-            {/* Spacer */}
-            <Box padding={2} />
-
-            {/* Controls */}
-            <Grid
-                container
-                alignItems="stretch"
-                className={alertWizardClasses.controlsContainer}
-                direction="column"
-                justify="flex-end"
-            >
-                {/* Separator */}
-                <Grid item>
-                    <Box
-                        border={Dimension.WIDTH_BORDER_DEFAULT}
-                        borderBottom={0}
-                        borderColor={Palette.COLOR_BORDER_DEFAULT}
-                        borderLeft={0}
-                        borderRight={0}
-                    />
-                </Grid>
-
-                <Grid item>
-                    <Grid container justify="space-between">
-                        {/* Cancel button */}
-                        <Grid item>
-                            {props.showCancel && (
-                                <Button
-                                    color="primary"
-                                    size="large"
-                                    variant="outlined"
-                                    onClick={onCancel}
-                                >
-                                    {t("label.cancel")}
-                                </Button>
-                            )}
+                            <Stepper
+                                alternativeLabel
+                                activeStep={currentWizardStep}
+                            >
+                                {Object.values(AlertWizardStep)
+                                    .filter(
+                                        (alertWizardStep) =>
+                                            typeof alertWizardStep === "string"
+                                    )
+                                    .map((alertWizardStep, index) => (
+                                        <Step key={index}>
+                                            <StepLabel>
+                                                {t(
+                                                    `label.${kebabCase(
+                                                        alertWizardStep as string
+                                                    )}`
+                                                )}
+                                            </StepLabel>
+                                        </Step>
+                                    ))}
+                            </Stepper>
                         </Grid>
 
-                        <Grid item>
-                            <Grid container>
-                                {/* Back button */}
-                                <Grid item>
-                                    <Button
-                                        color="primary"
-                                        disabled={
-                                            currentWizardStep ===
-                                            AlertWizardStep.DETECTION_CONFIGURATION
+                        {/* Step label */}
+                        <Grid item md={12}>
+                            <Typography variant="h5">
+                                {t(
+                                    `label.${kebabCase(
+                                        AlertWizardStep[currentWizardStep]
+                                    )}`
+                                )}
+                            </Typography>
+                        </Grid>
+
+                        {/* Spacer */}
+                        <Grid item md={12} />
+
+                        {/* Detection configuration */}
+                        {currentWizardStep ===
+                            AlertWizardStep.DETECTION_CONFIGURATION && (
+                            <>
+                                {/* Detection configuration editor */}
+                                <Grid item md={12}>
+                                    <JSONEditor
+                                        error={detectionConfigurationError}
+                                        helperText={
+                                            detectionConfigurationHelperText
                                         }
-                                        size="large"
-                                        variant="outlined"
-                                        onClick={onBack}
-                                    >
-                                        {t("label.back")}
-                                    </Button>
+                                        value={
+                                            (newAlert as unknown) as Record<
+                                                string,
+                                                unknown
+                                            >
+                                        }
+                                        onChange={
+                                            onDetectionConfigurationChange
+                                        }
+                                    />
+                                </Grid>
+                            </>
+                        )}
+
+                        {/* Subscription groups */}
+                        {!loading &&
+                            currentWizardStep ===
+                                AlertWizardStep.SUBSCRIPTION_GROUPS && (
+                                <>
+                                    {/* Detection configuration editor */}
+                                    <Grid item md={12}>
+                                        <TransferList<SubscriptionGroup>
+                                            fromLabel="All Subscription Groups"
+                                            fromList={subs}
+                                            listItemKeyFn={(
+                                                s: SubscriptionGroup
+                                            ): number => s.id}
+                                            listItemTextFn={(
+                                                s: SubscriptionGroup
+                                            ): string => s.name}
+                                            toLabel="Associated Subscription Groups"
+                                            toList={selecteddSubs}
+                                            onChange={setSelectedSubs}
+                                        />
+                                    </Grid>
+                                </>
+                            )}
+
+                        {/* Review and submit */}
+                        {currentWizardStep ===
+                            AlertWizardStep.REVIEW_AND_SUBMIT && (
+                            <>
+                                {/* Alert information */}
+                                <Grid item md={12}>
+                                    <JSONEditor
+                                        readOnly
+                                        value={
+                                            (newAlert as unknown) as Record<
+                                                string,
+                                                unknown
+                                            >
+                                        }
+                                    />
                                 </Grid>
 
-                                {/* Next button */}
+                                <Grid container justify="flex-end">
+                                    {/* Subscription groups */}
+                                    <Grid item md={2}>
+                                        <Typography variant="subtitle1">
+                                            <strong>
+                                                {t("label.subscription-groups")}
+                                            </strong>
+                                        </Typography>
+                                    </Grid>
+
+                                    {/* No subscription groups */}
+                                    {isEmpty(selecteddSubs) && (
+                                        <Grid item md={10}>
+                                            <Typography variant="body1">
+                                                {t("label.no-data-marker")}
+                                            </Typography>
+                                        </Grid>
+                                    )}
+
+                                    {/* All subscription groups */}
+                                    {selecteddSubs && (
+                                        <Grid item md={10}>
+                                            {selecteddSubs.map((sub, index) => (
+                                                <Typography
+                                                    key={index}
+                                                    variant="body1"
+                                                >
+                                                    {sub.name}
+                                                </Typography>
+                                            ))}
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            </>
+                        )}
+                    </Grid>
+
+                    {loading &&
+                        currentWizardStep ===
+                            AlertWizardStep.SUBSCRIPTION_GROUPS && (
+                            <LoadingIndicator />
+                        )}
+
+                    {/* Spacer */}
+                    <Box padding={2} />
+
+                    {/* Controls */}
+                    <Grid
+                        container
+                        alignItems="stretch"
+                        className={alertWizardClasses.controlsContainer}
+                        direction="column"
+                        justify="flex-end"
+                    >
+                        {detectionConfigurationError && (
+                            <Grid item>
+                                <MuiAlert severity="error">
+                                    There were some errors
+                                </MuiAlert>
+                            </Grid>
+                        )}
+
+                        {/* Separator */}
+                        <Grid item>
+                            <Box
+                                border={Dimension.WIDTH_BORDER_DEFAULT}
+                                borderBottom={0}
+                                borderColor={Palette.COLOR_BORDER_DEFAULT}
+                                borderLeft={0}
+                                borderRight={0}
+                            />
+                        </Grid>
+
+                        <Grid item>
+                            <Grid container justify="space-between">
+                                {/* Cancel button */}
                                 <Grid item>
-                                    <Button
-                                        color="primary"
-                                        disabled={detectionConfigurationError}
-                                        size="large"
-                                        variant="contained"
-                                        onClick={onNext}
-                                    >
+                                    <Grid container>
+                                        {props.showCancel && (
+                                            <Grid item>
+                                                <Button
+                                                    color="primary"
+                                                    size="large"
+                                                    variant="outlined"
+                                                    onClick={onCancel}
+                                                >
+                                                    {t("label.cancel")}
+                                                </Button>
+                                            </Grid>
+                                        )}
+
                                         {currentWizardStep ===
-                                        AlertWizardStep.REVIEW_AND_SUBMIT
-                                            ? t("label.finish")
-                                            : t("label.next")}
-                                    </Button>
+                                            AlertWizardStep.DETECTION_CONFIGURATION && (
+                                            <Grid item>
+                                                <Button
+                                                    color="primary"
+                                                    size="large"
+                                                    variant="outlined"
+                                                    onClick={(): void => {
+                                                        setNewAlert(
+                                                            createDefaultAlert()
+                                                        );
+                                                        setNewAlertJSON(
+                                                            JSON.stringify(
+                                                                createDefaultAlert()
+                                                            )
+                                                        );
+                                                    }}
+                                                >
+                                                    Reset
+                                                </Button>
+                                            </Grid>
+                                        )}
+
+                                        {currentWizardStep ===
+                                            AlertWizardStep.SUBSCRIPTION_GROUPS && (
+                                            <Grid item>
+                                                <Button
+                                                    color="primary"
+                                                    size="large"
+                                                    variant="outlined"
+                                                    onClick={onCreateNew}
+                                                >
+                                                    Create New Susbscription
+                                                    Group
+                                                </Button>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </Grid>
+
+                                <Grid item>
+                                    <Grid container>
+                                        {/* Back button */}
+                                        <Grid item>
+                                            <Button
+                                                color="primary"
+                                                disabled={
+                                                    currentWizardStep ===
+                                                    AlertWizardStep.DETECTION_CONFIGURATION
+                                                }
+                                                size="large"
+                                                variant="outlined"
+                                                onClick={onBack}
+                                            >
+                                                {t("label.back")}
+                                            </Button>
+                                        </Grid>
+
+                                        {/* Next button */}
+                                        <Grid item>
+                                            <Button
+                                                color="primary"
+                                                size="large"
+                                                variant="contained"
+                                                onClick={onNext}
+                                            >
+                                                {currentWizardStep ===
+                                                AlertWizardStep.REVIEW_AND_SUBMIT
+                                                    ? t("label.finish")
+                                                    : t("label.next")}
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
-                </Grid>
-            </Grid>
+                </>
+            )}
+
+            {wizard === "sub" && (
+                <SubscriptionGroupWizard
+                    showCancel
+                    alerts={alerts}
+                    onCancel={onSubWizardC}
+                    onChange={onSubscriptionGroupWizardStepChange}
+                    onFinish={onSubWizardFinish}
+                />
+            )}
         </>
     );
 };

@@ -26,7 +26,6 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
 
     useEffect(() => {
         // Input changed, reset
-        console.log("cage");
         initJSONInput();
     }, [props.value]);
 
@@ -48,7 +47,17 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
 
     const initJSONInput = (): void => {
         if (typeof props.value === "string") {
-            setValue(props.value);
+            // Format string if possible
+            let jsonObject;
+            try {
+                jsonObject = JSON.parse(props.value);
+            } catch (error) {
+                // Invalid JSON, set string as is
+                setValue(props.value);
+            }
+
+            // Valid JSON
+            setValue(JSON.stringify(jsonObject, null, TAB_SIZE));
 
             return;
         }

@@ -6,6 +6,7 @@ import {
     getAllSubscriptionGroups,
     getSubscriptionGroup,
     updateSubscriptionGroup,
+    updateSubscriptionGroups,
 } from "./subscription-groups-rest";
 
 jest.mock("axios");
@@ -92,6 +93,27 @@ describe("Subscription Groups REST", () => {
 
         await expect(
             updateSubscriptionGroup(mockSubscriptionGroupRequest)
+        ).rejects.toThrow("testErrorMessage");
+    });
+
+    test("updateSubscriptionGroups should invoke axios.put with appropriate input and return appropriate subscription groups", async () => {
+        jest.spyOn(axios, "put").mockResolvedValue({
+            data: [mockSubscriptionGroupResponse],
+        });
+
+        expect(
+            await updateSubscriptionGroups([mockSubscriptionGroupRequest])
+        ).toEqual([mockSubscriptionGroupResponse]);
+        expect(axios.put).toHaveBeenCalledWith("/api/subscription-groups", [
+            [mockSubscriptionGroupRequest],
+        ]);
+    });
+
+    test("updateSubscriptionGroups should throw encountered error", async () => {
+        jest.spyOn(axios, "put").mockRejectedValue(mockError);
+
+        await expect(
+            updateSubscriptionGroups([mockSubscriptionGroupRequest])
         ).rejects.toThrow("testErrorMessage");
     });
 

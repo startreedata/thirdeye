@@ -1,4 +1,3 @@
-import { kebabCase } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,7 +7,6 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
-import { SubscriptionGroupWizardStep } from "../../components/subscription-group-wizard/subscription-group-wizard.interfaces";
 import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -25,11 +23,7 @@ import {
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const {
-        setPageBreadcrumbs,
-        pushPageBreadcrumb,
-        popPageBreadcrumb,
-    } = useAppBreadcrumbs();
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const { t } = useTranslation();
@@ -42,10 +36,6 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                 onClick: (): void => {
                     history.push(getSubscriptionGroupsCreatePath());
                 },
-            },
-            // Empty page breadcrumb as a placeholder for subscription group wizard step
-            {
-                text: "",
             },
         ]);
     }, []);
@@ -68,20 +58,6 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
             .finally((): void => {
                 setLoading(false);
             });
-    };
-
-    const onSubscriptionGroupWizardStepChange = (
-        subscriptionGroupWizardStep: SubscriptionGroupWizardStep
-    ): void => {
-        // Update page breadcrumbs
-        popPageBreadcrumb();
-        pushPageBreadcrumb({
-            text: t(
-                `label.${kebabCase(
-                    SubscriptionGroupWizardStep[subscriptionGroupWizardStep]
-                )}`
-            ),
-        });
     };
 
     const onSubscriptionGroupWizardFinish = (
@@ -124,7 +100,6 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
             <PageContents centered hideTimeRange>
                 <SubscriptionGroupWizard
                     alerts={alerts}
-                    onChange={onSubscriptionGroupWizardStepChange}
                     onFinish={onSubscriptionGroupWizardFinish}
                 />
             </PageContents>

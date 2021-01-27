@@ -49,6 +49,7 @@ cd "$SAVED" >/dev/null
 
 CONFIG_DIR="${APP_HOME}/config"
 LIB_DIR="${APP_HOME}/lib"
+UI_DIR="${APP_HOME}/ui"
 
 CLASSPATH=""
 for filepath in "${LIB_DIR}"/*; do
@@ -69,9 +70,16 @@ function start_coordinator {
   java -cp "${CLASSPATH}" ${class_ref} server "${CONFIG_DIR}"/coordinator.yaml
 }
 
+function start_ui {
+  class_ref="org.apache.pinot.thirdeye.ThirdEyeUiServer"
+
+  java -cp "${CLASSPATH}" ${class_ref} --port 8081 --proxyHostPort localhost:8080 --resourceBase "${UI_DIR}"
+}
+
 MODE=$1
 case ${MODE} in
     "coordinator" )  start_coordinator ;;
     "worker"  )      start_worker ;;
+    "ui"  )          start_ui ;;
     * )              echo "Invalid argument: ${MODE}! Exiting."; exit 1;;
 esac

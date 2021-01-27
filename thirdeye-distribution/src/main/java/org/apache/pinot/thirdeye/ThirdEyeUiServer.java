@@ -55,7 +55,10 @@ public class ThirdEyeUiServer {
   }
 
   public void run() {
-    log.info("Starting server. port: {}, proxyHostPort: {}", port, proxyHostPort);
+    log.info("Starting server. port: {}, proxyHostPort: {}, resourceBase: {}",
+        port,
+        proxyHostPort,
+        resourceBase);
     final Server server = createServer();
 
     try {

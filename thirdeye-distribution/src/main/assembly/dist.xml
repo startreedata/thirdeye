@@ -42,6 +42,10 @@
       <directory>${thirdeye.root}/config</directory>
       <outputDirectory>config/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-ui/dist</directory>
+      <outputDirectory>ui/</outputDirectory>
+    </fileSet>
   </fileSets>
   <dependencySets>
     <dependencySet>

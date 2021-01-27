@@ -40,7 +40,6 @@ import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfigurati
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
-import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
@@ -94,11 +93,11 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     final DatabaseConfiguration dbConfig = getDatabaseConfiguration();
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
 
-    injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource));
+    injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource, config));
     DeprecatedInjectorUtil.setInjector(injector);
 
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
-    schedulerService = new SchedulerService(config);
+    schedulerService = injector.getInstance(SchedulerService.class);
 
     env.lifecycle().manage(lifecycleManager(config));
   }
@@ -113,9 +112,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
         requestStatisticsLogger.start();
 
         if (config.isWorker()) {
-          taskDriver = new TaskDriver(config,
-              injector.getInstance(TaskManager.class),
-              injector.getInstance(DAORegistry.class));
+          taskDriver = injector.getInstance(TaskDriver.class);
           taskDriver.start();
         }
 
@@ -141,7 +138,8 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
   }
 
   private void updateAdminSession(String adminUser, String sessionKey) {
-    SessionDTO savedSession = DAORegistry.getInstance().getSessionDAO().findBySessionKey(sessionKey);
+    SessionDTO savedSession = DAORegistry.getInstance().getSessionDAO()
+        .findBySessionKey(sessionKey);
     long expiryMillis = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365);
     if (savedSession == null) {
       SessionDTO sessionDTO = SessionUtils.buildServiceAccount(adminUser, sessionKey, expiryMillis);

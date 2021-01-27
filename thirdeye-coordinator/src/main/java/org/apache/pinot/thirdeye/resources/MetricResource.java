@@ -1,7 +1,10 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
 
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
@@ -24,17 +27,21 @@ import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
 
   private final DatasetConfigManager datasetConfigManager;
+  private final MetricConfigManager metricConfigManager;
 
   @Inject
   public MetricResource(final AuthService authService, final MetricConfigManager metricConfigManager, final DatasetConfigManager datasetConfigManager) {
     super(authService, metricConfigManager, ImmutableMap.of());
     this.datasetConfigManager = datasetConfigManager;
+    this.metricConfigManager = metricConfigManager;
   }
 
   @Override
   protected MetricConfigDTO createDto(final ThirdEyePrincipal principal, final MetricApi api) {
     ensureExists(api.getDataset(), "dataset");
     ensureExists(this.datasetConfigManager.findByDataset(api.getDataset().getName()));
+    ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
+    ensureNull(this.metricConfigManager.findByMetricName(api.getName()), ERR_DUPLICATE_NAME);
 
     final MetricConfigDTO dto = ApiBeanMapper.toMetricConfigDto(api);
     dto.setAlias(ThirdEyeUtils.constructMetricAlias(api.getDataset().getName(), api.getName()));

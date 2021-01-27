@@ -86,6 +86,7 @@ public abstract class ApiBeanMapper {
         )
         .setDerived(boolApi(dto.isDerived()))
         .setDerivedMetricExpression(dto.getDerivedMetricExpression())
+        .setWhere(dto.getWhere())
         .setAggregationColumn(dto.getAggregationColumn())
         .setAggregationFunction(dto.getDefaultAggFunction())
         .setRollupThreshold(dto.getRollupThreshold())

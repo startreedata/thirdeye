@@ -87,9 +87,7 @@ public class SqlQueryBuilder {
     names.append(")");
     values.append(")");
 
-    StringBuilder sb = new StringBuilder("INSERT INTO ");
-    sb.append(tableName).append(names.toString()).append(values.toString());
-    return sb.toString();
+    return "INSERT INTO " + tableName + names.toString() + values.toString();
   }
 
   public PreparedStatement createInsertStatement(Connection conn, AbstractEntity entity)
@@ -139,7 +137,7 @@ public class SqlQueryBuilder {
       Class<? extends AbstractEntity> entityClass, Long id) throws Exception {
     String tableName =
         entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
-    String sql = "Select * from " + tableName + " where id=?";
+    String sql = String.format("Select * from %s where id=?", tableName);
     PreparedStatement prepareStatement = connection.prepareStatement(sql);
     prepareStatement.setLong(1, id);
     return prepareStatement;
@@ -156,8 +154,7 @@ public class SqlQueryBuilder {
       delim = ", ";
     }
     sql.append(")");
-    PreparedStatement prepareStatement = connection.prepareStatement(sql.toString());
-    return prepareStatement;
+    return connection.prepareStatement(sql.toString());
   }
 
   public PreparedStatement createFindByParamsStatement(Connection connection,
@@ -215,7 +212,7 @@ public class SqlQueryBuilder {
           sqlBuilder.append("=");
           sqlBuilder.append("?");
           delim = ",";
-          parametersList.add(new ImmutablePair<String, Object>(columnNameInDB, val));
+          parametersList.add(new ImmutablePair<>(columnNameInDB, val));
         }
       }
     }
@@ -255,8 +252,7 @@ public class SqlQueryBuilder {
     }
     whereClause.append(")");
     sqlBuilder.append(whereClause.toString());
-    PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
-    return prepareStatement;
+    return connection.prepareStatement(sqlBuilder.toString());
   }
 
   public PreparedStatement createDeleteByIdStatement(Connection connection,
@@ -291,8 +287,7 @@ public class SqlQueryBuilder {
     String tableName =
         entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
     String sql = "Select * from " + tableName;
-    PreparedStatement prepareStatement = connection.prepareStatement(sql);
-    return prepareStatement;
+    return connection.prepareStatement(sql);
   }
 
   public PreparedStatement createFindByParamsStatement(Connection connection,
@@ -403,8 +398,7 @@ public class SqlQueryBuilder {
     String tableName =
         entityMappingHolder.tableToEntityNameMap.inverse().get(indexEntityClass.getSimpleName());
     String sql = "Select count(*) from " + tableName;
-    PreparedStatement prepareStatement = connection.prepareStatement(sql);
-    return prepareStatement;
+    return connection.prepareStatement(sql);
   }
 
   private void generateWhereClause(BiMap<String, String> entityNameToDBNameMapping,
@@ -480,7 +474,7 @@ public class SqlQueryBuilder {
     parameterizedSQL = "select * from " + tableName + " " + parameterizedSQL;
     parameterizedSQL = parameterizedSQL.replace(entityClass.getSimpleName(), tableName);
     StringBuilder psSql = new StringBuilder();
-    List<String> paramNames = new ArrayList<String>();
+    List<String> paramNames = new ArrayList<>();
     Matcher m = PARAM_PATTERN.matcher(parameterizedSQL);
 
     int index = 0;
@@ -513,8 +507,6 @@ public class SqlQueryBuilder {
         entityMappingHolder.columnInfoPerTable.get(tableName);
     for (String entityFieldName : paramNames) {
       String[] entityFieldNameParts = entityFieldName.split("__", 2);
-      if (entityFieldNameParts.length > 1) {
-      }
       String dbFieldName = dbNameToEntityNameMapping.inverse().get(entityFieldNameParts[0]);
 
       Object val = parameterMap.get(entityFieldName);

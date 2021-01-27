@@ -124,57 +124,67 @@ describe("Alerts Router", () => {
         expect(mockRemoveAppToolbar).toHaveBeenCalled();
     });
 
-    test("should render alerts all page at exact alerts path", () => {
+    test("should render alerts all page at exact alerts path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAlertsAllPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAlertsAllPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts path", () => {
+    test("should render page not found page at invalid alerts path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS}/testPath`]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render alerts all page at exact alerts all path", () => {
+    test("should render alerts all page at exact alerts all path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_ALL]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAlertsAllPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAlertsAllPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts all path", () => {
+    test("should render page not found page at invalid alerts all path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS_ALL}/testPath`]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render alerts detail page at exact alerts detail path", () => {
+    test("should render alerts detail page at exact alerts detail path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_DETAIL]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAlertsDetailPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAlertsDetailPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts detail path", () => {
+    test("should render page not found page at invalid alerts detail path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_DETAIL}/testPath`]}
@@ -183,20 +193,24 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render alerts create page at exact alerts create path", () => {
+    test("should render alerts create page at exact alerts create path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_CREATE]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAlertsCreatePage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAlertsCreatePage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts create path", () => {
+    test("should render page not found page at invalid alerts create path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_CREATE}/testPath`]}
@@ -205,20 +219,24 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render alerts update page at exact alerts update path", () => {
+    test("should render alerts update page at exact alerts update path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_UPDATE]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAlertsUpdatePage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAlertsUpdatePage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts update path", () => {
+    test("should render page not found page at invalid alerts update path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_UPDATE}/testPath`]}
@@ -227,27 +245,33 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", () => {
+    test("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page by default", () => {
+    test("should render page not found page by default", async () => {
         render(
             <MemoryRouter>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 });
 

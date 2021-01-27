@@ -84,7 +84,7 @@ describe("General Unauthenticated Router", () => {
         expect(mockRemoveAppToolbar).toHaveBeenCalled();
     });
 
-    test("should render sign in page at exact sign in path", () => {
+    test("should render sign in page at exact sign in path", async () => {
         mockPathname = "";
         render(
             <MemoryRouter initialEntries={[AppRoute.SIGN_IN]}>
@@ -92,10 +92,10 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testSignInPage:")).toBeInTheDocument();
+        expect(await screen.findByText("testSignInPage:")).toBeInTheDocument();
     });
 
-    test("should render sign in page at invalid sign in path", () => {
+    test("should render sign in page at invalid sign in path", async () => {
         mockPathname = "";
         render(
             <MemoryRouter initialEntries={[`${AppRoute.SIGN_IN}/testPath`]}>
@@ -103,10 +103,10 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testSignInPage:")).toBeInTheDocument();
+        expect(await screen.findByText("testSignInPage:")).toBeInTheDocument();
     });
 
-    test("should render sign in page with base path as redirection URL when location is sign in path", () => {
+    test("should render sign in page with base path as redirection URL when location is sign in path", async () => {
         mockPathname = AppRoute.SIGN_IN;
         render(
             <MemoryRouter>
@@ -115,11 +115,11 @@ describe("General Unauthenticated Router", () => {
         );
 
         expect(
-            screen.getByText("testSignInPage:testBasePath")
+            await screen.findByText("testSignInPage:testBasePath")
         ).toBeInTheDocument();
     });
 
-    test("should render sign in page with base path as redirection URL when location is sign out path", () => {
+    test("should render sign in page with base path as redirection URL when location is sign out path", async () => {
         mockPathname = AppRoute.SIGN_OUT;
         render(
             <MemoryRouter>
@@ -128,11 +128,11 @@ describe("General Unauthenticated Router", () => {
         );
 
         expect(
-            screen.getByText("testSignInPage:testBasePath")
+            await screen.findByText("testSignInPage:testBasePath")
         ).toBeInTheDocument();
     });
 
-    test("should render sign in page with appropriate redirection URL when location is anything other than sign in/out path", () => {
+    test("should render sign in page with appropriate redirection URL when location is anything other than sign in/out path", async () => {
         mockPathname = "testPath";
         render(
             <MemoryRouter>
@@ -140,10 +140,12 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testSignInPage:testPath")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testSignInPage:testPath")
+        ).toBeInTheDocument();
     });
 
-    test("should render sign in page by default", () => {
+    test("should render sign in page by default", async () => {
         mockPathname = "";
         render(
             <MemoryRouter>
@@ -151,7 +153,7 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testSignInPage:")).toBeInTheDocument();
+        expect(await screen.findByText("testSignInPage:")).toBeInTheDocument();
     });
 });
 

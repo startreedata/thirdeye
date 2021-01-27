@@ -3,9 +3,17 @@ import { Editor, EditorChange } from "codemirror";
 import "codemirror/addon/hint/show-hint";
 import "codemirror/addon/hint/show-hint.css";
 import "codemirror/lib/codemirror.css";
-import React, { FunctionComponent } from "react";
-import { Controlled as CodeMirror } from "react-codemirror2";
+import React, { FunctionComponent, lazy } from "react";
 import { CommonCodeMirrorProps } from "./code-mirror.interfaces";
+
+const CodeMirror = lazy(() =>
+    import(
+        /* webpackChunkName: 'ReactCodeMirror' */
+        "react-codemirror2"
+    ).then(({ Controlled }) => ({
+        default: Controlled,
+    }))
+);
 
 const useStyles = makeStyles(() => {
     return {

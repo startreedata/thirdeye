@@ -128,7 +128,7 @@ describe("Subscription Groups Router", () => {
         );
     });
 
-    test("should render subscription groups all page at exact subscription groups path", () => {
+    test("should render subscription groups all page at exact subscription groups path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS]}>
                 <SubscriptionGroupsRouter />
@@ -136,11 +136,11 @@ describe("Subscription Groups Router", () => {
         );
 
         expect(
-            screen.getByText("testSubscriptionGroupsAllPage")
+            await screen.findByText("testSubscriptionGroupsAllPage")
         ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups path", () => {
+    test("should render page not found page at invalid subscription groups path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.SUBSCRIPTION_GROUPS}/testPath`]}
@@ -149,10 +149,12 @@ describe("Subscription Groups Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render subscription groups all page at exact subscription groups all path", () => {
+    test("should render subscription groups all page at exact subscription groups all path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_ALL]}>
                 <SubscriptionGroupsRouter />
@@ -160,11 +162,11 @@ describe("Subscription Groups Router", () => {
         );
 
         expect(
-            screen.getByText("testSubscriptionGroupsAllPage")
+            await screen.findByText("testSubscriptionGroupsAllPage")
         ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups all path", () => {
+    test("should render page not found page at invalid subscription groups all path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
@@ -175,10 +177,12 @@ describe("Subscription Groups Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render subscription groups detail page at exact subscription groups detail path", () => {
+    test("should render subscription groups detail page at exact subscription groups detail path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_DETAIL]}
@@ -188,11 +192,11 @@ describe("Subscription Groups Router", () => {
         );
 
         expect(
-            screen.getByText("testSubscriptionGroupsDetailPage")
+            await screen.findByText("testSubscriptionGroupsDetailPage")
         ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups detail path", () => {
+    test("should render page not found page at invalid subscription groups detail path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
@@ -203,10 +207,12 @@ describe("Subscription Groups Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render subscription groups create page at exact subscription groups create path", () => {
+    test("should render subscription groups create page at exact subscription groups create path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_CREATE]}
@@ -216,11 +222,11 @@ describe("Subscription Groups Router", () => {
         );
 
         expect(
-            screen.getByText("testSubscriptionGroupsCreatePage")
+            await screen.findByText("testSubscriptionGroupsCreatePage")
         ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups create path", () => {
+    test("should render page not found page at invalid subscription groups create path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
@@ -231,10 +237,12 @@ describe("Subscription Groups Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render subscription groups update page at exact subscription groups update path", () => {
+    test("should render subscription groups update page at exact subscription groups update path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_UPDATE]}
@@ -244,11 +252,11 @@ describe("Subscription Groups Router", () => {
         );
 
         expect(
-            screen.getByText("testSubscriptionGroupsUpdatePage")
+            await screen.findByText("testSubscriptionGroupsUpdatePage")
         ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups update path", () => {
+    test("should render page not found page at invalid subscription groups update path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
@@ -259,27 +267,33 @@ describe("Subscription Groups Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", () => {
+    test("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <SubscriptionGroupsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page by default", () => {
+    test("should render page not found page by default", async () => {
         render(
             <MemoryRouter>
                 <SubscriptionGroupsRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 });
 

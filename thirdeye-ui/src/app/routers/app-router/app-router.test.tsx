@@ -44,7 +44,7 @@ jest.mock(
 );
 
 describe("App Router", () => {
-    test("should direct exact alerts path to alerts router when auth disabled", () => {
+    test("should direct exact alerts path to alerts router when auth disabled", async () => {
         mockAuthDisabled = true;
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS]}>
@@ -52,10 +52,10 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAlertsRouter")).toBeInTheDocument();
+        expect(await screen.findByText("testAlertsRouter")).toBeInTheDocument();
     });
 
-    test("should direct exact alerts path to alerts router when auth enabled and authenticated", () => {
+    test("should direct exact alerts path to alerts router when auth enabled and authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = true;
         render(
@@ -64,10 +64,10 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAlertsRouter")).toBeInTheDocument();
+        expect(await screen.findByText("testAlertsRouter")).toBeInTheDocument();
     });
 
-    test("should direct alerts path to alerts router when auth disabled", () => {
+    test("should direct alerts path to alerts router when auth disabled", async () => {
         mockAuthDisabled = true;
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS}/testPath`]}>
@@ -75,10 +75,10 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAlertsRouter")).toBeInTheDocument();
+        expect(await screen.findByText("testAlertsRouter")).toBeInTheDocument();
     });
 
-    test("should direct alerts path to alerts router when auth enabled and authenticated", () => {
+    test("should direct alerts path to alerts router when auth enabled and authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = true;
         render(
@@ -87,10 +87,10 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAlertsRouter")).toBeInTheDocument();
+        expect(await screen.findByText("testAlertsRouter")).toBeInTheDocument();
     });
 
-    test("should direct exact anomalies path to anomalies router when auth disabled", () => {
+    test("should direct exact anomalies path to anomalies router when auth disabled", async () => {
         mockAuthDisabled = true;
         render(
             <MemoryRouter initialEntries={[AppRoute.ANOMALIES]}>
@@ -98,10 +98,12 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesRouter")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAnomaliesRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should direct exact anomalies path to anomalies router when auth enabled and authenticated", () => {
+    test("should direct exact anomalies path to anomalies router when auth enabled and authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = true;
         render(
@@ -110,10 +112,12 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesRouter")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAnomaliesRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should direct anomalies path to anomalies router when auth disabled", () => {
+    test("should direct anomalies path to anomalies router when auth disabled", async () => {
         mockAuthDisabled = true;
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ANOMALIES}/testPath`]}>
@@ -121,10 +125,12 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesRouter")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAnomaliesRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should direct anomalies path to anomalies router when auth enbled and authenticated", () => {
+    test("should direct anomalies path to anomalies router when auth enbled and authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = true;
         render(
@@ -133,10 +139,12 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesRouter")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAnomaliesRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should direct exact configuration path to configuration router when auth disabled", () => {
+    test("should direct exact configuration path to configuration router when auth disabled", async () => {
         mockAuthDisabled = false;
         render(
             <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
@@ -144,10 +152,12 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testConfigurationRouter")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testConfigurationRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should direct exact configuration path to configuration router when auth enabled and authenticated", () => {
+    test("should direct exact configuration path to configuration router when auth enabled and authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = true;
         render(
@@ -156,10 +166,12 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testConfigurationRouter")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testConfigurationRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should direct configuration path to configuration router when auth disabled", () => {
+    test("should direct configuration path to configuration router when auth disabled", async () => {
         mockAuthDisabled = true;
         render(
             <MemoryRouter
@@ -169,10 +181,12 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testConfigurationRouter")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testConfigurationRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should direct configuration path to configuration router when auth enabled and authenticated", () => {
+    test("should direct configuration path to configuration router when auth enabled and authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = true;
         render(
@@ -183,10 +197,12 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testConfigurationRouter")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testConfigurationRouter")
+        ).toBeInTheDocument();
     });
 
-    test("should direct any other path to general authenticated router when auth disabled", () => {
+    test("should direct any other path to general authenticated router when auth disabled", async () => {
         mockAuthDisabled = true;
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
@@ -195,11 +211,11 @@ describe("App Router", () => {
         );
 
         expect(
-            screen.getByText("testGeneralAuthenticatedRouter")
+            await screen.findByText("testGeneralAuthenticatedRouter")
         ).toBeInTheDocument();
     });
 
-    test("should direct any other path to general authenticated router when auth enabled and authenticated", () => {
+    test("should direct any other path to general authenticated router when auth enabled and authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = true;
         render(
@@ -209,11 +225,11 @@ describe("App Router", () => {
         );
 
         expect(
-            screen.getByText("testGeneralAuthenticatedRouter")
+            await screen.findByText("testGeneralAuthenticatedRouter")
         ).toBeInTheDocument();
     });
 
-    test("should direct to general authenticated router by default when auth disabled", () => {
+    test("should direct to general authenticated router by default when auth disabled", async () => {
         mockAuthDisabled = true;
         render(
             <MemoryRouter>
@@ -222,11 +238,11 @@ describe("App Router", () => {
         );
 
         expect(
-            screen.getByText("testGeneralAuthenticatedRouter")
+            await screen.findByText("testGeneralAuthenticatedRouter")
         ).toBeInTheDocument();
     });
 
-    test("should direct to general authenticated router by default when auth enabled and authenticated", () => {
+    test("should direct to general authenticated router by default when auth enabled and authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = true;
         render(
@@ -236,11 +252,11 @@ describe("App Router", () => {
         );
 
         expect(
-            screen.getByText("testGeneralAuthenticatedRouter")
+            await screen.findByText("testGeneralAuthenticatedRouter")
         ).toBeInTheDocument();
     });
 
-    test("should direct any path to general unauthenticated router when auth enabled and not authenticated", () => {
+    test("should direct any path to general unauthenticated router when auth enabled and not authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = false;
         render(
@@ -250,11 +266,11 @@ describe("App Router", () => {
         );
 
         expect(
-            screen.getByText("testGeneralUnauthenticatedRouter")
+            await screen.findByText("testGeneralUnauthenticatedRouter")
         ).toBeInTheDocument();
     });
 
-    test("should direct to general unauthenticated router by default when auth enabled and not authenticated", () => {
+    test("should direct to general unauthenticated router by default when auth enabled and not authenticated", async () => {
         mockAuthDisabled = false;
         mockAuthenticated = false;
         render(
@@ -264,7 +280,7 @@ describe("App Router", () => {
         );
 
         expect(
-            screen.getByText("testGeneralUnauthenticatedRouter")
+            await screen.findByText("testGeneralUnauthenticatedRouter")
         ).toBeInTheDocument();
     });
 });

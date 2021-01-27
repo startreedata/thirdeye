@@ -1,17 +1,47 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { HomePage } from "../../pages/home-page/home-page.component";
-import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
-import { SignOutPage } from "../../pages/sign-out-page/sign-out-page.component";
 import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
     getBasePath,
     getHomePath,
 } from "../../utils/routes-util/routes-util";
+
+const HomePage = lazy(() =>
+    import(
+        /* webpackChunkName: 'HomePage' */
+        "../../pages/home-page/home-page.component"
+    ).then(({ HomePage }) => ({
+        default: HomePage,
+    }))
+);
+
+const SignOutPage = lazy(() =>
+    import(
+        /* webpackChunkName: 'SignOutPage' */
+        "../../pages/sign-out-page/sign-out-page.component"
+    ).then(({ SignOutPage }) => ({
+        default: SignOutPage,
+    }))
+);
+
+const PageNotFoundPage = lazy(() =>
+    import(
+        /* webpackChunkName: 'PageNotFoundPage' */
+        "../../pages/page-not-found-page/page-not-found-page.component"
+    ).then(({ PageNotFoundPage }) => ({
+        default: PageNotFoundPage,
+    }))
+);
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -39,27 +69,29 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     }
 
     return (
-        <Switch>
-            {/* Base path */}
-            <Route exact path={AppRoute.BASE}>
-                {/* Redirect to home path */}
-                <Redirect to={getHomePath()} />
-            </Route>
+        <Suspense fallback={<LoadingIndicator />}>
+            <Switch>
+                {/* Base path */}
+                <Route exact path={AppRoute.BASE}>
+                    {/* Redirect to home path */}
+                    <Redirect to={getHomePath()} />
+                </Route>
 
-            {/* Home path */}
-            <Route exact component={HomePage} path={AppRoute.HOME} />
+                {/* Home path */}
+                <Route exact component={HomePage} path={AppRoute.HOME} />
 
-            {/* Sign in path */}
-            <Route exact path={AppRoute.SIGN_IN}>
-                {/* Already authenticated, redirect to base path */}
-                <Redirect to={getBasePath()} />
-            </Route>
+                {/* Sign in path */}
+                <Route exact path={AppRoute.SIGN_IN}>
+                    {/* Already authenticated, redirect to base path */}
+                    <Redirect to={getBasePath()} />
+                </Route>
 
-            {/* Sign out path */}
-            <Route exact component={SignOutPage} path={AppRoute.SIGN_OUT} />
+                {/* Sign out path */}
+                <Route exact component={SignOutPage} path={AppRoute.SIGN_OUT} />
 
-            {/* No match found, render page not found */}
-            <Route component={PageNotFoundPage} />
-        </Switch>
+                {/* No match found, render page not found */}
+                <Route component={PageNotFoundPage} />
+            </Switch>
+        </Suspense>
     );
 };

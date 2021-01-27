@@ -77,84 +77,92 @@ describe("General Authenticated Router", () => {
         expect(mockRemoveAppToolbar).toHaveBeenCalled();
     });
 
-    test("should render home page at exact base path", () => {
+    test("should render home page at exact base path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.BASE]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testHomePage")).toBeInTheDocument();
+        expect(await screen.findByText("testHomePage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid base path", () => {
+    test("should render page not found page at invalid base path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.BASE}/testPath`]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render home page at exact sign in path", () => {
+    test("should render home page at exact sign in path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SIGN_IN]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testHomePage")).toBeInTheDocument();
+        expect(await screen.findByText("testHomePage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid sign in path", () => {
+    test("should render page not found page at invalid sign in path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.SIGN_IN}/testPath`]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render sign out page at exact sign out path", () => {
+    test("should render sign out page at exact sign out path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SIGN_OUT]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testSignOutPage")).toBeInTheDocument();
+        expect(await screen.findByText("testSignOutPage")).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid sign out path", () => {
+    test("should render page not found page at invalid sign out path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.SIGN_OUT}/testPath`]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", () => {
+    test("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render home page by default", () => {
+    test("should render home page by default", async () => {
         render(
             <MemoryRouter>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testHomePage")).toBeInTheDocument();
+        expect(await screen.findByText("testHomePage")).toBeInTheDocument();
     });
 });
 

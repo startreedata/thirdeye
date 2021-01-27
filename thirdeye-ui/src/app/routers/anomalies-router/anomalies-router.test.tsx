@@ -113,37 +113,43 @@ describe("Anomalies Router", () => {
         expect(mockRemoveAppToolbar).toHaveBeenCalled();
     });
 
-    test("should render anomalies all page at exact anomalies path", () => {
+    test("should render anomalies all page at exact anomalies path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ANOMALIES]}>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesAllPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAnomaliesAllPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies path", () => {
+    test("should render page not found page at invalid anomalies path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ANOMALIES}/testPath`]}>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render anomalies all page at exact anomalies all path", () => {
+    test("should render anomalies all page at exact anomalies all path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ANOMALIES_ALL]}>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesAllPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAnomaliesAllPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies all path", () => {
+    test("should render page not found page at invalid anomalies all path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ANOMALIES_ALL}/testPath`]}
@@ -152,20 +158,24 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render anomalies detail page at exact anomalies detail path", () => {
+    test("should render anomalies detail page at exact anomalies detail path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ANOMALIES_DETAIL]}>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testAnomaliesDetailPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testAnomaliesDetailPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies detail path", () => {
+    test("should render page not found page at invalid anomalies detail path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ANOMALIES_DETAIL}/testPath`]}
@@ -174,27 +184,33 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", () => {
+    test("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 
-    test("should render page not found page by default", () => {
+    test("should render page not found page by default", async () => {
         render(
             <MemoryRouter>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
 
-        expect(screen.getByText("testPageNotFoundPage")).toBeInTheDocument();
+        expect(
+            await screen.findByText("testPageNotFoundPage")
+        ).toBeInTheDocument();
     });
 });
 

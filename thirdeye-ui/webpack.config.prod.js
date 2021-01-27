@@ -18,6 +18,8 @@ module.exports = {
         path: outputPath,
         filename: "thirdeye-ui.js",
         publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
+        // `chunkFilename` provides a template for naming code-split bundles (optional)
+        chunkFilename: "[name].js",
     },
 
     // Loaders

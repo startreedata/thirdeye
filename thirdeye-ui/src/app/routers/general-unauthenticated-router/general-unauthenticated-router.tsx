@@ -1,6 +1,8 @@
 import React, {
     FunctionComponent,
+    lazy,
     ReactNode,
+    Suspense,
     useEffect,
     useState,
 } from "react";
@@ -14,7 +16,6 @@ import {
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { SignInPage } from "../../pages/sign-in-page/sign-in-page.component";
 import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
@@ -22,6 +23,15 @@ import {
     getBasePath,
     getSignInPath,
 } from "../../utils/routes-util/routes-util";
+
+const SignInPage = lazy(() =>
+    import(
+        /* webpackChunkName: 'SignInPage' */
+        "../../pages/sign-in-page/sign-in-page.component"
+    ).then(({ SignInPage }) => ({
+        default: SignInPage,
+    }))
+);
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -70,18 +80,23 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     }
 
     return (
-        <Switch>
-            {/* Sign in path */}
-            <Route
-                exact
-                path={AppRoute.SIGN_IN}
-                render={(props: RouteComponentProps): ReactNode => (
-                    <SignInPage {...props} redirectionURL={redirectionURL} />
-                )}
-            />
+        <Suspense fallback={<LoadingIndicator />}>
+            <Switch>
+                {/* Sign in path */}
+                <Route
+                    exact
+                    path={AppRoute.SIGN_IN}
+                    render={(props: RouteComponentProps): ReactNode => (
+                        <SignInPage
+                            {...props}
+                            redirectionURL={redirectionURL}
+                        />
+                    )}
+                />
 
-            {/* No match found, redirect to sign in path */}
-            <Redirect to={getSignInPath()} />
-        </Switch>
+                {/* No match found, redirect to sign in path */}
+                <Redirect to={getSignInPath()} />
+            </Switch>
+        </Suspense>
     );
 };

@@ -26,11 +26,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
+import org.apache.pinot.spi.utils.GroovyTemplateUtils;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
@@ -90,18 +93,19 @@ public class PqlUtils {
    * Due to the summation, all metric column values can be assumed to be doubles.
    */
   public static String getPql(ThirdEyeRequest request, MetricFunction metricFunction,
-      Multimap<String, String> filterSet, TimeSpec dataTimeSpec) throws ExecutionException {
+      Multimap<String, String> filterSet, Map<String, Map<String, String[]>> filterContextMap, TimeSpec dataTimeSpec) throws ExecutionException, IOException, ClassNotFoundException {
     // TODO handle request.getFilterClause()
 
     return getPql(metricFunction, request.getStartTimeInclusive(), request.getEndTimeExclusive(),
         filterSet,
+        filterContextMap,
         request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec,
         request.getLimit());
   }
 
   private static String getPql(MetricFunction metricFunction, DateTime startTime,
-      DateTime endTimeExclusive, Multimap<String, String> filterSet, List<String> groupBy,
-      TimeGranularity timeGranularity, TimeSpec dataTimeSpec, int limit) throws ExecutionException {
+      DateTime endTimeExclusive, Multimap<String, String> filterSet, Map<String, Map<String, String[]>> filterContextMap, List<String> groupBy,
+      TimeGranularity timeGranularity, TimeSpec dataTimeSpec, int limit) throws ExecutionException, IOException, ClassNotFoundException {
 
     MetricConfigDTO metricConfig = ThirdEyeUtils
         .getMetricConfigFromId(metricFunction.getMetricId());
@@ -120,7 +124,9 @@ public class PqlUtils {
     }
 
     if (StringUtils.isNotBlank(metricConfig.getWhere())) {
-      sb.append(" AND ").append(metricConfig.getWhere());
+      Map<String, Object> contextMap = combineValuesAndBuildContextMap(filterContextMap);
+      String whereClause = GroovyTemplateUtils.renderTemplate(metricConfig.getWhere(), contextMap);
+      sb.append(" AND ").append(whereClause);
     }
 
     if (limit <= 0) {
@@ -168,7 +174,7 @@ public class PqlUtils {
    */
   public static String getDimensionAsMetricPql(ThirdEyeRequest request,
       MetricFunction metricFunction,
-      Multimap<String, String> filterSet, TimeSpec dataTimeSpec, DatasetConfigDTO datasetConfig)
+      Multimap<String, String> filterSet, Map<String, Map<String, String[]>> filterContextMap, TimeSpec dataTimeSpec, DatasetConfigDTO datasetConfig)
       throws Exception {
 
     // select sum(metric_values_column) from collection
@@ -200,7 +206,7 @@ public class PqlUtils {
     }
 
     String dimensionAsMetricPql = getDimensionAsMetricPql(metricFunction,
-        request.getStartTimeInclusive(), request.getEndTimeExclusive(), filterSet,
+        request.getStartTimeInclusive(), request.getEndTimeExclusive(), filterSet, filterContextMap,
         request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec,
         metricNamesList, metricNamesColumnsList, metricValuesColumn, request.getLimit());
 
@@ -208,11 +214,11 @@ public class PqlUtils {
   }
 
   private static String getDimensionAsMetricPql(MetricFunction metricFunction, DateTime startTime,
-      DateTime endTimeExclusive, Multimap<String, String> filterSet, List<String> groupBy,
+      DateTime endTimeExclusive, Multimap<String, String> filterSet, Map<String, Map<String, String[]>> filterContextMap, List<String> groupBy,
       TimeGranularity timeGranularity, TimeSpec dataTimeSpec, List<String> metricNames,
       List<String> metricNamesColumns,
       String metricValuesColumn, int limit)
-      throws ExecutionException {
+          throws ExecutionException, IOException, ClassNotFoundException {
 
     MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
     String dataset = metricFunction.getDataset();
@@ -234,7 +240,9 @@ public class PqlUtils {
     }
 
     if (StringUtils.isNotBlank(metricConfig.getWhere())) {
-      sb.append(" AND ").append(metricConfig.getWhere());
+      Map<String, Object> contextMap = combineValuesAndBuildContextMap(filterContextMap);
+      String whereClause = GroovyTemplateUtils.renderTemplate(metricConfig.getWhere(), contextMap);
+      sb.append(" AND ").append(whereClause);
     }
 
     if (limit <= 0) {
@@ -248,6 +256,19 @@ public class PqlUtils {
     }
 
     return sb.toString();
+  }
+
+  private static Map<String, Object> combineValuesAndBuildContextMap(Map<String, Map<String, String[]>> filterContextMap) {
+    Map<String, Object> contextMap = new LinkedHashMap<>();
+    filterContextMap.forEach((view, columnValuesMap) -> {
+      Map<String, String> columnValueMap = new LinkedHashMap<>();
+      columnValuesMap.forEach((column, values) -> {
+        String value = "(" + String.join(",") + ")";
+        columnValueMap.put(column, value);
+      });
+      contextMap.put(view, columnValueMap);
+    });
+    return contextMap;
   }
 
   private static String getMetricWhereClause(MetricConfigDTO metricConfig,

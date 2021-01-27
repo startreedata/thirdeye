@@ -20,6 +20,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
@@ -196,7 +197,7 @@ public class PqlUtilsTest {
         .build("ref");
 
     String pql = PqlUtils
-        .getPql(request, metricFunction, ArrayListMultimap.create(), timeSpec);
+        .getPql(request, metricFunction, ArrayListMultimap.create(), new LinkedHashMap<>(), timeSpec);
 
     Assert.assertEquals(pql,
         "SELECT AVG(metric) FROM collection WHERE  metric >= 1 AND metric < 2 GROUP BY dimension TOP 12345");
@@ -218,7 +219,7 @@ public class PqlUtilsTest {
         .build("ref");
 
     String pql = PqlUtils
-        .getPql(request, metricFunction, ArrayListMultimap.create(), timeSpec);
+        .getPql(request, metricFunction, ArrayListMultimap.create(), new LinkedHashMap<>(), timeSpec);
 
     Assert.assertEquals(pql,
         "SELECT AVG(metric) FROM collection WHERE  metric >= 1 AND metric < 2 GROUP BY dimension TOP 100000");

@@ -25,6 +25,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -39,7 +40,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.helix.manager.zk.ZNRecordSerializer;
 import org.apache.helix.manager.zk.ZkClient;
 import org.apache.http.HttpHost;
-import org.apache.http.RequestLine;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.pinot.client.Request;
@@ -179,8 +179,10 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
         MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
         Multimap<String, String> filterSetFromView;
+        Map<String, Map<String, String[]>> filterContextMap = new LinkedHashMap<>();
         if(metricConfig != null && metricConfig.getViews() != null && metricConfig.getViews().size() > 0) {
           Map<String, ResultSetGroup> viewToTEResultSet = constructViews(metricConfig.getViews());
+          filterContextMap = convertToContextMap(viewToTEResultSet);
           filterSetFromView = resolveFilterSetFromView(viewToTEResultSet, request.getFilterSet());
         } else {
           filterSetFromView = request.getFilterSet();
@@ -200,10 +202,10 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         String pql;
         if (metricConfig != null && metricConfig.isDimensionAsMetric()) {
           pql = PqlUtils
-              .getDimensionAsMetricPql(request, metricFunction, decoratedFilterSet, dataTimeSpec,
+              .getDimensionAsMetricPql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec,
                   datasetConfig);
         } else {
-          pql = PqlUtils.getPql(request, metricFunction, decoratedFilterSet, dataTimeSpec);
+          pql = PqlUtils.getPql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec);
         }
 
         ThirdEyeResultSetGroup resultSetGroup;
@@ -249,6 +251,34 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       viewToTEResultSet.put(view.getName(), thirdEyeResultSetGroup);
     }
     return viewToTEResultSet;
+  }
+
+  private Map<String, Map<String, String[]>> convertToContextMap(Map<String, ResultSetGroup> viewToResultSetGroup) {
+    Map<String, Map<String, String[]>> contextMap = new LinkedHashMap<>();
+    for(Map.Entry<String, ResultSetGroup> entry: viewToResultSetGroup.entrySet()) {
+      String viewName = entry.getKey();
+      ResultSetGroup resultSetGroup = entry.getValue();
+      ResultSet resultSet = resultSetGroup.getResultSet(0);
+      Map<String, String[]> columnValues = convertResultSetToMap(resultSet);
+      contextMap.put(viewName, columnValues);
+    }
+    return contextMap;
+  }
+
+  private Map<String, String[]> convertResultSetToMap(ResultSet resultSet) {
+    int numColumns = resultSet.getColumnCount();
+    int numRows = resultSet.getRowCount();
+    Map<String, String[]> columnValues = new LinkedHashMap<>();
+    for(int i=0; i<numColumns; i++) {
+      String columnName = resultSet.getColumnName(i);
+      List<String> valueList = new ArrayList<>();
+      for(int j=0; j<numRows; j++) {
+        valueList.add(resultSet.getString(j, i));
+      }
+      String[] values = valueList.stream().toArray(String[]::new);
+      columnValues.put(columnName, values);
+    }
+    return columnValues;
   }
 
   private Multimap<String, String> resolveFilterSetFromView(Map<String, ResultSetGroup> viewToTEResultSet, Multimap<String, String> unresolvedFilterSet) {

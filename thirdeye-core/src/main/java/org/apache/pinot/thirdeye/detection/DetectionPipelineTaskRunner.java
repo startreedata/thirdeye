@@ -125,20 +125,11 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     try {
       DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
       AlertDTO config;
-      if (info.isOnline()) {
-        config = taskDAO.extractDetectionConfig(info);
-        // Online detection is not saved into DB so it does not have an ID
-        // To prevent later on pipeline throws a false error for null ID, use a dummy id here
-        config.setId(dummyDetectionId);
-        Preconditions.checkNotNull(config,
-            "Could not find detection config for online task info: " + info);
-      } else {
-        config = this.detectionDAO.findById(info.configId);
+      config = this.detectionDAO.findById(info.configId);
 
-        if (config == null) {
-          throw new IllegalArgumentException(
-              String.format("Could not resolve config id %d", info.configId));
-        }
+      if (config == null) {
+        throw new IllegalArgumentException(
+            String.format("Could not resolve config id %d", info.configId));
       }
 
       LOG.info("Start detection for config {} between {} and {}", config.getId(), info.start,

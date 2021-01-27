@@ -57,8 +57,6 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
 
   protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-  private final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
-
   private TaskDriver taskDriver = null;
   private SchedulerService schedulerService;
   private RequestStatisticsLogger requestStatisticsLogger = null;
@@ -115,14 +113,12 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
         requestStatisticsLogger.start();
 
         if (config.isWorker()) {
-          taskDriver = new TaskDriver(config, injector.getInstance(TaskManager.class), false);
+          taskDriver = new TaskDriver(config,
+              injector.getInstance(TaskManager.class),
+              injector.getInstance(DAORegistry.class));
           taskDriver.start();
         }
 
-        if (config.isOnlineWorker()) {
-          taskDriver = new TaskDriver(config, injector.getInstance(TaskManager.class), true);
-          taskDriver.start();
-        }
         schedulerService.start();
 
         if (config.getTeRestConfig() != null) {
@@ -145,14 +141,14 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
   }
 
   private void updateAdminSession(String adminUser, String sessionKey) {
-    SessionDTO savedSession = DAO_REGISTRY.getSessionDAO().findBySessionKey(sessionKey);
+    SessionDTO savedSession = DAORegistry.getInstance().getSessionDAO().findBySessionKey(sessionKey);
     long expiryMillis = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365);
     if (savedSession == null) {
       SessionDTO sessionDTO = SessionUtils.buildServiceAccount(adminUser, sessionKey, expiryMillis);
-      DAO_REGISTRY.getSessionDAO().save(sessionDTO);
+      DAORegistry.getInstance().getSessionDAO().save(sessionDTO);
     } else {
       savedSession.setExpirationTime(expiryMillis);
-      DAO_REGISTRY.getSessionDAO().update(savedSession);
+      DAORegistry.getInstance().getSessionDAO().update(savedSession);
     }
   }
 

@@ -279,16 +279,4 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
       return -1;
     }
   }
-
-  @Override
-  public void populateDetectionConfig(AlertDTO alertDTO, DetectionPipelineTaskInfo taskInfo) {
-    DetectionConfigBean bean = convertDTO2Bean(alertDTO, DetectionConfigBean.class);
-    taskInfo.setDetectionConfigBean(bean);
-  }
-
-  @Override
-  public AlertDTO extractDetectionConfig(DetectionPipelineTaskInfo taskInfo) {
-    DetectionConfigBean detectionConfigBean = taskInfo.getDetectionConfigBean();
-    return MODEL_MAPPER.map(detectionConfigBean, AlertDTO.class);
-  }
 }

@@ -37,7 +37,6 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
   private boolean pinotProxy = false;
   private boolean scheduler = false;
   private boolean worker = false;
-  private boolean onlineWorker = false;
   private boolean detectionPipeline = false;
   private boolean detectionAlert = false;
   private boolean dataAvailabilityEventListener = false;
@@ -123,15 +122,6 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
 
   public ThirdEyeWorkerConfiguration setWorker(final boolean worker) {
     this.worker = worker;
-    return this;
-  }
-
-  public boolean isOnlineWorker() {
-    return onlineWorker;
-  }
-
-  public ThirdEyeWorkerConfiguration setOnlineWorker(final boolean onlineWorker) {
-    this.onlineWorker = onlineWorker;
     return this;
   }
 

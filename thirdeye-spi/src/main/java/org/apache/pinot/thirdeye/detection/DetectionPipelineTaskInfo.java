@@ -28,8 +28,6 @@ public class DetectionPipelineTaskInfo implements TaskInfo {
   long configId;
   long start;
   long end;
-  boolean online;
-  DetectionConfigBean detectionConfigBean;
 
   public DetectionPipelineTaskInfo(long configId, long start, long end) {
     this.configId = configId;
@@ -65,25 +63,6 @@ public class DetectionPipelineTaskInfo implements TaskInfo {
 
   public DetectionPipelineTaskInfo setEnd(final long end) {
     this.end = end;
-    return this;
-  }
-
-  public boolean isOnline() {
-    return online;
-  }
-
-  public DetectionPipelineTaskInfo setOnline(final boolean online) {
-    this.online = online;
-    return this;
-  }
-
-  public DetectionConfigBean getDetectionConfigBean() {
-    return detectionConfigBean;
-  }
-
-  public DetectionPipelineTaskInfo setDetectionConfigBean(
-      final DetectionConfigBean detectionConfigBean) {
-    this.detectionConfigBean = detectionConfigBean;
     return this;
   }
 }

@@ -40,6 +40,7 @@ import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -57,29 +58,31 @@ public class TaskDriver {
   private final long workerId;
   private final Set<TaskStatus> allowedOldTaskStatus = new HashSet<>();
   private final TaskDriverConfiguration driverConfiguration;
-  private final boolean isOnline;
 
   private volatile boolean shutdown = false;
 
   public TaskDriver(final ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration,
       final TaskManager taskManager,
-      boolean isOnline) {
+      final DAORegistry daoRegistry) {
     this.taskManager = taskManager;
     driverConfiguration = thirdEyeWorkerConfiguration.getTaskDriverConfiguration();
     workerId = thirdEyeWorkerConfiguration.getId();
-    String threadNamePrefix = isOnline ? "online-" : "";
+
     taskExecutorService = Executors.newFixedThreadPool(
         driverConfiguration.getMaxParallelTasks(),
-        new ThreadFactoryBuilder().setNameFormat(threadNamePrefix + "task-executor-%d").build());
+        new ThreadFactoryBuilder().setNameFormat("task-executor-%d").build());
+
     taskWatcherExecutorService = Executors.newFixedThreadPool(
         driverConfiguration.getMaxParallelTasks(),
-        new ThreadFactoryBuilder().setNameFormat(threadNamePrefix + "task-watcher-%d")
+        new ThreadFactoryBuilder().setNameFormat("task-watcher-%d")
             .setDaemon(true).build());
-    taskContext = new TaskContext();
-    taskContext.setThirdEyeWorkerConfiguration(thirdEyeWorkerConfiguration);
+
+    taskContext = new TaskContext()
+        .setThirdEyeWorkerConfiguration(thirdEyeWorkerConfiguration)
+        .setDaoRegistry(daoRegistry);
+
     allowedOldTaskStatus.add(TaskStatus.FAILED);
     allowedOldTaskStatus.add(TaskStatus.WAITING);
-    this.isOnline = isOnline;
   }
 
   public void start() throws Exception {
@@ -106,9 +109,6 @@ public class TaskDriver {
           if (anomalyTaskSpec != null) {
             // a task has acquired and we must finish executing it before termination
             long tStart = System.nanoTime();
-            if (TaskDriver.this.isOnline) {
-              ThirdeyeMetricsUtil.onlineTaskCounter.inc();
-            }
             ThirdeyeMetricsUtil.taskCounter.inc();
 
             try {
@@ -155,9 +155,6 @@ public class TaskDriver {
               long elapsedTime = System.nanoTime() - tStart;
               LOG.info("Task {} took {} nano seconds", anomalyTaskSpec.getId(), elapsedTime);
               MDC.clear();
-              if (TaskDriver.this.isOnline) {
-                ThirdeyeMetricsUtil.onlineTaskDurationCounter.inc(elapsedTime);
-              }
               ThirdeyeMetricsUtil.taskDurationCounter.inc(elapsedTime);
             }
           }
@@ -190,20 +187,12 @@ public class TaskDriver {
         boolean orderAscending = System.currentTimeMillis() % 2 == 0;
 
         // find by task type to separate online task from a normal task
-        if (this.isOnline) {
-          anomalyTasks = taskManager
-              .findByStatusAndTypeOrderByCreateTime(TaskStatus.WAITING,
-                  TaskType.DETECTION_ONLINE, driverConfiguration.getTaskFetchSizeCap(),
-                  orderAscending);
-        } else {
-          anomalyTasks = taskManager
-              .findByStatusAndTypeNotInOrderByCreateTime(TaskStatus.WAITING,
-                  TaskType.DETECTION_ONLINE, driverConfiguration.getTaskFetchSizeCap(),
-                  orderAscending);
-        }
+        anomalyTasks = taskManager
+            .findByStatusAndTypeNotInOrderByCreateTime(TaskStatus.WAITING,
+                TaskType.DETECTION, driverConfiguration.getTaskFetchSizeCap(),
+                orderAscending);
       } catch (Exception e) {
         hasFetchError = true;
-        anomalyTasks.clear();
         LOG.warn("Exception found in fetching new tasks", e);
       }
 
@@ -243,7 +232,6 @@ public class TaskDriver {
               .nextInt(driverConfiguration.getRandomDelayCapInMillis());
         }
         try {
-          LOG.debug("No tasks found to execute, sleeping for {} MS", sleepTime);
           Thread.sleep(sleepTime);
         } catch (InterruptedException e) {
           if (!shutdown) {

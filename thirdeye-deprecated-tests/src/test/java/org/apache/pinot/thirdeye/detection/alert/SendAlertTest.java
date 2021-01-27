@@ -133,8 +133,8 @@ public class SendAlertTest {
     thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
     thirdEyeConfig.setAlerterConfiguration(alerterProps);
 
-    TaskContext taskContext = new TaskContext();
-    taskContext.setThirdEyeWorkerConfiguration(thirdEyeConfig);
+    final TaskContext taskContext = new TaskContext()
+        .setThirdEyeWorkerConfiguration(thirdEyeConfig);
 
     taskRunner.execute(alertTaskInfo, taskContext);
 

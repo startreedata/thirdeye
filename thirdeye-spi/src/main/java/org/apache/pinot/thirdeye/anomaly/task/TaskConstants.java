@@ -26,8 +26,7 @@ public class TaskConstants {
     DETECTION,                 // tasks to detect anomalies
     DETECTION_ALERT,           // tasks to send alerts to customers regarding anomalies
     YAML_DETECTION_ONBOARD,    // tasks to onboard new YAML configured detection
-    MONITOR,                   // tasks to clean up expired/invalid execution history
-    DETECTION_ONLINE           // tasks to online detection anomalies
+    MONITOR                    // tasks to clean up expired/invalid execution history
   }
 
   public enum TaskStatus {

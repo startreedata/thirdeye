@@ -264,7 +264,7 @@ public class PqlUtils {
     filterContextMap.forEach((view, columnValuesMap) -> {
       Map<String, String> columnValueMap = new LinkedHashMap<>();
       columnValuesMap.forEach((column, values) -> {
-        String value = "(" + Arrays.asList(values).stream().collect(Collectors.joining("','", "\"", "\"")) + ")";
+        String value = "(" + Arrays.asList(values).stream().collect(Collectors.joining("','", "'", "'")) + ")";
         columnValueMap.put(column, value);
       });
       contextMap.put(view, columnValueMap);

@@ -1,4 +1,4 @@
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
 export interface AlertWizardProps {
@@ -6,6 +6,7 @@ export interface AlertWizardProps {
     showCancel?: boolean;
     getAllSubscriptionGroups: () => Promise<SubscriptionGroup[]>;
     getAllAlerts: () => Promise<Alert[]>;
+    getAlertEvaluation: (alert: Alert) => Promise<AlertEvaluation>;
     onCancel?: () => void;
     onSubscriptionGroupWizardFinish: (
         sub: SubscriptionGroup

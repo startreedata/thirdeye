@@ -11,7 +11,7 @@ import { Alert as MuiAlert } from "@material-ui/lab";
 import { cloneDeep, isEmpty, kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     createDefaultAlert,
@@ -24,7 +24,9 @@ import { JSONEditor } from "../json-editor/json-editor.component";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
+import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TransferList } from "../transfer-list/transfer-list.component";
+import { AlertEvaluationTimeSeriesCard } from "../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { AlertWizardProps, AlertWizardStep } from "./alert-wizard.interfaces";
 import { useAlertWizardStyles } from "./alert-wizard.styles";
 
@@ -50,15 +52,24 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
     ] = useState("");
     const [subs, setSubs] = useState<SubscriptionGroup[]>([]);
     const [selecteddSubs, setSelectedSubs] = useState<SubscriptionGroup[]>([]);
+    const [
+        alertEvaluation,
+        setAlertEvaluation,
+    ] = useState<AlertEvaluation | null>(null);
     const [currentWizardStep, setCurrentWizardStep] = useState<AlertWizardStep>(
         AlertWizardStep.DETECTION_CONFIGURATION
     );
     const [wizard, setWizard] = useState("");
+    const { timeRangeDuration } = useTimeRange();
     const { t } = useTranslation();
 
     useEffect(() => {
         initSubs();
     }, [subs]);
+
+    useEffect(() => {
+        refreshAlertEvaluation();
+    }, [timeRangeDuration]);
 
     useEffect(() => {
         if (currentWizardStep === AlertWizardStep.SUBSCRIPTION_GROUPS) {
@@ -71,8 +82,26 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
         }
     }, [currentWizardStep]);
 
+    const refreshAlertEvaluation = (): void => {
+        setAlertEvaluation({} as AlertEvaluation);
+        if (validateDetectionConfiguration()) {
+            setAlertEvaluation(null);
+            let fetchedAlertEvaluation = {} as AlertEvaluation;
+            props.getAlertEvaluation &&
+                props
+                    .getAlertEvaluation(newAlert)
+                    .then((alertEvaluation: AlertEvaluation): void => {
+                        fetchedAlertEvaluation = alertEvaluation;
+                    })
+                    .finally((): void => {
+                        setAlertEvaluation(fetchedAlertEvaluation);
+                    });
+        }
+    };
+
     const onDetectionConfigurationChange = (value: string): void => {
         setNewAlertJSON(value);
+        setAlertEvaluation({} as AlertEvaluation);
     };
 
     const onCreateNew = (): void => {
@@ -267,6 +296,16 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                         onChange={
                                             onDetectionConfigurationChange
                                         }
+                                    />
+                                </Grid>
+
+                                {/* Alert evaluation */}
+                                <Grid item md={12}>
+                                    <AlertEvaluationTimeSeriesCard
+                                        showRefreshButton
+                                        alertEvaluation={alertEvaluation}
+                                        title="Preview Alert"
+                                        onRefresh={refreshAlertEvaluation}
                                     />
                                 </Grid>
                             </>

@@ -8,14 +8,20 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { createAlert, getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import {
+    createAlert,
+    getAlertEvaluation,
+    getAllAlerts,
+} from "../../rest/alerts-rest/alerts-rest";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     createSubscriptionGroup,
     getAllSubscriptionGroups,
     updateSubscriptionGroups,
 } from "../../rest/subscription-groups-rest/subscription-groups-rest";
+import { createAlertEvaluation } from "../../utils/alerts-util/alerts-util";
 import {
     getAlertsCreatePath,
     getAlertsDetailPath,
@@ -28,6 +34,7 @@ import {
 export const AlertsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { timeRangeDuration } = useTimeRange();
     const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const { t } = useTranslation();
@@ -78,6 +85,30 @@ export const AlertsCreatePage: FunctionComponent = () => {
             });
 
         return alerts;
+    };
+
+    const fetchAlertEvaluation = async (
+        alert: Alert
+    ): Promise<AlertEvaluation> => {
+        let fetchedAlertEvaluation = {} as AlertEvaluation;
+        await getAlertEvaluation(
+            createAlertEvaluation(
+                alert,
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            )
+        )
+            .then((alertEvaluation: AlertEvaluation): void => {
+                fetchedAlertEvaluation = alertEvaluation;
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            });
+
+        return fetchedAlertEvaluation;
     };
 
     const onAlertWizardFinish = (
@@ -170,8 +201,9 @@ export const AlertsCreatePage: FunctionComponent = () => {
 
     return (
         <PageContainer>
-            <PageContents centered hideTimeRange>
+            <PageContents centered>
                 <AlertWizard
+                    getAlertEvaluation={fetchAlertEvaluation}
                     getAllAlerts={fetchAllAlerts}
                     getAllSubscriptionGroups={fetchAllSubscriptionGroups}
                     onFinish={onAlertWizardFinish}

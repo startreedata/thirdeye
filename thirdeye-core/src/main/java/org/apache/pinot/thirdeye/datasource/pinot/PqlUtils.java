@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
@@ -263,7 +264,7 @@ public class PqlUtils {
     filterContextMap.forEach((view, columnValuesMap) -> {
       Map<String, String> columnValueMap = new LinkedHashMap<>();
       columnValuesMap.forEach((column, values) -> {
-        String value = "(" + String.join(",") + ")";
+        String value = "(" + Arrays.asList(values).stream().collect(Collectors.joining("','", "\"", "\"")) + ")";
         columnValueMap.put(column, value);
       });
       contextMap.put(view, columnValueMap);

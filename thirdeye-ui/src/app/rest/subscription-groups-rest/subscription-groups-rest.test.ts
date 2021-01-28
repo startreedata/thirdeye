@@ -104,8 +104,9 @@ describe("Subscription Groups REST", () => {
         expect(
             await updateSubscriptionGroups([mockSubscriptionGroupRequest])
         ).toEqual([mockSubscriptionGroupResponse]);
+
         expect(axios.put).toHaveBeenCalledWith("/api/subscription-groups", [
-            [mockSubscriptionGroupRequest],
+            mockSubscriptionGroupRequest,
         ]);
     });
 

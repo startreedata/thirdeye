@@ -62,9 +62,8 @@ public class MetricFunction implements Comparable<MetricFunction> {
     // TODO this is hardcoded for pinot's return column name, but there's no binding contract that
     // clients need to return response objects with these keys.
     return format(optional(functionName)
-            .map(Enum::name)
-            .orElse("null")
-        , metricName);
+        .map(Enum::name)
+        .orElse("null"), metricName);
   }
 
   @Override

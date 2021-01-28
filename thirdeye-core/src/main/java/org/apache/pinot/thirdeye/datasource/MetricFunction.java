@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
@@ -59,7 +61,10 @@ public class MetricFunction implements Comparable<MetricFunction> {
   public String toString() {
     // TODO this is hardcoded for pinot's return column name, but there's no binding contract that
     // clients need to return response objects with these keys.
-    return format(functionName.name(), metricName);
+    return format(optional(functionName)
+            .map(Enum::name)
+            .orElse("null")
+        , metricName);
   }
 
   @Override
@@ -88,16 +93,16 @@ public class MetricFunction implements Comparable<MetricFunction> {
     return functionName;
   }
 
+  public void setFunctionName(MetricAggFunction functionName) {
+    this.functionName = functionName;
+  }
+
   public String getMetricName() {
     return metricName;
   }
 
   public void setMetricName(String metricName) {
     this.metricName = metricName;
-  }
-
-  public void setFunctionName(MetricAggFunction functionName) {
-    this.functionName = functionName;
   }
 
   public Long getMetricId() {

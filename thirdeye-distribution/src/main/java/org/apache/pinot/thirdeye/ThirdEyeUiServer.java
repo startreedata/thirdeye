@@ -8,12 +8,15 @@ import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.proxy.ConnectHandler;
 import org.eclipse.jetty.proxy.ProxyServlet;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,24 +73,43 @@ public class ThirdEyeUiServer {
   }
 
   private Server createServer() {
-    final Server server = new Server(port);
+    final ThreadPool threadPool = new QueuedThreadPool();
+    final Server server = new Server(threadPool);
 
-    final ResourceHandler resourceHandler = createResourceHandler();
-    final ConnectHandler proxy = createProxyHandler();
+    final ServerConnector connector = new ServerConnector(server);
+    connector.setPort(port);
+    server.addConnector(connector);
 
-    final GzipHandler gzip = new GzipHandler();
-    gzip.setHandler(new HandlerList(resourceHandler, proxy, new DefaultHandler()));
-    server.setHandler(gzip);
+    final ServletContextHandler context = new ServletContextHandler();
+    context.setContextPath("/");
+    context.setWelcomeFiles(new String[]{"index.html"});
+    context.addAliasCheck(new ContextHandler.ApproveAliases());
+
+
+    // Lastly, the default servlet for resource base content (serves static files)
+    // It is important that this is last.
+    final ServletHolder defHolder = createDefaultServlet();
+    context.addServlet(defHolder, "/");
+
+    final ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
+    errorHandler.addErrorPage(404, "/");
+    context.setErrorHandler(errorHandler);
+
+    final ConnectHandler proxyHandler = createProxyHandler();
+    server.setHandler(new HandlerList(proxyHandler, context));
 
     return server;
   }
 
-  private ResourceHandler createResourceHandler() {
-    final ResourceHandler resourceHandler = new ResourceHandler();
-    resourceHandler.setDirectoriesListed(true);
-    resourceHandler.setWelcomeFiles(new String[]{"index.html"});
-    resourceHandler.setResourceBase(resourceBase);
-    return resourceHandler;
+  private ServletHolder createDefaultServlet() {
+    final ServletHolder defHolder = new ServletHolder("default", DefaultServlet.class);
+    // Cannot be null or empty, must be declared, must be a directory, can be a URL to some jar content
+    defHolder.setInitParameter("resourceBase", resourceBase);
+    defHolder.setInitParameter("dirAllowed", "true");
+    defHolder.setInitParameter("gzip", "true");
+    defHolder.setInitParameter("otherGzipFileExtensions", ".svgz");
+    defHolder.setInitParameter("cacheControl", "private, max-age=0, no-cache");
+    return defHolder;
   }
 
   private ConnectHandler createProxyHandler() {

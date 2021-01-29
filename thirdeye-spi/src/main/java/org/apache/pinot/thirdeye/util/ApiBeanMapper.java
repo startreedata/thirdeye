@@ -90,6 +90,7 @@ public abstract class ApiBeanMapper {
         .setAggregationColumn(dto.getAggregationColumn())
         .setAggregationFunction(dto.getDefaultAggFunction())
         .setRollupThreshold(dto.getRollupThreshold())
+        .setViews(dto.getViews())
         ;
   }
 

@@ -4,6 +4,7 @@ import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
 
 import com.google.common.collect.ImmutableMap;
+import io.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
@@ -15,6 +16,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 
+@Api(tags = "Dataset")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class DatasetResource extends CrudResource<DatasetApi, DatasetConfigDTO> {

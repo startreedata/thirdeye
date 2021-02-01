@@ -127,9 +127,8 @@ public class TaskDriverRunnable implements Runnable {
 
   private Future<List<TaskResult>> runTaskAsync(final TaskDTO taskDTO) throws IOException {
     final TaskType taskType = taskDTO.getTaskType();
+    final TaskInfo taskInfo = TaskInfoFactory.get(taskType, taskDTO.getTaskInfo());
     final TaskRunner taskRunner = TaskRunnerFactory.getTaskRunnerFromTaskType(taskType);
-    final TaskInfo taskInfo = TaskInfoFactory
-        .getTaskInfoFromTaskType(taskType, taskDTO.getTaskInfo());
 
     // execute the selected task asynchronously
     return taskExecutorService.submit(() -> taskRunner.execute(taskInfo, taskContext));

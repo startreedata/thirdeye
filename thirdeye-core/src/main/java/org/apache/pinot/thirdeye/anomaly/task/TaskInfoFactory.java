@@ -19,8 +19,16 @@
 
 package org.apache.pinot.thirdeye.anomaly.task;
 
+import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType.DATA_QUALITY;
+import static org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType.DETECTION;
+import static org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType.DETECTION_ALERT;
+import static org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType.MONITOR;
+import static org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType.YAML_DETECTION_ONBOARD;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
+import com.google.common.collect.ImmutableMap;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorTaskInfo;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
@@ -38,35 +46,20 @@ public class TaskInfoFactory {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Logger LOG = LoggerFactory.getLogger(TaskInfoFactory.class);
 
-  public static TaskInfo getTaskInfoFromTaskType(TaskType taskType, String taskInfoString)
-      throws IOException {
-    TaskInfo taskInfo = null;
-    try {
-      switch (taskType) {
-        case DATA_QUALITY:
-          taskInfo = OBJECT_MAPPER.readValue(taskInfoString, DetectionPipelineTaskInfo.class);
-          break;
-        case DETECTION:
-          taskInfo = OBJECT_MAPPER.readValue(taskInfoString, DetectionPipelineTaskInfo.class);
-          break;
-        case DETECTION_ALERT:
-          taskInfo = OBJECT_MAPPER.readValue(taskInfoString, DetectionAlertTaskInfo.class);
-          break;
-        case YAML_DETECTION_ONBOARD:
-          taskInfo = OBJECT_MAPPER.readValue(taskInfoString, YamlOnboardingTaskInfo.class);
-          break;
-        case MONITOR:
-          taskInfo = OBJECT_MAPPER.readValue(taskInfoString, MonitorTaskInfo.class);
-          break;
-        default:
-          LOG.error(
-              "TaskType must be one of DATA_QUALITY, DETECTION, DETECTION_ALERT, YAML_DETECTION_ONBOARD, MONITOR, DETECTION_ONLINE");
-          break;
-      }
-    } catch (Exception e) {
-      LOG.error("Exception in converting taskInfoString {} to taskType {}", taskInfoString,
-          taskType, e);
-    }
-    return taskInfo;
+  private static final ImmutableMap<TaskType, Class<? extends TaskInfo>> TASK_TYPE_POJO_MAP =
+      ImmutableMap.<TaskType, Class<? extends TaskInfo>>builder()
+          .put(DATA_QUALITY, DetectionPipelineTaskInfo.class)
+          .put(DETECTION, DetectionPipelineTaskInfo.class)
+          .put(DETECTION_ALERT, DetectionAlertTaskInfo.class)
+          .put(YAML_DETECTION_ONBOARD, YamlOnboardingTaskInfo.class)
+          .put(MONITOR, MonitorTaskInfo.class)
+          .build();
+
+  public static TaskInfo get(TaskType taskType, String jsonPayload) throws JsonProcessingException {
+    final Class<? extends TaskInfo> clazz = TASK_TYPE_POJO_MAP.get(taskType);
+    requireNonNull(clazz,
+        String.format("Invalid TaskType. Allowed: %s", TASK_TYPE_POJO_MAP.keySet()));
+
+    return OBJECT_MAPPER.readValue(jsonPayload, clazz);
   }
 }

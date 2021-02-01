@@ -224,8 +224,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     } else {
       // Load the watermark
       DetectionPipelineTaskInfo taskInfo = (DetectionPipelineTaskInfo) TaskInfoFactory
-          .getTaskInfoFromTaskType(
-              TaskConstants.TaskType.DETECTION, tasks.get(0).getTaskInfo());
+          .get(TaskConstants.TaskType.DETECTION, tasks.get(0).getTaskInfo());
       detectionIdToLastTaskEndTimeMap.put(detectionConfigId, taskInfo.getEnd());
     }
   }

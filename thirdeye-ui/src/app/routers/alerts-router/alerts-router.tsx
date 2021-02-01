@@ -10,7 +10,6 @@ import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
     getAlertsAllPath,
@@ -19,64 +18,41 @@ import {
 
 const AlertsAllPage = lazy(() =>
     import(
-        /* webpackChunkName: 'AlertsAllPage' */
-
-        "../../pages/alerts-all-page/alerts-all-page.component"
-    ).then(({ AlertsAllPage }) => ({
-        default: AlertsAllPage,
-    }))
+        /* webpackChunkName: "alerts-all-page" */ "../../pages/alerts-all-page/alerts-all-page.component"
+    ).then((module) => ({ default: module.AlertsAllPage }))
 );
 
 const AlertsCreatePage = lazy(() =>
     import(
-        /* webpackChunkName: 'AlertsCreatePage' */
-
-        "../../pages/alerts-create-page/alerts-create-page.component"
-    ).then(({ AlertsCreatePage }) => ({
-        default: AlertsCreatePage,
-    }))
+        /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-page.component"
+    ).then((module) => ({ default: module.AlertsCreatePage }))
 );
 
 const AlertsDetailPage = lazy(() =>
     import(
-        /* webpackChunkName: 'AlertsDetailPage' */
-
-        "../../pages/alerts-detail-page/alerts-detail-page.component"
-    ).then(({ AlertsDetailPage }) => ({
-        default: AlertsDetailPage,
-    }))
+        /* webpackChunkName: "alerts-detail-page" */ "../../pages/alerts-detail-page/alerts-detail-page.component"
+    ).then((module) => ({ default: module.AlertsDetailPage }))
 );
 
 const AlertsUpdatePage = lazy(() =>
     import(
-        /* webpackChunkName: 'AlertsUpdatePage' */
-        "../../pages/alerts-update-page/alerts-update-page.component"
-    ).then(({ AlertsUpdatePage }) => ({
-        default: AlertsUpdatePage,
-    }))
+        /* webpackChunkName: "alerts-update-page" */ "../../pages/alerts-update-page/alerts-update-page.component"
+    ).then((module) => ({ default: module.AlertsUpdatePage }))
 );
 
 const PageNotFoundPage = lazy(() =>
     import(
-        /* webpackChunkName: 'PageNotFoundPage' */
-
-        "../../pages/page-not-found-page/page-not-found-page.component"
-    ).then(({ PageNotFoundPage }) => ({
-        default: PageNotFoundPage,
-    }))
+        /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
+    ).then((module) => ({ default: module.PageNotFoundPage }))
 );
 
 export const AlertsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const [removeAppToolbar] = useAppToolbarStore((state) => [
-        state.removeAppToolbar,
-    ]);
     const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create router breadcrumbs
         setRouterBreadcrumbs([
             {
                 text: t("label.alerts"),
@@ -85,10 +61,6 @@ export const AlertsRouter: FunctionComponent = () => {
                 },
             },
         ]);
-
-        // No app toolbar under this router
-        removeAppToolbar();
-
         setLoading(false);
     }, []);
 

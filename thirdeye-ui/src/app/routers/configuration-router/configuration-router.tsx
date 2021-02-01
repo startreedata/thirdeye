@@ -6,47 +6,40 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
-import { AppToolbarConfiguration } from "../../components/app-toolbar-configuration/app-toolbar-configuration.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
     getConfigurationPath,
-    getSubscriptionGroupsPath,
 } from "../../utils/routes-util/routes-util";
 
-const PageNotFoundPage = lazy(() =>
+const ConfigurationPage = lazy(() =>
     import(
-        /* webpackChunkName: 'PageNotFoundPage' */
-        "../../pages/page-not-found-page/page-not-found-page.component"
-    ).then(({ PageNotFoundPage }) => ({
-        default: PageNotFoundPage,
-    }))
+        /* webpackChunkName: "configuration-page" */ "../../pages/configuration-page/configuration-page.component"
+    ).then((module) => ({ default: module.ConfigurationPage }))
 );
 
 const SubscriptionGroupsRouter = lazy(() =>
     import(
-        /* webpackChunkName: 'SubscriptionGroupsRouter' */
-        "../subscription-groups-router/subscription-groups-router"
-    ).then(({ SubscriptionGroupsRouter }) => ({
-        default: SubscriptionGroupsRouter,
-    }))
+        /* webpackChunkName: "subscription-groups-router" */ "../subscription-groups-router/subscription-groups-router"
+    ).then((module) => ({ default: module.SubscriptionGroupsRouter }))
+);
+
+const PageNotFoundPage = lazy(() =>
+    import(
+        /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
+    ).then((module) => ({ default: module.PageNotFoundPage }))
 );
 
 export const ConfigurationRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const [setAppToolbar] = useAppToolbarStore((state) => [
-        state.setAppToolbar,
-    ]);
     const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create router breadcrumbs
         setRouterBreadcrumbs([
             {
                 text: t("label.configuration"),
@@ -55,10 +48,6 @@ export const ConfigurationRouter: FunctionComponent = () => {
                 },
             },
         ]);
-
-        // Configuration app toolbar under this router
-        setAppToolbar(<AppToolbarConfiguration />);
-
         setLoading(false);
     }, []);
 
@@ -74,10 +63,11 @@ export const ConfigurationRouter: FunctionComponent = () => {
         <Suspense fallback={<LoadingIndicator />}>
             <Switch>
                 {/* Configuration path */}
-                <Route exact path={AppRoute.CONFIGURATION}>
-                    {/* Redirect to subscription groups path */}
-                    <Redirect to={getSubscriptionGroupsPath()} />
-                </Route>
+                <Route
+                    exact
+                    component={ConfigurationPage}
+                    path={AppRoute.CONFIGURATION}
+                />
 
                 {/* Direct all subscription groups paths to subscription groups router */}
                 <Route

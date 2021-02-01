@@ -141,9 +141,9 @@ export const filterAlerts = (
         return alertCardDatas;
     }
 
-    for (const alert of alertCardDatas) {
+    for (const alertCardDta of alertCardDatas) {
         // Create a copy without original alert
-        const alertCardDataCopy = cloneDeep(alert);
+        const alertCardDataCopy = cloneDeep(alertCardDta);
         alertCardDataCopy.alert = null;
 
         for (const searchWord of searchWords) {
@@ -161,7 +161,7 @@ export const filterAlerts = (
                     }
                 )
             ) {
-                filteredAlertCardDatas.push(alert);
+                filteredAlertCardDatas.push(alertCardDta);
 
                 break;
             }

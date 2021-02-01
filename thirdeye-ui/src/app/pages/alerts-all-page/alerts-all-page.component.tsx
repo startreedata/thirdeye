@@ -50,7 +50,6 @@ export const AlertsAllPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.all"),
@@ -62,48 +61,13 @@ export const AlertsAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        fetchData();
+        fetchAllAlerts();
     }, []);
 
     useEffect(() => {
-        // Fetched data or search changed, reset
+        // Fetched alerts or search changed, reset
         setFilteredAlertCardDatas(filterAlerts(alertCardDatas, searchWords));
     }, [alertCardDatas, searchWords]);
-
-    const fetchData = (): void => {
-        Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
-            .then(([alertsResponse, subscriptionGroupsResponse]): void => {
-                // Determine if any of the calls failed
-                if (
-                    alertsResponse.status === "rejected" ||
-                    subscriptionGroupsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
-                // Attempt to gather data
-                let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
-                if (subscriptionGroupsResponse.status === "fulfilled") {
-                    fetchedSubscriptionGroups =
-                        subscriptionGroupsResponse.value;
-                    setSubscriptionGroups(fetchedSubscriptionGroups);
-                }
-                if (alertsResponse.status === "fulfilled") {
-                    setAlertCardDatas(
-                        getAlertCardDatas(
-                            alertsResponse.value,
-                            fetchedSubscriptionGroups
-                        )
-                    );
-                }
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
-    };
 
     const onAlertChange = (alertCardData: AlertCardData): void => {
         if (!alertCardData || !alertCardData.alert) {
@@ -176,6 +140,41 @@ export const AlertsAllPage: FunctionComponent = () => {
             });
     };
 
+    const fetchAllAlerts = (): void => {
+        Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
+            .then(([alertsResponse, subscriptionGroupsResponse]): void => {
+                // Determine if any of the calls failed
+                if (
+                    alertsResponse.status === "rejected" ||
+                    subscriptionGroupsResponse.status === "rejected"
+                ) {
+                    enqueueSnackbar(
+                        t("message.fetch-error"),
+                        getErrorSnackbarOption()
+                    );
+                }
+
+                // Attempt to gather data
+                let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
+                if (subscriptionGroupsResponse.status === "fulfilled") {
+                    fetchedSubscriptionGroups =
+                        subscriptionGroupsResponse.value;
+                    setSubscriptionGroups(fetchedSubscriptionGroups);
+                }
+                if (alertsResponse.status === "fulfilled") {
+                    setAlertCardDatas(
+                        getAlertCardDatas(
+                            alertsResponse.value,
+                            fetchedSubscriptionGroups
+                        )
+                    );
+                }
+            })
+            .finally((): void => {
+                setLoading(false);
+            });
+    };
+
     const replaceAlertCardData = (alert: Alert): void => {
         if (!alert) {
             return;
@@ -218,7 +217,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents centered title={t("label.alerts")}>
-                <Grid container>
+                <Grid container direction="column">
                     {/* Search */}
                     <Grid item md={12}>
                         <SearchBar

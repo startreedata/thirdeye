@@ -1,5 +1,6 @@
 import { DetectionEvaluation } from "./detection.interfaces";
 import { Metric } from "./metric.interfaces";
+import { SubscriptionGroup } from "./subscription-group.interfaces";
 import { User } from "./user.interfaces";
 
 export interface Alert {
@@ -12,7 +13,9 @@ export interface Alert {
     created: number;
     updated: number;
     owner: User;
+    filters: { [index: string]: string[] };
     nodes: { [index: string]: AlertNode };
+    subscriptionGroups: SubscriptionGroup[];
 }
 
 export interface AlertNode {

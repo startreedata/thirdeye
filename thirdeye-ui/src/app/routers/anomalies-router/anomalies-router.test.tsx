@@ -12,14 +12,6 @@ jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
     })),
 }));
 
-jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
-    useAppToolbarStore: jest.fn().mockImplementation((selector) => {
-        return selector({
-            removeAppToolbar: mockRemoveAppToolbar,
-        });
-    }),
-}));
-
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
     useHistory: jest.fn().mockImplementation(() => ({
@@ -88,6 +80,8 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
+        expect(mockSetRouterBreadcrumbs).toHaveBeenCalled();
+
         // Get router breadcrumbs
         const breadcrumbs: Breadcrumb[] =
             mockSetRouterBreadcrumbs.mock.calls[0][0];
@@ -103,16 +97,6 @@ describe("Anomalies Router", () => {
         expect(mockPush).toHaveBeenCalledWith("testAnomaliesPath");
     });
 
-    test("should remove app toolbar", () => {
-        render(
-            <MemoryRouter>
-                <AnomaliesRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockRemoveAppToolbar).toHaveBeenCalled();
-    });
-
     test("should render anomalies all page at exact anomalies path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ANOMALIES]}>
@@ -120,9 +104,9 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAnomaliesAllPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAnomaliesAllPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid anomalies path", async () => {
@@ -132,9 +116,9 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render anomalies all page at exact anomalies all path", async () => {
@@ -144,9 +128,9 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAnomaliesAllPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAnomaliesAllPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid anomalies all path", async () => {
@@ -158,9 +142,9 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render anomalies detail page at exact anomalies detail path", async () => {
@@ -170,9 +154,9 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAnomaliesDetailPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAnomaliesDetailPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid anomalies detail path", async () => {
@@ -184,9 +168,9 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at any other path", async () => {
@@ -196,9 +180,9 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page by default", async () => {
@@ -208,14 +192,12 @@ describe("Anomalies Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 });
 
 const mockSetRouterBreadcrumbs = jest.fn();
-
-const mockRemoveAppToolbar = jest.fn();
 
 const mockPush = jest.fn();

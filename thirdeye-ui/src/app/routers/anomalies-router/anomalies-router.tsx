@@ -10,7 +10,6 @@ import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
     getAnomaliesAllPath,
@@ -19,42 +18,29 @@ import {
 
 const AnomaliesAllPage = lazy(() =>
     import(
-        /* webpackChunkName: 'AnomaliesAllPage' */
-        "../../pages/anomalies-all-page/anomalies-all-page.component"
-    ).then(({ AnomaliesAllPage }) => ({
-        default: AnomaliesAllPage,
-    }))
+        /* webpackChunkName: "anomalies-all-page" */ "../../pages/anomalies-all-page/anomalies-all-page.component"
+    ).then((module) => ({ default: module.AnomaliesAllPage }))
 );
 
 const AnomaliesDetailPage = lazy(() =>
     import(
-        /* webpackChunkName: 'AnomaliesDetailPage' */
-        "../../pages/anomalies-detail-page/anomalies-detail-page.component"
-    ).then(({ AnomaliesDetailPage }) => ({
-        default: AnomaliesDetailPage,
-    }))
+        /* webpackChunkName: "anomalies-detail-page" */ "../../pages/anomalies-detail-page/anomalies-detail-page.component"
+    ).then((module) => ({ default: module.AnomaliesDetailPage }))
 );
 
 const PageNotFoundPage = lazy(() =>
     import(
-        /* webpackChunkName: 'PageNotFoundPage' */
-        "../../pages/page-not-found-page/page-not-found-page.component"
-    ).then(({ PageNotFoundPage }) => ({
-        default: PageNotFoundPage,
-    }))
+        /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
+    ).then((module) => ({ default: module.PageNotFoundPage }))
 );
 
 export const AnomaliesRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const [removeAppToolbar] = useAppToolbarStore((state) => [
-        state.removeAppToolbar,
-    ]);
     const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create router breadcrumbs
         setRouterBreadcrumbs([
             {
                 text: t("label.anomalies"),
@@ -63,10 +49,6 @@ export const AnomaliesRouter: FunctionComponent = () => {
                 },
             },
         ]);
-
-        // No app toolbar under this router
-        removeAppToolbar();
-
         setLoading(false);
     }, []);
 

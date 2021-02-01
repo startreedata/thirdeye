@@ -17,7 +17,10 @@ const MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS = 3;
 // App store for time range, persisted in browser local storage
 export const useTimeRangeStore = create<TimeRangeStore>(
     persist<TimeRangeStore>(
-        (set: SetState<TimeRangeStore>, get: GetState<TimeRangeStore>) => ({
+        (
+            set: SetState<TimeRangeStore>,
+            get: GetState<TimeRangeStore>
+        ): TimeRangeStore => ({
             timeRangeDuration: getDefaultTimeRangeDuration(),
             recentCustomTimeRangeDurations: [],
 
@@ -39,18 +42,12 @@ export const useTimeRangeStore = create<TimeRangeStore>(
                         ...recentCustomTimeRangeDurations,
                         timeRangeDuration,
                     ];
-
                     // Trim recent custom time range duration entries to set threshold
-                    if (
-                        newRecentCustomTimeRangeDurations.length >
-                        MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS
-                    ) {
-                        newRecentCustomTimeRangeDurations.splice(
-                            0,
-                            newRecentCustomTimeRangeDurations.length -
-                                MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS
-                        );
-                    }
+                    newRecentCustomTimeRangeDurations.splice(
+                        0,
+                        newRecentCustomTimeRangeDurations.length -
+                            MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS
+                    );
 
                     set({
                         recentCustomTimeRangeDurations: newRecentCustomTimeRangeDurations,
@@ -59,12 +56,12 @@ export const useTimeRangeStore = create<TimeRangeStore>(
             },
 
             refreshTimeRange: (): void => {
-                const { timeRangeDuration: appTimeRangeDuration } = get();
+                const { timeRangeDuration } = get();
 
-                if (appTimeRangeDuration.timeRange === TimeRange.CUSTOM) {
+                if (timeRangeDuration.timeRange === TimeRange.CUSTOM) {
                     // Custom time range, set as is
                     set({
-                        timeRangeDuration: cloneDeep(appTimeRangeDuration),
+                        timeRangeDuration: cloneDeep(timeRangeDuration),
                     });
 
                     return;
@@ -73,7 +70,7 @@ export const useTimeRangeStore = create<TimeRangeStore>(
                 // Predefined time range, set current calculated time range duration
                 set({
                     timeRangeDuration: getTimeRangeDuration(
-                        appTimeRangeDuration.timeRange
+                        timeRangeDuration.timeRange
                     ),
                 });
             },

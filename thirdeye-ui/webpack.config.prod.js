@@ -17,9 +17,8 @@ module.exports = {
     output: {
         path: outputPath,
         filename: "thirdeye-ui.js",
-        publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
-        // `chunkFilename` provides a template for naming code-split bundles (optional)
         chunkFilename: "[name].js",
+        publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
     },
 
     // Loaders
@@ -65,11 +64,6 @@ module.exports = {
     resolve: {
         // File types to be handled
         extensions: [".ts", ".tsx", ".js", ".css", ".scss", ".svg", ".ttf"],
-        // Webpack 5 no longer includes polyfills for node.js core modules by default
-        // js-yaml requires buffer
-        fallback: {
-            buffer: require.resolve("buffer/"),
-        },
     },
 
     plugins: [
@@ -110,5 +104,5 @@ module.exports = {
     ],
 
     // Source map
-    devtool: "cheap-source-map",
+    devtool: "source-map",
 };

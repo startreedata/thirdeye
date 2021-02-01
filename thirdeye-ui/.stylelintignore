@@ -13,8 +13,6 @@ target/
 
 # TypeScript
 tsbuildinfo/
-*.ts
-*.tsx
 
 # Jest
 src/test/coverage/

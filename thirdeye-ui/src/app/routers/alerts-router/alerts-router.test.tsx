@@ -12,14 +12,6 @@ jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
     })),
 }));
 
-jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
-    useAppToolbarStore: jest.fn().mockImplementation((selector) => {
-        return selector({
-            removeAppToolbar: mockRemoveAppToolbar,
-        });
-    }),
-}));
-
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
     useHistory: jest.fn().mockImplementation(() => ({
@@ -114,16 +106,6 @@ describe("Alerts Router", () => {
         expect(mockPush).toHaveBeenCalledWith("testAlertsPath");
     });
 
-    test("should remove app toolbar", () => {
-        render(
-            <MemoryRouter>
-                <AlertsRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockRemoveAppToolbar).toHaveBeenCalled();
-    });
-
     test("should render alerts all page at exact alerts path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS]}>
@@ -131,9 +113,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAlertsAllPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAlertsAllPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid alerts path", async () => {
@@ -143,9 +125,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render alerts all page at exact alerts all path", async () => {
@@ -155,9 +137,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAlertsAllPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAlertsAllPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid alerts all path", async () => {
@@ -167,9 +149,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render alerts detail page at exact alerts detail path", async () => {
@@ -179,9 +161,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAlertsDetailPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAlertsDetailPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid alerts detail path", async () => {
@@ -193,9 +175,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render alerts create page at exact alerts create path", async () => {
@@ -205,9 +187,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAlertsCreatePage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAlertsCreatePage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid alerts create path", async () => {
@@ -219,9 +201,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render alerts update page at exact alerts update path", async () => {
@@ -231,9 +213,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAlertsUpdatePage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAlertsUpdatePage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid alerts update path", async () => {
@@ -245,9 +227,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at any other path", async () => {
@@ -257,9 +239,9 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page by default", async () => {
@@ -269,14 +251,12 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 });
 
 const mockSetRouterBreadcrumbs = jest.fn();
-
-const mockRemoveAppToolbar = jest.fn();
 
 const mockPush = jest.fn();

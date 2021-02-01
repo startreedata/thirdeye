@@ -209,6 +209,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
     const onSubWizardFinish = (subscriptionGroup: SubscriptionGroup): void => {
         props
             .onSubscriptionGroupWizardFinish(subscriptionGroup)
+            // todo null check
             .then((newSub: SubscriptionGroup): void => {
                 setSubs((s) => {
                     const a = cloneDeep(s);

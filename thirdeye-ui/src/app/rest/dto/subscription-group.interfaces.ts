@@ -10,12 +10,14 @@ export interface SubscriptionGroup {
     created: number;
     updated: number;
     owner: User;
-    notificationSchemes: {
-        email: EmailSettings;
-    };
+    notificationSchemes: NotificationSchemes;
 }
 
-export interface EmailSettings {
+export interface NotificationSchemes {
+    email: EmailScheme;
+}
+
+export interface EmailScheme {
     from: string;
     to: string[];
     cc: string[];

@@ -121,6 +121,7 @@
     },
     "message": {
         "page-not-found": "Requested page could not be found",
+        "sign-in-error": "Unable to sign in",
         "signed-out": "You have been signed out",
         "no-data": "No data available",
         "no-search-results": "No search results available",

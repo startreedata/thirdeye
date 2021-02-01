@@ -2,6 +2,7 @@ import axios from "axios";
 import { SubscriptionGroup } from "../dto/subscription-group.interfaces";
 import {
     createSubscriptionGroup,
+    createSubscriptionGroups,
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
     getSubscriptionGroup,
@@ -21,9 +22,10 @@ describe("Subscription Groups REST", () => {
             data: mockSubscriptionGroupResponse,
         });
 
-        expect(await getSubscriptionGroup(1)).toEqual(
+        await expect(getSubscriptionGroup(1)).resolves.toEqual(
             mockSubscriptionGroupResponse
         );
+
         expect(axios.get).toHaveBeenCalledWith("/api/subscription-groups/1");
     });
 
@@ -40,9 +42,10 @@ describe("Subscription Groups REST", () => {
             data: [mockSubscriptionGroupResponse],
         });
 
-        expect(await getAllSubscriptionGroups()).toEqual([
+        await expect(getAllSubscriptionGroups()).resolves.toEqual([
             mockSubscriptionGroupResponse,
         ]);
+
         expect(axios.get).toHaveBeenCalledWith("/api/subscription-groups");
     });
 
@@ -59,9 +62,10 @@ describe("Subscription Groups REST", () => {
             data: [mockSubscriptionGroupResponse],
         });
 
-        expect(
-            await createSubscriptionGroup(mockSubscriptionGroupRequest)
-        ).toEqual(mockSubscriptionGroupResponse);
+        await expect(
+            createSubscriptionGroup(mockSubscriptionGroupRequest)
+        ).resolves.toEqual(mockSubscriptionGroupResponse);
+
         expect(axios.post).toHaveBeenCalledWith("/api/subscription-groups", [
             mockSubscriptionGroupRequest,
         ]);
@@ -75,14 +79,37 @@ describe("Subscription Groups REST", () => {
         ).rejects.toThrow("testErrorMessage");
     });
 
+    test("createSubscriptionGroups should invoke axios.post with appropriate input and return appropriate subscription group array", async () => {
+        jest.spyOn(axios, "post").mockResolvedValue({
+            data: [mockSubscriptionGroupResponse],
+        });
+
+        await expect(
+            createSubscriptionGroups([mockSubscriptionGroupRequest])
+        ).resolves.toEqual([mockSubscriptionGroupResponse]);
+
+        expect(axios.post).toHaveBeenCalledWith("/api/subscription-groups", [
+            mockSubscriptionGroupRequest,
+        ]);
+    });
+
+    test("createSubscriptionGroups should throw encountered error", async () => {
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
+
+        await expect(
+            createSubscriptionGroups([mockSubscriptionGroupRequest])
+        ).rejects.toThrow("testErrorMessage");
+    });
+
     test("updateSubscriptionGroup should invoke axios.put with appropriate input and return appropriate subscription group", async () => {
         jest.spyOn(axios, "put").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });
 
-        expect(
-            await updateSubscriptionGroup(mockSubscriptionGroupRequest)
-        ).toEqual(mockSubscriptionGroupResponse);
+        await expect(
+            updateSubscriptionGroup(mockSubscriptionGroupRequest)
+        ).resolves.toEqual(mockSubscriptionGroupResponse);
+
         expect(axios.put).toHaveBeenCalledWith("/api/subscription-groups", [
             mockSubscriptionGroupRequest,
         ]);
@@ -101,9 +128,9 @@ describe("Subscription Groups REST", () => {
             data: [mockSubscriptionGroupResponse],
         });
 
-        expect(
-            await updateSubscriptionGroups([mockSubscriptionGroupRequest])
-        ).toEqual([mockSubscriptionGroupResponse]);
+        await expect(
+            updateSubscriptionGroups([mockSubscriptionGroupRequest])
+        ).resolves.toEqual([mockSubscriptionGroupResponse]);
 
         expect(axios.put).toHaveBeenCalledWith("/api/subscription-groups", [
             mockSubscriptionGroupRequest,
@@ -123,9 +150,10 @@ describe("Subscription Groups REST", () => {
             data: mockSubscriptionGroupResponse,
         });
 
-        expect(await deleteSubscriptionGroup(1)).toEqual(
+        await expect(deleteSubscriptionGroup(1)).resolves.toEqual(
             mockSubscriptionGroupResponse
         );
+
         expect(axios.delete).toHaveBeenCalledWith("/api/subscription-groups/1");
     });
 

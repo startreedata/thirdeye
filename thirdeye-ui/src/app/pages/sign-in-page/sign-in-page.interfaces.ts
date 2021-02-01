@@ -1,3 +1,3 @@
 export interface SignInPageProps {
-    redirectionURL: string;
+    redirectURL: string;
 }

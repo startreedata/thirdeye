@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { AppToolbarConfiguration } from "../../components/app-toolbar-configuration/app-toolbar-configuration.component";
 import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
@@ -11,14 +10,6 @@ jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
     useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
         setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
     })),
-}));
-
-jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
-    useAppToolbarStore: jest.fn().mockImplementation((selector) => {
-        return selector({
-            setAppToolbar: mockSetAppToolbar,
-        });
-    }),
 }));
 
 jest.mock("react-router-dom", () => ({
@@ -49,11 +40,11 @@ jest.mock("../../components/page-container/page-container.component", () => ({
 }));
 
 jest.mock(
-    "../../components/app-toolbar-configuration/app-toolbar-configuration.component",
+    "../../pages/configuration-page/configuration-page.component",
     () => ({
-        AppToolbarConfiguration: jest
+        ConfigurationPage: jest
             .fn()
-            .mockReturnValue(<>testAppToolbarConfiguration</>),
+            .mockReturnValue(<>testConfigurationPage</>),
     })
 );
 
@@ -105,28 +96,16 @@ describe("Configuration Router", () => {
         expect(mockPush).toHaveBeenCalledWith("testConfigurationPath");
     });
 
-    test("should set appropriate app toolbar", () => {
-        render(
-            <MemoryRouter>
-                <ConfigurationRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockSetAppToolbar).toHaveBeenCalledWith(
-            <AppToolbarConfiguration />
-        );
-    });
-
-    test("should direct exact configuration path to subscription groups router", async () => {
+    test("should render configuration page at exact configuration path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
                 <ConfigurationRouter />
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testSubscriptionGroupsRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testConfigurationPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid configuration path", async () => {
@@ -138,9 +117,9 @@ describe("Configuration Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct exact subscription groups path to subscription groups router", async () => {
@@ -150,9 +129,9 @@ describe("Configuration Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testSubscriptionGroupsRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testSubscriptionGroupsRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct subscription groups path to subscription groups router", async () => {
@@ -164,9 +143,9 @@ describe("Configuration Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testSubscriptionGroupsRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testSubscriptionGroupsRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at any other path", async () => {
@@ -176,9 +155,9 @@ describe("Configuration Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page by default", async () => {
@@ -188,14 +167,12 @@ describe("Configuration Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 });
 
 const mockSetRouterBreadcrumbs = jest.fn();
-
-const mockSetAppToolbar = jest.fn();
 
 const mockPush = jest.fn();

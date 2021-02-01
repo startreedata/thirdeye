@@ -9,7 +9,6 @@ import { Redirect, Route, Switch } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContainer } from "../../components/page-container/page-container.component";
-import { useAppToolbarStore } from "../../store/app-toolbar-store/app-toolbar-store";
 import {
     AppRoute,
     getBasePath,
@@ -18,45 +17,28 @@ import {
 
 const HomePage = lazy(() =>
     import(
-        /* webpackChunkName: 'HomePage' */
-        "../../pages/home-page/home-page.component"
-    ).then(({ HomePage }) => ({
-        default: HomePage,
-    }))
+        /* webpackChunkName: "home-page" */ "../../pages/home-page/home-page.component"
+    ).then((module) => ({ default: module.HomePage }))
 );
 
 const SignOutPage = lazy(() =>
     import(
-        /* webpackChunkName: 'SignOutPage' */
-        "../../pages/sign-out-page/sign-out-page.component"
-    ).then(({ SignOutPage }) => ({
-        default: SignOutPage,
-    }))
+        /* webpackChunkName: "sign-out-page" */ "../../pages/sign-out-page/sign-out-page.component"
+    ).then((module) => ({ default: module.SignOutPage }))
 );
 
 const PageNotFoundPage = lazy(() =>
     import(
-        /* webpackChunkName: 'PageNotFoundPage' */
-        "../../pages/page-not-found-page/page-not-found-page.component"
-    ).then(({ PageNotFoundPage }) => ({
-        default: PageNotFoundPage,
-    }))
+        /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
+    ).then((module) => ({ default: module.PageNotFoundPage }))
 );
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const [removeAppToolbar] = useAppToolbarStore((state) => [
-        state.removeAppToolbar,
-    ]);
 
     useEffect(() => {
-        // Create router breadcrumbs
         setRouterBreadcrumbs([]);
-
-        // No app toolbar under this router
-        removeAppToolbar();
-
         setLoading(false);
     }, []);
 

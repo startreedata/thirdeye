@@ -27,6 +27,7 @@ jest.mock("../history-util/history-util", () => ({
 
 describe("Params Util", () => {
     beforeAll(() => {
+        // Manipulate global location object
         Object.defineProperty(window, "location", {
             value: {
                 search: "",
@@ -35,6 +36,7 @@ describe("Params Util", () => {
     });
 
     afterAll(() => {
+        // Restore global location object
         Object.defineProperty(window, "location", {
             value: systemLocation,
         });

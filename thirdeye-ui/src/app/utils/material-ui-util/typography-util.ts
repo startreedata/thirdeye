@@ -1,68 +1,63 @@
 import { TypographyOptions } from "@material-ui/core/styles/createTypography";
 
-// CortexData Material-UI theme typography
+// Material-UI theme typography
 export const typographyOptions: TypographyOptions = {
     fontFamily: "Source Sans Pro, sans-serif",
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
+    fontWeightMedium: 600,
+    fontWeightBold: 700,
     h1: {
         fontSize: "48px",
-        lineHeight: "53px",
-        letterSpacing: "-1.5px",
+        fontWeight: 600,
     },
     h2: {
         fontSize: "40px",
-        lineHeight: "44px",
-        letterSpacing: "-0.5px",
+        fontWeight: 600,
     },
     h3: {
         fontSize: "36px",
-        lineHeight: "40px",
+        fontWeight: 600,
     },
     h4: {
         fontSize: "32px",
-        lineHeight: "35px",
-        letterSpacing: "-0.25px",
+        fontWeight: 600,
     },
     h5: {
         fontSize: "24px",
-        lineHeight: "27px",
+        fontWeight: 600,
     },
     h6: {
         fontSize: "20px",
-        lineHeight: "22px",
-        letterSpacing: "0.15px",
+        fontWeight: 600,
     },
     subtitle1: {
         fontSize: "16px",
-        lineHeight: "24px",
-        letterSpacing: "0.15px",
+        fontWeight: 600,
     },
     subtitle2: {
         fontSize: "14px",
-        lineHeight: "20px",
+        fontWeight: 600,
     },
     body1: {
         fontSize: "16px",
-        lineHeight: "28px",
-        letterSpacing: "0.5px",
+        fontWeight: 400,
     },
     body2: {
         fontSize: "14px",
-        lineHeight: "20px",
-        letterSpacing: "0.25px",
+        fontWeight: 400,
     },
     button: {
         fontSize: "14px",
-        lineHeight: "16px",
-        letterSpacing: "0.75px",
+        fontWeight: 400,
     },
     caption: {
         fontSize: "12px",
-        lineHeight: "16px",
-        letterSpacing: "0.4px",
+        fontWeight: 400,
     },
     overline: {
-        fontSize: "10px",
-        lineHeight: "16px",
-        letterSpacing: "1.5px",
+        fontSize: "12px",
+        fontWeight: 400,
+        letterSpacing: "1px",
     },
 };

@@ -14,9 +14,9 @@ jest.mock("../../utils/time-range-util/time-range-util", () => ({
                 endTime: 2,
             })
     ),
-    getTimeRangeDuration: jest.fn().mockImplementation(() => {
-        return mockTimeRangeDuration2;
-    }),
+    getTimeRangeDuration: jest
+        .fn()
+        .mockImplementation(() => mockTimeRangeDuration2),
 }));
 
 describe("Time Range Store", () => {
@@ -29,7 +29,7 @@ describe("Time Range Store", () => {
         expect(result.current.recentCustomTimeRangeDurations).toEqual([]);
     });
 
-    test("setAppTimeRangeDuration should not update store for invalid time range duration", () => {
+    test("setTimeRangeDuration should not update store for invalid time range duration", () => {
         const { result } = renderHook(() => useTimeRangeStore());
 
         expect(result.current.timeRangeDuration).toEqual(
@@ -49,7 +49,7 @@ describe("Time Range Store", () => {
         expect(result.current.recentCustomTimeRangeDurations).toEqual([]);
     });
 
-    test("setAppTimeRangeDuration should update store appropriately for predefined time range duration", () => {
+    test("setTimeRangeDuration should update store appropriately for predefined time range duration", () => {
         const { result } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration2);
@@ -61,7 +61,7 @@ describe("Time Range Store", () => {
         expect(result.current.recentCustomTimeRangeDurations).toEqual([]);
     });
 
-    test("setAppTimeRangeDuration should update store appropriately for custom time range duration", () => {
+    test("setTimeRangeDuration should update store appropriately for custom time range duration", () => {
         const { result } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration3);
@@ -80,7 +80,7 @@ describe("Time Range Store", () => {
         ]);
     });
 
-    test("refreshAppTimeRange should update store appropriately for predefined time range", () => {
+    test("refreshTimeRange should update store appropriately for predefined time range", () => {
         const { result } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration1);
@@ -92,7 +92,7 @@ describe("Time Range Store", () => {
         );
     });
 
-    test("refreshAppTimeRange should update store appropriately for custom time range", () => {
+    test("refreshTimeRange should update store appropriately for custom time range", () => {
         const { result } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration3);
@@ -115,13 +115,16 @@ describe("Time Range Store", () => {
         await waitFor(() => Boolean(result.current.timeRangeDuration));
 
         expect(localStorage.getItem("LOCAL_STORAGE_KEY_TIME_RANGE")).toEqual(
-            `{` +
+            `{"` +
+                `state":{` +
                 `"timeRangeDuration":{"timeRange":"CUSTOM","startTime":9,"endTime":10},` +
                 `"recentCustomTimeRangeDurations":[` +
                 `{"timeRange":"CUSTOM","startTime":5,"endTime":6},` +
                 `{"timeRange":"CUSTOM","startTime":7,"endTime":8},` +
                 `{"timeRange":"CUSTOM","startTime":9,"endTime":10}` +
                 `]` +
+                `},` +
+                `"version":0` +
                 `}`
         );
     });

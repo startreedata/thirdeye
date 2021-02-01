@@ -71,7 +71,14 @@ describe("Auth Store", () => {
         await waitFor(() => Boolean(result.current.accessToken));
 
         expect(localStorage.getItem("LOCAL_STORAGE_KEY_AUTH")).toEqual(
-            `{"authDisabled":false,"authenticated":true,"accessToken":"testToken"}`
+            `{` +
+                `"state":{` +
+                `"authDisabled":false,` +
+                `"authenticated":true,` +
+                `"accessToken":"testToken"` +
+                `},` +
+                `"version":0` +
+                `}`
         );
     });
 });

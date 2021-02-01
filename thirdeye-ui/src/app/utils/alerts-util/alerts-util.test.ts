@@ -28,7 +28,7 @@ jest.mock("i18next", () => ({
 }));
 
 describe("Alerts Util", () => {
-    test("createDefaultAlert should create appropriate default alert", () => {
+    test("createDefaultAlert should create appropriate alert", () => {
         expect(createDefaultAlert()).toEqual(mockDefaultAlert);
     });
 

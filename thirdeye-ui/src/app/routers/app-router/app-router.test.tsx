@@ -52,7 +52,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testAlertsRouter")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAlertsRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct exact alerts path to alerts router when auth enabled and authenticated", async () => {
@@ -64,7 +66,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testAlertsRouter")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAlertsRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct alerts path to alerts router when auth disabled", async () => {
@@ -75,7 +79,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testAlertsRouter")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAlertsRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct alerts path to alerts router when auth enabled and authenticated", async () => {
@@ -87,7 +93,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testAlertsRouter")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAlertsRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct exact anomalies path to anomalies router when auth disabled", async () => {
@@ -98,9 +106,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAnomaliesRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAnomaliesRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct exact anomalies path to anomalies router when auth enabled and authenticated", async () => {
@@ -112,9 +120,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAnomaliesRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAnomaliesRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct anomalies path to anomalies router when auth disabled", async () => {
@@ -125,9 +133,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAnomaliesRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAnomaliesRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct anomalies path to anomalies router when auth enbled and authenticated", async () => {
@@ -139,9 +147,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testAnomaliesRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testAnomaliesRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct exact configuration path to configuration router when auth disabled", async () => {
@@ -152,9 +160,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testConfigurationRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testConfigurationRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct exact configuration path to configuration router when auth enabled and authenticated", async () => {
@@ -166,9 +174,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testConfigurationRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testConfigurationRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct configuration path to configuration router when auth disabled", async () => {
@@ -181,9 +189,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testConfigurationRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testConfigurationRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct configuration path to configuration router when auth enabled and authenticated", async () => {
@@ -197,9 +205,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testConfigurationRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testConfigurationRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct any other path to general authenticated router when auth disabled", async () => {
@@ -210,9 +218,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testGeneralAuthenticatedRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testGeneralAuthenticatedRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct any other path to general authenticated router when auth enabled and authenticated", async () => {
@@ -224,9 +232,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testGeneralAuthenticatedRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testGeneralAuthenticatedRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct to general authenticated router by default when auth disabled", async () => {
@@ -237,9 +245,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testGeneralAuthenticatedRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testGeneralAuthenticatedRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct to general authenticated router by default when auth enabled and authenticated", async () => {
@@ -251,9 +259,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testGeneralAuthenticatedRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testGeneralAuthenticatedRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct any path to general unauthenticated router when auth enabled and not authenticated", async () => {
@@ -265,9 +273,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testGeneralUnauthenticatedRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testGeneralUnauthenticatedRouter")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should direct to general unauthenticated router by default when auth enabled and not authenticated", async () => {
@@ -279,9 +287,9 @@ describe("App Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testGeneralUnauthenticatedRouter")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testGeneralUnauthenticatedRouter")
+        ).resolves.toBeInTheDocument();
     });
 });
 

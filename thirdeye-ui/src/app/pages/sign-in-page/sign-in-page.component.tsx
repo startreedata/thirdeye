@@ -1,4 +1,5 @@
 import { Button, Grid } from "@material-ui/core";
+import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -10,6 +11,7 @@ import { PageContents } from "../../components/page-contents/page-contents.compo
 import { login } from "../../rest/auth-rest/auth-rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
 import { getSignInPath } from "../../utils/routes-util/routes-util";
+import { getErrorSnackbarOption } from "../../utils/snackbar-util/snackbar-util";
 import { SignInPageProps } from "./sign-in-page.interfaces";
 import { useSignInPageStyles } from "./sign-in-page.styles";
 
@@ -20,11 +22,11 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
     const [loading, setLoading] = useState(true);
     const { signIn } = useAuth();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.sign-in"),
@@ -33,17 +35,25 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
                 },
             },
         ]);
-
         setLoading(false);
     }, []);
 
     const performSignIn = (): void => {
-        login().then((auth: Auth): void => {
-            signIn(auth.accessToken);
+        setLoading(true);
+        login()
+            .then((auth: Auth): void => {
+                signIn(auth.accessToken);
 
-            // Redirect
-            history.push(props.redirectionURL);
-        });
+                // Redirect
+                history.push(props.redirectURL);
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.sign-in-error"),
+                    getErrorSnackbarOption()
+                );
+                setLoading(false);
+            });
     };
 
     if (loading) {
@@ -60,7 +70,7 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
                 <Grid
                     container
                     alignItems="center"
-                    className={signInPageClasses.buttonContainer}
+                    className={signInPageClasses.container}
                     justify="center"
                 >
                     <Grid item>

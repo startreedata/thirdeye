@@ -40,7 +40,6 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.create"),
@@ -49,72 +48,17 @@ export const AlertsCreatePage: FunctionComponent = () => {
                 },
             },
         ]);
-
         setLoading(false);
     }, []);
-
-    const fetchAllSubscriptionGroups = async (): Promise<
-        SubscriptionGroup[]
-    > => {
-        let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
-        await getAllSubscriptionGroups()
-            .then((subscriptionGroups: SubscriptionGroup[]): void => {
-                fetchedSubscriptionGroups = subscriptionGroups;
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            });
-
-        return fetchedSubscriptionGroups;
-    };
-
-    const fetchAllAlerts = async (): Promise<Alert[]> => {
-        let alerts: Alert[] = [];
-        await getAllAlerts()
-            .then((nalerts: Alert[]): void => {
-                alerts = nalerts;
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            });
-
-        return alerts;
-    };
-
-    const fetchAlertEvaluation = async (
-        alert: Alert
-    ): Promise<AlertEvaluation> => {
-        let fetchedAlertEvaluation = {} as AlertEvaluation;
-        await getAlertEvaluation(
-            createAlertEvaluation(
-                alert,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
-        )
-            .then((alertEvaluation: AlertEvaluation): void => {
-                fetchedAlertEvaluation = alertEvaluation;
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            });
-
-        return fetchedAlertEvaluation;
-    };
 
     const onAlertWizardFinish = (
         alert: Alert,
         subscriptionGroups: SubscriptionGroup[]
     ): void => {
+        if (!alert) {
+            return;
+        }
+
         createAlert(alert)
             .then((alert: Alert): void => {
                 enqueueSnackbar(
@@ -124,35 +68,45 @@ export const AlertsCreatePage: FunctionComponent = () => {
                     getSuccessSnackbarOption()
                 );
 
-                if (!isEmpty(subscriptionGroups)) {
-                    for (const subscriptionGroup of subscriptionGroups) {
-                        subscriptionGroup.alerts
-                            ? subscriptionGroup.alerts.push(alert)
-                            : (subscriptionGroup.alerts = [alert]);
-                    }
+                if (isEmpty(subscriptionGroups)) {
+                    // Redirect to alerts detail path
+                    history.push(getAlertsDetailPath(alert.id));
 
-                    updateSubscriptionGroups(subscriptionGroups)
-                        .then((): void => {
-                            enqueueSnackbar(
-                                t("message.update-success", {
-                                    entity: t("label.subscription-groups"),
-                                }),
-                                getSuccessSnackbarOption()
-                            );
-                        })
-                        .catch((): void => {
-                            enqueueSnackbar(
-                                t("message.update-error", {
-                                    entity: t("label.subscription-groups"),
-                                }),
-                                getErrorSnackbarOption()
-                            );
-                        })
-                        .finally((): void => {
-                            // Redirect to alerts detail path
-                            history.push(getAlertsDetailPath(alert.id));
-                        });
+                    return;
                 }
+
+                // Update subscription groups with new alert
+                for (const subscriptionGroup of subscriptionGroups) {
+                    if (subscriptionGroup.alerts) {
+                        // Add to existing list
+                        subscriptionGroup.alerts.push(alert);
+                    } else {
+                        // Create and add to list
+                        subscriptionGroup.alerts = [alert];
+                    }
+                }
+
+                updateSubscriptionGroups(subscriptionGroups)
+                    .then((): void => {
+                        enqueueSnackbar(
+                            t("message.update-success", {
+                                entity: t("label.subscription-groups"),
+                            }),
+                            getSuccessSnackbarOption()
+                        );
+                    })
+                    .catch((): void => {
+                        enqueueSnackbar(
+                            t("message.update-error", {
+                                entity: t("label.subscription-groups"),
+                            }),
+                            getErrorSnackbarOption()
+                        );
+                    })
+                    .finally((): void => {
+                        // Redirect to alerts detail path
+                        history.push(getAlertsDetailPath(alert.id));
+                    });
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -167,28 +121,75 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const onSubscriptionGroupWizardFinish = async (
         subscriptionGroup: SubscriptionGroup
     ): Promise<SubscriptionGroup> => {
-        let createdSubscriptionGroup: SubscriptionGroup = (null as unknown) as SubscriptionGroup;
-        await createSubscriptionGroup(subscriptionGroup)
-            .then((newSubscriptionGroup: SubscriptionGroup): void => {
-                enqueueSnackbar(
-                    t("message.create-success", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
-                );
+        let newSubscriptionGroup: SubscriptionGroup = (null as unknown) as SubscriptionGroup;
 
-                createdSubscriptionGroup = newSubscriptionGroup;
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.create-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                );
-            });
+        if (!subscriptionGroup) {
+            return newSubscriptionGroup;
+        }
 
-        return createdSubscriptionGroup;
+        try {
+            newSubscriptionGroup = await createSubscriptionGroup(
+                subscriptionGroup
+            );
+            enqueueSnackbar(
+                t("message.create-success", {
+                    entity: t("label.subscription-group"),
+                }),
+                getSuccessSnackbarOption()
+            );
+        } catch (error) {
+            enqueueSnackbar(
+                t("message.create-error", {
+                    entity: t("label.subscription-group"),
+                }),
+                getErrorSnackbarOption()
+            );
+        }
+
+        return newSubscriptionGroup;
+    };
+
+    const fetchAllSubscriptionGroups = async (): Promise<
+        SubscriptionGroup[]
+    > => {
+        let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
+        try {
+            fetchedSubscriptionGroups = await getAllSubscriptionGroups();
+        } catch (error) {
+            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+        }
+
+        return fetchedSubscriptionGroups;
+    };
+
+    const fetchAllAlerts = async (): Promise<Alert[]> => {
+        let fetchedAlerts: Alert[] = [];
+        try {
+            fetchedAlerts = await getAllAlerts();
+        } catch (error) {
+            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+        }
+
+        return fetchedAlerts;
+    };
+
+    const fetchAlertEvaluation = async (
+        alert: Alert
+    ): Promise<AlertEvaluation> => {
+        let fetchedAlertEvaluation = {} as AlertEvaluation;
+        try {
+            fetchedAlertEvaluation = await getAlertEvaluation(
+                createAlertEvaluation(
+                    alert,
+                    timeRangeDuration.startTime,
+                    timeRangeDuration.endTime
+                )
+            );
+        } catch (error) {
+            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+        }
+
+        return fetchedAlertEvaluation;
     };
 
     if (loading) {

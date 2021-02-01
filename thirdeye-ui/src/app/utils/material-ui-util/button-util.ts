@@ -1,6 +1,6 @@
 import { Dimension } from "./dimension-util";
 
-// CortexData Material-UI theme style overrides for Button
+// Material-UI theme style overrides for Button
 export const buttonClasses = {
     outlined: {
         "&:hover": {

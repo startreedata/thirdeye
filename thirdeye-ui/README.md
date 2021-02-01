@@ -55,7 +55,7 @@ Following the installation, the command above will let you switch to the require
 
 The project may depend on some GitHub Packages and [npm](https://www.npmjs.com) needs to be configured to allow access to these packages using a GitHub account. The GitHub repository to install packages from is configured in project root `.npmrc`.
 
-Follow the official GitHub Docs [here](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-with-a-personal-access-token) to configure npm with a GitHub personal access token using `~/.npmrc` file.
+Follow the official GitHub Docs [here](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-with-a-personal-access-token) to configure [npm](https://www.npmjs.com) with a GitHub personal access token using `~/.npmrc` file.
 
 ### Setup
 
@@ -105,7 +105,7 @@ $ npm run test
 
 ### `test-watch`
 
-Run all tests related to changed files (uncommitted files)
+Watch files for changes and re-run tests related to changed files
 
 ```
 $ npm run test-watch
@@ -121,7 +121,7 @@ $ npm run test-coverage
 
 ### `eslint`
 
-Run ESLint across the project except for files and directories listed in project root `.eslintignore`
+Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root `.eslintignore`
 
 ```
 $ npm run eslint
@@ -129,7 +129,7 @@ $ npm run eslint
 
 ### `stylelint`
 
-Run stylelint across the project except for files and directories listed in project root `.stylelintignore`
+Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root `.stylelintignore`
 
 ```
 $ npm run stylelint
@@ -137,7 +137,7 @@ $ npm run stylelint
 
 ### `pretty`
 
-Run Prettier across the project except for files and directories listed in project root `.prettierignore`
+Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root `.prettierignore`
 
 ```
 $ npm run pretty

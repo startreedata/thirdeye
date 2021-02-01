@@ -50,7 +50,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
         setAlertEvaluation,
     ] = useState<AlertEvaluation | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration: appTimeRangeDuration } = useTimeRange();
+    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const params = useParams<AlertsDetailPageParams>();
@@ -58,7 +58,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
+        // Fetched alert changed, set breadcrumbs
         setPageBreadcrumbs([
             {
                 text: alertCardData ? alertCardData.name : "",
@@ -72,96 +72,13 @@ export const AlertsDetailPage: FunctionComponent = () => {
     }, [alertCardData]);
 
     useEffect(() => {
-        fetchData();
+        fetchAlert();
     }, []);
 
     useEffect(() => {
-        fetchVisualizationData();
-    }, [alertCardData && alertCardData.id, appTimeRangeDuration]);
-
-    const fetchData = (): void => {
-        // Validate id from URL
-        if (!isValidNumberId(params.id)) {
-            enqueueSnackbar(
-                t("message.invalid-id", {
-                    entity: t("label.alert"),
-                    id: params.id,
-                }),
-                getErrorSnackbarOption()
-            );
-
-            setLoading(false);
-
-            return;
-        }
-
-        Promise.allSettled([
-            getAlert(toNumber(params.id)),
-            getAllSubscriptionGroups(),
-        ])
-            .then(([alertResponse, subscriptionGroupsResponse]): void => {
-                // Determine if any of the calls failed
-                if (
-                    alertResponse.status === "rejected" ||
-                    subscriptionGroupsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
-                // Attempt to gather data
-                let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
-                if (subscriptionGroupsResponse.status === "fulfilled") {
-                    fetchedSubscriptionGroups =
-                        subscriptionGroupsResponse.value;
-                    setSubscriptionGroups(fetchedSubscriptionGroups);
-                }
-                if (alertResponse.status === "fulfilled") {
-                    setAlertCardData(
-                        getAlertCardData(
-                            alertResponse.value,
-                            fetchedSubscriptionGroups
-                        )
-                    );
-                }
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
-    };
-
-    const fetchVisualizationData = (): void => {
-        setAlertEvaluation(null);
-        let fetchedAlertEvaluation = {} as AlertEvaluation;
-
-        if (!alertCardData || !alertCardData.alert) {
-            setAlertEvaluation(fetchedAlertEvaluation);
-
-            return;
-        }
-
-        getAlertEvaluation(
-            createAlertEvaluation(
-                alertCardData.alert,
-                appTimeRangeDuration.startTime,
-                appTimeRangeDuration.endTime
-            )
-        )
-            .then((alertEvaluation: AlertEvaluation): void => {
-                fetchedAlertEvaluation = alertEvaluation;
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            })
-            .finally((): void => {
-                setAlertEvaluation(fetchedAlertEvaluation);
-            });
-    };
+        // Fetched alert or time range changed, fetch alert evaluation
+        fetchAlertEvaluation();
+    }, [alertCardData, timeRangeDuration]);
 
     const onAlertChange = (alertCardData: AlertCardData): void => {
         if (!alertCardData || !alertCardData.alert) {
@@ -234,6 +151,89 @@ export const AlertsDetailPage: FunctionComponent = () => {
             });
     };
 
+    const fetchAlert = (): void => {
+        // Validate id from URL
+        if (!isValidNumberId(params.id)) {
+            enqueueSnackbar(
+                t("message.invalid-id", {
+                    entity: t("label.alert"),
+                    id: params.id,
+                }),
+                getErrorSnackbarOption()
+            );
+            setLoading(false);
+
+            return;
+        }
+
+        Promise.allSettled([
+            getAlert(toNumber(params.id)),
+            getAllSubscriptionGroups(),
+        ])
+            .then(([alertResponse, subscriptionGroupsResponse]): void => {
+                // Determine if any of the calls failed
+                if (
+                    alertResponse.status === "rejected" ||
+                    subscriptionGroupsResponse.status === "rejected"
+                ) {
+                    enqueueSnackbar(
+                        t("message.fetch-error"),
+                        getErrorSnackbarOption()
+                    );
+                }
+
+                // Attempt to gather data
+                let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
+                if (subscriptionGroupsResponse.status === "fulfilled") {
+                    fetchedSubscriptionGroups =
+                        subscriptionGroupsResponse.value;
+                    setSubscriptionGroups(fetchedSubscriptionGroups);
+                }
+                if (alertResponse.status === "fulfilled") {
+                    setAlertCardData(
+                        getAlertCardData(
+                            alertResponse.value,
+                            fetchedSubscriptionGroups
+                        )
+                    );
+                }
+            })
+            .finally((): void => {
+                setLoading(false);
+            });
+    };
+
+    const fetchAlertEvaluation = (): void => {
+        setAlertEvaluation(null);
+        let fetchedAlertEvaluation = {} as AlertEvaluation;
+
+        if (!alertCardData || !alertCardData.alert) {
+            setAlertEvaluation(fetchedAlertEvaluation);
+
+            return;
+        }
+
+        getAlertEvaluation(
+            createAlertEvaluation(
+                alertCardData.alert,
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            )
+        )
+            .then((alertEvaluation: AlertEvaluation): void => {
+                fetchedAlertEvaluation = alertEvaluation;
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setAlertEvaluation(fetchedAlertEvaluation);
+            });
+    };
+
     if (loading) {
         return (
             <PageContainer>
@@ -249,7 +249,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 title={alertCardData ? alertCardData.name : ""}
             >
                 {alertCardData && (
-                    <Grid container>
+                    <Grid container direction="column">
                         {/* Alert */}
                         <Grid item md={12}>
                             <AlertCard

@@ -14,7 +14,8 @@ describe("Auth REST", () => {
             data: mockAuthResponse,
         });
 
-        expect(await login()).toEqual(mockAuthResponse);
+        await expect(login()).resolves.toEqual(mockAuthResponse);
+
         expect(axios.post).toHaveBeenCalledWith(
             "/api/auth/login",
             mockAuthRequest

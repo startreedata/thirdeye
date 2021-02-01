@@ -38,7 +38,7 @@ describe("Date Time Util", () => {
     });
 
     test("formatDuration should return empty string for invalid dates", () => {
-        expect(formatDuration((null as unknown) as number, 2)).toEqual("");
+        expect(formatDuration((null as unknown) as number, 1)).toEqual("");
         expect(formatDuration(1, (null as unknown) as number)).toEqual("");
         expect(
             formatDuration(

@@ -14,7 +14,6 @@ export const HomePage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.home"),
@@ -23,9 +22,6 @@ export const HomePage: FunctionComponent = () => {
                 },
             },
         ]);
-    }, []);
-
-    useEffect(() => {
         setLoading(false);
     }, []);
 

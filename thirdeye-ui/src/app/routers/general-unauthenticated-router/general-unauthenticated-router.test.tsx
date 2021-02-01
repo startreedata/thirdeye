@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { PageContainer } from "../../components/page-container/page-container.component";
+import { SignInPageProps } from "../../pages/sign-in-page/sign-in-page.interfaces";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { GeneralUnauthenticatedRouter } from "./general-unauthenticated-router";
 
@@ -9,14 +10,6 @@ jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
     useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
         setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
     })),
-}));
-
-jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
-    useAppToolbarStore: jest.fn().mockImplementation((selector) => {
-        return selector({
-            removeAppToolbar: mockRemoveAppToolbar,
-        });
-    }),
 }));
 
 jest.mock("react-router-dom", () => ({
@@ -46,8 +39,8 @@ jest.mock("../../components/page-container/page-container.component", () => ({
 jest.mock("../../pages/sign-in-page/sign-in-page.component", () => ({
     SignInPage: jest
         .fn()
-        .mockImplementation((props) => (
-            <>{`testSignInPage:${props.redirectionURL}`}</>
+        .mockImplementation((props: SignInPageProps) => (
+            <>{`testSignInPage:${props.redirectURL}`}</>
         )),
 }));
 
@@ -73,17 +66,6 @@ describe("General Unauthenticated Router", () => {
         expect(mockSetRouterBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    test("should remove app toolbar", () => {
-        mockPathname = "";
-        render(
-            <MemoryRouter>
-                <GeneralUnauthenticatedRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockRemoveAppToolbar).toHaveBeenCalled();
-    });
-
     test("should render sign in page at exact sign in path", async () => {
         mockPathname = "";
         render(
@@ -92,7 +74,9 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testSignInPage:")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testSignInPage:")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render sign in page at invalid sign in path", async () => {
@@ -103,7 +87,9 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testSignInPage:")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testSignInPage:")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render sign in page with base path as redirection URL when location is sign in path", async () => {
@@ -114,9 +100,9 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testSignInPage:testBasePath")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testSignInPage:testBasePath")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render sign in page with base path as redirection URL when location is sign out path", async () => {
@@ -127,9 +113,9 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testSignInPage:testBasePath")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testSignInPage:testBasePath")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render sign in page with appropriate redirection URL when location is anything other than sign in/out path", async () => {
@@ -140,9 +126,9 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testSignInPage:testPath")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testSignInPage:testPath")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render sign in page by default", async () => {
@@ -153,12 +139,12 @@ describe("General Unauthenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testSignInPage:")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testSignInPage:")
+        ).resolves.toBeInTheDocument();
     });
 });
 
 const mockSetRouterBreadcrumbs = jest.fn();
-
-const mockRemoveAppToolbar = jest.fn();
 
 let mockPathname = "";

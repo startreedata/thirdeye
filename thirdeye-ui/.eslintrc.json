@@ -38,13 +38,12 @@
         "spaced-comment": ["error", "always"],
 
         // Maximum line length for comments
-        // Trailing comments allowed beyond maximum line length
         "max-len": [
             "error",
             {
                 "code": 200,
                 "comments": 100,
-                "ignoreTrailingComments": true
+                "ignoreTrailingComments": true // Trailing comments allowed beyond maximum line length
             }
         ],
 
@@ -72,12 +71,11 @@
                 "prev": "*",
                 "next": "export"
             },
-            // Ignore consecutive export statements
             {
                 "blankLine": "any",
                 "prev": "export",
                 "next": "export"
-            },
+            }, // Ignore consecutive export statements
             {
                 "blankLine": "always",
                 "prev": "*",

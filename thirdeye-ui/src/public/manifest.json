@@ -8,7 +8,7 @@
             "sizes": "32x32"
         },
         {
-            "src": "cortex-data-512x512.png",
+            "src": "thirdeye-512x512.png",
             "type": "image/png",
             "sizes": "512x512"
         }

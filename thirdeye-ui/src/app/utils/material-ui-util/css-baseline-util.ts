@@ -1,18 +1,20 @@
 import {
-    sourceSansProBold,
-    sourceSansProLight,
-    sourceSansProRegular,
-    sourceSansProSemiBold,
+    sourceCodeProRegular400,
+    sourceSansProBold700,
+    sourceSansProLight300,
+    sourceSansProRegular400,
+    sourceSansProSemiBold600,
 } from "./font-util";
 
-// CortexData Material-UI theme style overrides for CssBaseline
+// Material-UI theme style overrides for CssBaseline
 export const cssBaselineClasses = {
     "@global": {
         "@font-face": [
-            sourceSansProLight,
-            sourceSansProRegular,
-            sourceSansProSemiBold,
-            sourceSansProBold,
+            sourceSansProLight300,
+            sourceSansProRegular400,
+            sourceSansProSemiBold600,
+            sourceSansProBold700,
+            sourceCodeProRegular400,
         ],
     },
 };

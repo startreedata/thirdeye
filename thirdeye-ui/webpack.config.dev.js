@@ -18,6 +18,7 @@ module.exports = {
     output: {
         path: outputPath,
         filename: "[name].js",
+        chunkFilename: "[name].js",
         publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
     },
 
@@ -68,11 +69,6 @@ module.exports = {
     resolve: {
         // File types to be handled
         extensions: [".ts", ".tsx", ".js", ".css", ".scss", ".svg", ".ttf"],
-        // Webpack 5 no longer includes polyfills for node.js core modules by default
-        // js-yaml requires buffer
-        fallback: {
-            buffer: require.resolve("buffer/"),
-        },
     },
 
     plugins: [

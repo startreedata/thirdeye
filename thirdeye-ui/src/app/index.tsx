@@ -22,7 +22,8 @@ i18n.use(initReactI18next).init(getInitOptions());
 // Numbro (number formatting)
 numbro.registerLanguage(enUs);
 numbro.setLanguage("en-US");
-// Luxon (date, time formatting), picks up system default
+// Luxon (date, time formatting)
+// Picks up system default
 
 // App entry point
 ReactDOM.render(

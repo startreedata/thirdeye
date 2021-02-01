@@ -11,22 +11,6 @@ jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
     })),
 }));
 
-jest.mock("../../store/app-toolbar-store/app-toolbar-store", () => ({
-    useAppToolbarStore: jest.fn().mockImplementation((selector) => {
-        return selector({
-            removeAppToolbar: mockRemoveAppToolbar,
-        });
-    }),
-}));
-
-jest.mock("react-i18next", () => ({
-    useTranslation: jest.fn().mockReturnValue({
-        t: (key: string): string => {
-            return key;
-        },
-    }),
-}));
-
 jest.mock("../../components/page-container/page-container.component", () => ({
     PageContainer: jest.fn().mockReturnValue(<>testPageContainer</>),
 }));
@@ -67,16 +51,6 @@ describe("General Authenticated Router", () => {
         expect(mockSetRouterBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    test("should remove app toolbar", () => {
-        render(
-            <MemoryRouter>
-                <GeneralAuthenticatedRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockRemoveAppToolbar).toHaveBeenCalled();
-    });
-
     test("should render home page at exact base path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.BASE]}>
@@ -84,7 +58,9 @@ describe("General Authenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testHomePage")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testHomePage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid base path", async () => {
@@ -94,9 +70,33 @@ describe("General Authenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
+    });
+
+    test("should render home page at exact home path", async () => {
+        render(
+            <MemoryRouter initialEntries={[AppRoute.HOME]}>
+                <GeneralAuthenticatedRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testHomePage")
+        ).resolves.toBeInTheDocument();
+    });
+
+    test("should render page not found page at invalid home path", async () => {
+        render(
+            <MemoryRouter initialEntries={[`${AppRoute.HOME}/testPath`]}>
+                <GeneralAuthenticatedRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render home page at exact sign in path", async () => {
@@ -106,7 +106,9 @@ describe("General Authenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testHomePage")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testHomePage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid sign in path", async () => {
@@ -116,9 +118,9 @@ describe("General Authenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render sign out page at exact sign out path", async () => {
@@ -128,7 +130,9 @@ describe("General Authenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testSignOutPage")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testSignOutPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at invalid sign out path", async () => {
@@ -138,9 +142,9 @@ describe("General Authenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at any other path", async () => {
@@ -150,9 +154,9 @@ describe("General Authenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testPageNotFoundPage")
-        ).toBeInTheDocument();
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     test("should render home page by default", async () => {
@@ -162,10 +166,10 @@ describe("General Authenticated Router", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByText("testHomePage")).toBeInTheDocument();
+        await expect(
+            screen.findByText("testHomePage")
+        ).resolves.toBeInTheDocument();
     });
 });
 
 const mockSetRouterBreadcrumbs = jest.fn();
-
-const mockRemoveAppToolbar = jest.fn();

@@ -1,7 +1,7 @@
 import { PaletteOptions } from "@material-ui/core/styles/createPalette";
 import { Color } from "./color-util";
 
-// CortexData Material-UI theme component colors
+// Material-UI theme component colors
 export const Palette = {
     COLOR_TEXT_DEFAULT: Color.BLACK_1,
     COLOR_TEXT_GREY: Color.GREY_1,
@@ -20,7 +20,7 @@ export const Palette = {
     COLOR_VISUALIZATION_STROKE_BASELINE: Color.ORANGE_1,
 } as const;
 
-// CortexData Material-UI theme color palette
+// Material-UI theme color palette
 export const paletteOptions: PaletteOptions = {
     primary: {
         contrastText: Color.WHITE_1,

@@ -7,7 +7,7 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
     (
         set: SetState<AppBreadcrumbsStore>,
         get: GetState<AppBreadcrumbsStore>
-    ) => ({
+    ): AppBreadcrumbsStore => ({
         routerBreadcrumbs: [],
         pageBreadcrumbs: [],
 

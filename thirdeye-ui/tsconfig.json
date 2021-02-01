@@ -15,8 +15,7 @@
         "sourceMap": true,
         "composite": false,
         "tsBuildInfoFile": "./tsbuildinfo/tsconfig.tsbuildinfo",
-        // If we set removeComments to true, Webpack megic comments won't work
-        "removeComments": false,
+        "removeComments": false, // Required for webpack magic comments
         "noEmit": false,
         "importHelpers": true,
         "downlevelIteration": true,

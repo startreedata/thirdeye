@@ -21,7 +21,7 @@ import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-
 import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
-    EmailSettings,
+    EmailScheme,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
 import {
@@ -56,7 +56,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
+        // Fetched subscription group changed, set breadcrumbs
         setPageBreadcrumbs([
             {
                 text: subscriptionGroupCardData
@@ -76,60 +76,8 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     }, [subscriptionGroupCardData]);
 
     useEffect(() => {
-        fetchData();
+        fetchSubscriptionGroup();
     }, []);
-
-    const fetchData = (): void => {
-        // Validate id from URL
-        if (!isValidNumberId(params.id)) {
-            enqueueSnackbar(
-                t("message.invalid-id", {
-                    entity: t("label.subscription-group"),
-                    id: params.id,
-                }),
-                getErrorSnackbarOption()
-            );
-
-            setLoading(false);
-
-            return;
-        }
-
-        Promise.allSettled([
-            getSubscriptionGroup(toNumber(params.id)),
-            getAllAlerts(),
-        ])
-            .then(([subscriptionGroupResponse, alertsResponse]): void => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupResponse.status === "rejected" ||
-                    alertsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
-                // Attempt to gather data
-                let fetchedAlerts: Alert[] = [];
-                if (alertsResponse.status === "fulfilled") {
-                    fetchedAlerts = alertsResponse.value;
-                    setAlerts(fetchedAlerts);
-                }
-                if (subscriptionGroupResponse.status === "fulfilled") {
-                    setSubscriptionGroupCardData(
-                        getSubscriptionGroupCardData(
-                            subscriptionGroupResponse.value,
-                            fetchedAlerts
-                        )
-                    );
-                }
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
-    };
 
     const onDeleteSubscriptionGroup = (
         subscriptionGroupCardData: SubscriptionGroupCardData
@@ -211,20 +159,79 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
         const subscriptionGroupCopy = cloneDeep(
             subscriptionGroupCardData.subscriptionGroup
         );
-
-        if (subscriptionGroupCopy.notificationSchemes.email) {
+        if (
+            subscriptionGroupCopy.notificationSchemes &&
+            subscriptionGroupCopy.notificationSchemes.email
+        ) {
             subscriptionGroupCopy.notificationSchemes.email.to = emails;
         } else {
             subscriptionGroupCopy.notificationSchemes = {
-                email: { to: emails } as EmailSettings,
+                email: {
+                    to: emails,
+                } as EmailScheme,
             };
         }
         saveUpdatedSubscriptionGroup(subscriptionGroupCopy);
     };
 
+    const fetchSubscriptionGroup = (): void => {
+        // Validate id from URL
+        if (!isValidNumberId(params.id)) {
+            enqueueSnackbar(
+                t("message.invalid-id", {
+                    entity: t("label.subscription-group"),
+                    id: params.id,
+                }),
+                getErrorSnackbarOption()
+            );
+            setLoading(false);
+
+            return;
+        }
+
+        Promise.allSettled([
+            getSubscriptionGroup(toNumber(params.id)),
+            getAllAlerts(),
+        ])
+            .then(([subscriptionGroupResponse, alertsResponse]): void => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupResponse.status === "rejected" ||
+                    alertsResponse.status === "rejected"
+                ) {
+                    enqueueSnackbar(
+                        t("message.fetch-error"),
+                        getErrorSnackbarOption()
+                    );
+                }
+
+                // Attempt to gather data
+                let fetchedAlerts: Alert[] = [];
+                if (alertsResponse.status === "fulfilled") {
+                    fetchedAlerts = alertsResponse.value;
+                    setAlerts(fetchedAlerts);
+                }
+                if (subscriptionGroupResponse.status === "fulfilled") {
+                    setSubscriptionGroupCardData(
+                        getSubscriptionGroupCardData(
+                            subscriptionGroupResponse.value,
+                            fetchedAlerts
+                        )
+                    );
+                }
+            })
+            .finally((): void => {
+                setLoading(false);
+            });
+    };
+
     const saveUpdatedSubscriptionGroup = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
+        if (!subscriptionGroup) {
+            return;
+        }
+
         updateSubscriptionGroup(subscriptionGroup)
             .then((subscriptionGroup: SubscriptionGroup): void => {
                 enqueueSnackbar(
@@ -269,7 +276,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 }
             >
                 {subscriptionGroupCardData && (
-                    <Grid container>
+                    <Grid container direction="column">
                         {/* Subscription Group */}
                         <Grid item md={12}>
                             <SubscriptionGroupCard

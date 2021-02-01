@@ -29,6 +29,17 @@ export const createSubscriptionGroup = async (
     return response.data[0];
 };
 
+export const createSubscriptionGroups = async (
+    subscriptionGroups: SubscriptionGroup[]
+): Promise<SubscriptionGroup[]> => {
+    const response = await axios.post(
+        BASE_URL_SUBSCRIPTION_GROUPS,
+        subscriptionGroups
+    );
+
+    return response.data;
+};
+
 export const updateSubscriptionGroup = async (
     subscriptionGroup: SubscriptionGroup
 ): Promise<SubscriptionGroup> => {

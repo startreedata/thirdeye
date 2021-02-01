@@ -7,7 +7,7 @@ const LOCAL_STORAGE_KEY_AUTH = "LOCAL_STORAGE_KEY_AUTH";
 // App store for authentication, persisted in browser local storage
 export const useAuthStore = create<AuthStore>(
     persist<AuthStore>(
-        (set: SetState<AuthStore>) => ({
+        (set: SetState<AuthStore>): AuthStore => ({
             authDisabled: false,
             authenticated: false,
             accessToken: "",
@@ -20,11 +20,11 @@ export const useAuthStore = create<AuthStore>(
                 });
             },
 
-            setAccessToken: (token: string): void => {
+            setAccessToken: (accessToken: string): void => {
                 set({
                     authDisabled: false,
-                    authenticated: Boolean(token),
-                    accessToken: token || "",
+                    authenticated: Boolean(accessToken),
+                    accessToken: accessToken || "",
                 });
             },
 

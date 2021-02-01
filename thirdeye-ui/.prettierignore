@@ -11,6 +11,10 @@ dist/
 # Maven
 target/
 
+# Docker (Prettier has trouble parsing docker files)
+docker/
+Dockerfile
+
 # TypeScript
 tsbuildinfo/
 
@@ -22,7 +26,6 @@ src/test/coverage/
 *.png
 *.ico
 *.ttf
-*.txt
 
 # Ignore files (Prettier has trouble parsing files without extension)
 .dockerignore

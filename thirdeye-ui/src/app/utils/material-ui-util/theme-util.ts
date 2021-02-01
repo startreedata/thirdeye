@@ -9,7 +9,7 @@ import { shapeOptions } from "./shape-util";
 import { tooltipClasses } from "./tooltip-util";
 import { typographyOptions } from "./typography-util";
 
-// CortexData Material-UI theme
+// Material-UI theme
 export const theme: Theme = createMuiTheme({
     palette: paletteOptions,
     props: {

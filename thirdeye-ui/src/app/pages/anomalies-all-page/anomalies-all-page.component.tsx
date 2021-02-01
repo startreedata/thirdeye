@@ -14,9 +14,10 @@ import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indi
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SearchBar } from "../../components/search-bar/search-bar.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     deleteAnomaly,
-    getAllAnomalies,
+    getAnomaliesByTime,
 } from "../../rest/anomalies-rest/anomalies-rest";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
@@ -39,13 +40,13 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     >([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.all"),
@@ -57,31 +58,16 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        // Time range changed, fetch anomalies
+        fetchAnomaliesByTime();
+    }, [timeRangeDuration]);
 
     useEffect(() => {
-        // Fetched data or search changed, reset
+        // Fetched anomalies or search changed, reset
         setFilteredAnomalyCardDatas(
             filterAnomalies(anomalyCardDatas, searchWords)
         );
     }, [anomalyCardDatas, searchWords]);
-
-    const fetchData = (): void => {
-        getAllAnomalies()
-            .then((anomalies: Anomaly[]): void => {
-                setAnomalyCardDatas(getAnomalyCardDatas(anomalies));
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
-    };
 
     const onDeleteAnomaly = (anomalyCardData: AnomalyCardData): void => {
         if (!anomalyCardData) {
@@ -129,6 +115,25 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             });
     };
 
+    const fetchAnomaliesByTime = (): void => {
+        getAnomaliesByTime(
+            timeRangeDuration.startTime,
+            timeRangeDuration.endTime
+        )
+            .then((anomalies: Anomaly[]): void => {
+                setAnomalyCardDatas(getAnomalyCardDatas(anomalies));
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setLoading(false);
+            });
+    };
+
     const removeAnomalyCardData = (anomaly: Anomaly): void => {
         if (!anomaly) {
             return;
@@ -154,7 +159,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents centered title={t("label.anomalies")}>
-                <Grid container>
+                <Grid container direction="column">
                     {/* Search */}
                     <Grid item md={12}>
                         <SearchBar

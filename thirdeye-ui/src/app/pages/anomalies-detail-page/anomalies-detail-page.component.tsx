@@ -53,7 +53,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
+        // Fetched anomaly changed, set breadcrumbs
         setPageBreadcrumbs([
             {
                 text: anomalyCardData ? anomalyCardData.name : "",
@@ -69,74 +69,13 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     }, [anomalyCardData]);
 
     useEffect(() => {
-        fetchData();
+        fetchAnomaly();
     }, []);
 
     useEffect(() => {
-        fetchVisualizationData();
-    }, [anomalyCardData && anomalyCardData.alertId, timeRangeDuration]);
-
-    const fetchData = (): void => {
-        // Validate id from URL
-        if (!isValidNumberId(params.id)) {
-            enqueueSnackbar(
-                t("message.invalid-id", {
-                    entity: t("label.anomaly"),
-                    id: params.id,
-                }),
-                getErrorSnackbarOption()
-            );
-
-            setLoading(false);
-
-            return;
-        }
-
-        getAnomaly(toNumber(params.id))
-            .then((anomaly: Anomaly): void => {
-                setAnomalyCardData(getAnomalyCardData(anomaly));
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
-    };
-
-    const fetchVisualizationData = (): void => {
-        setAlertEvaluation(null);
-        let fetchedAlertEvaluation = {} as AlertEvaluation;
-
-        if (!anomalyCardData) {
-            setAlertEvaluation(fetchedAlertEvaluation);
-
-            return;
-        }
-
-        getAlertEvaluation(
-            createAlertEvaluation(
-                anomalyCardData.alertId,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
-        )
-            .then((alertEvaluation: AlertEvaluation): void => {
-                fetchedAlertEvaluation = alertEvaluation;
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            })
-            .finally((): void => {
-                setAlertEvaluation(fetchedAlertEvaluation);
-            });
-    };
+        // Fetched anomaly or time range changed, fetch alert evaluation
+        fetchAlertEvaluation();
+    }, [anomalyCardData, timeRangeDuration]);
 
     const onDeleteAnomaly = (anomalyCardData: AnomalyCardData): void => {
         if (!anomalyCardData) {
@@ -184,6 +123,67 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
             });
     };
 
+    const fetchAnomaly = (): void => {
+        // Validate id from URL
+        if (!isValidNumberId(params.id)) {
+            enqueueSnackbar(
+                t("message.invalid-id", {
+                    entity: t("label.anomaly"),
+                    id: params.id,
+                }),
+                getErrorSnackbarOption()
+            );
+            setLoading(false);
+
+            return;
+        }
+
+        getAnomaly(toNumber(params.id))
+            .then((anomaly: Anomaly): void => {
+                setAnomalyCardData(getAnomalyCardData(anomaly));
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setLoading(false);
+            });
+    };
+
+    const fetchAlertEvaluation = (): void => {
+        setAlertEvaluation(null);
+        let fetchedAlertEvaluation = {} as AlertEvaluation;
+
+        if (!anomalyCardData) {
+            setAlertEvaluation(fetchedAlertEvaluation);
+
+            return;
+        }
+
+        getAlertEvaluation(
+            createAlertEvaluation(
+                anomalyCardData.alertId,
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            )
+        )
+            .then((alertEvaluation: AlertEvaluation): void => {
+                fetchedAlertEvaluation = alertEvaluation;
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setAlertEvaluation(fetchedAlertEvaluation);
+            });
+    };
+
     if (loading) {
         return (
             <PageContainer>
@@ -199,7 +199,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                 title={anomalyCardData ? anomalyCardData.name : ""}
             >
                 {anomalyCardData && (
-                    <Grid container>
+                    <Grid container direction="column">
                         {/* Anomaly */}
                         <Grid item md={12}>
                             <AnomalyCard

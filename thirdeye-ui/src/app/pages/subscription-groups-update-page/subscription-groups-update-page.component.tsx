@@ -1,4 +1,4 @@
-import { kebabCase, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,7 +9,6 @@ import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indi
 import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
-import { SubscriptionGroupWizardStep } from "../../components/subscription-group-wizard/subscription-group-wizard.interfaces";
 import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -30,23 +29,19 @@ import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [alerts, setAlerts] = useState<Alert[]>([]);
     const [
         subscriptionGroup,
         setSubscriptionGroup,
     ] = useState<SubscriptionGroup>();
-    const {
-        setPageBreadcrumbs,
-        pushPageBreadcrumb,
-        popPageBreadcrumb,
-    } = useAppBreadcrumbs();
+    const [alerts, setAlerts] = useState<Alert[]>([]);
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { enqueueSnackbar } = useSnackbar();
     const params = useParams<SubscriptionGroupsUpdatePageParams>();
     const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
+        // Fetched subscription group changed, set breadcrumbs
         setPageBreadcrumbs([
             {
                 text: subscriptionGroup ? subscriptionGroup.name : "",
@@ -72,18 +67,45 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     }
                 },
             },
-            // Empty page breadcrumb as a placeholder for subscription group wizard step
-            {
-                text: "",
-            },
         ]);
     }, [subscriptionGroup]);
 
     useEffect(() => {
-        fetchData();
+        fetchSubscriptionGroup();
     }, []);
 
-    const fetchData = (): void => {
+    const onSubscriptionGroupWizardFinish = (
+        subscriptionGroup: SubscriptionGroup
+    ): void => {
+        if (!subscriptionGroup) {
+            return;
+        }
+
+        updateSubscriptionGroup(subscriptionGroup)
+            .then((subscriptionGroup: SubscriptionGroup): void => {
+                enqueueSnackbar(
+                    t("message.update-success", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getSuccessSnackbarOption()
+                );
+
+                // Redirect to subscription groups detail path
+                history.push(
+                    getSubscriptionGroupsDetailPath(subscriptionGroup.id)
+                );
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.update-error", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getErrorSnackbarOption()
+                );
+            });
+    };
+
+    const fetchSubscriptionGroup = (): void => {
         // Validate id from URL
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
@@ -93,7 +115,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 }),
                 getErrorSnackbarOption()
             );
-
             setLoading(false);
 
             return;
@@ -128,47 +149,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             });
     };
 
-    const onSubscriptionGroupWizardStepChange = (
-        subscriptionGroupWizardStep: SubscriptionGroupWizardStep
-    ): void => {
-        // Update page breadcrumbs
-        popPageBreadcrumb();
-        pushPageBreadcrumb({
-            text: t(
-                `label.${kebabCase(
-                    SubscriptionGroupWizardStep[subscriptionGroupWizardStep]
-                )}`
-            ),
-        });
-    };
-
-    const onSubscriptionGroupWizardFinish = (
-        subscriptionGroup: SubscriptionGroup
-    ): void => {
-        updateSubscriptionGroup(subscriptionGroup)
-            .then((subscriptionGroup: SubscriptionGroup): void => {
-                enqueueSnackbar(
-                    t("message.update-success", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Redirect to subscription groups detail path
-                history.push(
-                    getSubscriptionGroupsDetailPath(subscriptionGroup.id)
-                );
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.update-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                );
-            });
-    };
-
     if (loading) {
         return (
             <PageContainer>
@@ -184,7 +164,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     <SubscriptionGroupWizard
                         alerts={alerts}
                         subscriptionGroup={subscriptionGroup}
-                        onChange={onSubscriptionGroupWizardStepChange}
                         onFinish={onSubscriptionGroupWizardFinish}
                     />
                 )}

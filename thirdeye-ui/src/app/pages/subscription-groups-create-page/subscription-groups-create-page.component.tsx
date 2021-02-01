@@ -29,7 +29,6 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.create"),
@@ -41,28 +40,16 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        fetchData();
+        fetchAllAlerts();
     }, []);
-
-    const fetchData = (): void => {
-        getAllAlerts()
-            .then((alerts: Alert[]): void => {
-                setAlerts(alerts);
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
-    };
 
     const onSubscriptionGroupWizardFinish = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
+        if (!subscriptionGroup) {
+            return;
+        }
+
         createSubscriptionGroup(subscriptionGroup)
             .then((subscriptionGroup: SubscriptionGroup): void => {
                 enqueueSnackbar(
@@ -84,6 +71,22 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                     }),
                     getErrorSnackbarOption()
                 );
+            });
+    };
+
+    const fetchAllAlerts = (): void => {
+        getAllAlerts()
+            .then((alerts: Alert[]): void => {
+                setAlerts(alerts);
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setLoading(false);
             });
     };
 

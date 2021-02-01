@@ -49,7 +49,6 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Create page breadcrumbs
         setPageBreadcrumbs([
             {
                 text: t("label.all"),
@@ -61,48 +60,15 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        fetchData();
+        fetchAllSubscriptionGroups();
     }, []);
 
     useEffect(() => {
-        // Fetched data or search changed, reset
+        // Fetched subscription groups or search changed, reset
         setfilteredSubscriptionGroupCardDatas(
             filterSubscriptionGroups(subscriptionGroupCardDatas, searchWords)
         );
     }, [subscriptionGroupCardDatas, searchWords]);
-
-    const fetchData = (): void => {
-        Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
-            .then(([subscriptionGroupsResponse, alertsResponse]): void => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupsResponse.status === "rejected" ||
-                    alertsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
-                // Attempt to gather data
-                let fetchedAlerts: Alert[] = [];
-                if (alertsResponse.status === "fulfilled") {
-                    fetchedAlerts = alertsResponse.value;
-                }
-                if (subscriptionGroupsResponse.status === "fulfilled") {
-                    setSubscriptionGroupCardDatas(
-                        getSubscriptionGroupCardDatas(
-                            subscriptionGroupsResponse.value,
-                            fetchedAlerts
-                        )
-                    );
-                }
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
-    };
 
     const onDeleteSubscriptionGroup = (
         subscriptionGroupCardData: SubscriptionGroupCardData
@@ -141,8 +107,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                     getSuccessSnackbarOption()
                 );
 
-                // Remove deleted subscription group from fetched subscription
-                // groups
+                // Remove deleted subscription group from fetched subscription groups
                 removeSubscriptionGroupCardData(subscriptionGroup);
             })
             .catch((): void => {
@@ -152,6 +117,39 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                     }),
                     getErrorSnackbarOption()
                 );
+            });
+    };
+
+    const fetchAllSubscriptionGroups = (): void => {
+        Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
+            .then(([subscriptionGroupsResponse, alertsResponse]): void => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupsResponse.status === "rejected" ||
+                    alertsResponse.status === "rejected"
+                ) {
+                    enqueueSnackbar(
+                        t("message.fetch-error"),
+                        getErrorSnackbarOption()
+                    );
+                }
+
+                // Attempt to gather data
+                let fetchedAlerts: Alert[] = [];
+                if (alertsResponse.status === "fulfilled") {
+                    fetchedAlerts = alertsResponse.value;
+                }
+                if (subscriptionGroupsResponse.status === "fulfilled") {
+                    setSubscriptionGroupCardDatas(
+                        getSubscriptionGroupCardDatas(
+                            subscriptionGroupsResponse.value,
+                            fetchedAlerts
+                        )
+                    );
+                }
+            })
+            .finally((): void => {
+                setLoading(false);
             });
     };
 
@@ -190,7 +188,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                 hideTimeRange
                 title={t("label.subscription-groups")}
             >
-                <Grid container>
+                <Grid container direction="column">
                     {/* Search */}
                     <Grid item md={12}>
                         <SearchBar

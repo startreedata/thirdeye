@@ -12,6 +12,7 @@ import {
 import {
     formatLargeNumberForVisualization,
     getAlertEvaluationAnomalyPoints,
+    getAlertEvaluationAnomalyPointsMaxValue,
     getAlertEvaluationTimeSeriesPoints,
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
@@ -277,6 +278,37 @@ describe("Visualization Util", () => {
                 mockAlertEvaluationTimeSeriesPointsCopy
             )
         ).toEqual(15);
+    });
+
+    test("getAlertEvaluationAnomalyPointsMaxValue should return 0 for invalid alert evaluation anomaly points", () => {
+        expect(
+            getAlertEvaluationAnomalyPointsMaxValue(
+                (null as unknown) as AlertEvaluationAnomalyPoint[]
+            )
+        ).toEqual(0);
+    });
+
+    test("getAlertEvaluationAnomalyPointsMaxValue should return 0 for empty alert evaluation anomaly points", () => {
+        expect(getAlertEvaluationAnomalyPointsMaxValue([])).toEqual(0);
+    });
+
+    test("getAlertEvaluationAnomalyPointsMaxValue should return appropriate value for alert evaluation anomaly points", () => {
+        expect(
+            getAlertEvaluationAnomalyPointsMaxValue(
+                mockAlertEvaluationAnomalyPoints
+            )
+        ).toEqual(22);
+
+        const mockAlertEvaluationAnomalyPointsCopy = cloneDeep(
+            mockAlertEvaluationAnomalyPoints
+        );
+        mockAlertEvaluationAnomalyPointsCopy[1].current = NaN;
+
+        expect(
+            getAlertEvaluationAnomalyPointsMaxValue(
+                mockAlertEvaluationAnomalyPointsCopy
+            )
+        ).toEqual(18);
     });
 });
 

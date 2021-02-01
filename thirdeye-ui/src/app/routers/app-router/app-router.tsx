@@ -6,44 +6,32 @@ import { AppRoute } from "../../utils/routes-util/routes-util";
 
 const AlertsRouter = lazy(() =>
     import(
-        /* webpackChunkName: 'AlertsRouter' */
-        "../alerts-router/alerts-router"
-    ).then(({ AlertsRouter }) => ({
-        default: AlertsRouter,
-    }))
+        /* webpackChunkName: "alerts-router" */ "../alerts-router/alerts-router"
+    ).then((module) => ({ default: module.AlertsRouter }))
 );
 
 const AnomaliesRouter = lazy(() =>
     import(
-        /* webpackChunkName: 'AnomaliesRouter' */
-        "../anomalies-router/anomalies-router"
-    ).then(({ AnomaliesRouter }) => ({
-        default: AnomaliesRouter,
-    }))
+        /* webpackChunkName: "anomalies-router" */ "../anomalies-router/anomalies-router"
+    ).then((module) => ({ default: module.AnomaliesRouter }))
 );
+
 const ConfigurationRouter = lazy(() =>
     import(
-        /* webpackChunkName: 'ConfigurationRouter' */
-        "../configuration-router/configuration-router"
-    ).then(({ ConfigurationRouter }) => ({
-        default: ConfigurationRouter,
-    }))
+        /* webpackChunkName: "configuration-router" */ "../configuration-router/configuration-router"
+    ).then((module) => ({ default: module.ConfigurationRouter }))
 );
+
 const GeneralAuthenticatedRouter = lazy(() =>
     import(
-        /* webpackChunkName: 'GeneralAuthenticatedRouter' */
-        "../general-authenticated-router/general-authenticated-router"
-    ).then(({ GeneralAuthenticatedRouter }) => ({
-        default: GeneralAuthenticatedRouter,
-    }))
+        /* webpackChunkName: "general-authenticated-router" */ "../general-authenticated-router/general-authenticated-router"
+    ).then((module) => ({ default: module.GeneralAuthenticatedRouter }))
 );
+
 const GeneralUnauthenticatedRouter = lazy(() =>
     import(
-        /* webpackChunkName: 'GeneralUnauthenticatedRouter' */
-        "../general-unauthenticated-router/general-unauthenticated-router"
-    ).then(({ GeneralUnauthenticatedRouter }) => ({
-        default: GeneralUnauthenticatedRouter,
-    }))
+        /* webpackChunkName: "general-unauthenticated-router" */ "../general-unauthenticated-router/general-unauthenticated-router"
+    ).then((module) => ({ default: module.GeneralUnauthenticatedRouter }))
 );
 
 export const AppRouter: FunctionComponent = () => {

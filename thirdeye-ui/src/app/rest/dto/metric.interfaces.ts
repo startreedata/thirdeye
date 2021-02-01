@@ -6,6 +6,13 @@ export interface Metric {
     active: boolean;
     created: number;
     updated: number;
+    derived: boolean;
+    derivedMetricExpression: string;
+    aggregationColumn: string;
+    aggregationFunction: MetricAggFunction;
+    rollupThreshold: number;
+    views: LogicalView[];
+    where: string;
 }
 
 export interface Dataset {
@@ -16,6 +23,7 @@ export interface Dataset {
     dimensions: string[];
     timeColumn: TimeColumn;
     expectedDelay: Duration;
+    dataSource: string;
 }
 
 export interface TimeColumn {
@@ -29,13 +37,30 @@ export interface Duration {
     seconds: number;
     units: TemporalUnit[];
     nano: number;
-    negative: boolean;
     zero: boolean;
+    negative: boolean;
 }
 
 export interface TemporalUnit {
-    numberBased: boolean;
     timeBased: boolean;
+    numberBased: boolean;
     duration: Duration;
     durationEstimated: boolean;
+}
+
+export interface LogicalView {
+    name: string;
+    query: string;
+}
+
+export enum MetricAggFunction {
+    SUM = "SUM",
+    AVG = "AVG",
+    COUNT = "COUNT",
+    COUNT_DISTINCT = "COUNT_DISTINCT",
+    MAX = "MAX",
+    PCT50 = "PCT50",
+    PCT90 = "PCT90",
+    PCT95 = "PCT95",
+    PCT99 = "PCT99",
 }

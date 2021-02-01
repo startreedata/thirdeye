@@ -12,7 +12,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
-    EmailSettings,
+    EmailScheme,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
@@ -109,7 +109,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                     // Create and add to email settings
                     newSubscriptionGroup.notificationSchemes.email = {
                         to: emails,
-                    } as EmailSettings;
+                    } as EmailScheme;
                 }
 
                 return newSubscriptionGroup;

@@ -180,7 +180,6 @@ export const getAlertEvaluationAnomalyPointsMaxValue = (
 
     let maxValue = Number.MIN_VALUE;
     for (const alertEvaluationAnomalyPoint of alertEvaluationAnomalyPoints) {
-        // Current
         if (
             isFinite(alertEvaluationAnomalyPoint.current) &&
             maxValue < alertEvaluationAnomalyPoint.current

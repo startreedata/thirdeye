@@ -7,11 +7,10 @@ import {
 
 jest.mock("numbro", () =>
     jest.fn().mockImplementation(
-        (num: number): numbro.Numbro => {
-            return ({
+        (num: number): numbro.Numbro =>
+            (({
                 format: mockFormat.mockReturnValue(num.toString()),
-            } as unknown) as numbro.Numbro;
-        }
+            } as unknown) as numbro.Numbro)
     )
 );
 

@@ -1,4 +1,4 @@
-// CortexData Material-UI theme colors
+// Material-UI theme colors
 export const Color = {
     BLACK_1: "#000000",
     GREY_1: "#BDBDBD",

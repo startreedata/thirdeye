@@ -39,10 +39,10 @@ import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfigurati
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
+import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.scheduler.SchedulerService;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
@@ -137,20 +137,20 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
   }
 
   private void updateAdminSession(String adminUser, String sessionKey) {
-    SessionDTO savedSession = DAORegistry.getInstance().getSessionDAO()
-        .findBySessionKey(sessionKey);
-    long expiryMillis = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365);
+    final SessionManager sessionManager = injector.getInstance(SessionManager.class);
+    final SessionDTO savedSession = sessionManager.findBySessionKey(sessionKey);
+    final long expiryMillis = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365);
     if (savedSession == null) {
       SessionDTO sessionDTO = SessionUtils.buildServiceAccount(adminUser, sessionKey, expiryMillis);
-      DAORegistry.getInstance().getSessionDAO().save(sessionDTO);
+      sessionManager.save(sessionDTO);
     } else {
       savedSession.setExpirationTime(expiryMillis);
-      DAORegistry.getInstance().getSessionDAO().update(savedSession);
+      sessionManager.update(savedSession);
     }
   }
 
   public DatabaseConfiguration getDatabaseConfiguration() {
-    String persistenceConfig = System.getProperty("dw.rootDir") + "/persistence.yml";
+    final String persistenceConfig = System.getProperty("dw.rootDir") + "/persistence.yml";
     LOG.info("Loading persistence config from [{}]", persistenceConfig);
 
     final PersistenceConfig configuration = readPersistenceConfig(new File(persistenceConfig));

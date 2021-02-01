@@ -31,26 +31,20 @@ import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskRunner;
  */
 public class TaskRunnerFactory {
 
-  public static TaskRunner getTaskRunnerFromTaskType(TaskType taskType) {
-    TaskRunner taskRunner = null;
+  public static TaskRunner get(TaskType taskType) {
     switch (taskType) {
       case DATA_QUALITY:
-        taskRunner = new DataQualityPipelineTaskRunner();
-        break;
+        return new DataQualityPipelineTaskRunner();
       case DETECTION:
-        taskRunner = new DetectionPipelineTaskRunner();
-        break;
+        return new DetectionPipelineTaskRunner();
       case DETECTION_ALERT:
-        taskRunner = new DetectionAlertTaskRunner();
-        break;
+        return new DetectionAlertTaskRunner();
       case YAML_DETECTION_ONBOARD:
-        taskRunner = new YamlOnboardingTaskRunner();
-        break;
+        return new YamlOnboardingTaskRunner();
       case MONITOR:
-        taskRunner = new MonitorTaskRunner();
-        break;
+        return new MonitorTaskRunner();
       default:
+        throw new RuntimeException("Invalid TaskType: " + taskType);
     }
-    return taskRunner;
   }
 }

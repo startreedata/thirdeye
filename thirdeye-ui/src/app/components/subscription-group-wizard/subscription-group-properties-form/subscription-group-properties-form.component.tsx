@@ -40,7 +40,7 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<SubscriptionGrou
             onSubmit={handleSubmit(onSubmitSusbcriptionGroupPropertiesForm)}
         >
             <Grid container>
-                <Grid item md={4}>
+                <Grid item sm={4}>
                     {/* Name */}
                     <TextField
                         fullWidth

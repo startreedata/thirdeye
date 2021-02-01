@@ -130,9 +130,9 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             <CardContent>
                 {props.anomalyCardData && (
                     <Grid container>
-                        <Grid container item md={12}>
+                        <Grid container item sm={12}>
                             {/* Alert */}
-                            <Grid item md={4}>
+                            <Grid item sm={4}>
                                 <Typography variant="subtitle2">
                                     {t("label.alert")}
                                 </Typography>
@@ -151,7 +151,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             </Grid>
 
                             {/* Current / Predicted */}
-                            <Grid item md={4}>
+                            <Grid item sm={4}>
                                 <Typography variant="subtitle2">
                                     {t("label.current-/-predicted")}
                                 </Typography>
@@ -175,7 +175,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             </Grid>
 
                             {/* Deviation */}
-                            <Grid item md={4}>
+                            <Grid item sm={4}>
                                 <Typography variant="subtitle2">
                                     {t("label.deviation")}
                                 </Typography>
@@ -197,13 +197,13 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                         </Grid>
 
                         {/* Separator */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <Divider variant="fullWidth" />
                         </Grid>
 
-                        <Grid container item md={12}>
+                        <Grid container item sm={12}>
                             {/* Duration */}
-                            <Grid item md={4}>
+                            <Grid item sm={4}>
                                 <Typography variant="subtitle2">
                                     {t("label.duration")}
                                 </Typography>
@@ -217,7 +217,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             </Grid>
 
                             {/* Start */}
-                            <Grid item md={4}>
+                            <Grid item sm={4}>
                                 <Typography variant="subtitle2">
                                     {t("label.start")}
                                 </Typography>
@@ -231,7 +231,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             </Grid>
 
                             {/* End */}
-                            <Grid item md={4}>
+                            <Grid item sm={4}>
                                 <Typography variant="subtitle2">
                                     {t("label.end")}
                                 </Typography>

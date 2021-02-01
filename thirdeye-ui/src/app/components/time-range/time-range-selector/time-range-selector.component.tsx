@@ -234,11 +234,11 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                         >
                             <Grid container spacing={0}>
                                 {/* Calendars */}
-                                <Grid item md={12}>
+                                <Grid item sm={12}>
                                     <MuiPickersUtilsProvider utils={LuxonUtils}>
                                         <Grid container spacing={0}>
                                             {/* Start time calendar */}
-                                            <Grid item md={6}>
+                                            <Grid item sm={6}>
                                                 {/* Calendar label */}
                                                 <div
                                                     className={
@@ -268,7 +268,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                             </Grid>
 
                                             {/* End time calendar */}
-                                            <Grid item md={6}>
+                                            <Grid item sm={6}>
                                                 {/* Calendar label */}
                                                 <div
                                                     className={
@@ -306,7 +306,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                 </Grid>
 
                                 {/* Controls */}
-                                <Grid item md={12}>
+                                <Grid item sm={12}>
                                     <Box
                                         border={Dimension.WIDTH_BORDER_DEFAULT}
                                         borderBottom={0}

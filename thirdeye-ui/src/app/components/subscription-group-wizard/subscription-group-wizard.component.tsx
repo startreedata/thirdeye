@@ -164,7 +164,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         <>
             <Grid container>
                 {/* Stepper */}
-                <Grid item md={12}>
+                <Grid item sm={12}>
                     <Stepper alternativeLabel activeStep={currentWizardStep}>
                         {Object.values(SubscriptionGroupWizardStep)
                             .filter(
@@ -187,7 +187,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                 </Grid>
 
                 {/* Step label */}
-                <Grid item md={12}>
+                <Grid item sm={12}>
                     <Typography variant="h5">
                         {t(
                             `label.${kebabCase(
@@ -198,14 +198,14 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                 </Grid>
 
                 {/* Spacer */}
-                <Grid item md={12} />
+                <Grid item sm={12} />
 
                 {/* Subscription group properties */}
                 {currentWizardStep ===
                     SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (
                     <>
                         {/* Subscription group properties form */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <SubscriptionGroupPropertiesForm
                                 id={FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES}
                                 subscriptionGroup={newSubscriptionGroup}
@@ -216,16 +216,16 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                         </Grid>
 
                         {/* Spacer */}
-                        <Grid item md={12} />
+                        <Grid item sm={12} />
 
                         {/* Subscribe alerts */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <Typography variant="h5">
                                 {t("label.subscribe-alerts")}
                             </Typography>
                         </Grid>
 
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <TransferList<SubscriptionGroupAlert>
                                 fromLabel={t("label.all-alerts")}
                                 fromList={getSubscriptionGroupAlerts(
@@ -245,16 +245,16 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                         </Grid>
 
                         {/* Spacer */}
-                        <Grid item md={12} />
+                        <Grid item sm={12} />
 
                         {/* Subscribe emails */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <Typography variant="h5">
                                 {t("label.subscribe-emails")}
                             </Typography>
                         </Grid>
 
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <EditableList
                                 buttonLabel={t("label.add")}
                                 inputLabel={t("label.add-email")}

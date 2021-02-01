@@ -207,9 +207,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             <CardContent>
                 {props.alertCardData && (
                     <Grid container>
-                        <Grid container item md={12}>
+                        <Grid container item sm={12}>
                             {/* Created by */}
-                            <Grid item md={4}>
+                            <Grid item sm={4}>
                                 <Typography variant="subtitle2">
                                     {t("label.created-by")}
                                 </Typography>
@@ -222,13 +222,13 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         </Grid>
 
                         {/* Separator */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <Divider variant="fullWidth" />
                         </Grid>
 
-                        <Grid container item md={12}>
+                        <Grid container item sm={12}>
                             {/* Detection type */}
-                            <Grid item md={3}>
+                            <Grid item sm={3}>
                                 <ExpandableDetails<string>
                                     expand={expand}
                                     label={t("label.detection-type")}
@@ -242,7 +242,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                             </Grid>
 
                             {/* Dataset / Metric */}
-                            <Grid item md={3}>
+                            <Grid item sm={3}>
                                 <ExpandableDetails<AlertDatasetAndMetric>
                                     expand={expand}
                                     label={t("label.dataset-/-metric")}
@@ -256,7 +256,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                             </Grid>
 
                             {/* Filtered by */}
-                            <Grid item md={3}>
+                            <Grid item sm={3}>
                                 <ExpandableDetails<string>
                                     expand={expand}
                                     label={t("label.filtered-by")}
@@ -270,7 +270,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                             </Grid>
 
                             {/* Subscription groups */}
-                            <Grid item md={3}>
+                            <Grid item sm={3}>
                                 <ExpandableDetails<AlertSubscriptionGroup>
                                     link
                                     expand={expand}

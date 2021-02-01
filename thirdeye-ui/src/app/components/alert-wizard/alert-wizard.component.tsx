@@ -239,7 +239,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                 <>
                     <Grid container>
                         {/* Stepper */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <Stepper
                                 alternativeLabel
                                 activeStep={currentWizardStep}
@@ -264,7 +264,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                         </Grid>
 
                         {/* Step label */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <Typography variant="h5">
                                 {t(
                                     `label.${kebabCase(
@@ -275,14 +275,14 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                         </Grid>
 
                         {/* Spacer */}
-                        <Grid item md={12} />
+                        <Grid item sm={12} />
 
                         {/* Detection configuration */}
                         {currentWizardStep ===
                             AlertWizardStep.DETECTION_CONFIGURATION && (
                             <>
                                 {/* Detection configuration editor */}
-                                <Grid item md={12}>
+                                <Grid item sm={12}>
                                     <JSONEditor
                                         error={detectionConfigurationError}
                                         helperText={
@@ -301,7 +301,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                 </Grid>
 
                                 {/* Alert evaluation */}
-                                <Grid item md={12}>
+                                <Grid item sm={12}>
                                     <AlertEvaluationTimeSeriesCard
                                         showRefreshButton
                                         alertEvaluation={alertEvaluation}
@@ -318,7 +318,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                 AlertWizardStep.SUBSCRIPTION_GROUPS && (
                                 <>
                                     {/* Detection configuration editor */}
-                                    <Grid item md={12}>
+                                    <Grid item sm={12}>
                                         <TransferList<SubscriptionGroup>
                                             fromLabel="All Subscription Groups"
                                             fromList={subs}
@@ -341,7 +341,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                             AlertWizardStep.REVIEW_AND_SUBMIT && (
                             <>
                                 {/* Alert information */}
-                                <Grid item md={12}>
+                                <Grid item sm={12}>
                                     <JSONEditor
                                         readOnly
                                         value={
@@ -355,7 +355,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
 
                                 <Grid container justify="flex-end">
                                     {/* Subscription groups */}
-                                    <Grid item md={2}>
+                                    <Grid item sm={2}>
                                         <Typography variant="subtitle1">
                                             <strong>
                                                 {t("label.subscription-groups")}
@@ -365,7 +365,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
 
                                     {/* No subscription groups */}
                                     {isEmpty(selecteddSubs) && (
-                                        <Grid item md={10}>
+                                        <Grid item sm={10}>
                                             <Typography variant="body1">
                                                 {t("label.no-data-marker")}
                                             </Typography>
@@ -374,7 +374,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
 
                                     {/* All subscription groups */}
                                     {selecteddSubs && (
-                                        <Grid item md={10}>
+                                        <Grid item sm={10}>
                                             {selecteddSubs.map((sub, index) => (
                                                 <Typography
                                                     key={index}
@@ -404,11 +404,10 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                         container
                         alignItems="stretch"
                         className={alertWizardClasses.controlsContainer}
-                        direction="column"
                         justify="flex-end"
                     >
                         {detectionConfigurationError && (
-                            <Grid item>
+                            <Grid item sm={12}>
                                 <MuiAlert severity="error">
                                     There were some errors
                                 </MuiAlert>
@@ -416,7 +415,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                         )}
 
                         {/* Separator */}
-                        <Grid item>
+                        <Grid item sm={12}>
                             <Box
                                 border={Dimension.WIDTH_BORDER_DEFAULT}
                                 borderBottom={0}
@@ -426,7 +425,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                             />
                         </Grid>
 
-                        <Grid item>
+                        <Grid item sm={12}>
                             <Grid container justify="space-between">
                                 {/* Cancel button */}
                                 <Grid item>

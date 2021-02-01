@@ -98,7 +98,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     return (
         <Grid container>
             {/* Input */}
-            <Grid item md={9}>
+            <Grid item sm={9}>
                 <TextField
                     fullWidth
                     InputProps={{
@@ -121,7 +121,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
             </Grid>
 
             {/* Add button */}
-            <Grid item md={3}>
+            <Grid item sm={3}>
                 <Button
                     fullWidth
                     className={editableListClasses.addButton}
@@ -135,7 +135,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
             </Grid>
 
             {/* List */}
-            <Grid item md={12}>
+            <Grid item sm={12}>
                 <Card variant="outlined">
                     <CardContent className={editableListClasses.listContainer}>
                         <List dense>

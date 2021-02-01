@@ -199,9 +199,9 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                 title={anomalyCardData ? anomalyCardData.name : ""}
             >
                 {anomalyCardData && (
-                    <Grid container direction="column">
+                    <Grid container>
                         {/* Anomaly */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <AnomalyCard
                                 hideViewDetailsLinks
                                 anomalyCardData={anomalyCardData}
@@ -210,7 +210,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                         </Grid>
 
                         {/* Alert evaluation time series */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <AlertEvaluationTimeSeriesCard
                                 alertEvaluation={alertEvaluation}
                             />

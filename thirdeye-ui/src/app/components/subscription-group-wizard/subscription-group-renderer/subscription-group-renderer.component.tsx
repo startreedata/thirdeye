@@ -12,13 +12,13 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
     return (
         <Grid container justify="flex-end">
             {/* Name */}
-            <Grid item md={2}>
+            <Grid item sm={2}>
                 <Typography variant="subtitle1">
                     <strong>{t("label.name")}</strong>
                 </Typography>
             </Grid>
 
-            <Grid item md={10}>
+            <Grid item sm={10}>
                 <Typography variant="body1">
                     {(props.subscriptionGroup &&
                         props.subscriptionGroup.name) ||
@@ -27,7 +27,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
             </Grid>
 
             {/* Subscribed alerts */}
-            <Grid item md={2}>
+            <Grid item sm={2}>
                 <Typography variant="subtitle1">
                     <strong>{t("label.subscribed-alerts")}</strong>
                 </Typography>
@@ -36,7 +36,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
             {/* No subscribed alerts */}
             {!props.subscriptionGroup ||
                 (isEmpty(props.subscriptionGroup.alerts) && (
-                    <Grid item md={10}>
+                    <Grid item sm={10}>
                         <Typography variant="body1">
                             {t("label.no-data-marker")}
                         </Typography>
@@ -46,7 +46,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
             {/* All subscribed alerts */}
             {props.subscriptionGroup &&
                 !isEmpty(props.subscriptionGroup.alerts) && (
-                    <Grid item md={10}>
+                    <Grid item sm={10}>
                         {props.subscriptionGroup.alerts.map((alert, index) => (
                             <Typography key={index} variant="body1">
                                 {alert.name}
@@ -56,7 +56,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                 )}
 
             {/* Subscribed emails */}
-            <Grid item md={2}>
+            <Grid item sm={2}>
                 <Typography variant="subtitle1">
                     <strong>{t("label.subscribed-emails")}</strong>
                 </Typography>
@@ -68,7 +68,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                 (isEmpty(
                     props.subscriptionGroup.notificationSchemes.email.to
                 ) && (
-                    <Grid item md={10}>
+                    <Grid item sm={10}>
                         <Typography variant="body1">
                             {t("label.no-data-marker")}
                         </Typography>
@@ -81,7 +81,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                 !isEmpty(
                     props.subscriptionGroup.notificationSchemes.email.to
                 ) && (
-                    <Grid item md={10}>
+                    <Grid item sm={10}>
                         {props.subscriptionGroup.notificationSchemes.email.to.map(
                             (email, index) => (
                                 <Typography key={index} variant="body1">

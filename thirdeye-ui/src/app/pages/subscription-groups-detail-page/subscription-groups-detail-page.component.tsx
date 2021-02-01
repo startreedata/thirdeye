@@ -276,9 +276,9 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 }
             >
                 {subscriptionGroupCardData && (
-                    <Grid container direction="column">
+                    <Grid container>
                         {/* Subscription Group */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <SubscriptionGroupCard
                                 hideViewDetailsLinks
                                 subscriptionGroupCardData={
@@ -289,7 +289,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                         </Grid>
 
                         {/* Subscribed alerts */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <SubscriptionGroupAlertsAccordian
                                 alerts={alerts}
                                 subscriptionGroupCardData={
@@ -301,7 +301,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                         </Grid>
 
                         {/* Subscribed emails */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <SubscriptionGroupEmailsAccordian
                                 subscriptionGroupCardData={
                                     subscriptionGroupCardData

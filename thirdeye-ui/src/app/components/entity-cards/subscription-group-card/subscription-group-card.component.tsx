@@ -155,9 +155,9 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
             <CardContent>
                 {props.subscriptionGroupCardData && (
                     <Grid container>
-                        <Grid container item md={12}>
+                        <Grid container item sm={12}>
                             {/* Subscribed alerts */}
-                            <Grid item md={6}>
+                            <Grid item sm={6}>
                                 <ExpandableDetails<SubscriptionGroupAlert>
                                     link
                                     expand={expand}
@@ -173,7 +173,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                             </Grid>
 
                             {/* Subscribed emails */}
-                            <Grid item md={6}>
+                            <Grid item sm={6}>
                                 <ExpandableDetails<string>
                                     expand={expand}
                                     label={t("label.subscribed-emails")}

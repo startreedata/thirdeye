@@ -188,9 +188,9 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                 hideTimeRange
                 title={t("label.subscription-groups")}
             >
-                <Grid container direction="column">
+                <Grid container>
                     {/* Search */}
-                    <Grid item md={12}>
+                    <Grid item sm={12}>
                         <SearchBar
                             autoFocus
                             setSearchQueryString
@@ -211,7 +211,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                     {filteredSubscriptionGroupCardDatas &&
                         filteredSubscriptionGroupCardDatas.map(
                             (filteredSubscriptionGroupCardData, index) => (
-                                <Grid item key={index} md={12}>
+                                <Grid item key={index} sm={12}>
                                     <SubscriptionGroupCard
                                         searchWords={searchWords}
                                         subscriptionGroupCardData={

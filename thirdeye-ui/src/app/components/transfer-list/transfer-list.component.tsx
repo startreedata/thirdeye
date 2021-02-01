@@ -168,17 +168,17 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     return (
         <Grid container>
             {/* From-list*/}
-            <Grid item md={6}>
+            <Grid item sm={6}>
                 <Grid container>
                     {/* Label */}
-                    <Grid item md={12}>
+                    <Grid item sm={12}>
                         <Typography variant="subtitle2">
                             {props.fromLabel}
                         </Typography>
                     </Grid>
 
                     {/* Search */}
-                    <Grid item md={12}>
+                    <Grid item sm={12}>
                         <SearchBar
                             label={t("label.search")}
                             searchStatusLabel={t("label.search-count", {
@@ -191,7 +191,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                         />
                     </Grid>
 
-                    <Grid item md={12}>
+                    <Grid item sm={12}>
                         <Card variant="outlined">
                             <CardContent
                                 className={transferListClasses.listContainer}
@@ -275,17 +275,17 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             </Grid>
 
             {/* To-list */}
-            <Grid item md={6}>
+            <Grid item sm={6}>
                 <Grid container>
                     {/* Label */}
-                    <Grid item md={12}>
+                    <Grid item sm={12}>
                         <Typography variant="subtitle2">
                             {props.toLabel}
                         </Typography>
                     </Grid>
 
                     {/* Search */}
-                    <Grid item md={12}>
+                    <Grid item sm={12}>
                         <SearchBar
                             label={t("label.search")}
                             searchStatusLabel={t("label.search-count", {
@@ -298,7 +298,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                         />
                     </Grid>
 
-                    <Grid item md={12}>
+                    <Grid item sm={12}>
                         <Card variant="outlined">
                             <CardContent
                                 className={transferListClasses.listContainer}

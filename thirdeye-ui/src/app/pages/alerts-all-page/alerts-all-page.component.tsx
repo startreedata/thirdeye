@@ -217,9 +217,9 @@ export const AlertsAllPage: FunctionComponent = () => {
     return (
         <PageContainer>
             <PageContents centered title={t("label.alerts")}>
-                <Grid container direction="column">
+                <Grid container>
                     {/* Search */}
-                    <Grid item md={12}>
+                    <Grid item sm={12}>
                         <SearchBar
                             autoFocus
                             setSearchQueryString
@@ -240,7 +240,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                     {filteredAlertCardDatas &&
                         filteredAlertCardDatas.map(
                             (filteredAlertCardData, index) => (
-                                <Grid item key={index} md={12}>
+                                <Grid item key={index} sm={12}>
                                     <AlertCard
                                         alertCardData={filteredAlertCardData}
                                         searchWords={searchWords}

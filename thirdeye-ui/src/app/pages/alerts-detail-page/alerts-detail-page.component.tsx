@@ -249,9 +249,9 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 title={alertCardData ? alertCardData.name : ""}
             >
                 {alertCardData && (
-                    <Grid container direction="column">
+                    <Grid container>
                         {/* Alert */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <AlertCard
                                 hideViewDetailsLinks
                                 alertCardData={alertCardData}
@@ -261,7 +261,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
                         </Grid>
 
                         {/* Alert evaluation time series */}
-                        <Grid item md={12}>
+                        <Grid item sm={12}>
                             <AlertEvaluationTimeSeriesCard
                                 alertEvaluation={alertEvaluation}
                             />

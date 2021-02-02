@@ -44,6 +44,8 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.JobManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
@@ -58,8 +60,16 @@ public class MonitorTaskRunner implements TaskRunner {
   private static final Logger LOG = LoggerFactory.getLogger(MonitorJobRunner.class);
   private static final long MAX_TASK_TIME = TimeUnit.HOURS.toMillis(6);
   private static final long MAX_FAILED_DISABLE_DAYS = 30;
-  private final DAORegistry DAO_REGISTRY = DAORegistry.getInstance();
+  private final DAORegistry daoRegistry;
+  private final TaskManager taskManager;
+  private final JobManager jobManager;
   private ThirdEyeWorkerConfiguration thirdeyeConfig;
+
+  public MonitorTaskRunner(final DAORegistry daoRegistry) {
+    this.daoRegistry = daoRegistry;
+    this.taskManager = daoRegistry.getTaskDAO();
+    this.jobManager = daoRegistry.getJobDAO();
+  }
 
   @Override
   public List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) {
@@ -83,11 +93,11 @@ public class MonitorTaskRunner implements TaskRunner {
     int jobRetentionDays = monitorTaskInfo.getDefaultRetentionDays();
     try {
       // Mark expired tasks with RUNNING states as TIMEOUT
-      List<TaskDTO> timeoutTasks = DAO_REGISTRY.getTaskDAO()
+      List<TaskDTO> timeoutTasks = taskManager
           .findTimeoutTasksWithinDays(jobRetentionDays, MAX_TASK_TIME);
       if (!timeoutTasks.isEmpty()) {
         for (TaskDTO task : timeoutTasks) {
-          DAO_REGISTRY.getTaskDAO()
+          taskManager
               .updateStatusAndTaskEndTime(task.getId(), TaskStatus.RUNNING, TaskStatus.TIMEOUT,
                   System.currentTimeMillis(), "TIMEOUT status updated by MonitorTaskRunner");
         }
@@ -106,7 +116,7 @@ public class MonitorTaskRunner implements TaskRunner {
       if (!timeoutJobs.isEmpty()) {
         List<JobDTO> jobsToUpdate = extractJobDTO(scheduledJobs, timeoutJobs);
         if (!jobsToUpdate.isEmpty()) {
-          DAO_REGISTRY.getJobDAO().updateJobStatusAndEndTime(jobsToUpdate, JobStatus.TIMEOUT,
+          jobManager.updateJobStatusAndEndTime(jobsToUpdate, JobStatus.TIMEOUT,
               System.currentTimeMillis());
           scheduledJobs.keySet().removeAll(timeoutJobs);
           LOG.info("TIMEOUT jobs {}", timeoutJobs);
@@ -118,7 +128,7 @@ public class MonitorTaskRunner implements TaskRunner {
       if (!failedJobs.isEmpty()) {
         List<JobDTO> jobsToUpdate = extractJobDTO(scheduledJobs, failedJobs);
         if (!jobsToUpdate.isEmpty()) {
-          DAO_REGISTRY.getJobDAO().updateJobStatusAndEndTime(jobsToUpdate, JobStatus.FAILED,
+          jobManager.updateJobStatusAndEndTime(jobsToUpdate, JobStatus.FAILED,
               System.currentTimeMillis());
           scheduledJobs.keySet().removeAll(failedJobs);
           LOG.info("FAILED jobs {}", timeoutJobs);
@@ -129,7 +139,7 @@ public class MonitorTaskRunner implements TaskRunner {
       if (!scheduledJobs.isEmpty()) {
         List<JobDTO> jobsToUpdate = new ArrayList<>(scheduledJobs.values());
         if (!jobsToUpdate.isEmpty()) {
-          DAO_REGISTRY.getJobDAO().updateJobStatusAndEndTime(jobsToUpdate, JobStatus.COMPLETED,
+          jobManager.updateJobStatusAndEndTime(jobsToUpdate, JobStatus.COMPLETED,
               System.currentTimeMillis());
           LOG.info("COMPLETED jobs {}", scheduledJobs.keySet());
         }
@@ -147,7 +157,7 @@ public class MonitorTaskRunner implements TaskRunner {
    * since then.
    */
   private void disableLongFailedAlerts() {
-    AlertManager detectionDAO = DAO_REGISTRY.getDetectionConfigManager();
+    AlertManager detectionDAO = daoRegistry.getDetectionConfigManager();
     List<AlertDTO> detectionConfigs = detectionDAO.findAllActive();
     long currentTimeMillis = System.currentTimeMillis();
     long maxTaskFailMillis = TimeUnit.DAYS.toMillis(MAX_FAILED_DISABLE_DAYS);
@@ -207,10 +217,10 @@ public class MonitorTaskRunner implements TaskRunner {
     try {
       // CAUTION: Fist delete tasks then jobs, as task has a foreign key.
       int completedJobRetentionDays = monitorTaskInfo.getCompletedJobRetentionDays();
-      int deletedCompletedTasks = DAO_REGISTRY.getTaskDAO()
+      int deletedCompletedTasks = taskManager
           .deleteRecordsOlderThanDaysWithStatus(completedJobRetentionDays, TaskStatus.COMPLETED);
       int deletedCompletedJobs =
-          DAO_REGISTRY.getJobDAO()
+          jobManager
               .deleteRecordsOlderThanDaysWithStatus(completedJobRetentionDays, JobStatus.COMPLETED);
       LOG.info("Deleted {} completed jobs and {} completed tasks that are older than {} days.",
           deletedCompletedJobs,
@@ -223,8 +233,8 @@ public class MonitorTaskRunner implements TaskRunner {
     try {
       // CAUTION: Fist delete tasks then jobs, as task has a foreign key.
       int jobRetentionDays = monitorTaskInfo.getDefaultRetentionDays();
-      int deletedTasks = DAO_REGISTRY.getTaskDAO().deleteRecordsOlderThanDays(jobRetentionDays);
-      int deletedJobs = DAO_REGISTRY.getJobDAO().deleteRecordsOlderThanDays(jobRetentionDays);
+      int deletedTasks = taskManager.deleteRecordsOlderThanDays(jobRetentionDays);
+      int deletedJobs = jobManager.deleteRecordsOlderThanDays(jobRetentionDays);
       LOG.info("Deleted {} jobs and {} tasks that are older than {} days.", deletedTasks,
           deletedJobs,
           jobRetentionDays);
@@ -234,7 +244,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
     // Delete expired detection status.
     try {
-      int deletedDetectionStatus = DAO_REGISTRY.getDetectionStatusDAO()
+      int deletedDetectionStatus = daoRegistry.getDetectionStatusDAO()
           .deleteRecordsOlderThanDays(monitorTaskInfo.getDetectionStatusRetentionDays());
       LOG.info("Deleted {} detection status that are older than {} days.", deletedDetectionStatus,
           monitorTaskInfo.getDetectionStatusRetentionDays());
@@ -244,7 +254,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
     // Delete old evaluations.
     try {
-      int deletedEvaluations = DAO_REGISTRY.getEvaluationManager()
+      int deletedEvaluations = daoRegistry.getEvaluationManager()
           .deleteRecordsOlderThanDays(monitorTaskInfo.getDefaultRetentionDays());
       LOG.info("Deleted {} evaluations that are older than {} days.", deletedEvaluations,
           monitorTaskInfo.getDefaultRetentionDays());
@@ -254,7 +264,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
     // Delete expired online detection data
     try {
-      int deletedOnlineDetectionDatas = DAO_REGISTRY.getOnlineDetectionDataManager()
+      int deletedOnlineDetectionDatas = daoRegistry.getOnlineDetectionDataManager()
           .deleteRecordsOlderThanDays(monitorTaskInfo.getDefaultRetentionDays());
       LOG.info("Deleted {} online detection data that are older than {} days.",
           deletedOnlineDetectionDatas, monitorTaskInfo.getDefaultRetentionDays());
@@ -264,7 +274,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
     // Delete old anomaly subscription notifications.
     try {
-      int deletedRecords = DAO_REGISTRY.getAnomalySubscriptionGroupNotificationManager()
+      int deletedRecords = daoRegistry.getAnomalySubscriptionGroupNotificationManager()
           .deleteRecordsOlderThanDays(monitorTaskInfo.getDefaultRetentionDays());
       LOG.info("Deleted {} anomaly subscription notifications that are older than {} days.",
           deletedRecords,
@@ -276,7 +286,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
   private Map<Long, JobDTO> findScheduledJobsWithinDays(int days) {
     Map<Long, JobDTO> jobs = new HashMap<>();
-    List<JobDTO> jobList = DAO_REGISTRY.getJobDAO()
+    List<JobDTO> jobList = jobManager
         .findByStatusWithinDays(JobStatus.SCHEDULED, days);
     if (CollectionUtils.isNotEmpty(jobList)) {
       for (JobDTO jobDTO : jobList) {
@@ -288,7 +298,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
   private Set<Long> findWaitingJobsWithinDays(int days) {
     Set<Long> waitingJobIds = new HashSet<>();
-    List<TaskDTO> waitingTasks = DAO_REGISTRY.getTaskDAO()
+    List<TaskDTO> waitingTasks = taskManager
         .findByStatusWithinDays(TaskStatus.WAITING, days);
     for (TaskDTO task : waitingTasks) {
       waitingJobIds.add(task.getJobId());
@@ -298,7 +308,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
   private Set<Long> findTimeoutJobsWithinDays(int days) {
     Set<Long> timeoutJobs = new HashSet<>();
-    List<TaskDTO> timeoutTasks = DAO_REGISTRY.getTaskDAO()
+    List<TaskDTO> timeoutTasks = taskManager
         .findByStatusWithinDays(TaskStatus.TIMEOUT, days);
     for (TaskDTO task : timeoutTasks) {
       timeoutJobs.add(task.getJobId());
@@ -308,7 +318,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
   private Set<Long> findFailedJobsWithinDays(int days) {
     Set<Long> failedJobIds = new HashSet<>();
-    List<TaskDTO> failedTasks = DAO_REGISTRY.getTaskDAO()
+    List<TaskDTO> failedTasks = taskManager
         .findByStatusWithinDays(TaskStatus.FAILED, days);
     for (TaskDTO task : failedTasks) {
       failedJobIds.add(task.getJobId());

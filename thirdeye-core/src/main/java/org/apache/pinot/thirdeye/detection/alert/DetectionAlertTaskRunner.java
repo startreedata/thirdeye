@@ -31,7 +31,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.slf4j.Logger;
@@ -50,10 +49,12 @@ public class DetectionAlertTaskRunner implements TaskRunner {
   private final SubscriptionGroupManager subscriptionConfigDAO;
   private final MergedAnomalyResultManager mergedAnomalyDAO;
 
-  public DetectionAlertTaskRunner() {
-    this.detAlertTaskFactory = new DetectionAlertTaskFactory();
-    this.subscriptionConfigDAO = DAORegistry.getInstance().getDetectionAlertConfigManager();
-    this.mergedAnomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
+  public DetectionAlertTaskRunner(final DetectionAlertTaskFactory detectionAlertTaskFactory,
+      final SubscriptionGroupManager detectionAlertConfigManager,
+      final MergedAnomalyResultManager mergedAnomalyResultDAO) {
+    this.detAlertTaskFactory = detectionAlertTaskFactory;
+    this.subscriptionConfigDAO = detectionAlertConfigManager;
+    this.mergedAnomalyDAO = mergedAnomalyResultDAO;
   }
 
   private SubscriptionGroupDTO loadDetectionAlertConfig(long detectionAlertConfigId) {

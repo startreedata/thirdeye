@@ -26,9 +26,12 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskRunner;
+import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskFactory;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskRunner;
 import org.apache.pinot.thirdeye.detection.dataquality.DataQualityPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskRunner;
@@ -40,35 +43,55 @@ public class TaskRunnerFactory {
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final EvaluationManager evaluationManager;
   private final DataProvider dataProvider;
+  private final SubscriptionGroupManager subscriptionGroupManager;
+  private final DetectionPipelineLoader detectionPipelineLoader;
+  private final DAORegistry daoRegistry;
 
   @Inject
   public TaskRunnerFactory(
       final AlertManager detectionConfigManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final EvaluationManager evaluationManager,
-      final DataProvider dataProvider) {
+      final DataProvider dataProvider,
+      final SubscriptionGroupManager subscriptionGroupManager,
+      final DetectionPipelineLoader detectionPipelineLoader,
+      final DAORegistry daoRegistry) {
     this.detectionConfigManager = detectionConfigManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.evaluationManager = evaluationManager;
     this.dataProvider = dataProvider;
+    this.subscriptionGroupManager = subscriptionGroupManager;
+    this.detectionPipelineLoader = detectionPipelineLoader;
+    this.daoRegistry = daoRegistry;
   }
 
   public TaskRunner get(TaskType taskType) {
     switch (taskType) {
       case DATA_QUALITY:
-        return new DataQualityPipelineTaskRunner();
+        return new DataQualityPipelineTaskRunner(
+            dataProvider,
+            detectionPipelineLoader,
+            detectionConfigManager,
+            mergedAnomalyResultManager
+        );
       case DETECTION:
-        return new DetectionPipelineTaskRunner(new DetectionPipelineLoader(),
+        return new DetectionPipelineTaskRunner(detectionPipelineLoader,
             detectionConfigManager,
             mergedAnomalyResultManager,
             evaluationManager,
             dataProvider);
       case DETECTION_ALERT:
-        return new DetectionAlertTaskRunner();
+        return new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(),
+            subscriptionGroupManager,
+            mergedAnomalyResultManager);
       case YAML_DETECTION_ONBOARD:
-        return new YamlOnboardingTaskRunner();
+        return new YamlOnboardingTaskRunner(
+            dataProvider,
+            mergedAnomalyResultManager,
+            detectionConfigManager,
+            detectionPipelineLoader);
       case MONITOR:
-        return new MonitorTaskRunner();
+        return new MonitorTaskRunner(daoRegistry);
       default:
         throw new RuntimeException("Invalid TaskType: " + taskType);
     }

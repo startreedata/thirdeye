@@ -28,26 +28,14 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
-import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,29 +49,17 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
   private static final Logger LOG = LoggerFactory.getLogger(YamlOnboardingTaskRunner.class);
   private final AlertManager detectionDAO;
   private final MergedAnomalyResultManager anomalyDAO;
-  private final EvaluationManager evaluationDAO;
   private final DetectionPipelineLoader loader;
   private final DataProvider provider;
 
-  public YamlOnboardingTaskRunner() {
-    this.loader = new DetectionPipelineLoader();
-    this.detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
-    this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
-    this.evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
-
-    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    EventManager eventDAO = DAORegistry.getInstance().getEventDAO();
-
-    AggregationLoader aggregationLoader =
-        new DefaultAggregationLoader(metricDAO, datasetDAO,
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-                .getDatasetMaxDataTimeCache());
-
-    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, this.evaluationDAO,
-        aggregationLoader, this.loader, TimeSeriesCacheBuilder.getInstance(),
-        AnomaliesCacheBuilder.getInstance());
+  public YamlOnboardingTaskRunner(final DataProvider provider,
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AlertManager detectionConfigManager,
+      final DetectionPipelineLoader loader) {
+    this.loader = loader;
+    this.detectionDAO = detectionConfigManager;
+    this.anomalyDAO = mergedAnomalyResultManager;
+    this.provider = provider;
   }
 
   @Override

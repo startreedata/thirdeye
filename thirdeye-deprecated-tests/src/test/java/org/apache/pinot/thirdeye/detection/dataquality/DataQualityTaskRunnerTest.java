@@ -233,11 +233,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        this.detectionDAO,
-        this.anomalyDAO,
-        this.evaluationDAO,
-        this.loader,
-        mockDataProvider
+        mockDataProvider, this.loader, this.detectionDAO,
+        this.anomalyDAO
     );
 
     // CHECK 0: Report data missing immediately if delayed even by a minute (sla = 0_DAYS)
@@ -420,11 +417,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        this.detectionDAO,
-        this.anomalyDAO,
-        this.evaluationDAO,
-        this.loader,
-        mockDataProvider
+        mockDataProvider, this.loader, this.detectionDAO,
+        this.anomalyDAO
     );
 
     // Create detection window (2 - 10) with a lot of empty data points (no data after 3rd).
@@ -487,11 +481,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        this.detectionDAO,
-        this.anomalyDAO,
-        this.evaluationDAO,
-        this.loader,
-        mockDataProvider
+        mockDataProvider, this.loader, this.detectionDAO,
+        this.anomalyDAO
     );
 
     // Prepare the data sla task over existing data in time-series
@@ -535,11 +526,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        this.detectionDAO,
-        this.anomalyDAO,
-        this.evaluationDAO,
-        this.loader,
-        mockDataProvider
+        mockDataProvider, this.loader, this.detectionDAO,
+        this.anomalyDAO
     );
 
     // Scan a period where dimensional data is missing but dataset is complete.
@@ -586,11 +574,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        this.detectionDAO,
-        this.anomalyDAO,
-        this.evaluationDAO,
-        this.loader,
-        mockDataProvider
+        mockDataProvider, this.loader, this.detectionDAO,
+        this.anomalyDAO
     );
 
     // 1st scan
@@ -626,11 +611,8 @@ public class DataQualityTaskRunnerTest {
     datasetConfigDTO.setLastRefreshTime(START_TIME + 5 * GRANULARITY - 1);
     datasetDAO.update(datasetConfigDTO);
     runner = new DataQualityPipelineTaskRunner(
-        this.detectionDAO,
-        this.anomalyDAO,
-        this.evaluationDAO,
-        this.loader,
-        mockDataProvider
+        mockDataProvider, this.loader, this.detectionDAO,
+        this.anomalyDAO
     );
     runner.execute(this.info, this.context);
 

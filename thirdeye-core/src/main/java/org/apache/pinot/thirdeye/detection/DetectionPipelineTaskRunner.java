@@ -27,20 +27,12 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,28 +55,12 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final AlertManager detectionConfigManager,
       final MergedAnomalyResultManager mergedAnomalyResultDAO,
       final EvaluationManager evaluationManager,
-      final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager, final EventManager eventManager,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      final DataProvider provider) {
     this.loader = detectionPipelineLoader;
     this.detectionDAO = detectionConfigManager;
     this.anomalyDAO = mergedAnomalyResultDAO;
     this.evaluationDAO = evaluationManager;
-
-    final AggregationLoader aggregationLoader =
-        new DefaultAggregationLoader(metricConfigManager,
-            datasetConfigManager,
-            thirdEyeCacheRegistry.getQueryCache(),
-            thirdEyeCacheRegistry.getDatasetMaxDataTimeCache());
-
-    this.provider = new DefaultDataProvider(metricConfigManager,
-        datasetConfigManager,
-        eventManager,
-        this.evaluationDAO,
-        aggregationLoader,
-        this.loader,
-        TimeSeriesCacheBuilder.getInstance(),
-        AnomaliesCacheBuilder.getInstance());
+    this.provider = provider;
     this.maintenanceFlow = new ModelRetuneFlow(this.provider, DetectionRegistry.getInstance());
   }
 

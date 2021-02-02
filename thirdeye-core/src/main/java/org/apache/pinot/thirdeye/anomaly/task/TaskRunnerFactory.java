@@ -31,8 +31,10 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskRunner;
+import org.apache.pinot.thirdeye.detection.ModelRetuneFlow;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskFactory;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskRunner;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.dataquality.DataQualityPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskRunner;
 
@@ -75,11 +77,12 @@ public class TaskRunnerFactory {
             mergedAnomalyResultManager
         );
       case DETECTION:
-        return new DetectionPipelineTaskRunner(detectionPipelineLoader,
-            detectionConfigManager,
+        return new DetectionPipelineTaskRunner(detectionConfigManager,
             mergedAnomalyResultManager,
             evaluationManager,
-            dataProvider);
+            detectionPipelineLoader,
+            dataProvider,
+            new ModelRetuneFlow(dataProvider, new DetectionRegistry()));
       case DETECTION_ALERT:
         return new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(),
             subscriptionGroupManager,

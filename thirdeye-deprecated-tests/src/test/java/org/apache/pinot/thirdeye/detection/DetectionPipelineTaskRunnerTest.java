@@ -34,6 +34,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -89,7 +90,8 @@ public class DetectionPipelineTaskRunnerTest {
         this.anomalyDAO,
         this.evaluationDAO,
         this.loader,
-        this.provider
+        this.provider,
+        new ModelRetuneFlow(this.provider, new DetectionRegistry())
     );
 
     this.info = new DetectionPipelineTaskInfo();

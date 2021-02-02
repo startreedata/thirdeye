@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
@@ -32,7 +34,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,47 +42,35 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
 
-  private final AlertManager detectionDAO;
-  private final MergedAnomalyResultManager anomalyDAO;
-  private final EvaluationManager evaluationDAO;
+  private final AlertManager alertManager;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final EvaluationManager evaluationManager;
   private final DetectionPipelineLoader loader;
   private final DataProvider provider;
-  private final ModelMaintenanceFlow maintenanceFlow;
-
-  /**
-   * Default constructor for ThirdEye task execution framework.
-   */
-  public DetectionPipelineTaskRunner(final DetectionPipelineLoader detectionPipelineLoader,
-      final AlertManager detectionConfigManager,
-      final MergedAnomalyResultManager mergedAnomalyResultDAO,
-      final EvaluationManager evaluationManager,
-      final DataProvider provider) {
-    this.loader = detectionPipelineLoader;
-    this.detectionDAO = detectionConfigManager;
-    this.anomalyDAO = mergedAnomalyResultDAO;
-    this.evaluationDAO = evaluationManager;
-    this.provider = provider;
-    this.maintenanceFlow = new ModelRetuneFlow(this.provider, new DetectionRegistry());
-  }
+  private final ModelMaintenanceFlow modelMaintenanceFlow;
 
   /**
    * Alternate constructor for dependency injection.
    *
-   * @param detectionDAO detection config DAO
-   * @param anomalyDAO merged anomaly DAO
-   * @param evaluationDAO the evaluation DAO
+   * @param alertManager detection config DAO
+   * @param mergedAnomalyResultManager merged anomaly DAO
+   * @param evaluationManager the evaluation DAO
    * @param loader pipeline loader
    * @param provider pipeline data provider
+   * @param modelMaintenanceFlow
    */
-  public DetectionPipelineTaskRunner(AlertManager detectionDAO,
-      MergedAnomalyResultManager anomalyDAO,
-      EvaluationManager evaluationDAO, DetectionPipelineLoader loader, DataProvider provider) {
-    this.detectionDAO = detectionDAO;
-    this.anomalyDAO = anomalyDAO;
-    this.evaluationDAO = evaluationDAO;
+  public DetectionPipelineTaskRunner(AlertManager alertManager,
+      MergedAnomalyResultManager mergedAnomalyResultManager,
+      EvaluationManager evaluationManager,
+      DetectionPipelineLoader loader,
+      DataProvider provider,
+      ModelRetuneFlow modelMaintenanceFlow) {
+    this.alertManager = alertManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.evaluationManager = evaluationManager;
     this.loader = loader;
     this.provider = provider;
-    this.maintenanceFlow = new ModelRetuneFlow(this.provider, new DetectionRegistry());
+    this.modelMaintenanceFlow = modelMaintenanceFlow;
   }
 
   @Override
@@ -89,63 +78,72 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     ThirdeyeMetricsUtil.detectionTaskCounter.inc();
 
     try {
-      DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
-      AlertDTO config;
-      config = this.detectionDAO.findById(info.configId);
+      final DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
+      final AlertDTO config = requireNonNull(alertManager.findById(info.configId),
+          String.format("Could not resolve config id %d", info.configId));
 
-      if (config == null) {
-        throw new IllegalArgumentException(
-            String.format("Could not resolve config id %d", info.configId));
-      }
-
-      LOG.info("Start detection for config {} between {} and {}", config.getId(), info.start,
+      LOG.info("Start detection for config {} between {} and {}",
+          config.getId(),
+          info.start,
           info.end);
-      DetectionPipeline pipeline = this.loader.from(this.provider, config, info.start, info.end);
-      DetectionPipelineResult result = pipeline.run();
+
+      final DetectionPipeline pipeline = this.loader.from(this.provider,
+          config,
+          info.start,
+          info.end);
+      final DetectionPipelineResult result = pipeline.run();
 
       if (result.getLastTimestamp() < 0) {
-        LOG.info("No detection ran for config {} between {} and {}", config.getId(), info.start,
+        LOG.info("No detection ran for config {} between {} and {}",
+            config.getId(),
+            info.start,
             info.end);
         return Collections.emptyList();
       }
 
-      config.setLastTimestamp(result.getLastTimestamp());
-
-      for (MergedAnomalyResultDTO mergedAnomalyResultDTO : result.getAnomalies()) {
-        this.anomalyDAO.save(mergedAnomalyResultDTO);
-        if (mergedAnomalyResultDTO.getId() == null) {
-          LOG.warn("Could not store anomaly:\n{}", mergedAnomalyResultDTO);
-        }
-      }
-
-      for (EvaluationDTO evaluationDTO : result.getEvaluations()) {
-        this.evaluationDAO.save(evaluationDTO);
-      }
-
-      try {
-        // run maintenance flow to update model
-        config = maintenanceFlow.maintain(config, Instant.now());
-      } catch (Exception e) {
-        LOG.warn("Re-tune pipeline {} failed", config.getId(), e);
-      }
-      this.detectionDAO.update(config);
-
-      // re-notify the anomalies if any
-      for (MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
-        // if an anomaly should be re-notified, update the notification lookup table in the database
-        if (anomaly.isRenotify()) {
-          DetectionUtils.renotifyAnomaly(anomaly);
-        }
-      }
+      postExecution(config, result);
 
       ThirdeyeMetricsUtil.detectionTaskSuccessCounter.inc();
       LOG.info("End detection for config {} between {} and {}. Detected {} anomalies.",
           config.getId(), info.start,
           info.end, result.getAnomalies());
+
       return Collections.emptyList();
     } catch (Exception e) {
       ThirdeyeMetricsUtil.detectionTaskExceptionCounter.inc();
       throw e;
+    }
+  }
+
+  private void postExecution(final AlertDTO config,
+      final DetectionPipelineResult result) {
+    config.setLastTimestamp(result.getLastTimestamp());
+
+    for (MergedAnomalyResultDTO mergedAnomalyResultDTO : result.getAnomalies()) {
+      this.mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
+      if (mergedAnomalyResultDTO.getId() == null) {
+        LOG.error("Failed to store anomaly: {}", mergedAnomalyResultDTO);
+      }
+    }
+
+    for (EvaluationDTO evaluationDTO : result.getEvaluations()) {
+      this.evaluationManager.save(evaluationDTO);
+    }
+
+    try {
+      // run maintenance flow to update model
+      final AlertDTO updatedConfig = modelMaintenanceFlow.maintain(config, Instant.now());
+      this.alertManager.update(updatedConfig);
+    } catch (Exception e) {
+      LOG.warn("Re-tune pipeline {} failed", config.getId(), e);
+    }
+
+    // re-notify the anomalies if any
+    for (MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
+      // if an anomaly should be re-notified, update the notification lookup table in the database
+      if (anomaly.isRenotify()) {
+        DetectionUtils.renotifyAnomaly(anomaly);
+      }
     }
   }
 }

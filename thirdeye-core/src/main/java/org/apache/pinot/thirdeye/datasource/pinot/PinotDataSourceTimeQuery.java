@@ -83,7 +83,7 @@ public class PinotDataSourceTimeQuery {
       TimeSpec timeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 
       long cutoffTime = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
-      String timeClause = PqlUtils
+      String timeClause = SqlUtils
           .getBetweenClause(new DateTime(0, DateTimeZone.UTC),
               new DateTime(cutoffTime, DateTimeZone.UTC), timeSpec, dataset);
 
@@ -94,8 +94,8 @@ public class PinotDataSourceTimeQuery {
       ThirdEyeResultSetGroup resultSetGroup;
       final long tStart = System.nanoTime();
       try {
-        pinotThirdEyeDataSource.refreshPQL(maxTimePinotQuery);
-        resultSetGroup = pinotThirdEyeDataSource.executePQL(maxTimePinotQuery);
+        pinotThirdEyeDataSource.refreshSQL(maxTimePinotQuery);
+        resultSetGroup = pinotThirdEyeDataSource.executeSQL(maxTimePinotQuery);
         ThirdeyeMetricsUtil
             .getRequestLog()
             .success(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
@@ -108,7 +108,7 @@ public class PinotDataSourceTimeQuery {
       }
 
       if (resultSetGroup.size() == 0 || resultSetGroup.get(0).getRowCount() == 0) {
-        LOGGER.error("Failed to get latest max time for dataset {} with PQL: {}", dataset,
+        LOGGER.error("Failed to get latest max time for dataset {} with SQL: {}", dataset,
             maxTimePinotQuery.getQuery());
       } else {
         DateTimeZone timeZone = Utils.getDataTimeZone(dataset);

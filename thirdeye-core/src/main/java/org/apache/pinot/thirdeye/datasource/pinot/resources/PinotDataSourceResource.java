@@ -71,7 +71,7 @@ public class PinotDataSourceResource {
    */
   @GET
   @Path("/query")
-  public String executePQL(@QueryParam("pql") String pql, @QueryParam("tableName") String tableName)
+  public String executeSQL(@QueryParam("pql") String pql, @QueryParam("tableName") String tableName)
       throws UnsupportedEncodingException {
     initPinotDataSource();
 
@@ -80,7 +80,7 @@ public class PinotDataSourceResource {
     String decodedTableName = URLDecoder.decode(tableName, URL_ENCODING);
     PinotQuery pinotQuery = new PinotQuery(decodedPql, decodedTableName);
     try {
-      ThirdEyeResultSetGroup thirdEyeResultSetGroup = pinotDataSource.executePQL(pinotQuery);
+      ThirdEyeResultSetGroup thirdEyeResultSetGroup = pinotDataSource.executeSQL(pinotQuery);
       resultString = OBJECT_MAPPER.writeValueAsString(thirdEyeResultSetGroup);
     } catch (ExecutionException | JsonProcessingException e) {
       LOG.error("Failed to execute PQL ({}) due to the exception:", pinotQuery);

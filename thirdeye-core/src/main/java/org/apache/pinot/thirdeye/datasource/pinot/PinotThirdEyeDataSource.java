@@ -25,7 +25,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -45,6 +44,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
+import org.apache.pinot.common.utils.DataSchema;
+import org.apache.pinot.common.utils.DataSchema.ColumnDataType;
+import org.apache.pinot.spi.data.FieldSpec;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -179,7 +181,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
         MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
         Multimap<String, String> filterSetFromView;
-        Map<String, Map<String, String[]>> filterContextMap = new LinkedHashMap<>();
+        Map<String, Map<String, Object[]>> filterContextMap = new LinkedHashMap<>();
         if(metricConfig != null && metricConfig.getViews() != null && metricConfig.getViews().size() > 0) {
           Map<String, ResultSetGroup> viewToTEResultSet = constructViews(metricConfig.getViews());
           filterContextMap = convertToContextMap(viewToTEResultSet);
@@ -199,19 +201,19 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
                           datasetConfig.getDimensions(), datasetConfig.getDimensionsHaveNoPreAggregation(),
                           datasetConfig.getPreAggregatedKeyword());
         }
-        String pql;
+        String sql;
         if (metricConfig != null && metricConfig.isDimensionAsMetric()) {
-          pql = PqlUtils
-              .getDimensionAsMetricPql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec,
+          sql = SqlUtils
+              .getDimensionAsMetricSql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec,
                   datasetConfig);
         } else {
-          pql = PqlUtils.getPql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec);
+          sql = SqlUtils.getSql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec);
         }
 
         ThirdEyeResultSetGroup resultSetGroup;
         final long tStartFunction = System.nanoTime();
         try {
-          resultSetGroup = this.executePQL(new PinotQuery(pql, dataset));
+          resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
           if (metricConfig != null) {
             ThirdeyeMetricsUtil.getRequestLog()
                 .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
@@ -253,32 +255,69 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     return viewToTEResultSet;
   }
 
-  private Map<String, Map<String, String[]>> convertToContextMap(Map<String, ResultSetGroup> viewToResultSetGroup) {
-    Map<String, Map<String, String[]>> contextMap = new LinkedHashMap<>();
+  private Map<String, Map<String, Object[]>> convertToContextMap(Map<String, ResultSetGroup> viewToResultSetGroup) {
+    Map<String, Map<String, Object[]>> contextMap = new LinkedHashMap<>();
     for(Map.Entry<String, ResultSetGroup> entry: viewToResultSetGroup.entrySet()) {
       String viewName = entry.getKey();
       ResultSetGroup resultSetGroup = entry.getValue();
       ResultSet resultSet = resultSetGroup.getResultSet(0);
-      Map<String, String[]> columnValues = convertResultSetToMap(resultSet);
+      Map<String, Object[]> columnValues = convertResultSetToMap(resultSet);
       contextMap.put(viewName, columnValues);
     }
     return contextMap;
   }
 
-  private Map<String, String[]> convertResultSetToMap(ResultSet resultSet) {
+  private Map<String, Object[]> convertResultSetToMap(ResultSet resultSet) {
     int numColumns = resultSet.getColumnCount();
-    int numRows = resultSet.getRowCount();
-    Map<String, String[]> columnValues = new LinkedHashMap<>();
+    Map<String, Object[]> columnValues = new LinkedHashMap<>();
     for(int i=0; i<numColumns; i++) {
       String columnName = resultSet.getColumnName(i);
-      List<String> valueList = new ArrayList<>();
-      for(int j=0; j<numRows; j++) {
-        valueList.add(resultSet.getString(j, i));
-      }
-      String[] values = valueList.stream().toArray(String[]::new);
+      String columnType = resultSet.getColumnDataType(i);
+      Object[] values = getRowValues(resultSet, i, columnType);
       columnValues.put(columnName, values);
     }
     return columnValues;
+  }
+
+  private Object[] getRowValues(ResultSet resultSet, int columnIndex, String columnType) {
+    Object[] rowValues = new Object[resultSet.getRowCount()];
+    //TODO: This check needs to be removed once the resultset.getColumnType(i) returns not null
+    // The changes need to be made in pinot-java-client
+    if(columnType == null ) {
+      for (int i = 0; i < rowValues.length; i++) {
+        rowValues[i] = "'" + resultSet.getString(i, columnIndex) + "'";
+      }
+    } else {
+      ColumnDataType columnDataType = ColumnDataType.valueOf(columnType);
+      switch (columnDataType) {
+        case INT:
+          for (int i = 0; i < rowValues.length; i++) {
+            rowValues[i] = resultSet.getInt(i, columnIndex);
+          }
+          break;
+        case LONG:
+          for (int i = 0; i < rowValues.length; i++) {
+            rowValues[i] = resultSet.getLong(i, columnIndex);
+          }
+          break;
+        case FLOAT:
+          for (int i = 0; i < rowValues.length; i++) {
+            rowValues[i] = resultSet.getFloat(i, columnIndex);
+          }
+          break;
+        case DOUBLE:
+          for (int i = 0; i < rowValues.length; i++) {
+            rowValues[i] = resultSet.getDouble(i, columnIndex);
+          }
+          break;
+        default:
+          for (int i = 0; i < rowValues.length; i++) {
+            rowValues[i] = "'" + resultSet.getString(i, columnIndex) + "'";
+          }
+          break;
+      }
+    }
+    return rowValues;
   }
 
   private Multimap<String, String> resolveFilterSetFromView(Map<String, ResultSetGroup> viewToTEResultSet, Multimap<String, String> unresolvedFilterSet) {
@@ -400,7 +439,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  public ThirdEyeResultSetGroup executePQL(PinotQuery pinotQuery) throws ExecutionException {
+  public ThirdEyeResultSetGroup executeSQL(PinotQuery pinotQuery) throws ExecutionException {
     Preconditions
         .checkNotNull(this.pinotResponseCache,
             "{} doesn't connect to Pinot or cache is not initialized.", getName());
@@ -421,7 +460,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  public ThirdEyeResultSetGroup refreshPQL(PinotQuery pinotQuery) throws ExecutionException {
+  public ThirdEyeResultSetGroup refreshSQL(PinotQuery pinotQuery) throws ExecutionException {
     Preconditions
         .checkNotNull(this.pinotResponseCache,
             "{} doesn't connect to Pinot or cache is not initialized.", getName());

@@ -30,6 +30,7 @@ import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
+import org.apache.pinot.thirdeye.anomaly.task.TaskRunnerFactory;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
@@ -50,11 +51,13 @@ public class TaskDriver {
   private final TaskDriverConfiguration config;
   private final long workerId;
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
+  private final TaskRunnerFactory taskRunnerFactory;
 
   @Inject
   public TaskDriver(final ThirdEyeWorkerConfiguration workerConfiguration,
       final TaskManager taskManager,
-      final DAORegistry daoRegistry) {
+      final DAORegistry daoRegistry,
+      final TaskRunnerFactory taskRunnerFactory) {
     this.taskManager = taskManager;
     config = workerConfiguration.getTaskDriverConfiguration();
     workerId = workerConfiguration.getId();
@@ -76,6 +79,7 @@ public class TaskDriver {
         .setThirdEyeWorkerConfiguration(workerConfiguration)
         .setDaoRegistry(daoRegistry);
 
+    this.taskRunnerFactory = taskRunnerFactory;
   }
 
   public void start() {
@@ -96,7 +100,8 @@ public class TaskDriver {
         shutdown,
         taskExecutorService,
         config,
-        workerId
+        workerId,
+        taskRunnerFactory
     );
   }
 

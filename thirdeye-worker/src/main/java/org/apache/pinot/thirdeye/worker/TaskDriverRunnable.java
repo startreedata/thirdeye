@@ -63,13 +63,15 @@ public class TaskDriverRunnable implements Runnable {
   private final ExecutorService taskExecutorService;
   private final TaskDriverConfiguration config;
   private final long workerId;
+  private final TaskRunnerFactory taskRunnerFactory;
 
   public TaskDriverRunnable(final TaskManager taskManager,
       final TaskContext taskContext,
       final AtomicBoolean shutdown,
       final ExecutorService taskExecutorService,
       final TaskDriverConfiguration config,
-      final long workerId) {
+      final long workerId,
+      final TaskRunnerFactory taskRunnerFactory) {
 
     this.taskManager = taskManager;
     this.taskContext = taskContext;
@@ -77,6 +79,7 @@ public class TaskDriverRunnable implements Runnable {
     this.taskExecutorService = taskExecutorService;
     this.config = config;
     this.workerId = workerId;
+    this.taskRunnerFactory = taskRunnerFactory;
   }
 
   public void run() {
@@ -128,7 +131,7 @@ public class TaskDriverRunnable implements Runnable {
   private Future<List<TaskResult>> runTaskAsync(final TaskDTO taskDTO) throws IOException {
     final TaskType taskType = taskDTO.getTaskType();
     final TaskInfo taskInfo = TaskInfoFactory.get(taskType, taskDTO.getTaskInfo());
-    final TaskRunner taskRunner = TaskRunnerFactory.get(taskType);
+    final TaskRunner taskRunner = taskRunnerFactory.get(taskType);
 
     // execute the selected task asynchronously
     return taskExecutorService.submit(() -> taskRunner.execute(taskInfo, taskContext));

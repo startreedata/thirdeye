@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
@@ -28,24 +27,20 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,44 +48,42 @@ import org.slf4j.LoggerFactory;
 public class DetectionPipelineTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
+
   private final AlertManager detectionDAO;
   private final MergedAnomalyResultManager anomalyDAO;
   private final EvaluationManager evaluationDAO;
-  private final TaskManager taskDAO;
-  private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationDAO;
   private final DetectionPipelineLoader loader;
   private final DataProvider provider;
   private final ModelMaintenanceFlow maintenanceFlow;
 
-  private static final Long dummyDetectionId = 123456789L;
-
   /**
    * Default constructor for ThirdEye task execution framework.
-   * Loads dependencies from DAORegitry and CacheRegistry
-   *
-   * @see DAORegistry
-   * @see ThirdEyeCacheRegistry
    */
-  public DetectionPipelineTaskRunner() {
-    this.loader = new DetectionPipelineLoader();
-    this.detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
-    this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
-    this.evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
-    this.taskDAO = DAORegistry.getInstance().getTaskDAO();
-    this.anomalySubscriptionGroupNotificationDAO =
-        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager();
-    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    EventManager eventDAO = DAORegistry.getInstance().getEventDAO();
+  public DetectionPipelineTaskRunner(final DetectionPipelineLoader detectionPipelineLoader,
+      final AlertManager detectionConfigManager,
+      final MergedAnomalyResultManager mergedAnomalyResultDAO,
+      final EvaluationManager evaluationManager,
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager, final EventManager eventManager,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+    this.loader = detectionPipelineLoader;
+    this.detectionDAO = detectionConfigManager;
+    this.anomalyDAO = mergedAnomalyResultDAO;
+    this.evaluationDAO = evaluationManager;
 
-    AggregationLoader aggregationLoader =
-        new DefaultAggregationLoader(metricDAO, datasetDAO,
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-                .getDatasetMaxDataTimeCache());
+    final AggregationLoader aggregationLoader =
+        new DefaultAggregationLoader(metricConfigManager,
+            datasetConfigManager,
+            thirdEyeCacheRegistry.getQueryCache(),
+            thirdEyeCacheRegistry.getDatasetMaxDataTimeCache());
 
-    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, this.evaluationDAO,
-        aggregationLoader, this.loader, TimeSeriesCacheBuilder.getInstance(),
+    this.provider = new DefaultDataProvider(metricConfigManager,
+        datasetConfigManager,
+        eventManager,
+        this.evaluationDAO,
+        aggregationLoader,
+        this.loader,
+        TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
     this.maintenanceFlow = new ModelRetuneFlow(this.provider, DetectionRegistry.getInstance());
   }
@@ -112,9 +105,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     this.evaluationDAO = evaluationDAO;
     this.loader = loader;
     this.provider = provider;
-    this.taskDAO = DAORegistry.getInstance().getTaskDAO();
-    this.anomalySubscriptionGroupNotificationDAO =
-        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager();
     this.maintenanceFlow = new ModelRetuneFlow(this.provider, DetectionRegistry.getInstance());
   }
 

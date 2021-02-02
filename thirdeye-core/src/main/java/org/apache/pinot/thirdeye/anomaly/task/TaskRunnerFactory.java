@@ -19,24 +19,66 @@
 
 package org.apache.pinot.thirdeye.anomaly.task;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorTaskRunner;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskRunner;
 import org.apache.pinot.thirdeye.detection.dataquality.DataQualityPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskRunner;
 
-/**
- * This class returns an instance of the task runner depending on the task type
- */
+@Singleton
 public class TaskRunnerFactory {
 
-  public static TaskRunner get(TaskType taskType) {
+  private final AlertManager detectionConfigManager;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final EvaluationManager evaluationManager;
+  private final MetricConfigManager metricConfigManager;
+  private final DatasetConfigManager datasetConfigManager;
+  private final EventManager eventManager;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+
+  @Inject
+  public TaskRunnerFactory(
+      final AlertManager detectionConfigManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final EvaluationManager evaluationManager,
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager,
+      final EventManager eventManager,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+    this.detectionConfigManager = detectionConfigManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.evaluationManager = evaluationManager;
+    this.metricConfigManager = metricConfigManager;
+    this.datasetConfigManager = datasetConfigManager;
+
+    this.eventManager = eventManager;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+  }
+
+  public TaskRunner get(TaskType taskType) {
     switch (taskType) {
       case DATA_QUALITY:
         return new DataQualityPipelineTaskRunner();
       case DETECTION:
-        return new DetectionPipelineTaskRunner();
+        return new DetectionPipelineTaskRunner(new DetectionPipelineLoader(),
+            detectionConfigManager,
+            mergedAnomalyResultManager,
+            evaluationManager,
+            metricConfigManager,
+            datasetConfigManager,
+            eventManager,
+            thirdEyeCacheRegistry);
       case DETECTION_ALERT:
         return new DetectionAlertTaskRunner();
       case YAML_DETECTION_ONBOARD:

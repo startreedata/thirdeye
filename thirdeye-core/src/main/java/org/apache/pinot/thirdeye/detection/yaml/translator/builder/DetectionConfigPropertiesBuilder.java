@@ -83,7 +83,7 @@ public abstract class DetectionConfigPropertiesBuilder {
 
   final DetectionMetricAttributeHolder metricAttributesMap;
   final DataProvider dataProvider;
-  static final DetectionRegistry DETECTION_REGISTRY = DetectionRegistry.getInstance();
+  static final DetectionRegistry DETECTION_REGISTRY = new DetectionRegistry();
 
   DetectionConfigPropertiesBuilder(DetectionMetricAttributeHolder metricAttributesMap,
       DataProvider dataProvider) {

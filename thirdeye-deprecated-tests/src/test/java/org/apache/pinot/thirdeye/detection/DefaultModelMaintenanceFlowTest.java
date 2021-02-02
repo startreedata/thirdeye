@@ -61,7 +61,7 @@ public class DefaultModelMaintenanceFlowTest {
         .setDatasets(Collections.singletonList(dataset));
     this.configId = 100L;
     this.dataFetcher = new DefaultInputDataFetcher(this.provider, this.configId);
-    this.maintenanceFlow = new ModelRetuneFlow(this.provider, DetectionRegistry.getInstance());
+    this.maintenanceFlow = new ModelRetuneFlow(this.provider, new DetectionRegistry());
   }
 
   @Test

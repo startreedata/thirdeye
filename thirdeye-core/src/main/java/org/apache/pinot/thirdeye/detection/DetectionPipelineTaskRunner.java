@@ -61,7 +61,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     this.anomalyDAO = mergedAnomalyResultDAO;
     this.evaluationDAO = evaluationManager;
     this.provider = provider;
-    this.maintenanceFlow = new ModelRetuneFlow(this.provider, DetectionRegistry.getInstance());
+    this.maintenanceFlow = new ModelRetuneFlow(this.provider, new DetectionRegistry());
   }
 
   /**
@@ -81,7 +81,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     this.evaluationDAO = evaluationDAO;
     this.loader = loader;
     this.provider = provider;
-    this.maintenanceFlow = new ModelRetuneFlow(this.provider, DetectionRegistry.getInstance());
+    this.maintenanceFlow = new ModelRetuneFlow(this.provider, new DetectionRegistry());
   }
 
   @Override

@@ -55,18 +55,12 @@ public class DetectionRegistry {
   private static final String KEY_ANNOTATION = "annotation";
   private static final String KEY_IS_BASELINE_PROVIDER = "isBaselineProvider";
 
-  private static DetectionRegistry INSTANCE;
-
-  public static DetectionRegistry getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new DetectionRegistry();
-    }
-
-    return INSTANCE;
+  static {
+    init();
   }
 
-  private DetectionRegistry() {
-    init();
+  public DetectionRegistry() {
+
   }
 
   /**

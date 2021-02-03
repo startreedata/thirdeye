@@ -176,7 +176,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
       List<MetricConfigDTO> metrics = metricDAO.findByDataset(datasetConfigDTO.getDataset());
       int metricCount = metrics.size();
       for (MetricConfigDTO metric : metrics) {
-        if (!metric.isDerived() && !metric.getName().equals(ROW_COUNT)) {
+        if (metric.getDerivedMetricExpression() == null && !metric.getName().equals(ROW_COUNT)) {
           metric.setActive(false);
           metricDAO.save(metric);
           metricCount--;
@@ -346,7 +346,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     // audit existing metrics in ThirdEye
     for (MetricConfigDTO metricConfig : datasetMetricConfigs) {
       if (!schemaMetricNames.contains(getColumnName(metricConfig))) {
-        if (!metricConfig.isDerived() && !metricConfig.getName().equals(ROW_COUNT)) {
+        if (metricConfig.getDerivedMetricExpression() == null && !metricConfig.getName().equals(ROW_COUNT)) {
           // if metric is removed from schema and not a derived/row_count metric, deactivate it
           LOG.info("Deactivating metric {} in {}", metricConfig.getName(), dataset);
           metricConfig.setActive(false);

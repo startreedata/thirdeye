@@ -108,9 +108,8 @@ public class MetricExpression {
         if (metricToken.equals(COUNT_METRIC_ESCAPED)) {
           metricToken = COUNT_METRIC;
         } else {
-          metricId = Long
-              .valueOf(metricToken.replace(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, ""));
-          metricConfig = ThirdEyeUtils.getMetricConfigFromId(metricId);
+          metricConfig = ThirdEyeUtils.getMetricConfigFromNameAndDataset(metricToken, metricDataset);
+          metricId = metricConfig.getId();
           if (metricConfig != null) {
             metricDataset = metricConfig.getDataset();
           }

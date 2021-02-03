@@ -17,7 +17,6 @@ public class MetricApi implements ThirdEyeApi {
   private Boolean active;
   private Date created;
   private Date updated;
-  private Boolean derived;
   private String derivedMetricExpression;
   private String aggregationColumn;
   private MetricAggFunction aggregationFunction;
@@ -85,15 +84,6 @@ public class MetricApi implements ThirdEyeApi {
 
   public MetricApi setUpdated(final Date updated) {
     this.updated = updated;
-    return this;
-  }
-
-  public Boolean getDerived() {
-    return derived;
-  }
-
-  public MetricApi setDerived(final Boolean derived) {
-    this.derived = derived;
     return this;
   }
 

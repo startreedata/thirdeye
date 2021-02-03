@@ -72,7 +72,6 @@ public class DataAvailabilityTaskSchedulerTest {
     metric1.setDataset(TEST_DATASET_PREFIX + 1);
     metric1.setName(TEST_METRIC_PREFIX + 1);
     metric1.setActive(true);
-    metric1.setDerived(false);
     metric1.setAlias("");
     metricId1 = metricConfigManager.save(metric1);
 
@@ -80,7 +79,6 @@ public class DataAvailabilityTaskSchedulerTest {
     metric2.setDataset(TEST_DATASET_PREFIX + 2);
     metric2.setName(TEST_METRIC_PREFIX + 2);
     metric2.setActive(true);
-    metric1.setDerived(false);
     metric2.setAlias("");
     metricId2 = metricConfigManager.save(metric2);
     dataAvailabilityTaskScheduler = new DataAvailabilityTaskScheduler(60,

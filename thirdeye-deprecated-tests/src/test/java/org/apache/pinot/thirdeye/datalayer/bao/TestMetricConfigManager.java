@@ -67,7 +67,6 @@ public class TestMetricConfigManager {
 
     MetricConfigDTO metricConfig3 = DaoTestUtils
         .getTestMetricConfig(dataset1, derivedMetric1, null);
-    metricConfig3.setDerived(true);
     metricConfig3.setDerivedMetricExpression("id" + metricConfigId1 + "/id" + metricConfigId2);
     derivedMetricConfigId = metricConfigDAO.save(metricConfig3);
     Assert.assertNotNull(derivedMetricConfigId);

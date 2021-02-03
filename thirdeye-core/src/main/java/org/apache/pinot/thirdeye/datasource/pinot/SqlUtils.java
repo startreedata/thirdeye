@@ -108,8 +108,8 @@ public class SqlUtils {
       DateTime endTimeExclusive, Multimap<String, String> filterSet, Map<String, Map<String, Object[]>> filterContextMap, List<String> groupBy,
       TimeGranularity timeGranularity, TimeSpec dataTimeSpec, int limit) throws ExecutionException, IOException, ClassNotFoundException {
 
-    MetricConfigDTO metricConfig = ThirdEyeUtils
-        .getMetricConfigFromId(metricFunction.getMetricId());
+    //TODO: couldn't use metricFunction.getMetricConfig() because of tests.
+    MetricConfigDTO metricConfig = ThirdEyeUtils.getMetricConfigFromNameAndDataset(metricFunction.getMetricName(), metricFunction.getDataset());
     String dataset = metricFunction.getDataset();
 
     StringBuilder sb = new StringBuilder();
@@ -157,7 +157,8 @@ public class SqlUtils {
     if (metricFunction.getMetricName().equals("*")) {
       metricName = "*";
     } else {
-      metricName = optional(metricConfig.getAggregationColumn()).orElse(metricConfig.getName());
+        //TODO: couldn't use metricConfig.getName() in the else because of tests.
+        metricName = optional(metricConfig.getAggregationColumn()).orElse(metricFunction.getMetricName());
     }
     if (metricFunction.getFunctionName() == MetricAggFunction.COUNT_DISTINCT) {
       builder.append(MetricAggFunction.COUNT.name())

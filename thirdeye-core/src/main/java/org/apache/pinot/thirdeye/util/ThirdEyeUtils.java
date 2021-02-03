@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.util;
 
 import static org.apache.pinot.thirdeye.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
 import static org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -235,29 +236,9 @@ public abstract class ThirdEyeUtils {
   }
 
   public static MetricExpression getMetricExpressionFromMetricConfig(MetricConfigDTO metricConfig) {
-    String expression = null;
-    if (metricConfig.isDerived()) {
-      expression = metricConfig.getDerivedMetricExpression();
-    } else {
-      expression = MetricConfigBean.DERIVED_METRIC_ID_PREFIX + metricConfig.getId();
-    }
+    String expression = optional(metricConfig.getDerivedMetricExpression()).orElse(metricConfig.getName());
     MetricExpression metricExpression = new MetricExpression(metricConfig.getName(), expression,
         metricConfig.getDefaultAggFunction(), metricConfig.getDataset());
-    return metricExpression;
-  }
-
-  // TODO: Write parser instead of looking for occurrence of every metric
-  public static String substituteMetricIdsForMetrics(String metricExpression, String dataset) {
-    MetricConfigManager metricConfigDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    List<MetricConfigDTO> metricConfigs = metricConfigDAO.findByDataset(dataset);
-    for (MetricConfigDTO metricConfig : metricConfigs) {
-      if (metricConfig.isDerived()) {
-        continue;
-      }
-      String metricName = metricConfig.getName();
-      metricExpression = metricExpression.replaceAll(metricName,
-          MetricConfigBean.DERIVED_METRIC_ID_PREFIX + metricConfig.getId());
-    }
     return metricExpression;
   }
 
@@ -270,34 +251,20 @@ public abstract class ThirdEyeUtils {
         .getMetricConfigCache()
         .get(metricDataset);
 
-    if (metricConfig != null && metricConfig.isDerived()) {
+    if (metricConfig != null && metricConfig.getDerivedMetricExpression() != null) {
       derivedMetricExpression = metricConfig.getDerivedMetricExpression();
     } else {
-      derivedMetricExpression = MetricConfigBean.DERIVED_METRIC_ID_PREFIX + metricConfig.getId();
+      derivedMetricExpression = metricConfig.getName();
     }
-
     return derivedMetricExpression;
   }
 
   public static Map<String, Double> getMetricThresholdsMap(List<MetricFunction> metricFunctions) {
     Map<String, Double> metricThresholds = new HashMap<>();
     for (MetricFunction metricFunction : metricFunctions) {
-      String derivedMetricExpression = metricFunction.getMetricName();
-      String metricId = derivedMetricExpression
-          .replaceAll(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, "");
-      MetricConfigDTO metricConfig = DAORegistry.getInstance().getMetricConfigDAO()
-          .findById(Long.valueOf(metricId));
-      metricThresholds.put(derivedMetricExpression, metricConfig.getRollupThreshold());
+      metricThresholds.put(metricFunction.getMetricName(), metricFunction.getMetricConfig().getRollupThreshold());
     }
     return metricThresholds;
-  }
-
-  public static String getMetricNameFromFunction(MetricFunction metricFunction) {
-    String metricId = metricFunction.getMetricName()
-        .replace(MetricConfigBean.DERIVED_METRIC_ID_PREFIX, "");
-    MetricConfigDTO metricConfig = DAORegistry.getInstance().getMetricConfigDAO()
-        .findById(Long.valueOf(metricId));
-    return metricConfig.getName();
   }
 
   public static String constructMetricAlias(String datasetName, String metricName) {
@@ -344,7 +311,7 @@ public abstract class ThirdEyeUtils {
     if (metricConfig == null) {
       return new ArrayList<>();
     }
-    if (!metricConfig.isDerived()) {
+    if (metricConfig.getDerivedMetricExpression() == null) {
       return Collections
           .singletonList(datasetConfigManager.findByDataset(metricConfig.getDataset()));
     } else {

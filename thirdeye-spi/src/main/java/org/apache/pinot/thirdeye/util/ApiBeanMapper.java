@@ -84,7 +84,6 @@ public abstract class ApiBeanMapper {
         .setDataset(new DatasetApi()
             .setName(dto.getDataset())
         )
-        .setDerived(boolApi(dto.isDerived()))
         .setDerivedMetricExpression(dto.getDerivedMetricExpression())
         .setWhere(dto.getWhere())
         .setAggregationColumn(dto.getAggregationColumn())
@@ -192,7 +191,6 @@ public abstract class ApiBeanMapper {
         .setActive(optional(api.getActive()).orElse(false))
         .setViews(api.getViews())
         .setWhere(api.getWhere())
-        .setDerived(optional(api.getDerived()).orElse(false))
         .setDerivedMetricExpression(api.getDerivedMetricExpression());
 
     return dto;

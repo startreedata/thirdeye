@@ -56,8 +56,7 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
   protected MetricConfigDTO updateDto(final ThirdEyePrincipal principal, final MetricApi api) {
     final Long id = api.getId();
     final MetricConfigDTO dto = get(id);
-    optional(api.getName()).ifPresent(dto::setName);    
-    optional(api.getDerived()).ifPresent(dto::setDerived);
+    optional(api.getName()).ifPresent(dto::setName);
     optional(api.getDerivedMetricExpression()).ifPresent(dto::setDerivedMetricExpression);
     optional(api.getRollupThreshold()).ifPresent(dto::setRollupThreshold);
     optional(api.getActive()).ifPresent(dto::setActive);

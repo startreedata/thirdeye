@@ -33,7 +33,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 public class MetricConfigBean extends AbstractBean {
 
   public static double DEFAULT_THRESHOLD = 0.01;
-  public static String DERIVED_METRIC_ID_PREFIX = "id";
   public static final String ALIAS_JOINER = "::";
   public static final String URL_TEMPLATE_START_TIME = "startTime";
   public static final String URL_TEMPLATE_END_TIME = "endTime";
@@ -106,7 +105,6 @@ public class MetricConfigBean extends AbstractBean {
   private String alias;
   private Set<String> tags;
   private MetricType datatype;
-  private boolean derived = false;
   private String derivedMetricExpression;
   private String aggregationColumn;
   private MetricAggFunction defaultAggFunction = DEFAULT_AGG_FUNCTION;
@@ -163,15 +161,6 @@ public class MetricConfigBean extends AbstractBean {
 
   public MetricConfigBean setDatatype(final MetricType datatype) {
     this.datatype = datatype;
-    return this;
-  }
-
-  public boolean isDerived() {
-    return derived;
-  }
-
-  public MetricConfigBean setDerived(final boolean derived) {
-    this.derived = derived;
     return this;
   }
 
@@ -306,7 +295,6 @@ public class MetricConfigBean extends AbstractBean {
         && Objects.equals(name, mc.getName())
         && Objects.equals(dataset, mc.getDataset())
         && Objects.equals(alias, mc.getAlias())
-        && Objects.equals(derived, mc.isDerived())
         && Objects.equals(derivedMetricExpression, mc.getDerivedMetricExpression())
         && Objects.equals(defaultAggFunction, mc.getDefaultAggFunction())
         && Objects.equals(dimensionAsMetric, mc.isDimensionAsMetric())
@@ -323,7 +311,7 @@ public class MetricConfigBean extends AbstractBean {
   @Override
   public int hashCode() {
     return Objects
-        .hash(getId(), dataset, alias, derived, derivedMetricExpression, defaultAggFunction,
+        .hash(getId(), dataset, alias, derivedMetricExpression, defaultAggFunction,
             rollupThreshold,
             inverseMetric, cellSizeExpression, active, extSourceLinkInfo, metricProperties,
             views, where);

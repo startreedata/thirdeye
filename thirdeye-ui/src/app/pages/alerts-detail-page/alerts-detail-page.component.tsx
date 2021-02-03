@@ -28,10 +28,7 @@ import {
     getAlertCardData,
 } from "../../utils/alerts-util/alerts-util";
 import { isValidNumberId } from "../../utils/params-util/params-util";
-import {
-    getAlertsAllPath,
-    getAlertsDetailPath,
-} from "../../utils/routes-util/routes-util";
+import { getAlertsAllPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -57,20 +54,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Fetched alert changed, set breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: alertCardData ? alertCardData.name : "",
-                onClick: (): void => {
-                    if (alertCardData) {
-                        history.push(getAlertsDetailPath(alertCardData.id));
-                    }
-                },
-            },
-        ]);
-    }, [alertCardData]);
-
-    useEffect(() => {
+        setPageBreadcrumbs([]);
         fetchAlert();
     }, []);
 

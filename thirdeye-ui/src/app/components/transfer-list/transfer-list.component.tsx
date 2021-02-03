@@ -172,7 +172,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                 <Grid container>
                     {/* Label */}
                     <Grid item sm={12}>
-                        <Typography variant="subtitle2">
+                        <Typography variant="subtitle1">
                             {props.fromLabel}
                         </Typography>
                     </Grid>
@@ -180,7 +180,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                     {/* Search */}
                     <Grid item sm={12}>
                         <SearchBar
-                            label={t("label.search")}
+                            searchLabel={t("label.search")}
                             searchStatusLabel={t("label.search-count", {
                                 count: filteredFromList
                                     ? filteredFromList.length
@@ -197,67 +197,59 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                 className={transferListClasses.listContainer}
                             >
                                 {/* List */}
-                                {!isEmpty(props.fromList) && (
+                                {!isEmpty(filteredFromList) && (
                                     <List dense>
-                                        {filteredFromList &&
-                                            filteredFromList.map(
-                                                (fromListItem, index) => (
-                                                    <ListItem
-                                                        button
-                                                        key={index}
-                                                        onClick={(): void => {
-                                                            onTransferListItem(
-                                                                fromListItem
-                                                            );
-                                                        }}
-                                                    >
-                                                        <ListItemText
-                                                            primary={
-                                                                <TextHighlighter
-                                                                    searchWords={
-                                                                        fromSearchWords
-                                                                    }
-                                                                    text={
-                                                                        (props.listItemTextFn(
-                                                                            fromListItem
-                                                                        ) ||
-                                                                            props.listItemKeyFn(
-                                                                                fromListItem
-                                                                            )) as string
-                                                                    }
-                                                                />
-                                                            }
-                                                            primaryTypographyProps={{
-                                                                variant:
-                                                                    "body1",
-                                                                className:
-                                                                    transferListClasses.listItem,
-                                                            }}
-                                                        />
-
-                                                        {/* Transfer button */}
-                                                        <ListItemSecondaryAction>
-                                                            <IconButton
-                                                                onClick={(): void => {
-                                                                    onTransferListItem(
+                                        {filteredFromList.map(
+                                            (fromListItem, index) => (
+                                                <ListItem
+                                                    button
+                                                    key={index}
+                                                    onClick={(): void => {
+                                                        onTransferListItem(
+                                                            fromListItem
+                                                        );
+                                                    }}
+                                                >
+                                                    <ListItemText
+                                                        primary={
+                                                            <TextHighlighter
+                                                                searchWords={
+                                                                    fromSearchWords
+                                                                }
+                                                                text={
+                                                                    (props.listItemTextFn(
                                                                         fromListItem
-                                                                    );
-                                                                }}
-                                                            >
-                                                                <ArrowForward />
-                                                            </IconButton>
-                                                        </ListItemSecondaryAction>
-                                                    </ListItem>
-                                                )
-                                            )}
+                                                                    ) ||
+                                                                        props.listItemKeyFn(
+                                                                            fromListItem
+                                                                        )) as string
+                                                                }
+                                                            />
+                                                        }
+                                                        primaryTypographyProps={{
+                                                            variant: "body1",
+                                                            className:
+                                                                transferListClasses.listItem,
+                                                        }}
+                                                    />
+
+                                                    {/* Transfer button */}
+                                                    <ListItemSecondaryAction>
+                                                        <IconButton
+                                                            onClick={(): void => {
+                                                                onTransferListItem(
+                                                                    fromListItem
+                                                                );
+                                                            }}
+                                                        >
+                                                            <ArrowForward />
+                                                        </IconButton>
+                                                    </ListItemSecondaryAction>
+                                                </ListItem>
+                                            )
+                                        )}
                                     </List>
                                 )}
-
-                                {/* No data available message */}
-                                {isEmpty(props.fromList) &&
-                                    isEmpty(fromSearchWords) && (
-                                        <NoDataIndicator />
-                                    )}
 
                                 {/* No search results available message */}
                                 {isEmpty(filteredFromList) &&
@@ -279,7 +271,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                 <Grid container>
                     {/* Label */}
                     <Grid item sm={12}>
-                        <Typography variant="subtitle2">
+                        <Typography variant="subtitle1">
                             {props.toLabel}
                         </Typography>
                     </Grid>
@@ -287,7 +279,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                     {/* Search */}
                     <Grid item sm={12}>
                         <SearchBar
-                            label={t("label.search")}
+                            searchLabel={t("label.search")}
                             searchStatusLabel={t("label.search-count", {
                                 count: filteredToList
                                     ? filteredToList.length
@@ -304,54 +296,61 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                 className={transferListClasses.listContainer}
                             >
                                 {/* List */}
-                                <List dense>
-                                    {filteredToList &&
-                                        filteredToList.map((toItem, index) => (
-                                            <ListItem
-                                                button
-                                                key={index}
-                                                onClick={(): void => {
-                                                    onRemoveListItem(toItem);
-                                                }}
-                                            >
-                                                <ListItemText
-                                                    primary={
-                                                        <TextHighlighter
-                                                            searchWords={
-                                                                toSearchWords
-                                                            }
-                                                            text={
-                                                                (props.listItemTextFn(
-                                                                    toItem
-                                                                ) ||
-                                                                    props.listItemKeyFn(
-                                                                        toItem
-                                                                    )) as string
-                                                            }
-                                                        />
-                                                    }
-                                                    primaryTypographyProps={{
-                                                        variant: "body1",
-                                                        className:
-                                                            transferListClasses.listItem,
-                                                    }}
-                                                />
-
-                                                {/* Remove button */}
-                                                <ListItemSecondaryAction>
-                                                    <IconButton
+                                {!isEmpty(filteredToList) && (
+                                    <List dense>
+                                        {filteredToList &&
+                                            filteredToList.map(
+                                                (toItem, index) => (
+                                                    <ListItem
+                                                        button
+                                                        key={index}
                                                         onClick={(): void => {
                                                             onRemoveListItem(
                                                                 toItem
                                                             );
                                                         }}
                                                     >
-                                                        <Close />
-                                                    </IconButton>
-                                                </ListItemSecondaryAction>
-                                            </ListItem>
-                                        ))}
-                                </List>
+                                                        <ListItemText
+                                                            primary={
+                                                                <TextHighlighter
+                                                                    searchWords={
+                                                                        toSearchWords
+                                                                    }
+                                                                    text={
+                                                                        (props.listItemTextFn(
+                                                                            toItem
+                                                                        ) ||
+                                                                            props.listItemKeyFn(
+                                                                                toItem
+                                                                            )) as string
+                                                                    }
+                                                                />
+                                                            }
+                                                            primaryTypographyProps={{
+                                                                variant:
+                                                                    "body1",
+                                                                className:
+                                                                    transferListClasses.listItem,
+                                                            }}
+                                                        />
+
+                                                        {/* Remove button */}
+                                                        <ListItemSecondaryAction>
+                                                            <IconButton
+                                                                onClick={(): void => {
+                                                                    onRemoveListItem(
+                                                                        toItem
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <Close />
+                                                            </IconButton>
+                                                        </ListItemSecondaryAction>
+                                                    </ListItem>
+                                                )
+                                            )}
+                                    </List>
+                                )}
 
                                 {/* No search results available message */}
                                 {isEmpty(filteredToList) &&

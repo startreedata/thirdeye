@@ -1,11 +1,10 @@
 import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
@@ -21,17 +20,13 @@ import {
     updateSubscriptionGroups,
 } from "../../rest/subscription-groups-rest/subscription-groups-rest";
 import { createAlertEvaluation } from "../../utils/alerts-util/alerts-util";
-import {
-    getAlertsCreatePath,
-    getAlertsDetailPath,
-} from "../../utils/routes-util/routes-util";
+import { getAlertsDetailPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar-util/snackbar-util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { enqueueSnackbar } = useSnackbar();
@@ -39,15 +34,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        setPageBreadcrumbs([
-            {
-                text: t("label.create"),
-                onClick: (): void => {
-                    history.push(getAlertsCreatePath());
-                },
-            },
-        ]);
-        setLoading(false);
+        setPageBreadcrumbs([]);
     }, []);
 
     const onAlertWizardFinish = (
@@ -191,12 +178,8 @@ export const AlertsCreatePage: FunctionComponent = () => {
         return fetchedAlertEvaluation;
     };
 
-    if (loading) {
-        return <LoadingIndicator />;
-    }
-
     return (
-        <PageContents centered>
+        <PageContents centered title={t("label.create")}>
             <AlertWizard
                 getAlertEvaluation={fetchAlertEvaluation}
                 getAllAlerts={fetchAllAlerts}

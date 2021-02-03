@@ -3,7 +3,6 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
@@ -23,7 +22,6 @@ import {
     filterAnomalies,
     getAnomalyCardDatas,
 } from "../../utils/anomalies-util/anomalies-util";
-import { getAnomaliesAllPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -42,18 +40,10 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
-    const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        setPageBreadcrumbs([
-            {
-                text: t("label.all"),
-                onClick: (): void => {
-                    history.push(getAnomaliesAllPath());
-                },
-            },
-        ]);
+        setPageBreadcrumbs([]);
     }, []);
 
     useEffect(() => {
@@ -152,14 +142,14 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.anomalies")}>
+        <PageContents centered hideAppBreadcrumbs title={t("label.anomalies")}>
             <Grid container>
                 {/* Search */}
                 <Grid item sm={12}>
                     <SearchBar
                         autoFocus
                         setSearchQueryString
-                        label={t("label.search-anomalies")}
+                        searchLabel={t("label.search-anomalies")}
                         searchStatusLabel={t("label.search-count", {
                             count: filteredAnomalyCardDatas
                                 ? filteredAnomalyCardDatas.length

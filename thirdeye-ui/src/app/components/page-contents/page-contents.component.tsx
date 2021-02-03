@@ -1,6 +1,6 @@
 import { Box, Grid, Paper, Slide, Typography } from "@material-ui/core";
 import classnames from "classnames";
-import { debounce } from "lodash";
+import { debounce, isEmpty } from "lodash";
 import React, {
     createRef,
     FunctionComponent,
@@ -9,29 +9,43 @@ import React, {
     useEffect,
     useState,
 } from "react";
+import { Helmet } from "react-helmet";
 import { useCommonStyles } from "../../utils/material-ui-util/common-styles.util";
+import { getDocumentTitle } from "../../utils/page-util/page-util";
+import {
+    AppBreadcrumbs,
+    useAppBreadcrumbs,
+} from "../app-breadcrumbs/app-breadcrumbs.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.style";
 
-const THRESHOLD_OUTER_CONTAINER_SCROLL_TOP = 110;
+const THRESHOLD_OUTER_CONTAINER_SCROLL_TOP = 95;
 
 export const PageContents: FunctionComponent<PageContentsProps> = (
     props: PageContentsProps
 ) => {
     const pageContentsClasses = usePageContentsStyles();
     const commonClasses = useCommonStyles();
+    const [documentTitle, setDocumentTitle] = useState("");
     const [outerContainerScrollTop, setOuterContainerScrollTop] = useState(0);
     const [headerContainerWidth, setHeaderContainerWidth] = useState(0);
     const [showHeader, setShowHeader] = useState(true);
+    const { routerBreadcrumbs, pageBreadcrumbs } = useAppBreadcrumbs();
     const {
         timeRangeDuration,
         recentCustomTimeRangeDurations,
         setTimeRangeDuration,
         refreshTimeRange,
     } = useTimeRange();
+    const outerContainerRef = createRef<HTMLDivElement>();
     const contentsContainerRef = createRef<HTMLDivElement>();
+
+    useEffect(() => {
+        // Title or breadcrumbs changed, set document title
+        setDocumentTitle(generateDocumentTitle());
+    }, [props.title, routerBreadcrumbs, pageBreadcrumbs]);
 
     useEffect(() => {
         // Determine header container width based on contents container
@@ -41,7 +55,31 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     }, [contentsContainerRef]);
 
     const onOuterContainerScroll = (event: UIEvent<HTMLDivElement>): void => {
+        if (event.target !== outerContainerRef.current || props.hideHeader) {
+            return;
+        }
+
         setHeaderVisibility((event.target as HTMLDivElement).scrollTop);
+    };
+
+    const generateDocumentTitle = (): string => {
+        // Document title is composed of
+        // Last router breadcrumb (if available) +
+        // title (only if different from last router breadcrumb) +
+        // first page breadcrumb (if available) +
+        // app name
+        const routerBreadcrumbText =
+            (!isEmpty(routerBreadcrumbs) &&
+                routerBreadcrumbs[routerBreadcrumbs.length - 1].text) ||
+            "";
+        const pageBreadcrumbText =
+            (!isEmpty(pageBreadcrumbs) && pageBreadcrumbs[0].text) || "";
+
+        return getDocumentTitle(
+            routerBreadcrumbText,
+            props.title,
+            pageBreadcrumbText
+        );
     };
 
     const setHeaderVisibility = useCallback(
@@ -66,96 +104,117 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     );
 
     return (
-        <div
-            className={pageContentsClasses.outerContainer}
-            onScroll={onOuterContainerScroll}
-        >
-            <main
-                className={classnames(
-                    pageContentsClasses.innerContainer,
-                    props.centered
-                        ? pageContentsClasses.innerContainerCenterAlign
-                        : pageContentsClasses.innerContainerExpand
-                )}
+        <>
+            {/* Document title */}
+            <Helmet>
+                <title>{documentTitle}</title>
+            </Helmet>
+
+            <div
+                className={pageContentsClasses.outerContainer}
+                ref={outerContainerRef}
+                onScroll={onOuterContainerScroll}
             >
-                {/* Header, only if title is provided and/or time range is to be displayed */}
-                {(props.title || !props.hideTimeRange) && (
-                    <>
-                        <Slide
-                            direction="down"
-                            in={showHeader}
-                            timeout={{
-                                appear: 0,
-                                enter: 400,
-                                exit: 1000,
-                            }}
-                        >
-                            <Box
-                                className={classnames(
-                                    pageContentsClasses.headerContainer,
-                                    commonClasses.gridLimitation
-                                )}
-                                width={headerContainerWidth}
-                            >
-                                <Paper
-                                    className={pageContentsClasses.header}
-                                    elevation={4}
-                                >
-                                    <Grid
-                                        container
-                                        alignItems="center"
-                                        className={
-                                            pageContentsClasses.headerContents
-                                        }
-                                        justify="space-between"
-                                    >
-                                        {/* Title */}
-                                        <Grid item>
-                                            <Typography variant="h5">
-                                                {props.title}
-                                            </Typography>
-                                        </Grid>
-
-                                        {/* Time range selector */}
-                                        {!props.hideTimeRange && (
-                                            <Grid item>
-                                                <TimeRangeSelector
-                                                    recentCustomTimeRangeDurations={
-                                                        recentCustomTimeRangeDurations
-                                                    }
-                                                    timeRangeDuration={
-                                                        timeRangeDuration
-                                                    }
-                                                    onChange={
-                                                        setTimeRangeDuration
-                                                    }
-                                                    onRefresh={refreshTimeRange}
-                                                />
-                                            </Grid>
-                                        )}
-                                    </Grid>
-                                </Paper>
-                            </Box>
-                        </Slide>
-
-                        {/* Required to clip the subsequent container under header */}
-                        <div
-                            className={pageContentsClasses.headerPlaceholder}
-                        />
-                    </>
-                )}
-
-                {/* Contents */}
-                <div
+                <main
                     className={classnames(
-                        pageContentsClasses.contentsContainer,
-                        commonClasses.gridLimitation
+                        pageContentsClasses.innerContainer,
+                        props.centered
+                            ? pageContentsClasses.innerContainerCenterAlign
+                            : pageContentsClasses.innerContainerExpand
                     )}
-                    ref={contentsContainerRef}
                 >
-                    {props.children}
-                </div>
-            </main>
-        </div>
+                    {/* Header */}
+                    {!props.hideHeader && (
+                        <>
+                            <Slide
+                                direction="down"
+                                in={showHeader}
+                                timeout={{
+                                    appear: 0,
+                                    enter: 400,
+                                    exit: 1000,
+                                }}
+                            >
+                                <Box
+                                    className={classnames(
+                                        pageContentsClasses.headerContainer,
+                                        commonClasses.gridLimitation
+                                    )}
+                                    width={headerContainerWidth}
+                                >
+                                    <Paper
+                                        className={pageContentsClasses.header}
+                                        elevation={4}
+                                    >
+                                        <Grid
+                                            container
+                                            alignItems="center"
+                                            className={
+                                                pageContentsClasses.headerContents
+                                            }
+                                            justify="space-between"
+                                        >
+                                            <Grid item>
+                                                {/* App breadcrumbs */}
+                                                {!props.hideAppBreadcrumbs && (
+                                                    <AppBreadcrumbs
+                                                        maxRouterBreadcrumbs={
+                                                            props.maxRouterBreadcrumbs
+                                                        }
+                                                    />
+                                                )}
+
+                                                {/* Title */}
+                                                <Typography variant="h5">
+                                                    {props.title}
+                                                </Typography>
+                                            </Grid>
+
+                                            {/* Time range selector */}
+                                            {!props.hideTimeRange && (
+                                                <Grid item>
+                                                    <TimeRangeSelector
+                                                        recentCustomTimeRangeDurations={
+                                                            recentCustomTimeRangeDurations
+                                                        }
+                                                        timeRangeDuration={
+                                                            timeRangeDuration
+                                                        }
+                                                        onChange={
+                                                            setTimeRangeDuration
+                                                        }
+                                                        onRefresh={
+                                                            refreshTimeRange
+                                                        }
+                                                    />
+                                                </Grid>
+                                            )}
+                                        </Grid>
+                                    </Paper>
+                                </Box>
+                            </Slide>
+
+                            {/* Required to clip the subsequent container under header */}
+                            <div
+                                className={
+                                    pageContentsClasses.headerPlaceholder
+                                }
+                            />
+                        </>
+                    )}
+
+                    {/* Contents */}
+                    <div
+                        className={classnames(
+                            pageContentsClasses.contentsContainer,
+                            commonClasses.gridLimitation
+                        )}
+                        ref={contentsContainerRef}
+                    >
+                        {props.children}
+                    </div>
+                </main>
+            </div>
+        </>
     );
 };

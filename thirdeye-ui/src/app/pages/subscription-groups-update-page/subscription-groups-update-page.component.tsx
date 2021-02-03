@@ -16,10 +16,7 @@ import {
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups-rest/subscription-groups-rest";
 import { isValidNumberId } from "../../utils/params-util/params-util";
-import {
-    getSubscriptionGroupsDetailPath,
-    getSubscriptionGroupsUpdatePath,
-} from "../../utils/routes-util/routes-util";
+import { getSubscriptionGroupsDetailPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -48,18 +45,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     if (subscriptionGroup) {
                         history.push(
                             getSubscriptionGroupsDetailPath(
-                                subscriptionGroup.id
-                            )
-                        );
-                    }
-                },
-            },
-            {
-                text: t("label.update"),
-                onClick: (): void => {
-                    if (subscriptionGroup) {
-                        history.push(
-                            getSubscriptionGroupsUpdatePath(
                                 subscriptionGroup.id
                             )
                         );
@@ -153,7 +138,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered hideTimeRange>
+        <PageContents centered hideTimeRange title={t("label.update")}>
             {subscriptionGroup && (
                 <SubscriptionGroupWizard
                     alerts={alerts}

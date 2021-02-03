@@ -10,10 +10,7 @@ import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import {
-    getSubscriptionGroupsCreatePath,
-    getSubscriptionGroupsDetailPath,
-} from "../../utils/routes-util/routes-util";
+import { getSubscriptionGroupsDetailPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -28,17 +25,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        setPageBreadcrumbs([
-            {
-                text: t("label.create"),
-                onClick: (): void => {
-                    history.push(getSubscriptionGroupsCreatePath());
-                },
-            },
-        ]);
-    }, []);
-
-    useEffect(() => {
+        setPageBreadcrumbs([]);
         fetchAllAlerts();
     }, []);
 
@@ -94,7 +81,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered hideTimeRange>
+        <PageContents centered hideTimeRange title={t("label.create")}>
             <SubscriptionGroupWizard
                 alerts={alerts}
                 onFinish={onSubscriptionGroupWizardFinish}

@@ -1,9 +1,19 @@
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import {
     AppRoute,
+    getConfigurationPath,
     getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsPath,
 } from "../../utils/routes-util/routes-util";
 
 const SubscriptionGroupsAllPage = lazy(() =>
@@ -37,6 +47,33 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const SubscriptionGroupsRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
+    const history = useHistory();
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        setRouterBreadcrumbs([
+            {
+                text: t("label.configuration"),
+                onClick: (): void => {
+                    history.push(getConfigurationPath());
+                },
+            },
+            {
+                text: t("label.subscription-groups"),
+                onClick: (): void => {
+                    history.push(getSubscriptionGroupsPath());
+                },
+            },
+        ]);
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return <LoadingIndicator />;
+    }
+
     return (
         <Suspense fallback={<LoadingIndicator />}>
             <Switch>

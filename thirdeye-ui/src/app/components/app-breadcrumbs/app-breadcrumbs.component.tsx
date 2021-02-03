@@ -1,14 +1,14 @@
-import { Box, Toolbar } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { useAppBreadcrumbsStore } from "../../store/app-breadcrumbs-store/app-breadcrumbs-store";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
+import { useAppBreadcrumbsStore } from "../../stores/app-breadcrumbs-store/app-breadcrumbs-store";
 import { Breadcrumbs } from "../breadcrumbs/breadcrumbs.component";
-import { UseAppBreadcrumbsProps } from "./app-breadcrumbs.interfaces";
-import { useAppBreadcrumbsStyles } from "./app-breadcrumbs.styles";
+import {
+    AppBreadcrumbsProps,
+    UseAppBreadcrumbsProps,
+} from "./app-breadcrumbs.interfaces";
 
-export const AppBreadcrumbs: FunctionComponent = () => {
-    const appBreadcrumbsClasses = useAppBreadcrumbsStyles();
+export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
+    props: AppBreadcrumbsProps
+) => {
     const [
         routerBreadcrumbs,
         pageBreadcrumbs,
@@ -18,29 +18,29 @@ export const AppBreadcrumbs: FunctionComponent = () => {
     ]);
 
     return (
-        <Box
-            border={Dimension.WIDTH_BORDER_DEFAULT}
-            borderColor={Palette.COLOR_BORDER_DEFAULT}
-            borderLeft={0}
-            borderRight={0}
-            borderTop={0}
-            className={appBreadcrumbsClasses.container}
-        >
-            <Toolbar
-                classes={{ dense: appBreadcrumbsClasses.dense }}
-                variant="dense"
-            >
-                {/* Breadcrumbs */}
-                <Breadcrumbs
-                    breadcrumbs={[...routerBreadcrumbs, ...pageBreadcrumbs]}
-                />
-            </Toolbar>
-        </Box>
+        <Breadcrumbs
+            trailingSeparator
+            breadcrumbs={
+                props.maxRouterBreadcrumbs
+                    ? [
+                          ...routerBreadcrumbs.slice(
+                              0,
+                              props.maxRouterBreadcrumbs
+                          ),
+                          ...pageBreadcrumbs,
+                      ]
+                    : [...routerBreadcrumbs, ...pageBreadcrumbs]
+            }
+            maxItems={4}
+            variant="body2"
+        />
     );
 };
 
 export const useAppBreadcrumbs = (): UseAppBreadcrumbsProps => {
     return useAppBreadcrumbsStore((state) => ({
+        routerBreadcrumbs: state.routerBreadcrumbs,
+        pageBreadcrumbs: state.pageBreadcrumbs,
         setRouterBreadcrumbs: state.setRouterBreadcrumbs,
         setPageBreadcrumbs: state.setPageBreadcrumbs,
         pushPageBreadcrumb: state.pushPageBreadcrumb,

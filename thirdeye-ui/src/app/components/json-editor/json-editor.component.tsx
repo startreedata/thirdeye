@@ -8,12 +8,24 @@ import "codemirror/addon/fold/foldgutter.css";
 import "codemirror/addon/selection/active-line";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/javascript/javascript";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { Controlled as CodeMirror } from "react-codemirror2";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
 import { Palette } from "../../utils/material-ui-util/palette-util";
+import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { JSONEditorProps } from "./json-editor.interfaces";
 import { useJSONEditorStyles } from "./json-editor.styles";
+
+const CodeMirror = lazy(() =>
+    import(
+        /* webpackChunkName: "react-code-mirror-2" */ "react-codemirror2"
+    ).then((module) => ({ default: module.Controlled }))
+);
 
 const TAB_SIZE = 2;
 
@@ -22,12 +34,21 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
 ) => {
     const jsonEditorClasses = useJSONEditorStyles();
     const [value, setValue] = useState("");
+    const [mouseHover, setMouseHover] = useState(false);
     const theme = useTheme();
 
     useEffect(() => {
         // Input changed, reset
         initJSONInput();
     }, [props.value]);
+
+    const onEditorMouseEnter = (): void => {
+        setMouseHover(true);
+    };
+
+    const onEditorMouseLeave = (): void => {
+        setMouseHover(false);
+    };
 
     const onBeforeCodeMirrorInputChange = (
         _editor: Editor,
@@ -54,6 +75,8 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
             } catch (error) {
                 // Invalid JSON, set string as is
                 setValue(props.value);
+
+                return;
             }
 
             // Valid JSON
@@ -79,38 +102,44 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
                 borderColor={
                     props.error
                         ? theme.palette.error.main
+                        : mouseHover
+                        ? Palette.COLOR_BORDER_DARK
                         : Palette.COLOR_BORDER_DEFAULT
                 }
                 borderRadius={theme.shape.borderRadius}
+                onMouseEnter={onEditorMouseEnter}
+                onMouseLeave={onEditorMouseLeave}
             >
-                <CodeMirror
-                    className={jsonEditorClasses.container}
-                    options={
-                        {
-                            tabSize: 2,
-                            indentUnit: 2,
-                            indentWithTabs: false,
-                            lineNumbers: true,
-                            lineWrapping: true,
-                            styleActiveLine: true,
-                            matchBrackets: true,
-                            autoCloseBrackets: true,
-                            foldGutter: true,
-                            gutters: [
-                                "CodeMirror-linenumbers",
-                                "CodeMirror-foldgutter",
-                            ],
-                            mode: {
-                                name: "javascript",
-                                json: true,
-                            },
-                            readOnly: props.readOnly,
-                        } as EditorConfiguration
-                    }
-                    value={value}
-                    onBeforeChange={onBeforeCodeMirrorInputChange}
-                    onChange={onCodeMirrorInputChange}
-                />
+                <Suspense fallback={<LoadingIndicator />}>
+                    <CodeMirror
+                        className={jsonEditorClasses.container}
+                        options={
+                            {
+                                tabSize: 2,
+                                indentUnit: 2,
+                                indentWithTabs: false,
+                                lineNumbers: true,
+                                lineWrapping: true,
+                                styleActiveLine: true,
+                                matchBrackets: true,
+                                autoCloseBrackets: true,
+                                foldGutter: true,
+                                gutters: [
+                                    "CodeMirror-linenumbers",
+                                    "CodeMirror-foldgutter",
+                                ],
+                                mode: {
+                                    name: "javascript",
+                                    json: true,
+                                },
+                                readOnly: props.readOnly,
+                            } as EditorConfiguration
+                        }
+                        value={value}
+                        onBeforeChange={onBeforeCodeMirrorInputChange}
+                        onChange={onCodeMirrorInputChange}
+                    />
+                </Suspense>
             </Box>
 
             {/* Helper text */}

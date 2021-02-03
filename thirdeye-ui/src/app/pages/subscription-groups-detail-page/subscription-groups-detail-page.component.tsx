@@ -29,10 +29,7 @@ import {
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups-rest/subscription-groups-rest";
 import { isValidNumberId } from "../../utils/params-util/params-util";
-import {
-    getSubscriptionGroupsAllPath,
-    getSubscriptionGroupsDetailPath,
-} from "../../utils/routes-util/routes-util";
+import { getSubscriptionGroupsAllPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -55,26 +52,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Fetched subscription group changed, set breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: subscriptionGroupCardData
-                    ? subscriptionGroupCardData.name
-                    : "",
-                onClick: (): void => {
-                    if (subscriptionGroupCardData) {
-                        history.push(
-                            getSubscriptionGroupsDetailPath(
-                                subscriptionGroupCardData.id
-                            )
-                        );
-                    }
-                },
-            },
-        ]);
-    }, [subscriptionGroupCardData]);
-
-    useEffect(() => {
+        setPageBreadcrumbs([]);
         fetchSubscriptionGroup();
     }, []);
 

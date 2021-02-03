@@ -1,29 +1,60 @@
-import { makeStyles, Theme } from "@material-ui/core";
+import { darken, lighten, makeStyles, Theme } from "@material-ui/core";
 import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
 
 export const useSnackbarProviderStyles = makeStyles((theme: Theme) => ({
     container: {
         width: Dimension.WIDTH_SNACKBAR_DEFAULT,
     },
     success: {
-        color: `${Palette.COLOR_TEXT_DEFAULT} !important`,
-        backgroundColor: `${Palette.COLOR_BACKGROUND_ALERT_SUCCESS} !important`,
+        color: `${
+            theme.palette.type === "light"
+                ? darken(theme.palette.success.main, 0.6)
+                : lighten(theme.palette.success.main, 0.6)
+        } !important`,
+        backgroundColor: `${
+            theme.palette.type === "light"
+                ? lighten(theme.palette.success.main, 0.9)
+                : darken(theme.palette.success.main, 0.9)
+        } !important`,
         ...theme.typography.body2,
     },
     error: {
-        color: `${Palette.COLOR_TEXT_DEFAULT} !important`,
-        backgroundColor: `${Palette.COLOR_BACKGROUND_ALERT_ERROR} !important`,
+        color: `${
+            theme.palette.type === "light"
+                ? darken(theme.palette.error.main, 0.6)
+                : lighten(theme.palette.error.main, 0.6)
+        } !important`,
+        backgroundColor: `${
+            theme.palette.type === "light"
+                ? lighten(theme.palette.error.main, 0.9)
+                : darken(theme.palette.error.main, 0.9)
+        } !important`,
         ...theme.typography.body2,
     },
     warning: {
-        color: `${Palette.COLOR_TEXT_DEFAULT} !important`,
-        backgroundColor: `${Palette.COLOR_BACKGROUND_ALERT_WARNING} !important`,
+        color: `${
+            theme.palette.type === "light"
+                ? darken(theme.palette.warning.main, 0.6)
+                : lighten(theme.palette.warning.main, 0.6)
+        } !important`,
+        backgroundColor: `${
+            theme.palette.type === "light"
+                ? lighten(theme.palette.warning.main, 0.9)
+                : darken(theme.palette.warning.main, 0.9)
+        } !important`,
         ...theme.typography.body2,
     },
     info: {
-        color: `${Palette.COLOR_TEXT_DEFAULT} !important`,
-        backgroundColor: `${Palette.COLOR_BACKGROUND_ALERT_INFO} !important`,
+        color: `${
+            theme.palette.type === "light"
+                ? darken(theme.palette.info.main, 0.6)
+                : lighten(theme.palette.info.main, 0.6)
+        } !important`,
+        backgroundColor: `${
+            theme.palette.type === "light"
+                ? lighten(theme.palette.info.main, 0.9)
+                : darken(theme.palette.info.main, 0.9)
+        } !important`,
         ...theme.typography.body2,
     },
 }));

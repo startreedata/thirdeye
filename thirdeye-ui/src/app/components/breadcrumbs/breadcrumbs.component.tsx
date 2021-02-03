@@ -2,41 +2,39 @@ import { Breadcrumbs as MuiBreadcrumbs, Link } from "@material-ui/core";
 import { NavigateNext } from "@material-ui/icons";
 import React, { FunctionComponent } from "react";
 import { BreadcrumbsProps } from "./breadcrumbs.interfaces";
-import { useBreadcrumbsStyles } from "./breadcrumbs.styles";
 
 export const Breadcrumbs: FunctionComponent<BreadcrumbsProps> = (
     props: BreadcrumbsProps
 ) => {
-    const breadcrumbsClasses = useBreadcrumbsStyles();
-
     return (
-        <MuiBreadcrumbs separator={<NavigateNext />}>
+        <MuiBreadcrumbs
+            itemsAfterCollapse={props.trailingSeparator ? 2 : 1}
+            maxItems={
+                props.maxItems
+                    ? props.trailingSeparator
+                        ? props.maxItems + 1
+                        : props.maxItems
+                    : 5
+            }
+            separator={<NavigateNext fontSize="small" />}
+        >
+            {/* Breadcrumbs */}
             {props.breadcrumbs &&
-                props.breadcrumbs
-                    .filter((breadcrumb) => Boolean(breadcrumb.text))
-                    .map((breadcrumb, index) => (
-                        <Link
-                            className={
-                                // Last breadcrumb/breadcrumb without click handler to be selected
-                                index === props.breadcrumbs.length - 1 ||
-                                !breadcrumb.onClick
-                                    ? breadcrumbsClasses.selectedLink
-                                    : ""
-                            }
-                            component="button"
-                            disabled={
-                                // Last breadcrumb/breadcrumb without click handler to be disabled
-                                index === props.breadcrumbs.length - 1 ||
-                                !breadcrumb.onClick
-                            }
-                            display="block"
-                            key={index}
-                            variant="subtitle1"
-                            onClick={breadcrumb.onClick}
-                        >
-                            {breadcrumb.text}
-                        </Link>
-                    ))}
+                props.breadcrumbs.map((breadcrumb, index) => (
+                    <Link
+                        component="button"
+                        disabled={!breadcrumb.onClick}
+                        display="block"
+                        key={index}
+                        variant={props.variant || "subtitle2"}
+                        onClick={breadcrumb.onClick}
+                    >
+                        {breadcrumb.text}
+                    </Link>
+                ))}
+
+            {/* Trailing separator */}
+            {props.trailingSeparator && <span />}
         </MuiBreadcrumbs>
     );
 };

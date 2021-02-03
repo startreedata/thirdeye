@@ -62,3 +62,8 @@ export const typographyOptions: TypographyOptions = {
         letterSpacing: "1px",
     },
 };
+
+export const codeTypographyOptions = {
+    fontFamily: "Source Code Pro, monospace",
+    ...typographyOptions.body2,
+};

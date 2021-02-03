@@ -3,7 +3,6 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
@@ -20,7 +19,6 @@ import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
 } from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { getSubscriptionGroupsAllPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -44,21 +42,10 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
-    const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        setPageBreadcrumbs([
-            {
-                text: t("label.all"),
-                onClick: (): void => {
-                    history.push(getSubscriptionGroupsAllPath());
-                },
-            },
-        ]);
-    }, []);
-
-    useEffect(() => {
+        setPageBreadcrumbs([]);
         fetchAllSubscriptionGroups();
     }, []);
 
@@ -180,6 +167,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         <PageContents
             centered
             hideTimeRange
+            maxRouterBreadcrumbs={1}
             title={t("label.subscription-groups")}
         >
             <Grid container>
@@ -188,7 +176,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                     <SearchBar
                         autoFocus
                         setSearchQueryString
-                        label={t("label.search-subscription-groups")}
+                        searchLabel={t("label.search-subscription-groups")}
                         searchStatusLabel={t("label.search-count", {
                             count: filteredSubscriptionGroupCardDatas
                                 ? filteredSubscriptionGroupCardDatas.length

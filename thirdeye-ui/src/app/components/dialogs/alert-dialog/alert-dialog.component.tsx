@@ -7,7 +7,6 @@ import {
     DialogContentText,
     DialogTitle,
     Grid,
-    Typography,
 } from "@material-ui/core";
 import React, { FunctionComponent, useContext } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,13 +20,11 @@ export const AlertDialog: FunctionComponent = () => {
 
     const onClose = (): void => {
         dialogData && dialogData.onCancel && dialogData.onCancel();
-
         hideDialog();
     };
 
     const onOk = (): void => {
         dialogData && dialogData.onOk && dialogData.onOk();
-
         hideDialog();
     };
 
@@ -37,20 +34,14 @@ export const AlertDialog: FunctionComponent = () => {
                 <Dialog disableBackdropClick open={visible} onClose={onClose}>
                     {/* Header */}
                     {dialogData.title && (
-                        <DialogTitle disableTypography>
-                            <Typography variant="h5">
-                                {dialogData.title}
-                            </Typography>
-                        </DialogTitle>
+                        <DialogTitle>{dialogData.title}</DialogTitle>
                     )}
 
                     {/* Contents */}
                     <DialogContent
                         className={alertDialogClasses.contentsContainer}
                     >
-                        <DialogContentText variant="body1">
-                            {dialogData.text}
-                        </DialogContentText>
+                        <DialogContentText>{dialogData.text}</DialogContentText>
                     </DialogContent>
 
                     {/* Controls */}
@@ -61,7 +52,6 @@ export const AlertDialog: FunctionComponent = () => {
                                 <Grid item>
                                     <Button
                                         color="primary"
-                                        size="large"
                                         variant="outlined"
                                         onClick={onClose}
                                     >
@@ -74,7 +64,6 @@ export const AlertDialog: FunctionComponent = () => {
                                 <Grid item>
                                     <Button
                                         color="primary"
-                                        size="large"
                                         variant="contained"
                                         onClick={onOk}
                                     >

@@ -34,7 +34,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         }
 
         // If search label matches search query string, set search text from query string
-        if (props.label === getSearchFromQueryString()) {
+        if (props.searchLabel === getSearchFromQueryString()) {
             // Update search text and arrange to send event with a delay to allow user to notice
             // search
             updateSearchText(getSearchTextFromQueryString(), true);
@@ -77,7 +77,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         // Set search and search text in query string
         if (props.setSearchQueryString) {
             setSearchInQueryString(
-                props.label ? props.label : t("label.search")
+                props.searchLabel ? props.searchLabel : t("label.search")
             );
             setSearchTextInQueryString(
                 searchWords.join(DELIMITER_SEARCH_WORDS)
@@ -88,7 +88,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     const sendOnChangeDebounced = useCallback(debounce(sendOnChange, 400), [
         props.onChange,
         props.setSearchQueryString,
-        props.label,
+        props.searchLabel,
     ]);
 
     return (
@@ -120,7 +120,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
             }}
             autoFocus={props.autoFocus}
             inputRef={inputRef}
-            label={props.label ? props.label : t("label.search")}
+            label={props.searchLabel ? props.searchLabel : t("label.search")}
             value={searchText}
             variant="outlined"
             onChange={onSearchInputChange}

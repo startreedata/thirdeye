@@ -1,6 +1,6 @@
 export interface SearchBarProps {
     autoFocus?: boolean;
-    label?: string;
+    searchLabel?: string;
     searchStatusLabel?: string;
     setSearchQueryString?: boolean;
     onChange?: (searchWords: string[]) => void;

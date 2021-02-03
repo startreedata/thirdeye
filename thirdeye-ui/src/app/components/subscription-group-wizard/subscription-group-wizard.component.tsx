@@ -256,7 +256,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
 
                         <Grid item sm={12}>
                             <EditableList
-                                buttonLabel={t("label.add")}
+                                addButtonLabel={t("label.add")}
                                 inputLabel={t("label.add-email")}
                                 list={
                                     (newSubscriptionGroup &&

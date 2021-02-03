@@ -26,10 +26,7 @@ import {
     getAnomalyCardData,
 } from "../../utils/anomalies-util/anomalies-util";
 import { isValidNumberId } from "../../utils/params-util/params-util";
-import {
-    getAnomaliesAllPath,
-    getAnomaliesDetailPath,
-} from "../../utils/routes-util/routes-util";
+import { getAnomaliesAllPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -52,22 +49,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Fetched anomaly changed, set breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: anomalyCardData ? anomalyCardData.name : "",
-                onClick: (): void => {
-                    if (anomalyCardData) {
-                        history.push(
-                            getAnomaliesDetailPath(anomalyCardData.id)
-                        );
-                    }
-                },
-            },
-        ]);
-    }, [anomalyCardData]);
-
-    useEffect(() => {
+        setPageBreadcrumbs([]);
         fetchAnomaly();
     }, []);
 

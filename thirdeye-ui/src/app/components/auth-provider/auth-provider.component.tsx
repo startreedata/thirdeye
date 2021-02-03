@@ -2,7 +2,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuthStore } from "../../store/auth-store/auth-store";
+import { useAuthStore } from "../../stores/auth-store/auth-store";
 import {
     getFulfilledResponseInterceptor,
     getRejectedResponseInterceptor,
@@ -32,9 +32,7 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
     useEffect(() => {
         // Access token changed, reset axios
         setLoading(true);
-
         initAxios();
-
         setLoading(false);
     }, [accessToken]);
 

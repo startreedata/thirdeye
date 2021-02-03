@@ -3,7 +3,6 @@ import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
@@ -26,7 +25,6 @@ import {
     getAlertCardData,
     getAlertCardDatas,
 } from "../../utils/alerts-util/alerts-util";
-import { getAlertsAllPath } from "../../utils/routes-util/routes-util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -45,21 +43,10 @@ export const AlertsAllPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
-    const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        setPageBreadcrumbs([
-            {
-                text: t("label.all"),
-                onClick: (): void => {
-                    history.push(getAlertsAllPath());
-                },
-            },
-        ]);
-    }, []);
-
-    useEffect(() => {
+        setPageBreadcrumbs([]);
         fetchAllAlerts();
     }, []);
 
@@ -210,14 +197,14 @@ export const AlertsAllPage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.alerts")}>
+        <PageContents centered hideAppBreadcrumbs title={t("label.alerts")}>
             <Grid container>
                 {/* Search */}
                 <Grid item sm={12}>
                     <SearchBar
                         autoFocus
                         setSearchQueryString
-                        label={t("label.search-alerts")}
+                        searchLabel={t("label.search-alerts")}
                         searchStatusLabel={t("label.search-count", {
                             count: filteredAlertCardDatas
                                 ? filteredAlertCardDatas.length

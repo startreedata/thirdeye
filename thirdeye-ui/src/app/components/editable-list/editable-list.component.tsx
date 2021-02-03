@@ -63,7 +63,6 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         }
 
         const newList = [input, ...list];
-
         setList(newList);
         reset();
 
@@ -72,11 +71,9 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     };
 
     const onRemoveListItem = (index: number) => (): void => {
-        setList((list) => {
-            list.splice(index, 1);
-
-            return [...list];
-        });
+        const newList = [...list];
+        newList.splice(index, 1);
+        setList(newList);
 
         // Notify
         props.onChange && props.onChange(list);
@@ -88,8 +85,8 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         }
 
         // Clear input
-        setHelperText("");
         inputRef.current.value = "";
+        setHelperText("");
 
         // Set focus
         inputRef.current.focus();
@@ -114,7 +111,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                     error={Boolean(helperText)}
                     helperText={helperText}
                     inputRef={inputRef}
-                    label={props.inputLabel}
+                    label={props.inputLabel || t("label.add")}
                     variant="outlined"
                     onKeyPress={onInputKeyPress}
                 />
@@ -130,7 +127,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                     variant="outlined"
                     onClick={onAddListItem}
                 >
-                    {props.buttonLabel}
+                    {props.addButtonLabel || t("label.add")}
                 </Button>
             </Grid>
 

@@ -9,7 +9,6 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { login } from "../../rest/auth-rest/auth-rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
-import { getSignInPath } from "../../utils/routes-util/routes-util";
 import { getErrorSnackbarOption } from "../../utils/snackbar-util/snackbar-util";
 import { SignInPageProps } from "./sign-in-page.interfaces";
 import { useSignInPageStyles } from "./sign-in-page.styles";
@@ -18,7 +17,7 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
     props: SignInPageProps
 ) => {
     const signInPageClasses = useSignInPageStyles();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const { signIn } = useAuth();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { enqueueSnackbar } = useSnackbar();
@@ -26,15 +25,7 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
     const { t } = useTranslation();
 
     useEffect(() => {
-        setPageBreadcrumbs([
-            {
-                text: t("label.sign-in"),
-                onClick: (): void => {
-                    history.push(getSignInPath());
-                },
-            },
-        ]);
-        setLoading(false);
+        setPageBreadcrumbs([]);
     }, []);
 
     const performSignIn = (): void => {
@@ -60,7 +51,7 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
     }
 
     return (
-        <PageContents hideTimeRange>
+        <PageContents hideHeader title={t("label.sign-in")}>
             <Grid
                 container
                 alignItems="center"

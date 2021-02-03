@@ -3,10 +3,6 @@ import { Color } from "./color-util";
 
 // Material-UI theme component colors
 export const Palette = {
-    COLOR_TEXT_DEFAULT: Color.BLACK_1,
-    COLOR_TEXT_GREY: Color.GREY_1,
-    COLOR_BACKGROUND_DEFAULT: Color.WHITE_1,
-    COLOR_BACKGROUND_APP_BAR: Color.WHITE_1,
     COLOR_BORDER_DEFAULT: Color.GREY_1,
     COLOR_BORDER_DARK: Color.BLACK_1,
     // Visualizations

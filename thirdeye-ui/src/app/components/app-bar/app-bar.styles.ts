@@ -1,9 +1,8 @@
 import { makeStyles, Theme } from "@material-ui/core";
-import { Palette } from "../../utils/material-ui-util/palette-util";
 
 export const useAppBarStyles = makeStyles((theme: Theme) => ({
     container: {
-        backgroundColor: Palette.COLOR_BACKGROUND_APP_BAR,
+        backgroundColor: theme.palette.background.default,
         // App bar to be always above drawer
         zIndex: theme.zIndex.drawer + 1,
     },
@@ -17,8 +16,5 @@ export const useAppBarStyles = makeStyles((theme: Theme) => ({
     rightAlign: {
         marginLeft: "auto",
         marginRight: "16px",
-    },
-    selectedLink: {
-        color: Palette.COLOR_TEXT_DEFAULT,
     },
 }));

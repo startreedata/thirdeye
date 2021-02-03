@@ -119,12 +119,12 @@ export const AppBar: FunctionComponent = () => {
 
                 {/* Home */}
                 <Link
-                    className={classnames(
-                        appBarClasses.link,
+                    className={appBarClasses.link}
+                    color={
                         isRouteCurrent(AppRoute.HOME)
-                            ? appBarClasses.selectedLink
-                            : ""
-                    )}
+                            ? "textPrimary"
+                            : "primary"
+                    }
                     component="button"
                     variant="subtitle1"
                     onClick={onHomeClick}
@@ -134,12 +134,12 @@ export const AppBar: FunctionComponent = () => {
 
                 {/* Alerts */}
                 <Link
-                    className={classnames(
-                        appBarClasses.link,
+                    className={appBarClasses.link}
+                    color={
                         isRouteCurrent(AppRoute.ALERTS)
-                            ? appBarClasses.selectedLink
-                            : ""
-                    )}
+                            ? "textPrimary"
+                            : "primary"
+                    }
                     component="button"
                     variant="subtitle1"
                     onClick={onAlertsClick}
@@ -149,12 +149,12 @@ export const AppBar: FunctionComponent = () => {
 
                 {/* Anomalies */}
                 <Link
-                    className={classnames(
-                        appBarClasses.link,
+                    className={appBarClasses.link}
+                    color={
                         isRouteCurrent(AppRoute.ANOMALIES)
-                            ? appBarClasses.selectedLink
-                            : ""
-                    )}
+                            ? "textPrimary"
+                            : "primary"
+                    }
                     component="button"
                     variant="subtitle1"
                     onClick={onAnomaliesClick}
@@ -164,12 +164,12 @@ export const AppBar: FunctionComponent = () => {
 
                 {/* Configuration */}
                 <Link
-                    className={classnames(
-                        appBarClasses.link,
+                    className={appBarClasses.link}
+                    color={
                         isRouteCurrent(AppRoute.CONFIGURATION)
-                            ? appBarClasses.selectedLink
-                            : ""
-                    )}
+                            ? "textPrimary"
+                            : "primary"
+                    }
                     component="button"
                     variant="subtitle1"
                     onClick={onConfigurationClick}
@@ -182,11 +182,13 @@ export const AppBar: FunctionComponent = () => {
                     <Link
                         className={classnames(
                             appBarClasses.link,
-                            appBarClasses.rightAlign,
-                            isRouteCurrent(AppRoute.SIGN_IN)
-                                ? appBarClasses.selectedLink
-                                : ""
+                            appBarClasses.rightAlign
                         )}
+                        color={
+                            isRouteCurrent(AppRoute.SIGN_IN)
+                                ? "textPrimary"
+                                : "primary"
+                        }
                         component="button"
                         variant="subtitle1"
                         onClick={onSignInClick}

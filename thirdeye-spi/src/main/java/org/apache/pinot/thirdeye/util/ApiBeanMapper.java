@@ -166,8 +166,9 @@ public abstract class ApiBeanMapper {
     optional(api.getDimensions()).ifPresent(dto::setDimensions);
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
-      dto.setTimeDuration(TimeGranularity.fromDuration(timeColumn.getInterval()).getSize());
-      dto.setTimeUnit(TimeUnit.MILLISECONDS);
+      TimeGranularity timeGranularity = TimeGranularity.fromDuration(timeColumn.getInterval());
+      dto.setTimeDuration((int)timeGranularity.toDuration().getSeconds());
+      dto.setTimeUnit(TimeUnit.SECONDS);
       optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
       optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
     });

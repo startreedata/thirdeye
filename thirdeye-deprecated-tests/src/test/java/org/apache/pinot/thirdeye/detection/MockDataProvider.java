@@ -32,7 +32,6 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.Grouping;
 import org.apache.pinot.thirdeye.dataframe.Series;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
@@ -55,7 +54,6 @@ public class MockDataProvider implements DataProvider {
   private List<MetricConfigDTO> metrics;
   private List<DatasetConfigDTO> datasets;
   private List<EvaluationDTO> evaluations;
-  private DetectionPipelineLoader loader;
 
   public MockDataProvider() {
     // left blank
@@ -218,11 +216,6 @@ public class MockDataProvider implements DataProvider {
   }
 
   @Override
-  public DetectionPipeline loadPipeline(AlertDTO config, long start, long end) throws Exception {
-    return this.loader.from(this, config, start, end);
-  }
-
-  @Override
   public List<DatasetConfigDTO> fetchDatasetByDisplayName(String datasetDisplayName) {
     List<DatasetConfigDTO> datasetConfigDTOs = new ArrayList<>();
     for (DatasetConfigDTO datasetConfigDTO : getDatasets()) {
@@ -288,12 +281,7 @@ public class MockDataProvider implements DataProvider {
     return this;
   }
 
-  public DetectionPipelineLoader getLoader() {
-    return loader;
-  }
-
-  public MockDataProvider setLoader(DetectionPipelineLoader loader) {
-    this.loader = loader;
+  public MockDataProvider setLoader(DetectionPipelineFactory loader) {
     return this;
   }
 
@@ -317,11 +305,11 @@ public class MockDataProvider implements DataProvider {
     return Objects.equals(timeseries, that.timeseries) && Objects
         .equals(aggregates, that.aggregates)
         && Objects.equals(events, that.events) && Objects.equals(anomalies, that.anomalies)
-        && Objects.equals(metrics, that.metrics) && Objects.equals(loader, that.loader);
+        && Objects.equals(metrics, that.metrics);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(timeseries, aggregates, events, anomalies, metrics, loader);
+    return Objects.hash(timeseries, aggregates, events, anomalies, metrics);
   }
 }

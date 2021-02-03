@@ -26,7 +26,6 @@ import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
@@ -121,19 +120,6 @@ public interface DataProvider {
    * @see MetricConfigDTO
    */
   MetricConfigDTO fetchMetric(String metricName, String datasetName);
-
-  /**
-   * Returns an initialized instance of a detection pipeline for the given config. Injects this
-   * DataProvider as provider for the new pipeline.
-   *
-   * <br/><b>NOTE:</b> this method is typically used for prototyping and creating nested pipelines
-   *
-   * @param config detection config
-   * @param start detection window start time
-   * @param end detection window end time
-   * @return detection pipeline instance
-   */
-  DetectionPipeline loadPipeline(AlertDTO config, long start, long end) throws Exception;
 
   /**
    * Returns a multimap of evaluations (keyed by the evaluations slice) for a given set of

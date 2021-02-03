@@ -75,6 +75,7 @@ public class DimensionWrapperTest {
   private Map<String, Object> properties;
   private Map<String, Object> nestedProperties;
   private Map<MetricSlice, DataFrame> aggregates;
+  private MockPipelineLoader loader;
 
   private MetricConfigDTO createTestMetricConfig(long id) {
     MetricConfigDTO metric = new MetricConfigDTO();
@@ -111,8 +112,10 @@ public class DimensionWrapperTest {
         .setAggregates(this.aggregates)
         .setMetrics(Arrays.asList(metric1, metric2, metric3, metric4))
         .setDatasets(Collections.singletonList(dataset))
-        .setAnomalies(Collections.emptyList())
-        .setLoader(new MockPipelineLoader(this.runs, this.outputs));
+        .setAnomalies(Collections.emptyList());
+    loader = new MockPipelineLoader(this.runs, this.outputs, provider);
+
+
 
     this.nestedProperties = new HashMap<>();
     this.nestedProperties.put(PROP_CLASS_NAME, PROP_CLASS_NAME_VALUE);
@@ -138,6 +141,7 @@ public class DimensionWrapperTest {
     this.properties.put(PROP_DIMENSIONS, Collections.singleton("b"));
 
     this.wrapper = new DimensionWrapper(this.provider, this.config, 14, 15);
+    this.wrapper.setMockDetectionPipelineFactory(loader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 3);
@@ -151,6 +155,7 @@ public class DimensionWrapperTest {
     this.properties.put(PROP_DIMENSIONS, Collections.singleton("b"));
 
     this.wrapper = new DimensionWrapper(this.provider, this.config, 10, 15);
+    this.wrapper.setMockDetectionPipelineFactory(loader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 3);
@@ -164,6 +169,7 @@ public class DimensionWrapperTest {
     this.properties.put(PROP_DIMENSIONS, Arrays.asList("a", "b"));
 
     this.wrapper = new DimensionWrapper(this.provider, this.config, 10, 15);
+    this.wrapper.setMockDetectionPipelineFactory(loader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 6);
@@ -181,6 +187,7 @@ public class DimensionWrapperTest {
     this.properties.put(PROP_MIN_VALUE, 16.0d);
 
     this.wrapper = new DimensionWrapper(this.provider, this.config, 10, 15);
+    this.wrapper.setMockDetectionPipelineFactory(loader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 2);
@@ -194,6 +201,7 @@ public class DimensionWrapperTest {
     this.properties.put(PROP_MIN_CONTRIBUTION, 0.40d);
 
     this.wrapper = new DimensionWrapper(this.provider, this.config, 10, 15);
+    this.wrapper.setMockDetectionPipelineFactory(loader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 1);
@@ -206,6 +214,7 @@ public class DimensionWrapperTest {
     this.properties.put(PROP_K, 4);
 
     this.wrapper = new DimensionWrapper(this.provider, this.config, 10, 15);
+    this.wrapper.setMockDetectionPipelineFactory(loader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 4);
@@ -223,6 +232,7 @@ public class DimensionWrapperTest {
         Arrays.asList("thirdeye:metric:10", "thirdeye:metric:11", "thirdeye:metric:12"));
 
     this.wrapper = new DimensionWrapper(this.provider, this.config, 10, 15);
+    this.wrapper.setMockDetectionPipelineFactory(loader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 3);
@@ -250,10 +260,11 @@ public class DimensionWrapperTest {
         .setAggregates(this.aggregates)
         .setMetrics(Arrays.asList(metric0, metric1, metric2))
         .setDatasets(Collections.singletonList(dataset))
-        .setAnomalies(Collections.emptyList())
-        .setLoader(new MockPipelineLoader(this.runs, this.outputs));
+        .setAnomalies(Collections.emptyList());
+    final MockPipelineLoader loader = new MockPipelineLoader(this.runs, this.outputs, provider);
 
     this.wrapper = new DimensionWrapper(this.provider, this.config, 10, 15);
+    this.wrapper.setMockDetectionPipelineFactory(loader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 4);

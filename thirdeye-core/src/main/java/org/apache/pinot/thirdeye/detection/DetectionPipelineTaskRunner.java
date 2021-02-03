@@ -45,7 +45,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final EvaluationManager evaluationManager;
-  private final DetectionPipelineLoader loader;
+  private final DetectionPipelineFactory loader;
   private final DataProvider provider;
   private final ModelMaintenanceFlow modelMaintenanceFlow;
 
@@ -62,7 +62,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   public DetectionPipelineTaskRunner(AlertManager alertManager,
       MergedAnomalyResultManager mergedAnomalyResultManager,
       EvaluationManager evaluationManager,
-      DetectionPipelineLoader loader,
+      DetectionPipelineFactory loader,
       DataProvider provider,
       ModelRetuneFlow modelMaintenanceFlow) {
     this.alertManager = alertManager;
@@ -87,7 +87,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           info.start,
           info.end);
 
-      final DetectionPipeline pipeline = this.loader.from(this.provider,
+      final DetectionPipeline pipeline = this.loader.get(this.provider,
           config,
           info.start,
           info.end);

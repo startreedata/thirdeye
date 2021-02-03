@@ -20,6 +20,8 @@
 package org.apache.pinot.thirdeye.detection.alert;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,27 +29,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
-import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class DetectionAlertTaskFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertTaskFactory.class);
@@ -58,20 +48,9 @@ public class DetectionAlertTaskFactory {
 
   private final DataProvider provider;
 
-  public DetectionAlertTaskFactory() {
-    EventManager eventDAO = DAORegistry.getInstance().getEventDAO();
-    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    EvaluationManager evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
-    AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO, datasetDAO,
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-            .getDatasetMaxDataTimeCache());
-    this.provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO,
-        evaluationDAO,
-        aggregationLoader, new DetectionPipelineLoader(),
-        TimeSeriesCacheBuilder.getInstance(),
-        AnomaliesCacheBuilder.getInstance());
+  @Inject
+  public DetectionAlertTaskFactory(final DataProvider provider) {
+    this.provider = provider;
   }
 
   public DetectionAlertFilter loadAlertFilter(SubscriptionGroupDTO alertConfig, long endTime)

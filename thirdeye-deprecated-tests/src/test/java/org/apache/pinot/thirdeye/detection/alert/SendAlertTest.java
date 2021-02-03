@@ -110,7 +110,7 @@ public class SendAlertTest {
     datasetConfigDTO.setDataset(COLLECTION_VALUE);
     this.dataSetDAO.save(datasetConfigDTO);
 
-    this.taskRunner = new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(),
+    this.taskRunner = new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(null),
         DAORegistry.getInstance().getDetectionAlertConfigManager(),
         DAORegistry.getInstance().getMergedAnomalyResultDAO());
   }

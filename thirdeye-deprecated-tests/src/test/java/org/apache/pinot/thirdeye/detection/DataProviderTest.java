@@ -208,9 +208,13 @@ public class DataProviderTest {
         this.dataSourceCache, mockDatasetMaxDataTimeCache);
 
     // provider
-    this.provider = new DefaultDataProvider(this.metricDAO, this.datasetDAO, this.eventDAO,
-        this.evaluationDAO, aggregationLoader, null,
-        TimeSeriesCacheBuilder.getInstance(), AnomaliesCacheBuilder.getInstance());
+    this.provider = new DefaultDataProvider(this.metricDAO,
+        this.datasetDAO,
+        this.eventDAO,
+        this.evaluationDAO,
+        aggregationLoader,
+        TimeSeriesCacheBuilder.getInstance(),
+        AnomaliesCacheBuilder.getInstance());
   }
 
   @AfterClass(alwaysRun = true)

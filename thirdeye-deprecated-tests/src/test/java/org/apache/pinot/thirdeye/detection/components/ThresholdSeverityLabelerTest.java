@@ -99,12 +99,12 @@ public class ThresholdSeverityLabelerTest {
             DetectionTestUtils.makeAnomaly(3000L, 4000L, METRIC_URN, 4800, 5000),
             DetectionTestUtils.makeAnomaly(4000L, 6000L, METRIC_URN, 2500, 3000));
     this.runs = new ArrayList<>();
-    this.loader = new MockPipelineLoader(this.runs,
-        Collections.singletonList(new MockPipelineOutput(this.anomalies, 6000L)));
-    this.testDataProvider = new MockDataProvider().setLoader(this.loader)
+    this.testDataProvider = new MockDataProvider()
         .setMetrics(Collections.singletonList(metricConfigDTO))
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAggregates(aggregates);
+    this.loader = new MockPipelineLoader(this.runs,
+        Collections.singletonList(new MockPipelineOutput(this.anomalies, 6000L)), testDataProvider);
   }
 
   @Test
@@ -119,6 +119,8 @@ public class ThresholdSeverityLabelerTest {
     this.specs.put("severity", severityMap);
     this.thresholdSeverityLabeler = new AnomalyLabelerWrapper(this.testDataProvider, this.config,
         1000L, 6000L);
+    thresholdSeverityLabeler.setMockDetectionPipelineFactory(loader);
+
     DetectionPipelineResult result = this.thresholdSeverityLabeler.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 4);
@@ -137,6 +139,8 @@ public class ThresholdSeverityLabelerTest {
     this.specs.put("severity", severityMap);
     this.thresholdSeverityLabeler = new AnomalyLabelerWrapper(this.testDataProvider, this.config,
         1000L, 6000L);
+    thresholdSeverityLabeler.setMockDetectionPipelineFactory(loader);
+
     DetectionPipelineResult result = this.thresholdSeverityLabeler.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 4);
@@ -163,6 +167,8 @@ public class ThresholdSeverityLabelerTest {
     this.anomalies.set(this.anomalies.size() - 1, anomaly);
     this.thresholdSeverityLabeler = new AnomalyLabelerWrapper(this.testDataProvider, this.config,
         1000L, 6000L);
+    thresholdSeverityLabeler.setMockDetectionPipelineFactory(loader);
+
     DetectionPipelineResult result = this.thresholdSeverityLabeler.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 4);
@@ -187,6 +193,8 @@ public class ThresholdSeverityLabelerTest {
     this.anomalies.set(this.anomalies.size() - 1, anomaly);
     this.thresholdSeverityLabeler = new AnomalyLabelerWrapper(this.testDataProvider, this.config,
         1000L, 6000L);
+    thresholdSeverityLabeler.setMockDetectionPipelineFactory(loader);
+
     DetectionPipelineResult result = this.thresholdSeverityLabeler.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 4);

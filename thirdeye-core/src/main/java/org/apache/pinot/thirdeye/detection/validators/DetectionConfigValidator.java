@@ -32,7 +32,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionConfigValidator.class);
 
-  private final DetectionPipelineLoader loader;
+  private final DetectionPipelineFactory loader;
   private final DataProvider provider;
 
   private static final String PROP_DETECTION = "detection";
@@ -68,7 +68,7 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
     super(DETECTION_CONFIG_SCHEMA_PATH);
 
     this.provider = provider;
-    this.loader = new DetectionPipelineLoader();
+    this.loader = new DetectionPipelineFactory(provider);
   }
 
   /**
@@ -82,7 +82,7 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
 
     try {
       // try to load the detection pipeline and init all the components
-      this.loader.from(provider, detectionConfig, 0, 0);
+      this.loader.get(provider, detectionConfig, 0, 0);
     } catch (Exception e) {
       throw new RuntimeException("Semantic validation error in " + detectionConfig.getId(), e);
     }

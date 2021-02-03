@@ -36,7 +36,7 @@ import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DataProviderException;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
@@ -109,7 +109,7 @@ public class AlertEvaluator {
   private DetectionPipelineResult runPipeline(final AlertEvaluationApi request)
       throws InterruptedException, ExecutionException, TimeoutException {
     final AlertDTO alert = getAlert(ensureExists(request.getAlert()));
-    final DetectionPipeline pipeline = new DetectionPipelineLoader().from(
+    final DetectionPipeline pipeline = new DetectionPipelineFactory(dataProvider).get(
         dataProvider,
         alert,
         request.getStart().getTime(),

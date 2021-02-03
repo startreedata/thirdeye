@@ -35,9 +35,7 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -45,7 +43,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
@@ -65,16 +63,14 @@ public class DataQualityTaskRunnerTest {
   private TaskContext context;
   private DAOTestBase testDAOProvider;
   private AlertManager detectionDAO;
-  private SubscriptionGroupManager subscriptionDAO;
   private DatasetConfigManager datasetDAO;
   private MergedAnomalyResultManager anomalyDAO;
-  private EvaluationManager evaluationDAO;
   private MetricConfigDTO metricConfigDTO;
   private DatasetConfigDTO datasetConfigDTO;
   private AlertDTO alertDTO;
 
   private long detectorId;
-  private DetectionPipelineLoader loader;
+  private DetectionPipelineFactory loader;
   private DataProvider provider;
 
   private static final long GRANULARITY = TimeUnit.DAYS.toMillis(1);
@@ -86,11 +82,9 @@ public class DataQualityTaskRunnerTest {
   public void beforeMethod() throws Exception {
     this.testDAOProvider = DAOTestBase.getInstance();
     this.detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
-    this.subscriptionDAO = DAORegistry.getInstance().getDetectionAlertConfigManager();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
-    this.evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
-    this.loader = new DetectionPipelineLoader();
+    this.loader = new DetectionPipelineFactory(null);
 
     DetectionRegistry.registerComponent(DataSlaQualityChecker.class.getName(), "DATA_SLA");
     DetectionRegistry.registerComponent(ThresholdRuleDetector.class.getName(), "THRESHOLD");

@@ -43,7 +43,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
@@ -73,7 +72,6 @@ public class DefaultDataProvider implements DataProvider {
   private final EventManager eventDAO;
   private final EvaluationManager evaluationDAO;
   private final AggregationLoader aggregationLoader;
-  private final DetectionPipelineLoader loader;
 
   private final TimeSeriesCacheBuilder timeseriesCache;
   private final AnomaliesCacheBuilder anomaliesCache;
@@ -83,7 +81,6 @@ public class DefaultDataProvider implements DataProvider {
       EventManager eventDAO,
       EvaluationManager evaluationDAO,
       AggregationLoader aggregationLoader,
-      DetectionPipelineLoader loader,
       TimeSeriesCacheBuilder timeseriesCache,
       AnomaliesCacheBuilder anomaliesCache) {
     this.metricDAO = metricDAO;
@@ -91,9 +88,12 @@ public class DefaultDataProvider implements DataProvider {
     this.eventDAO = eventDAO;
     this.evaluationDAO = evaluationDAO;
     this.aggregationLoader = aggregationLoader;
-    this.loader = loader;
     this.timeseriesCache = timeseriesCache;
     this.anomaliesCache = anomaliesCache;
+  }
+
+  private static Predicate AND(Collection<Predicate> predicates) {
+    return Predicate.AND(predicates.toArray(new Predicate[predicates.size()]));
   }
 
   @Override
@@ -224,11 +224,6 @@ public class DefaultDataProvider implements DataProvider {
   }
 
   @Override
-  public DetectionPipeline loadPipeline(AlertDTO config, long start, long end) {
-    return this.loader.from(this, config, start, end);
-  }
-
-  @Override
   public MetricConfigDTO fetchMetric(String metricName, String datasetName) {
     return this.metricDAO.findByMetricAndDataset(metricName, datasetName);
   }
@@ -251,10 +246,6 @@ public class DefaultDataProvider implements DataProvider {
       output.putAll(slice, evaluations.stream().filter(slice::match).collect(Collectors.toList()));
     }
     return output;
-  }
-
-  private static Predicate AND(Collection<Predicate> predicates) {
-    return Predicate.AND(predicates.toArray(new Predicate[predicates.size()]));
   }
 
   /**

@@ -19,14 +19,28 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 
-public class DetectionPipelineLoader {
+@Singleton
+public class DetectionPipelineFactory {
 
   private static final String PROP_CLASS_NAME = "className";
 
-  public DetectionPipeline from(DataProvider provider, AlertDTO config, long start, long end) {
+  private final DataProvider dataProvider;
+
+  @Inject
+  public DetectionPipelineFactory(final DataProvider dataProvider) {
+    this.dataProvider = dataProvider;
+  }
+
+  public DetectionPipeline get(DetectionPipelineContext context) {
+    return get(dataProvider, context.getAlert(), context.getStart(), context.getEnd());
+  }
+
+  public DetectionPipeline get(DataProvider provider, AlertDTO config, long start, long end) {
     String className = config.getProperties().get(PROP_CLASS_NAME).toString();
     try {
       Constructor<?> constructor = Class.forName(className)

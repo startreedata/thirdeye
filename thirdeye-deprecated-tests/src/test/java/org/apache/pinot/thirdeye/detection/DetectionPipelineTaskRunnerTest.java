@@ -54,7 +54,7 @@ public class DetectionPipelineTaskRunnerTest {
   private MergedAnomalyResultManager anomalyDAO;
   private EvaluationManager evaluationDAO;
   private TaskManager taskDAO;
-  private DetectionPipelineLoader loader;
+  private DetectionPipelineFactory loader;
   private DataProvider provider;
   private Map<String, Object> properties;
 
@@ -71,8 +71,8 @@ public class DetectionPipelineTaskRunnerTest {
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
     this.evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
     this.taskDAO = DAORegistry.getInstance().getTaskDAO();
-    this.loader = new MockPipelineLoader(this.runs, this.outputs);
     this.provider = new MockDataProvider();
+    this.loader = new MockPipelineLoader(this.runs, this.outputs, provider);
 
     this.properties = new HashMap<>();
     this.properties.put("metricUrn", "thirdeye:metric:1");

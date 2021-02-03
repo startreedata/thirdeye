@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.detection.DetectionUtils.getSpecClassName;
 
 import com.google.common.base.Preconditions;
@@ -61,6 +62,21 @@ public abstract class DetectionPipeline {
   protected final AlertDTO config;
   protected final long startTime;
   protected final long endTime;
+
+  private DetectionPipelineFactory mockDetectionPipelineFactory;
+
+  /**
+   * Only used for testing. To be refactored. Please do not use.
+   *
+   * @param mockDetectionPipelineFactory
+   * @return
+   */
+  @Deprecated
+  public DetectionPipeline setMockDetectionPipelineFactory(
+      final DetectionPipelineFactory mockDetectionPipelineFactory) {
+    this.mockDetectionPipelineFactory = mockDetectionPipelineFactory;
+    return this;
+  }
 
   protected DetectionPipeline(DataProvider provider, AlertDTO config, long startTime,
       long endTime) {
@@ -271,7 +287,16 @@ public abstract class DetectionPipeline {
     nestedConfig.setDescription(this.config.getDescription());
     nestedConfig.setComponents(this.config.getComponents());
     nestedConfig.setProperties(properties);
-    DetectionPipeline pipeline = this.provider.loadPipeline(nestedConfig, startTime, endTime);
+
+    final DetectionPipelineFactory detectionPipelineFactory = optional(mockDetectionPipelineFactory)
+        .orElse(new DetectionPipelineFactory(provider));
+
+    final DetectionPipeline pipeline = detectionPipelineFactory.get(
+        new DetectionPipelineContext()
+            .setAlert(nestedConfig)
+            .setStart(startTime)
+            .setEnd(endTime)
+    );
     return pipeline.run();
   }
 

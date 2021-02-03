@@ -260,7 +260,7 @@ public class DetectionUtils {
    */
   public static TimeSeries getBaselineTimeseries(MergedAnomalyResultDTO anomaly,
       Multimap<String, String> filters, Long metricId, AlertDTO config,
-      long start, long end, DetectionPipelineLoader loader, DataProvider provider)
+      long start, long end, DetectionPipelineFactory loader, DataProvider provider)
       throws Exception {
     String baselineProviderComponentName = anomaly.getProperties()
         .get(PROP_BASELINE_PROVIDER_COMPONENT_NAME);
@@ -270,7 +270,7 @@ public class DetectionUtils {
     if (baselineProviderComponentName != null && config != null &&
         config.getComponentSpecs().containsKey(baselineProviderComponentName)) {
       // load pipeline and init components
-      loader.from(provider, config, start, end);
+      loader.get(provider, config, start, end);
       baselineProvider = (BaselineProvider) config.getComponents()
           .get(baselineProviderComponentName);
     } else {

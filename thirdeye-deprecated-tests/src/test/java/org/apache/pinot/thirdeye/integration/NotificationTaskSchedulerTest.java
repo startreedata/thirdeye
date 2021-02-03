@@ -39,7 +39,7 @@ import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
@@ -78,7 +78,7 @@ public class NotificationTaskSchedulerTest {
   private TaskManager taskDAO;
   private EvaluationManager evaluationDAO;
   private ApplicationManager appDAO;
-  private DetectionPipelineLoader detectionPipelineLoader;
+  private DetectionPipelineFactory detectionPipelineFactory;
   private long detectionId;
 
   @BeforeClass
@@ -113,7 +113,7 @@ public class NotificationTaskSchedulerTest {
     anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     evaluationDAO = daoRegistry.getEvaluationManager();
     appDAO = daoRegistry.getApplicationDAO();
-    detectionPipelineLoader = new DetectionPipelineLoader();
+    detectionPipelineFactory = new DetectionPipelineFactory(null);
   }
 
   private void cleanup_schedulers() throws SchedulerException {
@@ -141,8 +141,12 @@ public class NotificationTaskSchedulerTest {
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
                 .getDatasetMaxDataTimeCache());
 
-    DataProvider provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, evaluationDAO,
-        aggregationLoader, detectionPipelineLoader, TimeSeriesCacheBuilder.getInstance(),
+    DataProvider provider = new DefaultDataProvider(metricDAO,
+        datasetDAO,
+        eventDAO,
+        evaluationDAO,
+        aggregationLoader,
+        TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
 
     detectionId = daoRegistry.getDetectionConfigManager()

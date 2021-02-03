@@ -33,7 +33,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
 import org.slf4j.Logger;
@@ -49,13 +49,13 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
   private static final Logger LOG = LoggerFactory.getLogger(YamlOnboardingTaskRunner.class);
   private final AlertManager detectionDAO;
   private final MergedAnomalyResultManager anomalyDAO;
-  private final DetectionPipelineLoader loader;
+  private final DetectionPipelineFactory loader;
   private final DataProvider provider;
 
   public YamlOnboardingTaskRunner(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager,
-      final DetectionPipelineLoader loader) {
+      final DetectionPipelineFactory loader) {
     this.loader = loader;
     this.detectionDAO = detectionConfigManager;
     this.anomalyDAO = mergedAnomalyResultManager;
@@ -75,7 +75,7 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
     }
 
     DetectionPipeline pipeline = this.loader
-        .from(this.provider, config, info.getStart(), info.getEnd());
+        .get(this.provider, config, info.getStart(), info.getEnd());
     DetectionPipelineResult result = pipeline.run();
 
     if (result.getLastTimestamp() < 0) {

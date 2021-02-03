@@ -60,6 +60,7 @@ public class ChildKeepingMergeWrapperTest {
   private static final String PROP_NESTED = "nested";
   private static final String PROP_MAX_GAP = "maxGap";
   private static final String PROP_MAX_DURATION = "maxDuration";
+  private MockPipelineLoader mockLoader;
 
   @BeforeMethod
   public void beforeMethod() {
@@ -101,17 +102,17 @@ public class ChildKeepingMergeWrapperTest {
         makeAnomaly(1500, 2000)
     ), 3000));
 
-    MockPipelineLoader mockLoader = new MockPipelineLoader(this.runs, this.outputs);
-
     this.provider = new MockDataProvider()
-        .setLoader(mockLoader)
         .setAnomalies(Collections.emptyList());
+    mockLoader = new MockPipelineLoader(this.runs, this.outputs, provider);
+
   }
 
   @Test
   public void testMergerPassthru() throws Exception {
     this.config.getProperties().put(PROP_MAX_GAP, 0);
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 5);
@@ -123,6 +124,7 @@ public class ChildKeepingMergeWrapperTest {
     this.config.getProperties().put(PROP_MAX_GAP, 100);
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
@@ -140,6 +142,7 @@ public class ChildKeepingMergeWrapperTest {
     this.config.getProperties().put(PROP_MAX_DURATION, 1250);
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
@@ -168,6 +171,7 @@ public class ChildKeepingMergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
@@ -198,6 +202,7 @@ public class ChildKeepingMergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
@@ -214,6 +219,7 @@ public class ChildKeepingMergeWrapperTest {
   @Test
   public void testMergerExecution() throws Exception {
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 2);
@@ -232,6 +238,7 @@ public class ChildKeepingMergeWrapperTest {
     this.config.getProperties().put(PROP_NESTED, Collections.<Map<String, Object>>emptyList());
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 0);
@@ -264,6 +271,7 @@ public class ChildKeepingMergeWrapperTest {
     this.nestedProperties.add(nestedPropertiesFour);
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 6);
@@ -306,14 +314,17 @@ public class ChildKeepingMergeWrapperTest {
     config.setName(PROP_NAME_VALUE);
     config.setProperties(properties);
 
+    DataProvider provider = new MockDataProvider().setAnomalies(Collections.emptyList());
+
     MockPipelineLoader mockLoader = new MockPipelineLoader(this.runs,
-        Collections.singletonList(new MockPipelineOutput(Collections.singletonList(anomaly), -1L)));
+        Collections.singletonList(new MockPipelineOutput(Collections.singletonList(anomaly), -1L)),
+        provider);
 
-    DataProvider provider = new MockDataProvider()
-        .setLoader(mockLoader).setAnomalies(Collections.emptyList());
+    final ChildKeepingMergeWrapper childKeepingMergeWrapper = new ChildKeepingMergeWrapper(provider,
+        config, 1000, 3000);
+    childKeepingMergeWrapper.setMockDetectionPipelineFactory(mockLoader);
+    DetectionPipelineResult output = childKeepingMergeWrapper.run();
 
-    DetectionPipelineResult output = new ChildKeepingMergeWrapper(provider, config, 1000, 3000)
-        .run();
     List<MergedAnomalyResultDTO> anomalyResults = output.getAnomalies();
     Assert.assertEquals(anomalyResults.size(), 1);
     Assert.assertEquals(anomalyResults.get(0).getAvgBaselineVal(), 999.0);
@@ -337,6 +348,7 @@ public class ChildKeepingMergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 5);
@@ -363,6 +375,7 @@ public class ChildKeepingMergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 5);
@@ -387,6 +400,7 @@ public class ChildKeepingMergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);

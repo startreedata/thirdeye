@@ -54,7 +54,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -62,12 +61,9 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
-import org.apache.pinot.thirdeye.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
@@ -89,18 +85,15 @@ public class TestMetricAnomaliesContent {
   private final int id = 0;
   private final String dashboardHost = "http://localhost:8080/dashboard";
   private final String detectionConfigFile = "/sample-detection-config.yml";
+  private final ObjectMapper mapper = new ObjectMapper();
   private DAOTestBase testDAOProvider;
   private AlertManager detectionConfigDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
   private MetricConfigManager metricDAO;
   private DatasetConfigManager datasetDAO;
   private EventManager eventDAO;
-  private MergedAnomalyResultManager anomalyDAO;
-  private TaskManager taskDAO;
   private EvaluationManager evaluationDAO;
-  private DetectionPipelineLoader detectionPipelineLoader;
   private DataProvider provider;
-  private final ObjectMapper mapper = new ObjectMapper();
 
   @BeforeMethod
   public void beforeMethod() {
@@ -111,21 +104,20 @@ public class TestMetricAnomaliesContent {
     metricDAO = daoRegistry.getMetricConfigDAO();
     datasetDAO = daoRegistry.getDatasetConfigDAO();
     eventDAO = daoRegistry.getEventDAO();
-    taskDAO = daoRegistry.getTaskDAO();
-    anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     evaluationDAO = daoRegistry.getEvaluationManager();
-    detectionPipelineLoader = new DetectionPipelineLoader();
 
-    TimeSeriesLoader timeseriesLoader =
-        new DefaultTimeSeriesLoader(daoRegistry.getMetricConfigDAO(), datasetDAO, null, null);
     AggregationLoader aggregationLoader =
         new DefaultAggregationLoader(metricDAO, datasetDAO, DeprecatedInjectorUtil
             .getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
                 .getDatasetMaxDataTimeCache());
 
-    provider = new DefaultDataProvider(metricDAO, datasetDAO, eventDAO, evaluationDAO,
-        aggregationLoader, detectionPipelineLoader, TimeSeriesCacheBuilder.getInstance(),
+    provider = new DefaultDataProvider(metricDAO,
+        datasetDAO,
+        eventDAO,
+        evaluationDAO,
+        aggregationLoader,
+        TimeSeriesCacheBuilder.getInstance(),
         AnomaliesCacheBuilder.getInstance());
   }
 

@@ -115,15 +115,15 @@ public class MergeWrapperTest {
         new MockPipelineOutput(Arrays.asList(makeAnomaly(1150, 1250), makeAnomaly(2400, 2800)),
             3000));
 
-    this.mockLoader = new MockPipelineLoader(this.runs, this.outputs);
-
-    this.provider = new MockDataProvider().setAnomalies(existing).setLoader(this.mockLoader);
+    this.provider = new MockDataProvider().setAnomalies(existing);
+    this.mockLoader = new MockPipelineLoader(this.runs, this.outputs, provider);
   }
 
   @Test
   public void testMergerPassthru() throws Exception {
     this.config.getProperties().put(PROP_MAX_GAP, 0);
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
@@ -139,6 +139,7 @@ public class MergeWrapperTest {
     this.outputs.add(new MockPipelineOutput(Arrays.asList(makeAnomaly(0, 1200)), 2900));
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     // anomaly [1500, 2000] is not modified
@@ -156,6 +157,7 @@ public class MergeWrapperTest {
     this.config.getProperties().put(PROP_MAX_DURATION, 1250);
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
@@ -181,6 +183,7 @@ public class MergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 4000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
@@ -207,6 +210,7 @@ public class MergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 4000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
@@ -232,6 +236,7 @@ public class MergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 4000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 6);
@@ -247,6 +252,7 @@ public class MergeWrapperTest {
   @Test
   public void testMergerExecution() throws Exception {
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     this.wrapper.run();
 
     Assert.assertEquals(this.runs.size(), 2);
@@ -295,6 +301,7 @@ public class MergeWrapperTest {
     this.nestedProperties.add(nestedPropertiesFour);
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 6);
@@ -329,6 +336,7 @@ public class MergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 4000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 1);
@@ -357,6 +365,7 @@ public class MergeWrapperTest {
     this.nestedProperties.add(nestedProperties);
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
+    wrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.wrapper.run();
 
     // trend anomaly was not merged with deviation Anomaly

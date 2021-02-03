@@ -108,13 +108,14 @@ public class ThresholdRuleAnomalyFilterTest {
 
     this.runs = new ArrayList<>();
 
-    this.loader = new MockPipelineLoader(this.runs,
-        Collections.singletonList(new MockPipelineOutput(this.anomalies, 1551200400000L)));
-
-    this.testDataProvider = new MockDataProvider().setLoader(this.loader)
+    this.testDataProvider = new MockDataProvider()
         .setMetrics(Collections.singletonList(metricConfigDTO))
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAggregates(aggregates);
+
+    this.loader = new MockPipelineLoader(this.runs,
+        Collections.singletonList(new MockPipelineOutput(this.anomalies, 1551200400000L)), testDataProvider);
+
   }
 
   @Test(priority = 0)
@@ -122,6 +123,7 @@ public class ThresholdRuleAnomalyFilterTest {
     this.thresholdRuleFilter =
         new AnomalyFilterWrapper(this.testDataProvider, this.config, 1551186000000L,
             1551189600000L);
+    thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
     DetectionPipelineResult result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
@@ -139,6 +141,7 @@ public class ThresholdRuleAnomalyFilterTest {
     this.thresholdRuleFilter =
         new AnomalyFilterWrapper(this.testDataProvider, this.config, 1551186000000L,
             1551189600000L);
+    thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
     DetectionPipelineResult result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
@@ -155,6 +158,7 @@ public class ThresholdRuleAnomalyFilterTest {
     this.thresholdRuleFilter =
         new AnomalyFilterWrapper(this.testDataProvider, this.config, 1551186000000L,
             1551189600000L);
+    thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
     DetectionPipelineResult result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
@@ -172,6 +176,7 @@ public class ThresholdRuleAnomalyFilterTest {
     this.thresholdRuleFilter =
         new AnomalyFilterWrapper(this.testDataProvider, this.config, 1551186000000L,
             1551189600000L);
+    thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
     DetectionPipelineResult result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
@@ -187,6 +192,7 @@ public class ThresholdRuleAnomalyFilterTest {
     this.thresholdRuleFilter =
         new AnomalyFilterWrapper(this.testDataProvider, this.config, 1551186000000L,
             1551189600000L);
+    thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
     DetectionPipelineResult result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
@@ -203,6 +209,7 @@ public class ThresholdRuleAnomalyFilterTest {
     this.thresholdRuleFilter =
         new AnomalyFilterWrapper(this.testDataProvider, this.config, 1551186000000L,
             1551189600000L);
+    thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
     DetectionPipelineResult result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
@@ -220,6 +227,8 @@ public class ThresholdRuleAnomalyFilterTest {
     this.thresholdRuleFilter =
         new AnomalyFilterWrapper(this.testDataProvider, this.config, 1551186000000L,
             1551189600000L);
+    thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
+
     DetectionPipelineResult result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(result.getLastTimestamp(), 1551200400000L);

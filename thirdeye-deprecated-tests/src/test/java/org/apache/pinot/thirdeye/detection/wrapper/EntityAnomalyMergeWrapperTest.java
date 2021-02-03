@@ -63,6 +63,7 @@ public class EntityAnomalyMergeWrapperTest {
   private static final String PROP_PROPERTIES = "properties";
   private static final String PROP_NESTED = "nested";
   private static final String PROP_MAX_GAP = "maxGap";
+  private MockPipelineLoader mockLoader;
 
   @BeforeMethod
   public void beforeMethod() {
@@ -110,11 +111,10 @@ public class EntityAnomalyMergeWrapperTest {
     this.outputs.add(new MockPipelineOutput(Arrays.asList(parentAnomaly1), 2900));
     this.outputs.add(new MockPipelineOutput(Arrays.asList(parentAnomaly2), 3000));
 
-    MockPipelineLoader mockLoader = new MockPipelineLoader(this.runs, this.outputs);
 
     this.provider = new MockDataProvider()
-        .setLoader(mockLoader)
         .setAnomalies(Collections.emptyList());
+    mockLoader = new MockPipelineLoader(this.runs, this.outputs, provider);
   }
 
   @Test
@@ -123,6 +123,7 @@ public class EntityAnomalyMergeWrapperTest {
     this.config.getProperties().put(PROP_MAX_GAP, 200);
 
     this.mergeWrapper = new EntityAnomalyMergeWrapper(this.provider, this.config, 1000, 4000);
+    mergeWrapper.setMockDetectionPipelineFactory(mockLoader);
     DetectionPipelineResult output = this.mergeWrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 1);

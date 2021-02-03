@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
   private static final Logger LOG = LoggerFactory.getLogger(DataQualityPipelineTaskRunner.class);
   private final AlertManager detectionDAO;
   private final MergedAnomalyResultManager anomalyDAO;
-  private final DetectionPipelineLoader loader;
+  private final DetectionPipelineFactory loader;
   private final DataProvider provider;
 
   /**
@@ -60,7 +60,7 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
    * @see ThirdEyeCacheRegistry
    */
   public DataQualityPipelineTaskRunner(final DataProvider provider,
-      final DetectionPipelineLoader loader,
+      final DetectionPipelineFactory loader,
       final AlertManager detectionConfigManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
     this.loader = loader;
@@ -87,7 +87,7 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
       // A small hack to reuse the properties field to run the data quality pipeline; this is reverted after the run.
       config.setProperties(config.getDataQualityProperties());
       DetectionPipeline pipeline = this.loader
-          .from(this.provider, config, info.getStart(), info.getEnd());
+          .get(this.provider, config, info.getStart(), info.getEnd());
       DetectionPipelineResult result = pipeline.run();
       // revert the properties field back to detection properties
       config.setProperties(props);

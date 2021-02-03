@@ -29,7 +29,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineLoader;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.ModelRetuneFlow;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskFactory;
@@ -46,8 +46,9 @@ public class TaskRunnerFactory {
   private final EvaluationManager evaluationManager;
   private final DataProvider dataProvider;
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final DetectionPipelineLoader detectionPipelineLoader;
+  private final DetectionPipelineFactory detectionPipelineFactory;
   private final DAORegistry daoRegistry;
+  private final DetectionAlertTaskFactory detectionAlertTaskFactory;
 
   @Inject
   public TaskRunnerFactory(
@@ -56,15 +57,17 @@ public class TaskRunnerFactory {
       final EvaluationManager evaluationManager,
       final DataProvider dataProvider,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final DetectionPipelineLoader detectionPipelineLoader,
-      final DAORegistry daoRegistry) {
+      final DetectionPipelineFactory detectionPipelineFactory,
+      final DAORegistry daoRegistry,
+      final DetectionAlertTaskFactory detectionAlertTaskFactory) {
     this.detectionConfigManager = detectionConfigManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.evaluationManager = evaluationManager;
     this.dataProvider = dataProvider;
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.detectionPipelineLoader = detectionPipelineLoader;
+    this.detectionPipelineFactory = detectionPipelineFactory;
     this.daoRegistry = daoRegistry;
+    this.detectionAlertTaskFactory = detectionAlertTaskFactory;
   }
 
   public TaskRunner get(TaskType taskType) {
@@ -72,7 +75,7 @@ public class TaskRunnerFactory {
       case DATA_QUALITY:
         return new DataQualityPipelineTaskRunner(
             dataProvider,
-            detectionPipelineLoader,
+            detectionPipelineFactory,
             detectionConfigManager,
             mergedAnomalyResultManager
         );
@@ -80,11 +83,11 @@ public class TaskRunnerFactory {
         return new DetectionPipelineTaskRunner(detectionConfigManager,
             mergedAnomalyResultManager,
             evaluationManager,
-            detectionPipelineLoader,
+            detectionPipelineFactory,
             dataProvider,
             new ModelRetuneFlow(dataProvider, new DetectionRegistry()));
       case DETECTION_ALERT:
-        return new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(),
+        return new DetectionAlertTaskRunner(detectionAlertTaskFactory,
             subscriptionGroupManager,
             mergedAnomalyResultManager);
       case YAML_DETECTION_ONBOARD:
@@ -92,7 +95,7 @@ public class TaskRunnerFactory {
             dataProvider,
             mergedAnomalyResultManager,
             detectionConfigManager,
-            detectionPipelineLoader);
+            detectionPipelineFactory);
       case MONITOR:
         return new MonitorTaskRunner(daoRegistry);
       default:

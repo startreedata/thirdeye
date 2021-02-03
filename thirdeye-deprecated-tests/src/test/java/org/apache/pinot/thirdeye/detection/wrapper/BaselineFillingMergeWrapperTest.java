@@ -107,14 +107,16 @@ public class BaselineFillingMergeWrapperTest {
     MetricConfigDTO metric = new MetricConfigDTO();
     metric.setId(1L);
     metric.setDefaultAggFunction(MetricAggFunction.SUM);
-    DataProvider provider = new MockDataProvider().setLoader(new MockPipelineLoader(this.runs,
-        Collections.singletonList(new MockPipelineOutput(Collections.singletonList(anomaly), -1L))))
+    DataProvider provider = new MockDataProvider()
         .setAnomalies(Collections.emptyList())
         .setMetrics(Collections.singletonList(metric))
         .setTimeseries(timeseries)
         .setAggregates(ImmutableMap.of(MetricSlice.from(1, 3000, 3600),
             DataFrame.builder(DataFrame.COL_TIME + ":LONG", DataFrame.COL_VALUE + ":DOUBLE")
                 .append(3000, 100).build()));
+    final MockPipelineLoader loader = new MockPipelineLoader(this.runs,
+        Collections.singletonList(new MockPipelineOutput(Collections.singletonList(anomaly), -1L)),
+        provider);
 
     // set up detection config properties
     this.config.getProperties().put(PROP_MAX_GAP, 100);
@@ -137,6 +139,7 @@ public class BaselineFillingMergeWrapperTest {
 
     // run baseline filling merge wrapper
     this.wrapper = new BaselineFillingMergeWrapper(provider, this.config, 2900, 3600);
+    wrapper.setMockDetectionPipelineFactory(loader);
     DetectionPipelineResult output = this.wrapper.run();
 
     List<MergedAnomalyResultDTO> anomalyResults = output.getAnomalies();

@@ -2,7 +2,6 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 
 export const AlertsUpdatePage: FunctionComponent = () => {
@@ -31,16 +30,8 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     }, []);
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
-    return (
-        <PageContainer>
-            <PageContents centered title={t("label.update")} />
-        </PageContainer>
-    );
+    return <PageContents centered title={t("label.update")} />;
 };

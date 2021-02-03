@@ -158,7 +158,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                 )}
 
                 {/* Time range duration */}
-                <Typography variant="body1">
+                <Typography variant="body2">
                     {formatTimeRangeDuration(props.timeRangeDuration)}
                 </Typography>
             </Grid>

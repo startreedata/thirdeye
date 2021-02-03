@@ -1,6 +1,7 @@
 import {
     AppBar as MuiAppBar,
     Fab,
+    IconButton,
     Link,
     Menu,
     MenuItem,
@@ -105,7 +106,7 @@ export const AppBar: FunctionComponent = () => {
     };
 
     return (
-        <MuiAppBar className={appBarClasses.container}>
+        <MuiAppBar className={appBarClasses.container} elevation={6}>
             <Toolbar>
                 {/* ThirdEye logo */}
                 <Link
@@ -125,7 +126,7 @@ export const AppBar: FunctionComponent = () => {
                             : ""
                     )}
                     component="button"
-                    variant="subtitle2"
+                    variant="subtitle1"
                     onClick={onHomeClick}
                 >
                     {t("label.home")}
@@ -140,7 +141,7 @@ export const AppBar: FunctionComponent = () => {
                             : ""
                     )}
                     component="button"
-                    variant="subtitle2"
+                    variant="subtitle1"
                     onClick={onAlertsClick}
                 >
                     {t("label.alerts")}
@@ -155,7 +156,7 @@ export const AppBar: FunctionComponent = () => {
                             : ""
                     )}
                     component="button"
-                    variant="subtitle2"
+                    variant="subtitle1"
                     onClick={onAnomaliesClick}
                 >
                     {t("label.anomalies")}
@@ -170,7 +171,7 @@ export const AppBar: FunctionComponent = () => {
                             : ""
                     )}
                     component="button"
-                    variant="subtitle2"
+                    variant="subtitle1"
                     onClick={onConfigurationClick}
                 >
                     {t("label.configuration")}
@@ -187,7 +188,7 @@ export const AppBar: FunctionComponent = () => {
                                 : ""
                         )}
                         component="button"
-                        variant="subtitle2"
+                        variant="subtitle1"
                         onClick={onSignInClick}
                     >
                         {t("label.sign-in")}
@@ -230,14 +231,13 @@ export const AppBar: FunctionComponent = () => {
                 {!authDisabled && authenticated && (
                     <>
                         {/* Account options */}
-                        <Fab
+                        <IconButton
                             className={appBarClasses.link}
-                            color="primary"
                             size="small"
                             onClick={onAccountOptionsClick}
                         >
                             <Person />
-                        </Fab>
+                        </IconButton>
 
                         <Menu
                             anchorEl={accountOptionsAnchorElement}

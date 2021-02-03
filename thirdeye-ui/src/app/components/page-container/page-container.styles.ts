@@ -11,8 +11,7 @@ export const usePageContainerStyles = makeStyles({
     },
     innerContainer: {
         display: "flex",
-        flexGrow: 1, // Container to occupy remaining available area
-        overflowX: "hidden", // Disable horizontal scroll
-        overflowY: "auto", // Contents of this container to be scrollable while everything outside is fixed
+        flexGrow: 1, // Container to occupy available area
+        overflow: "hidden", // Contents of this container can scroll while everything outside is fixed
     },
 });

@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
@@ -91,21 +90,15 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <PageContainer>
-            <PageContents centered hideTimeRange>
-                <SubscriptionGroupWizard
-                    alerts={alerts}
-                    onFinish={onSubscriptionGroupWizardFinish}
-                />
-            </PageContents>
-        </PageContainer>
+        <PageContents centered hideTimeRange>
+            <SubscriptionGroupWizard
+                alerts={alerts}
+                onFinish={onSubscriptionGroupWizardFinish}
+            />
+        </PageContents>
     );
 };

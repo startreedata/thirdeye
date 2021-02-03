@@ -11,7 +11,6 @@ import { SubscriptionGroupCard } from "../../components/entity-cards/subscriptio
 import { SubscriptionGroupCardData } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SearchBar } from "../../components/search-bar/search-bar.component";
 import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
@@ -174,68 +173,60 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <PageContainer>
-            <PageContents
-                centered
-                hideTimeRange
-                title={t("label.subscription-groups")}
-            >
-                <Grid container>
-                    {/* Search */}
-                    <Grid item sm={12}>
-                        <SearchBar
-                            autoFocus
-                            setSearchQueryString
-                            label={t("label.search-subscription-groups")}
-                            searchStatusLabel={t("label.search-count", {
-                                count: filteredSubscriptionGroupCardDatas
-                                    ? filteredSubscriptionGroupCardDatas.length
-                                    : 0,
-                                total: subscriptionGroupCardDatas
-                                    ? subscriptionGroupCardDatas.length
-                                    : 0,
-                            })}
-                            onChange={setSearchWords}
-                        />
-                    </Grid>
-
-                    {/* Subscription groups */}
-                    {filteredSubscriptionGroupCardDatas &&
-                        filteredSubscriptionGroupCardDatas.map(
-                            (filteredSubscriptionGroupCardData, index) => (
-                                <Grid item key={index} sm={12}>
-                                    <SubscriptionGroupCard
-                                        searchWords={searchWords}
-                                        subscriptionGroupCardData={
-                                            filteredSubscriptionGroupCardData
-                                        }
-                                        onDelete={onDeleteSubscriptionGroup}
-                                    />
-                                </Grid>
-                            )
-                        )}
+        <PageContents
+            centered
+            hideTimeRange
+            title={t("label.subscription-groups")}
+        >
+            <Grid container>
+                {/* Search */}
+                <Grid item sm={12}>
+                    <SearchBar
+                        autoFocus
+                        setSearchQueryString
+                        label={t("label.search-subscription-groups")}
+                        searchStatusLabel={t("label.search-count", {
+                            count: filteredSubscriptionGroupCardDatas
+                                ? filteredSubscriptionGroupCardDatas.length
+                                : 0,
+                            total: subscriptionGroupCardDatas
+                                ? subscriptionGroupCardDatas.length
+                                : 0,
+                        })}
+                        onChange={setSearchWords}
+                    />
                 </Grid>
 
-                {/* No data available message */}
-                {isEmpty(filteredSubscriptionGroupCardDatas) &&
-                    isEmpty(searchWords) && <NoDataIndicator />}
-
-                {/* No search results available message */}
-                {isEmpty(filteredSubscriptionGroupCardDatas) &&
-                    !isEmpty(searchWords) && (
-                        <NoDataIndicator
-                            text={t("message.no-search-results")}
-                        />
+                {/* Subscription groups */}
+                {filteredSubscriptionGroupCardDatas &&
+                    filteredSubscriptionGroupCardDatas.map(
+                        (filteredSubscriptionGroupCardData, index) => (
+                            <Grid item key={index} sm={12}>
+                                <SubscriptionGroupCard
+                                    searchWords={searchWords}
+                                    subscriptionGroupCardData={
+                                        filteredSubscriptionGroupCardData
+                                    }
+                                    onDelete={onDeleteSubscriptionGroup}
+                                />
+                            </Grid>
+                        )
                     )}
-            </PageContents>
-        </PageContainer>
+            </Grid>
+
+            {/* No data available message */}
+            {isEmpty(filteredSubscriptionGroupCardDatas) &&
+                isEmpty(searchWords) && <NoDataIndicator />}
+
+            {/* No search results available message */}
+            {isEmpty(filteredSubscriptionGroupCardDatas) &&
+                !isEmpty(searchWords) && (
+                    <NoDataIndicator text={t("message.no-search-results")} />
+                )}
+        </PageContents>
     );
 };

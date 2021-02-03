@@ -11,7 +11,6 @@ import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-
 import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
@@ -185,42 +184,36 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <PageContainer>
-            <PageContents
-                centered
-                title={anomalyCardData ? anomalyCardData.name : ""}
-            >
-                {anomalyCardData && (
-                    <Grid container>
-                        {/* Anomaly */}
-                        <Grid item sm={12}>
-                            <AnomalyCard
-                                hideViewDetailsLinks
-                                anomalyCardData={anomalyCardData}
-                                onDelete={onDeleteAnomaly}
-                            />
-                        </Grid>
-
-                        {/* Alert evaluation time series */}
-                        <Grid item sm={12}>
-                            <AlertEvaluationTimeSeriesCard
-                                alertEvaluation={alertEvaluation}
-                            />
-                        </Grid>
+        <PageContents
+            centered
+            title={anomalyCardData ? anomalyCardData.name : ""}
+        >
+            {anomalyCardData && (
+                <Grid container>
+                    {/* Anomaly */}
+                    <Grid item sm={12}>
+                        <AnomalyCard
+                            hideViewDetailsLinks
+                            anomalyCardData={anomalyCardData}
+                            onDelete={onDeleteAnomaly}
+                        />
                     </Grid>
-                )}
 
-                {/* No data available message */}
-                {!anomalyCardData && <NoDataIndicator />}
-            </PageContents>
-        </PageContainer>
+                    {/* Alert evaluation time series */}
+                    <Grid item sm={12}>
+                        <AlertEvaluationTimeSeriesCard
+                            alertEvaluation={alertEvaluation}
+                        />
+                    </Grid>
+                </Grid>
+            )}
+
+            {/* No data available message */}
+            {!anomalyCardData && <NoDataIndicator />}
+        </PageContents>
     );
 };

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
-import { PageContainer } from "../../components/page-container/page-container.component";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { ConfigurationRouter } from "./configuration-router";
 
@@ -35,9 +35,12 @@ jest.mock("../../utils/routes-util/routes-util", () => ({
     getConfigurationPath: jest.fn().mockReturnValue("testConfigurationPath"),
 }));
 
-jest.mock("../../components/page-container/page-container.component", () => ({
-    PageContainer: jest.fn().mockReturnValue(<>testPageContainer</>),
-}));
+jest.mock(
+    "../../components/loading-indicator/loading-indicator.component",
+    () => ({
+        LoadingIndicator: jest.fn().mockReturnValue(<>testLoadingIndicator</>),
+    })
+);
 
 jest.mock(
     "../../pages/configuration-page/configuration-page.component",
@@ -62,14 +65,14 @@ jest.mock(
 );
 
 describe("Configuration Router", () => {
-    test("should have rendered page container while loading", () => {
+    test("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
                 <ConfigurationRouter />
             </MemoryRouter>
         );
 
-        expect(PageContainer).toHaveBeenCalled();
+        expect(LoadingIndicator).toHaveBeenCalled();
     });
 
     test("should set appropriate router breadcrumbs", () => {

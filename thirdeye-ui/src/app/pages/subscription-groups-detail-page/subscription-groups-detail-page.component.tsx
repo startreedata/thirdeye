@@ -14,7 +14,6 @@ import {
 } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
 import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
@@ -257,65 +256,57 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <PageContainer>
-            <PageContents
-                centered
-                hideTimeRange
-                title={
-                    subscriptionGroupCardData
-                        ? subscriptionGroupCardData.name
-                        : ""
-                }
-            >
-                {subscriptionGroupCardData && (
-                    <Grid container>
-                        {/* Subscription Group */}
-                        <Grid item sm={12}>
-                            <SubscriptionGroupCard
-                                hideViewDetailsLinks
-                                subscriptionGroupCardData={
-                                    subscriptionGroupCardData
-                                }
-                                onDelete={onDeleteSubscriptionGroup}
-                            />
-                        </Grid>
-
-                        {/* Subscribed alerts */}
-                        <Grid item sm={12}>
-                            <SubscriptionGroupAlertsAccordian
-                                alerts={alerts}
-                                subscriptionGroupCardData={
-                                    subscriptionGroupCardData
-                                }
-                                title={t("label.subscribe-alerts")}
-                                onChange={onSubscriptionGroupAlertsChange}
-                            />
-                        </Grid>
-
-                        {/* Subscribed emails */}
-                        <Grid item sm={12}>
-                            <SubscriptionGroupEmailsAccordian
-                                subscriptionGroupCardData={
-                                    subscriptionGroupCardData
-                                }
-                                title={t("label.subscribe-emails")}
-                                onChange={onSubscriptionGroupEmailsChange}
-                            />
-                        </Grid>
+        <PageContents
+            centered
+            hideTimeRange
+            title={
+                subscriptionGroupCardData ? subscriptionGroupCardData.name : ""
+            }
+        >
+            {subscriptionGroupCardData && (
+                <Grid container>
+                    {/* Subscription Group */}
+                    <Grid item sm={12}>
+                        <SubscriptionGroupCard
+                            hideViewDetailsLinks
+                            subscriptionGroupCardData={
+                                subscriptionGroupCardData
+                            }
+                            onDelete={onDeleteSubscriptionGroup}
+                        />
                     </Grid>
-                )}
 
-                {/* No data available message */}
-                {!subscriptionGroupCardData && <NoDataIndicator />}
-            </PageContents>
-        </PageContainer>
+                    {/* Subscribed alerts */}
+                    <Grid item sm={12}>
+                        <SubscriptionGroupAlertsAccordian
+                            alerts={alerts}
+                            subscriptionGroupCardData={
+                                subscriptionGroupCardData
+                            }
+                            title={t("label.subscribe-alerts")}
+                            onChange={onSubscriptionGroupAlertsChange}
+                        />
+                    </Grid>
+
+                    {/* Subscribed emails */}
+                    <Grid item sm={12}>
+                        <SubscriptionGroupEmailsAccordian
+                            subscriptionGroupCardData={
+                                subscriptionGroupCardData
+                            }
+                            title={t("label.subscribe-emails")}
+                            onChange={onSubscriptionGroupEmailsChange}
+                        />
+                    </Grid>
+                </Grid>
+            )}
+
+            {/* No data available message */}
+            {!subscriptionGroupCardData && <NoDataIndicator />}
+        </PageContents>
     );
 };

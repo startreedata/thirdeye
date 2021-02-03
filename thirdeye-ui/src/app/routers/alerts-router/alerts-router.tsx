@@ -9,7 +9,6 @@ import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import {
     AppRoute,
     getAlertsAllPath,
@@ -65,11 +64,7 @@ export const AlertsRouter: FunctionComponent = () => {
     }, []);
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (

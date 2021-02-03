@@ -58,6 +58,7 @@ export const typographyOptions: TypographyOptions = {
     overline: {
         fontSize: "12px",
         fontWeight: 400,
+        lineHeight: 1,
         letterSpacing: "1px",
     },
 };

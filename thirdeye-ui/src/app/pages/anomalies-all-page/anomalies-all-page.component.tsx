@@ -11,7 +11,6 @@ import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-
 import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SearchBar } from "../../components/search-bar/search-bar.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
@@ -149,62 +148,54 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <PageContainer>
-            <PageContents centered title={t("label.anomalies")}>
-                <Grid container>
-                    {/* Search */}
-                    <Grid item sm={12}>
-                        <SearchBar
-                            autoFocus
-                            setSearchQueryString
-                            label={t("label.search-anomalies")}
-                            searchStatusLabel={t("label.search-count", {
-                                count: filteredAnomalyCardDatas
-                                    ? filteredAnomalyCardDatas.length
-                                    : 0,
-                                total: anomalyCardDatas
-                                    ? anomalyCardDatas.length
-                                    : 0,
-                            })}
-                            onChange={setSearchWords}
-                        />
-                    </Grid>
-
-                    {/* Anomalies */}
-                    {filteredAnomalyCardDatas &&
-                        filteredAnomalyCardDatas.map(
-                            (filteredAnomalyCardData, index) => (
-                                <Grid item key={index} sm={12}>
-                                    <AnomalyCard
-                                        anomalyCardData={
-                                            filteredAnomalyCardData
-                                        }
-                                        searchWords={searchWords}
-                                        onDelete={onDeleteAnomaly}
-                                    />
-                                </Grid>
-                            )
-                        )}
+        <PageContents centered title={t("label.anomalies")}>
+            <Grid container>
+                {/* Search */}
+                <Grid item sm={12}>
+                    <SearchBar
+                        autoFocus
+                        setSearchQueryString
+                        label={t("label.search-anomalies")}
+                        searchStatusLabel={t("label.search-count", {
+                            count: filteredAnomalyCardDatas
+                                ? filteredAnomalyCardDatas.length
+                                : 0,
+                            total: anomalyCardDatas
+                                ? anomalyCardDatas.length
+                                : 0,
+                        })}
+                        onChange={setSearchWords}
+                    />
                 </Grid>
 
-                {/* No data available message */}
-                {isEmpty(filteredAnomalyCardDatas) && isEmpty(searchWords) && (
-                    <NoDataIndicator />
-                )}
+                {/* Anomalies */}
+                {filteredAnomalyCardDatas &&
+                    filteredAnomalyCardDatas.map(
+                        (filteredAnomalyCardData, index) => (
+                            <Grid item key={index} sm={12}>
+                                <AnomalyCard
+                                    anomalyCardData={filteredAnomalyCardData}
+                                    searchWords={searchWords}
+                                    onDelete={onDeleteAnomaly}
+                                />
+                            </Grid>
+                        )
+                    )}
+            </Grid>
 
-                {/* No search results available message */}
-                {isEmpty(filteredAnomalyCardDatas) && !isEmpty(searchWords) && (
-                    <NoDataIndicator text={t("message.no-search-results")} />
-                )}
-            </PageContents>
-        </PageContainer>
+            {/* No data available message */}
+            {isEmpty(filteredAnomalyCardDatas) && isEmpty(searchWords) && (
+                <NoDataIndicator />
+            )}
+
+            {/* No search results available message */}
+            {isEmpty(filteredAnomalyCardDatas) && !isEmpty(searchWords) && (
+                <NoDataIndicator text={t("message.no-search-results")} />
+            )}
+        </PageContents>
     );
 };

@@ -11,7 +11,6 @@ import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.c
 import { AlertCardData } from "../../components/entity-cards/alert-card/alert-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
@@ -235,43 +234,34 @@ export const AlertsDetailPage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <PageContainer>
-            <PageContents
-                centered
-                title={alertCardData ? alertCardData.name : ""}
-            >
-                {alertCardData && (
-                    <Grid container>
-                        {/* Alert */}
-                        <Grid item sm={12}>
-                            <AlertCard
-                                hideViewDetailsLinks
-                                alertCardData={alertCardData}
-                                onChange={onAlertChange}
-                                onDelete={onDeleteAlert}
-                            />
-                        </Grid>
-
-                        {/* Alert evaluation time series */}
-                        <Grid item sm={12}>
-                            <AlertEvaluationTimeSeriesCard
-                                alertEvaluation={alertEvaluation}
-                            />
-                        </Grid>
+        <PageContents centered title={alertCardData ? alertCardData.name : ""}>
+            {alertCardData && (
+                <Grid container>
+                    {/* Alert */}
+                    <Grid item sm={12}>
+                        <AlertCard
+                            hideViewDetailsLinks
+                            alertCardData={alertCardData}
+                            onChange={onAlertChange}
+                            onDelete={onDeleteAlert}
+                        />
                     </Grid>
-                )}
 
-                {/* No data available message */}
-                {!alertCardData && <NoDataIndicator />}
-            </PageContents>
-        </PageContainer>
+                    {/* Alert evaluation time series */}
+                    <Grid item sm={12}>
+                        <AlertEvaluationTimeSeriesCard
+                            alertEvaluation={alertEvaluation}
+                        />
+                    </Grid>
+                </Grid>
+            )}
+
+            {/* No data available message */}
+            {!alertCardData && <NoDataIndicator />}
+        </PageContents>
     );
 };

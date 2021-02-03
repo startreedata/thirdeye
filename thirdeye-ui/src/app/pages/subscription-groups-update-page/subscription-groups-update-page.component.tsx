@@ -6,7 +6,6 @@ import { useHistory, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
@@ -150,27 +149,21 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <PageContainer>
-            <PageContents centered hideTimeRange>
-                {subscriptionGroup && (
-                    <SubscriptionGroupWizard
-                        alerts={alerts}
-                        subscriptionGroup={subscriptionGroup}
-                        onFinish={onSubscriptionGroupWizardFinish}
-                    />
-                )}
+        <PageContents centered hideTimeRange>
+            {subscriptionGroup && (
+                <SubscriptionGroupWizard
+                    alerts={alerts}
+                    subscriptionGroup={subscriptionGroup}
+                    onFinish={onSubscriptionGroupWizardFinish}
+                />
+            )}
 
-                {/* No data available message */}
-                {!subscriptionGroup && <NoDataIndicator />}
-            </PageContents>
-        </PageContainer>
+            {/* No data available message */}
+            {!subscriptionGroup && <NoDataIndicator />}
+        </PageContents>
     );
 };

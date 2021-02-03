@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { PageContainer } from "../../components/page-container/page-container.component";
+import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { AppRoute } from "../../utils/routes-util/routes-util";
 import { GeneralAuthenticatedRouter } from "./general-authenticated-router";
 
@@ -11,9 +11,12 @@ jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
     })),
 }));
 
-jest.mock("../../components/page-container/page-container.component", () => ({
-    PageContainer: jest.fn().mockReturnValue(<>testPageContainer</>),
-}));
+jest.mock(
+    "../../components/loading-indicator/loading-indicator.component",
+    () => ({
+        LoadingIndicator: jest.fn().mockReturnValue(<>testLoadingIndicator</>),
+    })
+);
 
 jest.mock("../../pages/home-page/home-page.component", () => ({
     HomePage: jest.fn().mockReturnValue(<>testHomePage</>),
@@ -31,14 +34,14 @@ jest.mock(
 );
 
 describe("General Authenticated Router", () => {
-    test("should have rendered page container while loading", () => {
+    test("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
-        expect(PageContainer).toHaveBeenCalled();
+        expect(LoadingIndicator).toHaveBeenCalled();
     });
 
     test("should set appropriate router breadcrumbs", () => {

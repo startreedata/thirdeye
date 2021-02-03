@@ -4,7 +4,6 @@ import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { logout } from "../../rest/auth-rest/auth-rest";
 import { getSignOutPath } from "../../utils/routes-util/routes-util";
 
@@ -33,9 +32,5 @@ export const SignOutPage: FunctionComponent = () => {
         });
     };
 
-    return (
-        <PageContainer>
-            <LoadingIndicator />
-        </PageContainer>
-    );
+    return <LoadingIndicator />;
 };

@@ -8,7 +8,6 @@ import React, {
 import { Redirect, Route, Switch } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import {
     AppRoute,
     getBasePath,
@@ -43,11 +42,7 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     }, []);
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (

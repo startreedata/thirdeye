@@ -6,7 +6,6 @@ import { useHistory } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
@@ -193,26 +192,20 @@ export const AlertsCreatePage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <PageContainer>
-            <PageContents centered>
-                <AlertWizard
-                    getAlertEvaluation={fetchAlertEvaluation}
-                    getAllAlerts={fetchAllAlerts}
-                    getAllSubscriptionGroups={fetchAllSubscriptionGroups}
-                    onFinish={onAlertWizardFinish}
-                    onSubscriptionGroupWizardFinish={
-                        onSubscriptionGroupWizardFinish
-                    }
-                />
-            </PageContents>
-        </PageContainer>
+        <PageContents centered>
+            <AlertWizard
+                getAlertEvaluation={fetchAlertEvaluation}
+                getAllAlerts={fetchAllAlerts}
+                getAllSubscriptionGroups={fetchAllSubscriptionGroups}
+                onFinish={onAlertWizardFinish}
+                onSubscriptionGroupWizardFinish={
+                    onSubscriptionGroupWizardFinish
+                }
+            />
+        </PageContents>
     );
 };

@@ -6,7 +6,6 @@ import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { PageContainer } from "../../components/page-container/page-container.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { login } from "../../rest/auth-rest/auth-rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
@@ -57,34 +56,28 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
     };
 
     if (loading) {
-        return (
-            <PageContainer>
-                <LoadingIndicator />
-            </PageContainer>
-        );
+        return <LoadingIndicator />;
     }
 
     return (
-        <PageContainer>
-            <PageContents hideTimeRange>
-                <Grid
-                    container
-                    alignItems="center"
-                    className={signInPageClasses.container}
-                    justify="center"
-                >
-                    <Grid item>
-                        <Button
-                            color="primary"
-                            size="large"
-                            variant="contained"
-                            onClick={performSignIn}
-                        >
-                            {t("label.sign-in")}
-                        </Button>
-                    </Grid>
+        <PageContents hideTimeRange>
+            <Grid
+                container
+                alignItems="center"
+                className={signInPageClasses.container}
+                justify="center"
+            >
+                <Grid item>
+                    <Button
+                        color="primary"
+                        size="large"
+                        variant="contained"
+                        onClick={performSignIn}
+                    >
+                        {t("label.sign-in")}
+                    </Button>
                 </Grid>
-            </PageContents>
-        </PageContainer>
+            </Grid>
+        </PageContents>
     );
 };

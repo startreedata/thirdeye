@@ -20,7 +20,7 @@ export const getAnomaliesByTime = async (
     endTime: number
 ): Promise<Anomaly[]> => {
     const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?startTime=${startTime}&endTime=${endTime}`
+        `${BASE_URL_ANOMALIES}?startTime=[gte]${startTime}&endTime=[lte]${endTime}`
     );
 
     return response.data;
@@ -42,7 +42,7 @@ export const getAnomaliesByAlertIdAndTime = async (
     endTime: number
 ): Promise<Anomaly[]> => {
     const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?alert.id=${alertId}&startTime=${startTime}&endTime=${endTime}`
+        `${BASE_URL_ANOMALIES}?alert.id=${alertId}&startTime=[gte]${startTime}&endTime=[lte]${endTime}`
     );
 
     return response.data;

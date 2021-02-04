@@ -37,10 +37,16 @@ export const formatNumber = (
 // 1000000000000 -> 1t
 // 10000000000000 -> 10t
 // 100000000000000 -> 100t
-export const formatLargeNumber = (num: number): string => {
+export const formatLargeNumber = (
+    num: number,
+    mantissa = 2,
+    optionalMantissa = true
+): string => {
     return numbro(num).format({
         average: true,
         lowPrecision: false,
+        mantissa: mantissa,
+        optionalMantissa: optionalMantissa,
     } as numbro.Format);
 };
 

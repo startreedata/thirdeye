@@ -30,11 +30,9 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
 
         const startTime = props.scale.domain()[0];
         const endTimeTime = props.scale.domain()[1];
-
         if (date instanceof Date) {
             return formatDateTime(date, startTime, endTimeTime);
         }
-
         if (typeof date === "number") {
             return formatDateTime(new Date(date), startTime, endTimeTime);
         }

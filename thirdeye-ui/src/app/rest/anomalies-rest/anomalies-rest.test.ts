@@ -58,7 +58,7 @@ describe("Anomalies REST", () => {
         ]);
 
         expect(axios.get).toHaveBeenCalledWith(
-            "/api/anomalies?startTime=1&endTime=2"
+            "/api/anomalies?startTime=[gte]1&endTime=[lte]2"
         );
     });
 
@@ -100,7 +100,7 @@ describe("Anomalies REST", () => {
         ]);
 
         expect(axios.get).toHaveBeenCalledWith(
-            "/api/anomalies?alert.id=1&startTime=2&endTime=3"
+            "/api/anomalies?alert.id=1&startTime=[gte]2&endTime=[lte]3"
         );
     });
 

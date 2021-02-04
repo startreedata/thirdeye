@@ -33,11 +33,23 @@ describe("Number Util", () => {
         });
     });
 
-    test("formatLargeNumber should invoke numbro.format with appropriate input and return appropriate string", () => {
+    test("formatLargeNumber should invoke numbro.format with default input and return appropriate string", () => {
         expect(formatLargeNumber(1)).toEqual("1");
         expect(mockFormat).toHaveBeenCalledWith({
             average: true,
             lowPrecision: false,
+            mantissa: 2,
+            optionalMantissa: true,
+        });
+    });
+
+    test("formatLargeNumber should invoke numbro.format with appropriate input and return appropriate string", () => {
+        expect(formatLargeNumber(1, 1, false)).toEqual("1");
+        expect(mockFormat).toHaveBeenCalledWith({
+            average: true,
+            lowPrecision: false,
+            mantissa: 1,
+            optionalMantissa: false,
         });
     });
 

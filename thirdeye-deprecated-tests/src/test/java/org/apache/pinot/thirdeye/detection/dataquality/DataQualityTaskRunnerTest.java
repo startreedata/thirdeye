@@ -70,7 +70,6 @@ public class DataQualityTaskRunnerTest {
   private AlertDTO alertDTO;
 
   private long detectorId;
-  private DetectionPipelineFactory loader;
   private DataProvider provider;
 
   private static final long GRANULARITY = TimeUnit.DAYS.toMillis(1);
@@ -108,8 +107,6 @@ public class DataQualityTaskRunnerTest {
         .setMetrics(Collections.singletonList(metricConfigDTO))
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
-
-    this.loader = new DetectionPipelineFactory(provider);
 
     alertDTO = translateSlaConfig(-1, "sla-config-1.yaml");
     this.detectorId = alertDTO.getId();
@@ -226,7 +223,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, new DetectionPipelineFactory(mockDataProvider), this.detectionDAO,
+        new DetectionPipelineFactory(mockDataProvider),
+        this.detectionDAO,
         this.anomalyDAO
     );
 
@@ -409,7 +407,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, new DetectionPipelineFactory(mockDataProvider), this.detectionDAO,
+        new DetectionPipelineFactory(mockDataProvider),
+        this.detectionDAO,
         this.anomalyDAO
     );
 
@@ -472,7 +471,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, new DetectionPipelineFactory(mockDataProvider), this.detectionDAO,
+        new DetectionPipelineFactory(mockDataProvider),
+        this.detectionDAO,
         this.anomalyDAO
     );
 
@@ -516,7 +516,8 @@ public class DataQualityTaskRunnerTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, new DetectionPipelineFactory(mockDataProvider), this.detectionDAO,
+        new DetectionPipelineFactory(mockDataProvider),
+        this.detectionDAO,
         this.anomalyDAO
     );
 
@@ -564,7 +565,6 @@ public class DataQualityTaskRunnerTest {
         .setAnomalies(Collections.emptyList());
     final DetectionPipelineFactory loader = new DetectionPipelineFactory(mockDataProvider);
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider,
         loader,
         this.detectionDAO,
         this.anomalyDAO
@@ -603,7 +603,8 @@ public class DataQualityTaskRunnerTest {
     datasetConfigDTO.setLastRefreshTime(START_TIME + 5 * GRANULARITY - 1);
     datasetDAO.update(datasetConfigDTO);
     runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, loader, this.detectionDAO,
+        loader,
+        this.detectionDAO,
         this.anomalyDAO
     );
     runner.execute(this.info, this.context);

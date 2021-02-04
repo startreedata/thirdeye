@@ -35,6 +35,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DataProviderException;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
@@ -110,10 +111,11 @@ public class AlertEvaluator {
       throws InterruptedException, ExecutionException, TimeoutException {
     final AlertDTO alert = getAlert(ensureExists(request.getAlert()));
     final DetectionPipeline pipeline = new DetectionPipelineFactory(dataProvider).get(
-        dataProvider,
-        alert,
-        request.getStart().getTime(),
-        request.getEnd().getTime());
+        new DetectionPipelineContext()
+            .setAlert(alert)
+            .setStart(request.getStart().getTime())
+            .setEnd(request.getEnd().getTime())
+    );
 
     return executorService
         .submit(pipeline::run)

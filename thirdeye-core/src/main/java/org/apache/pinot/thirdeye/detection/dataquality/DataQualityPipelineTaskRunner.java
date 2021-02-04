@@ -35,6 +35,7 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
@@ -86,8 +87,13 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
       Map<String, Object> props = config.getProperties();
       // A small hack to reuse the properties field to run the data quality pipeline; this is reverted after the run.
       config.setProperties(config.getDataQualityProperties());
-      DetectionPipeline pipeline = this.loader
-          .get(this.provider, config, info.getStart(), info.getEnd());
+
+      final DetectionPipeline pipeline = this.loader.get(new DetectionPipelineContext()
+          .setAlert(config)
+          .setStart(info.getStart())
+          .setEnd(info.getEnd())
+      );
+
       DetectionPipelineResult result = pipeline.run();
       // revert the properties field back to detection properties
       config.setProperties(props);

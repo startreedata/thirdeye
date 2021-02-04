@@ -33,6 +33,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
@@ -74,8 +75,10 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
           String.format("Could not resolve config id %d", info.getConfigId()));
     }
 
-    DetectionPipeline pipeline = this.loader
-        .get(this.provider, config, info.getStart(), info.getEnd());
+    DetectionPipeline pipeline = this.loader.get(new DetectionPipelineContext()
+        .setAlert(config)
+        .setStart(info.getStart())
+        .setEnd(info.getEnd()));
     DetectionPipelineResult result = pipeline.run();
 
     if (result.getLastTimestamp() < 0) {

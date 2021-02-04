@@ -281,10 +281,6 @@ public class MockDataProvider implements DataProvider {
     return this;
   }
 
-  public MockDataProvider setLoader(DetectionPipelineFactory loader) {
-    return this;
-  }
-
   public List<EvaluationDTO> getEvaluations() {
     return evaluations;
   }

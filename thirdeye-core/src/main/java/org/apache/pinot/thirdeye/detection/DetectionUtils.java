@@ -270,7 +270,10 @@ public class DetectionUtils {
     if (baselineProviderComponentName != null && config != null &&
         config.getComponentSpecs().containsKey(baselineProviderComponentName)) {
       // load pipeline and init components
-      loader.get(provider, config, start, end);
+      loader.get(new DetectionPipelineContext()
+          .setAlert(config)
+          .setStart(start)
+          .setEnd(end));
       baselineProvider = (BaselineProvider) config.getComponents()
           .get(baselineProviderComponentName);
     } else {

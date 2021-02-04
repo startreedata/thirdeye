@@ -84,7 +84,6 @@ public class DataQualityTaskRunnerTest {
     this.detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
-    this.loader = new DetectionPipelineFactory(null);
 
     DetectionRegistry.registerComponent(DataSlaQualityChecker.class.getName(), "DATA_SLA");
     DetectionRegistry.registerComponent(ThresholdRuleDetector.class.getName(), "THRESHOLD");
@@ -106,10 +105,11 @@ public class DataQualityTaskRunnerTest {
     this.datasetDAO.save(datasetConfigDTO);
 
     this.provider = new MockDataProvider()
-        .setLoader(this.loader)
         .setMetrics(Collections.singletonList(metricConfigDTO))
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
+
+    this.loader = new DetectionPipelineFactory(provider);
 
     alertDTO = translateSlaConfig(-1, "sla-config-1.yaml");
     this.detectorId = alertDTO.getId();
@@ -221,13 +221,12 @@ public class DataQualityTaskRunnerTest {
   public void testDataSlaWhenDataIsMissing() throws Exception {
     Map<MetricSlice, DataFrame> timeSeries = prepareMockTimeseriesMap(0, 3);
     MockDataProvider mockDataProvider = new MockDataProvider()
-        .setLoader(this.loader)
         .setTimeseries(timeSeries)
         .setMetrics(Collections.singletonList(metricConfigDTO))
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, this.loader, this.detectionDAO,
+        mockDataProvider, new DetectionPipelineFactory(mockDataProvider), this.detectionDAO,
         this.anomalyDAO
     );
 
@@ -405,13 +404,12 @@ public class DataQualityTaskRunnerTest {
     datasetDAO.update(datasetConfigDTO);
 
     MockDataProvider mockDataProvider = new MockDataProvider()
-        .setLoader(this.loader)
         .setTimeseries(timeSeries)
         .setMetrics(Collections.singletonList(metricConfigDTO))
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, this.loader, this.detectionDAO,
+        mockDataProvider, new DetectionPipelineFactory(mockDataProvider), this.detectionDAO,
         this.anomalyDAO
     );
 
@@ -469,13 +467,12 @@ public class DataQualityTaskRunnerTest {
   public void testDataSlaWhenDataAvailable() throws Exception {
     Map<MetricSlice, DataFrame> timeSeries = prepareMockTimeseriesMap(0, 3);
     MockDataProvider mockDataProvider = new MockDataProvider()
-        .setLoader(this.loader)
         .setTimeseries(timeSeries)
         .setMetrics(Collections.singletonList(metricConfigDTO))
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, this.loader, this.detectionDAO,
+        mockDataProvider, new DetectionPipelineFactory(mockDataProvider), this.detectionDAO,
         this.anomalyDAO
     );
 
@@ -514,13 +511,12 @@ public class DataQualityTaskRunnerTest {
     // create 2 data points
     timeSeries.put(dimensionSlice, prepareMockTimeseries(0, 1));
     MockDataProvider mockDataProvider = new MockDataProvider()
-        .setLoader(this.loader)
         .setTimeseries(timeSeries)
         .setMetrics(Collections.singletonList(metricConfigDTO))
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, this.loader, this.detectionDAO,
+        mockDataProvider, new DetectionPipelineFactory(mockDataProvider), this.detectionDAO,
         this.anomalyDAO
     );
 
@@ -562,13 +558,15 @@ public class DataQualityTaskRunnerTest {
   public void testDataSlaAnomalyMerge() throws Exception {
     Map<MetricSlice, DataFrame> timeSeries = prepareMockTimeseriesMap(0, 3);
     MockDataProvider mockDataProvider = new MockDataProvider()
-        .setLoader(this.loader)
         .setTimeseries(timeSeries)
         .setMetrics(Collections.singletonList(metricConfigDTO))
         .setDatasets(Collections.singletonList(datasetConfigDTO))
         .setAnomalies(Collections.emptyList());
+    final DetectionPipelineFactory loader = new DetectionPipelineFactory(mockDataProvider);
     DataQualityPipelineTaskRunner runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, this.loader, this.detectionDAO,
+        mockDataProvider,
+        loader,
+        this.detectionDAO,
         this.anomalyDAO
     );
 
@@ -605,7 +603,7 @@ public class DataQualityTaskRunnerTest {
     datasetConfigDTO.setLastRefreshTime(START_TIME + 5 * GRANULARITY - 1);
     datasetDAO.update(datasetConfigDTO);
     runner = new DataQualityPipelineTaskRunner(
-        mockDataProvider, this.loader, this.detectionDAO,
+        mockDataProvider, loader, this.detectionDAO,
         this.anomalyDAO
     );
     runner.execute(this.info, this.context);

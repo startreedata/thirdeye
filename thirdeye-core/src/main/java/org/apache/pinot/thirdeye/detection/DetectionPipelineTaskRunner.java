@@ -57,7 +57,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
    * @param evaluationManager the evaluation DAO
    * @param loader pipeline loader
    * @param provider pipeline data provider
-   * @param modelMaintenanceFlow
    */
   public DetectionPipelineTaskRunner(AlertManager alertManager,
       MergedAnomalyResultManager mergedAnomalyResultManager,
@@ -87,10 +86,11 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           info.start,
           info.end);
 
-      final DetectionPipeline pipeline = this.loader.get(this.provider,
-          config,
-          info.start,
-          info.end);
+      final DetectionPipeline pipeline = this.loader.get(new DetectionPipelineContext()
+              .setAlert(config)
+              .setStart(info.getStart())
+              .setEnd(info.getEnd())
+      );
       final DetectionPipelineResult result = pipeline.run();
 
       if (result.getLastTimestamp() < 0) {

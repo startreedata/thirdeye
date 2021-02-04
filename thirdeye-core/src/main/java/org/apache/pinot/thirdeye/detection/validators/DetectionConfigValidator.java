@@ -32,6 +32,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
@@ -43,26 +44,23 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertDTO> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionConfigValidator.class);
-
-  private final DetectionPipelineFactory loader;
-  private final DataProvider provider;
-
-  private static final String PROP_DETECTION = "detection";
-  private static final String PROP_FILTER = "filter";
   public static final String PROP_METRIC = "metric";
   public static final String PROP_DATASET = "dataset";
   public static final String PROP_RULES = "rules";
+  private static final Logger LOG = LoggerFactory.getLogger(DetectionConfigValidator.class);
+  private static final String PROP_DETECTION = "detection";
+  private static final String PROP_FILTER = "filter";
   private static final String PROP_ALERTS = "alerts";
   private static final String PROP_GROUPER = "grouper";
   private static final String PROP_TYPE = "type";
   private static final String PROP_NAME = "name";
   private static final String PROP_DETECTION_NAME = "detectionName";
-
   private static final String METRIC_ALERT = "METRIC_ALERT";
   private static final String COMPOSITE_ALERT = "COMPOSITE_ALERT";
   private static final String DETECTION_CONFIG_SCHEMA_PATH =
       "/validators/detection/detection-config-schema.json";
+  private final DetectionPipelineFactory loader;
+  private final DataProvider provider;
 
   public DetectionConfigValidator(DataProvider provider) {
     super(DETECTION_CONFIG_SCHEMA_PATH);
@@ -82,7 +80,11 @@ public class DetectionConfigValidator extends ThirdEyeUserConfigValidator<AlertD
 
     try {
       // try to load the detection pipeline and init all the components
-      this.loader.get(provider, detectionConfig, 0, 0);
+      this.loader.get(new DetectionPipelineContext()
+          .setAlert(detectionConfig)
+          .setStart(0)
+          .setEnd(0)
+      );
     } catch (Exception e) {
       throw new RuntimeException("Semantic validation error in " + detectionConfig.getId(), e);
     }

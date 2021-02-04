@@ -17,12 +17,13 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.anomaly.task;
+package org.apache.pinot.thirdeye.task;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorTaskRunner;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
@@ -74,7 +75,6 @@ public class TaskRunnerFactory {
     switch (taskType) {
       case DATA_QUALITY:
         return new DataQualityPipelineTaskRunner(
-            dataProvider,
             detectionPipelineFactory,
             detectionConfigManager,
             mergedAnomalyResultManager

@@ -33,7 +33,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
@@ -48,10 +47,10 @@ import org.slf4j.LoggerFactory;
 public class DataQualityPipelineTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataQualityPipelineTaskRunner.class);
-  private final AlertManager detectionDAO;
-  private final MergedAnomalyResultManager anomalyDAO;
-  private final DetectionPipelineFactory loader;
-  private final DataProvider provider;
+
+  private final AlertManager alertManager;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final DetectionPipelineFactory detectionPipelineFactory;
 
   /**
    * Default constructor for ThirdEye task execution framework.
@@ -60,14 +59,12 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
    * @see DAORegistry
    * @see ThirdEyeCacheRegistry
    */
-  public DataQualityPipelineTaskRunner(final DataProvider provider,
-      final DetectionPipelineFactory loader,
+  public DataQualityPipelineTaskRunner(final DetectionPipelineFactory detectionPipelineFactory,
       final AlertManager detectionConfigManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this.loader = loader;
-    this.detectionDAO = detectionConfigManager;
-    this.anomalyDAO = mergedAnomalyResultManager;
-    this.provider = provider;
+    this.detectionPipelineFactory = detectionPipelineFactory;
+    this.alertManager = detectionConfigManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
   @Override
@@ -76,7 +73,7 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
 
     try {
       DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
-      AlertDTO config = this.detectionDAO.findById(info.getConfigId());
+      AlertDTO config = this.alertManager.findById(info.getConfigId());
       if (config == null) {
         throw new IllegalArgumentException(
             String.format("Could not resolve config id %d", info.getConfigId()));
@@ -88,7 +85,7 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
       // A small hack to reuse the properties field to run the data quality pipeline; this is reverted after the run.
       config.setProperties(config.getDataQualityProperties());
 
-      final DetectionPipeline pipeline = this.loader.get(new DetectionPipelineContext()
+      final DetectionPipeline pipeline = this.detectionPipelineFactory.get(new DetectionPipelineContext()
           .setAlert(config)
           .setStart(info.getStart())
           .setEnd(info.getEnd())
@@ -100,7 +97,7 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
 
       // Save all the data quality anomalies
       for (MergedAnomalyResultDTO mergedAnomalyResultDTO : result.getAnomalies()) {
-        this.anomalyDAO.save(mergedAnomalyResultDTO);
+        this.mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
         if (mergedAnomalyResultDTO.getId() == null) {
           LOG.warn("Could not store anomaly:\n{}", mergedAnomalyResultDTO);
         }

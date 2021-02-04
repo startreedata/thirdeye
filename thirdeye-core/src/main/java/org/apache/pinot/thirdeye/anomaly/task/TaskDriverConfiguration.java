@@ -19,60 +19,69 @@
 
 package org.apache.pinot.thirdeye.anomaly.task;
 
+import java.time.Duration;
+
 public class TaskDriverConfiguration {
 
-  private int noTaskDelayInMillis = 15_000; // 15 seconds
-  private int taskFailureDelayInMillis = 30_000; // 30 seconds
-  private int randomDelayCapInMillis = 15_000; // 15 seconds
+  private Duration noTaskDelay = Duration.ofSeconds(15);
+  private Duration taskFailureDelay = Duration.ofSeconds(30);
+  private Duration randomDelayCap = Duration.ofSeconds(15);
+  private Duration maxTaskRunTime = Duration.ofHours(6);
+
   private int taskFetchSizeCap = 50;
   private int maxParallelTasks = 5;
-  private long maxTaskRunTimeMillis = 6 * 60 * 60_000; // 6 hours
 
-  public int getNoTaskDelayInMillis() {
-    return noTaskDelayInMillis;
+  public Duration getNoTaskDelay() {
+    return noTaskDelay;
   }
 
-  public void setNoTaskDelayInMillis(int noTaskDelayInMillis) {
-    this.noTaskDelayInMillis = noTaskDelayInMillis;
+  public TaskDriverConfiguration setNoTaskDelay(final Duration noTaskDelay) {
+    this.noTaskDelay = noTaskDelay;
+    return this;
   }
 
-  public int getTaskFailureDelayInMillis() {
-    return taskFailureDelayInMillis;
+  public Duration getTaskFailureDelay() {
+    return taskFailureDelay;
   }
 
-  public void setTaskFailureDelayInMillis(int taskFailureDelayInMillis) {
-    this.taskFailureDelayInMillis = taskFailureDelayInMillis;
+  public TaskDriverConfiguration setTaskFailureDelay(final Duration taskFailureDelay) {
+    this.taskFailureDelay = taskFailureDelay;
+    return this;
   }
 
-  public int getRandomDelayCapInMillis() {
-    return randomDelayCapInMillis;
+  public Duration getRandomDelayCap() {
+    return randomDelayCap;
   }
 
-  public void setRandomDelayCapInMillis(int randomDelayCapInMillis) {
-    this.randomDelayCapInMillis = randomDelayCapInMillis;
+  public TaskDriverConfiguration setRandomDelayCap(final Duration randomDelayCap) {
+    this.randomDelayCap = randomDelayCap;
+    return this;
+  }
+
+  public Duration getMaxTaskRunTime() {
+    return maxTaskRunTime;
+  }
+
+  public TaskDriverConfiguration setMaxTaskRunTime(final Duration maxTaskRunTime) {
+    this.maxTaskRunTime = maxTaskRunTime;
+    return this;
   }
 
   public int getTaskFetchSizeCap() {
     return taskFetchSizeCap;
   }
 
-  public void setTaskFetchSizeCap(int taskFetchSizeCap) {
+  public TaskDriverConfiguration setTaskFetchSizeCap(final int taskFetchSizeCap) {
     this.taskFetchSizeCap = taskFetchSizeCap;
+    return this;
   }
 
   public int getMaxParallelTasks() {
     return maxParallelTasks;
   }
 
-  public void setMaxParallelTasks(int maxParallelTasks) {
+  public TaskDriverConfiguration setMaxParallelTasks(final int maxParallelTasks) {
     this.maxParallelTasks = maxParallelTasks;
-  }
-
-  public long getMaxTaskRunTimeMillis() {
-    return maxTaskRunTimeMillis;
-  }
-
-  public void setMaxTaskRunTimeMillis(long maxTaskRunTimeMillis) {
-    this.maxTaskRunTimeMillis = maxTaskRunTimeMillis;
+    return this;
   }
 }

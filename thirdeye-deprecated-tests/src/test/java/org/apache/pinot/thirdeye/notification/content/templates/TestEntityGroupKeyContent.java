@@ -23,6 +23,7 @@ import static org.apache.pinot.thirdeye.notification.content.templates.EntityGro
 import static org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent.PROP_ENTITY_WHITELIST;
 import static org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent.PROP_GROUP_KEY;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -100,11 +101,13 @@ public class TestEntityGroupKeyContent {
     MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
     monitorConfiguration.setMonitorFrequency(new TimeGranularity(3, TimeUnit.SECONDS));
     thirdeyeAnomalyConfig.setMonitorConfiguration(monitorConfiguration);
-    TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration();
-    taskDriverConfiguration.setNoTaskDelayInMillis(1000);
-    taskDriverConfiguration.setRandomDelayCapInMillis(200);
-    taskDriverConfiguration.setTaskFailureDelayInMillis(500);
-    taskDriverConfiguration.setMaxParallelTasks(2);
+
+    final TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration()
+        .setNoTaskDelay(Duration.ofMillis(1000))
+        .setRandomDelayCap(Duration.ofMillis(200))
+        .setTaskFailureDelay(Duration.ofMillis(500))
+        .setMaxParallelTasks(2);
+
     thirdeyeAnomalyConfig.setTaskDriverConfiguration(taskDriverConfiguration);
     thirdeyeAnomalyConfig.setRootDir(System.getProperty("dw.rootDir", "NOT_SET(dw.rootDir)"));
     Map<String, Map<String, Object>> alerters = new HashMap<>();
@@ -178,7 +181,8 @@ public class TestEntityGroupKeyContent {
   /**
    * Entity Alert Trigger Condition: Metric A AND (Sub-Entity-A OR Sub-Entity-B)
    * Where Sub-Entity-A and Sub-Entity-B anomalies have a groupKey and a groupScore
-   * E.g.: Alert on Model Performance Metric Anomalies along with co-occurring with Feature Anomalies
+   * E.g.: Alert on Model Performance Metric Anomalies along with co-occurring with Feature
+   * Anomalies
    */
   @Test
   public void testEntityGroupKeyAnomalyTemplateWithWhitelistEntity() throws Exception {
@@ -194,11 +198,13 @@ public class TestEntityGroupKeyContent {
     MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
     monitorConfiguration.setMonitorFrequency(new TimeGranularity(3, TimeUnit.SECONDS));
     thirdeyeAnomalyConfig.setMonitorConfiguration(monitorConfiguration);
-    TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration();
-    taskDriverConfiguration.setNoTaskDelayInMillis(1000);
-    taskDriverConfiguration.setRandomDelayCapInMillis(200);
-    taskDriverConfiguration.setTaskFailureDelayInMillis(500);
-    taskDriverConfiguration.setMaxParallelTasks(2);
+
+    final TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration()
+        .setNoTaskDelay(Duration.ofMillis(1000))
+        .setRandomDelayCap(Duration.ofMillis(200))
+        .setTaskFailureDelay(Duration.ofMillis(500))
+        .setMaxParallelTasks(2);
+
     thirdeyeAnomalyConfig.setTaskDriverConfiguration(taskDriverConfiguration);
     thirdeyeAnomalyConfig.setRootDir(System.getProperty("dw.rootDir", "NOT_SET(dw.rootDir)"));
     Map<String, Map<String, Object>> alerters = new HashMap<>();

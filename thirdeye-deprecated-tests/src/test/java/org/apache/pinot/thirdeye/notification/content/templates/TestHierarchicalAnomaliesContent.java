@@ -19,6 +19,7 @@ package org.apache.pinot.thirdeye.notification.content.templates;
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_HOST_KEY;
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_PORT_KEY;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,11 +80,13 @@ public class TestHierarchicalAnomaliesContent {
     MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
     monitorConfiguration.setMonitorFrequency(new TimeGranularity(3, TimeUnit.SECONDS));
     thirdeyeAnomalyConfig.setMonitorConfiguration(monitorConfiguration);
-    TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration();
-    taskDriverConfiguration.setNoTaskDelayInMillis(1000);
-    taskDriverConfiguration.setRandomDelayCapInMillis(200);
-    taskDriverConfiguration.setTaskFailureDelayInMillis(500);
-    taskDriverConfiguration.setMaxParallelTasks(2);
+
+    final TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration()
+        .setNoTaskDelay(Duration.ofMillis(1000))
+        .setRandomDelayCap(Duration.ofMillis(200))
+        .setTaskFailureDelay(Duration.ofMillis(500))
+        .setMaxParallelTasks(2);
+
     thirdeyeAnomalyConfig.setTaskDriverConfiguration(taskDriverConfiguration);
     thirdeyeAnomalyConfig.setRootDir(System.getProperty("dw.rootDir", "NOT_SET(dw.rootDir)"));
     Map<String, Map<String, Object>> alerters = new HashMap<>();

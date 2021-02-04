@@ -107,7 +107,7 @@ public class TaskDriverRunnable implements Runnable {
     try {
       future = runTaskAsync(taskDTO);
       // wait for the future to complete
-      future.get(config.getMaxTaskRunTimeMillis(), TimeUnit.MILLISECONDS);
+      future.get(config.getMaxTaskRunTime().toMillis(), TimeUnit.MILLISECONDS);
 
       LOG.info("DONE Executing task {}", taskDTO.getId());
       // update status to COMPLETED
@@ -223,9 +223,9 @@ public class TaskDriverRunnable implements Runnable {
 
   private void sleep(final boolean hasFetchError) {
     final long sleepTime = hasFetchError
-        ? config.getTaskFailureDelayInMillis()
-        : config.getNoTaskDelayInMillis() + RANDOM
-            .nextInt(config.getRandomDelayCapInMillis());
+        ? config.getTaskFailureDelay().toMillis()
+        : config.getNoTaskDelay().toMillis() + RANDOM
+            .nextInt((int) config.getRandomDelayCap().toMillis());
     // sleep for few seconds if not tasks found - avoid cpu thrashing
     // also add some extra random number of milli seconds to allow threads to start at different times
     try {

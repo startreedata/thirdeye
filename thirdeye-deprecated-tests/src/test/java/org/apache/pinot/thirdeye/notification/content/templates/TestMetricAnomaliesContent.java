@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -137,11 +138,13 @@ public class TestMetricAnomaliesContent {
     MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
     monitorConfiguration.setMonitorFrequency(new TimeGranularity(3, TimeUnit.SECONDS));
     thirdeyeAnomalyConfig.setMonitorConfiguration(monitorConfiguration);
-    TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration();
-    taskDriverConfiguration.setNoTaskDelayInMillis(1000);
-    taskDriverConfiguration.setRandomDelayCapInMillis(200);
-    taskDriverConfiguration.setTaskFailureDelayInMillis(500);
-    taskDriverConfiguration.setMaxParallelTasks(2);
+
+    final TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration()
+        .setNoTaskDelay(Duration.ofMillis(1000))
+        .setRandomDelayCap(Duration.ofMillis(200))
+        .setTaskFailureDelay(Duration.ofMillis(500))
+        .setMaxParallelTasks(2);
+
     thirdeyeAnomalyConfig.setTaskDriverConfiguration(taskDriverConfiguration);
     thirdeyeAnomalyConfig.setRootDir(System.getProperty("dw.rootDir", "NOT_SET(dw.rootDir)"));
     Map<String, Map<String, Object>> alerters = new HashMap<>();

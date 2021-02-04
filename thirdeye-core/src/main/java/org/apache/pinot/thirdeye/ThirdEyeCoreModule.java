@@ -23,7 +23,6 @@ import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeCoreModule extends AbstractModule {
@@ -50,10 +49,11 @@ public class ThirdEyeCoreModule extends AbstractModule {
   @Provides
   public DefaultTimeSeriesLoader getTimeSeriesLoader(
       final DatasetConfigManager datasetConfigManager,
-      final MetricConfigManager metricConfigManager) {
+      final MetricConfigManager metricConfigManager,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     return new DefaultTimeSeriesLoader(metricConfigManager, datasetConfigManager,
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getTimeSeriesCache());
+        thirdEyeCacheRegistry.getQueryCache(),
+        thirdEyeCacheRegistry.getTimeSeriesCache());
   }
 
   @Singleton

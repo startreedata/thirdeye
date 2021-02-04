@@ -6,24 +6,19 @@ export const useTimeRangeSelectorStyles = makeStyles({
         padding: "6px",
     },
     timeRangeSelectorContainer: {
-        height: "494px",
+        height: "491px",
         width: "810px",
         overflow: "hidden",
     },
     timeRangeListContainer: {
         float: "left",
-        height: "439px",
+        height: "426px",
         width: "190px",
         overflow: "auto",
     },
     calendarsAndControlsContainer: {
         float: "left",
-        height: "442px",
+        height: "426px",
         width: "620px",
-    },
-    calendarLabel: {
-        paddingTop: "12px",
-        paddingLeft: "25px",
-        marginBottom: "-5px", // Minimize whitespace between calendar label and calendar
     },
 });

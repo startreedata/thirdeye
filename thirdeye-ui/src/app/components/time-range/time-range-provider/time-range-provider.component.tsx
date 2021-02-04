@@ -30,7 +30,6 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
     useEffect(() => {
         // When loading for the first time, initialize app time range
         initAppTimeRange();
-
         setLoading(false);
     }, []);
 

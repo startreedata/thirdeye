@@ -6,5 +6,5 @@ import {
 export interface TimeRangeListProps {
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
     selectedTimeRange?: TimeRange;
-    onClick?: (eventObject: TimeRangeDuration | TimeRange) => void;
+    onClick?: (event: TimeRangeDuration | TimeRange) => void;
 }

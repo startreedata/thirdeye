@@ -43,10 +43,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         setTimeRangeSelectorAnchorElement(event.currentTarget);
     };
 
-    const onCloseTimeRangeSelector = (): void => {
-        setTimeRangeSelectorAnchorElement(null);
-    };
-
     const onOpenTimeRangeSelector = (): void => {
         // Update component time range duration
         setComponentTimeRangeDuration(
@@ -54,27 +50,31 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         );
     };
 
+    const onCloseTimeRangeSelector = (): void => {
+        setTimeRangeSelectorAnchorElement(null);
+    };
+
     const onTimeRangeListClick = (
-        eventObject: TimeRangeDuration | TimeRange
+        event: TimeRangeDuration | TimeRange
     ): void => {
-        if (typeof eventObject === "string") {
-            onTimeRangeClick(eventObject);
+        if (typeof event === "string") {
+            onTimeRangeClick(event);
 
             return;
         }
 
-        onRecentCustomTimeRangeDurationClick(eventObject);
+        onRecentCustomTimeRangeDurationClick(event);
     };
 
     const onRecentCustomTimeRangeDurationClick = (
-        timeRangeDuration: TimeRangeDuration
+        customTimeRangeDuration: TimeRangeDuration
     ): void => {
-        if (!timeRangeDuration) {
+        if (!customTimeRangeDuration) {
             return;
         }
 
         // Update component time range duration
-        setComponentTimeRangeDuration(timeRangeDuration);
+        setComponentTimeRangeDuration(customTimeRangeDuration);
     };
 
     const onTimeRangeClick = (timeRange: TimeRange): void => {
@@ -239,18 +239,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                         <Grid container spacing={0}>
                                             {/* Start time calendar */}
                                             <Grid item sm={6}>
-                                                {/* Calendar label */}
-                                                <div
-                                                    className={
-                                                        timeRangeSelectorClasses.calendarLabel
-                                                    }
-                                                >
-                                                    <Typography variant="overline">
-                                                        {t("label.from")}
-                                                    </Typography>
-                                                </div>
-
-                                                {/* Calendar */}
                                                 <DateTimePicker
                                                     disableFuture
                                                     hideTabs
@@ -269,18 +257,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
 
                                             {/* End time calendar */}
                                             <Grid item sm={6}>
-                                                {/* Calendar label */}
-                                                <div
-                                                    className={
-                                                        timeRangeSelectorClasses.calendarLabel
-                                                    }
-                                                >
-                                                    <Typography variant="overline">
-                                                        {t("label.to")}
-                                                    </Typography>
-                                                </div>
-
-                                                {/* Calendar */}
                                                 <DateTimePicker
                                                     disableFuture
                                                     hideTabs
@@ -324,7 +300,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                             <Grid item>
                                                 <Button
                                                     color="primary"
-                                                    size="large"
                                                     variant="outlined"
                                                     onClick={
                                                         onCloseTimeRangeSelector
@@ -338,7 +313,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                             <Grid item>
                                                 <Button
                                                     color="primary"
-                                                    size="large"
                                                     variant="contained"
                                                     onClick={onApply}
                                                 >

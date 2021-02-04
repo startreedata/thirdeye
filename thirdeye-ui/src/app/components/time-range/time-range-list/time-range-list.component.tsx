@@ -1,7 +1,6 @@
 import { List, ListItem, ListItemText, Tooltip } from "@material-ui/core";
-import classnames from "classnames";
 import { isEmpty } from "lodash";
-import React, { Fragment, FunctionComponent } from "react";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import {
     formatTimeRange,
@@ -21,11 +20,12 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
         <List dense>
             {/* Recent custom time range durations label */}
             {!isEmpty(props.recentCustomTimeRangeDurations) && (
-                <ListItem className={timeRangeListClasses.listLabel}>
+                <ListItem>
                     <ListItemText
                         primary={t("label.recent-custom")}
                         primaryTypographyProps={{
                             variant: "overline",
+                            className: timeRangeListClasses.listItem,
                         }}
                     />
                 </ListItem>
@@ -77,36 +77,30 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
             {Object.values(TimeRange)
                 .filter((timeRange) => typeof timeRange === "string")
                 .map((timeRange, index) => (
-                    <Fragment key={index}>
-                        <ListItem
-                            button
-                            divider={
-                                timeRange === TimeRange.CUSTOM ||
-                                timeRange === TimeRange.LAST_30_DAYS ||
-                                timeRange === TimeRange.YESTERDAY ||
-                                timeRange === TimeRange.LAST_WEEK ||
-                                timeRange === TimeRange.LAST_MONTH
-                            }
-                            onClick={(): void => {
-                                props.onClick && props.onClick(timeRange);
+                    <ListItem
+                        button
+                        divider={
+                            timeRange === TimeRange.CUSTOM ||
+                            timeRange === TimeRange.LAST_30_DAYS ||
+                            timeRange === TimeRange.YESTERDAY ||
+                            timeRange === TimeRange.LAST_WEEK ||
+                            timeRange === TimeRange.LAST_MONTH
+                        }
+                        key={index}
+                        selected={props.selectedTimeRange === timeRange}
+                        onClick={(): void => {
+                            props.onClick && props.onClick(timeRange);
+                        }}
+                    >
+                        <ListItemText
+                            primary={formatTimeRange(timeRange)}
+                            primaryTypographyProps={{
+                                variant: "button",
+                                color: "primary",
+                                className: timeRangeListClasses.listItem,
                             }}
-                        >
-                            <ListItemText
-                                primary={formatTimeRange(timeRange)}
-                                primaryTypographyProps={{
-                                    variant: "button",
-                                    color: "primary",
-                                    className:
-                                        props.selectedTimeRange === timeRange
-                                            ? classnames(
-                                                  timeRangeListClasses.selectedListItem,
-                                                  timeRangeListClasses.listItem
-                                              )
-                                            : timeRangeListClasses.listItem,
-                                }}
-                            />
-                        </ListItem>
-                    </Fragment>
+                        />
+                    </ListItem>
                 ))}
         </List>
     );

@@ -8,8 +8,7 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
         height: "100%",
         width: "100%",
         display: "flex",
-        overflowX: "hidden", // Disable horizontal scroll
-        overflowY: "auto", // Allow vertical scroll
+        overflow: "auto", // This container can scroll while everything outside is fixed
     },
     innerContainer: {
         display: "flex",
@@ -17,6 +16,7 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
     },
     innerContainerExpand: {
         flexGrow: 1, // Container to occupy available area
+        width: "100%",
         paddingLeft: "16px",
         paddingRight: "16px",
     },
@@ -33,6 +33,9 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
         background: `linear-gradient(${theme.palette.background.default}, transparent)`,
         // Header to be at the same level as drawer
         zIndex: theme.zIndex.drawer,
+    },
+    headerContainerFullWidth: {
+        width: "100%",
     },
     header: {
         display: "flex",

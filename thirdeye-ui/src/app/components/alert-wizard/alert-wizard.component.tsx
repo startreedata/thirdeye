@@ -122,7 +122,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
             return;
         }
 
-        // Calculate previous step
+        // Determine previous step
         setCurrentWizardStep(
             AlertWizardStep[
                 AlertWizardStep[
@@ -147,7 +147,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
             return;
         }
 
-        // Calculate next step
+        // Determine next step
         setCurrentWizardStep(
             AlertWizardStep[
                 AlertWizardStep[

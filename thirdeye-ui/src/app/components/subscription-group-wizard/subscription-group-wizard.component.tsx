@@ -130,7 +130,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
             return;
         }
 
-        // Calculate previous step
+        // Determine previous step
         setCurrentWizardStep(
             SubscriptionGroupWizardStep[
                 SubscriptionGroupWizardStep[
@@ -150,7 +150,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
             return;
         }
 
-        // Calculate next step
+        // Determine next step
         setCurrentWizardStep(
             SubscriptionGroupWizardStep[
                 SubscriptionGroupWizardStep[

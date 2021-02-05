@@ -31,6 +31,9 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     const [documentTitle, setDocumentTitle] = useState("");
     const [outerContainerScrollTop, setOuterContainerScrollTop] = useState(0);
     const [headerContainerWidth, setHeaderContainerWidth] = useState(0);
+    const [headerContainerFullWidth, setHeaderContainerFullWidth] = useState(
+        false
+    );
     const [showHeader, setShowHeader] = useState(true);
     const { routerBreadcrumbs, pageBreadcrumbs } = useAppBreadcrumbs();
     const {
@@ -48,18 +51,22 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     }, [props.title, routerBreadcrumbs, pageBreadcrumbs]);
 
     useEffect(() => {
-        // Determine header container width based on contents container
-        if (contentsContainerRef && contentsContainerRef.current) {
-            setHeaderContainerWidth(contentsContainerRef.current.offsetWidth);
-        }
-    }, [contentsContainerRef]);
+        // Contents container rendered or window width changed, determine header width
+        setHeaderWidthDebounced();
+    }, [contentsContainerRef, window.innerWidth]);
 
     const onOuterContainerScroll = (event: UIEvent<HTMLDivElement>): void => {
-        if (event.target !== outerContainerRef.current || props.hideHeader) {
+        if (
+            !outerContainerRef ||
+            event.target !== outerContainerRef.current ||
+            props.hideHeader
+        ) {
             return;
         }
 
-        setHeaderVisibility((event.target as HTMLDivElement).scrollTop);
+        setHeaderVisibilityDebounced(
+            (event.target as HTMLDivElement).scrollTop
+        );
     };
 
     const generateDocumentTitle = (): string => {
@@ -82,7 +89,24 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
         );
     };
 
-    const setHeaderVisibility = useCallback(
+    const setHeaderWidthDebounced = useCallback(
+        debounce((): void => {
+            // Determine header container width based on contents container and window width
+            if (contentsContainerRef && contentsContainerRef.current) {
+                setHeaderContainerWidth(
+                    contentsContainerRef.current.offsetWidth
+                );
+                // If contents container overflows window width (window has a horizontal scroll),
+                // header container to occupy full window width instead
+                setHeaderContainerFullWidth(
+                    contentsContainerRef.current.offsetWidth > window.innerWidth
+                );
+            }
+        }, 1),
+        [contentsContainerRef]
+    );
+
+    const setHeaderVisibilityDebounced = useCallback(
         debounce((newOuterContainerScrollTop: number): void => {
             if (newOuterContainerScrollTop < outerContainerScrollTop) {
                 // Outer container being scrolled up, show header
@@ -100,7 +124,7 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
 
             setOuterContainerScrollTop(newOuterContainerScrollTop);
         }, 1),
-        [outerContainerScrollTop, setShowHeader, setOuterContainerScrollTop]
+        [outerContainerScrollTop]
     );
 
     return (
@@ -138,7 +162,10 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                                 <Box
                                     className={classnames(
                                         pageContentsClasses.headerContainer,
-                                        commonClasses.gridLimitation
+                                        commonClasses.gridLimitation,
+                                        headerContainerFullWidth
+                                            ? pageContentsClasses.headerContainerFullWidth
+                                            : ""
                                     )}
                                     width={headerContainerWidth}
                                 >

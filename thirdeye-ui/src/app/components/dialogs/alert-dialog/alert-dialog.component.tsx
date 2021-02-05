@@ -11,10 +11,8 @@ import {
 import React, { FunctionComponent, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { DialogContext } from "../dialog-provider/dialog-provider.component";
-import { useAlertDialogStyles } from "./alert-dialog.styles";
 
 export const AlertDialog: FunctionComponent = () => {
-    const alertDialogClasses = useAlertDialogStyles();
     const { visible, hideDialog, dialogData } = useContext(DialogContext);
     const { t } = useTranslation();
 
@@ -31,16 +29,20 @@ export const AlertDialog: FunctionComponent = () => {
     return (
         <>
             {dialogData && (
-                <Dialog disableBackdropClick open={visible} onClose={onClose}>
+                <Dialog
+                    disableBackdropClick
+                    fullWidth
+                    maxWidth="sm"
+                    open={visible}
+                    onClose={onClose}
+                >
                     {/* Header */}
                     {dialogData.title && (
                         <DialogTitle>{dialogData.title}</DialogTitle>
                     )}
 
                     {/* Contents */}
-                    <DialogContent
-                        className={alertDialogClasses.contentsContainer}
-                    >
+                    <DialogContent>
                         <DialogContentText>{dialogData.text}</DialogContentText>
                     </DialogContent>
 

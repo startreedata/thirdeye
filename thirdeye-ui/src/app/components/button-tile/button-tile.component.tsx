@@ -30,7 +30,11 @@ export const ButtonTile: FunctionComponent<ButtonTileProps> = (
                             >
                                 {/* Icon */}
                                 <Grid item>
-                                    <props.icon fontSize="large" height={50} />
+                                    <props.icon
+                                        fill={props.iconColor}
+                                        fontSize="large"
+                                        height={50}
+                                    />
                                 </Grid>
                             </Grid>
                         </Grid>

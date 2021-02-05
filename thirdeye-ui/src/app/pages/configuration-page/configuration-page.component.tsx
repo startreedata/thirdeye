@@ -1,7 +1,9 @@
-import { Grid } from "@material-ui/core";
+import { Grid, useTheme } from "@material-ui/core";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { ReactComponent as Metrics } from "../../../assets/images/metrics.svg";
+import { ReactComponent as SubscriptionGroups } from "../../../assets/images/subscription-group.svg";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { ButtonTile } from "../../components/button-tile/button-tile.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
@@ -11,6 +13,7 @@ import { useConfigurationPageStyles } from "./configuration-page.styles";
 export const ConfigurationPage: FunctionComponent = () => {
     const configurationPageClasses = useConfigurationPageStyles();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const theme = useTheme();
     const history = useHistory();
     const { t } = useTranslation();
 
@@ -42,6 +45,8 @@ export const ConfigurationPage: FunctionComponent = () => {
                 {/* Subscription groups */}
                 <Grid item>
                     <ButtonTile
+                        icon={SubscriptionGroups}
+                        iconColor={theme.palette.primary.main}
                         text={t("label.subscription-groups")}
                         onClick={onSubscriptionGroupsClick}
                     />
@@ -50,6 +55,8 @@ export const ConfigurationPage: FunctionComponent = () => {
                 {/* Metrics */}
                 <Grid item>
                     <ButtonTile
+                        icon={Metrics}
+                        iconColor={theme.palette.primary.main}
                         text={t("label.metrics")}
                         onClick={onMetricsClick}
                     />

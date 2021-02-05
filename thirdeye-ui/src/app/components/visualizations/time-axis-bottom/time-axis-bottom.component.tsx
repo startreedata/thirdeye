@@ -9,6 +9,7 @@ import {
     formatYear,
 } from "../../../utils/date-time-util/date-time-util";
 import { TimeAxisBottomProps } from "./time-axis-bottom.interfaces";
+import { useTimeAxisBottomStyles } from "./time-axis-bottom.styles";
 
 export const TICK_FORMAT_SEPARATOR_DATE_TIME = "@";
 
@@ -16,6 +17,8 @@ export const TICK_FORMAT_SEPARATOR_DATE_TIME = "@";
 export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
     props: TimeAxisBottomProps
 ) => {
+    const timeAxisBottomClasses = useTimeAxisBottomStyles();
+
     const tickFormatter = (
         date: Date | number | { valueOf(): number }
     ): string => {
@@ -127,7 +130,7 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
                 <Text
                     textAnchor={tickRendererProps.textAnchor}
                     x={tickRendererProps.x}
-                    y={tickRendererProps.y + 10}
+                    y={tickRendererProps.y + 15}
                 >
                     {timeString}
                 </Text>
@@ -140,7 +143,7 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
             left={props.left}
             numTicks={props.numTicks}
             scale={props.scale}
-            tickClassName={props.tickClassName}
+            tickClassName={timeAxisBottomClasses.tick}
             tickComponent={tickComponentRenderer}
             tickFormat={tickFormatter}
             top={props.top}

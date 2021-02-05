@@ -1,14 +1,7 @@
 import { useTheme } from "@material-ui/core";
 import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
-import {
-    AxisLeft,
-    Brush,
-    Group,
-    ParentSize,
-    scaleLinear,
-    scaleTime,
-} from "@visx/visx";
+import { Brush, Group, ParentSize, scaleLinear, scaleTime } from "@visx/visx";
 import { debounce, isEmpty, max } from "lodash";
 import React, {
     createRef,
@@ -22,7 +15,6 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { Dimension } from "../../../utils/material-ui-util/dimension-util";
 import {
-    formatLargeNumberForVisualization,
     getAlertEvaluationAnomalyPoints,
     getAlertEvaluationAnomalyPointsMaxValue,
     getAlertEvaluationTimeSeriesPoints,
@@ -32,6 +24,7 @@ import {
 } from "../../../utils/visualization-util/visualization-util";
 import { LoadingIndicator } from "../../loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { LinearAxisLeft } from "../linear-axis-left/linear-axis-left.component";
 import { TimeAxisBottom } from "../time-axis-bottom/time-axis-bottom.component";
 import { AlertEvaluationTimeSeriesAnomaliesPlot } from "./alert-evaluation-time-series-anomalies-plot/alert-evaluation-time-series-anomalies-plot.component";
 import { AlertEvaluationTimeSeriesBaselinePlot } from "./alert-evaluation-time-series-baseline-plot/alert-evaluation-time-series-baseline-plot.component";
@@ -45,7 +38,6 @@ import {
     AlertEvaluationTimeSeriesPoint,
     AlertEvaluationTimeSeriesProps,
 } from "./alert-evaluation-time-series.interfaces";
-import { useAlertEvaluationTimeSeriesInternalStyles } from "./alert-evaluation-time-series.styles";
 
 const HEIGHT_CONTAINER_MIN = 310;
 const WIDTH_CONTAINER_MIN = 620;
@@ -76,7 +68,6 @@ export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSer
 const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSeriesInternalProps> = (
     props: AlertEvaluationTimeSeriesInternalProps
 ) => {
-    const alertEvaluationTimeSeriesInternalClasses = useAlertEvaluationTimeSeriesInternalStyles();
     const [loading, setLoading] = useState(true);
     const [noData, setNoData] = useState(false);
     const [
@@ -373,20 +364,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     <TimeAxisBottom
                         numTicks={5}
                         scale={timeSeriesXScale}
-                        tickClassName={
-                            alertEvaluationTimeSeriesInternalClasses.axisLabel
-                        }
                         top={timeSeriesYMax}
                     />
 
                     {/* Y axis */}
-                    <AxisLeft
-                        scale={timeSeriesYScale}
-                        tickClassName={
-                            alertEvaluationTimeSeriesInternalClasses.axisLabel
-                        }
-                        tickFormat={formatLargeNumberForVisualization}
-                    />
+                    <LinearAxisLeft scale={timeSeriesYScale} />
                 </Group>
 
                 {/* Brush */}
@@ -458,9 +440,6 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     <TimeAxisBottom
                         numTicks={5}
                         scale={brushXScale}
-                        tickClassName={
-                            alertEvaluationTimeSeriesInternalClasses.axisLabel
-                        }
                         top={brushYMax}
                     />
                 </Group>

@@ -61,7 +61,6 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
                 <Grid item>
                     <Button
                         color="primary"
-                        size="large"
                         variant="contained"
                         onClick={performSignIn}
                     >

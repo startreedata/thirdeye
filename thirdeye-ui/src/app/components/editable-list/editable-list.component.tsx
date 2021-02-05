@@ -123,7 +123,6 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                     fullWidth
                     className={editableListClasses.addButton}
                     color="primary"
-                    size="large"
                     variant="outlined"
                     onClick={onAddListItem}
                 >

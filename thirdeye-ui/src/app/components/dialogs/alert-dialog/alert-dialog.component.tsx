@@ -32,7 +32,7 @@ export const AlertDialog: FunctionComponent = () => {
                 <Dialog
                     disableBackdropClick
                     fullWidth
-                    maxWidth="sm"
+                    maxWidth="xs"
                     open={visible}
                     onClose={onClose}
                 >

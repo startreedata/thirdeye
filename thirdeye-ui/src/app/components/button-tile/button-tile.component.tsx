@@ -9,7 +9,11 @@ export const ButtonTile: FunctionComponent<ButtonTileProps> = (
     const buttonTileClasses = useButtonTileStyles();
 
     return (
-        <ButtonBase onClick={props.onClick}>
+        <ButtonBase
+            focusRipple
+            disabled={props.disabled}
+            onClick={props.onClick}
+        >
             <Paper className={buttonTileClasses.container} elevation={2}>
                 {/* Outer grid, vertically aligns icon and text */}
                 <Grid

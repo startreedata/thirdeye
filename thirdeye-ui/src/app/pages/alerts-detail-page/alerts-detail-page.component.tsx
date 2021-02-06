@@ -238,7 +238,10 @@ export const AlertsDetailPage: FunctionComponent = () => {
                     {/* Alert evaluation time series */}
                     <Grid item sm={12}>
                         <AlertEvaluationTimeSeriesCard
+                            showMaximizeButton
                             alertEvaluation={alertEvaluation}
+                            maximizedTitle={alertCardData.name}
+                            visualizationHeight={500}
                         />
                     </Grid>
                 </Grid>

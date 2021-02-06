@@ -93,13 +93,13 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
         debounce((): void => {
             // Determine header container width based on contents container and window width
             if (contentsContainerRef && contentsContainerRef.current) {
-                setHeaderContainerWidth(
-                    contentsContainerRef.current.offsetWidth
-                );
+                const contentsContainerOffsetWidth =
+                    contentsContainerRef.current.offsetWidth;
+                setHeaderContainerWidth(contentsContainerOffsetWidth);
                 // If contents container overflows window width (window has a horizontal scroll),
                 // header container to occupy full window width instead
                 setHeaderContainerFullWidth(
-                    contentsContainerRef.current.offsetWidth > window.innerWidth
+                    contentsContainerOffsetWidth > window.innerWidth
                 );
             }
         }, 1),
@@ -154,7 +154,6 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                                 direction="down"
                                 in={showHeader}
                                 timeout={{
-                                    appear: 0,
                                     enter: 400,
                                     exit: 1000,
                                 }}

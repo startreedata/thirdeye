@@ -7,4 +7,7 @@ export const useCommonStyles = makeStyles({
         // https://material-ui.com/components/grid/#limitations
         padding: "8px",
     },
+    backdrop: {
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
 });

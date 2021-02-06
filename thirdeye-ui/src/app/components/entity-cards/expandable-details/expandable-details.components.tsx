@@ -30,17 +30,17 @@ export function ExpandableDetails<T>(
                     <Grid item>
                         {props.values && props.values.length > 1 && (
                             <Link component="button" onClick={onExpandToggle}>
-                                {/* Collapse */}
-                                {props.expand && (
-                                    <ExpandLess
+                                {/* Expand */}
+                                {!props.expand && (
+                                    <ExpandMore
                                         color="primary"
                                         fontSize="small"
                                     />
                                 )}
 
-                                {/* Expand */}
-                                {!props.expand && (
-                                    <ExpandMore
+                                {/* Collapse */}
+                                {props.expand && (
+                                    <ExpandLess
                                         color="primary"
                                         fontSize="small"
                                     />

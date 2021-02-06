@@ -118,7 +118,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                     <CardHeader
                         disableTypography
                         action={
-                            <Grid container alignItems="center">
+                            <Grid container alignItems="center" spacing={0}>
                                 {/* Active/inactive */}
                                 <Grid item>
                                     <Typography

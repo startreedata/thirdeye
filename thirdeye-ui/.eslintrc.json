@@ -139,7 +139,12 @@
         // @typescript-eslint rules
 
         // Require explicit return type on functions and class methods
-        "@typescript-eslint/explicit-function-return-type": ["error"]
+        "@typescript-eslint/explicit-function-return-type": [
+            "error",
+            {
+                "allowExpressions": true
+            }
+        ]
     },
     "settings": {
         "react": {

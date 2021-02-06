@@ -37,7 +37,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         setList(props.list || []);
     }, [props.list]);
 
-    const onInputKeyPress = (event: KeyboardEvent<HTMLInputElement>): void => {
+    const onInputKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
         if (event.key === "Enter") {
             onAddListItem();
         }
@@ -113,7 +113,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                     inputRef={inputRef}
                     label={props.inputLabel || t("label.add")}
                     variant="outlined"
-                    onKeyPress={onInputKeyPress}
+                    onKeyDown={onInputKeyDown}
                 />
             </Grid>
 

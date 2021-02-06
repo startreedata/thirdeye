@@ -303,9 +303,11 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                 {/* Alert evaluation */}
                                 <Grid item sm={12}>
                                     <AlertEvaluationTimeSeriesCard
+                                        showMaximizeButton
                                         showRefreshButton
                                         alertEvaluation={alertEvaluation}
                                         title="Preview Alert"
+                                        visualizationHeight={500}
                                         onRefresh={refreshAlertEvaluation}
                                     />
                                 </Grid>

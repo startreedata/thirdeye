@@ -188,7 +188,10 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                     {/* Alert evaluation time series */}
                     <Grid item sm={12}>
                         <AlertEvaluationTimeSeriesCard
+                            showMaximizeButton
                             alertEvaluation={alertEvaluation}
+                            maximizedTitle={anomalyCardData.name}
+                            visualizationHeight={500}
                         />
                     </Grid>
                 </Grid>

@@ -6,15 +6,15 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
-import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
+import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { createSubscriptionGroup } from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { getSubscriptionGroupsDetailPath } from "../../utils/routes-util/routes-util";
+import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
+import { getSubscriptionGroupsDetailPath } from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
-} from "../../utils/snackbar-util/snackbar-util";
+} from "../../utils/snackbar/snackbar.util";
 
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

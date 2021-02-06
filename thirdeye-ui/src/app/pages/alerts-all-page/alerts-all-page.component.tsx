@@ -16,19 +16,19 @@ import {
     deleteAlert,
     getAllAlerts,
     updateAlert,
-} from "../../rest/alerts-rest/alerts-rest";
+} from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { getAllSubscriptionGroups } from "../../rest/subscription-groups-rest/subscription-groups-rest";
+import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     filterAlerts,
     getAlertCardData,
     getAlertCardDatas,
-} from "../../utils/alerts-util/alerts-util";
+} from "../../utils/alerts/alerts.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
-} from "../../utils/snackbar-util/snackbar-util";
+} from "../../utils/snackbar/snackbar.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

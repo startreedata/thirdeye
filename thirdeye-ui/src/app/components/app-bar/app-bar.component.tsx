@@ -24,7 +24,7 @@ import {
     getSignInPath,
     getSignOutPath,
     getSubscriptionGroupsCreatePath,
-} from "../../utils/routes-util/routes-util";
+} from "../../utils/routes/routes.util";
 import { useAuth } from "../auth-provider/auth-provider.component";
 import { useAppBarStyles } from "./app-bar.styles";
 

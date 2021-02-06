@@ -1,6 +1,6 @@
 import { AxisLeft } from "@visx/visx";
 import React, { FunctionComponent } from "react";
-import { formatLargeNumberForVisualization } from "../../../utils/visualization-util/visualization-util";
+import { formatLargeNumberForVisualization } from "../../../utils/visualization/visualization.util";
 import { LinearAxisLeftProps } from "./linear-axis-left.interfaces";
 import { useLinearAxisLeftStyles } from "./linear-axis-left.styles";
 

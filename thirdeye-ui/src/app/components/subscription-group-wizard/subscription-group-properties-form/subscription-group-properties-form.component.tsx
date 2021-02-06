@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
-import { createEmptySubscriptionGroup } from "../../../utils/subscription-groups-util/subscription-groups-util";
+import { createEmptySubscriptionGroup } from "../../../utils/subscription-groups/subscription-groups.util";
 import { SubscriptionGroupPropertiesFormProps } from "./subscription-group-properties-form.interfaces";
 
 export const SubscriptionGroupPropertiesForm: FunctionComponent<SubscriptionGroupPropertiesFormProps> = (

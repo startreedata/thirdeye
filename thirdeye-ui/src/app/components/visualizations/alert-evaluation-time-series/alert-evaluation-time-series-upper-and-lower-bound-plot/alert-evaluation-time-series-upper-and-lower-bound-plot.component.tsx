@@ -1,7 +1,7 @@
 import { useTheme } from "@material-ui/core";
 import { AreaClosed, curveNatural } from "@visx/visx";
 import React, { FunctionComponent } from "react";
-import { Dimension } from "../../../../utils/material-ui-util/dimension-util";
+import { Dimension } from "../../../../utils/material-ui/dimension.util";
 import { AlertEvaluationTimeSeriesPoint } from "../alert-evaluation-time-series.interfaces";
 import { AlertEvaluationTimeSeriesUpperAndLowerBoundPlotProps } from "./alert-evaluation-time-series-upper-and-lower-bound-plot.interfaces";
 

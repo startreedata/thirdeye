@@ -1,5 +1,5 @@
 import { darken, lighten, makeStyles, Theme } from "@material-ui/core";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
+import { Dimension } from "../../utils/material-ui/dimension.util";
 
 export const useSnackbarProviderStyles = makeStyles((theme: Theme) => ({
     container: {

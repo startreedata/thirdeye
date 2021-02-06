@@ -19,20 +19,20 @@ import {
     getAlert,
     getAlertEvaluation,
     updateAlert,
-} from "../../rest/alerts-rest/alerts-rest";
+} from "../../rest/alerts/alerts.rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { getAllSubscriptionGroups } from "../../rest/subscription-groups-rest/subscription-groups-rest";
+import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     createAlertEvaluation,
     getAlertCardData,
-} from "../../utils/alerts-util/alerts-util";
-import { isValidNumberId } from "../../utils/params-util/params-util";
-import { getAlertsAllPath } from "../../utils/routes-util/routes-util";
+} from "../../utils/alerts/alerts.util";
+import { isValidNumberId } from "../../utils/params/params.util";
+import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
-} from "../../utils/snackbar-util/snackbar-util";
+} from "../../utils/snackbar/snackbar.util";
 import { AlertsDetailPageParams } from "./alerts-detail-page.interfaces";
 
 export const AlertsDetailPage: FunctionComponent = () => {

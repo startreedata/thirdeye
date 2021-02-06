@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { useAppBreadcrumbsStore } from "../../stores/app-breadcrumbs-store/app-breadcrumbs-store";
+import { useAppBreadcrumbsStore } from "../../stores/app-breadcrumbs/app-breadcrumbs.store";
 import { Breadcrumbs } from "../breadcrumbs/breadcrumbs.component";
 import {
     AppBreadcrumbsProps,

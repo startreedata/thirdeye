@@ -12,9 +12,9 @@ import { SnackbarProvider } from "./components/snackbar-provider/snackbar-provid
 import { TimeRangeProvider } from "./components/time-range/time-range-provider/time-range-provider.component";
 import "./index.scss";
 import { enUs } from "./locale/numbers/en-us";
-import { appHistory } from "./utils/history-util/history-util";
-import { getInitOptions } from "./utils/i18next-util/i18next-util";
-import { theme } from "./utils/material-ui-util/theme-util";
+import { appHistory } from "./utils/history/history.util";
+import { getInitOptions } from "./utils/i18next/i18next.util";
+import { theme } from "./utils/material-ui/theme.util";
 
 // Initialize locale
 // i18next (language)

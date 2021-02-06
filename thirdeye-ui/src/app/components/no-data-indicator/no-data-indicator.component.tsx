@@ -2,8 +2,8 @@ import { Box, Grid, Typography, useTheme } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactComponent as EmptyGlass } from "../../../assets/images/empty-glass.svg";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
+import { Dimension } from "../../utils/material-ui/dimension.util";
+import { Palette } from "../../utils/material-ui/palette.util";
 import { NoDataIndicatorProps } from "./no-data-indicator.interfaces";
 import { useNoDataIndicatorStyles } from "./no-data-indicator.styles";
 

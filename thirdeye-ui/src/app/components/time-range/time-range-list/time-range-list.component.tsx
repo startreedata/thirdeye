@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import {
     formatTimeRange,
     formatTimeRangeDuration,
-} from "../../../utils/time-range-util/time-range-util";
+} from "../../../utils/time-range/time-range.util";
 import { TimeRange } from "../time-range-provider/time-range-provider.interfaces";
 import { TimeRangeListProps } from "./time-range-list.interfaces";
 import { useTimeRangeListStyles } from "./time-range-list.styles";

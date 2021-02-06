@@ -1,7 +1,7 @@
 import { curveNatural, LinePath } from "@visx/visx";
 import React, { FunctionComponent } from "react";
-import { Dimension } from "../../../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../../../utils/material-ui-util/palette-util";
+import { Dimension } from "../../../../utils/material-ui/dimension.util";
+import { Palette } from "../../../../utils/material-ui/palette.util";
 import { AlertEvaluationTimeSeriesPoint } from "../alert-evaluation-time-series.interfaces";
 import { AlertEvaluationTimeSeriesCurrentPlotProps } from "./alert-evaluation-time-series-current-plot.interfaces";
 

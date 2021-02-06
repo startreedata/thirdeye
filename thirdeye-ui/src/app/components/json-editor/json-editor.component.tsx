@@ -15,8 +15,8 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
+import { Dimension } from "../../utils/material-ui/dimension.util";
+import { Palette } from "../../utils/material-ui/palette.util";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { JSONEditorProps } from "./json-editor.interfaces";
 import { useJSONEditorStyles } from "./json-editor.styles";

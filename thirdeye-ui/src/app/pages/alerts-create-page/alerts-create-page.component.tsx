@@ -11,20 +11,20 @@ import {
     createAlert,
     getAlertEvaluation,
     getAllAlerts,
-} from "../../rest/alerts-rest/alerts-rest";
+} from "../../rest/alerts/alerts.rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     createSubscriptionGroup,
     getAllSubscriptionGroups,
     updateSubscriptionGroups,
-} from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { createAlertEvaluation } from "../../utils/alerts-util/alerts-util";
-import { getAlertsDetailPath } from "../../utils/routes-util/routes-util";
+} from "../../rest/subscription-groups/subscription-groups.rest";
+import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
+import { getAlertsDetailPath } from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
-} from "../../utils/snackbar-util/snackbar-util";
+} from "../../utils/snackbar/snackbar.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();

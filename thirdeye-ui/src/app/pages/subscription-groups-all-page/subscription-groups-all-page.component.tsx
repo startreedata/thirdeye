@@ -12,21 +12,21 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SearchBar } from "../../components/search-bar/search-bar.component";
-import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
+import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
-} from "../../rest/subscription-groups-rest/subscription-groups-rest";
+} from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
-} from "../../utils/snackbar-util/snackbar-util";
+} from "../../utils/snackbar/snackbar.util";
 import {
     filterSubscriptionGroups,
     getSubscriptionGroupCardDatas,
-} from "../../utils/subscription-groups-util/subscription-groups-util";
+} from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

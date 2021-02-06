@@ -17,7 +17,7 @@ import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indi
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
 import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
-import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
+import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     EmailScheme,
@@ -27,14 +27,14 @@ import {
     deleteSubscriptionGroup,
     getSubscriptionGroup,
     updateSubscriptionGroup,
-} from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { isValidNumberId } from "../../utils/params-util/params-util";
-import { getSubscriptionGroupsAllPath } from "../../utils/routes-util/routes-util";
+} from "../../rest/subscription-groups/subscription-groups.rest";
+import { isValidNumberId } from "../../utils/params/params.util";
+import { getSubscriptionGroupsAllPath } from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
-} from "../../utils/snackbar-util/snackbar-util";
-import { getSubscriptionGroupCardData } from "../../utils/subscription-groups-util/subscription-groups-util";
+} from "../../utils/snackbar/snackbar.util";
+import { getSubscriptionGroupCardData } from "../../utils/subscription-groups/subscription-groups.util";
 import { SubscriptionGroupsDetailPageParams } from "./subscription-groups-detail-page.interfaces";
 
 export const SubscriptionGroupsDetailPage: FunctionComponent = () => {

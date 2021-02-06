@@ -1,8 +1,8 @@
 import { Box, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
+import { Dimension } from "../../utils/material-ui/dimension.util";
+import { Palette } from "../../utils/material-ui/palette.util";
 import { usePageNotFoundIndicatorStyles } from "./page-not-found-indicator.styles";
 
 export const PageNotFoundIndicator: FunctionComponent = () => {

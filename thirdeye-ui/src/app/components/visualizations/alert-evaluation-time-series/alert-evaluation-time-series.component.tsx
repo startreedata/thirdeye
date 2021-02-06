@@ -13,7 +13,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimension } from "../../../utils/material-ui-util/dimension-util";
+import { Dimension } from "../../../utils/material-ui/dimension.util";
 import {
     getAlertEvaluationAnomalyPoints,
     getAlertEvaluationAnomalyPointsMaxValue,
@@ -21,7 +21,7 @@ import {
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
-} from "../../../utils/visualization-util/visualization-util";
+} from "../../../utils/visualization/visualization.util";
 import { LoadingIndicator } from "../../loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LinearAxisLeft } from "../linear-axis-left/linear-axis-left.component";

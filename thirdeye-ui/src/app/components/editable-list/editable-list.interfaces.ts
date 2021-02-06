@@ -1,4 +1,4 @@
-import { ValidationResult } from "../../utils/validation-util/validation-util";
+import { ValidationResult } from "../../utils/validation/validation.util";
 
 export interface EditableListProps {
     list?: string[];

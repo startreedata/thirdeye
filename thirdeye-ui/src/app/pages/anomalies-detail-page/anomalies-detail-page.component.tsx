@@ -14,23 +14,20 @@ import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indi
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
-import { getAlertEvaluation } from "../../rest/alerts-rest/alerts-rest";
-import {
-    deleteAnomaly,
-    getAnomaly,
-} from "../../rest/anomalies-rest/anomalies-rest";
+import { getAlertEvaluation } from "../../rest/alerts/alerts.rest";
+import { deleteAnomaly, getAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
     createAlertEvaluation,
     getAnomalyCardData,
-} from "../../utils/anomalies-util/anomalies-util";
-import { isValidNumberId } from "../../utils/params-util/params-util";
-import { getAnomaliesAllPath } from "../../utils/routes-util/routes-util";
+} from "../../utils/anomalies/anomalies.util";
+import { isValidNumberId } from "../../utils/params/params.util";
+import { getAnomaliesAllPath } from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
-} from "../../utils/snackbar-util/snackbar-util";
+} from "../../utils/snackbar/snackbar.util";
 import { AnomaliesDetailPageParams } from "./anomalies-detail-page.interfaces";
 
 export const AnomaliesDetailPage: FunctionComponent = () => {

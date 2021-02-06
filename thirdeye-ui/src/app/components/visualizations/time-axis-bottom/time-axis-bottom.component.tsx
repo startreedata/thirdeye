@@ -7,7 +7,7 @@ import {
     formatMonthOfYear,
     formatTime,
     formatYear,
-} from "../../../utils/date-time-util/date-time-util";
+} from "../../../utils/date-time/date-time.util";
 import { TimeAxisBottomProps } from "./time-axis-bottom.interfaces";
 import { useTimeAxisBottomStyles } from "./time-axis-bottom.styles";
 

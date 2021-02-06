@@ -2,13 +2,13 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuthStore } from "../../stores/auth-store/auth-store";
+import { useAuthStore } from "../../stores/auth/auth.store";
 import {
     getFulfilledResponseInterceptor,
     getRejectedResponseInterceptor,
     getRequestInterceptor,
-} from "../../utils/axios-util/axios-util";
-import { getWarningSnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+} from "../../utils/axios/axios.util";
+import { getWarningSnackbarOption } from "../../utils/snackbar/snackbar.util";
 import { AuthProviderProps, UseAuthProps } from "./auth-provider.interfaces";
 
 export const AuthProvider: FunctionComponent<AuthProviderProps> = (

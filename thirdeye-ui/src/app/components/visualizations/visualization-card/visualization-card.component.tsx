@@ -12,7 +12,7 @@ import { Fullscreen, FullscreenExit, Refresh } from "@material-ui/icons";
 import classnames from "classnames";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Flipped, Flipper } from "react-flip-toolkit";
-import { useCommonStyles } from "../../../utils/material-ui-util/common-styles.util";
+import { useCommonStyles } from "../../../utils/material-ui/common.styles";
 import { VisualizationCardProps } from "./visualization-card.interfaces";
 import { useVisualizationCardStyles } from "./visualization-card.styles";
 

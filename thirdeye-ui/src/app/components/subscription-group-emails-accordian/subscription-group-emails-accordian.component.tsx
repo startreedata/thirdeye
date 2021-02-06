@@ -7,7 +7,7 @@ import {
 import { ExpandMore } from "@material-ui/icons";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { validateEmail } from "../../utils/validation-util/validation-util";
+import { validateEmail } from "../../utils/validation/validation.util";
 import { EditableList } from "../editable-list/editable-list.component";
 import { SubscriptionGroupEmailsAccordianProps } from "./subscription-group-emails-accordian.interfaces";
 

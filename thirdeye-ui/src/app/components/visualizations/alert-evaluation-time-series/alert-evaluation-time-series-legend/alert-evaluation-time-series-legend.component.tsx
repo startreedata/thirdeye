@@ -9,8 +9,8 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimension } from "../../../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../../../utils/material-ui-util/palette-util";
+import { Dimension } from "../../../../utils/material-ui/dimension.util";
+import { Palette } from "../../../../utils/material-ui/palette.util";
 import { AlertEvaluationTimeSeriesPlot } from "../alert-evaluation-time-series.interfaces";
 import { AlertEvaluationTimeSeriesLegendProps } from "./alert-evaluation-time-series-legend.interfaces";
 import { useAlertEvaluationTimeSeriesLegendStyles } from "./alert-evaluation-time-series-legend.styles";

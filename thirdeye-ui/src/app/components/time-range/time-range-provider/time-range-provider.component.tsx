@@ -1,11 +1,11 @@
 import { isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { useTimeRangeStore } from "../../../stores/time-range-store/time-range-store";
+import { useTimeRangeStore } from "../../../stores/time-range/time-range.store";
 import {
     getTimeRangeDurationFromQueryString,
     setTimeRangeDurationInQueryString,
-} from "../../../utils/params-util/params-util";
+} from "../../../utils/params/params.util";
 import {
     TimeRange,
     TimeRangeProviderProps,

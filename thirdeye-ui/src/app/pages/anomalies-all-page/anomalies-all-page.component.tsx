@@ -16,16 +16,16 @@ import { useTimeRange } from "../../components/time-range/time-range-provider/ti
 import {
     deleteAnomaly,
     getAnomaliesByTime,
-} from "../../rest/anomalies-rest/anomalies-rest";
+} from "../../rest/anomalies/anomalies.rest";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
     filterAnomalies,
     getAnomalyCardDatas,
-} from "../../utils/anomalies-util/anomalies-util";
+} from "../../utils/anomalies/anomalies.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
-} from "../../utils/snackbar-util/snackbar-util";
+} from "../../utils/snackbar/snackbar.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);

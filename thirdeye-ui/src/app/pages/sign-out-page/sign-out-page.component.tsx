@@ -4,7 +4,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { logout } from "../../rest/auth-rest/auth-rest";
+import { logout } from "../../rest/auth/auth.rest";
 
 export const SignOutPage: FunctionComponent = () => {
     const { signOut } = useAuth();

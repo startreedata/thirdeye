@@ -11,7 +11,7 @@ import {
     formatMonth,
     formatYear,
     switchMeridiem,
-} from "../../../../utils/date-time-util/date-time-util";
+} from "../../../../utils/date-time/date-time.util";
 import { useDateTimePickerToolbarStyles } from "./date-time-picker-toolbar.styles";
 
 export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (

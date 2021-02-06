@@ -15,7 +15,7 @@ import {
     getSearchTextFromQueryString,
     setSearchInQueryString,
     setSearchTextInQueryString,
-} from "../../utils/params-util/params-util";
+} from "../../utils/params/params.util";
 import { SearchBarProps } from "./search-bar.interfaces";
 
 const DELIMITER_SEARCH_WORDS = " ";

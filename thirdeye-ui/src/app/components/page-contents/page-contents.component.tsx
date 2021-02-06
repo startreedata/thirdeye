@@ -10,8 +10,8 @@ import React, {
     useState,
 } from "react";
 import { Helmet } from "react-helmet";
-import { useCommonStyles } from "../../utils/material-ui-util/common-styles.util";
-import { getDocumentTitle } from "../../utils/page-util/page-util";
+import { useCommonStyles } from "../../utils/material-ui/common.styles";
+import { getDocumentTitle } from "../../utils/page/page.util";
 import {
     AppBreadcrumbs,
     useAppBreadcrumbs,

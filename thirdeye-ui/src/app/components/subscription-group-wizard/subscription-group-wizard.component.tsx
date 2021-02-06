@@ -15,16 +15,16 @@ import {
     EmailScheme,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
+import { Dimension } from "../../utils/material-ui/dimension.util";
+import { Palette } from "../../utils/material-ui/palette.util";
 import {
     createEmptySubscriptionGroup,
     getSubscriptionGroupAlertId,
     getSubscriptionGroupAlertName,
     getSubscriptionGroupAlerts,
     getSubscriptionGroupCardData,
-} from "../../utils/subscription-groups-util/subscription-groups-util";
-import { validateEmail } from "../../utils/validation-util/validation-util";
+} from "../../utils/subscription-groups/subscription-groups.util";
+import { validateEmail } from "../../utils/validation/validation.util";
 import { EditableList } from "../editable-list/editable-list.component";
 import { SubscriptionGroupAlert } from "../entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";

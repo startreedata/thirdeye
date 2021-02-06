@@ -8,19 +8,19 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
-import { getAllAlerts } from "../../rest/alerts-rest/alerts-rest";
+import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
-} from "../../rest/subscription-groups-rest/subscription-groups-rest";
-import { isValidNumberId } from "../../utils/params-util/params-util";
-import { getSubscriptionGroupsDetailPath } from "../../utils/routes-util/routes-util";
+} from "../../rest/subscription-groups/subscription-groups.rest";
+import { isValidNumberId } from "../../utils/params/params.util";
+import { getSubscriptionGroupsDetailPath } from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
-} from "../../utils/snackbar-util/snackbar-util";
+} from "../../utils/snackbar/snackbar.util";
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {

@@ -1,5 +1,5 @@
 import { makeStyles, Theme } from "@material-ui/core";
-import { codeTypographyOptions } from "../../utils/material-ui-util/typography-util";
+import { codeTypographyOptions } from "../../utils/material-ui/typography.util";
 
 export const useJSONEditorStyles = makeStyles((theme: Theme) => ({
     container: {

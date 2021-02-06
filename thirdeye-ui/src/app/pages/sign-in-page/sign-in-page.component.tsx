@@ -7,9 +7,9 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { login } from "../../rest/auth-rest/auth-rest";
+import { login } from "../../rest/auth/auth.rest";
 import { Auth } from "../../rest/dto/auth.interfaces";
-import { getErrorSnackbarOption } from "../../utils/snackbar-util/snackbar-util";
+import { getErrorSnackbarOption } from "../../utils/snackbar/snackbar.util";
 import { SignInPageProps } from "./sign-in-page.interfaces";
 import { useSignInPageStyles } from "./sign-in-page.styles";
 

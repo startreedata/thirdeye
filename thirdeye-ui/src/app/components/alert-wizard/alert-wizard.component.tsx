@@ -16,10 +16,10 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 import {
     createDefaultAlert,
     getAlertCardData,
-} from "../../utils/alerts-util/alerts-util";
-import { Dimension } from "../../utils/material-ui-util/dimension-util";
-import { Palette } from "../../utils/material-ui-util/palette-util";
-import { validateJSON } from "../../utils/validation-util/validation-util";
+} from "../../utils/alerts/alerts.util";
+import { Dimension } from "../../utils/material-ui/dimension.util";
+import { Palette } from "../../utils/material-ui/palette.util";
+import { validateJSON } from "../../utils/validation/validation.util";
 import { JSONEditor } from "../json-editor/json-editor.component";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";

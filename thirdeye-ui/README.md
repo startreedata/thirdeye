@@ -1,6 +1,7 @@
 <img align="right" width="65" height="65" src="./src/public/thirdeye-512x512.png">
 
 # ThirdEye UI
+
 [![ThirdEye UI Workflow](https://github.com/cortexdata/thirdeye/workflows/ThirdEye%20UI%20Workflow/badge.svg)](https://github.com/cortexdata/thirdeye/actions?query=workflow%3A%22ThirdEye+UI+Workflow%22)
 
 <br/>

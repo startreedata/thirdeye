@@ -1,32 +1,45 @@
 import { PaletteOptions } from "@material-ui/core/styles/createPalette";
 import { Color } from "./color.util";
 
+const COLOR_PRIMARY_CONTRAST_TEXT = Color.WHITE_1;
+const COLOR_PRIMARY_DARK = Color.TEAL_2;
+const COLOR_PRIMARY_LIGHT = Color.TEAL_3;
+const COLOR_PRIMARY_MAIN = Color.TEAL_1;
+const COLOR_SECONDARY_CONTRAST_TEXT = Color.WHITE_1;
+const COLOR_SECONDARY_DARK = Color.GREEN_2;
+const COLOR_SECONDARY_LIGHT = Color.GREEN_3;
+const COLOR_SECONDARY_MAIN = Color.GREEN_1;
+const COLOR_BACKGROUND_DEFAULT = Color.WHITE_1;
+const COLOR_BACKGROUND_PAPER = Color.WHITE_1;
+
 // Material-UI theme component colors
 export const Palette = {
     COLOR_BORDER_DEFAULT: Color.GREY_1,
     COLOR_BORDER_DARK: Color.BLACK_1,
     // Visualizations
-    COLOR_VISUALIZATION_STROKE_DEFAULT: Color.BLACK_1,
-    COLOR_VISUALIZATION_STROKE_GREY: Color.GREY_1,
-    COLOR_VISUALIZATION_STROKE_BASELINE: Color.ORANGE_1,
+    COLOR_VISUALIZATION_STROKE_CURRENT: Color.BLACK_1,
+    COLOR_VISUALIZATION_STROKE_BASELINE: Color.GREY_1,
+    COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND: COLOR_PRIMARY_MAIN,
+    COLOR_VISUALIZATION_STROKE_ANOMALIES: Color.RED_1,
+    COLOR_VISUALIZATION_STROKE_BRUSH: Color.GREY_1,
 } as const;
 
 // Material-UI theme color palette
 export const paletteOptions: PaletteOptions = {
     primary: {
-        contrastText: Color.WHITE_1,
-        dark: Color.TEAL_2,
-        light: Color.TEAL_3,
-        main: Color.TEAL_1,
+        contrastText: COLOR_PRIMARY_CONTRAST_TEXT,
+        dark: COLOR_PRIMARY_DARK,
+        light: COLOR_PRIMARY_LIGHT,
+        main: COLOR_PRIMARY_MAIN,
     },
     secondary: {
-        contrastText: Color.WHITE_1,
-        dark: Color.GREEN_2,
-        light: Color.GREEN_3,
-        main: Color.GREEN_1,
+        contrastText: COLOR_SECONDARY_CONTRAST_TEXT,
+        dark: COLOR_SECONDARY_DARK,
+        light: COLOR_SECONDARY_LIGHT,
+        main: COLOR_SECONDARY_MAIN,
     },
     background: {
-        paper: Color.WHITE_1,
-        default: Color.WHITE_1,
+        default: COLOR_BACKGROUND_DEFAULT,
+        paper: COLOR_BACKGROUND_PAPER,
     },
 };

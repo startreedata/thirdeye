@@ -2,21 +2,18 @@ import { makeStyles, Theme } from "@material-ui/core";
 
 export const useAlertEvaluationTimeSeriesLegendStyles = makeStyles(
     (theme: Theme) => ({
-        legendContainer: {
+        container: {
             display: "flex",
             justifyContent: "space-between",
-            marginLeft: "10px",
-            marginRight: "10px",
         },
         legendItem: {
             cursor: "pointer",
         },
-        legendItemDisabled: {
-            color: theme.palette.text.disabled,
-        },
-        legendItemText: {
+        legendItemLabel: {
             paddingLeft: "10px",
-            paddingTop: "1px",
+        },
+        legendItemLabelDisabled: {
+            color: theme.palette.text.disabled,
         },
     })
 );

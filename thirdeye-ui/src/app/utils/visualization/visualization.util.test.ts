@@ -1,4 +1,6 @@
+import { ScaleTime } from "d3-scale";
 import { cloneDeep } from "lodash";
+import { Settings } from "luxon";
 import {
     AlertEvaluationAnomalyPoint,
     AlertEvaluationTimeSeriesPoint,
@@ -10,6 +12,7 @@ import {
     DetectionEvaluation,
 } from "../../rest/dto/detection.interfaces";
 import {
+    formatDateTimeForAxis,
     formatLargeNumberForVisualization,
     getAlertEvaluationAnomalyPoints,
     getAlertEvaluationAnomalyPointsMaxValue,
@@ -17,7 +20,11 @@ import {
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
+    getTimeTickValuesForAxis,
 } from "./visualization.util";
+
+const systemLocale = Settings.defaultLocale;
+const systemZoneName = Settings.defaultZoneName;
 
 jest.mock("../number/number.util", () => ({
     formatLargeNumber: jest.fn().mockImplementation((num: number): string => {
@@ -26,6 +33,19 @@ jest.mock("../number/number.util", () => ({
 }));
 
 describe("Visualization Util", () => {
+    beforeAll(() => {
+        // Explicitly set locale and time zone to make sure date time manipulations and literal
+        // results are consistent regardless of where tests are run
+        Settings.defaultLocale = "en-US";
+        Settings.defaultZoneName = "America/Los_Angeles";
+    });
+
+    afterAll(() => {
+        // Restore locale and time zone
+        Settings.defaultLocale = systemLocale;
+        Settings.defaultZoneName = systemZoneName;
+    });
+
     test("formatLargeNumberForVisualization should return empty string for invalid number", () => {
         expect(
             formatLargeNumberForVisualization((null as unknown) as number)
@@ -36,12 +56,140 @@ describe("Visualization Util", () => {
         expect(formatLargeNumberForVisualization(1)).toEqual("1");
     });
 
-    test("formatLargeNumberForVisualization should return appropriate string for number object", () => {
+    test("formatLargeNumberForVisualization should return appropriate string for object", () => {
         expect(
             formatLargeNumberForVisualization({
-                valueOf: (): number => 1,
+                valueOf: () => 1,
             })
         ).toEqual("1");
+    });
+
+    test("formatDateTimeForAxis should return empty string for invalid date", () => {
+        expect(
+            formatDateTimeForAxis((null as unknown) as number, mockScale)
+        ).toEqual("");
+    });
+
+    test("formatDateTimeForAxis should return empty string for invalid scale", () => {
+        expect(
+            formatDateTimeForAxis(
+                1,
+                (null as unknown) as ScaleTime<number, number>
+            )
+        ).toEqual("");
+    });
+
+    test("formatDateTimeForAxis should return appropriate string for date and scale", () => {
+        mockScaleDomain = [new Date(1543651200000), new Date(1669881600000)];
+
+        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual("2020");
+    });
+
+    test("formatDateTimeForAxis should return appropriate string for object and scale", () => {
+        mockScaleDomain = [new Date(1543651200000), new Date(1669881600000)];
+
+        expect(
+            formatDateTimeForAxis(
+                {
+                    valueOf: () => 1606852800000,
+                },
+                mockScale
+            )
+        ).toEqual("2020");
+    });
+
+    test("formatDateTimeForAxis should return appropriate string for date and scale domain interval of more than 2 years", () => {
+        mockScaleDomain = [new Date(1543651200000), new Date(1669881600000)];
+
+        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual("2020");
+    });
+
+    test("formatDateTimeForAxis should return appropriate string for date and scale domain interval of less than or equal to 2 years and more than 2 months", () => {
+        mockScaleDomain = [new Date(1575273600000), new Date(1638345600000)]; // Interval = 2 years
+
+        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
+            "Dec 2020"
+        );
+
+        mockScaleDomain = [new Date(1577865600000), new Date(1638345600000)]; // Interval < 2 years
+
+        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
+            "Dec 2020"
+        );
+    });
+
+    test("formatDateTimeForAxis should return appropriate string for date and scale domain interval of less than or equal to 2 months and more than 2 days", () => {
+        mockScaleDomain = [new Date(1604304000000), new Date(1609488000000)]; // Interval = 2 months
+
+        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
+            "Dec 01, 2020"
+        );
+
+        mockScaleDomain = [new Date(1606723200000), new Date(1609488000000)]; // Interval < 2 months
+
+        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
+            "Dec 01, 2020"
+        );
+    });
+
+    test("formatDateTimeForAxis should return appropriate string for date and scale domain interval of less than or equal to 2 days", () => {
+        mockScaleDomain = [new Date(1606723200000), new Date(1606896000000)]; // Interval = 2 days
+
+        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
+            "Dec 01, 2020@12:00 PM"
+        );
+
+        mockScaleDomain = [new Date(1606852800000), new Date(1606896000000)]; // Interval < 2 days
+
+        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
+            "Dec 01, 2020@12:00 PM"
+        );
+    });
+
+    test("getTimeTickValuesForAxis should return empty array for number of ticks and invalid scale", () => {
+        expect(
+            getTimeTickValuesForAxis(
+                1,
+                (null as unknown) as ScaleTime<number, number>
+            )
+        ).toEqual([]);
+    });
+
+    test("getTimeTickValuesForAxis should return appropriate time tick value array for invalid number of ticks and scale", () => {
+        mockScaleDomain = [new Date(1575187200000), new Date(1606852800000)];
+        const timeTickValues = getTimeTickValuesForAxis(
+            (null as unknown) as number,
+            mockScale
+        );
+
+        expect(timeTickValues).toHaveLength(8);
+        expect(timeTickValues[0]).toEqual(1575187200000);
+        expect(timeTickValues[1]).toEqual(1579710857142.8572);
+        expect(timeTickValues[2]).toEqual(1584234514284.8572);
+        expect(timeTickValues[3]).toEqual(1588758171426.8572);
+        expect(timeTickValues[4]).toEqual(1593281828568.8572);
+        expect(timeTickValues[5]).toEqual(1597805485710.8572);
+        expect(timeTickValues[6]).toEqual(1602329142852.8572);
+        expect(timeTickValues[7]).toEqual(1606852800000);
+    });
+
+    test("getTimeTickValuesForAxis should return appropriate time tick value array for number of ticks less than 3 and scale", () => {
+        mockScaleDomain = [new Date(1575187200000), new Date(1606852800000)];
+        const timeTickValues = getTimeTickValuesForAxis(1, mockScale);
+
+        expect(timeTickValues).toHaveLength(2);
+        expect(timeTickValues[0]).toEqual(1575187200000);
+        expect(timeTickValues[1]).toEqual(1606852800000);
+    });
+
+    test("getTimeTickValuesForAxis should return appropriate time tick value array for number of ticks and scale", () => {
+        mockScaleDomain = [new Date(1575187200000), new Date(1606852800000)];
+        const timeTickValues = getTimeTickValuesForAxis(3, mockScale);
+
+        expect(timeTickValues).toHaveLength(3);
+        expect(timeTickValues[0]).toEqual(1575187200000);
+        expect(timeTickValues[1]).toEqual(1591020000000);
+        expect(timeTickValues[2]).toEqual(1606852800000);
     });
 
     test("getAlertEvaluationTimeSeriesPoints should return empty alert evaluation time series points for invalid alert evaluation", () => {
@@ -311,6 +459,12 @@ describe("Visualization Util", () => {
         ).toEqual(18);
     });
 });
+
+let mockScaleDomain: Date[] = [];
+
+const mockScale: ScaleTime<number, number> = ({
+    domain: jest.fn().mockImplementation(() => mockScaleDomain),
+} as unknown) as ScaleTime<number, number>;
 
 const mockAlertEvaluation: AlertEvaluation = {
     alert: {} as Alert,

@@ -5,5 +5,4 @@ export interface AlertEvaluationTimeSeriesAnomaliesPlotProps {
     alertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[];
     xScale: ScaleTime<number, number>;
     yScale: ScaleLinear<number, number>;
-    radius?: number;
 }

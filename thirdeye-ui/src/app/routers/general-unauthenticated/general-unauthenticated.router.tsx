@@ -1,18 +1,11 @@
 import React, {
     FunctionComponent,
     lazy,
-    ReactNode,
     Suspense,
     useEffect,
     useState,
 } from "react";
-import {
-    Redirect,
-    Route,
-    RouteComponentProps,
-    Switch,
-    useLocation,
-} from "react-router-dom";
+import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import {
@@ -66,7 +59,7 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
                 <Route
                     exact
                     path={AppRoute.SIGN_IN}
-                    render={(props: RouteComponentProps): ReactNode => (
+                    render={(props) => (
                         <SignInPage {...props} redirectURL={redirectURL} />
                     )}
                 />

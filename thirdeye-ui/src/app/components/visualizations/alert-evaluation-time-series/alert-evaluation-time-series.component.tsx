@@ -1,4 +1,3 @@
-import { useTheme } from "@material-ui/core";
 import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import { Brush, Group, ParentSize, scaleLinear, scaleTime } from "@visx/visx";
@@ -6,7 +5,6 @@ import { debounce, isEmpty, max } from "lodash";
 import React, {
     createRef,
     FunctionComponent,
-    ReactNode,
     useCallback,
     useEffect,
     useMemo,
@@ -14,6 +12,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
+import { Palette } from "../../../utils/material-ui/palette.util";
 import {
     getAlertEvaluationAnomalyPoints,
     getAlertEvaluationAnomalyPointsMaxValue,
@@ -41,11 +40,12 @@ import {
 
 const HEIGHT_CONTAINER_MIN = 310;
 const WIDTH_CONTAINER_MIN = 620;
-const MARGIN_LEFT = 40;
-const MARGIN_RIGHT = 40;
-const MARGIN_TOP = 30;
-const MARGIN_BOTTOM = 10;
-const HEIGHT_DIVIDER = 70;
+const PADDING_SVG_TOP = 10;
+const PADDING_SVG_BOTTOM = 30;
+const PADDING_SVG_LEFT = 50;
+const PADDING_SVG_RIGHT = 50;
+const HEIGHT_SEPARATOR_TIME_SERIES_BRUSH = 60;
+const HEIGHT_BRUSH = 100;
 const HEIGHT_LEGEND = 30;
 
 // Simple wrapper around AlertEvaluationTimeSeriesInternal to capture parent container dimensions
@@ -54,7 +54,7 @@ export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSer
 ) => {
     return (
         <ParentSize>
-            {(parent): ReactNode => (
+            {(parent) => (
                 <AlertEvaluationTimeSeriesInternal
                     alertEvaluation={props.alertEvaluation}
                     height={parent.height}
@@ -78,39 +78,41 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         filteredAlertEvaluationTimeSeriesPoints,
         setFilteredAlertEvaluationTimeSeriesPoints,
     ] = useState<AlertEvaluationTimeSeriesPoint[]>([]);
-
-    const [
-        filteredAlertEvaluationAnomalyPoints,
-        setFilteredAlertEvaluationAnomalyPoints,
-    ] = useState<AlertEvaluationAnomalyPoint[]>([]);
     const [
         alertEvaluationAnomalyPoints,
         setAlertEvaluationAnomalyPoints,
     ] = useState<AlertEvaluationAnomalyPoint[]>([]);
-    const [upperAndLowerBoundVisible, setUpperAndLowerBoundVisible] = useState(
-        true
-    );
-    const [currentVisible, setCurrentVisible] = useState(true);
-    const [baselineVisible, setBaselineVisible] = useState(true);
-    const [anomaliesVisible, setAnomaliesVisible] = useState(true);
+    const [
+        filteredAlertEvaluationAnomalyPoints,
+        setFilteredAlertEvaluationAnomalyPoints,
+    ] = useState<AlertEvaluationAnomalyPoint[]>([]);
+    const [currentPlotVisible, setCurrentPlotVisible] = useState(true);
+    const [baselinePlotVisible, setBaselinePlotVisible] = useState(true);
+    const [
+        upperAndLowerBoundPlotVisible,
+        setUpperAndLowerBoundPlotVisible,
+    ] = useState(true);
+    const [anomaliesPlotVisible, setAnomaliesPlotVisible] = useState(true);
     const brushRef = createRef<BaseBrush>();
-    const theme = useTheme();
     const { t } = useTranslation();
 
     // SVG bounds
-    const svgWidth = props.width; // container width
-    const svgHeight = props.height - HEIGHT_LEGEND; // container height - space for legend
+    const svgWidth = props.width; // Container width
+    const svgHeight = props.height - HEIGHT_LEGEND; // Container height - space for legend
 
     // Time series bounds
-    const timeSeriesXMax = svgWidth - MARGIN_LEFT - MARGIN_RIGHT; // Available SVG width - left and right margins
-    const timeSeriesHeight = (svgHeight - MARGIN_TOP - MARGIN_BOTTOM) * 0.8; // 85% of (available SVG height - top and bottom margins)
-    const timeSeriesYMax = timeSeriesHeight - HEIGHT_DIVIDER; // Time series height - space between time series and brush
+    const timeSeriesHeight =
+        svgHeight -
+        PADDING_SVG_TOP -
+        HEIGHT_SEPARATOR_TIME_SERIES_BRUSH -
+        HEIGHT_BRUSH; // Available SVG height - top SVG padding - separator height between time series and brush - brush height
+    const timeSeriesXMax = svgWidth - PADDING_SVG_LEFT - PADDING_SVG_RIGHT; // Available SVG width - left and right SVG padding
+    const timeSeriesYMax = timeSeriesHeight;
 
     // Brush bounds
-    const brushXMax = svgWidth - MARGIN_LEFT - MARGIN_RIGHT; // Available SVG width - left and right margins
-    const brushHeight =
-        svgHeight - timeSeriesHeight - MARGIN_TOP - MARGIN_BOTTOM; // Remaining SVG height after time series - top and bottom margins
-    const brushYMax = brushHeight; // Brush height
+    const brushHeight = HEIGHT_BRUSH - PADDING_SVG_BOTTOM; // Brush height - bottom SVG padding
+    const brushXMax = svgWidth - PADDING_SVG_LEFT - PADDING_SVG_RIGHT; // Available SVG width - left and right SVG padding
+    const brushYMax = brushHeight;
 
     // Time series scales
     const timeSeriesXScale = useMemo(() => {
@@ -125,6 +127,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 ),
             ],
             nice: true,
+            clamp: true,
         });
     }, [props.width, filteredAlertEvaluationTimeSeriesPoints]);
     const timeSeriesYScale = useMemo(() => {
@@ -142,6 +145,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 ]) || 0,
             ],
             nice: true,
+            clamp: true,
         });
     }, [
         props.height,
@@ -162,6 +166,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 ),
             ],
             nice: true,
+            clamp: true,
         });
     }, [props.width, alertEvaluationTimeSeriesPoints]);
     const brushYScale = useMemo(() => {
@@ -179,6 +184,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 ]) || 0,
             ],
             nice: true,
+            clamp: true,
         });
     }, [props.height, alertEvaluationTimeSeriesPoints]);
 
@@ -268,25 +274,32 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         alertEvaluationTimeSeriesPlot: AlertEvaluationTimeSeriesPlot
     ): void => {
         switch (alertEvaluationTimeSeriesPlot) {
-            case AlertEvaluationTimeSeriesPlot.UPPER_AND_LOWER_BOUND: {
-                setUpperAndLowerBoundVisible(
-                    (showUpperAndLowerBound) => !showUpperAndLowerBound
+            case AlertEvaluationTimeSeriesPlot.CURRENT: {
+                setCurrentPlotVisible(
+                    (currentPlotVisible) => !currentPlotVisible
                 );
 
                 break;
             }
-            case AlertEvaluationTimeSeriesPlot.CURRENT: {
-                setCurrentVisible((showCurrent) => !showCurrent);
+            case AlertEvaluationTimeSeriesPlot.BASELINE: {
+                setBaselinePlotVisible(
+                    (baselinePlotVisible) => !baselinePlotVisible
+                );
 
                 break;
             }
-            case AlertEvaluationTimeSeriesPlot.BASELINE: {
-                setBaselineVisible((showBaseline) => !showBaseline);
+            case AlertEvaluationTimeSeriesPlot.UPPER_AND_LOWER_BOUND: {
+                setUpperAndLowerBoundPlotVisible(
+                    (upperAndLowerBoundPlotVisible) =>
+                        !upperAndLowerBoundPlotVisible
+                );
 
                 break;
             }
             case AlertEvaluationTimeSeriesPlot.ANOMALIES: {
-                setAnomaliesVisible((showAnomalies) => !showAnomalies);
+                setAnomaliesPlotVisible(
+                    (anomaliesPlotVisible) => !anomaliesPlotVisible
+                );
 
                 break;
             }
@@ -315,42 +328,9 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             {/* SVG container with parent dimensions */}
             <svg height={svgHeight} width={svgWidth}>
                 {/* Time series */}
-                <Group left={MARGIN_LEFT} top={MARGIN_TOP}>
-                    {/* Upper and lower bound */}
-                    {upperAndLowerBoundVisible && (
-                        <AlertEvaluationTimeSeriesUpperAndLowerBoundPlot
-                            alertEvaluationTimeSeriesPoints={
-                                filteredAlertEvaluationTimeSeriesPoints
-                            }
-                            xScale={timeSeriesXScale}
-                            yScale={timeSeriesYScale}
-                        />
-                    )}
-
-                    {/* Current */}
-                    {currentVisible && (
-                        <AlertEvaluationTimeSeriesCurrentPlot
-                            alertEvaluationTimeSeriesPoints={
-                                filteredAlertEvaluationTimeSeriesPoints
-                            }
-                            xScale={timeSeriesXScale}
-                            yScale={timeSeriesYScale}
-                        />
-                    )}
-
-                    {/* Baseline */}
-                    {baselineVisible && (
-                        <AlertEvaluationTimeSeriesBaselinePlot
-                            alertEvaluationTimeSeriesPoints={
-                                filteredAlertEvaluationTimeSeriesPoints
-                            }
-                            xScale={timeSeriesXScale}
-                            yScale={timeSeriesYScale}
-                        />
-                    )}
-
+                <Group left={PADDING_SVG_LEFT} top={PADDING_SVG_TOP}>
                     {/* Anomalies */}
-                    {anomaliesVisible && (
+                    {anomaliesPlotVisible && (
                         <AlertEvaluationTimeSeriesAnomaliesPlot
                             alertEvaluationAnomalyPoints={
                                 filteredAlertEvaluationAnomalyPoints
@@ -360,9 +340,41 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                         />
                     )}
 
+                    {/* Upper and lower bound */}
+                    {upperAndLowerBoundPlotVisible && (
+                        <AlertEvaluationTimeSeriesUpperAndLowerBoundPlot
+                            alertEvaluationTimeSeriesPoints={
+                                filteredAlertEvaluationTimeSeriesPoints
+                            }
+                            xScale={timeSeriesXScale}
+                            yScale={timeSeriesYScale}
+                        />
+                    )}
+
+                    {/* Baseline */}
+                    {baselinePlotVisible && (
+                        <AlertEvaluationTimeSeriesBaselinePlot
+                            alertEvaluationTimeSeriesPoints={
+                                filteredAlertEvaluationTimeSeriesPoints
+                            }
+                            xScale={timeSeriesXScale}
+                            yScale={timeSeriesYScale}
+                        />
+                    )}
+
+                    {/* Current */}
+                    {currentPlotVisible && (
+                        <AlertEvaluationTimeSeriesCurrentPlot
+                            alertEvaluationTimeSeriesPoints={
+                                filteredAlertEvaluationTimeSeriesPoints
+                            }
+                            xScale={timeSeriesXScale}
+                            yScale={timeSeriesYScale}
+                        />
+                    )}
+
                     {/* X axis */}
                     <TimeAxisBottom
-                        numTicks={5}
                         scale={timeSeriesXScale}
                         top={timeSeriesYMax}
                     />
@@ -372,20 +384,23 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 </Group>
 
                 {/* Brush */}
-                <Group left={MARGIN_LEFT} top={timeSeriesHeight}>
+                <Group
+                    left={PADDING_SVG_LEFT}
+                    top={timeSeriesHeight + HEIGHT_SEPARATOR_TIME_SERIES_BRUSH}
+                >
                     {/* Time series in the brush to be always visible and slightly transparent */}
                     <Group opacity={0.5}>
-                        {/* Upper and lower bound */}
-                        <AlertEvaluationTimeSeriesUpperAndLowerBoundPlot
-                            alertEvaluationTimeSeriesPoints={
-                                alertEvaluationTimeSeriesPoints
+                        {/* Anomalies */}
+                        <AlertEvaluationTimeSeriesAnomaliesPlot
+                            alertEvaluationAnomalyPoints={
+                                alertEvaluationAnomalyPoints
                             }
                             xScale={brushXScale}
                             yScale={brushYScale}
                         />
 
-                        {/* Current */}
-                        <AlertEvaluationTimeSeriesCurrentPlot
+                        {/* Upper and lower bound */}
+                        <AlertEvaluationTimeSeriesUpperAndLowerBoundPlot
                             alertEvaluationTimeSeriesPoints={
                                 alertEvaluationTimeSeriesPoints
                             }
@@ -402,12 +417,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                             yScale={brushYScale}
                         />
 
-                        {/* Anomalies */}
-                        <AlertEvaluationTimeSeriesAnomaliesPlot
-                            alertEvaluationAnomalyPoints={
-                                alertEvaluationAnomalyPoints
+                        {/* Current */}
+                        <AlertEvaluationTimeSeriesCurrentPlot
+                            alertEvaluationTimeSeriesPoints={
+                                alertEvaluationTimeSeriesPoints
                             }
-                            radius={2}
                             xScale={brushXScale}
                             yScale={brushYScale}
                         />
@@ -419,14 +433,15 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                         innerRef={brushRef}
                         margin={{
                             top: 0,
-                            left: MARGIN_LEFT,
-                            right: MARGIN_RIGHT,
+                            left: PADDING_SVG_LEFT,
+                            right: PADDING_SVG_RIGHT,
                             bottom: 0,
                         }}
                         selectedBoxStyle={{
-                            fill: theme.palette.primary.main,
-                            fillOpacity: 0.2,
-                            stroke: theme.palette.primary.main,
+                            fill: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+                            fillOpacity: 0.4,
+                            strokeOpacity: 1,
+                            stroke: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
                             strokeWidth:
                                 Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
                         }}
@@ -437,20 +452,16 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     />
 
                     {/* X axis */}
-                    <TimeAxisBottom
-                        numTicks={5}
-                        scale={brushXScale}
-                        top={brushYMax}
-                    />
+                    <TimeAxisBottom scale={brushXScale} top={brushYMax} />
                 </Group>
             </svg>
 
             {/* Legend */}
             <AlertEvaluationTimeSeriesLegend
-                anomaliesVisible={anomaliesVisible}
-                baselineVisible={baselineVisible}
-                currentVisible={currentVisible}
-                upperAndLowerBoundVisible={upperAndLowerBoundVisible}
+                anomalies={anomaliesPlotVisible}
+                baseline={baselinePlotVisible}
+                current={currentPlotVisible}
+                upperAndLowerBound={upperAndLowerBoundPlotVisible}
                 onChange={onLegendChange}
             />
         </>

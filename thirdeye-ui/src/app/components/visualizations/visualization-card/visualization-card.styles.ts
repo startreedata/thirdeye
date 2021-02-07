@@ -1,33 +1,33 @@
 import { makeStyles, Theme } from "@material-ui/core";
 import { VisualizationCardProps } from "./visualization-card.interfaces";
 
-const outerContainerMaximizePadding = 32;
-const outerContainerMaximizePaddingTop = 100;
-const headerContainerHeight = 72;
+const PADDING_OUTER_CONTAINER_MAXIMIZE = 32;
+const PADDING_TOP_OUTER_CONTAINER_MAXIMIZE = 100;
+const HEIGHT_HEADER_CONTAINER = 72;
 
 export const useVisualizationCardStyles = makeStyles<
     Theme,
     VisualizationCardProps
 >((theme: Theme) => ({
     outerContainer: (props) => ({
-        height: `${headerContainerHeight + props.visualizationHeight}px`,
-        zIndex: theme.zIndex.drawer + 3, // Container to be always above backdrop
+        height: `${HEIGHT_HEADER_CONTAINER + props.visualizationHeight}px`,
     }),
     outerContainerMaximize: (props) => ({
         position: "fixed",
         top: "50%",
         left: "50%",
-        height: `${headerContainerHeight + props.visualizationHeight}px`, // Required height
+        height: `${HEIGHT_HEADER_CONTAINER + props.visualizationHeight}px`, // Required height
         maxHeight: `calc(100% - ${
-            outerContainerMaximizePadding + outerContainerMaximizePaddingTop
+            PADDING_OUTER_CONTAINER_MAXIMIZE +
+            PADDING_TOP_OUTER_CONTAINER_MAXIMIZE
         }px)`, // Available maxmized height
-        width: `calc(100% - ${outerContainerMaximizePadding * 2}px)`,
+        width: `calc(100% - ${PADDING_OUTER_CONTAINER_MAXIMIZE * 2}px)`,
         transform: "translate(-50%, -50%)", // Center the container
         overflowY: "auto",
-        zIndex: theme.zIndex.drawer + 3, // Container to be always above backdrop
+        zIndex: theme.zIndex.drawer + 3, // Maximized container to be always above backdrop
     }),
     headerContainer: {
-        height: headerContainerHeight,
+        height: HEIGHT_HEADER_CONTAINER,
     },
     innerContainer: (props) => ({
         height: `${props.visualizationHeight}px`,

@@ -4,7 +4,7 @@ import {
     SnackbarKey,
     SnackbarProvider as NotistackSnackbarProvider,
 } from "notistack";
-import React, { createRef, FunctionComponent, ReactNode } from "react";
+import React, { createRef, FunctionComponent } from "react";
 import { SnackbarProviderProps } from "./snackbar-provider.interfaces";
 import { useSnackbarProviderStyles } from "./snackbar-provider.styles";
 
@@ -23,7 +23,7 @@ export const SnackbarProvider: FunctionComponent<SnackbarProviderProps> = (
     return (
         <NotistackSnackbarProvider
             hideIconVariant
-            action={(key: SnackbarKey): ReactNode => {
+            action={(key) => {
                 // Close button
                 return (
                     <IconButton

@@ -1,5 +1,5 @@
-import { AxisLeft } from "@visx/visx";
-import React, { FunctionComponent } from "react";
+import { AxisLeft, Text, TickRendererProps } from "@visx/visx";
+import React, { FunctionComponent, ReactNode } from "react";
 import { formatLargeNumberForVisualization } from "../../../utils/visualization/visualization.util";
 import { LinearAxisLeftProps } from "./linear-axis-left.interfaces";
 import { useLinearAxisLeftStyles } from "./linear-axis-left.styles";
@@ -9,12 +9,29 @@ export const LinearAxisLeft: FunctionComponent<LinearAxisLeftProps> = (
 ) => {
     const linearAxisLeftClasses = useLinearAxisLeftStyles();
 
+    // Renders label from tick renderer props without any default visx label font properties
+    // Without custom renderer, tickClassName/labelClassName doesn't seem to work
+    const tickComponentRenderer = (
+        tickRendererProps: TickRendererProps
+    ): ReactNode => {
+        return (
+            <Text
+                textAnchor={tickRendererProps.textAnchor}
+                x={tickRendererProps.x - 2}
+                y={tickRendererProps.y + 4}
+            >
+                {tickRendererProps.formattedValue}
+            </Text>
+        );
+    };
+
     return (
         <AxisLeft
             left={props.left}
             numTicks={props.numTicks}
             scale={props.scale}
             tickClassName={linearAxisLeftClasses.tick}
+            tickComponent={tickComponentRenderer}
             tickFormat={formatLargeNumberForVisualization}
             top={props.top}
         />

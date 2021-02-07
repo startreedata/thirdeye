@@ -1,29 +1,44 @@
-import { useTheme } from "@material-ui/core";
-import { Circle } from "@visx/visx";
+import { Bar } from "@visx/visx";
 import React, { FunctionComponent } from "react";
+import { Dimension } from "../../../../utils/material-ui/dimension.util";
+import { Palette } from "../../../../utils/material-ui/palette.util";
 import { AlertEvaluationTimeSeriesAnomaliesPlotProps } from "./alert-evaluation-time-series-anomalies-plot.interfaces";
 
 export const AlertEvaluationTimeSeriesAnomaliesPlot: FunctionComponent<AlertEvaluationTimeSeriesAnomaliesPlotProps> = (
     props: AlertEvaluationTimeSeriesAnomaliesPlotProps
 ) => {
-    const theme = useTheme();
-
     return (
-        // Anomalies plot
         <>
             {props.alertEvaluationAnomalyPoints &&
                 props.alertEvaluationAnomalyPoints.map(
                     (alertEvaluationAnomalyPoint, index) => (
-                        <Circle
-                            cx={props.xScale(
+                        <Bar
+                            fill={Palette.COLOR_VISUALIZATION_STROKE_ANOMALIES}
+                            fillOpacity={0.2}
+                            height={
+                                props.yScale(props.yScale.domain()[0]) -
+                                props.yScale(props.yScale.domain()[1])
+                            }
+                            key={index}
+                            stroke={
+                                Palette.COLOR_VISUALIZATION_STROKE_ANOMALIES
+                            }
+                            strokeOpacity={0.2}
+                            strokeWidth={
+                                Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT
+                            }
+                            width={
+                                props.xScale(
+                                    alertEvaluationAnomalyPoint.endTime
+                                ) -
+                                props.xScale(
+                                    alertEvaluationAnomalyPoint.startTime
+                                )
+                            }
+                            x={props.xScale(
                                 alertEvaluationAnomalyPoint.startTime
                             )}
-                            cy={props.yScale(
-                                alertEvaluationAnomalyPoint.current
-                            )}
-                            fill={theme.palette.error.main}
-                            key={index}
-                            r={props.radius || 5}
+                            y={props.yScale(props.yScale.domain()[1])}
                         />
                     )
                 )}

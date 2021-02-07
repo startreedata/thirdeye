@@ -9,5 +9,5 @@ export const Color = {
     TEAL_1: "#54BAC9",
     TEAL_2: "#2994A9",
     TEAL_3: "#6EC4D1",
-    ORANGE_1: "#FF9505",
+    RED_1: "#FF0C3E",
 } as const;

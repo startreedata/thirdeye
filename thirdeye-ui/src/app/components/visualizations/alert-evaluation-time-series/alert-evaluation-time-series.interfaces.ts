@@ -11,18 +11,18 @@ export interface AlertEvaluationTimeSeriesInternalProps {
 }
 
 export enum AlertEvaluationTimeSeriesPlot {
-    UPPER_AND_LOWER_BOUND = "UPPER_AND_LOWER_BOUND",
     CURRENT = "CURRENT",
     BASELINE = "BASELINE",
+    UPPER_AND_LOWER_BOUND = "UPPER_AND_LOWER_BOUND",
     ANOMALIES = "ANOMALIES",
 }
 
 export interface AlertEvaluationTimeSeriesPoint {
     timestamp: number;
-    upperBound: number;
-    lowerBound: number;
     current: number;
     expected: number;
+    upperBound: number;
+    lowerBound: number;
 }
 
 export interface AlertEvaluationAnomalyPoint {

@@ -687,7 +687,7 @@ public class AnomalyDetectionInputContextBuilder {
 
     TimeSeriesHandler timeSeriesHandler =
         new TimeSeriesHandler(
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache());
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache());
 
     // Seed request with top-level...
     TimeSeriesRequest seedRequest = new TimeSeriesRequest();

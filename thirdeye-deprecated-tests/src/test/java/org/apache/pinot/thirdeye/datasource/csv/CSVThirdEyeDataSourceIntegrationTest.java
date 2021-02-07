@@ -85,7 +85,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     MetricSlice slice = MetricSlice.from(configDTO.getId(), 0, 7200000);
     RequestContainer requestContainer = DataFrameUtils
         .makeAggregateRequest(slice, Collections.emptyList(), -1, "ref");
-    ThirdEyeResponse response = cacheRegistry.getQueryCache()
+    ThirdEyeResponse response = cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
 

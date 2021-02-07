@@ -99,7 +99,7 @@ public class PinotDataSourceResource {
       Preconditions.checkNotNull(DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class),
           "Failed to get Pinot data source because ThirdEye cache registry is not initialized.");
       pinotDataSource = (PinotThirdEyeDataSource) DeprecatedInjectorUtil
-          .getInstance(ThirdEyeCacheRegistry.class).getQueryCache()
+          .getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache()
           .getDataSource(PinotThirdEyeDataSource.class.getSimpleName());
       Preconditions
           .checkNotNull(pinotDataSource,

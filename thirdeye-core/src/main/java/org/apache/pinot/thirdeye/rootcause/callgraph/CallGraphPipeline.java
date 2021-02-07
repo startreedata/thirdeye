@@ -137,7 +137,7 @@ public class CallGraphPipeline extends Pipeline {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
+    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache();
     this.dataset = MapUtils.getString(properties, PROP_DATASET, PROP_DATASET_DEFAULT);
     this.metricCount = MapUtils.getString(properties, PROP_METRIC_COUNT, PROP_METRIC_COUNT_DEFAULT);
     this.metricLatency = MapUtils

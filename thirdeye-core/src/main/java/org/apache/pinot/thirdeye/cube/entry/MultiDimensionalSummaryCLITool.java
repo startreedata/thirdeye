@@ -259,7 +259,7 @@ public class MultiDimensionalSummaryCLITool {
 
       // Initialize ThirdEye's environment
       ThirdEyeUtils.initLightWeightThirdEyeEnvironment(argList.get(0));
-      AdditiveDBClient cubeDbClient = new AdditiveDBClient(CACHE_REGISTRY_INSTANCE.getQueryCache());
+      AdditiveDBClient cubeDbClient = new AdditiveDBClient(CACHE_REGISTRY_INSTANCE.getDataSourceCache());
 
       // Convert JSON string to Objects
       Dimensions dimensions;

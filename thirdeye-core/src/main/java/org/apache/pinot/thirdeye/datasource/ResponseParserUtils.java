@@ -90,7 +90,7 @@ public class ResponseParserUtils {
     ThirdEyeRequest metricSumsRequest = requestBuilder.build("metricSums");
     try {
       ThirdEyeResponse metricSumsResponse = DeprecatedInjectorUtil
-          .getInstance(ThirdEyeCacheRegistry.class).getQueryCache()
+          .getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache()
           .getQueryResult(metricSumsRequest);
       return metricSumsResponse.getRow(0).getMetrics();
     } catch (Exception e) {
@@ -115,7 +115,7 @@ public class ResponseParserUtils {
     ThirdEyeResponse metricSumsResponse = null;
     try {
       metricSumsResponse =
-          DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache()
+          DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache()
               .getQueryResult(metricSumsRequest);
     } catch (Exception e) {
       LOGGER.error("Caught exception when executing metric sums request", e);

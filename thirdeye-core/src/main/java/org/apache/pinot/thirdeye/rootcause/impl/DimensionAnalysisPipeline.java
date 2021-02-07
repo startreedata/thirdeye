@@ -126,7 +126,7 @@ public class DimensionAnalysisPipeline extends Pipeline {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
+    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache();
     this.executor = Executors.newFixedThreadPool(
         MapUtils.getInteger(properties, PROP_PARALLELISM, PROP_PARALLELISM_DEFAULT));
     this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);

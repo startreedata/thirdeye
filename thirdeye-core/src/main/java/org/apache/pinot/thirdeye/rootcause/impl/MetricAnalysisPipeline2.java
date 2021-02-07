@@ -132,7 +132,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
+    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache();
     this.strategyFactory = parseStrategyFactory(
         MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
     this.granularity = TimeGranularity

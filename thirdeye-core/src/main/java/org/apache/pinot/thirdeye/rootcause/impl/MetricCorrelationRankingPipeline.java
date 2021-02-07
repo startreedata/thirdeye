@@ -128,7 +128,7 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
     super(outputName, inputNames);
     this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache();
+    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache();
 
     if (!properties.containsKey(PROP_TARGET_INPUT)) {
       throw new IllegalArgumentException(

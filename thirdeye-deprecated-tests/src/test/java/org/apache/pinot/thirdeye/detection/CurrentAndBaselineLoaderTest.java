@@ -80,7 +80,7 @@ public class CurrentAndBaselineLoaderTest {
 
     final AggregationLoader aggregationLoader = new DefaultAggregationLoader(this.metricDAO,
         dataSetDAO,
-        cacheRegistry.getQueryCache(),
+        cacheRegistry.getDataSourceCache(),
         cacheRegistry.getDatasetMaxDataTimeCache());
 
     this.currentAndBaselineLoader = new CurrentAndBaselineLoader(this.metricDAO, dataSetDAO,

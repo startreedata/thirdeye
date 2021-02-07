@@ -249,7 +249,7 @@ public class DataFrameUtils {
     MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
     DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
     DataSourceCache cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-        .getQueryCache();
+        .getDataSourceCache();
     return fetchTimeSeries(slice, metricDAO, datasetDAO, cache);
   }
 

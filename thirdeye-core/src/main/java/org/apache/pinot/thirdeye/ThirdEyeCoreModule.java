@@ -52,7 +52,7 @@ public class ThirdEyeCoreModule extends AbstractModule {
       final MetricConfigManager metricConfigManager,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     return new DefaultTimeSeriesLoader(metricConfigManager, datasetConfigManager,
-        thirdEyeCacheRegistry.getQueryCache(),
+        thirdEyeCacheRegistry.getDataSourceCache(),
         thirdEyeCacheRegistry.getTimeSeriesCache());
   }
 
@@ -85,7 +85,7 @@ public class ThirdEyeCoreModule extends AbstractModule {
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     return new DefaultAggregationLoader(metricConfigManager,
         datasetConfigManager,
-        thirdEyeCacheRegistry.getQueryCache(),
+        thirdEyeCacheRegistry.getDataSourceCache(),
         thirdEyeCacheRegistry.getDatasetMaxDataTimeCache());
   }
 }

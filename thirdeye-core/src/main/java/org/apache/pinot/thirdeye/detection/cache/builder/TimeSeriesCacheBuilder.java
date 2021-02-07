@@ -79,7 +79,7 @@ public class TimeSeriesCacheBuilder {
         timeSeriesLoader = new DefaultTimeSeriesLoader(
             DAORegistry.getInstance().getMetricConfigDAO(),
             DAORegistry.getInstance().getDatasetConfigDAO(),
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache(),
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getTimeSeriesCache());
       }
       INSTANCE.setTimeseriesLoader(timeSeriesLoader);

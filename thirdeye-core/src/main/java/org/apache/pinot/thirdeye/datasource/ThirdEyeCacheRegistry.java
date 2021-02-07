@@ -225,7 +225,7 @@ public class ThirdEyeCacheRegistry {
     this.dimensionFiltersCache = dimensionFiltersCache;
   }
 
-  public DataSourceCache getQueryCache() {
+  public DataSourceCache getDataSourceCache() {
     return dataSourceCache;
   }
 

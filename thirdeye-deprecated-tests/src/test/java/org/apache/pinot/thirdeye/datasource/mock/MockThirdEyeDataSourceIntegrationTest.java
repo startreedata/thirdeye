@@ -138,7 +138,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
         .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
     RequestContainer requestContainer = DataFrameUtils
         .makeAggregateRequest(slice, Collections.emptyList(), -1, "ref");
-    ThirdEyeResponse response = this.cacheRegistry.getQueryCache()
+    ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
 
@@ -152,7 +152,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
             this.timestamp); // allow for DST
     RequestContainer requestContainer = DataFrameUtils
         .makeAggregateRequest(slice, Arrays.asList("country", "browser"), -1, "ref");
-    ThirdEyeResponse response = this.cacheRegistry.getQueryCache()
+    ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
 
@@ -172,7 +172,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
         .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
     TimeSeriesRequestContainer requestContainer = DataFrameUtils
         .makeTimeSeriesRequest(slice, "ref");
-    ThirdEyeResponse response = this.cacheRegistry.getQueryCache()
+    ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
 
@@ -204,19 +204,19 @@ public class MockThirdEyeDataSourceIntegrationTest {
 
     RequestContainer reqBasic = DataFrameUtils
         .makeAggregateRequest(sliceBasic, Collections.emptyList(), -1, "ref");
-    ThirdEyeResponse resBasic = this.cacheRegistry.getQueryCache()
+    ThirdEyeResponse resBasic = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(reqBasic.getRequest());
     DataFrame dfBasic = DataFrameUtils.evaluateResponse(resBasic, reqBasic);
 
     RequestContainer reqMobile = DataFrameUtils
         .makeAggregateRequest(sliceMobile, Collections.emptyList(), -1, "ref");
-    ThirdEyeResponse resMobile = this.cacheRegistry.getQueryCache()
+    ThirdEyeResponse resMobile = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(reqMobile.getRequest());
     DataFrame dfMobile = DataFrameUtils.evaluateResponse(resMobile, reqMobile);
 
     RequestContainer reqDesktop = DataFrameUtils
         .makeAggregateRequest(sliceDesktop, Collections.emptyList(), -1, "ref");
-    ThirdEyeResponse resDesktop = this.cacheRegistry.getQueryCache()
+    ThirdEyeResponse resDesktop = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(reqDesktop.getRequest());
     DataFrame dfDesktop = DataFrameUtils.evaluateResponse(resDesktop, reqDesktop);
 

@@ -82,7 +82,7 @@ public class SeverityComputationUtil {
 
   private double getSum(ThirdEyeRequest thirdEyeRequest) throws Exception {
     double sum = 0;
-    ThirdEyeResponse response = CACHE_REGISTRY.getQueryCache().getQueryResult(thirdEyeRequest);
+    ThirdEyeResponse response = CACHE_REGISTRY.getDataSourceCache().getQueryResult(thirdEyeRequest);
     if (response.getNumRows() == 1) {
       ThirdEyeResponseRow row = response.getRow(0);
       sum = row.getMetrics().get(0);

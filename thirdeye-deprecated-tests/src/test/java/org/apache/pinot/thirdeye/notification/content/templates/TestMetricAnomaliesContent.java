@@ -109,7 +109,7 @@ public class TestMetricAnomaliesContent {
 
     AggregationLoader aggregationLoader =
         new DefaultAggregationLoader(metricDAO, datasetDAO, DeprecatedInjectorUtil
-            .getInstance(ThirdEyeCacheRegistry.class).getQueryCache(),
+            .getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache(),
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
                 .getDatasetMaxDataTimeCache());
 

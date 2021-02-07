@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.io.Resources;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
-import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.util.Duration;
 import java.io.IOException;
@@ -88,7 +87,7 @@ public class CoordinatorTest {
         .isGreaterThan(0);
 
     assertThat(instance).isNotNull();
-    assertThat(instance.getQueryCache()).isNotNull();
+    assertThat(instance.getDataSourceCache()).isNotNull();
   }
 
   @Test(dependsOnMethods = "testDataSourcesLoaded")

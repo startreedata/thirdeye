@@ -40,32 +40,38 @@ public class DataSourceConfig {
     return name;
   }
 
-  public void setName(String name) {
+  public DataSourceConfig setName(final String name) {
     this.name = name;
+    return this;
   }
 
   public String getClassName() {
     return className;
   }
 
-  public void setClassName(String className) {
+  public DataSourceConfig setClassName(final String className) {
     this.className = className;
+    return this;
   }
 
   public Map<String, Object> getProperties() {
     return properties;
   }
 
-  public void setProperties(Map<String, Object> properties) {
+  public DataSourceConfig setProperties(
+      final Map<String, Object> properties) {
     this.properties = properties;
+    return this;
   }
 
   public List<MetadataSourceConfig> getMetadataSourceConfigs() {
     return metadataSourceConfigs;
   }
 
-  public void setMetadataSourceConfigs(List<MetadataSourceConfig> metadataSourceConfigs) {
+  public DataSourceConfig setMetadataSourceConfigs(
+      final List<MetadataSourceConfig> metadataSourceConfigs) {
     this.metadataSourceConfigs = metadataSourceConfigs;
+    return this;
   }
 
   @Override

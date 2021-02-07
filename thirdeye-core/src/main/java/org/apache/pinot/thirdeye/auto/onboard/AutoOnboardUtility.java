@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datasource.DataSourceConfig;
-import org.apache.pinot.thirdeye.datasource.DataSources;
+import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.slf4j.Logger;
@@ -44,12 +44,12 @@ public class AutoOnboardUtility {
   public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(URL dataSourcesUrl) {
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = new HashMap<>();
 
-    DataSources dataSources = new DataSourcesLoader().fromDataSourcesUrl(dataSourcesUrl);
-    if (dataSources == null) {
+    DataSourcesConfiguration dataSourcesConfiguration = new DataSourcesLoader().fromDataSourcesUrl(dataSourcesUrl);
+    if (dataSourcesConfiguration == null) {
       throw new IllegalStateException(
           "Could not create data sources config from path " + dataSourcesUrl);
     }
-    for (DataSourceConfig dataSourceConfig : dataSources.getDataSourceConfigs()) {
+    for (DataSourceConfig dataSourceConfig : dataSourcesConfiguration.getDataSourceConfigs()) {
       List<MetadataSourceConfig> metadataSourceConfigs = dataSourceConfig
           .getMetadataSourceConfigs();
       if (metadataSourceConfigs != null) {

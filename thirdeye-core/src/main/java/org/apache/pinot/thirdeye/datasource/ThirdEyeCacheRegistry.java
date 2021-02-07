@@ -102,13 +102,13 @@ public class ThirdEyeCacheRegistry {
 
   public DataSourceCache buildQueryCache(final URL dataSourcesUrl) {
     final DataSourcesLoader loader = new DataSourcesLoader();
-    final DataSources dataSources = requireNonNull(
+    final DataSourcesConfiguration dataSourcesConfiguration = requireNonNull(
         loader.fromDataSourcesUrl(dataSourcesUrl),
         "Could not create data sources from path " + dataSourcesUrl);
 
     // Query Cache
     final Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = loader
-        .getDataSourceMap(dataSources);
+        .getDataSourceMap(dataSourcesConfiguration);
     return new DataSourceCache(thirdEyeDataSourcesMap, Executors.newCachedThreadPool());
   }
 

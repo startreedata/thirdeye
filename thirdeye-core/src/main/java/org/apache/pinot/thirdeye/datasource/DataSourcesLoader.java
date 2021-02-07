@@ -46,10 +46,10 @@ public class DataSourcesLoader {
    * @param dataSourcesUrl URL to data sources config
    * @return DataSources
    */
-  public DataSources fromDataSourcesUrl(URL dataSourcesUrl) {
+  public DataSourcesConfiguration fromDataSourcesUrl(URL dataSourcesUrl) {
     requireNonNull(dataSourcesUrl, "dataSourcesUrl is null!");
     try {
-      return requireNonNull(OBJECT_MAPPER.readValue(dataSourcesUrl, DataSources.class),
+      return requireNonNull(OBJECT_MAPPER.readValue(dataSourcesUrl, DataSourcesConfiguration.class),
           "dataSources is null");
     } catch (IOException e) {
       LOG.error("Exception in reading data sources file {}", dataSourcesUrl, e);
@@ -60,12 +60,13 @@ public class DataSourcesLoader {
   /**
    * Returns datasource name to datasource map
    */
-  public Map<String, ThirdEyeDataSource> getDataSourceMap(DataSources dataSources) {
+  public Map<String, ThirdEyeDataSource> getDataSourceMap(
+      DataSourcesConfiguration dataSourcesConfiguration) {
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
-    if (!optional(dataSources.getDataSourceConfigs()).filter(l -> l.size() > 0).isPresent()) {
+    if (!optional(dataSourcesConfiguration.getDataSourceConfigs()).filter(l -> l.size() > 0).isPresent()) {
       return dataSourceMap;
     }
-    for (DataSourceConfig dataSourceConfig : dataSources.getDataSourceConfigs()) {
+    for (DataSourceConfig dataSourceConfig : dataSourcesConfiguration.getDataSourceConfigs()) {
       String className = dataSourceConfig.getClassName();
       Map<String, Object> properties = dataSourceConfig.getProperties();
       try {

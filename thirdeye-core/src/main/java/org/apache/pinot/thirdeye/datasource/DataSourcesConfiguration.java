@@ -26,7 +26,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 /**
  * This class keeps the datasource configs for all the datasources used in thirdeye
  */
-public class DataSources {
+public class DataSourcesConfiguration {
 
   private List<DataSourceConfig> dataSourceConfigs = new ArrayList<>();
 
@@ -34,12 +34,9 @@ public class DataSources {
     return dataSourceConfigs;
   }
 
-  public void setDataSourceConfigs(List<DataSourceConfig> dataSourceConfigs) {
+  public DataSourcesConfiguration setDataSourceConfigs(
+      final List<DataSourceConfig> dataSourceConfigs) {
     this.dataSourceConfigs = dataSourceConfigs;
-  }
-
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
+    return this;
   }
 }

@@ -21,12 +21,13 @@ package org.apache.pinot.thirdeye.detection;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 
 public class MockPipelineLoader extends DetectionPipelineFactory {
 
   private final List<MockPipeline> runs;
   private final List<MockPipelineOutput> outputs;
+  private final DataProvider dataProvider;
+
   private int offset = 0;
 
   public MockPipelineLoader(List<MockPipeline> runs, List<MockPipelineOutput> outputs,
@@ -34,14 +35,19 @@ public class MockPipelineLoader extends DetectionPipelineFactory {
     super(dataProvider);
     this.outputs = outputs;
     this.runs = runs;
+    this.dataProvider = dataProvider;
   }
 
   @Override
-  public DetectionPipeline get(DataProvider provider, AlertDTO config, long start, long end) {
+  public DetectionPipeline get(DetectionPipelineContext context) {
     MockPipelineOutput output = this.outputs.isEmpty() ?
         new MockPipelineOutput(Collections.emptyList(), -1) :
         this.outputs.get(this.offset++);
-    MockPipeline p = new MockPipeline(provider, config, start, end, output);
+    MockPipeline p = new MockPipeline(dataProvider,
+        context.getAlert(),
+        context.getStart(),
+        context.getEnd(),
+        output);
     this.runs.add(p);
     return p;
   }

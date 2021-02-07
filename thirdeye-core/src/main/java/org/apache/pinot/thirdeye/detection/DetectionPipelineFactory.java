@@ -37,15 +37,20 @@ public class DetectionPipelineFactory {
   }
 
   public DetectionPipeline get(DetectionPipelineContext context) {
-    return get(dataProvider, context.getAlert(), context.getStart(), context.getEnd());
-  }
-
-  public DetectionPipeline get(DataProvider provider, AlertDTO config, long start, long end) {
-    String className = config.getProperties().get(PROP_CLASS_NAME).toString();
+    final AlertDTO config = context.getAlert();
+    final String className = config.getProperties().get(PROP_CLASS_NAME).toString();
     try {
-      Constructor<?> constructor = Class.forName(className)
-          .getConstructor(DataProvider.class, AlertDTO.class, long.class, long.class);
-      return (DetectionPipeline) constructor.newInstance(provider, config, start, end);
+      final Constructor<?> constructor = Class
+          .forName(className)
+          .getConstructor(DataProvider.class,
+              AlertDTO.class,
+              long.class,
+              long.class);
+
+      return (DetectionPipeline) constructor.newInstance(dataProvider,
+          config,
+          context.getStart(),
+          context.getEnd());
     } catch (Exception e) {
       throw new IllegalArgumentException("Failed to initialize the detection pipeline.", e);
     }

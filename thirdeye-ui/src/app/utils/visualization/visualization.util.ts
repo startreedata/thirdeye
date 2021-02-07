@@ -190,36 +190,28 @@ export const getAlertEvaluationAnomalyPoints = (
 export const getAlertEvaluationTimeSeriesPointsMinTimestamp = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {
-    if (isEmpty(alertEvaluationTimeSeriesPoints)) {
-        return 0;
-    }
-
-    let minTimestamp = Number.MAX_VALUE;
-    for (const alertEvaluationTimeSeriesPoint of alertEvaluationTimeSeriesPoints) {
-        if (minTimestamp > alertEvaluationTimeSeriesPoint.timestamp) {
-            minTimestamp = alertEvaluationTimeSeriesPoint.timestamp;
-        }
-    }
-
-    return minTimestamp;
+    return (
+        (alertEvaluationTimeSeriesPoints &&
+            alertEvaluationTimeSeriesPoints[0] &&
+            alertEvaluationTimeSeriesPoints[0].timestamp) ||
+        0
+    );
 };
 
 // Returns maximum timestamp from alert evaluation time series points
 export const getAlertEvaluationTimeSeriesPointsMaxTimestamp = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {
-    if (isEmpty(alertEvaluationTimeSeriesPoints)) {
-        return 0;
-    }
-
-    let maxTimestamp = Number.MIN_VALUE;
-    for (const alertEvaluationTimeSeriesPoint of alertEvaluationTimeSeriesPoints) {
-        if (maxTimestamp < alertEvaluationTimeSeriesPoint.timestamp) {
-            maxTimestamp = alertEvaluationTimeSeriesPoint.timestamp;
-        }
-    }
-
-    return maxTimestamp;
+    return (
+        (alertEvaluationTimeSeriesPoints &&
+            alertEvaluationTimeSeriesPoints[
+                alertEvaluationTimeSeriesPoints.length - 1
+            ] &&
+            alertEvaluationTimeSeriesPoints[
+                alertEvaluationTimeSeriesPoints.length - 1
+            ].timestamp) ||
+        0
+    );
 };
 
 // Returns maximum value from alert evaluation time series points
@@ -262,27 +254,6 @@ export const getAlertEvaluationTimeSeriesPointsMaxValue = (
             maxValue < alertEvaluationTimeSeriesPoint.expected
         ) {
             maxValue = alertEvaluationTimeSeriesPoint.expected;
-        }
-    }
-
-    return maxValue;
-};
-
-// Returns maximum value from alert evaluation anomaly points
-export const getAlertEvaluationAnomalyPointsMaxValue = (
-    alertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[]
-): number => {
-    if (isEmpty(alertEvaluationAnomalyPoints)) {
-        return 0;
-    }
-
-    let maxValue = Number.MIN_VALUE;
-    for (const alertEvaluationAnomalyPoint of alertEvaluationAnomalyPoints) {
-        if (
-            isFinite(alertEvaluationAnomalyPoint.current) &&
-            maxValue < alertEvaluationAnomalyPoint.current
-        ) {
-            maxValue = alertEvaluationAnomalyPoint.current;
         }
     }
 

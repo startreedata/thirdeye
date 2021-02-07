@@ -10,6 +10,27 @@ export interface AlertEvaluationTimeSeriesInternalProps {
     alertEvaluation: AlertEvaluation | null;
 }
 
+export interface AlertEvaluationTimeSeriesInternalState {
+    loading: boolean;
+    noData: boolean;
+    alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[];
+    filteredAlertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[];
+    alertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[];
+    filteredAlertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[];
+    currentPlotVisible: boolean;
+    baselinePlotVisible: boolean;
+    upperAndLowerBoundPlotVisible: boolean;
+    anomaliesPlotVisible: boolean;
+}
+
+export enum AlertEvaluationTimeSeriesInternalStateAction {
+    UPDATE,
+    TOGGLE_CURRENT_PLOT_VISIBLE,
+    TOGGLE_BASELINE_PLOT_VISIBLE,
+    TOGGLE_UPPER_AND_LOWER_BOUND_PLOT_VISIBLE,
+    TOGGLE_ANOMALIES_PLOT_VISIBLE,
+}
+
 export enum AlertEvaluationTimeSeriesPlot {
     CURRENT = "CURRENT",
     BASELINE = "BASELINE",

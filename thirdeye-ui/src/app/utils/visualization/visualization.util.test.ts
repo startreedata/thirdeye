@@ -15,7 +15,6 @@ import {
     formatDateTimeForAxis,
     formatLargeNumberForVisualization,
     getAlertEvaluationAnomalyPoints,
-    getAlertEvaluationAnomalyPointsMaxValue,
     getAlertEvaluationTimeSeriesPoints,
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
@@ -348,18 +347,6 @@ describe("Visualization Util", () => {
                 mockAlertEvaluationTimeSeriesPoints
             )
         ).toEqual(1);
-
-        const mockAlertEvaluationTimeSeriesPointsCopy = cloneDeep(
-            mockAlertEvaluationTimeSeriesPoints
-        );
-        mockAlertEvaluationTimeSeriesPointsCopy[0].timestamp = Number.MAX_VALUE;
-        mockAlertEvaluationTimeSeriesPointsCopy[1].timestamp = Number.MIN_VALUE;
-
-        expect(
-            getAlertEvaluationTimeSeriesPointsMinTimestamp(
-                mockAlertEvaluationTimeSeriesPointsCopy
-            )
-        ).toEqual(Number.MIN_VALUE);
     });
 
     test("getAlertEvaluationTimeSeriesPointsMaxTimestamp should return 0 for invalid alert evaluation time series points", () => {
@@ -380,18 +367,6 @@ describe("Visualization Util", () => {
                 mockAlertEvaluationTimeSeriesPoints
             )
         ).toEqual(3);
-
-        const mockAlertEvaluationTimeSeriesPointsCopy = cloneDeep(
-            mockAlertEvaluationTimeSeriesPoints
-        );
-        mockAlertEvaluationTimeSeriesPointsCopy[0].timestamp = Number.MAX_VALUE;
-        mockAlertEvaluationTimeSeriesPointsCopy[1].timestamp = Number.MIN_VALUE;
-
-        expect(
-            getAlertEvaluationTimeSeriesPointsMaxTimestamp(
-                mockAlertEvaluationTimeSeriesPointsCopy
-            )
-        ).toEqual(Number.MAX_VALUE);
     });
 
     test("getAlertEvaluationTimeSeriesPointsMaxValue should return 0 for invalid alert evaluation time series points", () => {
@@ -426,37 +401,6 @@ describe("Visualization Util", () => {
                 mockAlertEvaluationTimeSeriesPointsCopy
             )
         ).toEqual(15);
-    });
-
-    test("getAlertEvaluationAnomalyPointsMaxValue should return 0 for invalid alert evaluation anomaly points", () => {
-        expect(
-            getAlertEvaluationAnomalyPointsMaxValue(
-                (null as unknown) as AlertEvaluationAnomalyPoint[]
-            )
-        ).toEqual(0);
-    });
-
-    test("getAlertEvaluationAnomalyPointsMaxValue should return 0 for empty alert evaluation anomaly points", () => {
-        expect(getAlertEvaluationAnomalyPointsMaxValue([])).toEqual(0);
-    });
-
-    test("getAlertEvaluationAnomalyPointsMaxValue should return appropriate value for alert evaluation anomaly points", () => {
-        expect(
-            getAlertEvaluationAnomalyPointsMaxValue(
-                mockAlertEvaluationAnomalyPoints
-            )
-        ).toEqual(22);
-
-        const mockAlertEvaluationAnomalyPointsCopy = cloneDeep(
-            mockAlertEvaluationAnomalyPoints
-        );
-        mockAlertEvaluationAnomalyPointsCopy[1].current = NaN;
-
-        expect(
-            getAlertEvaluationAnomalyPointsMaxValue(
-                mockAlertEvaluationAnomalyPointsCopy
-            )
-        ).toEqual(18);
     });
 });
 

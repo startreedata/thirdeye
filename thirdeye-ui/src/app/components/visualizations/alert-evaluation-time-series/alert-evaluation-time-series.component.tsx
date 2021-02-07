@@ -1,21 +1,20 @@
 import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import { Brush, Group, ParentSize, scaleLinear, scaleTime } from "@visx/visx";
-import { debounce, isEmpty, max } from "lodash";
+import { debounce, isEmpty } from "lodash";
 import React, {
     createRef,
     FunctionComponent,
     useCallback,
     useEffect,
     useMemo,
-    useState,
+    useReducer,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
 import {
     getAlertEvaluationAnomalyPoints,
-    getAlertEvaluationAnomalyPointsMaxValue,
     getAlertEvaluationTimeSeriesPoints,
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
@@ -31,12 +30,12 @@ import { AlertEvaluationTimeSeriesCurrentPlot } from "./alert-evaluation-time-se
 import { AlertEvaluationTimeSeriesLegend } from "./alert-evaluation-time-series-legend/alert-evaluation-time-series-legend.component";
 import { AlertEvaluationTimeSeriesUpperAndLowerBoundPlot } from "./alert-evaluation-time-series-upper-and-lower-bound-plot/alert-evaluation-time-series-upper-and-lower-bound-plot.component";
 import {
-    AlertEvaluationAnomalyPoint,
     AlertEvaluationTimeSeriesInternalProps,
+    AlertEvaluationTimeSeriesInternalStateAction,
     AlertEvaluationTimeSeriesPlot,
-    AlertEvaluationTimeSeriesPoint,
     AlertEvaluationTimeSeriesProps,
 } from "./alert-evaluation-time-series.interfaces";
+import { alertEvaluationTimeSeriesInternalReducer } from "./alert-evaluation-time-series.reducer";
 
 const HEIGHT_CONTAINER_MIN = 310;
 const WIDTH_CONTAINER_MIN = 620;
@@ -68,31 +67,32 @@ export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSer
 const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSeriesInternalProps> = (
     props: AlertEvaluationTimeSeriesInternalProps
 ) => {
-    const [loading, setLoading] = useState(true);
-    const [noData, setNoData] = useState(false);
     const [
-        alertEvaluationTimeSeriesPoints,
-        setAlertEvaluationTimeSeriesPoints,
-    ] = useState<AlertEvaluationTimeSeriesPoint[]>([]);
-    const [
-        filteredAlertEvaluationTimeSeriesPoints,
-        setFilteredAlertEvaluationTimeSeriesPoints,
-    ] = useState<AlertEvaluationTimeSeriesPoint[]>([]);
-    const [
-        alertEvaluationAnomalyPoints,
-        setAlertEvaluationAnomalyPoints,
-    ] = useState<AlertEvaluationAnomalyPoint[]>([]);
-    const [
-        filteredAlertEvaluationAnomalyPoints,
-        setFilteredAlertEvaluationAnomalyPoints,
-    ] = useState<AlertEvaluationAnomalyPoint[]>([]);
-    const [currentPlotVisible, setCurrentPlotVisible] = useState(true);
-    const [baselinePlotVisible, setBaselinePlotVisible] = useState(true);
-    const [
-        upperAndLowerBoundPlotVisible,
-        setUpperAndLowerBoundPlotVisible,
-    ] = useState(true);
-    const [anomaliesPlotVisible, setAnomaliesPlotVisible] = useState(true);
+        {
+            loading,
+            noData,
+            alertEvaluationTimeSeriesPoints,
+            filteredAlertEvaluationTimeSeriesPoints,
+            alertEvaluationAnomalyPoints,
+            filteredAlertEvaluationAnomalyPoints,
+            currentPlotVisible,
+            baselinePlotVisible,
+            upperAndLowerBoundPlotVisible,
+            anomaliesPlotVisible,
+        },
+        dispatch,
+    ] = useReducer(alertEvaluationTimeSeriesInternalReducer, {
+        loading: true,
+        noData: false,
+        alertEvaluationTimeSeriesPoints: [],
+        filteredAlertEvaluationTimeSeriesPoints: [],
+        alertEvaluationAnomalyPoints: [],
+        filteredAlertEvaluationAnomalyPoints: [],
+        currentPlotVisible: true,
+        baselinePlotVisible: true,
+        upperAndLowerBoundPlotVisible: true,
+        anomaliesPlotVisible: true,
+    });
     const brushRef = createRef<BaseBrush>();
     const { t } = useTranslation();
 
@@ -135,23 +135,14 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             range: [timeSeriesYMax, 0],
             domain: [
                 0,
-                max([
-                    getAlertEvaluationTimeSeriesPointsMaxValue(
-                        filteredAlertEvaluationTimeSeriesPoints
-                    ),
-                    getAlertEvaluationAnomalyPointsMaxValue(
-                        filteredAlertEvaluationAnomalyPoints
-                    ),
-                ]) || 0,
+                getAlertEvaluationTimeSeriesPointsMaxValue(
+                    filteredAlertEvaluationTimeSeriesPoints
+                ),
             ],
             nice: true,
             clamp: true,
         });
-    }, [
-        props.height,
-        filteredAlertEvaluationTimeSeriesPoints,
-        filteredAlertEvaluationAnomalyPoints,
-    ]);
+    }, [props.height, filteredAlertEvaluationTimeSeriesPoints]);
 
     // Brush scales
     const brushXScale = useMemo(() => {
@@ -174,14 +165,9 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             range: [brushYMax, 0],
             domain: [
                 0,
-                max([
-                    getAlertEvaluationTimeSeriesPointsMaxValue(
-                        alertEvaluationTimeSeriesPoints
-                    ),
-                    getAlertEvaluationAnomalyPointsMaxValue(
-                        alertEvaluationAnomalyPoints
-                    ),
-                ]) || 0,
+                getAlertEvaluationTimeSeriesPointsMaxValue(
+                    alertEvaluationTimeSeriesPoints
+                ),
             ],
             nice: true,
             clamp: true,
@@ -190,84 +176,91 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
 
     useEffect(() => {
         // Input changed, reset
-        setLoading(true);
-        setNoData(false);
-        setAlertEvaluationTimeSeriesPoints([]);
-        setFilteredAlertEvaluationTimeSeriesPoints([]);
+        dispatch({
+            type: AlertEvaluationTimeSeriesInternalStateAction.UPDATE,
+            payload: {
+                loading: true,
+                noData: false,
+                alertEvaluationTimeSeriesPoints: [],
+                filteredAlertEvaluationTimeSeriesPoints: [],
+                alertEvaluationAnomalyPoints: [],
+                filteredAlertEvaluationAnomalyPoints: [],
+            },
+        });
+        // Reset brush
+        brushRef && brushRef.current && brushRef.current.reset();
 
         if (!props.alertEvaluation) {
             return;
         }
 
-        const alertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
+        const newAlertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
             props.alertEvaluation
         );
-        if (isEmpty(alertEvaluationTimeSeriesPoints)) {
-            setLoading(false);
-            setNoData(true);
+        const newAlertEvaluationAnomalyPoints = getAlertEvaluationAnomalyPoints(
+            props.alertEvaluation
+        );
+        if (isEmpty(newAlertEvaluationTimeSeriesPoints)) {
+            dispatch({
+                type: AlertEvaluationTimeSeriesInternalStateAction.UPDATE,
+                payload: {
+                    loading: false,
+                    noData: true,
+                },
+            });
 
             return;
         }
 
-        // Reset brush selection
-        brushRef && brushRef.current && brushRef.current.reset();
-
-        setAlertEvaluationTimeSeriesPoints(alertEvaluationTimeSeriesPoints);
-        setFilteredAlertEvaluationTimeSeriesPoints(
-            alertEvaluationTimeSeriesPoints
-        );
-        setAlertEvaluationAnomalyPoints(
-            getAlertEvaluationAnomalyPoints(props.alertEvaluation)
-        );
-
-        setLoading(false);
-        setNoData(false);
+        dispatch({
+            type: AlertEvaluationTimeSeriesInternalStateAction.UPDATE,
+            payload: {
+                loading: false,
+                noData: false,
+                alertEvaluationTimeSeriesPoints: newAlertEvaluationTimeSeriesPoints,
+                filteredAlertEvaluationTimeSeriesPoints: newAlertEvaluationTimeSeriesPoints,
+                alertEvaluationAnomalyPoints: newAlertEvaluationAnomalyPoints,
+                filteredAlertEvaluationAnomalyPoints: newAlertEvaluationAnomalyPoints,
+            },
+        });
     }, [props.alertEvaluation]);
 
     const onBrushChange = useCallback(
         debounce((domain: Bounds | null): void => {
             if (!domain || domain.x1 - domain.x0 === 0) {
                 // Reset brush selection
-                setFilteredAlertEvaluationTimeSeriesPoints(
-                    alertEvaluationTimeSeriesPoints
-                );
+                dispatch({
+                    type: AlertEvaluationTimeSeriesInternalStateAction.UPDATE,
+                    payload: {
+                        filteredAlertEvaluationTimeSeriesPoints: alertEvaluationTimeSeriesPoints,
+                        filteredAlertEvaluationAnomalyPoints: alertEvaluationAnomalyPoints,
+                    },
+                });
 
                 return;
             }
 
             // Filter time series based on brush selection
-            const filteredAlertEvaluationTimeSeriesPoints = alertEvaluationTimeSeriesPoints.filter(
-                (
-                    alertEvaluationTimeSeriesPoint: AlertEvaluationTimeSeriesPoint
-                ): boolean => {
-                    return (
-                        alertEvaluationTimeSeriesPoint.timestamp >= domain.x0 &&
-                        alertEvaluationTimeSeriesPoint.timestamp <= domain.x1
-                    );
-                }
+            const newFilteredAlertEvaluationTimeSeriesPoints = alertEvaluationTimeSeriesPoints.filter(
+                (alertEvaluationTimeSeriesPoint) =>
+                    alertEvaluationTimeSeriesPoint.timestamp >= domain.x0 &&
+                    alertEvaluationTimeSeriesPoint.timestamp <= domain.x1
             );
-
-            // Filter anomaly based on brush selection
-            const filteredAlertEvaluationAnomalyPoints = alertEvaluationAnomalyPoints.filter(
-                (
-                    alertEvaluationAnomalyPoint: AlertEvaluationAnomalyPoint
-                ): boolean => {
-                    return (
-                        alertEvaluationAnomalyPoint.startTime >= domain.x0 &&
-                        alertEvaluationAnomalyPoint.startTime <= domain.x1
-                    );
-                }
+            // Filter anomalies based on brush selection
+            const newFilteredAlertEvaluationAnomalyPoints = alertEvaluationAnomalyPoints.filter(
+                (alertEvaluationAnomalyPoint) =>
+                    alertEvaluationAnomalyPoint.startTime >= domain.x0 &&
+                    alertEvaluationAnomalyPoint.startTime <= domain.x1
             );
-
-            setFilteredAlertEvaluationTimeSeriesPoints(
-                filteredAlertEvaluationTimeSeriesPoints
-            );
-
-            setFilteredAlertEvaluationAnomalyPoints(
-                filteredAlertEvaluationAnomalyPoints
-            );
+            dispatch({
+                type: AlertEvaluationTimeSeriesInternalStateAction.UPDATE,
+                payload: {
+                    filteredAlertEvaluationTimeSeriesPoints: newFilteredAlertEvaluationTimeSeriesPoints,
+                    filteredAlertEvaluationAnomalyPoints: newFilteredAlertEvaluationAnomalyPoints,
+                },
+            });
         }, 1),
-        [alertEvaluationTimeSeriesPoints]
+        [alertEvaluationTimeSeriesPoints, alertEvaluationAnomalyPoints]
     );
 
     const onLegendChange = (
@@ -275,31 +268,34 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     ): void => {
         switch (alertEvaluationTimeSeriesPlot) {
             case AlertEvaluationTimeSeriesPlot.CURRENT: {
-                setCurrentPlotVisible(
-                    (currentPlotVisible) => !currentPlotVisible
-                );
+                dispatch({
+                    type:
+                        AlertEvaluationTimeSeriesInternalStateAction.TOGGLE_CURRENT_PLOT_VISIBLE,
+                });
 
                 break;
             }
             case AlertEvaluationTimeSeriesPlot.BASELINE: {
-                setBaselinePlotVisible(
-                    (baselinePlotVisible) => !baselinePlotVisible
-                );
+                dispatch({
+                    type:
+                        AlertEvaluationTimeSeriesInternalStateAction.TOGGLE_BASELINE_PLOT_VISIBLE,
+                });
 
                 break;
             }
             case AlertEvaluationTimeSeriesPlot.UPPER_AND_LOWER_BOUND: {
-                setUpperAndLowerBoundPlotVisible(
-                    (upperAndLowerBoundPlotVisible) =>
-                        !upperAndLowerBoundPlotVisible
-                );
+                dispatch({
+                    type:
+                        AlertEvaluationTimeSeriesInternalStateAction.TOGGLE_UPPER_AND_LOWER_BOUND_PLOT_VISIBLE,
+                });
 
                 break;
             }
             case AlertEvaluationTimeSeriesPlot.ANOMALIES: {
-                setAnomaliesPlotVisible(
-                    (anomaliesPlotVisible) => !anomaliesPlotVisible
-                );
+                dispatch({
+                    type:
+                        AlertEvaluationTimeSeriesInternalStateAction.TOGGLE_ANOMALIES_PLOT_VISIBLE,
+                });
 
                 break;
             }

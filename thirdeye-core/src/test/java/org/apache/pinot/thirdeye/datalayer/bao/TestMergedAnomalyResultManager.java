@@ -16,6 +16,7 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,10 +25,10 @@ import java.util.HashSet;
 import java.util.List;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -38,21 +39,19 @@ public class TestMergedAnomalyResultManager {
 
   private MergedAnomalyResultDTO mergedResult = null;
 
-  private DAOTestBase testDAOProvider;
   private AlertManager detectionConfigDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    detectionConfigDAO = daoRegistry.getDetectionConfigManager();
-    mergedAnomalyResultDAO = daoRegistry.getMergedAnomalyResultDAO();
+    final Injector injector = new TestDatabase().createInjector();
+    detectionConfigDAO = injector.getInstance(AlertManager.class);
+    mergedAnomalyResultDAO = injector.getInstance(MergedAnomalyResultManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    testDAOProvider.cleanup();
+
   }
 
   @Test(dependsOnMethods = {"testSaveChildren"})

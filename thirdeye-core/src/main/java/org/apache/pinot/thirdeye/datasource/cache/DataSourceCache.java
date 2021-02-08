@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
@@ -36,9 +37,8 @@ public class DataSourceCache {
   private final ExecutorService executorService;
   private final Map<String, ThirdEyeDataSource> dataSourceMap;
 
-  public DataSourceCache(Map<String, ThirdEyeDataSource> dataSourceMap,
-      ExecutorService executorService) {
-    this.executorService = executorService;
+  public DataSourceCache(Map<String, ThirdEyeDataSource> dataSourceMap) {
+    this.executorService = Executors.newCachedThreadPool();
     this.dataSourceMap = dataSourceMap;
   }
 

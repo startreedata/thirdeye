@@ -109,7 +109,7 @@ public class ThirdEyeCacheRegistry {
     // Query Cache
     final Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = loader
         .getDataSourceMap(dataSourcesConfiguration);
-    return new DataSourceCache(thirdEyeDataSourcesMap, Executors.newCachedThreadPool());
+    return new DataSourceCache(thirdEyeDataSourcesMap);
   }
 
   public TimeSeriesCache buildTimeSeriesCache(

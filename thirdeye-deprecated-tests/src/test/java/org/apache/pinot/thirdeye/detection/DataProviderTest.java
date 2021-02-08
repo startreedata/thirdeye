@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
@@ -190,7 +189,7 @@ public class DataProviderTest {
     id2name.put(this.metricIds.get(1), "value");
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
-    this.dataSourceCache = new DataSourceCache(dataSourceMap, Executors.newSingleThreadExecutor());
+    this.dataSourceCache = new DataSourceCache(dataSourceMap);
 
     ThirdEyeCacheRegistry cacheRegistry = DeprecatedInjectorUtil
         .getInstance(ThirdEyeCacheRegistry.class);

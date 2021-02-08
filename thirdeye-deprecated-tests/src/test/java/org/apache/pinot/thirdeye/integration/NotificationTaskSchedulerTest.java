@@ -63,12 +63,13 @@ import org.testng.annotations.Test;
  */
 public class NotificationTaskSchedulerTest {
 
-  private DetectionCronScheduler detectionJobScheduler = null;
-  private SubscriptionCronScheduler alertJobScheduler = null;
   private final String detectionConfigFile = "/sample-detection-config.yml";
   private final String alertConfigFile = "/sample-alert-config.yml";
   private final String metric = "cost";
   private final String collection = "test-collection";
+
+  private DetectionCronScheduler detectionJobScheduler = null;
+  private SubscriptionCronScheduler alertJobScheduler = null;
   private DAOTestBase testDAOProvider = null;
   private DAORegistry daoRegistry = null;
   private MetricConfigManager metricDAO;
@@ -145,7 +146,7 @@ public class NotificationTaskSchedulerTest {
         evaluationDAO,
         aggregationLoader,
         mock(TimeSeriesCacheBuilder.class),
-        AnomaliesCacheBuilder.getInstance());
+        mock(AnomaliesCacheBuilder.class));
 
     detectionId = daoRegistry.getDetectionConfigManager()
         .save(DaoTestUtils.getTestDetectionConfig(provider, detectionConfigFile));

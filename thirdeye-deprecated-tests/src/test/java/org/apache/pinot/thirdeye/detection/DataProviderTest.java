@@ -207,7 +207,7 @@ public class DataProviderTest {
         evaluationDAO,
         aggregationLoader,
         timeSeriesCacheBuilder,
-        AnomaliesCacheBuilder.getInstance());
+        new AnomaliesCacheBuilder(anomalyDAO));
   }
 
   @AfterClass(alwaysRun = true)

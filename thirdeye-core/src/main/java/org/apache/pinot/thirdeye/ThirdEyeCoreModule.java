@@ -11,7 +11,6 @@ import org.apache.pinot.thirdeye.auth.ThirdEyeCredentials;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
@@ -21,7 +20,6 @@ import org.apache.pinot.thirdeye.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
-import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeCoreModule extends AbstractModule {
@@ -53,13 +51,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
     return new DefaultTimeSeriesLoader(metricConfigManager, datasetConfigManager,
         thirdEyeCacheRegistry.getDataSourceCache(),
         thirdEyeCacheRegistry.getTimeSeriesCache());
-  }
-
-  @Singleton
-  @Provides
-  public AnomaliesCacheBuilder getAnomaliesCacheBuilder(
-      MergedAnomalyResultManager mergedAnomalyResultManager) {
-    return AnomaliesCacheBuilder.getInstance(mergedAnomalyResultManager);
   }
 
   @Singleton

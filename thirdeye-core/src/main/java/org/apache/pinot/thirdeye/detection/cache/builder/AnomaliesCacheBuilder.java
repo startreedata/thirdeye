@@ -23,6 +23,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +40,6 @@ import java.util.concurrent.TimeoutException;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * Essentially a fetcher for fetching anomalies from cache/datasource.
  * The cache holds anomalies information per Anomaly Slices
  */
+@Singleton
 public class AnomaliesCacheBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(AnomaliesCacheBuilder.class);
@@ -61,33 +63,12 @@ public class AnomaliesCacheBuilder {
   private final ExecutorService executor = Executors.newCachedThreadPool();
 
   private static AnomaliesCacheBuilder INSTANCE;
-  private MergedAnomalyResultManager anomalyDAO;
+  private final MergedAnomalyResultManager anomalyDAO;
 
-  private AnomaliesCacheBuilder() {
+  @Inject
+  public AnomaliesCacheBuilder(final MergedAnomalyResultManager anomalyDAO) {
+    this.anomalyDAO = anomalyDAO;
     this.cache = initCache();
-  }
-
-  synchronized public static AnomaliesCacheBuilder getInstance() {
-    return getInstance(null);
-  }
-
-  public static synchronized AnomaliesCacheBuilder getInstance(
-      MergedAnomalyResultManager provided) {
-    if (INSTANCE == null) {
-      INSTANCE = new AnomaliesCacheBuilder();
-      MergedAnomalyResultManager mergedAnomalyResultManager = provided;
-      if (mergedAnomalyResultManager == null) {
-        mergedAnomalyResultManager = DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO();
-      }
-      INSTANCE.setAnomalyDAO(mergedAnomalyResultManager);
-    }
-
-    return INSTANCE;
-  }
-
-  private void setAnomalyDAO(MergedAnomalyResultManager mergedAnomalyResultDAO) {
-    this.anomalyDAO = mergedAnomalyResultDAO;
   }
 
   private LoadingCache<AnomalySlice, Collection<MergedAnomalyResultDTO>> initCache() {

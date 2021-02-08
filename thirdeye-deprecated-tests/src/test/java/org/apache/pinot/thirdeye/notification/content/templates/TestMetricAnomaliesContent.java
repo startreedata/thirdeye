@@ -120,7 +120,7 @@ public class TestMetricAnomaliesContent {
         evaluationDAO,
         aggregationLoader,
         mock(TimeSeriesCacheBuilder.class),
-        AnomaliesCacheBuilder.getInstance());
+        mock(AnomaliesCacheBuilder.class));
   }
 
   @AfterMethod(alwaysRun = true)

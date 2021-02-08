@@ -61,8 +61,6 @@ public class AnomaliesCacheBuilder {
 
   private final LoadingCache<AnomalySlice, Collection<MergedAnomalyResultDTO>> cache;
   private final ExecutorService executor = Executors.newCachedThreadPool();
-
-  private static AnomaliesCacheBuilder INSTANCE;
   private final MergedAnomalyResultManager anomalyDAO;
 
   @Inject

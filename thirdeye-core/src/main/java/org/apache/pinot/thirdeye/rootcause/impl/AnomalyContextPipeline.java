@@ -25,12 +25,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
@@ -77,25 +75,6 @@ public class AnomalyContextPipeline extends Pipeline {
     this.metricDAO = metricDAO;
     this.baselineOffset = baselineOffset;
     this.analysisWindow = analysisWindow;
-  }
-
-  /**
-   * Alternate constructor for use by RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_BASELINE_OFFSET}, {@code
-   *     PROP_ANALYSIS_WINDOW})
-   */
-  public AnomalyContextPipeline(String outputName, Set<String> inputNames,
-      Map<String, Object> properties) {
-    super(outputName, inputNames);
-    this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
-    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    this.baselineOffset = MapUtils
-        .getLongValue(properties, PROP_BASELINE_OFFSET, PROP_BASELINE_OFFSET_DEFAULT);
-    this.analysisWindow = MapUtils
-        .getLongValue(properties, PROP_ANALYSIS_WINDOW, PROP_ANALYSIS_WINDOW_DEFAULT);
   }
 
   @Override

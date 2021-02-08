@@ -12,7 +12,7 @@ export const useAuthStore = create<AuthStore>(
             authenticated: false,
             accessToken: "",
 
-            disableAuth: (): void => {
+            disableAuth: () => {
                 set({
                     authDisabled: true,
                     authenticated: false,
@@ -20,7 +20,7 @@ export const useAuthStore = create<AuthStore>(
                 });
             },
 
-            setAccessToken: (accessToken: string): void => {
+            setAccessToken: (accessToken) => {
                 set({
                     authDisabled: false,
                     authenticated: Boolean(accessToken),
@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthStore>(
                 });
             },
 
-            clearAccessToken: (): void => {
+            clearAccessToken: () => {
                 set({
                     authDisabled: false,
                     authenticated: false,

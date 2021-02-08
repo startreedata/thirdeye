@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { SubscriptionGroupsRouter } from "./subscription-groups.router";
@@ -107,8 +106,7 @@ describe("Subscription Groups Router", () => {
         expect(mockSetRouterBreadcrumbs).toHaveBeenCalled();
 
         // Get router breadcrumbs
-        const breadcrumbs: Breadcrumb[] =
-            mockSetRouterBreadcrumbs.mock.calls[0][0];
+        const breadcrumbs = mockSetRouterBreadcrumbs.mock.calls[0][0];
         // Also invoke the click handlers
         breadcrumbs &&
             breadcrumbs[0] &&

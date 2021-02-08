@@ -62,12 +62,11 @@ describe("Auth Store", () => {
         expect(result.current.accessToken).toEqual("");
     });
 
-    test("should persist in local storage", async () => {
+    test("should persist in browser local storage", async () => {
         const { result, waitFor } = renderHook(() => useAuthStore());
         act(() => {
             result.current.setAccessToken("testToken");
         });
-
         await waitFor(() => Boolean(result.current.accessToken));
 
         expect(localStorage.getItem("LOCAL_STORAGE_KEY_AUTH")).toEqual(

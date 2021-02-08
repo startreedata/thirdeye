@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { SignInPageProps } from "../../pages/sign-in-page/sign-in-page.interfaces";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { GeneralUnauthenticatedRouter } from "./general-unauthenticated.router";
 
@@ -40,7 +39,7 @@ jest.mock(
 jest.mock("../../pages/sign-in-page/sign-in-page.component", () => ({
     SignInPage: jest
         .fn()
-        .mockImplementation((props: SignInPageProps) => (
+        .mockImplementation((props) => (
             <>{`testSignInPage:${props.redirectURL}`}</>
         )),
 }));

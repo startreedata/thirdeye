@@ -104,14 +104,13 @@ describe("Time Range Store", () => {
         );
     });
 
-    test("should persist in local storage", async () => {
+    test("should persist in browser local storage", async () => {
         const { result, waitFor } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration3);
             result.current.setTimeRangeDuration(mockTimeRangeDuration4);
             result.current.setTimeRangeDuration(mockTimeRangeDuration5);
         });
-
         await waitFor(() => Boolean(result.current.timeRangeDuration));
 
         expect(localStorage.getItem("LOCAL_STORAGE_KEY_TIME_RANGE")).toEqual(

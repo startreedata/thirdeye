@@ -1,10 +1,7 @@
 import { cloneDeep } from "lodash";
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import {
-    TimeRange,
-    TimeRangeDuration,
-} from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import { TimeRange } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     getDefaultTimeRangeDuration,
     getTimeRangeDuration,
@@ -21,9 +18,7 @@ export const useTimeRangeStore = create<TimeRangeStore>(
             timeRangeDuration: getDefaultTimeRangeDuration(),
             recentCustomTimeRangeDurations: [],
 
-            setTimeRangeDuration: (
-                timeRangeDuration: TimeRangeDuration
-            ): void => {
+            setTimeRangeDuration: (timeRangeDuration) => {
                 if (!timeRangeDuration) {
                     return;
                 }
@@ -53,7 +48,7 @@ export const useTimeRangeStore = create<TimeRangeStore>(
                 }
             },
 
-            refreshTimeRange: (): void => {
+            refreshTimeRange: () => {
                 const { timeRangeDuration } = get();
 
                 if (timeRangeDuration.timeRange === TimeRange.CUSTOM) {

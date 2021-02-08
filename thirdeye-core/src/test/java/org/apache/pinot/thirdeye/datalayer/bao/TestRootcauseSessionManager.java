@@ -16,32 +16,81 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestRootcauseSessionResult;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class TestRootcauseSessionManager {
 
-  private DAOTestBase testDAOProvider;
   private RootcauseSessionManager sessionDAO;
+
+  private static RootcauseSessionDTO makeDefault() {
+    return getTestRootcauseSessionResult(1000,
+        1100,
+        1500,
+        2000,
+        "myname",
+        "myowner",
+        "mytext",
+        "mygranularity",
+        "mycomparemode",
+        12345L,
+        1234L);
+  }
+
+  private static RootcauseSessionDTO makeName(String name) {
+    RootcauseSessionDTO session = makeDefault();
+    session.setName(name);
+    return session;
+  }
+
+  private static RootcauseSessionDTO makeOwner(String owner) {
+    RootcauseSessionDTO session = makeDefault();
+    session.setOwner(owner);
+    return session;
+  }
+
+  private static RootcauseSessionDTO makeCreated(long created) {
+    RootcauseSessionDTO session = makeDefault();
+    session.setCreated(created);
+    return session;
+  }
+
+  private static RootcauseSessionDTO makeUpdated(long updated) {
+    RootcauseSessionDTO session = makeDefault();
+    session.setUpdated(updated);
+    return session;
+  }
+
+  private static RootcauseSessionDTO makeAnomaly(long anomalyId) {
+    RootcauseSessionDTO session = makeDefault();
+    session.setAnomalyId(anomalyId);
+    return session;
+  }
+
+  private static RootcauseSessionDTO makeAnomalyRange(long start, long end) {
+    RootcauseSessionDTO session = makeDefault();
+    session.setAnomalyRangeStart(start);
+    session.setAnomalyRangeEnd(end);
+    return session;
+  }
+
+  private static RootcauseSessionDTO makePrevious(long previousId) {
+    RootcauseSessionDTO session = makeDefault();
+    session.setPreviousId(previousId);
+    return session;
+  }
 
   @BeforeMethod
   void beforeMethod() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    sessionDAO = daoRegistry.getRootcauseSessionDAO();
-  }
-
-  @AfterMethod(alwaysRun = true)
-  void afterMethod() {
-    testDAOProvider.cleanup();
+    sessionDAO = new TestDatabase().createInjector().getInstance(RootcauseSessionManager.class);
   }
 
   @Test
@@ -210,53 +259,5 @@ public class TestRootcauseSessionManager {
     Assert.assertEquals(sessions1.size(), 2);
     Assert.assertEquals(sessions2.size(), 1);
     Assert.assertEquals(sessions3.size(), 0);
-  }
-
-  private static RootcauseSessionDTO makeDefault() {
-    return DaoTestUtils.getTestRootcauseSessionResult(1000, 1100, 1500, 2000, "myname", "myowner",
-        "mytext", "mygranularity", "mycomparemode", 12345L, 1234L);
-  }
-
-  private static RootcauseSessionDTO makeName(String name) {
-    RootcauseSessionDTO session = makeDefault();
-    session.setName(name);
-    return session;
-  }
-
-  private static RootcauseSessionDTO makeOwner(String owner) {
-    RootcauseSessionDTO session = makeDefault();
-    session.setOwner(owner);
-    return session;
-  }
-
-  private static RootcauseSessionDTO makeCreated(long created) {
-    RootcauseSessionDTO session = makeDefault();
-    session.setCreated(created);
-    return session;
-  }
-
-  private static RootcauseSessionDTO makeUpdated(long updated) {
-    RootcauseSessionDTO session = makeDefault();
-    session.setUpdated(updated);
-    return session;
-  }
-
-  private static RootcauseSessionDTO makeAnomaly(long anomalyId) {
-    RootcauseSessionDTO session = makeDefault();
-    session.setAnomalyId(anomalyId);
-    return session;
-  }
-
-  private static RootcauseSessionDTO makeAnomalyRange(long start, long end) {
-    RootcauseSessionDTO session = makeDefault();
-    session.setAnomalyRangeStart(start);
-    session.setAnomalyRangeEnd(end);
-    return session;
-  }
-
-  private static RootcauseSessionDTO makePrevious(long previousId) {
-    RootcauseSessionDTO session = makeDefault();
-    session.setPreviousId(previousId);
-    return session;
   }
 }

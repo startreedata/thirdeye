@@ -16,17 +16,19 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestJobSpec;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Injector;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.joda.time.DateTime;
 import org.testng.Assert;
@@ -36,9 +38,6 @@ import org.testng.annotations.Test;
 
 public class TestAnomalyTaskManager {
 
-  private Long anomalyTaskId1;
-  private Long anomalyTaskId2;
-  private Long anomalyJobId;
   private static final Set<TaskStatus> allowedOldTaskStatus = new HashSet<>();
 
   static {
@@ -46,26 +45,34 @@ public class TestAnomalyTaskManager {
     allowedOldTaskStatus.add(TaskStatus.WAITING);
   }
 
-  private DAOTestBase testDAOProvider;
+  private Long anomalyTaskId1;
+  private Long anomalyTaskId2;
+  private Long anomalyJobId;
   private JobManager jobDAO;
   private TaskManager taskDAO;
 
+  static DetectionPipelineTaskInfo getTestDetectionTaskInfo() {
+    DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo();
+    taskInfo.setStart((new DateTime().minusHours(1)).getMillis());
+    taskInfo.setEnd((new DateTime().minusHours(1)).getMillis());
+    return taskInfo;
+  }
+
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    jobDAO = daoRegistry.getJobDAO();
-    taskDAO = daoRegistry.getTaskDAO();
+    Injector injector = new TestDatabase().createInjector();
+    jobDAO = injector.getInstance(JobManager.class);
+    taskDAO = injector.getInstance(TaskManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    testDAOProvider.cleanup();
+
   }
 
   @Test
   public void testCreate() throws JsonProcessingException {
-    JobDTO testAnomalyJobSpec = DaoTestUtils.getTestJobSpec();
+    JobDTO testAnomalyJobSpec = getTestJobSpec();
     anomalyJobId = jobDAO.save(testAnomalyJobSpec);
     anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
     Assert.assertNotNull(anomalyTaskId1);
@@ -137,7 +144,7 @@ public class TestAnomalyTaskManager {
 
   @Test(dependsOnMethods = {"testDeleteRecordOlderThanDaysWithStatus"})
   public void testFindByStatusWithinDays() throws JsonProcessingException, InterruptedException {
-    JobDTO testAnomalyJobSpec = DaoTestUtils.getTestJobSpec();
+    JobDTO testAnomalyJobSpec = getTestJobSpec();
     anomalyJobId = jobDAO.save(testAnomalyJobSpec);
     anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
     Assert.assertNotNull(anomalyTaskId1);
@@ -178,12 +185,5 @@ public class TestAnomalyTaskManager {
     jobSpec.setTaskInfo(new ObjectMapper().writeValueAsString(getTestDetectionTaskInfo()));
     jobSpec.setJobId(anomalyJobSpec.getId());
     return jobSpec;
-  }
-
-  static DetectionPipelineTaskInfo getTestDetectionTaskInfo() {
-    DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo();
-    taskInfo.setStart((new DateTime().minusHours(1)).getMillis());
-    taskInfo.setEnd((new DateTime().minusHours(1)).getMillis());
-    return taskInfo;
   }
 }

@@ -16,44 +16,37 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestOverrideConfigForTimeSeries;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.override.OverrideConfigHelper;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
 import org.joda.time.DateTime;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestOverrideConfigManager {
 
-  private Long overrideConfigId1 = null;
   private final DateTime now = new DateTime();
-
-  private DAOTestBase testDAOProvider;
+  private Long overrideConfigId1 = null;
   private OverrideConfigManager overrideConfigDAO;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    overrideConfigDAO = daoRegistry.getOverrideConfigDAO();
-  }
-
-  @AfterClass(alwaysRun = true)
-  void afterClass() {
-    testDAOProvider.cleanup();
+    overrideConfigDAO = new TestDatabase()
+        .createInjector()
+        .getInstance(OverrideConfigManager.class);
   }
 
   @Test
   public void testCreate() {
-    OverrideConfigDTO overrideConfigDTO1 = DaoTestUtils.getTestOverrideConfigForTimeSeries(now);
+    OverrideConfigDTO overrideConfigDTO1 = getTestOverrideConfigForTimeSeries(now);
     overrideConfigId1 = overrideConfigDAO.save(overrideConfigDTO1);
     Assert.assertNotNull(overrideConfigId1);
     Assert.assertNotNull(overrideConfigDAO.findById(overrideConfigId1));

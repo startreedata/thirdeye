@@ -21,30 +21,21 @@ package org.apache.pinot.thirdeye.datalayer.bao;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseTemplateDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class TestRootcauseTemplateManager {
 
-  private DAOTestBase testDAOProvider;
   private RootcauseTemplateManager templateDao;
   private final static String TEMPLATE_NAME = "test_template_";
   private final static String APPLICATION_NAME = "test-app";
 
   @BeforeMethod
   void beforeMethod() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    templateDao = daoRegistry.getRootcauseTemplateDao();
-  }
-
-  @AfterMethod(alwaysRun = true)
-  void afterMethod() {
-    testDAOProvider.cleanup();
+    templateDao = new TestDatabase().createInjector().getInstance(RootcauseTemplateManager.class);
   }
 
   @Test

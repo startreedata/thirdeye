@@ -16,10 +16,11 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestEntityToEntityMapping;
+
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -27,46 +28,44 @@ import org.testng.annotations.Test;
 
 public class TestEntityToEntityMappingManager {
 
+  private static final String METRIC_TO_METRIC = "METRIC_TO_METRIC";
+  private static final String METRIC_TO_SERVICE = "METRIC_TO_SERVICE";
+  private static final String DIMENSION_TO_DIMENSION = "DIMENSION_TO_DIMENSION";
+
   Long testId1 = null;
   Long testId2 = null;
   Long testId3 = null;
-  Long testId4 = null;
+
   String metricURN1 = "thirdeye:metric:d1:m1";
   String metricURN2 = "thirdeye:metric:d1:m2";
   String serviceURN1 = "thirdeye:service:s1";
   String dimensionURN1 = "thirdeye:dimension:country:UnitedStates";
   String dimensionURN2 = "thirdeye:dimension:country:US";
 
-  private static final String METRIC_TO_METRIC = "METRIC_TO_METRIC";
-  private static final String METRIC_TO_SERVICE = "METRIC_TO_SERVICE";
-  private static final String DIMENSION_TO_DIMENSION = "DIMENSION_TO_DIMENSION";
-
-  private DAOTestBase testDAOProvider;
   private EntityToEntityMappingManager entityToEntityMappingDAO;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    entityToEntityMappingDAO = daoRegistry.getEntityToEntityMappingDAO();
+    entityToEntityMappingDAO = new TestDatabase()
+        .createInjector()
+        .getInstance(EntityToEntityMappingManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    testDAOProvider.cleanup();
+
   }
 
   @Test
   public void testCreate() {
-    EntityToEntityMappingDTO dto = DaoTestUtils
-        .getTestEntityToEntityMapping(metricURN1, metricURN2, METRIC_TO_METRIC);
+    EntityToEntityMappingDTO dto = getTestEntityToEntityMapping(metricURN1, metricURN2,
+        METRIC_TO_METRIC);
     testId1 = entityToEntityMappingDAO.save(dto);
     Assert.assertNotNull(testId1);
-    dto = DaoTestUtils.getTestEntityToEntityMapping(metricURN1, serviceURN1, METRIC_TO_SERVICE);
+    dto = getTestEntityToEntityMapping(metricURN1, serviceURN1, METRIC_TO_SERVICE);
     testId2 = entityToEntityMappingDAO.save(dto);
     Assert.assertNotNull(testId2);
-    dto = DaoTestUtils
-        .getTestEntityToEntityMapping(dimensionURN1, dimensionURN2, DIMENSION_TO_DIMENSION);
+    dto = getTestEntityToEntityMapping(dimensionURN1, dimensionURN2, DIMENSION_TO_DIMENSION);
     testId3 = entityToEntityMappingDAO.save(dto);
     Assert.assertNotNull(testId3);
   }

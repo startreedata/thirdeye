@@ -16,12 +16,13 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestJobSpec;
+
 import java.util.Arrays;
 import java.util.List;
 import org.apache.pinot.thirdeye.Constants.JobStatus;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,27 +34,25 @@ public class TestAnomalyJobManager {
   private Long anomalyJobId2;
   private Long anomalyJobId3;
 
-  private DAOTestBase testDAOProvider;
   private JobManager jobDAO;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
-    jobDAO = DAORegistry.getInstance().getJobDAO();
+    jobDAO = new TestDatabase().createInjector().getInstance(JobManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    testDAOProvider.cleanup();
+
   }
 
   @Test
   public void testCreate() {
-    anomalyJobId1 = jobDAO.save(DaoTestUtils.getTestJobSpec());
+    anomalyJobId1 = jobDAO.save(getTestJobSpec());
     Assert.assertNotNull(anomalyJobId1);
-    anomalyJobId2 = jobDAO.save(DaoTestUtils.getTestJobSpec());
+    anomalyJobId2 = jobDAO.save(getTestJobSpec());
     Assert.assertNotNull(anomalyJobId2);
-    anomalyJobId3 = jobDAO.save(DaoTestUtils.getTestJobSpec());
+    anomalyJobId3 = jobDAO.save(getTestJobSpec());
     Assert.assertNotNull(anomalyJobId3);
     printAll("After insert");
   }
@@ -104,11 +103,11 @@ public class TestAnomalyJobManager {
 
   @Test(dependsOnMethods = {"testDeleteRecordsOlderThanDaysWithStatus"})
   public void testFindByStatusWithinDays() throws InterruptedException {
-    anomalyJobId1 = jobDAO.save(DaoTestUtils.getTestJobSpec());
+    anomalyJobId1 = jobDAO.save(getTestJobSpec());
     Assert.assertNotNull(anomalyJobId1);
-    anomalyJobId2 = jobDAO.save(DaoTestUtils.getTestJobSpec());
+    anomalyJobId2 = jobDAO.save(getTestJobSpec());
     Assert.assertNotNull(anomalyJobId2);
-    anomalyJobId3 = jobDAO.save(DaoTestUtils.getTestJobSpec());
+    anomalyJobId3 = jobDAO.save(getTestJobSpec());
     Assert.assertNotNull(anomalyJobId3);
 
     Thread.sleep(100); // To ensure every job has been created more than 1 ms ago

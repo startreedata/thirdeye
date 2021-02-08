@@ -16,10 +16,11 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestDetectionStatus;
+
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -30,25 +31,23 @@ import org.testng.annotations.Test;
 
 public class TestDetectionStatusManager {
 
-  private Long detectionStatusId1;
-  private Long detectionStatusId2;
   private static final String collection1 = "my dataset1";
   private final DateTime now = new DateTime();
   private final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyyMMddHH");
-
-  private DAOTestBase testDAOProvider;
+  private Long detectionStatusId1;
+  private Long detectionStatusId2;
   private DetectionStatusManager detectionStatusDAO;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    detectionStatusDAO = daoRegistry.getDetectionStatusDAO();
+    detectionStatusDAO = new TestDatabase()
+        .createInjector()
+        .getInstance(DetectionStatusManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    testDAOProvider.cleanup();
+
   }
 
   @Test
@@ -57,21 +56,21 @@ public class TestDetectionStatusManager {
     String dateString = dateTimeFormatter.print(now.getMillis());
     long dateMillis = dateTimeFormatter.parseMillis(dateString);
     detectionStatusId1 = detectionStatusDAO
-        .save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, false, 1));
+        .save(getTestDetectionStatus(collection1, dateMillis, dateString, false, 1));
     detectionStatusDAO
-        .save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
+        .save(getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
 
     dateMillis = new DateTime(dateMillis).minusHours(1).getMillis();
     dateString = dateTimeFormatter.print(dateMillis);
     detectionStatusId2 = detectionStatusDAO.
-        save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 1));
+        save(getTestDetectionStatus(collection1, dateMillis, dateString, true, 1));
     detectionStatusDAO
-        .save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
+        .save(getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
 
     dateMillis = new DateTime(dateMillis).minusHours(1).getMillis();
     dateString = dateTimeFormatter.print(dateMillis);
     detectionStatusDAO
-        .save(DaoTestUtils.getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
+        .save(getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
 
     Assert.assertNotNull(detectionStatusId1);
     Assert.assertNotNull(detectionStatusId2);

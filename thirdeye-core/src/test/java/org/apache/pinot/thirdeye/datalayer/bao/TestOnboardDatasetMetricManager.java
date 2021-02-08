@@ -16,20 +16,17 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestOnboardConfig;
+
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.OnboardDatasetMetricDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestOnboardDatasetMetricManager {
 
-  private Long id1 = null;
-  private Long id2 = null;
-  private Long id3 = null;
   private static final String dataSource1 = "ds1";
   private static final String dataSource2 = "ds2";
   private static final String dataset1 = "d1";
@@ -38,35 +35,32 @@ public class TestOnboardDatasetMetricManager {
   private static final String metric2 = "m2";
   private static final String metric3 = "m3";
 
-  private DAOTestBase testDAOProvider;
+  private Long id1 = null;
+  private Long id2 = null;
+  private Long id3 = null;
   private OnboardDatasetMetricManager onboardDatasetMetricDAO;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    onboardDatasetMetricDAO = daoRegistry.getOnboardDatasetMetricDAO();
-  }
-
-  @AfterClass(alwaysRun = true)
-  void afterClass() {
-    testDAOProvider.cleanup();
+    onboardDatasetMetricDAO = new TestDatabase()
+        .createInjector()
+        .getInstance(OnboardDatasetMetricManager.class);
   }
 
   @Test
   public void testCreateOnboardConfig() {
     // create just a dataset
-    OnboardDatasetMetricDTO dto = DaoTestUtils.getTestOnboardConfig(dataset1, null, dataSource1);
+    OnboardDatasetMetricDTO dto = getTestOnboardConfig(dataset1, null, dataSource1);
     id1 = onboardDatasetMetricDAO.save(dto);
     Assert.assertNotNull(id1);
 
     // create metric + dataset
-    dto = DaoTestUtils.getTestOnboardConfig(dataset2, metric2, dataSource2);
+    dto = getTestOnboardConfig(dataset2, metric2, dataSource2);
     id2 = onboardDatasetMetricDAO.save(dto);
     Assert.assertNotNull(id2);
 
     // add metric to existing dataset
-    dto = DaoTestUtils.getTestOnboardConfig(dataset2, metric3, dataSource2);
+    dto = getTestOnboardConfig(dataset2, metric3, dataSource2);
     id3 = onboardDatasetMetricDAO.save(dto);
     Assert.assertNotNull(id3);
   }

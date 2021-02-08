@@ -1,28 +1,19 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.OnlineDetectionDataDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class TestOnlineDetectionDataManager {
 
-  private DAOTestBase testDAOProvider;
   private OnlineDetectionDataManager dataDAO;
 
   @BeforeMethod
   void beforeMethod() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    dataDAO = daoRegistry.getOnlineDetectionDataManager();
-  }
-
-  @AfterMethod(alwaysRun = true)
-  void afterMethod() {
-    testDAOProvider.cleanup();
+    dataDAO = new TestDatabase().createInjector().getInstance(OnlineDetectionDataManager.class);
   }
 
   @Test

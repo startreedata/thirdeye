@@ -113,12 +113,16 @@ public class TestMetricAnomaliesContent {
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
                 .getDatasetMaxDataTimeCache());
 
+    final TimeSeriesCacheBuilder result;
+    synchronized (TimeSeriesCacheBuilder.class) {
+      result = TimeSeriesCacheBuilder.getInstance(null);
+    }
     provider = new DefaultDataProvider(metricDAO,
         datasetDAO,
         eventDAO,
         evaluationDAO,
         aggregationLoader,
-        TimeSeriesCacheBuilder.getInstance(),
+        result,
         AnomaliesCacheBuilder.getInstance());
   }
 

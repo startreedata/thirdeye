@@ -24,6 +24,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.Weigher;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * A fetcher for fetching time-series from cache/datasource.
  * The cache holds time-series information per Metric Slices
  */
+@Singleton
 public class TimeSeriesCacheBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesCacheBuilder.class);
@@ -55,23 +58,21 @@ public class TimeSeriesCacheBuilder {
   private static final long TIMEOUT = 60000;
   private static TimeSeriesCacheBuilder INSTANCE;
 
-  private final ExecutorService executor = Executors.newCachedThreadPool();
+  private final ExecutorService executor;
   private final LoadingCache<MetricSlice, DataFrame> cache;
-  private DefaultTimeSeriesLoader timeseriesLoader;
+  private final DefaultTimeSeriesLoader timeseriesLoader;
 
-  private TimeSeriesCacheBuilder() {
+  @Inject
+  public TimeSeriesCacheBuilder(final DefaultTimeSeriesLoader timeseriesLoader) {
+    this.timeseriesLoader = timeseriesLoader;
     this.cache = initCache();
-  }
-
-  synchronized public static TimeSeriesCacheBuilder getInstance() {
-    return getInstance(null);
+    executor = Executors.newCachedThreadPool();
   }
 
   synchronized public static TimeSeriesCacheBuilder getInstance(
       DefaultTimeSeriesLoader defaultTimeSeriesLoader
   ) {
     if (INSTANCE == null) {
-      INSTANCE = new TimeSeriesCacheBuilder();
       DefaultTimeSeriesLoader timeSeriesLoader = defaultTimeSeriesLoader;
       if (timeSeriesLoader == null) {
         timeSeriesLoader = new DefaultTimeSeriesLoader(
@@ -80,14 +81,10 @@ public class TimeSeriesCacheBuilder {
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache(),
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getTimeSeriesCache());
       }
-      INSTANCE.setTimeseriesLoader(timeSeriesLoader);
+      INSTANCE = new TimeSeriesCacheBuilder(timeSeriesLoader);
     }
 
     return INSTANCE;
-  }
-
-  private void setTimeseriesLoader(DefaultTimeSeriesLoader defaultTimeSeriesLoader) {
-    this.timeseriesLoader = defaultTimeSeriesLoader;
   }
 
   private LoadingCache<MetricSlice, DataFrame> initCache() {

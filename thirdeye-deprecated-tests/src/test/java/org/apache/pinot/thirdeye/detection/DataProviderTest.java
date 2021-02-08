@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
@@ -54,14 +57,11 @@ import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
 import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
-import org.apache.pinot.thirdeye.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
-import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
@@ -70,17 +70,6 @@ import org.testng.annotations.Test;
 public class DataProviderTest {
 
   private DAOTestBase testBase;
-  private EventManager eventDAO;
-  private MergedAnomalyResultManager anomalyDAO;
-  private MetricConfigManager metricDAO;
-  private DatasetConfigManager datasetDAO;
-  private EvaluationManager evaluationDAO;
-  private AlertManager detectionDAO;
-  private DataSourceCache dataSourceCache;
-  private TimeSeriesLoader timeseriesLoader;
-  private AggregationLoader aggregationLoader;
-
-  private DataFrame data;
 
   private DataProvider provider;
 
@@ -95,91 +84,90 @@ public class DataProviderTest {
     this.testBase = DAOTestBase.getInstance();
 
     DAORegistry reg = DAORegistry.getInstance();
-    this.eventDAO = reg.getEventDAO();
-    this.anomalyDAO = reg.getMergedAnomalyResultDAO();
-    this.metricDAO = reg.getMetricConfigDAO();
-    this.datasetDAO = reg.getDatasetConfigDAO();
-    this.evaluationDAO = reg.getEvaluationManager();
-    this.detectionDAO = reg.getDetectionConfigManager();
+    final EventManager eventDAO = reg.getEventDAO();
+    final MergedAnomalyResultManager anomalyDAO = reg.getMergedAnomalyResultDAO();
+    final MetricConfigManager metricDAO = reg.getMetricConfigDAO();
+    final DatasetConfigManager datasetDAO = reg.getDatasetConfigDAO();
+    final EvaluationManager evaluationDAO = reg.getEvaluationManager();
+    final AlertManager detectionDAO = reg.getDetectionConfigManager();
     // events
     this.eventIds = new ArrayList<>();
-    this.eventIds.add(this.eventDAO.save(makeEvent(3600000L, 7200000L)));
-    this.eventIds.add(this.eventDAO.save(makeEvent(10800000L, 14400000L)));
+    this.eventIds.add(eventDAO.save(makeEvent(3600000L, 7200000L)));
+    this.eventIds.add(eventDAO.save(makeEvent(10800000L, 14400000L)));
     this.eventIds.add(
-        this.eventDAO.save(makeEvent(14400000L, 18000000L, Arrays.asList("a=1", "b=4", "b=2"))));
+        eventDAO.save(makeEvent(14400000L, 18000000L, Arrays.asList("a=1", "b=4", "b=2"))));
     this.eventIds
-        .add(this.eventDAO.save(makeEvent(604800000L, 1209600000L, Arrays.asList("b=2", "c=3"))));
+        .add(eventDAO.save(makeEvent(604800000L, 1209600000L, Arrays.asList("b=2", "c=3"))));
     this.eventIds
-        .add(this.eventDAO.save(makeEvent(1209800000L, 1210600000L, Collections.singleton("b=4"))));
+        .add(eventDAO.save(makeEvent(1209800000L, 1210600000L, Collections.singleton("b=4"))));
 
     // detections
     this.detectionIds = new ArrayList<>();
     AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName("test_detection_1");
     detectionConfig.setDescription("test_description_1");
-    this.detectionIds.add(this.detectionDAO.save(detectionConfig));
+    this.detectionIds.add(detectionDAO.save(detectionConfig));
     detectionConfig.setName("test_detection_2");
     detectionConfig.setDescription("test_description_2");
-    this.detectionIds.add(this.detectionDAO.save(detectionConfig));
+    this.detectionIds.add(detectionDAO.save(detectionConfig));
 
     // anomalies
     this.anomalyIds = new ArrayList<>();
-    this.anomalyIds.add(this.anomalyDAO.save(
+    this.anomalyIds.add(anomalyDAO.save(
         makeAnomaly(null, detectionIds.get(0), 4000000L, 8000000L,
             Arrays.asList("a=1", "c=3", "b=2"))));
-    this.anomalyIds.add(this.anomalyDAO.save(
+    this.anomalyIds.add(anomalyDAO.save(
         makeAnomaly(null, detectionIds.get(0), 8000000L, 12000000L, Arrays.asList("a=1", "c=4"))));
-    this.anomalyIds.add(this.anomalyDAO.save(
+    this.anomalyIds.add(anomalyDAO.save(
         makeAnomaly(null, detectionIds.get(1), 604800000L, 1209600000L,
             Collections.emptyList())));
-    this.anomalyIds.add(this.anomalyDAO.save(
+    this.anomalyIds.add(anomalyDAO.save(
         makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "c=3"))));
-    this.anomalyIds.add(this.anomalyDAO.save(
+    this.anomalyIds.add(anomalyDAO.save(
         makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
             Arrays.asList("a=1", "a=2", "c=3"))));
-    this.anomalyIds.add(this.anomalyDAO.save(
+    this.anomalyIds.add(anomalyDAO.save(
         makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
             Arrays.asList("a=1", "a=3", "c=3"))));
-    this.anomalyIds.add(this.anomalyDAO.save(
+    this.anomalyIds.add(anomalyDAO.save(
         makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
             Arrays.asList("a=1", "a=2", "c=3", "d=4"))));
 
     // metrics
     this.metricIds = new ArrayList<>();
-    this.metricIds.add(this.metricDAO.save(makeMetric(null, "myMetric1", "myDataset1")));
-    this.metricIds.add(this.metricDAO.save(makeMetric(null, "myMetric2", "myDataset2")));
-    this.metricIds.add(this.metricDAO.save(makeMetric(null, "myMetric3", "myDataset1")));
+    this.metricIds.add(metricDAO.save(makeMetric(null, "myMetric1", "myDataset1")));
+    this.metricIds.add(metricDAO.save(makeMetric(null, "myMetric2", "myDataset2")));
+    this.metricIds.add(metricDAO.save(makeMetric(null, "myMetric3", "myDataset1")));
 
     // datasets
     this.datasetIds = new ArrayList<>();
-    this.datasetIds.add(this.datasetDAO.save(makeDataset(null, "myDataset1")));
-    this.datasetIds.add(this.datasetDAO.save(makeDataset(null, "myDataset2")));
+    this.datasetIds.add(datasetDAO.save(makeDataset(null, "myDataset1")));
+    this.datasetIds.add(datasetDAO.save(makeDataset(null, "myDataset2")));
 
     // data
+    DataFrame data;
     try (Reader dataReader = new InputStreamReader(
         this.getClass().getResourceAsStream("algorithm/timeseries-4w.csv"))) {
-      this.data = DataFrame.fromCsv(dataReader);
-      this.data.setIndex(DataFrame.COL_TIME);
-      this.data
-          .addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
+      data = DataFrame.fromCsv(dataReader);
+      data.setIndex(DataFrame.COL_TIME);
+      data
+          .addSeries(DataFrame.COL_TIME, data.getLongs(DataFrame.COL_TIME).multiply(1000));
     }
 
     // register caches
 
-    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito
-        .mock(LoadingCache.class);
-    DatasetConfigDTO datasetConfig = this.datasetDAO.findByDataset("myDataset2");
-    Mockito.when(mockDatasetConfigCache.get("myDataset2")).thenReturn(datasetConfig);
+    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = mock(LoadingCache.class);
+    DatasetConfigDTO datasetConfig = datasetDAO.findByDataset("myDataset2");
+    when(mockDatasetConfigCache.get("myDataset2")).thenReturn(datasetConfig);
 
-    LoadingCache<String, Long> mockDatasetMaxDataTimeCache = Mockito.mock(LoadingCache.class);
-    Mockito.when(mockDatasetMaxDataTimeCache.get("myDataset2"))
+    LoadingCache<String, Long> mockDatasetMaxDataTimeCache = mock(LoadingCache.class);
+    when(mockDatasetMaxDataTimeCache.get("myDataset2"))
         .thenReturn(Long.MAX_VALUE);
 
     MetricDataset metricDataset = new MetricDataset("myMetric2", "myDataset2");
-    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = Mockito
-        .mock(LoadingCache.class);
-    MetricConfigDTO metricConfig = this.metricDAO.findByMetricAndDataset("myMetric2", "myDataset2");
-    Mockito.when(mockMetricConfigCache.get(metricDataset)).thenReturn(metricConfig);
+    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = mock(LoadingCache.class);
+    MetricConfigDTO metricConfig = metricDAO.findByMetricAndDataset("myMetric2", "myDataset2");
+    when(mockMetricConfigCache.get(metricDataset)).thenReturn(metricConfig);
 
     Map<String, DataFrame> datasets = new HashMap<>();
     datasets.put("myDataset1", data);
@@ -189,30 +177,32 @@ public class DataProviderTest {
     id2name.put(this.metricIds.get(1), "value");
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
-    this.dataSourceCache = new DataSourceCache(dataSourceMap);
+    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourceMap);
 
     ThirdEyeCacheRegistry cacheRegistry = DeprecatedInjectorUtil
         .getInstance(ThirdEyeCacheRegistry.class);
     cacheRegistry.registerMetricConfigCache(mockMetricConfigCache);
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);
-    cacheRegistry.registerQueryCache(this.dataSourceCache);
+    cacheRegistry.registerQueryCache(dataSourceCache);
     cacheRegistry.registerDatasetMaxDataTimeCache(mockDatasetMaxDataTimeCache);
 
     // time series loader
-    this.timeseriesLoader = new DefaultTimeSeriesLoader(this.metricDAO, this.datasetDAO,
-        this.dataSourceCache, null);
 
     // aggregation loader
-    this.aggregationLoader = new DefaultAggregationLoader(this.metricDAO, this.datasetDAO,
-        this.dataSourceCache, mockDatasetMaxDataTimeCache);
+    final AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO, datasetDAO,
+        dataSourceCache, mockDatasetMaxDataTimeCache);
 
     // provider
-    this.provider = new DefaultDataProvider(this.metricDAO,
-        this.datasetDAO,
-        this.eventDAO,
-        this.evaluationDAO,
+    final TimeSeriesCacheBuilder timeSeriesCacheBuilder;
+    synchronized (TimeSeriesCacheBuilder.class) {
+      timeSeriesCacheBuilder = TimeSeriesCacheBuilder.getInstance(null);
+    }
+    this.provider = new DefaultDataProvider(metricDAO,
+        datasetDAO,
+        eventDAO,
+        evaluationDAO,
         aggregationLoader,
-        TimeSeriesCacheBuilder.getInstance(),
+        timeSeriesCacheBuilder,
         AnomaliesCacheBuilder.getInstance());
   }
 

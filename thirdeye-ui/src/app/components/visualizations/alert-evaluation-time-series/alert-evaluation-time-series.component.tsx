@@ -1,4 +1,7 @@
-import BaseBrush from "@visx/brush/lib/BaseBrush";
+import BaseBrush, {
+    BaseBrushState,
+    UpdateBrush,
+} from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import {
     Bar,
@@ -181,6 +184,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             clamp: true,
         });
     }, [props.width, alertEvaluationTimeSeriesPoints]);
+
     const brushYScale = useMemo(() => {
         return scaleLinear<number>({
             range: [brushYMax, 0],
@@ -194,6 +198,48 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             clamp: true,
         });
     }, [props.height, alertEvaluationTimeSeriesPoints]);
+
+    // To update brush position when window size changes
+    useEffect(() => {
+        brushRef &&
+            brushRef.current &&
+            brushRef.current.updateBrush(updateBrush);
+    }, [props.width]);
+
+    const updateBrush: UpdateBrush = (prevBrush: BaseBrushState) => {
+        if (
+            !brushRef ||
+            !brushRef.current ||
+            alertEvaluationTimeSeriesPoints.length ===
+                filteredAlertEvaluationTimeSeriesPoints.length
+        ) {
+            return prevBrush;
+        }
+
+        const newExtent = brushRef?.current?.getExtent(
+            {
+                x: brushXScale(
+                    filteredAlertEvaluationTimeSeriesPoints[0].timestamp
+                ),
+            },
+            {
+                x: brushXScale(
+                    filteredAlertEvaluationTimeSeriesPoints[
+                        filteredAlertEvaluationTimeSeriesPoints.length - 1
+                    ].timestamp
+                ),
+            }
+        );
+
+        const newState: BaseBrushState = {
+            ...prevBrush,
+            start: { y: newExtent.y0, x: newExtent.x0 },
+            end: { y: newExtent.y1, x: newExtent.x1 },
+            extent: newExtent,
+        };
+
+        return newState;
+    };
 
     useEffect(() => {
         // Input changed, reset

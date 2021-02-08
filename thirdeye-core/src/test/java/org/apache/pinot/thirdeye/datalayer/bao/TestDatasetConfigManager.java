@@ -16,10 +16,11 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestDatasetConfig;
+
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -27,34 +28,31 @@ import org.testng.annotations.Test;
 
 public class TestDatasetConfigManager {
 
-  private Long datasetConfigId1;
-  private Long datasetConfigId2;
   private static final String collection1 = "my dataset1";
   private static final String collection2 = "my dataset2";
 
-  private DAOTestBase testDAOProvider;
+  private Long datasetConfigId1;
+  private Long datasetConfigId2;
   private DatasetConfigManager datasetConfigDAO;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    datasetConfigDAO = daoRegistry.getDatasetConfigDAO();
+    datasetConfigDAO = new TestDatabase().createInjector().getInstance(DatasetConfigManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    testDAOProvider.cleanup();
+
   }
 
   @Test
   public void testCreate() {
 
-    DatasetConfigDTO datasetConfig1 = DaoTestUtils.getTestDatasetConfig(collection1);
+    DatasetConfigDTO datasetConfig1 = getTestDatasetConfig(collection1);
     datasetConfigId1 = datasetConfigDAO.save(datasetConfig1);
     Assert.assertNotNull(datasetConfigId1);
 
-    DatasetConfigDTO datasetConfig2 = DaoTestUtils.getTestDatasetConfig(collection2);
+    DatasetConfigDTO datasetConfig2 = getTestDatasetConfig(collection2);
     datasetConfig2.setActive(false);
     datasetConfigId2 = datasetConfigDAO.save(datasetConfig2);
     Assert.assertNotNull(datasetConfigId2);

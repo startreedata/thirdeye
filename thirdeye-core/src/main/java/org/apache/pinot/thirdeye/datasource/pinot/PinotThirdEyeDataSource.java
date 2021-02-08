@@ -44,9 +44,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
-import org.apache.pinot.common.utils.DataSchema;
 import org.apache.pinot.common.utils.DataSchema.ColumnDataType;
-import org.apache.pinot.spi.data.FieldSpec;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -55,7 +53,6 @@ import org.apache.pinot.thirdeye.datalayer.pojo.LogicalView;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
@@ -63,7 +60,6 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGro
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.rootcause.util.FilterPredicate;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -476,8 +472,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public List<String> getDatasets() throws Exception {
-    return DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDatasetsCache()
-        .getDatasets();
+    throw new UnsupportedOperationException();
   }
 
   @Override

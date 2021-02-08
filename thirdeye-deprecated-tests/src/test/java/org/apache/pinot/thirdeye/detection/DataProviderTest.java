@@ -57,6 +57,7 @@ import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
 import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
+import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
@@ -186,17 +187,20 @@ public class DataProviderTest {
     cacheRegistry.registerQueryCache(dataSourceCache);
     cacheRegistry.registerDatasetMaxDataTimeCache(mockDatasetMaxDataTimeCache);
 
-    // time series loader
 
     // aggregation loader
     final AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO, datasetDAO,
         dataSourceCache, mockDatasetMaxDataTimeCache);
 
+    // time series loader
+    DefaultTimeSeriesLoader timeSeriesLoader = new DefaultTimeSeriesLoader(
+        DAORegistry.getInstance().getMetricConfigDAO(),
+        DAORegistry.getInstance().getDatasetConfigDAO(),
+        cacheRegistry.getDataSourceCache(),
+        cacheRegistry.getTimeSeriesCache());
+
     // provider
-    final TimeSeriesCacheBuilder timeSeriesCacheBuilder;
-    synchronized (TimeSeriesCacheBuilder.class) {
-      timeSeriesCacheBuilder = TimeSeriesCacheBuilder.getInstance(null);
-    }
+    final TimeSeriesCacheBuilder timeSeriesCacheBuilder = new TimeSeriesCacheBuilder(timeSeriesLoader);
     this.provider = new DefaultDataProvider(metricDAO,
         datasetDAO,
         eventDAO,

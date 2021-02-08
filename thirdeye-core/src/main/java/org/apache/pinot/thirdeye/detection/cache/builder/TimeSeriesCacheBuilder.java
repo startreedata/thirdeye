@@ -37,12 +37,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +53,6 @@ public class TimeSeriesCacheBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesCacheBuilder.class);
 
   private static final long TIMEOUT = 60000;
-  private static TimeSeriesCacheBuilder INSTANCE;
 
   private final ExecutorService executor;
   private final LoadingCache<MetricSlice, DataFrame> cache;
@@ -67,24 +63,6 @@ public class TimeSeriesCacheBuilder {
     this.timeseriesLoader = timeseriesLoader;
     this.cache = initCache();
     executor = Executors.newCachedThreadPool();
-  }
-
-  synchronized public static TimeSeriesCacheBuilder getInstance(
-      DefaultTimeSeriesLoader defaultTimeSeriesLoader
-  ) {
-    if (INSTANCE == null) {
-      DefaultTimeSeriesLoader timeSeriesLoader = defaultTimeSeriesLoader;
-      if (timeSeriesLoader == null) {
-        timeSeriesLoader = new DefaultTimeSeriesLoader(
-            DAORegistry.getInstance().getMetricConfigDAO(),
-            DAORegistry.getInstance().getDatasetConfigDAO(),
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache(),
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getTimeSeriesCache());
-      }
-      INSTANCE = new TimeSeriesCacheBuilder(timeSeriesLoader);
-    }
-
-    return INSTANCE;
   }
 
   private LoadingCache<MetricSlice, DataFrame> initCache() {
@@ -106,7 +84,7 @@ public class TimeSeriesCacheBuilder {
             return loadTimeseries(Collections.singleton(slice)).get(slice);
           }
 
-          // buck loading time series slice in parallel
+          // bulk loading time series slice in parallel
           @Override
           public Map<MetricSlice, DataFrame> loadAll(Iterable<? extends MetricSlice> slices) {
             return loadTimeseries(Lists.newArrayList(slices));

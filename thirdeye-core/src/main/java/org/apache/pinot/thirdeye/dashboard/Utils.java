@@ -19,19 +19,14 @@
 
 package org.apache.pinot.thirdeye.dashboard;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
@@ -66,26 +61,6 @@ public class Utils {
         .getDatasetConfigCache()
         .get(collection);
     return datasetConfig.getDimensions();
-  }
-
-  public static List<String> getDimensionsToGroupBy(String collection,
-      Multimap<String, String> filters)
-      throws Exception {
-    List<String> dimensions = Utils.getSortedDimensionNames(collection);
-
-    List<String> dimensionsToGroupBy = new ArrayList<>();
-    if (filters != null) {
-      Set<String> filterDimenions = filters.keySet();
-      for (String dimension : dimensions) {
-        if (!filterDimenions.contains(dimension)) {
-          // dimensions.remove(dimension);
-          dimensionsToGroupBy.add(dimension);
-        }
-      }
-    } else {
-      return dimensions;
-    }
-    return dimensionsToGroupBy;
   }
 
   public static List<MetricExpression> convertToMetricExpressions(String metricsJson,
@@ -126,35 +101,6 @@ public class Utils {
       metricFunctions.addAll(expression.computeMetricFunctions());
     }
     return Lists.newArrayList(metricFunctions);
-  }
-
-  /**
-   * If the dataset is non-additive, then the bucket granularity is return. Otherwise, a
-   * TimeGranularity that is
-   * constructed from the given string of aggregation granularity is returned.
-   *
-   * @param aggTimeGranularity the string of aggregation granularity.
-   * @param dataset the name of the dataset.
-   * @return the available aggregation granularity for the given dataset.
-   */
-  public static TimeGranularity getAggregationTimeGranularity(String aggTimeGranularity,
-      String dataset) {
-    DatasetConfigDTO datasetConfig;
-    try {
-      datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-          .getDatasetConfigCache().get(dataset);
-    } catch (ExecutionException e) {
-      LOG.info(
-          "Unable to determine whether dataset: {} is additive, the given aggregation granularity: {} is used.",
-          dataset, aggTimeGranularity);
-      return TimeGranularity.fromString(aggTimeGranularity);
-    }
-
-    if (datasetConfig.isAdditive()) {
-      return TimeGranularity.fromString(aggTimeGranularity);
-    } else {
-      return datasetConfig.bucketTimeGranularity();
-    }
   }
 
   /**
@@ -226,35 +172,10 @@ public class Utils {
     return DateTimeZone.forID(timezone);
   }
 
-  public static String getJsonFromObject(Object obj) throws JsonProcessingException {
-    return OBJECT_MAPPER.writeValueAsString(obj);
-  }
-
-  public static Map<String, Object> getMapFromJson(String json) throws IOException {
-    TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
-    };
-    return OBJECT_MAPPER.readValue(json, typeRef);
-  }
-
-  public static Map<String, Object> getMapFromObject(Object object) throws IOException {
-    return getMapFromJson(getJsonFromObject(object));
-  }
-
   public static <T extends Object> List<T> sublist(List<T> input, int startIndex, int length) {
     startIndex = Math.min(startIndex, input.size());
     int endIndex = Math.min(startIndex + length, input.size());
     List<T> subList = Lists.newArrayList(input).subList(startIndex, endIndex);
     return subList;
-  }
-
-  public static long getMaxDataTimeForDataset(String dataset) {
-    long endTime = 0;
-    try {
-      endTime = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-          .getDatasetMaxDataTimeCache().get(dataset);
-    } catch (ExecutionException e) {
-      LOG.error("Exception when getting max data time for {}", dataset);
-    }
-    return endTime;
   }
 }

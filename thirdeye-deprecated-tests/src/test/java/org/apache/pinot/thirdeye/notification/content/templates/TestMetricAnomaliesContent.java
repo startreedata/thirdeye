@@ -20,6 +20,7 @@ import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestDatasetCon
 import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestMetricConfig;
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_HOST_KEY;
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_PORT_KEY;
+import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -113,16 +114,12 @@ public class TestMetricAnomaliesContent {
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
                 .getDatasetMaxDataTimeCache());
 
-    final TimeSeriesCacheBuilder result;
-    synchronized (TimeSeriesCacheBuilder.class) {
-      result = TimeSeriesCacheBuilder.getInstance(null);
-    }
     provider = new DefaultDataProvider(metricDAO,
         datasetDAO,
         eventDAO,
         evaluationDAO,
         aggregationLoader,
-        result,
+        mock(TimeSeriesCacheBuilder.class),
         AnomaliesCacheBuilder.getInstance());
   }
 

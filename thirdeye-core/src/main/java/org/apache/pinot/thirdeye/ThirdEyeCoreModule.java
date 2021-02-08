@@ -22,7 +22,6 @@ import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeCoreModule extends AbstractModule {
@@ -67,14 +66,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
   @Provides
   public TimeSeriesCache getTimeSeriesCache(final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     return thirdEyeCacheRegistry.buildTimeSeriesCache(null, 10);
-  }
-
-  @Singleton
-  @Provides
-  public TimeSeriesCacheBuilder getTimeSeriesCacheBuilder(
-      DefaultTimeSeriesLoader defaultTimeSeriesLoader
-  ) {
-    return TimeSeriesCacheBuilder.getInstance(defaultTimeSeriesLoader);
   }
 
   @Singleton

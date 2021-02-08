@@ -29,14 +29,12 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +42,6 @@ import org.slf4j.LoggerFactory;
 public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   private static final Logger LOG = LoggerFactory.getLogger(SqlThirdEyeDataSource.class);
-  private static final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE = DeprecatedInjectorUtil
-      .getInstance(ThirdEyeCacheRegistry.class);
   protected LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> sqlResponseCache;
   private final SqlResponseCacheLoader sqlResponseCacheLoader;
   private final String name;
@@ -117,7 +113,7 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public List<String> getDatasets() throws Exception {
-    return CACHE_REGISTRY_INSTANCE.getDatasetsCache().getDatasets();
+    throw new UnsupportedOperationException();
   }
 
   @Override

@@ -18,6 +18,7 @@ package org.apache.pinot.thirdeye.integration;
 
 import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestDatasetConfig;
 import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestMetricConfig;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
@@ -39,7 +40,6 @@ import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
@@ -78,7 +78,6 @@ public class NotificationTaskSchedulerTest {
   private TaskManager taskDAO;
   private EvaluationManager evaluationDAO;
   private ApplicationManager appDAO;
-  private DetectionPipelineFactory detectionPipelineFactory;
   private long detectionId;
 
   @BeforeClass
@@ -113,7 +112,6 @@ public class NotificationTaskSchedulerTest {
     anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     evaluationDAO = daoRegistry.getEvaluationManager();
     appDAO = daoRegistry.getApplicationDAO();
-    detectionPipelineFactory = new DetectionPipelineFactory(null);
   }
 
   private void cleanup_schedulers() throws SchedulerException {
@@ -141,16 +139,12 @@ public class NotificationTaskSchedulerTest {
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
                 .getDatasetMaxDataTimeCache());
 
-    final TimeSeriesCacheBuilder result;
-    synchronized (TimeSeriesCacheBuilder.class) {
-      result = TimeSeriesCacheBuilder.getInstance(null);
-    }
     DataProvider provider = new DefaultDataProvider(metricDAO,
         datasetDAO,
         eventDAO,
         evaluationDAO,
         aggregationLoader,
-        result,
+        mock(TimeSeriesCacheBuilder.class),
         AnomaliesCacheBuilder.getInstance());
 
     detectionId = daoRegistry.getDetectionConfigManager()

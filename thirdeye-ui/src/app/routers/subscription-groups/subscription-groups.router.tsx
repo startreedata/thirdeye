@@ -56,15 +56,11 @@ export const SubscriptionGroupsRouter: FunctionComponent = () => {
         setRouterBreadcrumbs([
             {
                 text: t("label.configuration"),
-                onClick: (): void => {
-                    history.push(getConfigurationPath());
-                },
+                onClick: () => history.push(getConfigurationPath()),
             },
             {
                 text: t("label.subscription-groups"),
-                onClick: (): void => {
-                    history.push(getSubscriptionGroupsPath());
-                },
+                onClick: () => history.push(getSubscriptionGroupsPath()),
             },
         ]);
         setLoading(false);

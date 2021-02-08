@@ -78,9 +78,10 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                                 ? visualizationCardClasses.outerContainerMaximize
                                 : visualizationCardClasses.outerContainer
                         }
-                        elevation={24}
+                        elevation={24} // Same as Material-UI dialog
                         variant={maximized ? "elevation" : "outlined"}
                     >
+                        {/* Visualization card */}
                         <CardHeader
                             disableTypography
                             action={
@@ -152,6 +153,11 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                     </Card>
                 </Flipped>
             </Flipper>
+
+            {/* Placeholder while the visualization card is maximized */}
+            {maximized && (
+                <div className={visualizationCardClasses.outerContainer} />
+            )}
 
             {/* Backdrop */}
             <Fade in={backdrop}>

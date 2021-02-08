@@ -19,9 +19,11 @@ const systemLocation = location;
 
 jest.mock("../history/history.util", () => ({
     appHistory: {
-        replace: jest.fn().mockImplementation((locationObject): void => {
-            location.search = locationObject.search;
-        }),
+        replace: jest
+            .fn()
+            .mockImplementation(
+                (locationObject) => (location.search = locationObject.search)
+            ),
     },
 }));
 
@@ -230,7 +232,7 @@ describe("Params Util", () => {
     });
 });
 
-const mockTimeRangeDuration: TimeRangeDuration = {
+const mockTimeRangeDuration = {
     timeRange: TimeRange.CUSTOM,
     startTime: 1,
     endTime: 2,

@@ -1,9 +1,5 @@
 import { cloneDeep } from "lodash";
-import {
-    AlertCardData,
-    AlertDatasetAndMetric,
-    AlertSubscriptionGroup,
-} from "../../components/entity-cards/alert-card/alert-card.interfaces";
+import { AlertCardData } from "../../components/entity-cards/alert-card/alert-card.interfaces";
 import {
     Alert,
     AlertNode,
@@ -22,9 +18,7 @@ import {
 } from "./alerts.util";
 
 jest.mock("i18next", () => ({
-    t: jest.fn().mockImplementation((key: string): string => {
-        return key;
-    }),
+    t: jest.fn().mockImplementation((key) => key),
 }));
 
 describe("Alerts Util", () => {
@@ -171,7 +165,7 @@ describe("Alerts Util", () => {
     });
 });
 
-const mockDefaultAlert: Alert = {
+const mockDefaultAlert = {
     name: "new-alert",
     description: "This is the detection used by online service",
     nodes: {
@@ -187,12 +181,12 @@ const mockDefaultAlert: Alert = {
             params: {
                 offset: "wo1w",
                 percentageChange: 0.2,
-            } as { [index: string]: unknown },
-        } as AlertNode,
-    } as { [index: string]: AlertNode },
-} as Alert;
+            },
+        },
+    },
+};
 
-const mockEmptyAlertCardData: AlertCardData = {
+const mockEmptyAlertCardData = {
     id: -1,
     name: "label.no-data-marker",
     active: false,
@@ -206,19 +200,19 @@ const mockEmptyAlertCardData: AlertCardData = {
     alert: null,
 };
 
-const mockEmptyAlertDatasetAndMetric: AlertDatasetAndMetric = {
+const mockEmptyAlertDatasetAndMetric = {
     datasetId: -1,
     datasetName: "label.no-data-marker",
     metricId: -1,
     metricName: "label.no-data-marker",
 };
 
-const mockEmptyAlertSubscriptionGroup: AlertSubscriptionGroup = {
+const mockEmptyAlertSubscriptionGroup = {
     id: -1,
     name: "label.no-data-marker",
 };
 
-const mockAlert1: Alert = {
+const mockAlert1 = {
     id: 1,
     name: "testAlertName1",
     active: true,
@@ -254,7 +248,7 @@ const mockAlert1: Alert = {
     } as { [index: string]: AlertNode },
 } as Alert;
 
-const mockAlert2: Alert = {
+const mockAlert2 = {
     id: 6,
     name: "testAlertName6",
     active: false,
@@ -262,7 +256,7 @@ const mockAlert2: Alert = {
 
 const mockAlerts = [mockAlert1, mockAlert2];
 
-const mockSubscriptionGroup1: SubscriptionGroup = {
+const mockSubscriptionGroup1 = {
     id: 7,
     name: "testSubscriptionGroupName7",
     alerts: [
@@ -275,7 +269,7 @@ const mockSubscriptionGroup1: SubscriptionGroup = {
     ],
 } as SubscriptionGroup;
 
-const mockSubscriptionGroup2: SubscriptionGroup = {
+const mockSubscriptionGroup2 = {
     id: 8,
     name: "testSubscriptionGroupName8",
     alerts: [
@@ -285,7 +279,7 @@ const mockSubscriptionGroup2: SubscriptionGroup = {
     ],
 } as SubscriptionGroup;
 
-const mockSubscriptionGroup3: SubscriptionGroup = {
+const mockSubscriptionGroup3 = {
     id: 9,
     name: "testSubscriptionGroupName9",
 } as SubscriptionGroup;
@@ -296,7 +290,7 @@ const mockSubscriptionGroups = [
     mockSubscriptionGroup3,
 ];
 
-const mockAlertCardData1: AlertCardData = {
+const mockAlertCardData1 = {
     id: 1,
     name: "testAlertName1",
     active: true,
@@ -332,7 +326,7 @@ const mockAlertCardData1: AlertCardData = {
     alert: mockAlert1,
 };
 
-const mockAlertCardData2: AlertCardData = {
+const mockAlertCardData2 = {
     id: 6,
     name: "testAlertName6",
     active: false,

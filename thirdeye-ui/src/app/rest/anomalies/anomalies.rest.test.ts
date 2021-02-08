@@ -1,5 +1,4 @@
 import axios from "axios";
-import { Anomaly } from "../dto/anomaly.interfaces";
 import {
     deleteAnomaly,
     getAllAnomalies,
@@ -129,8 +128,8 @@ describe("Anomalies REST", () => {
     });
 });
 
-const mockAnomalyResponse: Anomaly = {
+const mockAnomalyResponse = {
     id: 1,
-} as Anomaly;
+};
 
 const mockError = new Error("testErrorMessage");

@@ -1,5 +1,5 @@
 import { cloneDeep } from "lodash";
-import create, { GetState, SetState } from "zustand";
+import create from "zustand";
 import { persist } from "zustand/middleware";
 import {
     TimeRange,
@@ -16,11 +16,8 @@ const MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS = 3;
 
 // App store for time range, persisted in browser local storage
 export const useTimeRangeStore = create<TimeRangeStore>(
-    persist<TimeRangeStore>(
-        (
-            set: SetState<TimeRangeStore>,
-            get: GetState<TimeRangeStore>
-        ): TimeRangeStore => ({
+    persist(
+        (set, get) => ({
             timeRangeDuration: getDefaultTimeRangeDuration(),
             recentCustomTimeRangeDurations: [],
 
@@ -42,6 +39,7 @@ export const useTimeRangeStore = create<TimeRangeStore>(
                         ...recentCustomTimeRangeDurations,
                         timeRangeDuration,
                     ];
+
                     // Trim recent custom time range duration entries to set threshold
                     newRecentCustomTimeRangeDurations.splice(
                         0,

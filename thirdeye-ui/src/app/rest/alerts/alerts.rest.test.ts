@@ -178,20 +178,20 @@ describe("Alerts REST", () => {
     });
 });
 
-const mockAlertRequest: Alert = {
+const mockAlertRequest = {
     name: "testAlertNameRequest",
 } as Alert;
 
-const mockAlertResponse: Alert = {
+const mockAlertResponse = {
     name: "testAlertNameResponse",
-} as Alert;
+};
 
-const mockAlertEvaluationRequest: AlertEvaluation = {
+const mockAlertEvaluationRequest = {
     alert: mockAlertRequest,
 } as AlertEvaluation;
 
-const mockAlertEvaluationResponse: AlertEvaluation = {
+const mockAlertEvaluationResponse = {
     alert: mockAlertResponse,
-} as AlertEvaluation;
+};
 
 const mockError = new Error("testErrorMessage");

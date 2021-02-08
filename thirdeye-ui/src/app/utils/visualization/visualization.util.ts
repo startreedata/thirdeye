@@ -1,3 +1,4 @@
+import bounds from "binary-search-bounds";
 import { ScaleTime } from "d3-scale";
 import { isEmpty } from "lodash";
 import { Interval } from "luxon";
@@ -34,10 +35,10 @@ export const formatLargeNumberForVisualization = (
 
 // Returns formatted string representation of date based on scale domain interval
 // For example:
-// Time interval > 2 years - YYYY
-// 2 years >= Time interval > 2 months - MMM YYYY
-// 2 months >= Time interval > 2 days - MMM DD, YYYY
-// 2 days >= Time interval - MMM DD, YY SEPARATOR_DATE_TIME HH:MM AM/PM
+// Interval > 2 years - YYYY
+// 2 years >= interval > 2 months - MMM YYYY
+// 2 months >= interval > 2 days - MMM DD, YYYY
+// 2 days >= interval - MMM DD, YY SEPARATOR_DATE_TIME HH:MM AM/PM
 export const formatDateTimeForAxis = (
     date: number | { valueOf(): number },
     scale: ScaleTime<number, number>
@@ -258,4 +259,90 @@ export const getAlertEvaluationTimeSeriesPointsMaxValue = (
     }
 
     return maxValue;
+};
+
+export const filterAlertEvaluationTimeSeriesPointsByTime = (
+    alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[],
+    startTime: number,
+    endTime: number
+): AlertEvaluationTimeSeriesPoint[] => {
+    if (!alertEvaluationTimeSeriesPoints) {
+        return [];
+    }
+
+    if (!startTime || !endTime) {
+        return alertEvaluationTimeSeriesPoints;
+    }
+
+    // Search first alert evaluation time series point with timestamp greater than or equal to start
+    // time
+    let index = bounds.ge(
+        alertEvaluationTimeSeriesPoints,
+        { timestamp: startTime } as AlertEvaluationTimeSeriesPoint,
+        (alertEvaluationTimeSeriesPointA, alertEvaluationTimeSeriesPointB) =>
+            alertEvaluationTimeSeriesPointA.timestamp -
+            alertEvaluationTimeSeriesPointB.timestamp
+    );
+
+    if (index === alertEvaluationTimeSeriesPoints.length) {
+        // Not found
+        return [];
+    }
+
+    // Gather all alert evaluation time series points with timestamp less than or equal to end time
+    const filteredAlertEvaluationTimeSeriesPoints = [];
+    while (
+        index < alertEvaluationTimeSeriesPoints.length &&
+        alertEvaluationTimeSeriesPoints[index].timestamp <= endTime
+    ) {
+        filteredAlertEvaluationTimeSeriesPoints.push(
+            alertEvaluationTimeSeriesPoints[index]
+        );
+        index++;
+    }
+
+    return filteredAlertEvaluationTimeSeriesPoints;
+};
+
+export const filterAlertEvaluationAnomalyPointsByTime = (
+    alertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[],
+    startTime: number,
+    endTime: number
+): AlertEvaluationAnomalyPoint[] => {
+    if (!alertEvaluationAnomalyPoints) {
+        return [];
+    }
+
+    if (!startTime || !endTime) {
+        return alertEvaluationAnomalyPoints;
+    }
+
+    // Search first alert evaluation anomaly point with timestamp greater than or equal to start
+    // time
+    let index = bounds.ge(
+        alertEvaluationAnomalyPoints,
+        { startTime: startTime } as AlertEvaluationAnomalyPoint,
+        (alertEvaluationTimeSeriesPointA, alertEvaluationTimeSeriesPointB) =>
+            alertEvaluationTimeSeriesPointA.startTime -
+            alertEvaluationTimeSeriesPointB.startTime
+    );
+
+    if (index === alertEvaluationAnomalyPoints.length) {
+        // Not found
+        return [];
+    }
+
+    // Gather all alert evaluation anomaly points with timestamp less than or equal to end time
+    const filteredAlertEvaluationAnomalyPoints = [];
+    while (
+        index < alertEvaluationAnomalyPoints.length &&
+        alertEvaluationAnomalyPoints[index].startTime <= endTime
+    ) {
+        filteredAlertEvaluationAnomalyPoints.push(
+            alertEvaluationAnomalyPoints[index]
+        );
+        index++;
+    }
+
+    return filteredAlertEvaluationAnomalyPoints;
 };

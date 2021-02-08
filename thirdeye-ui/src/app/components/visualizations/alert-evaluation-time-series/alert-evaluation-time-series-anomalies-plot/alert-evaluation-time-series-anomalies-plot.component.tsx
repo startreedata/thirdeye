@@ -13,16 +13,14 @@ export const AlertEvaluationTimeSeriesAnomaliesPlot: FunctionComponent<AlertEval
                 props.alertEvaluationAnomalyPoints.map(
                     (alertEvaluationAnomalyPoint, index) => (
                         <Bar
-                            fill={Palette.COLOR_VISUALIZATION_STROKE_ANOMALIES}
+                            fill={Palette.COLOR_VISUALIZATION_STROKE_ANOMALY}
                             fillOpacity={0.2}
                             height={
                                 props.yScale(props.yScale.domain()[0]) -
                                 props.yScale(props.yScale.domain()[1])
                             }
                             key={index}
-                            stroke={
-                                Palette.COLOR_VISUALIZATION_STROKE_ANOMALIES
-                            }
+                            stroke={Palette.COLOR_VISUALIZATION_STROKE_ANOMALY}
                             strokeOpacity={0.2}
                             strokeWidth={
                                 Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT

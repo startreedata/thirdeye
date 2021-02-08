@@ -1,17 +1,13 @@
-import create, { GetState, SetState } from "zustand";
-import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
+import create from "zustand";
 import { AppBreadcrumbsStore } from "./app-breadcrumbs.interfaces";
 
 // App store for app breadcrumbs
 export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
-    (
-        set: SetState<AppBreadcrumbsStore>,
-        get: GetState<AppBreadcrumbsStore>
-    ): AppBreadcrumbsStore => ({
+    (set, get) => ({
         routerBreadcrumbs: [],
         pageBreadcrumbs: [],
 
-        setRouterBreadcrumbs: (breadcrumbs: Breadcrumb[]): void => {
+        setRouterBreadcrumbs: (breadcrumbs) => {
             if (!breadcrumbs) {
                 return;
             }
@@ -21,7 +17,7 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
             });
         },
 
-        setPageBreadcrumbs: (breadcrumbs: Breadcrumb[]): void => {
+        setPageBreadcrumbs: (breadcrumbs) => {
             if (!breadcrumbs) {
                 return;
             }
@@ -31,7 +27,7 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
             });
         },
 
-        pushPageBreadcrumb: (breadcrumb: Breadcrumb): void => {
+        pushPageBreadcrumb: (breadcrumb) => {
             if (!breadcrumb) {
                 return;
             }
@@ -42,7 +38,7 @@ export const useAppBreadcrumbsStore = create<AppBreadcrumbsStore>(
             });
         },
 
-        popPageBreadcrumb: (): void => {
+        popPageBreadcrumb: () => {
             const { pageBreadcrumbs } = get();
             set({
                 pageBreadcrumbs: pageBreadcrumbs.slice(

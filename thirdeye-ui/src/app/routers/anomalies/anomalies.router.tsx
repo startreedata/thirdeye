@@ -43,9 +43,7 @@ export const AnomaliesRouter: FunctionComponent = () => {
         setRouterBreadcrumbs([
             {
                 text: t("label.anomalies"),
-                onClick: (): void => {
-                    history.push(getAnomaliesPath());
-                },
+                onClick: () => history.push(getAnomaliesPath()),
             },
         ]);
         setLoading(false);

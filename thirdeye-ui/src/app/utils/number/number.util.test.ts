@@ -1,4 +1,3 @@
-import numbro from "numbro";
 import {
     formatLargeNumber,
     formatNumber,
@@ -6,12 +5,9 @@ import {
 } from "./number.util";
 
 jest.mock("numbro", () =>
-    jest.fn().mockImplementation(
-        (num: number): numbro.Numbro =>
-            (({
-                format: mockFormat.mockReturnValue(num.toString()),
-            } as unknown) as numbro.Numbro)
-    )
+    jest.fn().mockImplementation((num) => ({
+        format: mockFormat.mockReturnValue(num.toString()),
+    }))
 );
 
 describe("Number Util", () => {

@@ -55,9 +55,7 @@ export const AlertsRouter: FunctionComponent = () => {
         setRouterBreadcrumbs([
             {
                 text: t("label.alerts"),
-                onClick: (): void => {
-                    history.push(getAlertsPath());
-                },
+                onClick: () => history.push(getAlertsPath()),
             },
         ]);
         setLoading(false);

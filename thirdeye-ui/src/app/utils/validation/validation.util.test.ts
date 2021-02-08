@@ -1,9 +1,7 @@
 import { validateEmail, validateJSON } from "./validation.util";
 
 jest.mock("i18next", () => ({
-    t: jest.fn().mockImplementation((key: string): string => {
-        return key;
-    }),
+    t: jest.fn().mockImplementation((key) => key),
 }));
 
 describe("Validation Util", () => {

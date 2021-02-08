@@ -16,7 +16,6 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationT
     const alertEvaluationTimeSeriesLegendClasses = useAlertEvaluationTimeSeriesLegendStyles();
     const { t } = useTranslation();
 
-    // Legend scale
     const legendOrdinalScale = scaleOrdinal({
         domain: [
             AlertEvaluationTimeSeriesPlot.CURRENT,
@@ -28,7 +27,7 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationT
             Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
             Palette.COLOR_VISUALIZATION_STROKE_BASELINE,
             Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
-            Palette.COLOR_VISUALIZATION_STROKE_ANOMALIES,
+            Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
         ],
     });
 
@@ -61,71 +60,66 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationT
                     className={alertEvaluationTimeSeriesLegendClasses.container}
                 >
                     {labels &&
-                        labels.map((label, index) => {
-                            return (
-                                <LegendItem
-                                    className={
-                                        alertEvaluationTimeSeriesLegendClasses.legendItem
+                        labels.map((label, index) => (
+                            <LegendItem
+                                className={
+                                    alertEvaluationTimeSeriesLegendClasses.legendItem
+                                }
+                                key={index}
+                                onClick={() =>
+                                    props.onChange &&
+                                    props.onChange(
+                                        label.text as AlertEvaluationTimeSeriesPlot
+                                    )
+                                }
+                            >
+                                {/* Glyph */}
+                                <svg
+                                    height={
+                                        Dimension.HEIGHT_VISUALIZATION_LEGEND_GLYPH
                                     }
-                                    key={index}
-                                    onClick={(): void => {
-                                        props.onChange &&
-                                            props.onChange(
-                                                label.text as AlertEvaluationTimeSeriesPlot
-                                            );
-                                    }}
+                                    opacity={
+                                        getLegendItemState(
+                                            label.text as AlertEvaluationTimeSeriesPlot
+                                        )
+                                            ? 1
+                                            : 0.5
+                                    }
+                                    width={
+                                        Dimension.WIDTH_VISUALIZATION_LEGEND_GLYPH
+                                    }
                                 >
-                                    {/* Glyph */}
-                                    <svg
+                                    <rect
+                                        fill={label.value}
                                         height={
                                             Dimension.HEIGHT_VISUALIZATION_LEGEND_GLYPH
-                                        }
-                                        opacity={
-                                            getLegendItemState(
-                                                label.text as AlertEvaluationTimeSeriesPlot
-                                            )
-                                                ? 1
-                                                : 0.5
                                         }
                                         width={
                                             Dimension.WIDTH_VISUALIZATION_LEGEND_GLYPH
                                         }
-                                    >
-                                        <rect
-                                            fill={label.value}
-                                            height={
-                                                Dimension.HEIGHT_VISUALIZATION_LEGEND_GLYPH
-                                            }
-                                            width={
-                                                Dimension.WIDTH_VISUALIZATION_LEGEND_GLYPH
-                                            }
-                                        />
-                                    </svg>
+                                    />
+                                </svg>
 
-                                    {/* Label */}
-                                    <LegendLabel
-                                        className={classnames(
-                                            alertEvaluationTimeSeriesLegendClasses.legendItemLabel,
-                                            getLegendItemState(
-                                                label.text as AlertEvaluationTimeSeriesPlot
-                                            )
-                                                ? ""
-                                                : alertEvaluationTimeSeriesLegendClasses.legendItemLabelDisabled
-                                        )}
-                                    >
-                                        {
-                                            <Typography variant="subtitle2">
-                                                {t(
-                                                    `label.${kebabCase(
-                                                        label.text
-                                                    )}`
-                                                )}
-                                            </Typography>
-                                        }
-                                    </LegendLabel>
-                                </LegendItem>
-                            );
-                        })}
+                                {/* Label */}
+                                <LegendLabel
+                                    className={classnames(
+                                        alertEvaluationTimeSeriesLegendClasses.legendItemLabel,
+                                        !getLegendItemState(
+                                            label.text as AlertEvaluationTimeSeriesPlot
+                                        ) &&
+                                            alertEvaluationTimeSeriesLegendClasses.legendItemLabelDisabled
+                                    )}
+                                >
+                                    {
+                                        <Typography variant="subtitle2">
+                                            {t(
+                                                `label.${kebabCase(label.text)}`
+                                            )}
+                                        </Typography>
+                                    }
+                                </LegendLabel>
+                            </LegendItem>
+                        ))}
                 </div>
             )}
         </Legend>

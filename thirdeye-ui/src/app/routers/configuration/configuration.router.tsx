@@ -39,9 +39,7 @@ export const ConfigurationRouter: FunctionComponent = () => {
         setRouterBreadcrumbs([
             {
                 text: t("label.configuration"),
-                onClick: (): void => {
-                    history.push(getConfigurationPath());
-                },
+                onClick: () => history.push(getConfigurationPath()),
             },
         ]);
         setLoading(false);

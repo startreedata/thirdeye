@@ -132,31 +132,31 @@ describe("Time Range Store", () => {
 
 let mockTimeRangeDuration1: TimeRangeDuration;
 
-const mockTimeRangeDuration2: TimeRangeDuration = {
+const mockTimeRangeDuration2 = {
     timeRange: TimeRange.YESTERDAY,
     startTime: 3,
     endTime: 4,
 };
 
-const mockTimeRangeDuration3: TimeRangeDuration = {
+const mockTimeRangeDuration3 = {
     timeRange: TimeRange.CUSTOM,
     startTime: 5,
     endTime: 6,
 };
 
-const mockTimeRangeDuration4: TimeRangeDuration = {
+const mockTimeRangeDuration4 = {
     timeRange: TimeRange.CUSTOM,
     startTime: 7,
     endTime: 8,
 };
 
-const mockTimeRangeDuration5: TimeRangeDuration = {
+const mockTimeRangeDuration5 = {
     timeRange: TimeRange.CUSTOM,
     startTime: 9,
     endTime: 10,
 };
 
-const mockTimeRangeDuration6: TimeRangeDuration = {
+const mockTimeRangeDuration6 = {
     timeRange: TimeRange.CUSTOM,
     startTime: 11,
     endTime: 12,

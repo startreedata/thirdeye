@@ -12,6 +12,8 @@ import {
     DetectionEvaluation,
 } from "../../rest/dto/detection.interfaces";
 import {
+    filterAlertEvaluationAnomalyPointsByTime,
+    filterAlertEvaluationTimeSeriesPointsByTime,
     formatDateTimeForAxis,
     formatLargeNumberForVisualization,
     getAlertEvaluationAnomalyPoints,
@@ -26,9 +28,7 @@ const systemLocale = Settings.defaultLocale;
 const systemZoneName = Settings.defaultZoneName;
 
 jest.mock("../number/number.util", () => ({
-    formatLargeNumber: jest.fn().mockImplementation((num: number): string => {
-        return num.toString();
-    }),
+    formatLargeNumber: jest.fn().mockImplementation((num) => num.toString()),
 }));
 
 describe("Visualization Util", () => {
@@ -404,13 +404,109 @@ describe("Visualization Util", () => {
     });
 });
 
+test("filterAlertEvaluationTimeSeriesPointsByTime should return empty array for invalid alert evaluation time series points", () => {
+    expect(
+        filterAlertEvaluationTimeSeriesPointsByTime(
+            (null as unknown) as AlertEvaluationTimeSeriesPoint[],
+            1,
+            2
+        )
+    ).toEqual([]);
+});
+
+test("filterAlertEvaluationTimeSeriesPointsByTime should return empty array for empty alert evaluation time series points", () => {
+    expect(filterAlertEvaluationTimeSeriesPointsByTime([], 1, 2)).toEqual([]);
+});
+
+test("filterAlertEvaluationTimeSeriesPointsByTime should return appropriate alert evaluation time series points array for alert evaluation time series points and invalid start and end time", () => {
+    expect(
+        filterAlertEvaluationTimeSeriesPointsByTime(
+            mockAlertEvaluationTimeSeriesPoints,
+            (null as unknown) as number,
+            1
+        )
+    ).toEqual(mockAlertEvaluationTimeSeriesPoints);
+    expect(
+        filterAlertEvaluationTimeSeriesPointsByTime(
+            mockAlertEvaluationTimeSeriesPoints,
+            1,
+            (null as unknown) as number
+        )
+    ).toEqual(mockAlertEvaluationTimeSeriesPoints);
+    expect(
+        filterAlertEvaluationTimeSeriesPointsByTime(
+            mockAlertEvaluationTimeSeriesPoints,
+            (null as unknown) as number,
+            (null as unknown) as number
+        )
+    ).toEqual(mockAlertEvaluationTimeSeriesPoints);
+});
+
+test("filterAlertEvaluationTimeSeriesPointsByTime should return appropriate alert evaluation time series points array for alert evaluation time series points and start and end time", () => {
+    expect(
+        filterAlertEvaluationTimeSeriesPointsByTime(
+            mockAlertEvaluationTimeSeriesPoints,
+            2,
+            2
+        )
+    ).toEqual([mockAlertEvaluationTimeSeriesPoint2]);
+});
+
+test("filterAlertEvaluationAnomalyPointsByTime should return empty array for invalid alert evaluation anomaly points", () => {
+    expect(
+        filterAlertEvaluationAnomalyPointsByTime(
+            (null as unknown) as AlertEvaluationAnomalyPoint[],
+            1,
+            2
+        )
+    ).toEqual([]);
+});
+
+test("filterAlertEvaluationAnomalyPointsByTime should return empty array for empty alert evaluation anomaly points", () => {
+    expect(filterAlertEvaluationAnomalyPointsByTime([], 1, 2)).toEqual([]);
+});
+
+test("filterAlertEvaluationAnomalyPointsByTime should return appropriate alert evaluation anomaly points array for alert evaluation anomaly points and invalid start and end time", () => {
+    expect(
+        filterAlertEvaluationAnomalyPointsByTime(
+            mockAlertEvaluationAnomalyPoints,
+            (null as unknown) as number,
+            1
+        )
+    ).toEqual(mockAlertEvaluationAnomalyPoints);
+    expect(
+        filterAlertEvaluationAnomalyPointsByTime(
+            mockAlertEvaluationAnomalyPoints,
+            1,
+            (null as unknown) as number
+        )
+    ).toEqual(mockAlertEvaluationAnomalyPoints);
+    expect(
+        filterAlertEvaluationAnomalyPointsByTime(
+            mockAlertEvaluationAnomalyPoints,
+            (null as unknown) as number,
+            (null as unknown) as number
+        )
+    ).toEqual(mockAlertEvaluationAnomalyPoints);
+});
+
+test("filterAlertEvaluationAnomalyPointsByTime should return appropriate alert evaluation anomaly points array for alert evaluation anomaly points and start and end time", () => {
+    expect(
+        filterAlertEvaluationAnomalyPointsByTime(
+            mockAlertEvaluationAnomalyPoints,
+            20,
+            20
+        )
+    ).toEqual([mockAlertEvaluationAnomalyPoint2]);
+});
+
 let mockScaleDomain: Date[] = [];
 
-const mockScale: ScaleTime<number, number> = ({
+const mockScale = ({
     domain: jest.fn().mockImplementation(() => mockScaleDomain),
 } as unknown) as ScaleTime<number, number>;
 
-const mockAlertEvaluation: AlertEvaluation = {
+const mockAlertEvaluation = {
     alert: {} as Alert,
     detectionEvaluations: {
         detectionEvaluation1: {
@@ -463,43 +559,53 @@ const mockAlertEvaluation: AlertEvaluation = {
     start: 37,
     end: 38,
     lastTimestamp: 39,
+} as AlertEvaluation;
+
+const mockAlertEvaluationTimeSeriesPoint1 = {
+    timestamp: 1,
+    upperBound: 4,
+    lowerBound: 7,
+    current: 10,
+    expected: 13,
 };
 
-const mockAlertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[] = [
-    {
-        timestamp: 1,
-        upperBound: 4,
-        lowerBound: 7,
-        current: 10,
-        expected: 13,
-    },
-    {
-        timestamp: 2,
-        upperBound: 5,
-        lowerBound: 8,
-        current: 11,
-        expected: 14,
-    },
-    {
-        timestamp: 3,
-        upperBound: 6,
-        lowerBound: 9,
-        current: 12,
-        expected: 15,
-    },
+const mockAlertEvaluationTimeSeriesPoint2 = {
+    timestamp: 2,
+    upperBound: 5,
+    lowerBound: 8,
+    current: 11,
+    expected: 14,
+};
+
+const mockAlertEvaluationTimeSeriesPoint3 = {
+    timestamp: 3,
+    upperBound: 6,
+    lowerBound: 9,
+    current: 12,
+    expected: 15,
+};
+
+const mockAlertEvaluationTimeSeriesPoints = [
+    mockAlertEvaluationTimeSeriesPoint1,
+    mockAlertEvaluationTimeSeriesPoint2,
+    mockAlertEvaluationTimeSeriesPoint3,
 ];
 
-const mockAlertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[] = [
-    {
-        startTime: 16,
-        endTime: 17,
-        current: 18,
-        baseline: 19,
-    },
-    {
-        startTime: 20,
-        endTime: 21,
-        current: 22,
-        baseline: 23,
-    },
+const mockAlertEvaluationAnomalyPoint1 = {
+    startTime: 16,
+    endTime: 17,
+    current: 18,
+    baseline: 19,
+};
+
+const mockAlertEvaluationAnomalyPoint2 = {
+    startTime: 20,
+    endTime: 21,
+    current: 22,
+    baseline: 23,
+};
+
+const mockAlertEvaluationAnomalyPoints = [
+    mockAlertEvaluationAnomalyPoint1,
+    mockAlertEvaluationAnomalyPoint2,
 ];

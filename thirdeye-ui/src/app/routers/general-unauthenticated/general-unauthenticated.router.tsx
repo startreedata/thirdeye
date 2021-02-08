@@ -34,18 +34,19 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     }, []);
 
     const initRedirectionURL = (): void => {
-        // If location is anything other than sign in/out path, store it to redirect the user after
-        // authentication
         if (
-            location.pathname === AppRoute.SIGN_IN ||
-            location.pathname === AppRoute.SIGN_OUT
+            location.pathname !== AppRoute.SIGN_IN &&
+            location.pathname !== AppRoute.SIGN_OUT
         ) {
-            setRedirectURL(getBasePath());
+            // Store location to redirect the user after authentication
+            setRedirectURL(
+                createPathWithRecognizedQueryString(location.pathname)
+            );
 
             return;
         }
 
-        setRedirectURL(createPathWithRecognizedQueryString(location.pathname));
+        setRedirectURL(getBasePath());
     };
 
     if (loading) {

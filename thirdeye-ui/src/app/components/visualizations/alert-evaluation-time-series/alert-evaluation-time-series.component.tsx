@@ -1,10 +1,24 @@
 import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
-import { Brush, Group, ParentSize, scaleLinear, scaleTime } from "@visx/visx";
+import {
+    Bar,
+    Brush,
+    Circle,
+    Group,
+    Line,
+    localPoint,
+    ParentSize,
+    Point,
+    scaleLinear,
+    scaleTime,
+    useTooltip,
+} from "@visx/visx";
+import bounds from "binary-search-bounds";
 import { debounce, isEmpty } from "lodash";
 import React, {
     createRef,
     FunctionComponent,
+    MouseEvent,
     useCallback,
     useEffect,
     useMemo,
@@ -14,6 +28,8 @@ import { useTranslation } from "react-i18next";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
 import {
+    filterAlertEvaluationAnomalyPointsByTime,
+    filterAlertEvaluationTimeSeriesPointsByTime,
     getAlertEvaluationAnomalyPoints,
     getAlertEvaluationTimeSeriesPoints,
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
@@ -33,12 +49,14 @@ import {
     AlertEvaluationTimeSeriesInternalProps,
     AlertEvaluationTimeSeriesInternalStateAction,
     AlertEvaluationTimeSeriesPlot,
+    AlertEvaluationTimeSeriesPoint,
     AlertEvaluationTimeSeriesProps,
+    AlertEvaluationTimeSeriesTooltipPoint,
 } from "./alert-evaluation-time-series.interfaces";
 import { alertEvaluationTimeSeriesInternalReducer } from "./alert-evaluation-time-series.reducer";
 
 const HEIGHT_CONTAINER_MIN = 310;
-const WIDTH_CONTAINER_MIN = 620;
+const WIDTH_CONTAINER_MIN = 520;
 const PADDING_SVG_TOP = 10;
 const PADDING_SVG_BOTTOM = 30;
 const PADDING_SVG_LEFT = 50;
@@ -93,6 +111,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         upperAndLowerBoundPlotVisible: true,
         anomaliesPlotVisible: true,
     });
+    const {
+        tooltipData,
+        showTooltip,
+        hideTooltip,
+    } = useTooltip<AlertEvaluationTimeSeriesTooltipPoint>();
     const brushRef = createRef<BaseBrush>();
     const { t } = useTranslation();
 
@@ -105,7 +128,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         svgHeight -
         PADDING_SVG_TOP -
         HEIGHT_SEPARATOR_TIME_SERIES_BRUSH -
-        HEIGHT_BRUSH; // Available SVG height - top SVG padding - separator height between time series and brush - brush height
+        HEIGHT_BRUSH; // Available SVG height - top SVG padding - separator height between time series and brush - space for brush
     const timeSeriesXMax = svgWidth - PADDING_SVG_LEFT - PADDING_SVG_RIGHT; // Available SVG width - left and right SVG padding
     const timeSeriesYMax = timeSeriesHeight;
 
@@ -126,7 +149,6 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     filteredAlertEvaluationTimeSeriesPoints
                 ),
             ],
-            nice: true,
             clamp: true,
         });
     }, [props.width, filteredAlertEvaluationTimeSeriesPoints]);
@@ -156,7 +178,6 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     alertEvaluationTimeSeriesPoints
                 ),
             ],
-            nice: true,
             clamp: true,
         });
     }, [props.width, alertEvaluationTimeSeriesPoints]);
@@ -225,7 +246,83 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         });
     }, [props.alertEvaluation]);
 
-    const onBrushChange = useCallback(
+    const onTimeSeriesMouseMove = (event: MouseEvent<SVGRectElement>): void => {
+        onTimeSeriesMouseMoveDebounced(
+            localPoint(event) as Point // Event coordinates to SVG coordinates
+        );
+    };
+
+    const onTimeSeriesMouseMoveDebounced = useCallback(
+        debounce((svgPoint: Point): void => {
+            if (!svgPoint) {
+                hideTooltip();
+
+                return;
+            }
+
+            // Determine time series time scale value from SVG coordinate, accounting for SVG
+            // padding
+            const xValue = timeSeriesXScale.invert(
+                svgPoint.x - PADDING_SVG_LEFT
+            );
+
+            if (!xValue) {
+                hideTooltip();
+
+                return;
+            }
+
+            // Search first alert evaluation anomaly point with timestamp less than or equal to SVG
+            // coordinate timestamp
+            const index = bounds.le(
+                filteredAlertEvaluationTimeSeriesPoints,
+                {
+                    timestamp: xValue.getTime(),
+                } as AlertEvaluationTimeSeriesPoint,
+                (
+                    alertEvaluationTimeSeriesPointA,
+                    alertEvaluationTimeSeriesPointB
+                ) =>
+                    alertEvaluationTimeSeriesPointA.timestamp -
+                    alertEvaluationTimeSeriesPointB.timestamp
+            );
+
+            if (index === -1) {
+                // Not found
+                hideTooltip();
+
+                return;
+            }
+
+            showTooltip({
+                tooltipTop: 0,
+                tooltipLeft: 0,
+                tooltipData: {
+                    timestamp:
+                        filteredAlertEvaluationTimeSeriesPoints[index]
+                            .timestamp,
+                    current:
+                        filteredAlertEvaluationTimeSeriesPoints[index].current,
+                    expected:
+                        filteredAlertEvaluationTimeSeriesPoints[index].expected,
+                    upperBound:
+                        filteredAlertEvaluationTimeSeriesPoints[index]
+                            .upperBound,
+                    lowerBound:
+                        filteredAlertEvaluationTimeSeriesPoints[index]
+                            .lowerBound,
+                    anomalies: [],
+                },
+            });
+        }, 1),
+        [props.width, filteredAlertEvaluationTimeSeriesPoints]
+    );
+
+    const onTimeSeriesMouseLeave = (): void => {
+        hideTooltip();
+    };
+
+    const onBrushChangeDebounced = useCallback(
         debounce((domain: Bounds | null): void => {
             if (!domain || domain.x1 - domain.x0 === 0) {
                 // Reset brush selection
@@ -241,17 +338,18 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             }
 
             // Filter time series based on brush selection
-            const newFilteredAlertEvaluationTimeSeriesPoints = alertEvaluationTimeSeriesPoints.filter(
-                (alertEvaluationTimeSeriesPoint) =>
-                    alertEvaluationTimeSeriesPoint.timestamp >= domain.x0 &&
-                    alertEvaluationTimeSeriesPoint.timestamp <= domain.x1
+            const newFilteredAlertEvaluationTimeSeriesPoints = filterAlertEvaluationTimeSeriesPointsByTime(
+                alertEvaluationTimeSeriesPoints,
+                domain.x0,
+                domain.x1
             );
             // Filter anomalies based on brush selection
-            const newFilteredAlertEvaluationAnomalyPoints = alertEvaluationAnomalyPoints.filter(
-                (alertEvaluationAnomalyPoint) =>
-                    alertEvaluationAnomalyPoint.startTime >= domain.x0 &&
-                    alertEvaluationAnomalyPoint.startTime <= domain.x1
+            const newFilteredAlertEvaluationAnomalyPoints = filterAlertEvaluationAnomalyPointsByTime(
+                alertEvaluationAnomalyPoints,
+                domain.x0,
+                domain.x1
             );
+
             dispatch({
                 type: AlertEvaluationTimeSeriesInternalStateAction.UPDATE,
                 payload: {
@@ -369,6 +467,78 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                         />
                     )}
 
+                    {/* Mouse hover region  */}
+                    <Bar
+                        height={timeSeriesYMax}
+                        opacity={0}
+                        width={timeSeriesXMax}
+                        onMouseLeave={onTimeSeriesMouseLeave}
+                        onMouseMove={onTimeSeriesMouseMove}
+                    />
+
+                    {/* Mouse hover marker */}
+                    {tooltipData && (
+                        <>
+                            <Line
+                                from={{
+                                    x: timeSeriesXScale(0),
+                                    y: timeSeriesYScale(tooltipData.current),
+                                }}
+                                opacity={0.2}
+                                stroke={
+                                    Palette.COLOR_VISUALIZATION_STROKE_HOVER_MARKER
+                                }
+                                strokeDasharray={
+                                    Dimension.DASHARRAY_VISUALIZATION_HOVER_MARKER
+                                }
+                                strokeWidth={
+                                    Dimension.WIDTH_VISUALIZATION_STROKE_HOVER_MARKER
+                                }
+                                to={{
+                                    x: timeSeriesXScale(tooltipData.timestamp),
+                                    y: timeSeriesYScale(tooltipData.current),
+                                }}
+                            />
+
+                            <Line
+                                from={{
+                                    x: timeSeriesXScale(tooltipData.timestamp),
+                                    y: timeSeriesYScale(tooltipData.current),
+                                }}
+                                opacity={0.2}
+                                stroke={
+                                    Palette.COLOR_VISUALIZATION_STROKE_HOVER_MARKER
+                                }
+                                strokeDasharray={
+                                    Dimension.DASHARRAY_VISUALIZATION_HOVER_MARKER
+                                }
+                                strokeWidth={
+                                    Dimension.WIDTH_VISUALIZATION_STROKE_HOVER_MARKER
+                                }
+                                to={{
+                                    x: timeSeriesXScale(tooltipData.timestamp),
+                                    y: timeSeriesYScale(0),
+                                }}
+                            />
+
+                            <Circle
+                                cx={timeSeriesXScale(tooltipData.timestamp)}
+                                cy={timeSeriesYScale(tooltipData.current)}
+                                fill={
+                                    Palette.COLOR_VISUALIZATION_FILL_HOVER_MARKER
+                                }
+                                opacity={0.7}
+                                r={Dimension.RADIUS_VISUALIZATION_HOVER_MARKER}
+                                stroke={
+                                    Palette.COLOR_VISUALIZATION_STROKE_HOVER_MARKER
+                                }
+                                strokeWidth={
+                                    Dimension.WIDTH_VISUALIZATION_STROKE_HOVER_MARKER
+                                }
+                            />
+                        </>
+                    )}
+
                     {/* X axis */}
                     <TimeAxisBottom
                         scale={timeSeriesXScale}
@@ -385,7 +555,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                     top={timeSeriesHeight + HEIGHT_SEPARATOR_TIME_SERIES_BRUSH}
                 >
                     {/* Time series in the brush to be always visible and slightly transparent */}
-                    <Group opacity={0.5}>
+                    <Group opacity={0.6}>
                         {/* Anomalies */}
                         <AlertEvaluationTimeSeriesAnomaliesPlot
                             alertEvaluationAnomalyPoints={
@@ -444,7 +614,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                         width={brushXMax}
                         xScale={brushXScale}
                         yScale={brushYScale}
-                        onChange={onBrushChange}
+                        onChange={onBrushChangeDebounced}
                     />
 
                     {/* X axis */}

@@ -166,12 +166,12 @@ describe("Subscription Groups REST", () => {
     });
 });
 
-const mockSubscriptionGroupRequest: SubscriptionGroup = {
+const mockSubscriptionGroupRequest = {
     name: "testSubscriptionGroupNameRequest",
 } as SubscriptionGroup;
 
-const mockSubscriptionGroupResponse: SubscriptionGroup = {
+const mockSubscriptionGroupResponse = {
     name: "testSubscriptionGroupNameResponse",
-} as SubscriptionGroup;
+};
 
 const mockError = new Error("testErrorMessage");

@@ -164,15 +164,11 @@ export const filterSubscriptionGroups = (
             if (
                 deepSearchStringProperty(
                     subscriptionGroupCardDataCopy,
-                    (value: string): boolean => {
-                        // Check if string property value contains current search word
-                        return (
-                            Boolean(value) &&
-                            value
-                                .toLowerCase()
-                                .indexOf(searchWord.toLowerCase()) > -1
-                        );
-                    }
+                    // Check if string property value contains current search word
+                    (value) =>
+                        Boolean(value) &&
+                        value.toLowerCase().indexOf(searchWord.toLowerCase()) >
+                            -1
                 )
             ) {
                 filteredSubscriptionGroupCardDatas.push(

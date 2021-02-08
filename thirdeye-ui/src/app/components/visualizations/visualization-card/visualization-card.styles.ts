@@ -1,14 +1,14 @@
 import { makeStyles, Theme } from "@material-ui/core";
 import { VisualizationCardProps } from "./visualization-card.interfaces";
 
-const PADDING_OUTER_CONTAINER_MAXIMIZE = 32;
 const PADDING_TOP_OUTER_CONTAINER_MAXIMIZE = 100;
+const PADDING_OUTER_CONTAINER_MAXIMIZE = 32;
 const HEIGHT_HEADER_CONTAINER = 72;
 
 export const useVisualizationCardStyles = makeStyles<
     Theme,
     VisualizationCardProps
->((theme: Theme) => ({
+>((theme) => ({
     outerContainer: (props) => ({
         height: `${HEIGHT_HEADER_CONTAINER + props.visualizationHeight}px`,
     }),
@@ -18,16 +18,16 @@ export const useVisualizationCardStyles = makeStyles<
         left: "50%",
         height: `${HEIGHT_HEADER_CONTAINER + props.visualizationHeight}px`, // Required height
         maxHeight: `calc(100% - ${
-            PADDING_OUTER_CONTAINER_MAXIMIZE +
-            PADDING_TOP_OUTER_CONTAINER_MAXIMIZE
-        }px)`, // Available maxmized height
-        width: `calc(100% - ${PADDING_OUTER_CONTAINER_MAXIMIZE * 2}px)`,
+            PADDING_TOP_OUTER_CONTAINER_MAXIMIZE +
+            PADDING_OUTER_CONTAINER_MAXIMIZE
+        }px)`, // Available maxmized height, available height - top and bottom padding
+        width: `calc(100% - ${PADDING_OUTER_CONTAINER_MAXIMIZE * 2}px)`, // Available height - left and right padding
         transform: "translate(-50%, -50%)", // Center the container
-        overflowY: "auto",
+        overflowY: "auto", // Allow vertical scroll in case maximized height is not sufficient
         zIndex: theme.zIndex.drawer + 3, // Maximized container to be always above backdrop
     }),
     headerContainer: {
-        height: HEIGHT_HEADER_CONTAINER,
+        height: `${HEIGHT_HEADER_CONTAINER}px`,
     },
     innerContainer: (props) => ({
         height: `${props.visualizationHeight}px`,

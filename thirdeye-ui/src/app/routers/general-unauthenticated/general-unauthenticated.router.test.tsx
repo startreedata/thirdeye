@@ -27,9 +27,7 @@ jest.mock("../../utils/routes/routes.util", () => ({
     getBasePath: jest.fn().mockReturnValue("testBasePath"),
     createPathWithRecognizedQueryString: jest
         .fn()
-        .mockImplementation((path: string): string => {
-            return path;
-        }),
+        .mockImplementation((path) => path),
 }));
 
 jest.mock(

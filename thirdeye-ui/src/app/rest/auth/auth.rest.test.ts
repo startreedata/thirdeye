@@ -1,5 +1,4 @@
 import axios from "axios";
-import { Auth } from "../dto/auth.interfaces";
 import { login, logout } from "./auth.rest";
 
 jest.mock("axios");
@@ -48,8 +47,8 @@ mockAuthRequest.append("grant_type", "password");
 mockAuthRequest.append("principal", "admin");
 mockAuthRequest.append("password", "password");
 
-const mockAuthResponse: Auth = {
+const mockAuthResponse = {
     accessToken: "testAccessTokenResponse",
-} as Auth;
+};
 
 const mockError = new Error("testErrorMessage");

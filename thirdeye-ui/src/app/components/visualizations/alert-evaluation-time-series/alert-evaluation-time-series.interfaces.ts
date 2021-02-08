@@ -5,8 +5,8 @@ export interface AlertEvaluationTimeSeriesProps {
 }
 
 export interface AlertEvaluationTimeSeriesInternalProps {
-    width: number;
     height: number;
+    width: number;
     alertEvaluation: AlertEvaluation | null;
 }
 
@@ -51,4 +51,13 @@ export interface AlertEvaluationAnomalyPoint {
     endTime: number;
     current: number;
     baseline: number;
+}
+
+export interface AlertEvaluationTimeSeriesTooltipPoint {
+    timestamp: number;
+    current: number;
+    expected: number;
+    upperBound: number;
+    lowerBound: number;
+    anomalies: AlertEvaluationAnomalyPoint[];
 }

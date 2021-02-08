@@ -133,18 +133,18 @@ test("popPageBreadcrumb should update store appropriately", () => {
     expect(result.current.pageBreadcrumbs).toEqual([mockPageBreadcrumb1]);
 });
 
-const mockRouterBreadcrumb1: Breadcrumb = {
+const mockRouterBreadcrumb1 = {
     text: "testRouterBreadcrumbText1",
 };
 
-const mockRouterBreadcrumb2: Breadcrumb = {
+const mockRouterBreadcrumb2 = {
     text: "testRouterBreadcrumbText2",
 };
 
-const mockPageBreadcrumb1: Breadcrumb = {
+const mockPageBreadcrumb1 = {
     text: "testPageBreadcrumbText1",
 };
 
-const mockPageBreadcrumb2: Breadcrumb = {
+const mockPageBreadcrumb2 = {
     text: "testPageBreadcrumbText2",
 };

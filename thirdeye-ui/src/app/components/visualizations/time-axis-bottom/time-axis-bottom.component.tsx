@@ -22,7 +22,7 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
         return getTimeTickValuesForAxis(props.numTicks as number, props.scale);
     };
 
-    // Renders date from tick renderer props based on whether or not it contains
+    // Renders formatted date from tick renderer props based on whether or not it contains
     // SEPARATOR_DATE_TIME
     const tickComponentRenderer = (
         tickRendererProps: TickRendererProps

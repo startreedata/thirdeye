@@ -2,15 +2,14 @@ import i18n from "i18next";
 import { getDocumentTitle } from "./page.util";
 
 jest.mock("i18next", () => ({
-    t: jest.fn().mockImplementation((key: string): string => {
-        return key;
-    }),
+    t: jest.fn().mockImplementation((key) => key),
 }));
 
 describe("Page Util", () => {
     test("getDocumentTitle should return appropriate string for invalid router breadcrumb text, invalid page title and invalid page breadcrumb text", () => {
         expect(getDocumentTitle("", "", "")).toEqual("label.thirdeye");
-        expect(i18n.t).toHaveBeenCalledWith("label.thirdeye");
+        expect(i18n.t).toHaveBeenNthCalledWith(1, "label.thirdeye");
+
         expect(
             getDocumentTitle(
                 (null as unknown) as string,
@@ -18,7 +17,7 @@ describe("Page Util", () => {
                 (null as unknown) as string
             )
         ).toEqual("label.thirdeye");
-        expect(i18n.t).toHaveBeenCalledWith("label.thirdeye");
+        expect(i18n.t).toHaveBeenNthCalledWith(2, "label.thirdeye");
     });
 
     test("getDocumentTitle should return appropriate string for router breadcrumb text, invalid page title and invalid page breadcrumb text", () => {

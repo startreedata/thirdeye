@@ -1,4 +1,4 @@
-import create, { SetState } from "zustand";
+import create from "zustand";
 import { persist } from "zustand/middleware";
 import { AuthStore } from "./auth.interfaces";
 
@@ -6,8 +6,8 @@ const LOCAL_STORAGE_KEY_AUTH = "LOCAL_STORAGE_KEY_AUTH";
 
 // App store for authentication, persisted in browser local storage
 export const useAuthStore = create<AuthStore>(
-    persist<AuthStore>(
-        (set: SetState<AuthStore>): AuthStore => ({
+    persist(
+        (set) => ({
             authDisabled: false,
             authenticated: false,
             accessToken: "",

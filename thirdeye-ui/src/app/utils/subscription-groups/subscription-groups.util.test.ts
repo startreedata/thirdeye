@@ -19,9 +19,7 @@ import {
 } from "./subscription-groups.util";
 
 jest.mock("i18next", () => ({
-    t: jest.fn().mockImplementation((key: string): string => {
-        return key;
-    }),
+    t: jest.fn().mockImplementation((key) => key),
 }));
 
 describe("Subscription Groups Util", () => {
@@ -235,7 +233,7 @@ describe("Subscription Groups Util", () => {
     });
 });
 
-const mockEmptySubscriptionGroup: SubscriptionGroup = ({
+const mockEmptySubscriptionGroup = {
     name: "",
     alerts: [],
     notificationSchemes: {
@@ -243,9 +241,9 @@ const mockEmptySubscriptionGroup: SubscriptionGroup = ({
             to: [],
         },
     },
-} as unknown) as SubscriptionGroup;
+};
 
-const mockEmptySubscriptionGroupCardData: SubscriptionGroupCardData = {
+const mockEmptySubscriptionGroupCardData = {
     id: -1,
     name: "label.no-data-marker",
     alerts: [],
@@ -253,12 +251,12 @@ const mockEmptySubscriptionGroupCardData: SubscriptionGroupCardData = {
     subscriptionGroup: null,
 };
 
-const mockEmptySubscriptionGroupAlert: SubscriptionGroupAlert = {
+const mockEmptySubscriptionGroupAlert = {
     id: -1,
     name: "label.no-data-marker",
 };
 
-const mockSubscriptionGroup1: SubscriptionGroup = {
+const mockSubscriptionGroup1 = {
     id: 1,
     name: "testSubscriptionGroupName1",
     alerts: [
@@ -279,7 +277,7 @@ const mockSubscriptionGroup1: SubscriptionGroup = {
     },
 } as SubscriptionGroup;
 
-const mockSubscriptionGroup2: SubscriptionGroup = {
+const mockSubscriptionGroup2 = {
     id: 5,
     name: "testSubscriptionGroupName5",
     alerts: [] as Alert[],
@@ -288,34 +286,34 @@ const mockSubscriptionGroup2: SubscriptionGroup = {
 
 const mockSubscriptionGroups = [mockSubscriptionGroup1, mockSubscriptionGroup2];
 
-const mockAlert1: Alert = {
+const mockAlert1 = {
     id: 2,
     name: "testAlertName2",
 } as Alert;
 
-const mockAlert2: Alert = {
+const mockAlert2 = {
     id: 3,
     name: "testAlertName3",
 } as Alert;
 
-const mockAlert3: Alert = {
+const mockAlert3 = {
     id: 6,
     name: "testAlertName6",
 } as Alert;
 
 const mockAlerts = [mockAlert1, mockAlert2, mockAlert3];
 
-const mockSubscriptionGroupAlert1: SubscriptionGroupAlert = {
+const mockSubscriptionGroupAlert1 = {
     id: 2,
     name: "testAlertName2",
 };
 
-const mockSubscriptionGroupAlert2: SubscriptionGroupAlert = {
+const mockSubscriptionGroupAlert2 = {
     id: 3,
     name: "testAlertName3",
 };
 
-const mockSubscriptionGroupAlert3: SubscriptionGroupAlert = {
+const mockSubscriptionGroupAlert3 = {
     id: 6,
     name: "testAlertName6",
 };
@@ -326,7 +324,7 @@ const mockSubscriptionGroupAlerts = [
     mockSubscriptionGroupAlert3,
 ];
 
-const mockSubscriptionGroupCardData1: SubscriptionGroupCardData = {
+const mockSubscriptionGroupCardData1 = {
     id: 1,
     name: "testSubscriptionGroupName1",
     alerts: [
@@ -343,7 +341,7 @@ const mockSubscriptionGroupCardData1: SubscriptionGroupCardData = {
     subscriptionGroup: mockSubscriptionGroup1,
 };
 
-const mockSubscriptionGroupCardData2: SubscriptionGroupCardData = {
+const mockSubscriptionGroupCardData2 = {
     id: 5,
     name: "testSubscriptionGroupName5",
     alerts: [],

@@ -137,14 +137,14 @@ export const filterAnomalies = (
     for (const anomaly of anomalyCardDatas) {
         for (const searchWord of searchWords) {
             if (
-                deepSearchStringProperty(anomaly, (value: string): boolean => {
+                deepSearchStringProperty(
+                    anomaly,
                     // Check if string property value contains current search word
-                    return (
+                    (value) =>
                         Boolean(value) &&
                         value.toLowerCase().indexOf(searchWord.toLowerCase()) >
                             -1
-                    );
-                })
+                )
             ) {
                 filteredAnomalyCardDatas.push(anomaly);
 

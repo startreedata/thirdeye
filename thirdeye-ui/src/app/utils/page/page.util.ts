@@ -45,8 +45,7 @@ export const getDocumentTitle = (
             pageText = pageBreadcrumbText;
         }
     } else {
-        // Both router breadcrumb text and page breadcrumb text not available
-        // Use what's available
+        // Both router breadcrumb text and page breadcrumb text not available, use what's available
         pageText = pageTitle || "";
     }
 

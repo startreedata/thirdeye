@@ -8,7 +8,6 @@ export interface VisualizationCardCommonProps {
     title?: string;
     maximizedTitle?: string;
     visualizationHeight: number;
-    visualizationMaximizedHeight?: number;
     stale?: boolean;
     staleLabel?: string;
     showRefreshButton?: boolean;

@@ -18,9 +18,7 @@ const systemLocale = Settings.defaultLocale;
 const systemZoneName = Settings.defaultZoneName;
 
 jest.mock("i18next", () => ({
-    t: jest.fn().mockImplementation((key: string): string => {
-        return key;
-    }),
+    t: jest.fn().mockImplementation((key) => key),
 }));
 
 describe("Date Time Util", () => {

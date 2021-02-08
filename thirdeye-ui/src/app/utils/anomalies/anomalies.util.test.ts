@@ -11,29 +11,22 @@ import {
 } from "./anomalies.util";
 
 jest.mock("i18next", () => ({
-    t: jest.fn().mockImplementation((key: string): string => {
-        return key;
-    }),
+    t: jest.fn().mockImplementation((key) => key),
 }));
 
 jest.mock("../date-time/date-time.util", () => ({
-    formatDateAndTime: jest.fn().mockImplementation((date: number): string => {
-        return date.toString();
-    }),
+    formatDateAndTime: jest.fn().mockImplementation((date) => date.toString()),
     formatDuration: jest
         .fn()
-        .mockImplementation((startTime: number, endTime: number): string => {
-            return `${startTime.toString()} ${endTime.toString()}`;
-        }),
+        .mockImplementation(
+            (startTime, endTime) =>
+                `${startTime.toString()} ${endTime.toString()}`
+        ),
 }));
 
 jest.mock("../number/number.util", () => ({
-    formatLargeNumber: jest.fn().mockImplementation((num: number): string => {
-        return num.toString();
-    }),
-    formatPercentage: jest.fn().mockImplementation((num: number): string => {
-        return num.toString();
-    }),
+    formatLargeNumber: jest.fn().mockImplementation((num) => num.toString()),
+    formatPercentage: jest.fn().mockImplementation((num) => num.toString()),
 }));
 
 describe("Anomalies Util", () => {
@@ -122,11 +115,11 @@ describe("Anomalies Util", () => {
     });
 });
 
-const mockAnomaly: Anomaly = {
+const mockAnomaly = {
     id: 1,
 } as Anomaly;
 
-const mockEmptyAnomalyCardData: AnomalyCardData = {
+const mockEmptyAnomalyCardData = {
     id: -1,
     name: "label.no-data-marker",
     alertName: "label.no-data-marker",
@@ -140,7 +133,7 @@ const mockEmptyAnomalyCardData: AnomalyCardData = {
     endTime: "label.no-data-marker",
 };
 
-const mockAnomaly1: Anomaly = {
+const mockAnomaly1 = {
     id: 2,
     startTime: 3,
     endTime: 4,
@@ -152,13 +145,13 @@ const mockAnomaly1: Anomaly = {
     },
 } as Anomaly;
 
-const mockAnomaly2: Anomaly = {
+const mockAnomaly2 = {
     id: 8,
 } as Anomaly;
 
 const mockAnomalies = [mockAnomaly1, mockAnomaly2];
 
-const mockAnomalyCardData1: AnomalyCardData = {
+const mockAnomalyCardData1 = {
     id: 2,
     name: "label.anomaly label.anomaly-id",
     alertName: "testAlertName7",
@@ -172,7 +165,7 @@ const mockAnomalyCardData1: AnomalyCardData = {
     endTime: "4",
 };
 
-const mockAnomalyCardData2: AnomalyCardData = {
+const mockAnomalyCardData2 = {
     id: 8,
     name: "label.anomaly label.anomaly-id",
     alertName: "label.no-data-marker",

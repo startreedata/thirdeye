@@ -97,7 +97,6 @@ export const setQueryString = (key: string, value: string): void => {
 
 export const getQueryString = (key: string): string => {
     let value = "";
-
     const urlSearchParams = new URLSearchParams(location.search);
     if (urlSearchParams.has(key)) {
         value = urlSearchParams.get(key) as string;

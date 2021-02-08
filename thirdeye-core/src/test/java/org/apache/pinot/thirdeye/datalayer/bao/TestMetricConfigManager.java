@@ -16,12 +16,14 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestMetricConfig;
+
+import com.google.inject.Injector;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -29,44 +31,39 @@ import org.testng.annotations.Test;
 
 public class TestMetricConfigManager {
 
-  private Long metricConfigId1;
-  private Long metricConfigId2;
-  private Long derivedMetricConfigId;
   private static final String dataset1 = "my dataset1";
   private static final String dataset2 = "my dataset2";
   private static final String metric1 = "metric1";
   private static final String metric2 = "metric2";
   private static final String derivedMetric1 = "metric3";
-
-  private DAOTestBase testDAOProvider;
+  private Long metricConfigId1;
+  private Long metricConfigId2;
+  private Long derivedMetricConfigId;
   private MetricConfigManager metricConfigDAO;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    metricConfigDAO = daoRegistry.getMetricConfigDAO();
+    Injector injector = new TestDatabase().createInjector();
+    metricConfigDAO = injector.getInstance(MetricConfigManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    testDAOProvider.cleanup();
   }
 
   @Test
   public void testCreate() {
 
-    MetricConfigDTO metricConfig1 = DaoTestUtils.getTestMetricConfig(dataset1, metric1, null);
+    MetricConfigDTO metricConfig1 = getTestMetricConfig(dataset1, metric1, null);
     metricConfig1.setActive(false);
     metricConfigId1 = metricConfigDAO.save(metricConfig1);
     Assert.assertNotNull(metricConfigId1);
 
     metricConfigId2 = metricConfigDAO
-        .save(DaoTestUtils.getTestMetricConfig(dataset2, metric2, null));
+        .save(getTestMetricConfig(dataset2, metric2, null));
     Assert.assertNotNull(metricConfigId2);
 
-    MetricConfigDTO metricConfig3 = DaoTestUtils
-        .getTestMetricConfig(dataset1, derivedMetric1, null);
+    MetricConfigDTO metricConfig3 = getTestMetricConfig(dataset1, derivedMetric1, null);
     metricConfig3.setDerivedMetricExpression("id" + metricConfigId1 + "/id" + metricConfigId2);
     derivedMetricConfigId = metricConfigDAO.save(metricConfig3);
     Assert.assertNotNull(derivedMetricConfigId);

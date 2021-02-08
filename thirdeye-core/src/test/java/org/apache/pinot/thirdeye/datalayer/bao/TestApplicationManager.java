@@ -22,7 +22,6 @@ import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -45,11 +44,9 @@ public class TestApplicationManager {
   }
 
   @BeforeClass
-  void beforeClass() {
+  void beforeClass() throws Exception {
     db = new TestDatabase();
-    db.init();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
-    applicationManager = daoRegistry.getApplicationDAO();
+    applicationManager = db.createInjector().getInstance(ApplicationManager.class);
   }
 
   @AfterClass(alwaysRun = true)

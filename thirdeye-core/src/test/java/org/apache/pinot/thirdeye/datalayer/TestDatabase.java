@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.datalayer;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -7,7 +9,6 @@ import java.sql.Connection;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,12 +65,12 @@ public class TestDatabase {
     return ds;
   }
 
-  public void init() {
+  public Injector createInjector() {
     try {
       final PersistenceConfig configuration = testPersistenceConfig();
       final DataSource dataSource = createDataSource(configuration);
 
-      DeprecatedInjectorUtil.init(dataSource);
+      return Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

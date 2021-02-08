@@ -10,7 +10,6 @@ import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.resources.RootResource;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.testng.annotations.Test;
 
@@ -31,7 +30,6 @@ public class ThirdEyeCoordinatorModuleTest {
         configuration,
         dataSource
     ));
-    DeprecatedInjectorUtil.setInjector(injector);
 
     injector
         .getInstance(ThirdEyeCacheRegistry.class)

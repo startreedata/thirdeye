@@ -22,14 +22,11 @@ package org.apache.pinot.thirdeye.rootcause.callgraph;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.Series;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
@@ -39,8 +36,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Entity;
@@ -50,7 +45,6 @@ import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.impl.DimensionsEntity;
 import org.apache.pinot.thirdeye.rootcause.impl.TimeRangeEntity;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,34 +126,6 @@ public class CallGraphPipeline extends Pipeline {
     this.cutoffFraction = cutoffFraction;
   }
 
-  public CallGraphPipeline(String outputName, Set<String> inputNames,
-      Map<String, Object> properties) {
-    super(outputName, inputNames);
-    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache();
-    this.dataset = MapUtils.getString(properties, PROP_DATASET, PROP_DATASET_DEFAULT);
-    this.metricCount = MapUtils.getString(properties, PROP_METRIC_COUNT, PROP_METRIC_COUNT_DEFAULT);
-    this.metricLatency = MapUtils
-        .getString(properties, PROP_METRIC_LATENCY, PROP_METRIC_LATENCY_DEFAULT);
-    this.k = MapUtils.getIntValue(properties, PROP_K, PROP_K_DEFAULT);
-    this.cutoffFraction = MapUtils
-        .getDoubleValue(properties, PROP_CUTOFF_FRACTION, PROP_CUTOFF_FRACTION_DEFAULT);
-
-    if (properties.containsKey(PROP_INCLUDE_DIMENSIONS)) {
-      this.includeDimensions = new HashSet<>(
-          (Collection<String>) properties.get(PROP_INCLUDE_DIMENSIONS));
-    } else {
-      this.includeDimensions = new HashSet<>();
-    }
-
-    if (properties.containsKey(PROP_EXCLUDE_DIMENSIONS)) {
-      this.excludeDimensions = new HashSet<>(
-          (Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
-    } else {
-      this.excludeDimensions = new HashSet<>();
-    }
-  }
 
   @Override
   public PipelineResult run(PipelineContext pipelineContext) {

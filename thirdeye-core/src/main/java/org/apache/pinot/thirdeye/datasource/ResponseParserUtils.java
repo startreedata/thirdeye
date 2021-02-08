@@ -24,9 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,69 +60,6 @@ public class ResponseParserUtils {
       responseMap.put(String.valueOf(thirdEyeResponseRow.getTimeBucketId()), thirdEyeResponseRow);
     }
     return responseMap;
-  }
-
-  public static Map<String, ThirdEyeResponseRow> createResponseMapByDimension(
-      ThirdEyeResponse thirdEyeResponse) {
-    Map<String, ThirdEyeResponseRow> responseMap;
-    responseMap = new HashMap<>();
-    int numRows = thirdEyeResponse.getNumRows();
-    for (int i = 0; i < numRows; i++) {
-      ThirdEyeResponseRow thirdEyeResponseRow = thirdEyeResponse.getRow(i);
-      responseMap.put(thirdEyeResponseRow.getDimensions().get(0), thirdEyeResponseRow);
-    }
-    return responseMap;
-  }
-
-  public static List<Double> getMetricSums(ThirdEyeResponse response) {
-
-    ThirdEyeRequest request = response.getRequest();
-    ThirdEyeRequestBuilder requestBuilder = ThirdEyeRequest.newBuilder();
-    requestBuilder.setStartTimeInclusive(request.getStartTimeInclusive());
-    requestBuilder.setEndTimeExclusive(request.getEndTimeExclusive());
-    requestBuilder.setFilterSet(request.getFilterSet());
-    requestBuilder.setMetricFunctions(request.getMetricFunctions());
-    requestBuilder.setDataSource(
-        ThirdEyeUtils.getDataSourceFromMetricFunctions(request.getMetricFunctions()));
-    ThirdEyeRequest metricSumsRequest = requestBuilder.build("metricSums");
-    try {
-      ThirdEyeResponse metricSumsResponse = DeprecatedInjectorUtil
-          .getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache()
-          .getQueryResult(metricSumsRequest);
-      return metricSumsResponse.getRow(0).getMetrics();
-    } catch (Exception e) {
-      LOGGER.error("Caught exception when executing metric sums request", e);
-    }
-    return Collections.emptyList();
-  }
-
-  public static Map<Integer, List<Double>> getMetricSumsByTime(ThirdEyeResponse response) {
-
-    ThirdEyeRequest request = response.getRequest();
-    Map<Integer, List<Double>> metricSums = new HashMap<>();
-    ThirdEyeRequestBuilder requestBuilder = ThirdEyeRequest.newBuilder();
-    requestBuilder.setStartTimeInclusive(request.getStartTimeInclusive());
-    requestBuilder.setEndTimeExclusive(request.getEndTimeExclusive());
-    requestBuilder.setFilterSet(request.getFilterSet());
-    requestBuilder.setGroupByTimeGranularity(request.getGroupByTimeGranularity());
-    requestBuilder.setMetricFunctions(request.getMetricFunctions());
-    requestBuilder.setDataSource(
-        ThirdEyeUtils.getDataSourceFromMetricFunctions(request.getMetricFunctions()));
-    ThirdEyeRequest metricSumsRequest = requestBuilder.build("metricSums");
-    ThirdEyeResponse metricSumsResponse = null;
-    try {
-      metricSumsResponse =
-          DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache()
-              .getQueryResult(metricSumsRequest);
-    } catch (Exception e) {
-      LOGGER.error("Caught exception when executing metric sums request", e);
-    }
-
-    for (int i = 0; i < metricSumsResponse.getNumRows(); i++) {
-      ThirdEyeResponseRow row = metricSumsResponse.getRow(i);
-      metricSums.put(row.getTimeBucketId(), row.getMetrics());
-    }
-    return metricSums;
   }
 
   public static String computeTimeDimensionValue(int timeBucketId, String dimensionValue) {

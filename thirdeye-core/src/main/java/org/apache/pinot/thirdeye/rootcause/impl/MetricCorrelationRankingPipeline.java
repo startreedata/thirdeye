@@ -38,8 +38,6 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
@@ -47,7 +45,6 @@ import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,33 +111,6 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.strategy = strategy;
-  }
-
-  /**
-   * Alternate constructor for RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_TARGET_INPUT})
-   */
-  public MetricCorrelationRankingPipeline(String outputName, Set<String> inputNames,
-      Map<String, Object> properties) {
-    super(outputName, inputNames);
-    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache();
-
-    if (!properties.containsKey(PROP_TARGET_INPUT)) {
-      throw new IllegalArgumentException(
-          String.format("Property '%s' required, but not found.", PROP_TARGET_INPUT));
-    }
-    this.targetInput = properties.get(PROP_TARGET_INPUT).toString();
-
-    String propStrategy = STRATEGY_CORRELATION;
-    if (properties.containsKey(PROP_STRATEGY)) {
-      propStrategy = properties.get(PROP_STRATEGY).toString();
-    }
-    this.strategy = parseStrategy(propStrategy);
   }
 
   @Override

@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
@@ -43,8 +42,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
@@ -54,7 +51,6 @@ import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregate;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
@@ -118,25 +114,6 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     this.datasetDAO = datasetDAO;
     this.strategyFactory = strategyFactory;
     this.granularity = granularity;
-  }
-
-  /**
-   * Alternate constructor for RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_STRATEGY})
-   */
-  public MetricAnalysisPipeline2(String outputName, Set<String> inputNames,
-      Map<String, Object> properties) {
-    super(outputName, inputNames);
-    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache();
-    this.strategyFactory = parseStrategyFactory(
-        MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
-    this.granularity = TimeGranularity
-        .fromString(MapUtils.getString(properties, PROP_GRANULARITY, PROP_GRANULARITY_DEFAULT));
   }
 
   @Override

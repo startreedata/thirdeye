@@ -25,26 +25,77 @@ import com.google.common.collect.Range;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.Builder;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 //Heavily based off TimeOnTime equivalent
 public class UITimeSeriesResponseParser extends BaseTimeSeriesResponseParser {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UITimeSeriesResponseParser.class);
   private final boolean doRollUp = true; // roll up small metric to OTHER dimensions
+  private DataSourceCache dataSourceCache;
+
+  public UITimeSeriesResponseParser(final DataSourceCache dataSourceCache) {
+    this.dataSourceCache = dataSourceCache;
+  }
+
+  private static boolean checkMetricSums(TimeSeriesRow row, List<Double> metricSums,
+      Map<String, Double> metricThresholds) {
+    List<TimeSeriesMetric> metrics = row.getMetrics();
+    for (int i = 0; i < metrics.size(); i++) {
+      TimeSeriesMetric metric = metrics.get(i);
+      double sum = 0;
+      if (metricSums != null) {
+        sum = metricSums.get(i);
+      }
+      if (metric.getValue() > metricThresholds.get(metric.getMetricName()) * sum) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public Map<Integer, List<Double>> getMetricSumsByTime(ThirdEyeResponse response) {
+
+    ThirdEyeRequest request = response.getRequest();
+    Map<Integer, List<Double>> metricSums = new HashMap<>();
+    ThirdEyeRequestBuilder requestBuilder = ThirdEyeRequest.newBuilder();
+    requestBuilder.setStartTimeInclusive(request.getStartTimeInclusive());
+    requestBuilder.setEndTimeExclusive(request.getEndTimeExclusive());
+    requestBuilder.setFilterSet(request.getFilterSet());
+    requestBuilder.setGroupByTimeGranularity(request.getGroupByTimeGranularity());
+    requestBuilder.setMetricFunctions(request.getMetricFunctions());
+    requestBuilder.setDataSource(
+        ThirdEyeUtils.getDataSourceFromMetricFunctions(request.getMetricFunctions()));
+    ThirdEyeRequest metricSumsRequest = requestBuilder.build("metricSums");
+    ThirdEyeResponse metricSumsResponse = null;
+    try {
+      metricSumsResponse = dataSourceCache.getQueryResult(metricSumsRequest);
+    } catch (Exception e) {
+      ResponseParserUtils.LOGGER.error("Caught exception when executing metric sums request", e);
+    }
+
+    for (int i = 0; i < metricSumsResponse.getNumRows(); i++) {
+      ThirdEyeResponseRow row = metricSumsResponse.getRow(i);
+      metricSums.put(row.getTimeBucketId(), row.getMetrics());
+    }
+    return metricSums;
+  }
+
+  /* Helper functions */
 
   /**
    * Returns the parsed ThirdEye response that has GroupBy in space dimension. In addition, the
@@ -66,7 +117,7 @@ public class UITimeSeriesResponseParser extends BaseTimeSeriesResponseParser {
 
     Map<Integer, List<Double>> metricSums = Collections.emptyMap();
     if (doRollUp) {
-      metricSums = ResponseParserUtils.getMetricSumsByTime(response);
+      metricSums = getMetricSumsByTime(response);
     }
 
     // group by time and dimension values
@@ -161,23 +212,5 @@ public class UITimeSeriesResponseParser extends BaseTimeSeriesResponseParser {
     }
 
     return rows;
-  }
-
-  /* Helper functions */
-
-  private static boolean checkMetricSums(TimeSeriesRow row, List<Double> metricSums,
-      Map<String, Double> metricThresholds) {
-    List<TimeSeriesMetric> metrics = row.getMetrics();
-    for (int i = 0; i < metrics.size(); i++) {
-      TimeSeriesMetric metric = metrics.get(i);
-      double sum = 0;
-      if (metricSums != null) {
-        sum = metricSums.get(i);
-      }
-      if (metric.getValue() > metricThresholds.get(metric.getMetricName()) * sum) {
-        return true;
-      }
-    }
-    return false;
   }
 }

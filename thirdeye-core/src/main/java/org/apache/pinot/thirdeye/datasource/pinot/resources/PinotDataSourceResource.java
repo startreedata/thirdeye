@@ -19,11 +19,13 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot.resources;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.concurrent.ExecutionException;
@@ -33,12 +35,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotQuery;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetSerializer;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +49,7 @@ public class PinotDataSourceResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotDataSourceResource.class);
   private static final ObjectMapper OBJECT_MAPPER;
+  private static final String URL_ENCODING = "UTF-8";
 
   static {
     SimpleModule module = new SimpleModule("ThirdEyeResultSetSerializer",
@@ -56,9 +59,13 @@ public class PinotDataSourceResource {
     OBJECT_MAPPER.registerModule(module);
   }
 
-  private static final String URL_ENCODING = "UTF-8";
-
   private PinotThirdEyeDataSource pinotDataSource;
+  private final DataSourceCache dataSourceCache;
+
+  @Inject
+  public PinotDataSourceResource(ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+    dataSourceCache = thirdEyeCacheRegistry.getDataSourceCache();
+  }
 
   /**
    * Returns the JSON string of the ThirdEyeResultSetGroup of the given Pinot query.
@@ -96,13 +103,9 @@ public class PinotDataSourceResource {
    */
   private void initPinotDataSource() {
     if (pinotDataSource == null) {
-      Preconditions.checkNotNull(DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class),
-          "Failed to get Pinot data source because ThirdEye cache registry is not initialized.");
-      pinotDataSource = (PinotThirdEyeDataSource) DeprecatedInjectorUtil
-          .getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache()
-          .getDataSource(PinotThirdEyeDataSource.class.getSimpleName());
-      Preconditions
-          .checkNotNull(pinotDataSource,
+      pinotDataSource =
+          requireNonNull((PinotThirdEyeDataSource) dataSourceCache
+                  .getDataSource(PinotThirdEyeDataSource.class.getSimpleName()),
               "Failed to get Pinot data source because it is not initialized in ThirdEye.");
     }
   }

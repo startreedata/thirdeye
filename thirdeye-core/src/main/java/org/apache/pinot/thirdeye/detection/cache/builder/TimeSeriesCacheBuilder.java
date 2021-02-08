@@ -53,13 +53,11 @@ public class TimeSeriesCacheBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesCacheBuilder.class);
 
   private static final long TIMEOUT = 60000;
+  private static TimeSeriesCacheBuilder INSTANCE;
 
   private final ExecutorService executor = Executors.newCachedThreadPool();
   private final LoadingCache<MetricSlice, DataFrame> cache;
-
   private DefaultTimeSeriesLoader timeseriesLoader;
-
-  private static TimeSeriesCacheBuilder INSTANCE;
 
   private TimeSeriesCacheBuilder() {
     this.cache = initCache();
@@ -96,7 +94,8 @@ public class TimeSeriesCacheBuilder {
     // don't use more than one third of memory for detection time series
     long cacheSize = Runtime.getRuntime().freeMemory() / 3;
     LOG.info("initializing detection timeseries cache with {} bytes", cacheSize);
-    return CacheBuilder.newBuilder()
+    return CacheBuilder
+        .newBuilder()
         .maximumWeight(cacheSize)
         // Estimate that most detection tasks will complete within 15 minutes
         .expireAfterWrite(15, TimeUnit.MINUTES)

@@ -24,15 +24,11 @@ import com.google.common.collect.TreeMultimap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.StringSeries;
@@ -43,8 +39,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
@@ -52,7 +46,6 @@ import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,44 +123,6 @@ public class MetricBreakdownPipeline extends Pipeline {
     this.excludeDimensions = excludeDimensions;
     this.k = k;
     this.ignoreScore = ignoreScore;
-  }
-
-  /**
-   * Alternate constructor for use by RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_K}, {@code PROP_PARALLELISM})
-   */
-  public MetricBreakdownPipeline(String outputName, Set<String> inputNames,
-      Map<String, Object> properties) {
-    super(outputName, inputNames);
-    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache();
-    this.executor = Executors.newFixedThreadPool(
-        MapUtils.getInteger(properties, PROP_PARALLELISM, PROP_PARALLELISM_DEFAULT));
-    this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
-
-    if (properties.containsKey(PROP_INCLUDE_DIMENSIONS)) {
-      this.includeDimensions = new HashSet<>(
-          (Collection<String>) properties.get(PROP_INCLUDE_DIMENSIONS));
-    } else {
-      this.includeDimensions = new HashSet<>();
-    }
-
-    if (properties.containsKey(PROP_EXCLUDE_DIMENSIONS)) {
-      this.excludeDimensions = new HashSet<>(
-          (Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
-    } else {
-      this.excludeDimensions = new HashSet<>();
-    }
-
-    if (properties.containsKey(PROP_IGNORE_SCORE)) {
-      this.ignoreScore = PROP_IGNORE_SCORE_TRUE;
-    } else {
-      this.ignoreScore = PROP_IGNORE_SCORE_FALSE;
-    }
   }
 
   @Override

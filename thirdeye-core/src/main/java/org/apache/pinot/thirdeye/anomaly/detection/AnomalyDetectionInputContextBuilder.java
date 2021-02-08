@@ -49,7 +49,7 @@ import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.timeseries.AnomalyDetectionTimeSeriesResponseParser;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesHandler;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRequest;
@@ -59,7 +59,6 @@ import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow;
 import org.apache.pinot.thirdeye.detector.function.AnomalyFunctionFactory;
 import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -72,15 +71,46 @@ public class AnomalyDetectionInputContextBuilder {
   private static final Logger LOG = LoggerFactory
       .getLogger(AnomalyDetectionInputContextBuilder.class);
 
+  private final AnomalyFunctionFactory anomalyFunctionFactory;
+  private final DataSourceCache dataSourceCache;
+
   private AnomalyDetectionInputContext anomalyDetectionInputContext;
   private AnomalyFunctionDTO anomalyFunctionSpec;
   private BaseAnomalyFunction anomalyFunction;
-  private final AnomalyFunctionFactory anomalyFunctionFactory;
   private List<String> collectionDimensions;
-  private String dataset;
 
-  public AnomalyDetectionInputContextBuilder(AnomalyFunctionFactory anomalyFunctionFactory) {
+  public AnomalyDetectionInputContextBuilder(AnomalyFunctionFactory anomalyFunctionFactory,
+      final DataSourceCache dataSourceCache) {
     this.anomalyFunctionFactory = anomalyFunctionFactory;
+    this.dataSourceCache = dataSourceCache;
+  }
+
+  /**
+   * Get the metric filter setting for an anomaly function
+   */
+  public static Multimap<String, String> getFiltersForFunction(String filterString) {
+    // Get the original filter
+    Multimap<String, String> filters;
+    if (StringUtils.isNotBlank(filterString)) {
+      filters = ThirdEyeSpiUtils.getFilterSet(filterString);
+    } else {
+      filters = HashMultimap.create();
+    }
+    return filters;
+  }
+
+  /**
+   * Get the explore dimensions for an anomaly function
+   */
+  public static List<String> getDimensionsForFunction(AnomalyFunctionDTO anomalyFunctionSpec) {
+    List<String> groupByDimensions;
+    String exploreDimensionString = anomalyFunctionSpec.getExploreDimensions();
+    if (StringUtils.isNotBlank(exploreDimensionString)) {
+      groupByDimensions = Arrays.asList(exploreDimensionString.trim().split(","));
+    } else {
+      groupByDimensions = Collections.emptyList();
+    }
+    return groupByDimensions;
   }
 
   public AnomalyDetectionInputContextBuilder setFunction(AnomalyFunctionDTO anomalyFunctionSpec)
@@ -94,8 +124,9 @@ public class AnomalyDetectionInputContextBuilder {
     this.anomalyFunctionSpec = anomalyFunctionSpec;
     this.anomalyFunction = anomalyFunctionFactory.fromSpec(anomalyFunctionSpec);
     this.anomalyDetectionInputContext = anomalyDetectionInputContext;
-    this.dataset = this.anomalyFunctionSpec.getCollection();
-    DatasetConfigDTO datasetConfig = DAORegistry.getInstance().getDatasetConfigDAO().findByDataset(dataset);
+    final String dataset = this.anomalyFunctionSpec.getCollection();
+    DatasetConfigDTO datasetConfig = DAORegistry.getInstance().getDatasetConfigDAO()
+        .findByDataset(dataset);
     if (datasetConfig == null) {
       LOG.error("Dataset [" + dataset + "] is not found");
       throw new IllegalArgumentException(
@@ -433,34 +464,6 @@ public class AnomalyDetectionInputContextBuilder {
   }
 
   /**
-   * Get the metric filter setting for an anomaly function
-   */
-  public static Multimap<String, String> getFiltersForFunction(String filterString) {
-    // Get the original filter
-    Multimap<String, String> filters;
-    if (StringUtils.isNotBlank(filterString)) {
-      filters = ThirdEyeSpiUtils.getFilterSet(filterString);
-    } else {
-      filters = HashMultimap.create();
-    }
-    return filters;
-  }
-
-  /**
-   * Get the explore dimensions for an anomaly function
-   */
-  public static List<String> getDimensionsForFunction(AnomalyFunctionDTO anomalyFunctionSpec) {
-    List<String> groupByDimensions;
-    String exploreDimensionString = anomalyFunctionSpec.getExploreDimensions();
-    if (StringUtils.isNotBlank(exploreDimensionString)) {
-      groupByDimensions = Arrays.asList(exploreDimensionString.trim().split(","));
-    } else {
-      groupByDimensions = Collections.emptyList();
-    }
-    return groupByDimensions;
-  }
-
-  /**
    * Returns the set of metric time series that are needed by the given anomaly function for
    * detecting anomalies.
    *
@@ -685,9 +688,7 @@ public class AnomalyDetectionInputContextBuilder {
       List<String> groupByDimensions, boolean endTimeInclusive)
       throws JobExecutionException, ExecutionException {
 
-    TimeSeriesHandler timeSeriesHandler =
-        new TimeSeriesHandler(
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache());
+    TimeSeriesHandler timeSeriesHandler = new TimeSeriesHandler(dataSourceCache);
 
     // Seed request with top-level...
     TimeSeriesRequest seedRequest = new TimeSeriesRequest();

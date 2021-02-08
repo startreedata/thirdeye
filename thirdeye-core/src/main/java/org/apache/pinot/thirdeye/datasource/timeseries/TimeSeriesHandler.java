@@ -48,13 +48,14 @@ import org.slf4j.LoggerFactory;
 public class TimeSeriesHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesHandler.class);
-  private static final TimeSeriesResponseParser DEFAULT_TIMESERIES_RESPONSE_PARSER = new UITimeSeriesResponseParser();
+  private final TimeSeriesResponseParser defaultTimeseriesResponseParser;
 
   private final DataSourceCache dataSourceCache;
   private ExecutorService executorService;
 
   public TimeSeriesHandler(DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
+    defaultTimeseriesResponseParser = new UITimeSeriesResponseParser(dataSourceCache);
   }
 
   /**
@@ -66,7 +67,7 @@ public class TimeSeriesHandler {
    * @throws Exception Any exception that is thrown during the retrieval.
    */
   public TimeSeriesResponse handle(TimeSeriesRequest timeSeriesRequest) throws Exception {
-    return handle(timeSeriesRequest, DEFAULT_TIMESERIES_RESPONSE_PARSER);
+    return handle(timeSeriesRequest, defaultTimeseriesResponseParser);
   }
 
   /**

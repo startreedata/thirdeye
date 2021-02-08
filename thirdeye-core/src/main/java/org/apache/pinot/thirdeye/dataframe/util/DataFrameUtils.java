@@ -40,14 +40,12 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
@@ -233,24 +231,6 @@ public class DataFrameUtils {
       map.put(series, df.getDoubles(series).toList());
     }
     return map;
-  }
-
-  /**
-   * Returns a DataFrame wrapping the requested time series at the associated dataset's native
-   * time granularity.
-   * <br/><b>NOTE:</b> this method injects dependencies from the DAO and Cache registries.
-   *
-   * @param slice metric data slice
-   * @return DataFrame with time series
-   * @see DataFrameUtils#fetchTimeSeries(MetricSlice, MetricConfigManager, DatasetConfigManager,
-   *     DataSourceCache)
-   */
-  public static DataFrame fetchTimeSeries(MetricSlice slice) throws Exception {
-    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    DataSourceCache cache = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-        .getDataSourceCache();
-    return fetchTimeSeries(slice, metricDAO, datasetDAO, cache);
   }
 
   /**

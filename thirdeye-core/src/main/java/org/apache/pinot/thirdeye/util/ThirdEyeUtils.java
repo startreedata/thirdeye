@@ -36,9 +36,6 @@ import com.google.common.cache.Weigher;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import io.dropwizard.configuration.YamlConfigurationFactory;
-import io.dropwizard.jackson.Jackson;
-import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -53,7 +50,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.validation.Validation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
@@ -63,12 +59,10 @@ import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.thirdeye.Constants.CompareMode;
 import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
-import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -473,45 +467,6 @@ public abstract class ThirdEyeUtils {
       }
     }
     return message;
-  }
-
-  /**
-   * Initializes a light weight ThirdEye environment for conducting standalone experiments.
-   *
-   * @param thirdEyeConfigDir the directory to ThirdEye configurations.
-   */
-  public static void initLightWeightThirdEyeEnvironment(String thirdEyeConfigDir) {
-    System.setProperty("dw.rootDir", thirdEyeConfigDir);
-
-    // Initialize DAO Registry
-    String persistenceConfig = thirdEyeConfigDir + "/persistence.yml";
-    LOG.info("Loading persistence config from [{}]", persistenceConfig);
-    DeprecatedInjectorUtil.init(new File(persistenceConfig));
-
-    // Read configuration for data sources, etc.
-    // TODO spyne Fix dependency loading
-    ThirdEyeConfiguration config;
-    try {
-      String dashboardConfigFilePath = thirdEyeConfigDir + "/dashboard.yml";
-      File configFile = new File(dashboardConfigFilePath);
-      YamlConfigurationFactory<ThirdEyeConfiguration> factory =
-          new YamlConfigurationFactory<>(ThirdEyeConfiguration.class,
-              Validation.buildDefaultValidatorFactory().getValidator(), Jackson.newObjectMapper(),
-              "");
-      config = factory.build(configFile);
-      config.setRootDir(thirdEyeConfigDir);
-    } catch (Exception e) {
-      LOG.error("Exception while constructing ThirdEye config:", e);
-      throw new RuntimeException(e);
-    }
-
-    // Initialize Cache Registry
-    try {
-      DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
-    } catch (Exception e) {
-      LOG.error("Exception while loading caches:", e);
-      throw new RuntimeException(e);
-    }
   }
 
   /**

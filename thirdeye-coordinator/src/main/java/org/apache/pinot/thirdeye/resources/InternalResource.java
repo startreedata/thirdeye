@@ -9,7 +9,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.datasource.pinot.resources.PinotDataSourceResource;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -21,8 +20,7 @@ public class InternalResource {
   private final PinotDataSourceResource pinotDataSourceResource;
 
   @Inject
-  public InternalResource(final GenericPojoDao genericPojoDao,
-      final PinotDataSourceResource pinotDataSourceResource) {
+  public InternalResource(final PinotDataSourceResource pinotDataSourceResource) {
     this.pinotDataSourceResource = pinotDataSourceResource;
   }
 

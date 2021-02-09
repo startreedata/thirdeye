@@ -6,6 +6,7 @@
         "anomalies": "Anomalies",
         "configuration": "Configuration",
         "subscription-groups": "Subscription Groups",
+        "metrics": "Metrics",
         "sign-in": "Sign In",
         "sign-out": "Sign Out",
         "create-alert": "Create Alert",
@@ -120,7 +121,11 @@
         "add-subscription-gorup": "Add to Subscription Group",
         "create-subscription-gorup": "Create Subscription Group",
         "all-detection-rules-anomalies-over-time": "All detection rules anomalies over time",
-        "alert-performance": "Alert Performance"
+        "alert-performance": "Alert Performance",
+
+        "id": "Id",
+        "function": "Function",
+        "threshold": "Threshold"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

@@ -10,6 +10,7 @@ import { Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { AppRoute, getConfigurationPath } from "../../utils/routes/routes.util";
+import { MetricsRouter } from "../metrics-router/metrics-router";
 
 const ConfigurationPage = lazy(() =>
     import(
@@ -64,6 +65,9 @@ export const ConfigurationRouter: FunctionComponent = () => {
                     component={SubscriptionGroupsRouter}
                     path={AppRoute.SUBSCRIPTION_GROUPS}
                 />
+
+                {/* Direct all metrics paths to metrics router */}
+                <Route component={MetricsRouter} path={AppRoute.METRICS} />
 
                 {/* No match found, render page not found */}
                 <Route component={PageNotFoundPage} />

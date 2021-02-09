@@ -3,6 +3,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WebpackBar = require("webpackbar");
+const webpack = require("webpack");
 
 const outputPath = path.join(__dirname, "dist");
 
@@ -100,6 +101,9 @@ module.exports = {
         new WebpackBar({
             name: "@cortexdata/thirdeye-ui [prod]",
             color: "#6EC4D1",
+        }),
+        new webpack.ProvidePlugin({
+            process: "process/browser",
         }),
     ],
 

@@ -7,7 +7,10 @@ import { ReactComponent as SubscriptionGroups } from "../../../assets/images/sub
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { ButtonTile } from "../../components/button-tile/button-tile.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { getSubscriptionGroupsPath } from "../../utils/routes/routes.util";
+import {
+    getMetricsPath,
+    getSubscriptionGroupsPath,
+} from "../../utils/routes/routes.util";
 import { useConfigurationPageStyles } from "./configuration-page.styles";
 
 export const ConfigurationPage: FunctionComponent = () => {
@@ -26,7 +29,7 @@ export const ConfigurationPage: FunctionComponent = () => {
     };
 
     const onMetricsClick = (): void => {
-        // ToDo
+        history.push(getMetricsPath());
     };
 
     return (

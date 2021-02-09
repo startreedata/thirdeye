@@ -19,6 +19,10 @@ export const AppRoute = {
     SUBSCRIPTION_GROUPS_DETAIL: `/configuration/subscriptionGroups/detail/id/${ROUTE_PLACEHOLDER_ID}`,
     SUBSCRIPTION_GROUPS_CREATE: "/configuration/subscriptionGroups/create",
     SUBSCRIPTION_GROUPS_UPDATE: `/configuration/subscriptionGroups/update/id/${ROUTE_PLACEHOLDER_ID}`,
+    METRICS: "/configuration/metrics",
+    METRICS_ALL: "/configuration/metrics/all",
+    METRICS_DETAIL: `/configuration/metrics/detail/id/${ROUTE_PLACEHOLDER_ID}`,
+    METRICS_UPDATE: `/configuration/metrics/update/id/${ROUTE_PLACEHOLDER_ID}`,
     SIGN_IN: "/signIn",
     SIGN_OUT: "/signOut",
 } as const;
@@ -101,6 +105,28 @@ export const getSubscriptionGroupsCreatePath = (): string => {
 
 export const getSubscriptionGroupsUpdatePath = (id: number): string => {
     let path: string = AppRoute.SUBSCRIPTION_GROUPS_UPDATE;
+    path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getMetricsPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.METRICS);
+};
+
+export const getMetricsAllPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.METRICS_ALL);
+};
+
+export const getMetricsDetailsPath = (id: number): string => {
+    let path: string = AppRoute.METRICS_DETAIL;
+    path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getMetricsUpdatePath = (id: number): string => {
+    let path: string = AppRoute.METRICS_UPDATE;
     path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);

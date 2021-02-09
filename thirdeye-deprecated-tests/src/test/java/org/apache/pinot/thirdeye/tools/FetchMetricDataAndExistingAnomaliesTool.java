@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.tools;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,11 +32,15 @@ import org.apache.pinot.thirdeye.anomaly.utils.AbstractResourceHttpUtils;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
+import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
+import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
+import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
+import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
+import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -57,7 +63,7 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
   }
 
   // Private class for storing and sorting results
-  public class ResultNode implements Comparable<ResultNode> {
+  public static class ResultNode implements Comparable<ResultNode> {
 
     long functionId;
     String functionName;
@@ -121,20 +127,18 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
 
   /**
    * Initialize DAOs
-   * @param persistenceFile path to the persistence file
+   * @param configFile path to the persistence file
    * @throws Exception
    */
-  public void init(File persistenceFile) throws Exception {
-    DeprecatedInjectorUtil.init(persistenceFile);
-    anomalyFunctionDAO = DeprecatedInjectorUtil
-        .getInstance(org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl.class);
-    mergedAnomalyResultDAO = DeprecatedInjectorUtil
-        .getInstance(
-            org.apache.pinot.thirdeye.datalayer.bao.jdbc.MergedAnomalyResultManagerImpl.class);
-  }
+  public void init(File configFile) throws Exception {
+    final PersistenceConfig configuration = PersistenceConfig.readPersistenceConfig(configFile);
+    final DatabaseConfiguration dbConfig = configuration.getDatabaseConfiguration();
 
-  public AnomalyFunctionDTO getAnomalyFunctionDTO(long functionId) {
-    return anomalyFunctionDAO.findById(functionId);
+    final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
+    Injector injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
+
+    anomalyFunctionDAO = injector.getInstance(AnomalyFunctionManager.class);
+    mergedAnomalyResultDAO = injector.getInstance(MergedAnomalyResultManager.class);
   }
 
   public List<ResultNode> fetchMergedAnomaliesInRangeByFunctionId(long functionId,
@@ -202,7 +206,6 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
    * @param metric metric name
    * @param startTime start time of requested data in DateTime
    * @param endTime end time of requested data in DateTime
-   * @param timeGranularity the time granularity
    * @param dimensions the list of dimensions
    * @param filterJson filters, in JSON
    * @return {dimension-> {DateTime: value}}

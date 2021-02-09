@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,6 +26,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.pinot.thirdeye.datalayer.ScriptRunner;
+import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -52,7 +55,8 @@ public class DAOTestBase {
     } catch (SQLException  | IOException e) {
       throw new RuntimeException(e);
     }
-    DeprecatedInjectorUtil.init(dataSource);
+    final Injector injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
+    DeprecatedInjectorUtil.setInjector(injector);
   }
 
   public void cleanup() {

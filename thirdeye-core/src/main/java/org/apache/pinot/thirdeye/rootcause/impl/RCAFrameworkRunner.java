@@ -56,7 +56,6 @@ import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.apache.pinot.thirdeye.rootcause.RCAFrameworkExecutionResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -133,8 +132,6 @@ public class RCAFrameworkRunner {
 
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
     Injector injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
-
-    DeprecatedInjectorUtil.init(daoConfig);
 
     ThirdEyeConfiguration thirdEyeConfig = new ThirdEyeWorkerConfiguration();
     thirdEyeConfig.setRootDir(config.getAbsolutePath());

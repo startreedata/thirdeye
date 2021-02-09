@@ -21,14 +21,7 @@ package org.apache.pinot.thirdeye.util;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
-import java.io.File;
-import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
-import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
-import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
-import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
-import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,18 +38,6 @@ public abstract class DeprecatedInjectorUtil {
   private static final Logger LOG = LoggerFactory.getLogger(DeprecatedInjectorUtil.class);
 
   private static Injector injector;
-
-  public static void init(File localConfigFile) {
-    final PersistenceConfig configuration = PersistenceConfig
-        .readPersistenceConfig(localConfigFile);
-    final DatabaseConfiguration dbConfig = configuration.getDatabaseConfiguration();
-
-    init(new DataSourceBuilder().build(dbConfig));
-  }
-
-  public static void init(DataSource dataSource) {
-    setInjector(Guice.createInjector(new ThirdEyePersistenceModule(dataSource)));
-  }
 
   public static synchronized void setInjector(final Injector injector) {
     if (DeprecatedInjectorUtil.injector != null) {

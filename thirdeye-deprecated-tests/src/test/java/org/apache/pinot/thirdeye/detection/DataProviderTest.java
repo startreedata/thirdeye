@@ -189,8 +189,11 @@ public class DataProviderTest {
 
 
     // aggregation loader
-    final AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO, datasetDAO,
-        dataSourceCache, mockDatasetMaxDataTimeCache);
+    final AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO,
+        datasetDAO,
+        dataSourceCache,
+        mockDatasetMaxDataTimeCache,
+        cacheRegistry);
 
     // time series loader
     DefaultTimeSeriesLoader timeSeriesLoader = new DefaultTimeSeriesLoader(
@@ -198,7 +201,7 @@ public class DataProviderTest {
         DAORegistry.getInstance().getDatasetConfigDAO(),
         cacheRegistry.getDataSourceCache(),
         cacheRegistry.getTimeSeriesCache(),
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+        cacheRegistry);
 
     // provider
     final TimeSeriesCacheBuilder timeSeriesCacheBuilder = new TimeSeriesCacheBuilder(timeSeriesLoader);

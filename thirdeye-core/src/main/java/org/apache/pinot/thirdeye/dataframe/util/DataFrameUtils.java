@@ -37,7 +37,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -46,7 +45,6 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
@@ -351,29 +349,18 @@ public class DataFrameUtils {
    * @param dimensions dimensions to group by
    * @param limit top k element limit ({@code -1} for default)
    * @param reference unique identifier for request
-   * @return RequestContainer
-   */
-  public static RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
-      int limit, String reference) throws Exception {
-    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    return makeAggregateRequest(slice, dimensions, limit, reference, metricDAO, datasetDAO);
-  }
-
-  /**
-   * Constructs and wraps a request for a metric with derived expressions. Resolves all
-   * required dependencies from the Thirdeye database.
-   *
-   * @param slice metric data slice
-   * @param dimensions dimensions to group by
-   * @param limit top k element limit ({@code -1} for default)
-   * @param reference unique identifier for request
    * @param metricDAO metric config DAO
    * @param datasetDAO dataset config DAO
+   * @param thirdEyeCacheRegistry
    * @return RequestContainer
    */
-  public static RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
-      int limit, String reference, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO)
+  public static RequestContainer makeAggregateRequest(MetricSlice slice,
+      List<String> dimensions,
+      int limit,
+      String reference,
+      MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
     MetricConfigDTO metric = metricDAO.findById(slice.metricId);
     if (metric == null) {
@@ -390,7 +377,7 @@ public class DataFrameUtils {
 
     List<MetricExpression> expressions = Utils.convertToMetricExpressions(metric.getName(),
         metric.getDefaultAggFunction(), metric.getDataset(),
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+        thirdEyeCacheRegistry);
 
     ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, metric, dataset, expressions,
         metricDAO)

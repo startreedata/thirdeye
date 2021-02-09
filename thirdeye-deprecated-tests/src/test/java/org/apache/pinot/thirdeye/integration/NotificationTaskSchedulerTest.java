@@ -35,9 +35,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
 import org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter;
@@ -49,7 +47,6 @@ import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.quartz.SchedulerException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -134,17 +131,11 @@ public class NotificationTaskSchedulerTest {
     app.setRecipients("test@test");
     this.appDAO.save(app);
 
-    AggregationLoader aggregationLoader =
-        new DefaultAggregationLoader(metricDAO, datasetDAO, DeprecatedInjectorUtil
-            .getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache(),
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-                .getDatasetMaxDataTimeCache());
-
     DataProvider provider = new DefaultDataProvider(metricDAO,
         datasetDAO,
         eventDAO,
         evaluationDAO,
-        aggregationLoader,
+        mock(AggregationLoader.class),
         mock(TimeSeriesCacheBuilder.class),
         mock(AnomaliesCacheBuilder.class));
 

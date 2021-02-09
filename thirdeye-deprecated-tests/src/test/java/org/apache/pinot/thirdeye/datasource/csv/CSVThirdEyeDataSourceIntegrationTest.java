@@ -30,6 +30,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.datasource.mock.MockThirdEyeDataSourceIntegrationTest;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -83,8 +84,9 @@ public class CSVThirdEyeDataSourceIntegrationTest {
         .getInstance(ThirdEyeCacheRegistry.class);
 
     MetricSlice slice = MetricSlice.from(configDTO.getId(), 0, 7200000);
-    RequestContainer requestContainer = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.emptyList(), -1, "ref");
+    RequestContainer requestContainer = MockThirdEyeDataSourceIntegrationTest
+        .makeAggregateRequest(slice, Collections.emptyList(), -1, "ref",
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
     ThirdEyeResponse response = cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);

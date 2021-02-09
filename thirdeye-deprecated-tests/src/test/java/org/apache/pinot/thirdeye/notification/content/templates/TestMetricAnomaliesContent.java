@@ -60,9 +60,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
@@ -73,7 +71,6 @@ import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.notification.ContentFormatterUtils;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.Assert;
@@ -108,17 +105,11 @@ public class TestMetricAnomaliesContent {
     eventDAO = daoRegistry.getEventDAO();
     evaluationDAO = daoRegistry.getEvaluationManager();
 
-    AggregationLoader aggregationLoader =
-        new DefaultAggregationLoader(metricDAO, datasetDAO, DeprecatedInjectorUtil
-            .getInstance(ThirdEyeCacheRegistry.class).getDataSourceCache(),
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-                .getDatasetMaxDataTimeCache());
-
     provider = new DefaultDataProvider(metricDAO,
         datasetDAO,
         eventDAO,
         evaluationDAO,
-        aggregationLoader,
+        mock(AggregationLoader.class),
         mock(TimeSeriesCacheBuilder.class),
         mock(AnomaliesCacheBuilder.class));
   }

@@ -69,6 +69,7 @@ public class ThirdEyeCoreModule extends AbstractModule {
     return new DefaultAggregationLoader(metricConfigManager,
         datasetConfigManager,
         thirdEyeCacheRegistry.getDataSourceCache(),
-        thirdEyeCacheRegistry.getDatasetMaxDataTimeCache());
+        thirdEyeCacheRegistry.getDatasetMaxDataTimeCache(),
+        thirdEyeCacheRegistry);
   }
 }

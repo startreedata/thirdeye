@@ -42,6 +42,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
@@ -91,10 +92,12 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
   private final ExecutorService executor;
   private final Set<String> excludeDimensions;
   private final int k;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   /**
    * Constructor for dependency injection
    *
+   * @param thirdEyeCacheRegistry
    * @param outputName pipeline output name
    * @param inputNames input pipeline names
    * @param metricDAO metric config DAO
@@ -102,10 +105,15 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
    * @param cache query cache for running contribution analysis
    * @param executor executor service for parallel task execution
    */
-  public MetricComponentAnalysisPipeline(String outputName, Set<String> inputNames,
+  public MetricComponentAnalysisPipeline(String outputName,
+      Set<String> inputNames,
       MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, DataSourceCache cache, ExecutorService executor,
-      Set<String> excludeDimensions, int k) {
+      DatasetConfigManager datasetDAO,
+      DataSourceCache cache,
+      ExecutorService executor,
+      Set<String> excludeDimensions,
+      int k,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
@@ -113,6 +121,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     this.executor = executor;
     this.excludeDimensions = excludeDimensions;
     this.k = k;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -201,7 +210,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     String ref = String.format("%d", slice.getMetricId());
     RequestContainer rc = DataFrameUtils
         .makeAggregateRequest(slice, Collections.emptyList(), -1, ref, this.metricDAO,
-            this.datasetDAO);
+            this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc);
@@ -213,7 +222,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
     RequestContainer rc = DataFrameUtils
         .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO,
-            this.datasetDAO);
+            this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc);

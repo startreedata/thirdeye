@@ -56,7 +56,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
-import org.apache.pinot.thirdeye.Constants.CompareMode;
 import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
@@ -266,26 +265,6 @@ public abstract class ThirdEyeUtils {
   public static String constructMetricAlias(String datasetName, String metricName) {
     String alias = datasetName + MetricConfigBean.ALIAS_JOINER + metricName;
     return alias;
-  }
-
-  public static Period getbaselineOffsetPeriodByMode(CompareMode compareMode) {
-    int numWeeksAgo = 1;
-    switch (compareMode) {
-      case Wo2W:
-        numWeeksAgo = 2;
-        break;
-      case Wo3W:
-        numWeeksAgo = 3;
-        break;
-      case Wo4W:
-        numWeeksAgo = 4;
-        break;
-      case WoW:
-      default:
-        numWeeksAgo = 1;
-        break;
-    }
-    return new Period(0, 0, 0, 7 * numWeeksAgo, 0, 0, 0, 0);
   }
 
   public static DatasetConfigDTO getDatasetConfigFromName(String dataset) {

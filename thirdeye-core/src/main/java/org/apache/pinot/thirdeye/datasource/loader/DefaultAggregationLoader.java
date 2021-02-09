@@ -36,6 +36,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.slf4j.Logger;
@@ -51,13 +52,18 @@ public class DefaultAggregationLoader implements AggregationLoader {
   private final DatasetConfigManager datasetDAO;
   private final DataSourceCache cache;
   private final LoadingCache<String, Long> maxTimeCache;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
-  public DefaultAggregationLoader(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
-      DataSourceCache cache, LoadingCache<String, Long> maxTimeCache) {
+  public DefaultAggregationLoader(MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO,
+      DataSourceCache cache,
+      LoadingCache<String, Long> maxTimeCache,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.cache = cache;
     this.maxTimeCache = maxTimeCache;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -94,7 +100,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
     for (String dimension : dimensions) {
       RequestContainer rc = DataFrameUtils
           .makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref",
-              this.metricDAO, this.datasetDAO);
+              this.metricDAO, this.datasetDAO,
+              thirdEyeCacheRegistry);
       Future<ThirdEyeResponse> res = this.cache.getQueryResultAsync(rc.getRequest());
 
       requests.put(dimension, rc);
@@ -154,7 +161,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     RequestContainer rc = DataFrameUtils
         .makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref", this.metricDAO,
-            this.datasetDAO);
+            this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
     return DataFrameUtils.evaluateResponse(res, rc);
   }

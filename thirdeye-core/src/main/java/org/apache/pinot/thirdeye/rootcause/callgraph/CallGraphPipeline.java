@@ -36,6 +36,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Entity;
@@ -108,11 +109,21 @@ public class CallGraphPipeline extends Pipeline {
   private final int k;
 
   private final double cutoffFraction;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
-  public CallGraphPipeline(String outputName, Set<String> inputNames, MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, DataSourceCache cache, String dataset, String metricCount,
+  public CallGraphPipeline(String outputName,
+      Set<String> inputNames,
+      MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO,
+      DataSourceCache cache,
+      String dataset,
+      String metricCount,
       String metricLatency,
-      Set<String> includeDimensions, Set<String> excludeDimensions, int k, double cutoffFraction) {
+      Set<String> includeDimensions,
+      Set<String> excludeDimensions,
+      int k,
+      double cutoffFraction,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
@@ -124,6 +135,7 @@ public class CallGraphPipeline extends Pipeline {
     this.excludeDimensions = excludeDimensions;
     this.k = k;
     this.cutoffFraction = cutoffFraction;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
 
@@ -168,16 +180,16 @@ public class CallGraphPipeline extends Pipeline {
       // prepare requests
       RequestContainer rcCurrCount = DataFrameUtils
           .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", this.metricDAO,
-              this.datasetDAO);
+              this.datasetDAO, thirdEyeCacheRegistry);
       RequestContainer rcCurrLatency = DataFrameUtils
           .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", this.metricDAO,
-              this.datasetDAO);
+              this.datasetDAO, thirdEyeCacheRegistry);
       RequestContainer rcBaseCount = DataFrameUtils
           .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", this.metricDAO,
-              this.datasetDAO);
+              this.datasetDAO, thirdEyeCacheRegistry);
       RequestContainer rcBaseLatency = DataFrameUtils
           .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", this.metricDAO,
-              this.datasetDAO);
+              this.datasetDAO, thirdEyeCacheRegistry);
 
       // send requests
       Future<ThirdEyeResponse> resCurrCount = this.cache

@@ -39,6 +39,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
@@ -93,6 +94,7 @@ public class MetricBreakdownPipeline extends Pipeline {
   private final Set<String> excludeDimensions;
   private final int k;
   private final boolean ignoreScore;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   /**
    * Constructor for dependency injection
@@ -108,12 +110,14 @@ public class MetricBreakdownPipeline extends Pipeline {
    * @param k number of top-ranking elements to emit
    * @param ignoreScore flag to include all breakdowns, even if score is zero (only set if
    *     ignoring wanted)
+   * @param thirdEyeCacheRegistry
    */
   public MetricBreakdownPipeline(String outputName, Set<String> inputNames,
       MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO, DataSourceCache cache, ExecutorService executor,
       Set<String> includeDimensions,
-      Set<String> excludeDimensions, int k, boolean ignoreScore) {
+      Set<String> excludeDimensions, int k, boolean ignoreScore,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
@@ -123,6 +127,7 @@ public class MetricBreakdownPipeline extends Pipeline {
     this.excludeDimensions = excludeDimensions;
     this.k = k;
     this.ignoreScore = ignoreScore;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -169,7 +174,7 @@ public class MetricBreakdownPipeline extends Pipeline {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
     RequestContainer rc = DataFrameUtils
         .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO,
-            this.datasetDAO);
+            this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc);

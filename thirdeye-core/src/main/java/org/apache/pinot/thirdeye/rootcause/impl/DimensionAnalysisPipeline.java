@@ -44,6 +44,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Entity;
@@ -87,10 +88,12 @@ public class DimensionAnalysisPipeline extends Pipeline {
   private final DatasetConfigManager datasetDAO;
   private final ExecutorService executor;
   private final int k;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   /**
    * Constructor for dependency injection
    *
+   * @param thirdEyeCacheRegistry
    * @param outputName pipeline output name
    * @param inputNames input pipeline names
    * @param metricDAO metric config DAO
@@ -98,15 +101,21 @@ public class DimensionAnalysisPipeline extends Pipeline {
    * @param cache query cache for running contribution analysis
    * @param executor executor service for parallel task execution
    */
-  public DimensionAnalysisPipeline(String outputName, Set<String> inputNames,
+  public DimensionAnalysisPipeline(String outputName,
+      Set<String> inputNames,
       MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, DataSourceCache cache, ExecutorService executor, int k) {
+      DatasetConfigManager datasetDAO,
+      DataSourceCache cache,
+      ExecutorService executor,
+      int k,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     super(outputName, inputNames);
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.cache = cache;
     this.executor = executor;
     this.k = k;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -167,7 +176,7 @@ public class DimensionAnalysisPipeline extends Pipeline {
     RequestContainer
         rc = DataFrameUtils
         .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO,
-            this.datasetDAO);
+            this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc);

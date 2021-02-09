@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +46,10 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
+import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
+import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
+import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
+import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
@@ -51,6 +57,7 @@ import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.apache.pinot.thirdeye.rootcause.RCAFrameworkExecutionResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
+import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -121,12 +128,18 @@ public class RCAFrameworkRunner {
     File config = new File(cmd.getOptionValue(CLI_THIRDEYE_CONFIG));
 
     File daoConfig = new File(config.getAbsolutePath() + "/persistence.yml");
+    final PersistenceConfig configuration = PersistenceConfig.readPersistenceConfig(daoConfig);
+    final DatabaseConfiguration dbConfig = configuration.getDatabaseConfiguration();
+
+    final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
+    Injector injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
+
     DeprecatedInjectorUtil.init(daoConfig);
 
     ThirdEyeConfiguration thirdEyeConfig = new ThirdEyeWorkerConfiguration();
     thirdEyeConfig.setRootDir(config.getAbsolutePath());
 
-    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+    injector.getInstance(ThirdEyeCacheRegistry.class)
         .initializeCaches(thirdEyeConfig);
 
     // ************************************************************************

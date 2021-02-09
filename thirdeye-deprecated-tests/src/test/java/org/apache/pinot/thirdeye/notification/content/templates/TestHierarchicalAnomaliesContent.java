@@ -155,11 +155,12 @@ public class TestHierarchicalAnomaliesContent {
     SubscriptionGroupDTO notificationConfigDTO = DaoTestUtils
         .getTestNotificationConfig("Test Config");
 
+    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = DeprecatedInjectorUtil
+        .getInstance(ThirdEyeCacheRegistry.class);
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(new Properties(),
-        new HierarchicalAnomaliesContent(
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-                .getDataSourceCache()),
+        new HierarchicalAnomaliesContent(thirdEyeCacheRegistry.getDataSourceCache(),
+            thirdEyeCacheRegistry),
         thirdeyeAnomalyConfig, notificationConfigDTO);
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);
 

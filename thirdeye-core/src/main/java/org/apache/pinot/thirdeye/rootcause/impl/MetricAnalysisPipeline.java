@@ -40,6 +40,7 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
@@ -85,6 +86,7 @@ public class MetricAnalysisPipeline extends Pipeline {
   private final DatasetConfigManager datasetDAO;
   private final ScoringStrategyFactory strategyFactory;
   private final TimeGranularity granularity;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   /**
    * Constructor for dependency injection
@@ -96,16 +98,23 @@ public class MetricAnalysisPipeline extends Pipeline {
    * @param cache query cache
    * @param metricDAO metric config DAO
    * @param datasetDAO datset config DAO
+   * @param thirdEyeCacheRegistry
    */
-  public MetricAnalysisPipeline(String outputName, Set<String> inputNames,
-      ScoringStrategyFactory strategyFactory, TimeGranularity granularity, DataSourceCache cache,
-      MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
+  public MetricAnalysisPipeline(String outputName,
+      Set<String> inputNames,
+      ScoringStrategyFactory strategyFactory,
+      TimeGranularity granularity,
+      DataSourceCache cache,
+      MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     super(outputName, inputNames);
     this.cache = cache;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.strategyFactory = strategyFactory;
     this.granularity = granularity;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -284,21 +293,13 @@ public class MetricAnalysisPipeline extends Pipeline {
       MetricSlice slice = MetricSlice.from(me.getId(), start, end, jointFilters, this.granularity);
       try {
         requests.add(DataFrameUtils
-            .makeTimeSeriesRequestAligned(slice, me.getUrn(), this.metricDAO, this.datasetDAO));
+            .makeTimeSeriesRequestAligned(slice, me.getUrn(), this.metricDAO, this.datasetDAO,
+                thirdEyeCacheRegistry));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request for '%s'. Skipping.", me.getUrn()), ex);
       }
     }
     return requests;
-  }
-
-  private static ScoringStrategyFactory parseStrategyFactory(String strategy) {
-    switch (strategy) {
-      case STRATEGY_THRESHOLD:
-        return new ThresholdStrategyFactory(0.90, 0.95, 0.975, 0.99, 1.00);
-      default:
-        throw new IllegalArgumentException(String.format("Unknown strategy '%s'", strategy));
-    }
   }
 
   private interface ScoringStrategyFactory {

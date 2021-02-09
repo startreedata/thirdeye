@@ -42,6 +42,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
@@ -93,6 +94,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
   private final DatasetConfigManager datasetDAO;
   private final ScoringStrategyFactory strategyFactory;
   private final TimeGranularity granularity;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   /**
    * Constructor for dependency injection
@@ -104,16 +106,23 @@ public class MetricAnalysisPipeline2 extends Pipeline {
    * @param cache query cache
    * @param metricDAO metric config DAO
    * @param datasetDAO datset config DAO
+   * @param thirdEyeCacheRegistry
    */
-  public MetricAnalysisPipeline2(String outputName, Set<String> inputNames,
-      ScoringStrategyFactory strategyFactory, TimeGranularity granularity, DataSourceCache cache,
-      MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
+  public MetricAnalysisPipeline2(String outputName,
+      Set<String> inputNames,
+      ScoringStrategyFactory strategyFactory,
+      TimeGranularity granularity,
+      DataSourceCache cache,
+      MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     super(outputName, inputNames);
     this.cache = cache;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.strategyFactory = strategyFactory;
     this.granularity = granularity;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -342,7 +351,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
       try {
         requests.add(DataFrameUtils
             .makeTimeSeriesRequestAligned(slice, makeIdentifier(slice), this.metricDAO,
-                this.datasetDAO));
+                this.datasetDAO, thirdEyeCacheRegistry));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request. Skipping."), ex);
       }

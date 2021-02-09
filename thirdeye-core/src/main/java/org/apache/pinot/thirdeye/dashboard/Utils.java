@@ -64,7 +64,8 @@ public class Utils {
   }
 
   public static List<MetricExpression> convertToMetricExpressions(String metricsJson,
-      MetricAggFunction aggFunction, String dataset) throws ExecutionException {
+      MetricAggFunction aggFunction, String dataset,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) throws ExecutionException {
 
     List<MetricExpression> metricExpressions = new ArrayList<>();
     if (metricsJson == null) {
@@ -84,7 +85,8 @@ public class Utils {
     }
     for (String metricExpressionName : metricExpressionNames) {
       String derivedMetricExpression = ThirdEyeUtils
-          .getDerivedMetricExpression(metricExpressionName, dataset);
+          .getDerivedMetricExpression(metricExpressionName, dataset,
+              thirdEyeCacheRegistry);
       MetricExpression metricExpression = new MetricExpression(metricExpressionName,
           derivedMetricExpression,
           aggFunction, dataset);

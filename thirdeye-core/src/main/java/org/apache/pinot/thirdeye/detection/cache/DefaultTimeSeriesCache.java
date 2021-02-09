@@ -32,6 +32,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
@@ -58,14 +59,20 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
   private final DataSourceCache dataSourceCache;
   private final CacheDAO cacheDAO;
   private final ExecutorService executor;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
-  public DefaultTimeSeriesCache(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
-      DataSourceCache dataSourceCache, CacheDAO cacheDAO, ExecutorService executorService) {
+  public DefaultTimeSeriesCache(MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO,
+      DataSourceCache dataSourceCache,
+      CacheDAO cacheDAO,
+      ExecutorService executorService,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.dataSourceCache = dataSourceCache;
     this.cacheDAO = cacheDAO;
     this.executor = executorService;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   /**
@@ -151,7 +158,8 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
    */
   private ThirdEyeResponse fetchSliceFromSource(MetricSlice slice) throws Exception {
     TimeSeriesRequestContainer rc = DataFrameUtils
-        .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO);
+        .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO,
+            thirdEyeCacheRegistry);
     return this.dataSourceCache.getQueryResult(rc.getRequest());
   }
 

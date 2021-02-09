@@ -27,6 +27,7 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
@@ -43,16 +44,19 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
   private final DatasetConfigManager datasetDAO;
   private final DataSourceCache dataSourceCache;
   private final TimeSeriesCache timeSeriesCache;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   @Inject
   public DefaultTimeSeriesLoader(MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO,
       DataSourceCache dataSourceCache,
-      TimeSeriesCache cache) {
+      TimeSeriesCache cache,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.dataSourceCache = dataSourceCache;
     this.timeSeriesCache = cache;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   /**
@@ -66,7 +70,8 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
     LOG.info("Loading time series for '{}'", slice);
 
     TimeSeriesRequestContainer rc = DataFrameUtils
-        .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO);
+        .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO,
+            thirdEyeCacheRegistry);
     ThirdEyeResponse response;
     if (CacheConfig.getInstance().useCentralizedCache()) {
       response = this.timeSeriesCache.fetchTimeSeries(rc.getRequest());

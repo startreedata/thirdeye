@@ -197,7 +197,8 @@ public class DataProviderTest {
         DAORegistry.getInstance().getMetricConfigDAO(),
         DAORegistry.getInstance().getDatasetConfigDAO(),
         cacheRegistry.getDataSourceCache(),
-        cacheRegistry.getTimeSeriesCache());
+        cacheRegistry.getTimeSeriesCache(),
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     // provider
     final TimeSeriesCacheBuilder timeSeriesCacheBuilder = new TimeSeriesCacheBuilder(timeSeriesLoader);

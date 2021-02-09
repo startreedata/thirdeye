@@ -36,6 +36,7 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
@@ -68,6 +69,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
   protected final static DateTime NULL_DATETIME = new DateTime();
   protected final static int TIME_OUT_VALUE = 1200;
   protected final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   protected DataSourceCache dataSourceCache;
   protected String dataset = "";
@@ -80,9 +82,12 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
    * Constructs a Pinot client.
    *
    * @param dataSourceCache the query cached to Pinot.
+   * @param thirdEyeCacheRegistry
    */
-  public BaseCubePinotClient(DataSourceCache dataSourceCache) {
+  public BaseCubePinotClient(DataSourceCache dataSourceCache,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     this.dataSourceCache = Preconditions.checkNotNull(dataSourceCache);
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   public void setDataset(String dataset) {
@@ -118,7 +123,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
    * @param filterSets the data filter.
    * @return a list of ThirdEye requests.
    */
-  protected static Map<CubeTag, ThirdEyeRequestMetricExpressions> constructBulkRequests(
+  protected Map<CubeTag, ThirdEyeRequestMetricExpressions> constructBulkRequests(
       String dataset,
       List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets)
       throws ExecutionException {
@@ -128,7 +133,8 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
     for (CubeSpec cubeSpec : cubeSpecs) {
       // Set dataset and metric
       List<MetricExpression> metricExpressions =
-          Utils.convertToMetricExpressions(cubeSpec.getMetric(), MetricAggFunction.SUM, dataset);
+          Utils.convertToMetricExpressions(cubeSpec.getMetric(), MetricAggFunction.SUM, dataset,
+              thirdEyeCacheRegistry);
       List<MetricFunction> metricFunctions = metricExpressions.get(0).computeMetricFunctions();
 
       ThirdEyeRequest.ThirdEyeRequestBuilder builder = ThirdEyeRequest.newBuilder();
@@ -259,7 +265,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
   public R getTopAggregatedValues(Multimap<String, String> filterSets) throws Exception {
     List<String> groupBy = Collections.emptyList();
     List<Map<CubeTag, ThirdEyeRequestMetricExpressions>> bulkRequests = Collections.singletonList(
-        BaseCubePinotClient.constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
+        constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
     return constructAggregatedValues(new Dimensions(), bulkRequests).get(0).get(0);
   }
 
@@ -271,7 +277,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
     for (int level = 0; level < dimensions.size(); ++level) {
       List<String> groupBy = Lists.newArrayList(dimensions.get(level));
       bulkRequests.add(
-          BaseCubePinotClient.constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
+          constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }
@@ -284,7 +290,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
     for (int level = 0; level < dimensions.size() + 1; ++level) {
       List<String> groupBy = Lists.newArrayList(dimensions.namesToDepth(level));
       bulkRequests.add(
-          BaseCubePinotClient.constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
+          constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }

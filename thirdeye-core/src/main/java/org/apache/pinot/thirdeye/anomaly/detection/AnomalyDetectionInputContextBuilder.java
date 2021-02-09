@@ -49,6 +49,7 @@ import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.timeseries.AnomalyDetectionTimeSeriesResponseParser;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesHandler;
@@ -73,6 +74,7 @@ public class AnomalyDetectionInputContextBuilder {
 
   private final AnomalyFunctionFactory anomalyFunctionFactory;
   private final DataSourceCache dataSourceCache;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   private AnomalyDetectionInputContext anomalyDetectionInputContext;
   private AnomalyFunctionDTO anomalyFunctionSpec;
@@ -80,9 +82,10 @@ public class AnomalyDetectionInputContextBuilder {
   private List<String> collectionDimensions;
 
   public AnomalyDetectionInputContextBuilder(AnomalyFunctionFactory anomalyFunctionFactory,
-      final DataSourceCache dataSourceCache) {
+      final DataSourceCache dataSourceCache, final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     this.anomalyFunctionFactory = anomalyFunctionFactory;
     this.dataSourceCache = dataSourceCache;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   /**
@@ -686,7 +689,7 @@ public class AnomalyDetectionInputContextBuilder {
       List<Pair<Long, Long>> startEndTimeRanges, TimeGranularity timeGranularity,
       Multimap<String, String> filters,
       List<String> groupByDimensions, boolean endTimeInclusive)
-      throws JobExecutionException, ExecutionException {
+      throws ExecutionException {
 
     TimeSeriesHandler timeSeriesHandler = new TimeSeriesHandler(dataSourceCache);
 
@@ -697,7 +700,8 @@ public class AnomalyDetectionInputContextBuilder {
     String metricsToRetrieve = StringUtils.join(metrics, ",");
     List<MetricExpression> metricExpressions = Utils
         .convertToMetricExpressions(metricsToRetrieve,
-            anomalyFunctionSpec.getMetricFunction(), anomalyFunctionSpec.getCollection());
+            anomalyFunctionSpec.getMetricFunction(), anomalyFunctionSpec.getCollection(),
+            thirdEyeCacheRegistry);
     seedRequest.setMetricExpressions(metricExpressions);
     seedRequest.setAggregationTimeGranularity(timeGranularity);
     seedRequest.setEndDateInclusive(false);

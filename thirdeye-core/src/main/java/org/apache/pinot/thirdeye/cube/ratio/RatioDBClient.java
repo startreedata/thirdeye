@@ -27,6 +27,7 @@ import org.apache.pinot.thirdeye.cube.data.dbclient.CubeSpec;
 import org.apache.pinot.thirdeye.cube.data.dbclient.CubeTag;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 
 /**
@@ -45,9 +46,11 @@ public class RatioDBClient extends BaseCubePinotClient<RatioRow> {
    * Constructs a DB client to the ratio metric.
    *
    * @param dataSourceCache the query cache to Pinot DB.
+   * @param thirdEyeCacheRegistry
    */
-  public RatioDBClient(DataSourceCache dataSourceCache) {
-    super(dataSourceCache);
+  public RatioDBClient(DataSourceCache dataSourceCache,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+    super(dataSourceCache, thirdEyeCacheRegistry);
   }
 
   /**

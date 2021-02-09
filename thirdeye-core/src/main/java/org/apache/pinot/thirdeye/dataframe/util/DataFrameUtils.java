@@ -40,12 +40,13 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
-import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
@@ -234,43 +235,6 @@ public class DataFrameUtils {
   }
 
   /**
-   * Returns a DataFrame wrapping the requested time series at the associated dataset's native
-   * time granularity.
-   *
-   * @param slice metric data slice
-   * @param metricDAO metric config DAO
-   * @param datasetDAO dataset config DAO
-   * @param cache query cache
-   * @return DataFrame with time series
-   */
-  public static DataFrame fetchTimeSeries(MetricSlice slice, MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, DataSourceCache cache) throws Exception {
-    String ref = String
-        .format("%s-%d-%d", Thread.currentThread().getName(), slice.metricId, System.nanoTime());
-    RequestContainer req = makeTimeSeriesRequest(slice, ref, metricDAO, datasetDAO);
-    ThirdEyeResponse resp = cache.getQueryResult(req.request);
-    return evaluateExpressions(parseResponse(resp), req.expressions);
-  }
-
-  /**
-   * Constructs and wraps a request for a metric with derived expressions. Resolves all
-   * required dependencies from the Thirdeye database.
-   * <br/><b>NOTE:</b> this method injects dependencies from the DAO registry.
-   *
-   * @param slice metric data slice
-   * @param reference unique identifier for request
-   * @return RequestContainer
-   * @see DataFrameUtils#makeTimeSeriesRequest(MetricSlice slice, String, MetricConfigManager,
-   *     DatasetConfigManager)
-   */
-  public static TimeSeriesRequestContainer makeTimeSeriesRequest(MetricSlice slice,
-      String reference) throws Exception {
-    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    return makeTimeSeriesRequest(slice, reference, metricDAO, datasetDAO);
-  }
-
-  /**
    * Constructs and wraps a request for a metric with derived expressions. Resolves all
    * required dependencies from the Thirdeye database. Also aligns start and end timestamps by
    * rounding them down (start) and up (end) to align with metric time granularity boundaries.
@@ -280,10 +244,12 @@ public class DataFrameUtils {
    * @param reference unique identifier for request
    * @param metricDAO metric config DAO
    * @param datasetDAO dataset config DAO
+   * @param thirdEyeCacheRegistry
    * @return TimeSeriesRequestContainer
    */
   public static TimeSeriesRequestContainer makeTimeSeriesRequestAligned(MetricSlice slice,
-      String reference, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO)
+      String reference, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
     MetricConfigDTO metric = metricDAO.findById(slice.metricId);
     if (metric == null) {
@@ -299,7 +265,8 @@ public class DataFrameUtils {
     }
 
     List<MetricExpression> expressions = Utils.convertToMetricExpressions(metric.getName(),
-        metric.getDefaultAggFunction(), metric.getDataset());
+        metric.getDefaultAggFunction(), metric.getDataset(),
+        thirdEyeCacheRegistry);
 
     TimeGranularity granularity = dataset.bucketTimeGranularity();
     if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.granularity)) {
@@ -332,10 +299,12 @@ public class DataFrameUtils {
    * @param reference unique identifier for request
    * @param metricDAO metric config DAO
    * @param datasetDAO dataset config DAO
+   * @param thirdEyeCacheRegistry
    * @return TimeSeriesRequestContainer
    */
   public static TimeSeriesRequestContainer makeTimeSeriesRequest(MetricSlice slice,
-      String reference, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO)
+      String reference, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
     MetricConfigDTO metric = metricDAO.findById(slice.metricId);
     if (metric == null) {
@@ -351,7 +320,8 @@ public class DataFrameUtils {
     }
 
     List<MetricExpression> expressions = Utils.convertToMetricExpressions(metric.getName(),
-        metric.getDefaultAggFunction(), metric.getDataset());
+        metric.getDefaultAggFunction(), metric.getDataset(),
+        thirdEyeCacheRegistry);
 
     TimeGranularity granularity = dataset.bucketTimeGranularity();
     if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.granularity)) {
@@ -419,7 +389,8 @@ public class DataFrameUtils {
     }
 
     List<MetricExpression> expressions = Utils.convertToMetricExpressions(metric.getName(),
-        metric.getDefaultAggFunction(), metric.getDataset());
+        metric.getDefaultAggFunction(), metric.getDataset(),
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, metric, dataset, expressions,
         metricDAO)

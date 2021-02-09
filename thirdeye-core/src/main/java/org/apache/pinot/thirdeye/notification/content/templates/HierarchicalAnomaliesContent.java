@@ -48,6 +48,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detector.function.AnomalyFunctionFactory;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
@@ -71,13 +72,16 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
 
   private static final String PRESENT_SEASONAL_VALUES = "presentSeasonalValues";
   private static final String DEFAULT_PRESENT_SEASONAL_VALUES = "false";
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   private boolean presentSeasonalValues;
   private Set<EventDTO> relatedEvents;
   private final DataSourceCache dataSourceCache;
 
-  public HierarchicalAnomaliesContent(final DataSourceCache dataSourceCache) {
+  public HierarchicalAnomaliesContent(final DataSourceCache dataSourceCache,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     this.dataSourceCache = dataSourceCache;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -244,7 +248,8 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
     DatasetConfigDTO datasetConfigDTO = DAORegistry.getInstance().getDatasetConfigDAO()
         .findByDataset(anomalyFunction.getCollection());
     AnomalyDetectionInputContextBuilder contextBuilder = new AnomalyDetectionInputContextBuilder(
-        anomalyFunctionFactory, dataSourceCache);
+        anomalyFunctionFactory, dataSourceCache,
+        thirdEyeCacheRegistry);
     contextBuilder.setFunction(anomalyFunction);
 
     DateTimeZone timeZone = DateTimeZone.forID(datasetConfigDTO.getTimezone());

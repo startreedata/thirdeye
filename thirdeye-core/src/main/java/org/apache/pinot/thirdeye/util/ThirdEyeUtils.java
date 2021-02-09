@@ -236,15 +236,17 @@ public abstract class ThirdEyeUtils {
     return metricExpression;
   }
 
-  public static String getDerivedMetricExpression(String metricExpressionName, String dataset)
+  public static String getDerivedMetricExpression(String metricExpressionName,
+      String dataset,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws ExecutionException {
-    String derivedMetricExpression = null;
-    MetricDataset metricDataset = new MetricDataset(metricExpressionName, dataset);
+    final MetricDataset metricDataset = new MetricDataset(metricExpressionName, dataset);
 
-    MetricConfigDTO metricConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+    MetricConfigDTO metricConfig = thirdEyeCacheRegistry
         .getMetricConfigCache()
         .get(metricDataset);
 
+    String derivedMetricExpression;
     if (metricConfig != null && metricConfig.getDerivedMetricExpression() != null) {
       derivedMetricExpression = metricConfig.getDerivedMetricExpression();
     } else {

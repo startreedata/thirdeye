@@ -107,7 +107,7 @@ public class TimeSeriesCacheTest {
     this.executor = Executors.newSingleThreadExecutor();
 
     this.cache = new DefaultTimeSeriesCache(metricDAO, datasetDAO, dataSourceCache, cacheDAO,
-        executor);
+        executor, DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
     DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
         .registerTimeSeriesCache(this.cache);
   }

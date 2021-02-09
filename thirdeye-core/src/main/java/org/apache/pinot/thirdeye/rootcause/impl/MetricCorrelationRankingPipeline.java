@@ -38,6 +38,7 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
@@ -89,6 +90,7 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
   private final DatasetConfigManager datasetDAO;
   private final String targetInput;
   private final ScoringStrategy strategy;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   /**
    * Constructor for dependency injection
@@ -100,17 +102,23 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
    * @param cache query cache
    * @param metricDAO metric config DAO
    * @param datasetDAO datset config DAO
+   * @param thirdEyeCacheRegistry
    */
-  public MetricCorrelationRankingPipeline(String outputName, Set<String> inputNames,
-      String targetInput, ScoringStrategy strategy, DataSourceCache cache,
+  public MetricCorrelationRankingPipeline(String outputName,
+      Set<String> inputNames,
+      String targetInput,
+      ScoringStrategy strategy,
+      DataSourceCache cache,
       MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO) {
+      DatasetConfigManager datasetDAO,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     super(outputName, inputNames);
     this.targetInput = targetInput;
     this.cache = cache;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.strategy = strategy;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -308,7 +316,8 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
       MetricSlice slice = MetricSlice.from(e.getId(), range.getStart(), range.getEnd(), filters);
       try {
         requests
-            .add(DataFrameUtils.makeTimeSeriesRequest(slice, id, this.metricDAO, this.datasetDAO));
+            .add(DataFrameUtils.makeTimeSeriesRequest(slice, id, this.metricDAO, this.datasetDAO,
+                thirdEyeCacheRegistry));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request for '%s'. Skipping.", id), ex);
       }

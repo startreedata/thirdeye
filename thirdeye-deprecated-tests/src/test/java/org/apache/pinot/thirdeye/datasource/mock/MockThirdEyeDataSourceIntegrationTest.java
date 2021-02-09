@@ -30,6 +30,8 @@ import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.RequestContainer;
 import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
 import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -53,6 +55,25 @@ public class MockThirdEyeDataSourceIntegrationTest {
   private ThirdEyeCacheRegistry cacheRegistry;
 
   private long timestamp;
+
+  /**
+   * Constructs and wraps a request for a metric with derived expressions. Resolves all
+   * required dependencies from the Thirdeye database.
+   * <br/><b>NOTE:</b> this method injects dependencies from the DAO registry.
+   *
+   * @param slice metric data slice
+   * @param reference unique identifier for request
+   * @return RequestContainer
+   * @see DataFrameUtils#makeTimeSeriesRequest(MetricSlice slice, String, MetricConfigManager,
+   *     DatasetConfigManager)
+   */
+  public static TimeSeriesRequestContainer makeTimeSeriesRequest(MetricSlice slice,
+      String reference) throws Exception {
+    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
+    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    return DataFrameUtils.makeTimeSeriesRequest(slice, reference, metricDAO, datasetDAO,
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+  }
 
   @BeforeClass
   void beforeMethod() throws Exception {
@@ -170,8 +191,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
   public void testTimeSeries() throws Exception {
     MetricSlice slice = MetricSlice
         .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
-    TimeSeriesRequestContainer requestContainer = DataFrameUtils
-        .makeTimeSeriesRequest(slice, "ref");
+    TimeSeriesRequestContainer requestContainer = makeTimeSeriesRequest(slice, "ref");
     ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);

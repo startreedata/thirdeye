@@ -50,7 +50,8 @@ public class ThirdEyeCoreModule extends AbstractModule {
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     return new DefaultTimeSeriesLoader(metricConfigManager, datasetConfigManager,
         thirdEyeCacheRegistry.getDataSourceCache(),
-        thirdEyeCacheRegistry.getTimeSeriesCache());
+        thirdEyeCacheRegistry.getTimeSeriesCache(),
+        thirdEyeCacheRegistry);
   }
 
   @Singleton

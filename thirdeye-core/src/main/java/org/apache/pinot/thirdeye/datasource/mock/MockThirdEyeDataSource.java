@@ -53,6 +53,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.StringSeries;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
@@ -333,8 +334,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public long getMaxDataTime(String dataset) throws Exception {
-    return this.delegate.getMaxDataTime(dataset);
+  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
+    return this.delegate.getMaxDataTime(datasetConfig);
   }
 
   @Override

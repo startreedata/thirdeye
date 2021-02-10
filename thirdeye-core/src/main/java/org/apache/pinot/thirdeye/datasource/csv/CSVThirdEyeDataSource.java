@@ -44,6 +44,7 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.Grouping;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.Series;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
@@ -304,11 +305,11 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public long getMaxDataTime(String dataset) throws Exception {
-    if (!dataSets.containsKey(dataset)) {
+  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
+    if (!dataSets.containsKey(datasetConfig.getName())) {
       throw new IllegalArgumentException();
     }
-    return dataSets.get(dataset).getLongs(COL_TIMESTAMP).max().longValue();
+    return dataSets.get(datasetConfig.getName()).getLongs(COL_TIMESTAMP).max().longValue();
   }
 
   @Override

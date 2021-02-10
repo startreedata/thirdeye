@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
@@ -27,14 +28,22 @@ public class MockThirdEyeDataSourceTest {
 
   private MockThirdEyeDataSource dataSource;
 
+  private static DatasetConfigDTO newDataset(final String name) {
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
+    datasetConfigDTO.setDataset(name);
+    return datasetConfigDTO;
+  }
+
   @BeforeMethod
   public void beforeMethod() throws Exception {
     Yaml yaml = new Yaml();
     try (Reader dataReader = new InputStreamReader(
         this.getClass().getResourceAsStream("data-sources-config.yml"))) {
+
       // NOTE: Yes, static typing does this to you.
-      Map<String, List<Map<String, Map<String, Object>>>> config = (Map<String, List<Map<String, Map<String, Object>>>>) yaml
-          .load(dataReader);
+      Map<String, List<Map<String, Map<String, Object>>>> config =
+          (Map<String, List<Map<String, Map<String, Object>>>>) yaml.load(dataReader);
+
       this.dataSource = new MockThirdEyeDataSource(
           config.get("dataSourceConfigs").get(0).get("properties"));
     }
@@ -48,12 +57,14 @@ public class MockThirdEyeDataSourceTest {
   @Test
   public void testGetMaxTime() throws Exception {
     long time = System.currentTimeMillis();
-    Assert.assertTrue(this.dataSource.getMaxDataTime("business") <= time);
+    Assert.assertTrue(this.dataSource.getMaxDataTime(
+        newDataset("business")) <= time);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testGetMaxTimeInvalidDataset() throws Exception {
-    this.dataSource.getMaxDataTime("invalid");
+    this.dataSource.getMaxDataTime(
+        newDataset("invalid"));
   }
 
   @Test

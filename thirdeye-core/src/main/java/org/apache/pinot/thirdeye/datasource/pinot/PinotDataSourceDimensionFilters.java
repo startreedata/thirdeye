@@ -35,6 +35,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
@@ -67,7 +68,8 @@ public class PinotDataSourceDimensionFilters {
   public Map<String, List<String>> getDimensionFilters(String dataset) {
     long maxTime = System.currentTimeMillis();
     try {
-      maxTime = this.pinotThirdEyeDataSource.getMaxDataTime(dataset);
+      maxTime = this.pinotThirdEyeDataSource.getMaxDataTime(
+          DAORegistry.getInstance().getDatasetConfigDAO().findByDataset(dataset));
     } catch (Exception e) {
       // left blank
     }

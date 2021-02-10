@@ -63,7 +63,7 @@ public class DatasetMaxDataTimeCacheLoader extends CacheLoader<String, Long> {
       if (dataSource == null) {
         LOGGER.warn("dataSource [{}] found null in the query cache", dataSourceName);
       } else {
-        maxTime = dataSource.getMaxDataTime(dataset);
+        maxTime = dataSource.getMaxDataTime(datasetConfig);
       }
     } catch (Exception e) {
       LOGGER.error("Exception in getting max date time for {} from data source {}", dataset,

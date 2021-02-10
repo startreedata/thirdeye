@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.datasource;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 
 public interface ThirdEyeDataSource {
 
@@ -43,17 +44,17 @@ public interface ThirdEyeDataSource {
   /**
    * Returns max dateTime in millis for the dataset
    *
-   * @param dataset name of the dataset
    * @return the time corresponding to the earliest available data point.
+   * @param datasetConfig
    */
-  default long getMinDataTime(String dataset) throws Exception {
+  default long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
     return -1L;
   }
 
   /**
    * Returns max dateTime in millis for the dataset
    */
-  long getMaxDataTime(String dataset) throws Exception;
+  long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception;
 
   /**
    * Returns map of dimension name to dimension values for filters

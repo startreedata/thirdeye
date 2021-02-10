@@ -26,7 +26,6 @@ import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
@@ -57,8 +56,8 @@ public class PinotDataSourceTimeQuery {
    *
    * @return max date time in millis
    */
-  public long getMaxDateTime(String dataset) {
-    long maxTime = queryTimeSpecFromPinot(dataset, "max");
+  public long getMaxDateTime(final DatasetConfigDTO datasetConfig) {
+    long maxTime = queryTimeSpecFromPinot("max", datasetConfig);
     if (maxTime <= 0) {
       maxTime = System.currentTimeMillis();
     }
@@ -68,17 +67,18 @@ public class PinotDataSourceTimeQuery {
   /**
    * Returns the earliest time in millis for a dataset in pinot
    *
-   * @param dataset name of the dataset
    * @return min (earliest) date time in millis. Returns 0 if dataset is not found
+   * @param datasetConfig
    */
-  public long getMinDateTime(String dataset) {
-    return queryTimeSpecFromPinot(dataset, "min");
+  public long getMinDateTime(final DatasetConfigDTO datasetConfig) {
+    return queryTimeSpecFromPinot("min", datasetConfig);
   }
 
-  private long queryTimeSpecFromPinot(final String dataset, final String functionName) {
+  private long queryTimeSpecFromPinot(final String functionName,
+      final DatasetConfigDTO datasetConfig) {
     long maxTime = 0;
+    String dataset = datasetConfig.getName();
     try {
-      DatasetConfigDTO datasetConfig = DAORegistry.getInstance().getDatasetConfigDAO().findByDataset(dataset);
       // By default, query only offline, unless dataset has been marked as realtime
       TimeSpec timeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 

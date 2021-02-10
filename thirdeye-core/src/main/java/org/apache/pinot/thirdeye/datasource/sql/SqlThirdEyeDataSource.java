@@ -127,9 +127,9 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public long getMaxDataTime(String dataset) throws Exception {
-    LOG.info("Getting max data time for " + dataset);
-    return sqlResponseCacheLoader.getMaxDataTime(dataset);
+  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
+    LOG.info("Getting max data time for " + datasetConfig.getName());
+    return sqlResponseCacheLoader.getMaxDataTime(datasetConfig);
   }
 
   @Override

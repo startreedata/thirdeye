@@ -476,13 +476,14 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public long getMaxDataTime(String dataset) throws Exception {
-    return pinotDataSourceTimeQuery.getMaxDateTime(dataset);
+  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
+    return pinotDataSourceTimeQuery.getMaxDateTime(
+        datasetConfig);
   }
 
   @Override
-  public long getMinDataTime(final String dataset) throws Exception {
-    return pinotDataSourceTimeQuery.getMinDateTime(dataset);
+  public long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
+    return pinotDataSourceTimeQuery.getMinDateTime(datasetConfig);
   }
 
   @Override

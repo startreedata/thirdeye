@@ -30,6 +30,7 @@ import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
@@ -41,6 +42,12 @@ import org.testng.annotations.Test;
 public class CSVThirdEyeDataSourceTest {
 
   ThirdEyeDataSource dataSource;
+
+  private static DatasetConfigDTO newDataset(final String name) {
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
+    datasetConfigDTO.setDataset(name);
+    return datasetConfigDTO;
+  }
 
   @BeforeMethod
   public void beforeMethod() {
@@ -87,7 +94,9 @@ public class CSVThirdEyeDataSourceTest {
     dimensions.put("browser", Arrays.asList("chrome", "firefox", "safari"));
 
     Assert.assertEquals(dataSource.getDatasets(), Collections.singletonList("business"));
-    Assert.assertEquals(dataSource.getMaxDataTime("business"), 7200000);
+    final DatasetConfigDTO datasetConfigDTO = newDataset("business");
+
+    Assert.assertEquals(dataSource.getMaxDataTime(datasetConfigDTO), 7200000);
     Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters("business").get("country")),
         new HashSet<>(dimensions.get("country")));
     Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters("business").get("browser")),
@@ -107,12 +116,12 @@ public class CSVThirdEyeDataSourceTest {
 
   @Test
   public void testGetMaxDataTime() throws Exception {
-    Assert.assertEquals(dataSource.getMaxDataTime("source"), 10800000);
+    Assert.assertEquals(dataSource.getMaxDataTime(newDataset("source")), 10800000);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testGetMaxDataTimeFail() throws Exception {
-    dataSource.getMaxDataTime("invalid");
+    dataSource.getMaxDataTime(newDataset("invalid"));
   }
 
   @Test

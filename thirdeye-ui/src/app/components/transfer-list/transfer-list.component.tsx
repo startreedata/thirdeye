@@ -9,10 +9,13 @@ import {
     ListItemText,
     Typography,
 } from "@material-ui/core";
-import { ArrowForward, Close } from "@material-ui/icons";
+import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
+import CloseIcon from "@material-ui/icons/Close";
+import { produce } from "immer";
 import { isEmpty } from "lodash";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
@@ -21,6 +24,7 @@ import { useTransferListStyles } from "./transfer-list.styles";
 
 export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     const transferListClasses = useTransferListStyles();
+    const commonClasses = useCommonStyles();
     const [fromListMap, setFromListMap] = useState<Map<string | number, T>>(
         new Map()
     );
@@ -34,7 +38,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Input changed, populate to-list maps
+        // Input changed, populate list maps
         populateListMaps();
     }, [props.fromList, props.toList]);
 
@@ -49,8 +53,8 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     }, [fromListMap, fromSearchWords]);
 
     const populateListMaps = (): void => {
-        const newToListMap = new Map<string | number, T>();
-        const newFromListMap = new Map<string | number, T>();
+        const newToListMap = new Map();
+        const newFromListMap = new Map();
 
         if (props.toList) {
             for (const toListItem of props.toList) {
@@ -87,30 +91,27 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         listMap: Map<string | number, T>,
         searchWords: string[]
     ): T[] => {
-        const newFilteredList: T[] = [];
-
         if (isEmpty(listMap)) {
-            return newFilteredList;
+            return [];
         }
 
-        for (const item of listMap.values()) {
+        const newFilteredList = [];
+        for (const listItem of listMap.values()) {
             if (isEmpty(searchWords)) {
-                newFilteredList.push(item);
+                newFilteredList.push(listItem);
 
                 continue;
             }
 
             // Try to see if item matches any of the search words
-            const itemText =
-                props.listItemTextFn(item) ||
-                (props.listItemKeyFn(item) as string);
+            const listItemText = props.listItemTextFn(listItem) || "";
             for (const searchWord of searchWords) {
                 if (
-                    itemText
-                        .toLocaleLowerCase()
+                    listItemText
+                        .toLowerCase()
                         .indexOf(searchWord.toLowerCase()) > -1
                 ) {
-                    newFilteredList.push(item);
+                    newFilteredList.push(listItem);
 
                     break;
                 }
@@ -127,17 +128,17 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             return;
         }
 
-        // Clone from-list map and delete item
-        const newFromListMap = new Map(fromListMap);
-        newFromListMap.delete(key);
-
-        // Clone to-list map and add item
+        // Update to-list map
         const newToListMap = new Map(toListMap);
         newToListMap.set(key, item);
-
-        // Update
-        setFromListMap(newFromListMap);
         setToListMap(newToListMap);
+
+        // Update from-list map
+        setFromListMap(
+            produce((draft) => {
+                draft.delete(key);
+            })
+        );
 
         // Notify
         props.onChange && props.onChange([...newToListMap.values()]);
@@ -149,17 +150,17 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             return;
         }
 
-        // Clone to-list map and delete item
+        // Update to-list map
         const newToListMap = new Map(toListMap);
         newToListMap.delete(key);
-
-        // Clone from-list map and add item
-        const newFromListMap = new Map(fromListMap);
-        newFromListMap.set(key, item);
-
-        // Update
         setToListMap(newToListMap);
-        setFromListMap(newFromListMap);
+
+        // Update from-list map
+        setFromListMap(
+            produce((draft) => {
+                draft.set(key, item);
+            })
+        );
 
         // Notify
         props.onChange && props.onChange([...newToListMap.values()]);
@@ -169,7 +170,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         <Grid container>
             {/* From-list*/}
             <Grid item sm={6}>
-                <Grid container>
+                <Grid container direction="column">
                     {/* Label */}
                     <Grid item sm={12}>
                         <Typography variant="subtitle1">
@@ -191,24 +192,22 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                         />
                     </Grid>
 
+                    {/* List */}
                     <Grid item sm={12}>
                         <Card variant="outlined">
-                            <CardContent
-                                className={transferListClasses.listContainer}
-                            >
-                                {/* List */}
-                                {!isEmpty(filteredFromList) && (
-                                    <List dense>
-                                        {filteredFromList.map(
+                            <CardContent className={transferListClasses.list}>
+                                <List dense>
+                                    {filteredFromList &&
+                                        filteredFromList.map(
                                             (fromListItem, index) => (
                                                 <ListItem
                                                     button
                                                     key={index}
-                                                    onClick={(): void => {
+                                                    onClick={() =>
                                                         onTransferListItem(
                                                             fromListItem
-                                                        );
-                                                    }}
+                                                        )
+                                                    }
                                                 >
                                                     <ListItemText
                                                         primary={
@@ -216,40 +215,34 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                 searchWords={
                                                                     fromSearchWords
                                                                 }
-                                                                text={
-                                                                    (props.listItemTextFn(
-                                                                        fromListItem
-                                                                    ) ||
-                                                                        props.listItemKeyFn(
-                                                                            fromListItem
-                                                                        )) as string
-                                                                }
+                                                                text={props.listItemTextFn(
+                                                                    fromListItem
+                                                                )}
                                                             />
                                                         }
                                                         primaryTypographyProps={{
                                                             variant: "body1",
                                                             className:
-                                                                transferListClasses.listItem,
+                                                                commonClasses.ellipsis,
                                                         }}
                                                     />
 
                                                     {/* Transfer button */}
                                                     <ListItemSecondaryAction>
                                                         <IconButton
-                                                            onClick={(): void => {
+                                                            onClick={() =>
                                                                 onTransferListItem(
                                                                     fromListItem
-                                                                );
-                                                            }}
+                                                                )
+                                                            }
                                                         >
-                                                            <ArrowForward />
+                                                            <ArrowForwardIcon />
                                                         </IconButton>
                                                     </ListItemSecondaryAction>
                                                 </ListItem>
                                             )
                                         )}
-                                    </List>
-                                )}
+                                </List>
 
                                 {/* No search results available message */}
                                 {isEmpty(filteredFromList) &&
@@ -268,7 +261,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
 
             {/* To-list */}
             <Grid item sm={6}>
-                <Grid container>
+                <Grid container direction="column">
                     {/* Label */}
                     <Grid item sm={12}>
                         <Typography variant="subtitle1">
@@ -290,67 +283,53 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                         />
                     </Grid>
 
+                    {/* List */}
                     <Grid item sm={12}>
                         <Card variant="outlined">
-                            <CardContent
-                                className={transferListClasses.listContainer}
-                            >
-                                {/* List */}
-                                {!isEmpty(filteredToList) && (
-                                    <List dense>
-                                        {filteredToList &&
-                                            filteredToList.map(
-                                                (toItem, index) => (
-                                                    <ListItem
-                                                        button
-                                                        key={index}
-                                                        onClick={(): void => {
+                            <CardContent className={transferListClasses.list}>
+                                <List dense>
+                                    {filteredToList &&
+                                        filteredToList.map((toItem, index) => (
+                                            <ListItem
+                                                button
+                                                key={index}
+                                                onClick={() =>
+                                                    onRemoveListItem(toItem)
+                                                }
+                                            >
+                                                <ListItemText
+                                                    primary={
+                                                        <TextHighlighter
+                                                            searchWords={
+                                                                toSearchWords
+                                                            }
+                                                            text={props.listItemTextFn(
+                                                                toItem
+                                                            )}
+                                                        />
+                                                    }
+                                                    primaryTypographyProps={{
+                                                        variant: "body1",
+                                                        className:
+                                                            commonClasses.ellipsis,
+                                                    }}
+                                                />
+
+                                                {/* Remove button */}
+                                                <ListItemSecondaryAction>
+                                                    <IconButton
+                                                        onClick={() =>
                                                             onRemoveListItem(
                                                                 toItem
-                                                            );
-                                                        }}
+                                                            )
+                                                        }
                                                     >
-                                                        <ListItemText
-                                                            primary={
-                                                                <TextHighlighter
-                                                                    searchWords={
-                                                                        toSearchWords
-                                                                    }
-                                                                    text={
-                                                                        (props.listItemTextFn(
-                                                                            toItem
-                                                                        ) ||
-                                                                            props.listItemKeyFn(
-                                                                                toItem
-                                                                            )) as string
-                                                                    }
-                                                                />
-                                                            }
-                                                            primaryTypographyProps={{
-                                                                variant:
-                                                                    "body1",
-                                                                className:
-                                                                    transferListClasses.listItem,
-                                                            }}
-                                                        />
-
-                                                        {/* Remove button */}
-                                                        <ListItemSecondaryAction>
-                                                            <IconButton
-                                                                onClick={(): void => {
-                                                                    onRemoveListItem(
-                                                                        toItem
-                                                                    );
-                                                                }}
-                                                            >
-                                                                <Close />
-                                                            </IconButton>
-                                                        </ListItemSecondaryAction>
-                                                    </ListItem>
-                                                )
-                                            )}
-                                    </List>
-                                )}
+                                                        <CloseIcon />
+                                                    </IconButton>
+                                                </ListItemSecondaryAction>
+                                            </ListItem>
+                                        ))}
+                                </List>
 
                                 {/* No search results available message */}
                                 {isEmpty(filteredToList) &&

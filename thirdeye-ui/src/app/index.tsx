@@ -1,5 +1,6 @@
 import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import i18n from "i18next";
+import { enableAllPlugins } from "immer";
 import numbro from "numbro";
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom";
@@ -24,6 +25,9 @@ numbro.registerLanguage(enUs);
 numbro.setLanguage("en-US");
 // Luxon (date, time formatting)
 // Picks up system default
+
+// Initialize Immer to handle maps and sets
+enableAllPlugins();
 
 // App entry point
 ReactDOM.render(

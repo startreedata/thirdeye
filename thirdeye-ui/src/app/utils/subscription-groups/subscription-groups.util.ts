@@ -202,10 +202,7 @@ const mapAlertsToSubscriptionGroupIds = (
     subscriptionGroups: SubscriptionGroup[],
     alerts: Alert[]
 ): Map<number, SubscriptionGroupAlert[]> => {
-    const alertsToSubscriptionGroupIdsMap = new Map<
-        number,
-        SubscriptionGroupAlert[]
-    >();
+    const alertsToSubscriptionGroupIdsMap = new Map();
 
     const alertToAlertIdsMap = mapAlertsToAlertIds(alerts);
     if (isEmpty(alertToAlertIdsMap)) {
@@ -244,7 +241,7 @@ const mapAlertsToSubscriptionGroupIds = (
 const mapAlertsToAlertIds = (
     alerts: Alert[]
 ): Map<number, SubscriptionGroupAlert> => {
-    const alertsToAlertIdsMap = new Map<number, SubscriptionGroupAlert>();
+    const alertsToAlertIdsMap = new Map();
 
     if (isEmpty(alerts)) {
         return alertsToAlertIdsMap;

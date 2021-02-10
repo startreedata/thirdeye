@@ -11,8 +11,8 @@ export const UpperAndLowerBoundPlot: FunctionComponent<UpperAndLowerBoundPlotPro
         <AreaClosed
             data={props.alertEvaluationTimeSeriesPoints}
             defined={(alertEvaluationTimeSeriesPoint) =>
-                // Area to be plot between upper and lower bound whenever both available or
-                // between current and upper/lower bound (whichever available)
+                // Area to be plot between upper and lower bound whenever both available or between
+                // current and upper/lower bound (whichever available)
                 (isFinite(alertEvaluationTimeSeriesPoint.upperBound) &&
                     isFinite(alertEvaluationTimeSeriesPoint.lowerBound)) ||
                 (isFinite(alertEvaluationTimeSeriesPoint.current) &&

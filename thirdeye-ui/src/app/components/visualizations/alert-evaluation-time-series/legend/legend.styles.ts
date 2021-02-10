@@ -1,19 +1,19 @@
 import { makeStyles } from "@material-ui/core";
 
 export const useLegendStyles = makeStyles((theme) => ({
-    container: {
+    legend: {
         display: "flex",
         justifyContent: "space-between",
-        paddingLeft: "10px",
-        paddingRight: "10px",
+        marginLeft: "10px",
+        marginRight: "10px",
     },
     legendItem: {
         cursor: "pointer",
     },
     legendItemLabel: {
-        paddingLeft: "10px",
+        marginLeft: "10px",
     },
-    legendItemLabelDisabled: {
+    disabledlegendItemLabel: {
         color: theme.palette.text.disabled,
     },
 }));

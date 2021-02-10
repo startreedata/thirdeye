@@ -28,8 +28,8 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
     const location = useLocation();
 
     useEffect(() => {
-        // When loading for the first time, initialize app time range
-        initAppTimeRange();
+        // When loading for the first time, initialize time range
+        initTimeRange();
         setLoading(false);
     }, []);
 
@@ -38,7 +38,7 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
             return;
         }
 
-        // App time range changed, add app time range durtion to query string
+        // Time range changed, add time range durtion to query string
         setTimeRangeDurationInQueryString(timeRangeDuration);
     }, [timeRangeDuration]);
 
@@ -47,25 +47,26 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
             return;
         }
 
-        // Use any navigation opportunity to refresh app time range
+        // Use any navigation opportunity to refresh time range
         refreshTimeRange();
     }, [location.pathname]);
 
-    const initAppTimeRange = (): void => {
+    const initTimeRange = (): void => {
         // Pick up time range duration from query string
-        const timeRageDuration = getTimeRangeDurationFromQueryString();
-
-        // If time range duration from query string is available and different from current app
-        // time range duration, update it to app time range store as a custom time range duration
-        if (timeRageDuration && !isEqual(timeRageDuration, timeRangeDuration)) {
-            timeRageDuration.timeRange = TimeRange.CUSTOM;
-            setTimeRangeDuration(timeRageDuration);
+        const queryStringTimeRageDuration = getTimeRangeDurationFromQueryString();
+        // If time range duration from query string is available and different from current time
+        // range duration, update it to time range store as a custom time range duration
+        if (
+            queryStringTimeRageDuration &&
+            !isEqual(queryStringTimeRageDuration, timeRangeDuration)
+        ) {
+            queryStringTimeRageDuration.timeRange = TimeRange.CUSTOM;
+            setTimeRangeDuration(queryStringTimeRageDuration);
 
             return;
         }
 
-        // If time range duration from query string is not available, refresh existing app time
-        // range
+        // If time range duration from query string is not available, refresh existing time range
         refreshTimeRange();
     };
 
@@ -73,12 +74,7 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
         return <></>;
     }
 
-    return (
-        <>
-            {/* Contents */}
-            {props.children}
-        </>
-    );
+    return <>{props.children}</>;
 };
 
 export const useTimeRange = (): UseTimeRangeProps => {

@@ -228,10 +228,7 @@ const getAlertCardDataInternal = (
 const mapSubscriptionGroupsToAlertIds = (
     subscriptionGroups: SubscriptionGroup[]
 ): Map<number, AlertSubscriptionGroup[]> => {
-    const subscriptionGroupsToAlertIdsMap = new Map<
-        number,
-        AlertSubscriptionGroup[]
-    >();
+    const subscriptionGroupsToAlertIdsMap = new Map();
 
     if (isEmpty(subscriptionGroups)) {
         return subscriptionGroupsToAlertIdsMap;

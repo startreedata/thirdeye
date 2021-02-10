@@ -59,9 +59,7 @@ export const Legend: FunctionComponent<LegendProps> = (props: LegendProps) => {
     return (
         <VisxLegend direction="row" scale={legendScale}>
             {(labels) => (
-                <div
-                    className={alertEvaluationTimeSeriesLegendClasses.container}
-                >
+                <div className={alertEvaluationTimeSeriesLegendClasses.legend}>
                     {labels &&
                         labels.map((label, index) => (
                             <LegendItem
@@ -110,7 +108,7 @@ export const Legend: FunctionComponent<LegendProps> = (props: LegendProps) => {
                                         !getLegendItemState(
                                             label.text as AlertEvaluationTimeSeriesPlot
                                         ) &&
-                                            alertEvaluationTimeSeriesLegendClasses.legendItemLabelDisabled
+                                            alertEvaluationTimeSeriesLegendClasses.disabledlegendItemLabel
                                     )}
                                 >
                                     {

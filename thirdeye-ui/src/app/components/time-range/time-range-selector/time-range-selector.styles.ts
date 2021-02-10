@@ -1,24 +1,28 @@
 import { makeStyles } from "@material-ui/core";
 
+const HEIGHT_TIME_RANGE_SELECTOR_CONTENTS = "395px";
+
 export const useTimeRangeSelectorStyles = makeStyles({
-    timeRangeSelectorButton: {
+    button: {
         minWidth: "0px",
         padding: "6px",
     },
-    timeRangeSelectorContainer: {
-        height: "491px",
-        width: "810px",
-        overflow: "hidden",
+    popoverPaper: {
+        overflowX: "auto",
+        overflowY: "auto",
     },
-    timeRangeListContainer: {
-        float: "left",
-        height: "426px",
-        width: "190px",
+    timeRangeSelector: {
+        width: "801px",
+    },
+    timeRangeSelectorContents: {
+        height: HEIGHT_TIME_RANGE_SELECTOR_CONTENTS,
+    },
+    timeRangeList: {
+        height: HEIGHT_TIME_RANGE_SELECTOR_CONTENTS,
+        width: "180px",
         overflow: "auto",
     },
-    calendarsAndControlsContainer: {
-        float: "left",
-        height: "426px",
-        width: "620px",
+    calendar: {
+        marginTop: "10px",
     },
 });

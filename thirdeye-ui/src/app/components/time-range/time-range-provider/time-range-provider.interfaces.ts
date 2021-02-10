@@ -5,14 +5,10 @@ export interface TimeRangeProviderProps {
 }
 
 export interface UseTimeRangeProps {
-    // Current app time range duration
-    timeRangeDuration: TimeRangeDuration;
-    // An ordered list of last few used custom time range durations
-    recentCustomTimeRangeDurations: TimeRangeDuration[];
-    // Sets app time range duration
-    setTimeRangeDuration: (timeRangeDuration: TimeRangeDuration) => void;
-    // Refreshes app time range so that listeners pick up the latest app time range duration
-    refreshTimeRange: () => void;
+    timeRangeDuration: TimeRangeDuration; // Current time range duration
+    recentCustomTimeRangeDurations: TimeRangeDuration[]; // An ordered list of last few used custom time range durations
+    setTimeRangeDuration: (timeRangeDuration: TimeRangeDuration) => void; // Sets time range duration
+    refreshTimeRange: () => void; // Refreshes time range so that listeners pick up the latest time range duration
 }
 
 export interface TimeRangeDuration {

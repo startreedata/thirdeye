@@ -2,18 +2,18 @@ import { List, ListItem, ListItemText, Tooltip } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { useCommonStyles } from "../../../utils/material-ui/common.styles";
 import {
     formatTimeRange,
     formatTimeRangeDuration,
 } from "../../../utils/time-range/time-range.util";
 import { TimeRange } from "../time-range-provider/time-range-provider.interfaces";
 import { TimeRangeListProps } from "./time-range-list.interfaces";
-import { useTimeRangeListStyles } from "./time-range-list.styles";
 
 export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
     props: TimeRangeListProps
 ) => {
-    const timeRangeListClasses = useTimeRangeListStyles();
+    const commonClasses = useCommonStyles();
     const { t } = useTranslation();
 
     return (
@@ -25,7 +25,7 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
                         primary={t("label.recent-custom")}
                         primaryTypographyProps={{
                             variant: "overline",
-                            className: timeRangeListClasses.listItem,
+                            className: commonClasses.ellipsis,
                         }}
                     />
                 </ListItem>
@@ -46,16 +46,15 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
                             <ListItem
                                 button
                                 divider={
+                                    index ===
                                     (props.recentCustomTimeRangeDurations &&
                                         props.recentCustomTimeRangeDurations
-                                            .length - 1) === index
+                                            .length - 1)
                                 }
-                                onClick={(): void => {
+                                onClick={() =>
                                     props.onClick &&
-                                        props.onClick(
-                                            recentCustomTimeRangeDuration
-                                        );
-                                }}
+                                    props.onClick(recentCustomTimeRangeDuration)
+                                }
                             >
                                 <ListItemText
                                     primary={formatTimeRangeDuration(
@@ -64,8 +63,7 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
                                     primaryTypographyProps={{
                                         variant: "button",
                                         color: "primary",
-                                        className:
-                                            timeRangeListClasses.listItem,
+                                        className: commonClasses.ellipsis,
                                     }}
                                 />
                             </ListItem>
@@ -87,17 +85,17 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
                             timeRange === TimeRange.LAST_MONTH
                         }
                         key={index}
-                        selected={props.selectedTimeRange === timeRange}
-                        onClick={(): void => {
-                            props.onClick && props.onClick(timeRange);
-                        }}
+                        selected={timeRange === props.selectedTimeRange}
+                        onClick={() =>
+                            props.onClick && props.onClick(timeRange)
+                        }
                     >
                         <ListItemText
                             primary={formatTimeRange(timeRange)}
                             primaryTypographyProps={{
                                 variant: "button",
                                 color: "primary",
-                                className: timeRangeListClasses.listItem,
+                                className: commonClasses.ellipsis,
                             }}
                         />
                     </ListItem>

@@ -76,8 +76,8 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                     <Card
                         className={
                             maximized
-                                ? visualizationCardClasses.outerContainerMaximize
-                                : visualizationCardClasses.outerContainer
+                                ? visualizationCardClasses.cardMaximize
+                                : visualizationCardClasses.card
                         }
                         elevation={24} // Same as Material-UI dialog
                         variant={maximized ? "elevation" : "outlined"}
@@ -89,7 +89,7 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                                     {/* Stale label */}
                                     <Grid item>
                                         <FormHelperText error>
-                                            {props.staleLabel || ""}
+                                            {props.staleLabel}
                                         </FormHelperText>
                                     </Grid>
 
@@ -124,17 +124,17 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                                     )}
                                 </Grid>
                             }
-                            className={visualizationCardClasses.headerContainer}
+                            className={visualizationCardClasses.header}
                             title={
                                 maximized
-                                    ? props.maximizedTitle || props.title || ""
-                                    : props.title || ""
+                                    ? props.maximizedTitle || props.title
+                                    : props.title
                             }
                             titleTypographyProps={{ variant: "h6" }}
                         />
 
                         <CardContent
-                            className={visualizationCardClasses.innerContainer}
+                            className={visualizationCardClasses.contents}
                         >
                             {props.children}
                         </CardContent>
@@ -143,9 +143,7 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
             </Flipper>
 
             {/* Placeholder while the visualization card is maximized */}
-            {maximized && (
-                <div className={visualizationCardClasses.outerContainer} />
-            )}
+            {maximized && <div className={visualizationCardClasses.card} />}
 
             {/* Backdrop */}
             <Fade in={backdrop}>

@@ -11,8 +11,8 @@ export const TextHighlighter: FunctionComponent<TextHighlighterProps> = (
     return (
         <Highlighter
             highlightClassName={textHighlighterClasses.highlight}
-            searchWords={props.searchWords ? props.searchWords : []}
-            textToHighlight={props.text ? props.text : ""}
+            searchWords={props.searchWords || []}
+            textToHighlight={props.text || ""}
         />
     );
 };

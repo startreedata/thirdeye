@@ -49,17 +49,16 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
 
     return (
         <Toolbar
-            className={dateTimePickerToolbarClasses.container}
-            classes={{ dense: dateTimePickerToolbarClasses.dense }}
+            className={dateTimePickerToolbarClasses.toolbar}
+            classes={{ dense: dateTimePickerToolbarClasses.toolbarDense }}
             variant="dense"
         >
             {/* Month */}
             <Link
                 className={classnames(
                     dateTimePickerToolbarClasses.link,
-                    props.openView === "month"
-                        ? dateTimePickerToolbarClasses.selectedLink
-                        : ""
+                    props.openView === "month" &&
+                        dateTimePickerToolbarClasses.selectedLink
                 )}
                 component="button"
                 variant="subtitle1"
@@ -72,9 +71,8 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
             <Link
                 className={classnames(
                     dateTimePickerToolbarClasses.link,
-                    props.openView === "date"
-                        ? dateTimePickerToolbarClasses.selectedLink
-                        : ""
+                    props.openView === "date" &&
+                        dateTimePickerToolbarClasses.selectedLink
                 )}
                 component="button"
                 variant="subtitle1"
@@ -87,9 +85,8 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
             <Link
                 className={classnames(
                     dateTimePickerToolbarClasses.link,
-                    props.openView === "year"
-                        ? dateTimePickerToolbarClasses.selectedLink
-                        : ""
+                    props.openView === "year" &&
+                        dateTimePickerToolbarClasses.selectedLink
                 )}
                 component="button"
                 variant="subtitle1"
@@ -103,9 +100,8 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 className={classnames(
                     dateTimePickerToolbarClasses.rightAlign,
                     dateTimePickerToolbarClasses.link,
-                    props.openView === "hours"
-                        ? dateTimePickerToolbarClasses.selectedLink
-                        : ""
+                    props.openView === "hours" &&
+                        dateTimePickerToolbarClasses.selectedLink
                 )}
                 component="button"
                 variant="subtitle1"
@@ -118,9 +114,8 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
             <Link
                 className={classnames(
                     dateTimePickerToolbarClasses.link,
-                    props.openView === "minutes"
-                        ? dateTimePickerToolbarClasses.selectedLink
-                        : ""
+                    props.openView === "minutes" &&
+                        dateTimePickerToolbarClasses.selectedLink
                 )}
                 component="button"
                 variant="subtitle1"

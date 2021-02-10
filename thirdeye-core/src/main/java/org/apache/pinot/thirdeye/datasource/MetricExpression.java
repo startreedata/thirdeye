@@ -28,7 +28,6 @@ import java.util.TreeSet;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import parsii.eval.Expression;
 import parsii.eval.Parser;
@@ -104,7 +103,6 @@ public class MetricExpression {
         Long metricId = null;
         MetricConfigDTO metricConfig = null;
         String metricDataset = dataset;
-        DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(metricDataset);
         if (metricToken.equals(COUNT_METRIC_ESCAPED)) {
           metricToken = COUNT_METRIC;
         } else {
@@ -114,6 +112,7 @@ public class MetricExpression {
             metricDataset = metricConfig.getDataset();
           }
         }
+        DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(metricDataset);
         metricFunctions.add(
             new MetricFunction(aggFunction, metricToken, metricId, metricDataset, metricConfig,
                 datasetConfig));

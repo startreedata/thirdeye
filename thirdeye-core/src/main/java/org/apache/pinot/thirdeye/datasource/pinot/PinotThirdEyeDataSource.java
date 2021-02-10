@@ -169,7 +169,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       TimeSpec timeSpec = null;
       for (MetricFunction metricFunction : request.getMetricFunctions()) {
         String dataset = metricFunction.getDataset();
-        DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(dataset);
+        DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
         TimeSpec dataTimeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
         if (timeSpec == null) {
           timeSpec = dataTimeSpec;

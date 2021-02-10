@@ -82,7 +82,7 @@ public class ThirdEyeResultSetUtils {
       MetricFunction metricFunction = entry.getKey();
 
       String dataset = metricFunction.getDataset();
-      DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(dataset);
+      DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
       TimeSpec dataTimeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 
       TimeGranularity dataGranularity = null;

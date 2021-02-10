@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -101,12 +100,7 @@ public class PinotDataSourceDimensionFilters {
     Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();
     for (final ThirdEyeRequest request : requests) {
       Future<ThirdEyeResponse> responseFuture = executorService
-          .submit(new Callable<ThirdEyeResponse>() {
-            @Override
-            public ThirdEyeResponse call() throws Exception {
-              return pinotThirdEyeDataSource.execute(request);
-            }
-          });
+          .submit(() -> pinotThirdEyeDataSource.execute(request));
       responseFuturesMap.put(request, responseFuture);
     }
 

@@ -8,6 +8,7 @@ import {
     Point,
     scaleLinear,
     scaleTime,
+    TooltipWithBounds,
     useTooltip,
 } from "@visx/visx";
 import { cloneDeep, debounce, isEmpty } from "lodash";
@@ -54,10 +55,10 @@ import { UpperAndLowerBoundPlot } from "./upper-and-lower-bound-plot/upper-and-l
 
 const HEIGHT_CONTAINER_MIN = 310;
 const WIDTH_CONTAINER_MIN = 520;
-const PADDING_SVG_TOP = 10;
-const PADDING_SVG_BOTTOM = 30;
-const PADDING_SVG_LEFT = 50;
-const PADDING_SVG_RIGHT = 50;
+const PADDING_TOP_SVG = 10;
+const PADDING_BOTTOM_SVG = 30;
+const PADDING_LEFT_SVG = 50;
+const PADDING_RIGHT_SVG = 50;
 const HEIGHT_SEPARATOR_TIME_SERIES_BRUSH = 60;
 const HEIGHT_BRUSH = 100;
 const HEIGHT_LEGEND = 30;
@@ -109,12 +110,13 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         anomaliesPlotVisible: true,
     });
     const {
+        tooltipTop,
+        tooltipLeft,
         tooltipData,
         showTooltip,
         hideTooltip,
     } = useTooltip<AlertEvaluationTimeSeriesTooltipPoint>();
     const brushRef = useRef<BaseBrush>(null);
-    const svgRef = useRef<SVGSVGElement>(null);
     const { t } = useTranslation();
 
     // SVG bounds
@@ -124,15 +126,15 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     // Time series bounds
     const timeSeriesHeight =
         svgHeight -
-        PADDING_SVG_TOP -
+        PADDING_TOP_SVG -
         HEIGHT_SEPARATOR_TIME_SERIES_BRUSH -
         HEIGHT_BRUSH; // Available SVG height - top SVG padding - separator height between time series and brush - space for brush
-    const timeSeriesXMax = svgWidth - PADDING_SVG_LEFT - PADDING_SVG_RIGHT; // Available SVG width - left and right SVG padding
+    const timeSeriesXMax = svgWidth - PADDING_LEFT_SVG - PADDING_RIGHT_SVG; // Available SVG width - left and right SVG padding
     const timeSeriesYMax = timeSeriesHeight;
 
     // Brush bounds
-    const brushHeight = HEIGHT_BRUSH - PADDING_SVG_BOTTOM; // Brush height - bottom SVG padding
-    const brushXMax = svgWidth - PADDING_SVG_LEFT - PADDING_SVG_RIGHT; // Available SVG width - left and right SVG padding
+    const brushHeight = HEIGHT_BRUSH - PADDING_BOTTOM_SVG; // Brush height - bottom SVG padding
+    const brushXMax = svgWidth - PADDING_LEFT_SVG - PADDING_RIGHT_SVG; // Available SVG width - left and right SVG padding
     const brushYMax = brushHeight;
 
     // Time series scales
@@ -392,7 +394,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             // Determine time series time scale value from SVG coordinate, accounting for SVG
             // padding
             const xValue = timeSeriesXScale.invert(
-                svgPoint.x - PADDING_SVG_LEFT
+                svgPoint.x - PADDING_LEFT_SVG
             );
             if (!xValue) {
                 hideTooltip();
@@ -406,7 +408,6 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 xValue.getTime()
             );
             if (!alertEvaluationTimeSeriesPoint) {
-                // Not found
                 hideTooltip();
 
                 return;
@@ -423,7 +424,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 },
             });
         }, 1),
-        [props.width, svgRef, filteredAlertEvaluationTimeSeriesPoints]
+        [props.width, filteredAlertEvaluationTimeSeriesPoints]
     );
 
     if (loading) {
@@ -446,9 +447,9 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     return (
         <>
             {/* SVG container with parent dimensions */}
-            <svg height={svgHeight} ref={svgRef} width={svgWidth}>
+            <svg height={svgHeight} width={svgWidth}>
                 {/* Time series */}
-                <Group left={PADDING_SVG_LEFT} top={PADDING_SVG_TOP}>
+                <Group left={PADDING_LEFT_SVG} top={PADDING_TOP_SVG}>
                     {/* Anomalies */}
                     {anomaliesPlotVisible && (
                         <AnomaliesPlot
@@ -514,7 +515,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
 
                 {/* Brush */}
                 <Group
-                    left={PADDING_SVG_LEFT}
+                    left={PADDING_LEFT_SVG}
                     top={timeSeriesHeight + HEIGHT_SEPARATOR_TIME_SERIES_BRUSH}
                 >
                     {/* Time series in the brush to be always visible and slightly transparent */}
@@ -564,8 +565,8 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                             top:
                                 timeSeriesHeight +
                                 HEIGHT_SEPARATOR_TIME_SERIES_BRUSH,
-                            left: PADDING_SVG_LEFT,
-                            right: PADDING_SVG_RIGHT,
+                            left: PADDING_LEFT_SVG,
+                            right: PADDING_RIGHT_SVG,
                             bottom: 0,
                         }}
                         selectedBoxStyle={{
@@ -595,6 +596,12 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 upperAndLowerBound={upperAndLowerBoundPlotVisible}
                 onChange={onLegendChange}
             />
+
+            {tooltipData && (
+                <TooltipWithBounds left={tooltipLeft} top={tooltipTop}>
+                    TEST TEST
+                </TooltipWithBounds>
+            )}
         </>
     );
 };

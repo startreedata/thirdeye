@@ -468,14 +468,14 @@ test("filterAlertEvaluationTimeSeriesPointsByTime should return appropriate aler
     expect(
         filterAlertEvaluationTimeSeriesPointsByTime(
             mockAlertEvaluationTimeSeriesPoints,
-            -7,
-            7
+            -1,
+            4
         )
     ).toEqual(mockAlertEvaluationTimeSeriesPoints);
     expect(
         filterAlertEvaluationTimeSeriesPointsByTime(
             mockAlertEvaluationTimeSeriesPoints,
-            -7,
+            -1,
             2
         )
     ).toEqual([
@@ -486,12 +486,26 @@ test("filterAlertEvaluationTimeSeriesPointsByTime should return appropriate aler
         filterAlertEvaluationTimeSeriesPointsByTime(
             mockAlertEvaluationTimeSeriesPoints,
             2,
-            7
+            4
         )
     ).toEqual([
         mockAlertEvaluationTimeSeriesPoint2,
         mockAlertEvaluationTimeSeriesPoint3,
     ]);
+    expect(
+        filterAlertEvaluationTimeSeriesPointsByTime(
+            mockAlertEvaluationTimeSeriesPoints,
+            -2,
+            -1
+        )
+    ).toEqual([]);
+    expect(
+        filterAlertEvaluationTimeSeriesPointsByTime(
+            mockAlertEvaluationTimeSeriesPoints,
+            4,
+            5
+        )
+    ).toEqual([]);
 });
 
 test("filterAlertEvaluationAnomalyPointsByTime should return empty array for invalid alert evaluation anomaly points", () => {
@@ -550,17 +564,38 @@ test("filterAlertEvaluationAnomalyPointsByTime should return appropriate alert e
     expect(
         filterAlertEvaluationAnomalyPointsByTime(
             mockAlertEvaluationAnomalyPoints,
-            1,
-            30
+            15,
+            25
         )
     ).toEqual(mockAlertEvaluationAnomalyPoints);
     expect(
         filterAlertEvaluationAnomalyPointsByTime(
             mockAlertEvaluationAnomalyPoints,
-            17,
-            30
+            15,
+            18
         )
-    ).toEqual(mockAlertEvaluationAnomalyPoints);
+    ).toEqual([mockAlertEvaluationAnomalyPoint1]);
+    expect(
+        filterAlertEvaluationAnomalyPointsByTime(
+            mockAlertEvaluationAnomalyPoints,
+            18,
+            25
+        )
+    ).toEqual([mockAlertEvaluationAnomalyPoint2]);
+    expect(
+        filterAlertEvaluationAnomalyPointsByTime(
+            mockAlertEvaluationAnomalyPoints,
+            14,
+            15
+        )
+    ).toEqual([]);
+    expect(
+        filterAlertEvaluationAnomalyPointsByTime(
+            mockAlertEvaluationAnomalyPoints,
+            22,
+            14
+        )
+    ).toEqual([]);
 });
 
 test("getAlertEvaluationTimeSeriesPointAtTime should return null for invalid alert evaluation time series points", () => {

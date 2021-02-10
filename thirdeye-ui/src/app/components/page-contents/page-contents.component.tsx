@@ -2,14 +2,15 @@ import { Box, Grid, Paper, Slide, Typography } from "@material-ui/core";
 import classnames from "classnames";
 import { debounce, isEmpty } from "lodash";
 import React, {
-    createRef,
     FunctionComponent,
     UIEvent,
     useCallback,
     useEffect,
+    useRef,
     useState,
 } from "react";
 import { Helmet } from "react-helmet";
+import { useWindowSize } from "../../utils/hooks/useWindowSize";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { getDocumentTitle } from "../../utils/page/page.util";
 import {
@@ -42,8 +43,10 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
         setTimeRangeDuration,
         refreshTimeRange,
     } = useTimeRange();
-    const outerContainerRef = createRef<HTMLDivElement>();
-    const contentsContainerRef = createRef<HTMLDivElement>();
+    const outerContainerRef = useRef<HTMLDivElement>(null);
+    const contentsContainerRef = useRef<HTMLDivElement>(null);
+
+    const { windowWidth } = useWindowSize();
 
     useEffect(() => {
         // Title or breadcrumbs changed, set document title
@@ -53,7 +56,7 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     useEffect(() => {
         // Contents container rendered or window width changed, determine header width
         setHeaderWidthDebounced();
-    }, [contentsContainerRef, window.innerWidth]);
+    }, [contentsContainerRef, windowWidth]);
 
     const onOuterContainerScroll = (event: UIEvent<HTMLDivElement>): void => {
         if (

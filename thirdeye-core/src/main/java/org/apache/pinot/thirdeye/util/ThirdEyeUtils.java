@@ -23,13 +23,11 @@ import static org.apache.pinot.thirdeye.Constants.GROUP_WRAPPER_PROP_DETECTOR_CO
 import static org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -40,13 +38,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
@@ -78,7 +74,6 @@ import org.slf4j.LoggerFactory;
 public abstract class ThirdEyeUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   /**
    * Returns or modifies a filter that can be for querying the results corresponding to the given
@@ -144,9 +139,8 @@ public abstract class ThirdEyeUtils {
    */
   public static TimeSpec getTimeSpecFromDatasetConfig(DatasetConfigDTO datasetConfig) {
     String timeFormat = getTimeFormatString(datasetConfig);
-    TimeSpec timespec = new TimeSpec(datasetConfig.getTimeColumn(),
+    return new TimeSpec(datasetConfig.getTimeColumn(),
         new TimeGranularity(datasetConfig.bucketTimeGranularity()), timeFormat);
-    return timespec;
   }
 
   /**
@@ -163,10 +157,9 @@ public abstract class ThirdEyeUtils {
    */
   public static TimeSpec getTimestampTimeSpecFromDatasetConfig(DatasetConfigDTO datasetConfig) {
     String timeFormat = getTimeFormatString(datasetConfig);
-    TimeSpec timespec = new TimeSpec(datasetConfig.getTimeColumn(),
+    return new TimeSpec(datasetConfig.getTimeColumn(),
         new TimeGranularity(datasetConfig.getTimeDuration(), datasetConfig.getTimeUnit()),
         timeFormat);
-    return timespec;
   }
 
   private static String getSDFPatternFromTimeFormat(String timeFormat) {
@@ -179,10 +172,12 @@ public abstract class ThirdEyeUtils {
   }
 
   public static MetricExpression getMetricExpressionFromMetricConfig(MetricConfigDTO metricConfig) {
-    String expression = optional(metricConfig.getDerivedMetricExpression()).orElse(metricConfig.getName());
-    MetricExpression metricExpression = new MetricExpression(metricConfig.getName(), expression,
-        metricConfig.getDefaultAggFunction(), metricConfig.getDataset());
-    return metricExpression;
+    String expression = optional(metricConfig.getDerivedMetricExpression())
+        .orElse(metricConfig.getName());
+    return new MetricExpression(metricConfig.getName(),
+        expression,
+        metricConfig.getDefaultAggFunction(),
+        metricConfig.getDataset());
   }
 
   public static String getDerivedMetricExpression(String metricExpressionName,
@@ -207,14 +202,14 @@ public abstract class ThirdEyeUtils {
   public static Map<String, Double> getMetricThresholdsMap(List<MetricFunction> metricFunctions) {
     Map<String, Double> metricThresholds = new HashMap<>();
     for (MetricFunction metricFunction : metricFunctions) {
-      metricThresholds.put(metricFunction.getMetricName(), metricFunction.getMetricConfig().getRollupThreshold());
+      metricThresholds.put(metricFunction.getMetricName(),
+          metricFunction.getMetricConfig().getRollupThreshold());
     }
     return metricThresholds;
   }
 
   public static String constructMetricAlias(String datasetName, String metricName) {
-    String alias = datasetName + MetricConfigBean.ALIAS_JOINER + metricName;
-    return alias;
+    return datasetName + MetricConfigBean.ALIAS_JOINER + metricName;
   }
 
   public static DatasetConfigDTO getDatasetConfigFromName(String dataset) {
@@ -360,22 +355,6 @@ public abstract class ThirdEyeUtils {
   }
 
   /**
-   * Converts a Properties, which is a Map<Object, Object>, to a Map<String, String>.
-   *
-   * @param properties the properties to be converted
-   * @return the map of the properties.
-   */
-  public static Map<String, String> propertiesToStringMap(Properties properties) {
-    Map<String, String> map = new HashMap<>();
-    if (MapUtils.isNotEmpty(properties)) {
-      for (String propertyKey : properties.stringPropertyNames()) {
-        map.put(propertyKey, properties.getProperty(propertyKey));
-      }
-    }
-    return map;
-  }
-
-  /**
    * Prints messages and stack traces of the given list of exceptions in a string.
    *
    * @param exceptions the list of exceptions to be printed.
@@ -443,25 +422,15 @@ public abstract class ThirdEyeUtils {
   }
 
   public static LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> buildResponseCache(
-      CacheLoader cacheLoader) throws Exception {
+      CacheLoader cacheLoader) {
     Preconditions.checkNotNull(cacheLoader, "A cache loader is required.");
 
     // Initializes listener that prints expired entries in debuggin mode.
     RemovalListener<RelationalQuery, ThirdEyeResultSet> listener;
     if (LOG.isDebugEnabled()) {
-      listener = new RemovalListener<RelationalQuery, ThirdEyeResultSet>() {
-        @Override
-        public void onRemoval(
-            RemovalNotification<RelationalQuery, ThirdEyeResultSet> notification) {
-          LOG.debug("Expired {}", notification.getKey().getQuery());
-        }
-      };
+      listener = notification -> LOG.debug("Expired {}", notification.getKey().getQuery());
     } else {
-      listener = new RemovalListener<RelationalQuery, ThirdEyeResultSet>() {
-        @Override
-        public void onRemoval(
-            RemovalNotification<RelationalQuery, ThirdEyeResultSet> notification) {
-        }
+      listener = notification -> {
       };
     }
 
@@ -477,19 +446,17 @@ public abstract class ThirdEyeUtils {
         .removalListener(listener)
         .expireAfterWrite(15, TimeUnit.MINUTES)
         .maximumWeight(maxBucketNumber)
-        .weigher(new Weigher<RelationalQuery, ThirdEyeResultSetGroup>() {
-          @Override
-          public int weigh(RelationalQuery relationalQuery, ThirdEyeResultSetGroup resultSetGroup) {
-            int resultSetCount = resultSetGroup.size();
-            int weight = 0;
-            for (int idx = 0; idx < resultSetCount; ++idx) {
-              ThirdEyeResultSet resultSet = resultSetGroup.get(idx);
-              weight += ((resultSet.getColumnCount() + resultSet.getGroupKeyLength()) * resultSet
-                  .getRowCount());
-            }
-            return weight;
-          }
-        })
+        .weigher(
+            (Weigher<RelationalQuery, ThirdEyeResultSetGroup>) (relationalQuery, resultSetGroup) -> {
+              int resultSetCount = resultSetGroup.size();
+              int weight = 0;
+              for (int idx = 0; idx < resultSetCount; ++idx) {
+                ThirdEyeResultSet resultSet = resultSetGroup.get(idx);
+                weight += ((resultSet.getColumnCount() + resultSet.getGroupKeyLength()) * resultSet
+                    .getRowCount());
+              }
+              return weight;
+            })
         .build(cacheLoader);
   }
 

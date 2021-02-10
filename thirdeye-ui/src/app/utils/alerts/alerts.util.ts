@@ -105,10 +105,8 @@ export const getAlertCardDatas = (
     alerts: Alert[],
     subscriptionGroups: SubscriptionGroup[]
 ): AlertCardData[] => {
-    const alertCardDatas: AlertCardData[] = [];
-
     if (isEmpty(alerts)) {
-        return alertCardDatas;
+        return [];
     }
 
     // Map subscription groups to alert ids
@@ -116,6 +114,7 @@ export const getAlertCardDatas = (
         subscriptionGroups
     );
 
+    const alertCardDatas: AlertCardData[] = [];
     for (const alert of alerts) {
         alertCardDatas.push(
             getAlertCardDataInternal(alert, subscriptionGroupsToAlertIdsMap)
@@ -129,20 +128,17 @@ export const filterAlerts = (
     alertCardDatas: AlertCardData[],
     searchWords: string[]
 ): AlertCardData[] => {
-    const filteredAlertCardDatas: AlertCardData[] = [];
-
     if (isEmpty(alertCardDatas)) {
-        // No alerts available, return empty result
-        return filteredAlertCardDatas;
+        return [];
     }
 
     if (isEmpty(searchWords)) {
-        // No search words available, return original alerts
         return alertCardDatas;
     }
 
+    const filteredAlertCardDatas: AlertCardData[] = [];
     for (const alertCardDta of alertCardDatas) {
-        // Create a copy without original alert
+        // Only the alert card data to be searched and not contained alert
         const alertCardDataCopy = cloneDeep(alertCardDta);
         alertCardDataCopy.alert = null;
 
@@ -167,14 +163,13 @@ export const filterAlerts = (
     return filteredAlertCardDatas;
 };
 
-// Internal method, lacks appropriate validations
 const getAlertCardDataInternal = (
     alert: Alert,
     subscriptionGroupsToAlertIdsMap: Map<number, AlertSubscriptionGroup[]>
 ): AlertCardData => {
     const alertCardData = createEmptyAlertCardData();
 
-    // Maintain a copy of alert, needed when updating alert
+    // Maintain a copy of alert
     alertCardData.alert = alert;
 
     // Basic properties
@@ -230,7 +225,6 @@ const getAlertCardDataInternal = (
     return alertCardData;
 };
 
-// Internal method, lacks appropriate validations
 const mapSubscriptionGroupsToAlertIds = (
     subscriptionGroups: SubscriptionGroup[]
 ): Map<number, AlertSubscriptionGroup[]> => {
@@ -240,7 +234,6 @@ const mapSubscriptionGroupsToAlertIds = (
     >();
 
     if (isEmpty(subscriptionGroups)) {
-        // No subscription groups available, return empty result
         return subscriptionGroupsToAlertIdsMap;
     }
 

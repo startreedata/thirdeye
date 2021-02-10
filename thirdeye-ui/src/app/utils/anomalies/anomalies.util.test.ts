@@ -30,9 +30,9 @@ jest.mock("../number/number.util", () => ({
 }));
 
 describe("Anomalies Util", () => {
-    test("getAnomalyName should return no data available marker for invalid anomaly", () => {
+    test("getAnomalyName should return appropriate name for invalid anomaly", () => {
         expect(getAnomalyName((null as unknown) as Anomaly)).toEqual(
-            "label.no-data-marker"
+            "label.anomaly"
         );
     });
 

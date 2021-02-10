@@ -202,7 +202,7 @@ describe("Time Range Util", () => {
     });
 
     test("formatTimeRangeDuration should return appropriate string for time range duration", () => {
-        const mockCustomTimeRangeDuration: TimeRangeDuration = {
+        const mockCustomTimeRangeDuration = {
             timeRange: TimeRange.CUSTOM,
             startTime: 1,
             endTime: 2,

@@ -1,11 +1,10 @@
 import { Bar } from "@visx/visx";
 import React, { FunctionComponent } from "react";
-import { Dimension } from "../../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../../utils/material-ui/palette.util";
-import { AlertEvaluationTimeSeriesAnomaliesPlotProps } from "./alert-evaluation-time-series-anomalies-plot.interfaces";
+import { AnomaliesPlotProps } from "./anomalies-plot.interfaces";
 
-export const AlertEvaluationTimeSeriesAnomaliesPlot: FunctionComponent<AlertEvaluationTimeSeriesAnomaliesPlotProps> = (
-    props: AlertEvaluationTimeSeriesAnomaliesPlotProps
+export const AnomaliesPlot: FunctionComponent<AnomaliesPlotProps> = (
+    props: AnomaliesPlotProps
 ) => {
     return (
         <>
@@ -14,17 +13,9 @@ export const AlertEvaluationTimeSeriesAnomaliesPlot: FunctionComponent<AlertEval
                     (alertEvaluationAnomalyPoint, index) => (
                         <Bar
                             fill={Palette.COLOR_VISUALIZATION_STROKE_ANOMALY}
-                            fillOpacity={0.2}
-                            height={
-                                props.yScale(props.yScale.domain()[0]) -
-                                props.yScale(props.yScale.domain()[1])
-                            }
+                            height={props.yScale.range()[0]}
                             key={index}
-                            stroke={Palette.COLOR_VISUALIZATION_STROKE_ANOMALY}
-                            strokeOpacity={0.2}
-                            strokeWidth={
-                                Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT
-                            }
+                            opacity={0.2}
                             width={
                                 props.xScale(
                                     alertEvaluationAnomalyPoint.endTime
@@ -36,7 +27,7 @@ export const AlertEvaluationTimeSeriesAnomaliesPlot: FunctionComponent<AlertEval
                             x={props.xScale(
                                 alertEvaluationAnomalyPoint.startTime
                             )}
-                            y={props.yScale(props.yScale.domain()[1])}
+                            y={props.yScale.range()[1]}
                         />
                     )
                 )}

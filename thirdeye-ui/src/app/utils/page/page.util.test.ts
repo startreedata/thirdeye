@@ -7,9 +7,6 @@ jest.mock("i18next", () => ({
 
 describe("Page Util", () => {
     test("getDocumentTitle should return appropriate string for invalid router breadcrumb text, invalid page title and invalid page breadcrumb text", () => {
-        expect(getDocumentTitle("", "", "")).toEqual("label.thirdeye");
-        expect(i18n.t).toHaveBeenNthCalledWith(1, "label.thirdeye");
-
         expect(
             getDocumentTitle(
                 (null as unknown) as string,
@@ -17,6 +14,9 @@ describe("Page Util", () => {
                 (null as unknown) as string
             )
         ).toEqual("label.thirdeye");
+        expect(i18n.t).toHaveBeenNthCalledWith(1, "label.thirdeye");
+
+        expect(getDocumentTitle("", "", "")).toEqual("label.thirdeye");
         expect(i18n.t).toHaveBeenNthCalledWith(2, "label.thirdeye");
     });
 

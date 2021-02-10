@@ -1,6 +1,6 @@
 import bounds from "binary-search-bounds";
 import { ScaleTime } from "d3-scale";
-import { isEmpty } from "lodash";
+import { cloneDeep, isEmpty } from "lodash";
 import { Interval } from "luxon";
 import {
     AlertEvaluationAnomalyPoint,
@@ -47,7 +47,6 @@ export const formatDateTimeForAxis = (
         return "";
     }
 
-    // Capture date
     let targetDate;
     if (typeof date === "number") {
         targetDate = date;
@@ -76,7 +75,7 @@ export const formatDateTimeForAxis = (
         return formatDate(targetDate);
     }
 
-    // MMM DD, YY SEPARATOR_DATE_TIME HH:MM AM/PM
+    // MMM DD, YYYY SEPARATOR_DATE_TIME HH:MM AM/PM
     return (
         formatDate(targetDate) + SEPARATOR_DATE_TIME + formatTime(targetDate)
     );
@@ -93,7 +92,7 @@ export const getTimeTickValuesForAxis = (
 
     numTicks = numTicks || 8; // Default to 8 ticks
     if (numTicks < 3) {
-        // Just the scale domain interval start and end time
+        // Just the scale domain start and end time
         return [scale.domain()[0].getTime(), scale.domain()[1].getTime()];
     }
 
@@ -103,16 +102,16 @@ export const getTimeTickValuesForAxis = (
         scale.domain()[1]
     );
     const splitIntervals = interval.divideEqually(numTicks - 1); // Account for scale domain start and end time as two time tick values
+    if (isEmpty(splitIntervals)) {
+        // Just the scale domain start and end time
+        return [scale.domain()[0].getTime(), scale.domain()[1].getTime()];
+    }
 
-    const timeTickValues: number[] = [];
-    splitIntervals.forEach((splitInterval, index) => {
-        if (index === splitIntervals.length - 1) {
-            // Same as scale domain end time
-            return;
-        }
-
-        timeTickValues.push(splitInterval.end.toMillis());
-    });
+    const timeTickValues = [];
+    for (let index = 0; index < splitIntervals.length - 1; index++) {
+        // Ignore last interval, same as scale domain end time
+        timeTickValues.push(splitIntervals[index].end.toMillis());
+    }
 
     return [
         scale.domain()[0].getTime(),
@@ -121,60 +120,58 @@ export const getTimeTickValuesForAxis = (
     ];
 };
 
-// Returns alert evaluation time series points from alert evaluation
 export const getAlertEvaluationTimeSeriesPoints = (
     alertEvaluation: AlertEvaluation
 ): AlertEvaluationTimeSeriesPoint[] => {
-    const alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[] = [];
-
     if (!alertEvaluation || isEmpty(alertEvaluation.detectionEvaluations)) {
-        return alertEvaluationTimeSeriesPoints;
+        return [];
     }
 
     // Gather only first detection evaluation
     const detectionEvaluation = Object.values(
         alertEvaluation.detectionEvaluations
     )[0];
-
     if (
         isEmpty(detectionEvaluation.data) ||
         isEmpty(detectionEvaluation.data.timestamp)
     ) {
-        return alertEvaluationTimeSeriesPoints;
+        return [];
     }
 
-    for (const index in detectionEvaluation.data.timestamp) {
+    const alertEvaluationTimeSeriesPoints = [];
+    for (
+        let index = 0;
+        index < detectionEvaluation.data.timestamp.length;
+        index++
+    ) {
         alertEvaluationTimeSeriesPoints.push({
             timestamp: detectionEvaluation.data.timestamp[index],
-            upperBound: detectionEvaluation.data.upperBound[index],
-            lowerBound: detectionEvaluation.data.lowerBound[index],
             current: detectionEvaluation.data.current[index],
             expected: detectionEvaluation.data.expected[index],
+            upperBound: detectionEvaluation.data.upperBound[index],
+            lowerBound: detectionEvaluation.data.lowerBound[index],
         });
     }
 
     return alertEvaluationTimeSeriesPoints;
 };
 
-// Returns alert evaluation anomaly points from given alert evaluation
 export const getAlertEvaluationAnomalyPoints = (
     alertEvaluation: AlertEvaluation
 ): AlertEvaluationAnomalyPoint[] => {
-    const alertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[] = [];
-
     if (!alertEvaluation || isEmpty(alertEvaluation.detectionEvaluations)) {
-        return alertEvaluationAnomalyPoints;
+        return [];
     }
 
     // Gather only first detection evaluation
     const detectionEvaluation = Object.values(
         alertEvaluation.detectionEvaluations
     )[0];
-
     if (isEmpty(detectionEvaluation.anomalies)) {
-        return alertEvaluationAnomalyPoints;
+        return [];
     }
 
+    const alertEvaluationAnomalyPoints = [];
     for (const anomaly of detectionEvaluation.anomalies) {
         alertEvaluationAnomalyPoints.push({
             startTime: anomaly.startTime,
@@ -187,10 +184,10 @@ export const getAlertEvaluationAnomalyPoints = (
     return alertEvaluationAnomalyPoints;
 };
 
-// Returns minimum timestamp from alert evaluation time series points
 export const getAlertEvaluationTimeSeriesPointsMinTimestamp = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {
+    // Alert evaluation time series points assumed to be sorted by timestamp
     return (
         (alertEvaluationTimeSeriesPoints &&
             alertEvaluationTimeSeriesPoints[0] &&
@@ -199,10 +196,10 @@ export const getAlertEvaluationTimeSeriesPointsMinTimestamp = (
     );
 };
 
-// Returns maximum timestamp from alert evaluation time series points
 export const getAlertEvaluationTimeSeriesPointsMaxTimestamp = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {
+    // Alert evaluation time series points assumed to be sorted by timestamp
     return (
         (alertEvaluationTimeSeriesPoints &&
             alertEvaluationTimeSeriesPoints[
@@ -215,7 +212,6 @@ export const getAlertEvaluationTimeSeriesPointsMaxTimestamp = (
     );
 };
 
-// Returns maximum value from alert evaluation time series points
 export const getAlertEvaluationTimeSeriesPointsMaxValue = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {
@@ -274,34 +270,26 @@ export const filterAlertEvaluationTimeSeriesPointsByTime = (
         return alertEvaluationTimeSeriesPoints;
     }
 
+    // Alert evaluation time series points assumed to be sorted by timestamp
     // Search first alert evaluation time series point with timestamp greater than or equal to start
     // time
-    let index = bounds.ge(
+    const startIndex = bounds.ge(
         alertEvaluationTimeSeriesPoints,
         { timestamp: startTime } as AlertEvaluationTimeSeriesPoint,
-        (alertEvaluationTimeSeriesPointA, alertEvaluationTimeSeriesPointB) =>
-            alertEvaluationTimeSeriesPointA.timestamp -
-            alertEvaluationTimeSeriesPointB.timestamp
+        alertEvaluationTimeSeriesPointsComparator
     );
-
-    if (index === alertEvaluationTimeSeriesPoints.length) {
+    // Search first alert evaluation time series point with timestamp less than or equal to end time
+    const endIndex = bounds.le(
+        alertEvaluationTimeSeriesPoints,
+        { timestamp: endTime } as AlertEvaluationTimeSeriesPoint,
+        alertEvaluationTimeSeriesPointsComparator
+    );
+    if (startIndex === alertEvaluationTimeSeriesPoints.length) {
         // Not found
         return [];
     }
 
-    // Gather all alert evaluation time series points with timestamp less than or equal to end time
-    const filteredAlertEvaluationTimeSeriesPoints = [];
-    while (
-        index < alertEvaluationTimeSeriesPoints.length &&
-        alertEvaluationTimeSeriesPoints[index].timestamp <= endTime
-    ) {
-        filteredAlertEvaluationTimeSeriesPoints.push(
-            alertEvaluationTimeSeriesPoints[index]
-        );
-        index++;
-    }
-
-    return filteredAlertEvaluationTimeSeriesPoints;
+    return alertEvaluationTimeSeriesPoints.slice(startIndex, endIndex + 1);
 };
 
 export const filterAlertEvaluationAnomalyPointsByTime = (
@@ -317,32 +305,99 @@ export const filterAlertEvaluationAnomalyPointsByTime = (
         return alertEvaluationAnomalyPoints;
     }
 
-    // Search first alert evaluation anomaly point with timestamp greater than or equal to start
+    // Anomalies may not be sorted, sort by anomaly start time
+    let sortedAlertEvaluationAnomalyPoints = cloneDeep(
+        alertEvaluationAnomalyPoints
+    ).sort(alertEvaluationAnomalyPointsStartTimeComparator);
+
+    // Search last alert evaluation anomaly point with start time less than or equal to filter end
     // time
-    let index = bounds.ge(
-        alertEvaluationAnomalyPoints,
-        { startTime: startTime } as AlertEvaluationAnomalyPoint,
-        (alertEvaluationTimeSeriesPointA, alertEvaluationTimeSeriesPointB) =>
-            alertEvaluationTimeSeriesPointA.startTime -
-            alertEvaluationTimeSeriesPointB.startTime
+    const indexByStartTime = bounds.le(
+        sortedAlertEvaluationAnomalyPoints,
+        { startTime: endTime } as AlertEvaluationAnomalyPoint,
+        alertEvaluationAnomalyPointsStartTimeComparator
+    );
+    if (indexByStartTime !== -1) {
+        // Found, clip alert evaluation anomaly points with start time beyond filter end time
+        sortedAlertEvaluationAnomalyPoints = sortedAlertEvaluationAnomalyPoints.slice(
+            0,
+            indexByStartTime + 1
+        );
+    }
+
+    // Sort by anomaly end time
+    sortedAlertEvaluationAnomalyPoints.sort(
+        alertEvaluationAnomalyPointsEndTimeComparator
     );
 
-    if (index === alertEvaluationAnomalyPoints.length) {
-        // Not found
-        return [];
-    }
-
-    // Gather all alert evaluation anomaly points with timestamp less than or equal to end time
-    const filteredAlertEvaluationAnomalyPoints = [];
-    while (
-        index < alertEvaluationAnomalyPoints.length &&
-        alertEvaluationAnomalyPoints[index].startTime <= endTime
-    ) {
-        filteredAlertEvaluationAnomalyPoints.push(
-            alertEvaluationAnomalyPoints[index]
+    // Search first alert evaluation anomaly point with end time greater than or equal to filter
+    // start time
+    const indexByEndTime = bounds.ge(
+        sortedAlertEvaluationAnomalyPoints,
+        { endTime: startTime } as AlertEvaluationAnomalyPoint,
+        alertEvaluationAnomalyPointsEndTimeComparator
+    );
+    if (indexByEndTime !== -sortedAlertEvaluationAnomalyPoints.length + 1) {
+        // Found, clip alert evaluation anomaly points with end time before filter start time
+        sortedAlertEvaluationAnomalyPoints = sortedAlertEvaluationAnomalyPoints.slice(
+            indexByEndTime,
+            sortedAlertEvaluationAnomalyPoints.length
         );
-        index++;
     }
 
-    return filteredAlertEvaluationAnomalyPoints;
+    return sortedAlertEvaluationAnomalyPoints;
+};
+
+export const getAlertEvaluationTimeSeriesPointAtTime = (
+    alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[],
+    time: number
+): AlertEvaluationTimeSeriesPoint | null => {
+    if (isEmpty(alertEvaluationTimeSeriesPoints || !time)) {
+        return null;
+    }
+
+    // Search first alert evaluation time series point with timestamp closest or equal to time
+    const index = bounds.le(
+        alertEvaluationTimeSeriesPoints,
+        {
+            timestamp: time,
+        } as AlertEvaluationTimeSeriesPoint,
+        alertEvaluationTimeSeriesPointsComparator
+    );
+    if (index === -1) {
+        // Not found
+        return null;
+    }
+
+    return alertEvaluationTimeSeriesPoints[index];
+};
+
+const alertEvaluationTimeSeriesPointsComparator = (
+    alertEvaluationTimeSeriesPointA: AlertEvaluationTimeSeriesPoint,
+    alertEvaluationTimeSeriesPointB: AlertEvaluationTimeSeriesPoint
+): number => {
+    return (
+        alertEvaluationTimeSeriesPointA.timestamp -
+        alertEvaluationTimeSeriesPointB.timestamp
+    );
+};
+
+const alertEvaluationAnomalyPointsStartTimeComparator = (
+    alertEvaluationAnomalyPointA: AlertEvaluationAnomalyPoint,
+    alertEvaluationAnomalyPointB: AlertEvaluationAnomalyPoint
+): number => {
+    return (
+        alertEvaluationAnomalyPointA.startTime -
+        alertEvaluationAnomalyPointB.startTime
+    );
+};
+
+const alertEvaluationAnomalyPointsEndTimeComparator = (
+    alertEvaluationAnomalyPointA: AlertEvaluationAnomalyPoint,
+    alertEvaluationAnomalyPointB: AlertEvaluationAnomalyPoint
+): number => {
+    return (
+        alertEvaluationAnomalyPointA.endTime -
+        alertEvaluationAnomalyPointB.endTime
+    );
 };

@@ -15,6 +15,8 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
         notificationSchemes: {
             email: {
                 to: [],
+                cc: [],
+                bcc: [],
             },
         },
     } as unknown) as SubscriptionGroup;
@@ -61,10 +63,8 @@ export const getSubscriptionGroupCardDatas = (
     subscriptionGroups: SubscriptionGroup[],
     alerts: Alert[]
 ): SubscriptionGroupCardData[] => {
-    const subscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
-
     if (isEmpty(subscriptionGroups)) {
-        return subscriptionGroupCardDatas;
+        return [];
     }
 
     // Map alerts to subscription group ids
@@ -73,6 +73,7 @@ export const getSubscriptionGroupCardDatas = (
         alerts
     );
 
+    const subscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
     for (const subscriptionGroup of subscriptionGroups) {
         subscriptionGroupCardDatas.push(
             getSubscriptionGroupCardDataInternal(
@@ -104,12 +105,11 @@ export const getSubscriptionGroupAlert = (
 export const getSubscriptionGroupAlerts = (
     alerts: Alert[]
 ): SubscriptionGroupAlert[] => {
-    const subscriptionGroupAlerts: SubscriptionGroupAlert[] = [];
-
     if (isEmpty(alerts)) {
-        return subscriptionGroupAlerts;
+        return [];
     }
 
+    const subscriptionGroupAlerts: SubscriptionGroupAlert[] = [];
     for (const alert of alerts) {
         subscriptionGroupAlerts.push(getSubscriptionGroupAlert(alert));
     }
@@ -120,41 +120,30 @@ export const getSubscriptionGroupAlerts = (
 export const getSubscriptionGroupAlertId = (
     subscriptionGroupAlert: SubscriptionGroupAlert
 ): number => {
-    if (!subscriptionGroupAlert) {
-        return -1;
-    }
-
-    return subscriptionGroupAlert.id;
+    return (subscriptionGroupAlert && subscriptionGroupAlert.id) || -1;
 };
 
 export const getSubscriptionGroupAlertName = (
     subscriptionGroupAlert: SubscriptionGroupAlert
 ): string => {
-    if (!subscriptionGroupAlert) {
-        return "";
-    }
-
-    return subscriptionGroupAlert.name;
+    return (subscriptionGroupAlert && subscriptionGroupAlert.name) || "";
 };
 
 export const filterSubscriptionGroups = (
     subscriptionGroupCardDatas: SubscriptionGroupCardData[],
     searchWords: string[]
 ): SubscriptionGroupCardData[] => {
-    const filteredSubscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
-
     if (isEmpty(subscriptionGroupCardDatas)) {
-        // No subscription groups available, return empty result
-        return filteredSubscriptionGroupCardDatas;
+        return [];
     }
 
     if (isEmpty(searchWords)) {
-        // No search words available, return original subscription groups
         return subscriptionGroupCardDatas;
     }
 
+    const filteredSubscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
     for (const subscriptionGroupCardData of subscriptionGroupCardDatas) {
-        // Create a copy without original subscription group
+        // Only the subscription group card data to be searched and not contained subscription group
         const subscriptionGroupCardDataCopy = cloneDeep(
             subscriptionGroupCardData
         );
@@ -183,14 +172,13 @@ export const filterSubscriptionGroups = (
     return filteredSubscriptionGroupCardDatas;
 };
 
-// Internal method, lacks appropriate validations
 const getSubscriptionGroupCardDataInternal = (
     subscriptionGroup: SubscriptionGroup,
     alertsToSubscriptionGroupIdsMap: Map<number, SubscriptionGroupAlert[]>
 ): SubscriptionGroupCardData => {
     const subscriptionGroupCardData = createEmptySubscriptionGroupCardData();
 
-    // Maintain a copy of subscription group, needed when updating subscription group
+    // Maintain a copy of subscription group
     subscriptionGroupCardData.subscriptionGroup = subscriptionGroup;
 
     // Basic properties
@@ -210,7 +198,6 @@ const getSubscriptionGroupCardDataInternal = (
     return subscriptionGroupCardData;
 };
 
-// Internal method, lacks appropriate validations
 const mapAlertsToSubscriptionGroupIds = (
     subscriptionGroups: SubscriptionGroup[],
     alerts: Alert[]
@@ -222,7 +209,6 @@ const mapAlertsToSubscriptionGroupIds = (
 
     const alertToAlertIdsMap = mapAlertsToAlertIds(alerts);
     if (isEmpty(alertToAlertIdsMap)) {
-        // No alerts available, return empty result
         return alertsToSubscriptionGroupIdsMap;
     }
 
@@ -234,7 +220,6 @@ const mapAlertsToSubscriptionGroupIds = (
         for (const alert of subscriptionGroup.alerts) {
             const mappedAlert = alertToAlertIdsMap.get(alert.id);
             if (!mappedAlert) {
-                // Alert details not available
                 continue;
             }
 
@@ -256,14 +241,12 @@ const mapAlertsToSubscriptionGroupIds = (
     return alertsToSubscriptionGroupIdsMap;
 };
 
-// Internal method, lacks appropriate validations
 const mapAlertsToAlertIds = (
     alerts: Alert[]
 ): Map<number, SubscriptionGroupAlert> => {
     const alertsToAlertIdsMap = new Map<number, SubscriptionGroupAlert>();
 
     if (isEmpty(alerts)) {
-        // No alerts available, return empty result
         return alertsToAlertIdsMap;
     }
 

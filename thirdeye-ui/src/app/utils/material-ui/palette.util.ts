@@ -1,6 +1,7 @@
 import { PaletteOptions } from "@material-ui/core/styles/createPalette";
 import { Color } from "./color.util";
 
+// Constants for convenience, to be shared across Palette and PaletteOptions
 const COLOR_PRIMARY_CONTRAST_TEXT = Color.WHITE_1;
 const COLOR_PRIMARY_DARK = Color.TEAL_2;
 const COLOR_PRIMARY_LIGHT = Color.TEAL_3;
@@ -12,11 +13,12 @@ const COLOR_SECONDARY_MAIN = Color.GREEN_1;
 const COLOR_BACKGROUND_DEFAULT = Color.WHITE_1;
 const COLOR_BACKGROUND_PAPER = Color.WHITE_1;
 
-// Material-UI theme component colors
+// Material-UI theme colors
 export const Palette = {
     COLOR_BORDER_DEFAULT: Color.GREY_1,
     COLOR_BORDER_DARK: Color.BLACK_1,
     // Visualizations
+    COLOR_VISUALIZATION_STROKE_DEFAULT: Color.BLACK_1,
     COLOR_VISUALIZATION_STROKE_CURRENT: Color.BLACK_1,
     COLOR_VISUALIZATION_STROKE_BASELINE: Color.GREY_1,
     COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND: COLOR_PRIMARY_MAIN,

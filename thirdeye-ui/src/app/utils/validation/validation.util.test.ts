@@ -10,17 +10,17 @@ describe("Validation Util", () => {
             valid: false,
             message: "message.email-required",
         });
-        expect(validateEmail("testInvalidEmail")).toEqual({
+        expect(validateEmail("testEmail")).toEqual({
             valid: false,
             message: "message.invalid-email",
         });
     });
 
     test("validateEmail should return appropriate validation result for valid email", () => {
-        expect(validateEmail("test@valid.email")).toEqual({
+        expect(validateEmail("test@email.com")).toEqual({
             valid: true,
         });
-        expect(validateEmail(" test@valid.email ")).toEqual({
+        expect(validateEmail(" test@email.com ")).toEqual({
             valid: true,
         });
     });
@@ -34,7 +34,7 @@ describe("Validation Util", () => {
             valid: false,
             message: "message.json-input-required",
         });
-        expect(validateJSON("testInvalidJson")).toEqual({
+        expect(validateJSON("testJson")).toEqual({
             valid: false,
             message: "message.invalid-json",
         });
@@ -44,7 +44,7 @@ describe("Validation Util", () => {
         expect(
             validateJSON(`{
             "testKey1": {
-                "testKey2": "testStringValue"
+                "testKey2": "testValue2"
             },
             "testKey3": [3]
         }`)
@@ -54,7 +54,7 @@ describe("Validation Util", () => {
         expect(
             validateJSON(` {
             "testKey1": {
-                "testKey2": "testStringValue"
+                "testKey2": "testValue2"
             },
             "testKey3": [3]
         } `)

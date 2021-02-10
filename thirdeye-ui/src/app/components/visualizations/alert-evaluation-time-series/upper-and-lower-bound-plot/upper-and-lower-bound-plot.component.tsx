@@ -2,10 +2,10 @@ import { AreaClosed } from "@visx/visx";
 import React, { FunctionComponent } from "react";
 import { Dimension } from "../../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../../utils/material-ui/palette.util";
-import { AlertEvaluationTimeSeriesUpperAndLowerBoundPlotProps } from "./alert-evaluation-time-series-upper-and-lower-bound-plot.interfaces";
+import { UpperAndLowerBoundPlotProps } from "./upper-and-lower-bound-plot.interfaces";
 
-export const AlertEvaluationTimeSeriesUpperAndLowerBoundPlot: FunctionComponent<AlertEvaluationTimeSeriesUpperAndLowerBoundPlotProps> = (
-    props: AlertEvaluationTimeSeriesUpperAndLowerBoundPlotProps
+export const UpperAndLowerBoundPlot: FunctionComponent<UpperAndLowerBoundPlotProps> = (
+    props: UpperAndLowerBoundPlotProps
 ) => {
     return (
         <AreaClosed

@@ -1,42 +1,35 @@
 import { OptionsObject, VariantType } from "notistack";
 
-export enum SnackbarOption {
-    ERROR = "ERROR",
-    SUCCESS = "SUCCESS",
-    WARNING = "WARNING",
-    INFO = "INFO",
-}
-
-export const getErrorSnackbarOption = (
+export const getInfoSnackbarOption = (
     preventDuplicate?: boolean
 ): OptionsObject => {
-    return getSnackbarOption(SnackbarOption.ERROR, preventDuplicate);
+    return getSnackbarOption("info", preventDuplicate);
 };
 
 export const getSuccessSnackbarOption = (
     preventDuplicate?: boolean
 ): OptionsObject => {
-    return getSnackbarOption(SnackbarOption.SUCCESS, preventDuplicate);
+    return getSnackbarOption("success", preventDuplicate);
 };
 
 export const getWarningSnackbarOption = (
     preventDuplicate?: boolean
 ): OptionsObject => {
-    return getSnackbarOption(SnackbarOption.WARNING, preventDuplicate);
+    return getSnackbarOption("warning", preventDuplicate);
 };
 
-export const getInfoSnackbarOption = (
+export const getErrorSnackbarOption = (
     preventDuplicate?: boolean
 ): OptionsObject => {
-    return getSnackbarOption(SnackbarOption.INFO, preventDuplicate);
+    return getSnackbarOption("error", preventDuplicate);
 };
 
 const getSnackbarOption = (
-    snackbarOption: SnackbarOption,
+    variant: VariantType,
     preventDuplicate?: boolean
 ): OptionsObject => {
     return {
-        variant: snackbarOption.toLowerCase() as VariantType,
+        variant: variant,
         preventDuplicate: Boolean(preventDuplicate),
     };
 };

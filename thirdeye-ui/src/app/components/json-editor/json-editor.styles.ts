@@ -5,7 +5,7 @@ export const useJSONEditorStyles = makeStyles((theme: Theme) => ({
     container: {
         // Override CodeMirror styles to better align with Material-UI theme
         "& .CodeMirror": {
-            ...codeTypographyOptions,
+            ...codeTypographyOptions.body2,
             borderRadius: theme.shape.borderRadius,
         },
         "& .CodeMirror-focused .CodeMirror-selected": {

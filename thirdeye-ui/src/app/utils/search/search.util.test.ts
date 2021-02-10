@@ -14,6 +14,21 @@ describe("Search Util", () => {
         expect(deepSearchStringProperty("testString", mockMatchFn)).toBeNull();
     });
 
+    test("deepSearchStringProperty should return appropriate string property for object", () => {
+        expect(
+            deepSearchStringProperty(
+                mockObject,
+                (value) => value === "testString"
+            )
+        ).toBeNull();
+        expect(
+            deepSearchStringProperty(
+                mockObject,
+                (value) => value === "testString5"
+            )
+        ).toEqual("testString5");
+    });
+
     test("deepSearchStringProperty should invoke match function on all string properties of object", () => {
         deepSearchStringProperty(mockObject, mockMatchFn);
 

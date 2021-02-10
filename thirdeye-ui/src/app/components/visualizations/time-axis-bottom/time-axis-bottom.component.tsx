@@ -59,13 +59,15 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
                     {dateString}
                 </Text>
 
-                <Text
-                    textAnchor={tickRendererProps.textAnchor}
-                    x={tickRendererProps.x}
-                    y={tickRendererProps.y + 16}
-                >
-                    {timeString}
-                </Text>
+                {timeString && (
+                    <Text
+                        textAnchor={tickRendererProps.textAnchor}
+                        x={tickRendererProps.x}
+                        y={tickRendererProps.y + 16}
+                    >
+                        {timeString}
+                    </Text>
+                )}
             </>
         );
     };

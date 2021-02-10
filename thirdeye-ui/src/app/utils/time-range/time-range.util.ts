@@ -21,14 +21,7 @@ export const createTimeRangeDuration = (
 
 // Returns TimeRange.TODAY time range duration
 export const getDefaultTimeRangeDuration = (): TimeRangeDuration => {
-    const now = DateTime.local();
-    const today = now.startOf("day");
-
-    return createTimeRangeDuration(
-        TimeRange.TODAY,
-        today.toMillis(),
-        now.toMillis()
-    );
+    return getTimeRangeDuration(TimeRange.TODAY);
 };
 
 export const getTimeRangeDuration = (
@@ -155,7 +148,6 @@ export const getTimeRangeDuration = (
                 lastMonth.endOf("month").toMillis()
             );
         }
-
         case TimeRange.THIS_YEAR: {
             const now = DateTime.local();
             const thisYear = now.startOf("year");

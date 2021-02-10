@@ -1,5 +1,10 @@
 import { Typography } from "@material-ui/core";
-import { Legend, LegendItem, LegendLabel, scaleOrdinal } from "@visx/visx";
+import {
+    Legend as VisxLegend,
+    LegendItem,
+    LegendLabel,
+    scaleOrdinal,
+} from "@visx/visx";
 import classnames from "classnames";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent } from "react";
@@ -7,16 +12,14 @@ import { useTranslation } from "react-i18next";
 import { Dimension } from "../../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../../utils/material-ui/palette.util";
 import { AlertEvaluationTimeSeriesPlot } from "../alert-evaluation-time-series.interfaces";
-import { AlertEvaluationTimeSeriesLegendProps } from "./alert-evaluation-time-series-legend.interfaces";
-import { useAlertEvaluationTimeSeriesLegendStyles } from "./alert-evaluation-time-series-legend.styles";
+import { LegendProps } from "./legend.interfaces";
+import { useLegendStyles } from "./legend.styles";
 
-export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationTimeSeriesLegendProps> = (
-    props: AlertEvaluationTimeSeriesLegendProps
-) => {
-    const alertEvaluationTimeSeriesLegendClasses = useAlertEvaluationTimeSeriesLegendStyles();
+export const Legend: FunctionComponent<LegendProps> = (props: LegendProps) => {
+    const alertEvaluationTimeSeriesLegendClasses = useLegendStyles();
     const { t } = useTranslation();
 
-    const legendOrdinalScale = scaleOrdinal({
+    const legendScale = scaleOrdinal({
         domain: [
             AlertEvaluationTimeSeriesPlot.CURRENT,
             AlertEvaluationTimeSeriesPlot.BASELINE,
@@ -54,7 +57,7 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationT
     };
 
     return (
-        <Legend direction="row" scale={legendOrdinalScale}>
+        <VisxLegend direction="row" scale={legendScale}>
             {(labels) => (
                 <div
                     className={alertEvaluationTimeSeriesLegendClasses.container}
@@ -122,6 +125,6 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationT
                         ))}
                 </div>
             )}
-        </Legend>
+        </VisxLegend>
     );
 };

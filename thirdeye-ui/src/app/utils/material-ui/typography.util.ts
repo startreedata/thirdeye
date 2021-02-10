@@ -64,6 +64,8 @@ export const typographyOptions: TypographyOptions = {
 };
 
 export const codeTypographyOptions = {
-    fontFamily: "Source Code Pro, monospace",
-    ...typographyOptions.body2,
+    body2: {
+        fontFamily: "Source Code Pro, monospace",
+        ...typographyOptions.body2,
+    },
 };

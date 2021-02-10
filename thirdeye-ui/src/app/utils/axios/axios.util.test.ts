@@ -51,7 +51,7 @@ describe("Axios Util", () => {
     });
 
     test("axios rejected response interceptor should throw 401 error and invoke unauthenticated access function", () => {
-        const mockError: AxiosError = {
+        const mockError = {
             response: {
                 status: 401,
             },
@@ -65,7 +65,7 @@ describe("Axios Util", () => {
     });
 
     test("axios rejected response interceptor should throw any error other than 401 but not invoke unauthenticated access function", () => {
-        const mockError: AxiosError = {
+        const mockError = {
             response: {
                 status: 500,
             },

@@ -6,9 +6,10 @@ import {
     FormHelperText,
     Grid,
     IconButton,
-    Typography,
 } from "@material-ui/core";
-import { Fullscreen, FullscreenExit, Refresh } from "@material-ui/icons";
+import FullscreenIcon from "@material-ui/icons/Fullscreen";
+import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import classnames from "classnames";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Flipped, Flipper } from "react-flip-toolkit";
@@ -65,7 +66,7 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
     };
 
     return (
-        <div>
+        <>
             <Flipper
                 flipKey={maximized}
                 onComplete={onMaximizeToggleComplete}
@@ -83,7 +84,6 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                     >
                         {/* Visualization card */}
                         <CardHeader
-                            disableTypography
                             action={
                                 <Grid container alignItems="center" spacing={0}>
                                     {/* Stale label */}
@@ -99,7 +99,7 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                                             <IconButton
                                                 onClick={props.onRefresh}
                                             >
-                                                <Refresh />
+                                                <RefreshIcon />
                                             </IconButton>
                                         </Grid>
                                     )}
@@ -111,11 +111,13 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                                                 onClick={onMaximizeToggle}
                                             >
                                                 {/* Maximize button */}
-                                                {!maximized && <Fullscreen />}
+                                                {!maximized && (
+                                                    <FullscreenIcon />
+                                                )}
 
                                                 {/* Restore button */}
                                                 {maximized && (
-                                                    <FullscreenExit />
+                                                    <FullscreenExitIcon />
                                                 )}
                                             </IconButton>
                                         </Grid>
@@ -124,30 +126,16 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                             }
                             className={visualizationCardClasses.headerContainer}
                             title={
-                                <>
-                                    {/* Title */}
-                                    {!maximized && (
-                                        <Typography variant="h6">
-                                            {props.title || ""}
-                                        </Typography>
-                                    )}
-
-                                    {/* Maximized title */}
-                                    {maximized && (
-                                        <Typography variant="h6">
-                                            {props.maximizedTitle ||
-                                                props.title ||
-                                                ""}
-                                        </Typography>
-                                    )}
-                                </>
+                                maximized
+                                    ? props.maximizedTitle || props.title || ""
+                                    : props.title || ""
                             }
+                            titleTypographyProps={{ variant: "h6" }}
                         />
 
                         <CardContent
                             className={visualizationCardClasses.innerContainer}
                         >
-                            {/* Contents */}
                             {props.children}
                         </CardContent>
                     </Card>
@@ -168,6 +156,6 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                     )}
                 />
             </Fade>
-        </div>
+        </>
     );
 };

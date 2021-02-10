@@ -125,8 +125,7 @@ describe("Params Util", () => {
     });
 
     test("getTimeRangeDurationFromQueryString should return null for invalid time range in query string", () => {
-        location.search =
-            "time_range=testInvalidTimeRangeValue&start_time=1&end_time=2";
+        location.search = "time_range=testTimeRange&start_time=1&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
@@ -138,8 +137,7 @@ describe("Params Util", () => {
     });
 
     test("getTimeRangeDurationFromQueryString should return null for invalid end time in query string", () => {
-        location.search =
-            "time_range=CUSTOM&start_time=1&end_time=testInvalidEndTimeValue";
+        location.search = "time_range=CUSTOM&start_time=1&end_time=testEndTime";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });

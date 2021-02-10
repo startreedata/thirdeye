@@ -21,7 +21,7 @@ export const useVisualizationCardStyles = makeStyles<
             PADDING_TOP_OUTER_CONTAINER_MAXIMIZE +
             PADDING_OUTER_CONTAINER_MAXIMIZE
         }px)`, // Available maxmized height, available height - top and bottom padding
-        width: `calc(100% - ${PADDING_OUTER_CONTAINER_MAXIMIZE * 2}px)`, // Available height - left and right padding
+        width: `calc(100% - ${PADDING_OUTER_CONTAINER_MAXIMIZE * 2}px)`, // Available width - left and right padding
         transform: "translate(-50%, -50%)", // Center the container
         overflowY: "auto", // Allow vertical scroll in case maximized height is not sufficient
         zIndex: theme.zIndex.drawer + 3, // Maximized container to be always above backdrop

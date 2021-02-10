@@ -6,20 +6,20 @@ import {
 } from "./snackbar.util";
 
 describe("Snackbar Util", () => {
-    test("getErrorSnackbarOption should return appropriate snackbar option with default prevent duplicate behavior", () => {
-        expect(getErrorSnackbarOption()).toEqual({
-            variant: "error",
+    test("getInfoSnackbarOption should return appropriate snackbar option with default prevent duplicate behavior", () => {
+        expect(getInfoSnackbarOption()).toEqual({
+            variant: "info",
             preventDuplicate: false,
         });
     });
 
-    test("getErrorSnackbarOption should return appropriate snackbar option", () => {
-        expect(getErrorSnackbarOption(true)).toEqual({
-            variant: "error",
+    test("getInfoSnackbarOption should return appropriate snackbar option", () => {
+        expect(getInfoSnackbarOption(true)).toEqual({
+            variant: "info",
             preventDuplicate: true,
         });
-        expect(getErrorSnackbarOption(false)).toEqual({
-            variant: "error",
+        expect(getInfoSnackbarOption(false)).toEqual({
+            variant: "info",
             preventDuplicate: false,
         });
     });
@@ -60,20 +60,20 @@ describe("Snackbar Util", () => {
         });
     });
 
-    test("getInfoSnackbarOption should return appropriate snackbar option with default prevent duplicate behavior", () => {
-        expect(getInfoSnackbarOption()).toEqual({
-            variant: "info",
+    test("getErrorSnackbarOption should return appropriate snackbar option with default prevent duplicate behavior", () => {
+        expect(getErrorSnackbarOption()).toEqual({
+            variant: "error",
             preventDuplicate: false,
         });
     });
 
-    test("getInfoSnackbarOption should return appropriate snackbar option", () => {
-        expect(getInfoSnackbarOption(true)).toEqual({
-            variant: "info",
+    test("getErrorSnackbarOption should return appropriate snackbar option", () => {
+        expect(getErrorSnackbarOption(true)).toEqual({
+            variant: "error",
             preventDuplicate: true,
         });
-        expect(getInfoSnackbarOption(false)).toEqual({
-            variant: "info",
+        expect(getErrorSnackbarOption(false)).toEqual({
+            variant: "error",
             preventDuplicate: false,
         });
     });

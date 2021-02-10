@@ -1,6 +1,6 @@
 import { AlertEvaluationTimeSeriesPlot } from "../alert-evaluation-time-series.interfaces";
 
-export interface AlertEvaluationTimeSeriesLegendProps {
+export interface LegendProps {
     current: boolean;
     baseline: boolean;
     upperAndLowerBound: boolean;

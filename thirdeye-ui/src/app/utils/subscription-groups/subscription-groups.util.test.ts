@@ -239,6 +239,8 @@ const mockEmptySubscriptionGroup = {
     notificationSchemes: {
         email: {
             to: [],
+            cc: [],
+            bcc: [],
         },
     },
 };

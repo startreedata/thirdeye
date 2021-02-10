@@ -109,6 +109,9 @@
             }
         ],
 
+        // Omit boolean property value when set to true
+        "react/jsx-boolean-value": ["error", "never"],
+
         // Require self closing tags in JSX/HTML
         "react/self-closing-comp": ["error"],
 
@@ -122,7 +125,7 @@
 
         // eslint-plugin-jest rules
 
-        // Prefer 'test' over 'it'
+        // Prefer "test" over "it"
         "jest/consistent-test-it": [
             "error",
             {
@@ -134,7 +137,7 @@
         // eslint-plugin-jest-formatting rules
 
         // Require blank line before certain statements (ESLint doesn't work for Jest)
-        "jest-formatting/padding-around-all": 2,
+        "jest-formatting/padding-around-all": "error",
 
         // @typescript-eslint rules
 

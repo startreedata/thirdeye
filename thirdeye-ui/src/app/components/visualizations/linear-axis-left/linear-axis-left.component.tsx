@@ -10,7 +10,6 @@ export const LinearAxisLeft: FunctionComponent<LinearAxisLeftProps> = (
     const linearAxisLeftClasses = useLinearAxisLeftStyles();
 
     // Renders formatted label value from tick renderer props without any visx label font properties
-    // Without custom renderer, tickClassName/labelClassName doesn't seem to work
     const tickComponentRenderer = (
         tickRendererProps: TickRendererProps
     ): ReactNode => {

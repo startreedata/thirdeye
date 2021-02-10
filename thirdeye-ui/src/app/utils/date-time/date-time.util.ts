@@ -92,7 +92,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
     }`;
 };
 
-// Returns formatted string representation of date
+// Returns formatted string representation of date and time
 // For example:
 // MMM DD, YYYY, HH:MM AM/PM
 export const formatDateAndTime = (date: number): string => {
@@ -235,10 +235,8 @@ export const switchMeridiem = (date: number): number => {
     }
 
     const originalDate = DateTime.fromMillis(date);
-
     // Subtract 12 hours from original date
     let switchedDate = originalDate.minus({ hour: 12 });
-
     // Verify only meridiem changed and not day
     if (switchedDate.day !== originalDate.day) {
         // Day changed, add 12 hours instead

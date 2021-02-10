@@ -9,7 +9,7 @@ import { deepSearchStringProperty } from "../search/search.util";
 
 export const getAnomalyName = (anomaly: Anomaly): string => {
     if (!anomaly) {
-        return i18n.t("label.no-data-marker");
+        return i18n.t("label.anomaly");
     }
 
     return `${i18n.t("label.anomaly")} ${i18n.t("label.anomaly-id", {
@@ -74,7 +74,7 @@ export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
         anomalyCardData.predicted = formatLargeNumber(anomaly.avgBaselineVal);
     }
 
-    // Calculate deviation if both average and current values are available
+    // Calculate deviation if both current and average values are available
     if (anomaly.avgCurrentVal && anomaly.avgBaselineVal) {
         const deviation =
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
@@ -105,12 +105,11 @@ export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
 export const getAnomalyCardDatas = (
     anomalies: Anomaly[]
 ): AnomalyCardData[] => {
-    const anomalyCardDatas: AnomalyCardData[] = [];
-
     if (isEmpty(anomalies)) {
-        return anomalyCardDatas;
+        return [];
     }
 
+    const anomalyCardDatas: AnomalyCardData[] = [];
     for (const anomaly of anomalies) {
         anomalyCardDatas.push(getAnomalyCardData(anomaly));
     }
@@ -122,18 +121,15 @@ export const filterAnomalies = (
     anomalyCardDatas: AnomalyCardData[],
     searchWords: string[]
 ): AnomalyCardData[] => {
-    const filteredAnomalyCardDatas: AnomalyCardData[] = [];
-
     if (isEmpty(anomalyCardDatas)) {
-        // No anomalies available, return empty result
-        return filteredAnomalyCardDatas;
+        return [];
     }
 
     if (isEmpty(searchWords)) {
-        // No search words available, return original anomalies
         return anomalyCardDatas;
     }
 
+    const filteredAnomalyCardDatas: AnomalyCardData[] = [];
     for (const anomaly of anomalyCardDatas) {
         for (const searchWord of searchWords) {
             if (

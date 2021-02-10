@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core";
 
-export const useAlertEvaluationTimeSeriesLegendStyles = makeStyles((theme) => ({
+export const useLegendStyles = makeStyles((theme) => ({
     container: {
         display: "flex",
         justifyContent: "space-between",

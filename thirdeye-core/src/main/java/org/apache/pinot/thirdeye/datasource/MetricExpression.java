@@ -108,9 +108,7 @@ public class MetricExpression {
         } else {
           metricConfig = ThirdEyeUtils.getMetricConfigFromNameAndDataset(metricToken, metricDataset);
           metricId = metricConfig.getId();
-          if (metricConfig != null) {
-            metricDataset = metricConfig.getDataset();
-          }
+          metricDataset = metricConfig.getDataset();
         }
         DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(metricDataset);
         metricFunctions.add(

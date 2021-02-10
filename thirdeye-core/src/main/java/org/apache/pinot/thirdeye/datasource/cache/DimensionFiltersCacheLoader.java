@@ -60,7 +60,8 @@ public class DimensionFiltersCacheLoader extends CacheLoader<String, String> {
       if (dataSource == null) {
         LOGGER.warn("datasource [{}] found null in queryCache", dataSourceName);
       } else {
-        Map<String, List<String>> dimensionFilters = dataSource.getDimensionFilters(dataset);
+        Map<String, List<String>> dimensionFilters = dataSource.getDimensionFilters(
+            datasetConfig);
         dimensionFiltersJson = OBJECT_MAPPER.writeValueAsString(dimensionFilters);
       }
     } catch (Exception e) {

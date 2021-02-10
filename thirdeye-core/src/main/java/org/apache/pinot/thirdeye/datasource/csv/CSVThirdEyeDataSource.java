@@ -313,7 +313,8 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public Map<String, List<String>> getDimensionFilters(String dataset) throws Exception {
+  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig) throws Exception {
+    String dataset = datasetConfig.getName();
     if (!dataSets.containsKey(dataset)) {
       throw new IllegalArgumentException();
     }

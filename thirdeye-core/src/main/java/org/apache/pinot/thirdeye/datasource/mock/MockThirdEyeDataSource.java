@@ -339,8 +339,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public Map<String, List<String>> getDimensionFilters(String dataset) throws Exception {
-    return this.delegate.getDimensionFilters(dataset);
+  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig) throws Exception {
+    return this.delegate.getDimensionFilters(datasetConfig);
   }
 
   /**

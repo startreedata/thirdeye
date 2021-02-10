@@ -266,9 +266,9 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
    *
    * @return dimension filters map
    */
-  public Map<String, List<String>> getDimensionFilters(String dataset) throws Exception {
-    LOG.info("Getting dimension filters for " + dataset);
-    DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(dataset);
+  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
+      throws Exception {
+    String dataset = datasetConfig.getName();
 
     String sourceName = dataset.split("\\.")[0];
     String tableName = SqlUtils.computeSqlTableName(dataset);

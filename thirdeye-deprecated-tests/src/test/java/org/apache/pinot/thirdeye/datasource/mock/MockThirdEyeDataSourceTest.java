@@ -75,7 +75,8 @@ public class MockThirdEyeDataSourceTest {
 
   @Test
   public void testGetDimensionFiltersTracking() throws Exception {
-    Map<String, List<String>> filters = this.dataSource.getDimensionFilters("tracking");
+    Map<String, List<String>> filters = this.dataSource.getDimensionFilters(
+        newDataset("tracking"));
     Assert.assertEquals(filters.keySet(),
         new HashSet<>(Arrays.asList("country", "browser", "platform")));
     Assert.assertEquals(new HashSet<>(filters.get("country")),
@@ -88,7 +89,7 @@ public class MockThirdEyeDataSourceTest {
 
   @Test
   public void testGetDimensionFiltersBusiness() throws Exception {
-    Map<String, List<String>> filters = this.dataSource.getDimensionFilters("business");
+    Map<String, List<String>> filters = this.dataSource.getDimensionFilters(newDataset("business"));
     Assert.assertEquals(filters.keySet(), new HashSet<>(Arrays.asList("country", "browser")));
     Assert.assertEquals(new HashSet<>(filters.get("country")),
         new HashSet<>(Arrays.asList("ca", "mx", "us")));
@@ -98,7 +99,7 @@ public class MockThirdEyeDataSourceTest {
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testGetDimensionFiltersInvalidDataset() throws Exception {
-    this.dataSource.getDimensionFilters("invalid");
+    this.dataSource.getDimensionFilters(newDataset("invalid"));
   }
 
   @Test(enabled = false)

@@ -61,5 +61,5 @@ public interface ThirdEyeDataSource {
    *
    * @return dimension map
    */
-  Map<String, List<String>> getDimensionFilters(String dataset) throws Exception;
+  Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig) throws Exception;
 }

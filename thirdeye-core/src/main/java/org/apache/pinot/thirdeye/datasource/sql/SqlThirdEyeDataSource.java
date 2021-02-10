@@ -128,13 +128,12 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    LOG.info("Getting max data time for " + datasetConfig.getName());
     return sqlResponseCacheLoader.getMaxDataTime(datasetConfig);
   }
 
   @Override
-  public Map<String, List<String>> getDimensionFilters(String dataset) throws Exception {
-    LOG.info("Running dimension filters for " + dataset);
-    return this.sqlResponseCacheLoader.getDimensionFilters(dataset);
+  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
+      throws Exception {
+    return this.sqlResponseCacheLoader.getDimensionFilters(datasetConfig);
   }
 }

@@ -34,11 +34,9 @@ import java.util.concurrent.TimeoutException;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +62,11 @@ public class PinotDataSourceDimensionFilters {
    *
    * @return dimension filters map
    */
-  public Map<String, List<String>> getDimensionFilters(String dataset) {
+  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig) {
     long maxTime = System.currentTimeMillis();
+    String dataset = datasetConfig.getName();
     try {
-      maxTime = this.pinotThirdEyeDataSource.getMaxDataTime(
-          DAORegistry.getInstance().getDatasetConfigDAO().findByDataset(dataset));
+      maxTime = this.pinotThirdEyeDataSource.getMaxDataTime(datasetConfig);
     } catch (Exception e) {
       // left blank
     }
@@ -80,7 +78,8 @@ public class PinotDataSourceDimensionFilters {
     try {
       LOG.debug("Loading dimension filters cache {}", dataset);
       List<String> dimensions = Utils.getSortedDimensionNames(dataset);
-      filters = getFilters(dataset, dimensions, startDateTime, endDateTime);
+      filters = getFilters(dimensions, startDateTime, endDateTime,
+          datasetConfig);
     } catch (Exception e) {
       LOG.error("Error while fetching dimension values in filter drop down for collection: {}",
           dataset, e);
@@ -88,14 +87,22 @@ public class PinotDataSourceDimensionFilters {
     return filters;
   }
 
-  private Map<String, List<String>> getFilters(String dataset, List<String> dimensions,
-      DateTime start, DateTime end) {
-    DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(dataset);
-    MetricFunction metricFunction =
-        new MetricFunction(MetricAggFunction.COUNT, "*", null, dataset, null, datasetConfig);
-    List<ThirdEyeRequest> requests =
-        generateFilterRequests(metricFunction, dimensions, start, end,
-            datasetConfig.getDataSource());
+  private Map<String, List<String>> getFilters(List<String> dimensions,
+      DateTime start, DateTime end, final DatasetConfigDTO datasetConfig) {
+
+    final String dataset = datasetConfig.getName();
+    MetricFunction metricFunction = new MetricFunction(MetricAggFunction.COUNT,
+            "*",
+            null,
+        dataset,
+            null,
+        datasetConfig);
+
+    List<ThirdEyeRequest> requests = generateFilterRequests(metricFunction,
+        dimensions,
+        start,
+        end,
+        datasetConfig.getDataSource());
 
     Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();
     for (final ThirdEyeRequest request : requests) {

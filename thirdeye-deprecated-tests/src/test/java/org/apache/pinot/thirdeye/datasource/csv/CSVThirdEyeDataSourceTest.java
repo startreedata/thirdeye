@@ -97,9 +97,9 @@ public class CSVThirdEyeDataSourceTest {
     final DatasetConfigDTO datasetConfigDTO = newDataset("business");
 
     Assert.assertEquals(dataSource.getMaxDataTime(datasetConfigDTO), 7200000);
-    Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters("business").get("country")),
+    Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters(newDataset("business")).get("country")),
         new HashSet<>(dimensions.get("country")));
-    Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters("business").get("browser")),
+    Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters(newDataset("business")).get("browser")),
         new HashSet<>(dimensions.get("browser")));
   }
 
@@ -129,7 +129,7 @@ public class CSVThirdEyeDataSourceTest {
     Map<String, List<String>> expectedMap = new HashMap<>();
     expectedMap.put("country", Arrays.asList("cn", "us"));
     expectedMap.put("browser", Arrays.asList("chrome", "safari"));
-    Map<String, List<String>> actualMap = dataSource.getDimensionFilters("source");
+    Map<String, List<String>> actualMap = dataSource.getDimensionFilters(newDataset("source"));
     Assert.assertEquals(new HashSet<>(actualMap.get("browser")),
         new HashSet<>(expectedMap.get("browser")));
     Assert.assertEquals(new HashSet<>(actualMap.get("country")),
@@ -138,7 +138,7 @@ public class CSVThirdEyeDataSourceTest {
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testGetDimensionFiltersFail() throws Exception {
-    dataSource.getDimensionFilters("invalid");
+    dataSource.getDimensionFilters(newDataset("invalid"));
   }
 
   @Test

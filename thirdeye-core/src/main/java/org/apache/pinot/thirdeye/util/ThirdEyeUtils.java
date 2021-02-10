@@ -23,8 +23,6 @@ import static org.apache.pinot.thirdeye.Constants.GROUP_WRAPPER_PROP_DETECTOR_CO
 import static org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -33,14 +31,11 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +48,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.thirdeye.CoreConstants;
@@ -67,7 +61,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
@@ -123,49 +116,6 @@ public abstract class ThirdEyeUtils {
     }
 
     return filterToDecorate;
-  }
-
-  public static String convertMultiMapToJson(Multimap<String, String> multimap)
-      throws JsonProcessingException {
-    Map<String, Collection<String>> map = multimap.asMap();
-    return OBJECT_MAPPER.writeValueAsString(map);
-  }
-
-  public static Multimap<String, String> convertToMultiMap(String json) {
-    ArrayListMultimap<String, String> multimap = ArrayListMultimap.create();
-    if (json == null) {
-      return multimap;
-    }
-    try {
-      TypeReference<Map<String, ArrayList<String>>> valueTypeRef =
-          new TypeReference<Map<String, ArrayList<String>>>() {
-          };
-      Map<String, ArrayList<String>> map;
-
-      map = OBJECT_MAPPER.readValue(json, valueTypeRef);
-      for (Map.Entry<String, ArrayList<String>> entry : map.entrySet()) {
-        ArrayList<String> valueList = entry.getValue();
-        ArrayList<String> trimmedList = new ArrayList<>();
-        for (String value : valueList) {
-          trimmedList.add(value.trim());
-        }
-        multimap.putAll(entry.getKey(), trimmedList);
-      }
-      return multimap;
-    } catch (IOException e) {
-      LOG.error("Error parsing json:{} message:{}", json, e.getMessage());
-    }
-    return multimap;
-  }
-
-  public static String getSortedFiltersFromJson(String filterJson) {
-    Multimap<String, String> filterMultiMap = convertToMultiMap(filterJson);
-    String sortedFilters = ThirdEyeSpiUtils.getSortedFiltersFromMultiMap(filterMultiMap);
-
-    if (StringUtils.isBlank(sortedFilters)) {
-      return null;
-    }
-    return sortedFilters;
   }
 
   private static String getTimeFormatString(DatasetConfigDTO datasetConfig) {

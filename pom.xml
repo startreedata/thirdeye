@@ -75,7 +75,7 @@
     <mockito.version>1.8.4</mockito.version>
     <jcommander.version>1.35</jcommander.version>
     <hsqldb.version>2.3.4</hsqldb.version>
-    <guice-persist.version>4.1.0</guice-persist.version>
+    <guice-persist.version>4.2.3</guice-persist.version>
     <hibernate-jpa-2.1-api.version>1.0.0.Final</hibernate-jpa-2.1-api.version>
     <hibernate-entirymanager.version>4.3.10.Final</hibernate-entirymanager.version>
     <jsonpath.version>2.4.0</jsonpath.version>

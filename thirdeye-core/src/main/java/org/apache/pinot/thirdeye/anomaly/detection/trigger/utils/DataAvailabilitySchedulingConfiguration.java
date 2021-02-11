@@ -38,12 +38,16 @@ public class DataAvailabilitySchedulingConfiguration {
   private long consumerPollTimeInMilli = 5_000; // consumer wait 5 secs by default for the buffer to be filled
   private List<String> dataSourceWhitelist;
   private List<String> filterClassList;
+
   // delay time after each run for the scheduler to reduce DB polling
   private long schedulerDelayInSec = TimeUnit.MINUTES.toSeconds(5);
+
   // default threshold if detection level threshold is not set
   private long taskTriggerFallBackTimeInSec = TimeUnit.DAYS.toSeconds(1);
+
   // scheduling window for data availability scheduling to avoid over-scheduling if watermarks do not move forward
   private long schedulingWindowInSec = TimeUnit.MINUTES.toSeconds(30);
+
   // schedule delay upon receiving data update trigger in case the visibility of data in source is delayed
   private long scheduleDelayInSec = TimeUnit.MINUTES.toSeconds(10);
 
@@ -51,119 +55,147 @@ public class DataAvailabilitySchedulingConfiguration {
     return consumerClass;
   }
 
-  public void setConsumerClass(String consumerClass) {
+  public DataAvailabilitySchedulingConfiguration setConsumerClass(final String consumerClass) {
     this.consumerClass = consumerClass;
+    return this;
   }
 
   public String getKafkaBootstrapServers() {
     return kafkaBootstrapServers;
   }
 
-  public void setKafkaBootstrapServers(String kafkaBootstrapServers) {
+  public DataAvailabilitySchedulingConfiguration setKafkaBootstrapServers(
+      final String kafkaBootstrapServers) {
     this.kafkaBootstrapServers = kafkaBootstrapServers;
+    return this;
   }
 
   public String getKafkaTopic() {
     return kafkaTopic;
   }
 
-  public void setKafkaTopic(String kafkaTopic) {
+  public DataAvailabilitySchedulingConfiguration setKafkaTopic(final String kafkaTopic) {
     this.kafkaTopic = kafkaTopic;
+    return this;
   }
 
   public String getKafkaConsumerGroupId() {
     return kafkaConsumerGroupId;
   }
 
-  public void setKafkaConsumerGroupId(String kafkaConsumerGroupId) {
+  public DataAvailabilitySchedulingConfiguration setKafkaConsumerGroupId(
+      final String kafkaConsumerGroupId) {
     this.kafkaConsumerGroupId = kafkaConsumerGroupId;
+    return this;
   }
 
   public String getKafkaConsumerPropPath() {
     return kafkaConsumerPropPath;
   }
 
-  public void setKafkaConsumerPropPath(String kafkaConsumerPropPath) {
+  public DataAvailabilitySchedulingConfiguration setKafkaConsumerPropPath(
+      final String kafkaConsumerPropPath) {
     this.kafkaConsumerPropPath = kafkaConsumerPropPath;
+    return this;
   }
 
   public int getNumParallelConsumer() {
     return numParallelConsumer;
   }
 
-  public void setNumParallelConsumer(int numParallelConsumer) {
+  public DataAvailabilitySchedulingConfiguration setNumParallelConsumer(
+      final int numParallelConsumer) {
     this.numParallelConsumer = numParallelConsumer;
+    return this;
   }
 
   public int getDatasetWhitelistUpdateFreqInMin() {
     return datasetWhitelistUpdateFreqInMin;
   }
 
-  public void setDatasetWhitelistUpdateFreqInMin(int datasetWhitelistUpdateFreqInMin) {
+  public DataAvailabilitySchedulingConfiguration setDatasetWhitelistUpdateFreqInMin(
+      final int datasetWhitelistUpdateFreqInMin) {
     this.datasetWhitelistUpdateFreqInMin = datasetWhitelistUpdateFreqInMin;
+    return this;
   }
 
   public long getSleepTimeWhenNoEventInMilli() {
     return sleepTimeWhenNoEventInMilli;
   }
 
-  public void setSleepTimeWhenNoEventInMilli(long sleepTimeWhenNoEventInMilli) {
+  public DataAvailabilitySchedulingConfiguration setSleepTimeWhenNoEventInMilli(
+      final long sleepTimeWhenNoEventInMilli) {
     this.sleepTimeWhenNoEventInMilli = sleepTimeWhenNoEventInMilli;
+    return this;
   }
 
   public long getConsumerPollTimeInMilli() {
     return consumerPollTimeInMilli;
   }
 
-  public void setConsumerPollTimeInMilli(long consumerPollTimeInMilli) {
+  public DataAvailabilitySchedulingConfiguration setConsumerPollTimeInMilli(
+      final long consumerPollTimeInMilli) {
     this.consumerPollTimeInMilli = consumerPollTimeInMilli;
+    return this;
   }
 
   public List<String> getDataSourceWhitelist() {
     return dataSourceWhitelist;
   }
 
-  public void setDataSourceWhitelist(List<String> dataSourceWhitelist) {
+  public DataAvailabilitySchedulingConfiguration setDataSourceWhitelist(
+      final List<String> dataSourceWhitelist) {
     this.dataSourceWhitelist = dataSourceWhitelist;
+    return this;
   }
 
   public List<String> getFilterClassList() {
     return filterClassList;
   }
 
-  public void setFilterClassList(List<String> filterClassList) {
+  public DataAvailabilitySchedulingConfiguration setFilterClassList(
+      final List<String> filterClassList) {
     this.filterClassList = filterClassList;
+    return this;
   }
 
   public long getSchedulerDelayInSec() {
     return schedulerDelayInSec;
   }
 
-  public void setSchedulerDelayInSec(long schedulerDelayInSec) {
+  public DataAvailabilitySchedulingConfiguration setSchedulerDelayInSec(
+      final long schedulerDelayInSec) {
     this.schedulerDelayInSec = schedulerDelayInSec;
+    return this;
   }
 
   public long getTaskTriggerFallBackTimeInSec() {
     return taskTriggerFallBackTimeInSec;
   }
 
-  public void setTaskTriggerFallBackTimeInSec(long taskTriggerFallBackTimeInSec) {
+  public DataAvailabilitySchedulingConfiguration setTaskTriggerFallBackTimeInSec(
+      final long taskTriggerFallBackTimeInSec) {
     this.taskTriggerFallBackTimeInSec = taskTriggerFallBackTimeInSec;
+    return this;
   }
 
   public long getSchedulingWindowInSec() {
     return schedulingWindowInSec;
   }
 
-  public void setSchedulingWindowInSec(long schedulingWindowInSec) {
+  public DataAvailabilitySchedulingConfiguration setSchedulingWindowInSec(
+      final long schedulingWindowInSec) {
     this.schedulingWindowInSec = schedulingWindowInSec;
+    return this;
   }
 
   public long getScheduleDelayInSec() {
     return scheduleDelayInSec;
   }
 
-  public void setScheduleDelayInSec(long scheduleDelayInSec) {
+  public DataAvailabilitySchedulingConfiguration setScheduleDelayInSec(
+      final long scheduleDelayInSec) {
     this.scheduleDelayInSec = scheduleDelayInSec;
+    return this;
   }
 }

@@ -8,7 +8,6 @@ import {
     Point,
     scaleLinear,
     scaleTime,
-    TooltipWithBounds,
     useTooltip,
 } from "@visx/visx";
 import { cloneDeep, debounce, isEmpty } from "lodash";
@@ -51,6 +50,7 @@ import { BaselinePlot } from "./baseline-plot/baseline-plot.component";
 import { CurrentPlot } from "./current-plot/current-plot.component";
 import { Legend } from "./legend/legend.component";
 import { MouseHoverMarker } from "./mouse-hover-marker/mouse-hover-marker.component";
+import { Tooltip } from "./tooltip/tooltip.component";
 import { UpperAndLowerBoundPlot } from "./upper-and-lower-bound-plot/upper-and-lower-bound-plot.component";
 
 const HEIGHT_CONTAINER_MIN = 310;
@@ -414,6 +414,10 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             }
 
             showTooltip({
+                tooltipLeft: svgPoint.x,
+                tooltipTop: timeSeriesYScale(
+                    alertEvaluationTimeSeriesPoint.current
+                ),
                 tooltipData: {
                     timestamp: alertEvaluationTimeSeriesPoint.timestamp,
                     current: alertEvaluationTimeSeriesPoint.current,
@@ -445,7 +449,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     }
 
     return (
-        <>
+        <Tooltip
+            alertEvaluationTimeSeriesTooltipPoint={tooltipData}
+            tooltipLeft={tooltipLeft}
+            tooltipTop={tooltipTop}
+        >
             {/* SVG container with parent dimensions */}
             <svg height={svgHeight} width={svgWidth}>
                 {/* Time series */}
@@ -596,12 +604,6 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 upperAndLowerBound={upperAndLowerBoundPlotVisible}
                 onChange={onLegendChange}
             />
-
-            {tooltipData && (
-                <TooltipWithBounds left={tooltipLeft} top={tooltipTop}>
-                    TEST TEST
-                </TooltipWithBounds>
-            )}
-        </>
+        </Tooltip>
     );
 };

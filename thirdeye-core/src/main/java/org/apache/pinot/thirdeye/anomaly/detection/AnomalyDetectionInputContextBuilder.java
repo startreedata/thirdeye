@@ -132,15 +132,20 @@ public class AnomalyDetectionInputContextBuilder {
    */
   public AnomalyDetectionInputContextBuilder fetchTimeSeriesDataByDimension(
       List<Pair<Long, Long>> startEndTimeRanges,
-      DimensionMap dimensions, boolean endTimeInclusive)
+      DimensionMap dimensions,
+      boolean endTimeInclusive,
+      final DatasetConfigDTO datasetConfig)
       throws Exception {
     TimeGranularity timeGranularity = new TimeGranularity(anomalyFunctionSpec.getBucketSize(),
         anomalyFunctionSpec.getBucketUnit());
 
     // Retrieve Time Series
-    MetricTimeSeries metricTimeSeries =
-        getTimeSeriesByDimension(anomalyFunctionSpec, startEndTimeRanges, dimensions,
-            timeGranularity, endTimeInclusive);
+    MetricTimeSeries metricTimeSeries = getTimeSeriesByDimension(anomalyFunctionSpec,
+        startEndTimeRanges,
+        dimensions,
+        timeGranularity,
+        endTimeInclusive,
+        datasetConfig);
     Map<DimensionMap, MetricTimeSeries> metricTimeSeriesMap = new HashMap<>();
     metricTimeSeriesMap.put(dimensions, metricTimeSeries);
     this.anomalyDetectionInputContext.setDimensionMapMetricTimeSeriesMap(metricTimeSeriesMap);
@@ -168,9 +173,11 @@ public class AnomalyDetectionInputContextBuilder {
    *     anomaly detection
    */
   public MetricTimeSeries getTimeSeriesByDimension(AnomalyFunctionDTO anomalyFunctionSpec,
-      List<Pair<Long, Long>> startEndTimeRanges, DimensionMap dimensionMap,
+      List<Pair<Long, Long>> startEndTimeRanges,
+      DimensionMap dimensionMap,
       TimeGranularity timeGranularity,
-      boolean endTimeInclusive)
+      boolean endTimeInclusive,
+      final DatasetConfigDTO datasetConfig)
       throws ExecutionException {
 
     // Get the original filter
@@ -202,9 +209,9 @@ public class AnomalyDetectionInputContextBuilder {
         getTimeSeriesResponseImpl(anomalyFunctionSpec, startEndTimeRanges,
             timeGranularity, filters, groupByDimensions, endTimeInclusive);
     try {
+
       Map<DimensionKey, MetricTimeSeries> metricTimeSeriesMap = TimeSeriesResponseConverter
-          .toMap(response,
-              Utils.getSchemaDimensionNames(anomalyFunctionSpec.getCollection()));
+          .toMap(response, datasetConfig.getDimensions());
       return extractMetricTimeSeriesByDimension(metricTimeSeriesMap);
     } catch (Exception e) {
       LOG.warn("Unable to get schema dimension name for retrieving metric time series: {}",

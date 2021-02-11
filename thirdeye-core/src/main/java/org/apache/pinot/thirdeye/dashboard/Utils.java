@@ -23,7 +23,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +34,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -46,20 +44,6 @@ public class Utils {
   private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  public static List<String> getSortedDimensionNames(String collection)
-      throws Exception {
-    List<String> dimensions = new ArrayList<>(getSchemaDimensionNames(collection));
-    Collections.sort(dimensions);
-    return dimensions;
-  }
-
-  public static List<String> getSchemaDimensionNames(String collection) throws Exception {
-    DatasetConfigDTO datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-        .getDatasetConfigCache()
-        .get(collection);
-    return datasetConfig.getDimensions();
-  }
 
   public static List<MetricExpression> convertToMetricExpressions(String metricsJson,
       MetricAggFunction aggFunction, String dataset,

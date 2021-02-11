@@ -32,7 +32,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
@@ -77,7 +76,9 @@ public class PinotDataSourceDimensionFilters {
     Map<String, List<String>> filters = null;
     try {
       LOG.debug("Loading dimension filters cache {}", dataset);
-      List<String> dimensions = Utils.getSortedDimensionNames(dataset);
+      List<String> dimensions = new ArrayList<>(datasetConfig.getDimensions());
+      Collections.sort(dimensions);
+
       filters = getFilters(dimensions, startDateTime, endDateTime,
           datasetConfig);
     } catch (Exception e) {

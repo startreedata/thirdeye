@@ -72,10 +72,9 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
   private static final String PRESENT_SEASONAL_VALUES = "presentSeasonalValues";
   private static final String DEFAULT_PRESENT_SEASONAL_VALUES = "false";
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
-
+  private final DataSourceCache dataSourceCache;
   private boolean presentSeasonalValues;
   private Set<EventDTO> relatedEvents;
-  private final DataSourceCache dataSourceCache;
 
   public HierarchicalAnomaliesContent(final DataSourceCache dataSourceCache,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
@@ -261,7 +260,8 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
         baselineEndTime.getMillis());
     MetricTimeSeries
         baselineTimeSeries = contextBuilder
-        .fetchTimeSeriesDataByDimension(Arrays.asList(timeRange), anomaly.getDimensions(), false)
+        .fetchTimeSeriesDataByDimension(Arrays.asList(timeRange), anomaly.getDimensions(), false,
+            datasetConfigDTO)
         .build().getDimensionMapMetricTimeSeriesMap().get(anomaly.getDimensions());
 
     return baselineTimeSeries.getMetricAvgs(0d)[0];

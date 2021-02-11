@@ -10,54 +10,62 @@ import org.apache.pinot.thirdeye.anomaly.events.HolidayEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorJobScheduler;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardService;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.model.download.ModelDownloaderManager;
 
 @Singleton
 public class SchedulerService implements Managed {
 
   private final ThirdEyeWorkerConfiguration config;
-  private MonitorJobScheduler monitorJobScheduler = null;
-  private DetectionCronScheduler detectionScheduler = null;
-  private AutoOnboardService autoOnboardService = null;
-  private HolidayEventsLoader holidayEventsLoader = null;
-  private DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver = null;
-  private ModelDownloaderManager modelDownloaderManager = null;
+  private final MonitorJobScheduler monitorJobScheduler;
+  private final AutoOnboardService autoOnboardService;
+  private final EventManager eventManager;
+  private final HolidayEventsLoader holidayEventsLoader;
+  private final DetectionCronScheduler detectionScheduler;
+  private final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver;
+  private final ModelDownloaderManager modelDownloaderManager;
+  private final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler;
 
   @Inject
-  public SchedulerService(final ThirdEyeWorkerConfiguration config) {
+  public SchedulerService(final ThirdEyeWorkerConfiguration config,
+      final MonitorJobScheduler monitorJobScheduler,
+      final AutoOnboardService autoOnboardService, final EventManager eventManager,
+      final HolidayEventsLoader holidayEventsLoader,
+      final DetectionCronScheduler detectionScheduler,
+      final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver,
+      final ModelDownloaderManager modelDownloaderManager,
+      final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler) {
     this.config = config;
+    this.monitorJobScheduler = monitorJobScheduler;
+    this.autoOnboardService = autoOnboardService;
+    this.eventManager = eventManager;
+    this.holidayEventsLoader = holidayEventsLoader;
+    this.detectionScheduler = detectionScheduler;
+    this.dataAvailabilityEventListenerDriver = dataAvailabilityEventListenerDriver;
+    this.modelDownloaderManager = modelDownloaderManager;
+    this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
   }
 
   @Override
   public void start() throws Exception {
-
     if (config.isMonitor()) {
-      monitorJobScheduler = new MonitorJobScheduler(config.getMonitorConfiguration());
       monitorJobScheduler.start();
     }
+
     if (config.isAutoload()) {
-      autoOnboardService = new AutoOnboardService(config);
       autoOnboardService.start();
     }
+
     if (config.isHolidayEventsLoader()) {
-      holidayEventsLoader =
-          new HolidayEventsLoader(config.getHolidayEventsLoaderConfiguration(),
-              config.getCalendarApiKeyPath(),
-              DAORegistry.getInstance().getEventDAO());
       holidayEventsLoader.start();
-      // TODO suvodeep Move this to Coordinator
-      //      env.jersey().register(new HolidayEventResource(holidayEventsLoader));
     }
     if (config.isMockEventsLoader()) {
       final MockEventsLoader mockEventsLoader = new MockEventsLoader(
           config.getMockEventsLoaderConfiguration(),
-          DAORegistry.getInstance().getEventDAO());
+          eventManager);
       mockEventsLoader.run();
     }
     if (config.isDetectionPipeline()) {
-      detectionScheduler = new DetectionCronScheduler(
-          DAORegistry.getInstance().getDetectionConfigManager());
       detectionScheduler.start();
     }
     if (config.isDetectionAlert()) {
@@ -65,20 +73,12 @@ public class SchedulerService implements Managed {
       subscriptionScheduler.start();
     }
     if (config.isDataAvailabilityEventListener()) {
-      dataAvailabilityEventListenerDriver = new DataAvailabilityEventListenerDriver(
-          config.getDataAvailabilitySchedulingConfiguration());
       dataAvailabilityEventListenerDriver.start();
     }
     if (config.isDataAvailabilityTaskScheduler()) {
-      final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler = new DataAvailabilityTaskScheduler(
-          config.getDataAvailabilitySchedulingConfiguration().getSchedulerDelayInSec(),
-          config.getDataAvailabilitySchedulingConfiguration().getTaskTriggerFallBackTimeInSec(),
-          config.getDataAvailabilitySchedulingConfiguration().getSchedulingWindowInSec(),
-          config.getDataAvailabilitySchedulingConfiguration().getScheduleDelayInSec());
       dataAvailabilityTaskScheduler.start();
     }
     if (config.getModelDownloaderConfig() != null) {
-      modelDownloaderManager = new ModelDownloaderManager(config.getModelDownloaderConfig());
       modelDownloaderManager.start();
     }
   }
@@ -99,6 +99,9 @@ public class SchedulerService implements Managed {
     }
     if (dataAvailabilityEventListenerDriver != null) {
       dataAvailabilityEventListenerDriver.shutdown();
+    }
+    if (config.isDataAvailabilityTaskScheduler()) {
+      dataAvailabilityTaskScheduler.shutdown();
     }
     if (modelDownloaderManager != null) {
       modelDownloaderManager.shutdown();

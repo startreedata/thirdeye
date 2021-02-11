@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.scheduler;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -49,6 +51,7 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class DetectionCronScheduler implements ThirdEyeCronScheduler {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionCronScheduler.class);
@@ -61,10 +64,15 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   final Scheduler scheduler;
   final ScheduledExecutorService executorService;
 
-  public DetectionCronScheduler(AlertManager detectionDAO) throws Exception {
+  @Inject
+  public DetectionCronScheduler(AlertManager detectionDAO) {
     this.detectionDAO = detectionDAO;
-    this.scheduler = StdSchedulerFactory.getDefaultScheduler();
     this.executorService = Executors.newSingleThreadScheduledExecutor();
+    try {
+      this.scheduler = StdSchedulerFactory.getDefaultScheduler();
+    } catch (SchedulerException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

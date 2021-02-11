@@ -30,6 +30,8 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.ibm.icu.util.TimeZone;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -39,12 +41,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.HolidayEventsLoaderConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
@@ -54,191 +56,27 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Holiday events loader, which loads the holiday events from Google Calendar periodically.
  */
+@Singleton
 public class HolidayEventsLoader implements Runnable {
 
-  static class HolidayEvent {
-
-    /**
-     * The Name.
-     */
-    String name;
-    /**
-     * The Event type.
-     */
-    String eventType;
-
-    /**
-     * The Start time.
-     */
-    long startTime;
-    /**
-     * The End time.
-     */
-    long endTime;
-
-    /**
-     * Instantiates a new Holiday event.
-     *
-     * @param name the name
-     * @param eventType the event type
-     * @param startTime the start time
-     * @param endTime the end time
-     */
-    HolidayEvent(String name, String eventType, long startTime, long endTime) {
-      this.name = name;
-      this.eventType = eventType;
-      this.startTime = startTime;
-      this.endTime = endTime;
-    }
-
-    /**
-     * Gets name.
-     *
-     * @return the name
-     */
-    public String getName() {
-      return name;
-    }
-
-    /**
-     * Sets name.
-     *
-     * @param name the name
-     */
-    public void setName(String name) {
-      this.name = name;
-    }
-
-    /**
-     * Gets start time.
-     *
-     * @return the start time
-     */
-    public long getStartTime() {
-      return startTime;
-    }
-
-    /**
-     * Sets start time.
-     *
-     * @param startTime the start time
-     */
-    public void setStartTime(long startTime) {
-      this.startTime = startTime;
-    }
-
-    /**
-     * Gets end time.
-     *
-     * @return the end time
-     */
-    public long getEndTime() {
-      return endTime;
-    }
-
-    /**
-     * Sets end time.
-     *
-     * @param endTime the end time
-     */
-    public void setEndTime(long endTime) {
-      this.endTime = endTime;
-    }
-
-    /**
-     * Gets event type.
-     *
-     * @return the event type
-     */
-    public String getEventType() {
-      return eventType;
-    }
-
-    /**
-     * Sets event type.
-     *
-     * @param eventType the event type
-     */
-    public void setEventType(String eventType) {
-      this.eventType = eventType;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(getName(), getEventType(), getStartTime(), getEndTime());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof HolidayEvent)) {
-        return false;
-      }
-      HolidayEvent holidayEvent = (HolidayEvent) obj;
-      return Objects.equals(getName(), holidayEvent.getName()) && Objects.equals(getStartTime(),
-          holidayEvent.getStartTime()) && Objects.equals(getEndTime(), holidayEvent.getEndTime())
-          && Objects.equals(
-          getEventType(), holidayEvent.getEventType());
-    }
-  }
-
-  /**
-   * Instantiates a new Holiday events loader.
-   *
-   * @param holidayEventsLoaderConfiguration the configuration
-   * @param calendarApiKeyPath the calendar api key path
-   * @param eventDAO the event dao
-   */
-  public HolidayEventsLoader(HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
-      String calendarApiKeyPath, EventManager eventDAO) {
-    this.holidayLoadRange = holidayEventsLoaderConfiguration.getHolidayLoadRange();
-    this.calendarList = holidayEventsLoaderConfiguration.getCalendars();
-    this.keyPath = calendarApiKeyPath;
-    this.eventDAO = eventDAO;
-    this.runFrequency = new TimeGranularity(holidayEventsLoaderConfiguration.getRunFrequency(),
-        TimeUnit.DAYS);
-    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-  }
-
-  /**
-   * List of google holiday calendar ids
-   */
-  private final List<String> calendarList;
-
-  /**
-   * Calendar Api private key path
-   */
-  private final String keyPath;
-  private final ScheduledExecutorService scheduledExecutorService;
-  private final TimeGranularity runFrequency;
-
-  /**
-   * Time range to calculate the upper bound for an holiday's start time. In milliseconds
-   */
-  private final long holidayLoadRange;
-
   private static final Logger LOG = LoggerFactory.getLogger(HolidayEventsLoader.class);
-
-  /**
-   * Global instance of the HTTP transport.
-   */
-  private static HttpTransport HTTP_TRANSPORT;
-
   /**
    * Global instance of the JSON factory.
    */
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-
   /**
    * Global instance of the scopes.
    */
   private static final Set<String> SCOPES = Collections.singleton(CalendarScopes.CALENDAR_READONLY);
-
   private static final String NO_COUNTRY_CODE = "no country code";
-
   /**
    * Override the time zone code for a country
    */
   private static final Map<String, String> COUNTRY_TO_TIMEZONE = ImmutableMap.of("US", "PST");
+  /**
+   * Global instance of the HTTP transport.
+   */
+  private static HttpTransport HTTP_TRANSPORT;
 
   static {
     try {
@@ -248,7 +86,41 @@ public class HolidayEventsLoader implements Runnable {
     }
   }
 
-  private final EventManager eventDAO;
+  /**
+   * List of google holiday calendar ids
+   */
+  private final List<String> calendarList;
+  /**
+   * Calendar Api private key path
+   */
+  private final String keyPath;
+  private final ScheduledExecutorService scheduledExecutorService;
+  private final TimeGranularity runFrequency;
+  /**
+   * Time range to calculate the upper bound for an holiday's start time. In milliseconds
+   */
+  private final long holidayLoadRange;
+  private final EventManager eventManager;
+
+  /**
+   * Instantiates a new Holiday events loader.
+   *
+   * @param eventManager the event dao
+   */
+  @Inject
+  public HolidayEventsLoader(
+      final ThirdEyeWorkerConfiguration config,
+      final EventManager eventManager) {
+    final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration = config
+        .getHolidayEventsLoaderConfiguration();
+    this.holidayLoadRange = holidayEventsLoaderConfiguration.getHolidayLoadRange();
+    this.calendarList = holidayEventsLoaderConfiguration.getCalendars();
+    this.keyPath = config.getCalendarApiKeyPath();
+    this.eventManager = eventManager;
+    this.runFrequency = new TimeGranularity(holidayEventsLoaderConfiguration.getRunFrequency(),
+        TimeUnit.DAYS);
+    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+  }
 
   /**
    * Start.
@@ -291,7 +163,7 @@ public class HolidayEventsLoader implements Runnable {
         newHolidayEventToCountryCodes);
 
     // Get the existing holidays within the time range from the database
-    List<EventDTO> existingEvents = eventDAO
+    List<EventDTO> existingEvents = eventManager
         .findEventsBetweenTimeRange(EventType.HOLIDAY.toString(), start, end);
 
     mergeWithExistingHolidays(holidayNameToHolidayEvent, existingEvents);
@@ -375,7 +247,7 @@ public class HolidayEventsLoader implements Runnable {
       String holidayName = existingEvent.getName();
       if (!holidayNameToHolidayEvent.containsKey(holidayName)) {
         // If a event disappears, delete the event
-        eventDAO.delete(existingEvent);
+        eventManager.delete(existingEvent);
       } else {
         // If an existing event shows up again, overwrite with new time and country code.
         List<EventDTO> eventList = holidayNameToHolidayEvent.get(holidayName);
@@ -384,7 +256,7 @@ public class HolidayEventsLoader implements Runnable {
         existingEvent.setStartTime(newEvent.getStartTime());
         existingEvent.setEndTime(newEvent.getEndTime());
         existingEvent.setTargetDimensionMap(newEvent.getTargetDimensionMap());
-        eventDAO.update(existingEvent);
+        eventManager.update(existingEvent);
 
         if (eventList.isEmpty()) {
           holidayNameToHolidayEvent.remove(holidayName);
@@ -395,7 +267,7 @@ public class HolidayEventsLoader implements Runnable {
     // Add all remaining new events into the database
     for (List<EventDTO> eventDTOList : holidayNameToHolidayEvent.values()) {
       for (EventDTO eventDTO : eventDTOList) {
-        eventDAO.save(eventDTO);
+        eventManager.save(eventDTO);
       }
     }
   }

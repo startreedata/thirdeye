@@ -21,7 +21,8 @@ package org.apache.pinot.thirdeye.auto.onboard;
 
 import static java.util.Objects.requireNonNull;
 
-import java.time.Duration;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * This is a service to onboard datasets automatically to thirdeye from the different data sources
  * This service runs periodically and runs auto load for each data source
  */
+@Singleton
 public class AutoOnboardService implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardService.class);
@@ -43,27 +45,23 @@ public class AutoOnboardService implements Runnable {
   private final ScheduledExecutorService scheduledExecutorService;
 
   private final List<AutoOnboard> autoOnboardServices = new ArrayList<>();
-  private final Duration frequency;
+  private final ThirdEyeWorkerConfiguration config;
 
   /**
    * Reads data sources configs and instantiates the constructors for auto load of all data sources,
    * if availble
    */
+  @Inject
   public AutoOnboardService(ThirdEyeWorkerConfiguration config) {
-    frequency = config.getAutoOnboardConfiguration().getFrequency();
+    this.config = config;
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-
-    Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
-        .getDataSourceToAutoOnboardMap(
-            requireNonNull(config.getDataSourcesAsUrl()));
-    for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {
-      autoOnboardServices.addAll(autoOnboards);
-    }
   }
 
   public void start() {
     scheduledExecutorService
-        .scheduleAtFixedRate(this, 0, frequency.getSeconds(), TimeUnit.SECONDS);
+        .scheduleAtFixedRate(this, 0,
+            config.getAutoOnboardConfiguration().getFrequency().getSeconds(),
+            TimeUnit.SECONDS);
   }
 
   public void shutdown() {
@@ -73,6 +71,13 @@ public class AutoOnboardService implements Runnable {
 
   @Override
   public void run() {
+    Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
+        .getDataSourceToAutoOnboardMap(
+            requireNonNull(config.getDataSourcesAsUrl()));
+
+    for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {
+      autoOnboardServices.addAll(autoOnboards);
+    }
     for (AutoOnboard autoOnboard : autoOnboardServices) {
       LOG.info("Running auto load for {}", autoOnboard.getClass().getSimpleName());
       try {

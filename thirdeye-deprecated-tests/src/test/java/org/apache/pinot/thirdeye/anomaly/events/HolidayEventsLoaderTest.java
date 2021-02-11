@@ -26,13 +26,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.HolidayEventsLoaderConfiguration;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
- *  Holiday events loader test.
+ * Holiday events loader test.
  */
 public class HolidayEventsLoaderTest {
 
@@ -59,8 +60,9 @@ public class HolidayEventsLoaderTest {
     anotherEventDTO.setId(1L);
     eventsDAO = new MockEventsManager(new HashSet<>(Arrays.asList(eventDTO, anotherEventDTO)),
         null);
-    holidayEventsLoader = new HolidayEventsLoader(holidayEventsLoaderConfiguration, "path to key",
-        eventsDAO);
+    ThirdEyeWorkerConfiguration config = new ThirdEyeWorkerConfiguration()
+        .setHolidayEventsLoaderConfiguration(holidayEventsLoaderConfiguration);
+    holidayEventsLoader = new HolidayEventsLoader(config, eventsDAO);
   }
 
   /**
@@ -68,18 +70,18 @@ public class HolidayEventsLoaderTest {
    */
   @Test
   public void testGetHolidayNameToEventDtoMap() {
-    Map<HolidayEventsLoader.HolidayEvent, Set<String>> newHolidayEventToCountryCodes = new HashMap<>();
-    HolidayEventsLoader.HolidayEvent firstHolidayEvent =
-        new HolidayEventsLoader.HolidayEvent("Some festival", EventType.HOLIDAY.toString(),
+    Map<HolidayEvent, Set<String>> newHolidayEventToCountryCodes = new HashMap<>();
+    HolidayEvent firstHolidayEvent =
+        new HolidayEvent("Some festival", EventType.HOLIDAY.toString(),
             1521676800L, 1521763200L);
 
-    HolidayEventsLoader.HolidayEvent secondHolidayEvent =
-        new HolidayEventsLoader.HolidayEvent("Some special day", EventType.HOLIDAY.toString(),
+    HolidayEvent secondHolidayEvent =
+        new HolidayEvent("Some special day", EventType.HOLIDAY.toString(),
             1521676800L,
             1521763200L);
 
-    HolidayEventsLoader.HolidayEvent thirdHolidayEvent =
-        new HolidayEventsLoader.HolidayEvent("Some festival", EventType.HOLIDAY.toString(),
+    HolidayEvent thirdHolidayEvent =
+        new HolidayEvent("Some festival", EventType.HOLIDAY.toString(),
             1521504000L, 1521590400L);
 
     newHolidayEventToCountryCodes.put(firstHolidayEvent, new HashSet<>(Arrays.asList("us", "cn")));

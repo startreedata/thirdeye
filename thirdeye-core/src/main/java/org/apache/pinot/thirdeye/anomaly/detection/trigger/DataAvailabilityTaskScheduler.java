@@ -22,6 +22,8 @@ package org.apache.pinot.thirdeye.anomaly.detection.trigger;
 import static org.apache.pinot.thirdeye.detection.TaskUtils.createDataQualityTask;
 import static org.apache.pinot.thirdeye.detection.TaskUtils.createDetectionTask;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -34,6 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.CoreConstants;
+import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskInfoFactory;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
@@ -59,6 +62,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is to schedule detection tasks based on data availability events.
  */
+@Singleton
 public class DataAvailabilityTaskScheduler implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataAvailabilityTaskScheduler.class);
@@ -79,15 +83,18 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   /**
    * Construct an instance of {@link DataAvailabilityTaskScheduler}
    *
+   * @param dataAvailabilitySchedulingConfiguration
    * @param sleepPerRunInSec delay after each run to avoid polling the database too often
    * @param fallBackTimeInSec global threshold for fallback if detection level one is not set
    */
-  public DataAvailabilityTaskScheduler(long sleepPerRunInSec, long fallBackTimeInSec,
-      long schedulingWindowInSec, long scheduleDelayInSec) {
-    this.sleepPerRunInSec = sleepPerRunInSec;
-    this.fallBackTimeInSec = fallBackTimeInSec;
-    this.schedulingWindowInSec = schedulingWindowInSec;
-    this.scheduleDelayInSec = scheduleDelayInSec;
+  @Inject
+  public DataAvailabilityTaskScheduler(
+      final DataAvailabilitySchedulingConfiguration config) {
+    this.sleepPerRunInSec = config.getSchedulerDelayInSec();
+    this.fallBackTimeInSec = config.getTaskTriggerFallBackTimeInSec();
+    this.schedulingWindowInSec = config.getSchedulingWindowInSec();
+    this.scheduleDelayInSec = config.getScheduleDelayInSec();
+
     this.detectionIdToLastTaskEndTimeMap = new HashMap<>();
     this.executorService = Executors.newSingleThreadScheduledExecutor();
     this.taskDAO = DAORegistry.getInstance().getTaskDAO();
@@ -267,4 +274,9 @@ public class DataAvailabilityTaskScheduler implements Runnable {
         .max(Comparator.naturalOrder()).orElse(0L);
     return System.currentTimeMillis() <= maxEventTime + schedulingWindowInSec * 1000;
   }
+
+  public void shutdown() {
+    executorService.shutdown();
+  }
+
 }

@@ -20,6 +20,8 @@
 package org.apache.pinot.thirdeye.anomaly.detection.trigger;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -37,30 +39,38 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is to start DataAvailabilityEventListener based on configuration.
  */
+@Singleton
 public class DataAvailabilityEventListenerDriver {
 
   private static final Logger LOG = LoggerFactory
       .getLogger(DataAvailabilityEventListenerDriver.class);
+
   private final ExecutorService executorService;
   private final DataAvailabilitySchedulingConfiguration config;
-  private final Properties consumerProps;
-  private final List<DataAvailabilityEventListener> listeners;
+  private final Properties consumerProps = new Properties();
+  private final List<DataAvailabilityEventListener> listeners = new ArrayList<>();
 
-  public DataAvailabilityEventListenerDriver(DataAvailabilitySchedulingConfiguration config)
-      throws IOException {
-    String rootDir = System.getProperty("dw.rootDir");
+  @Inject
+  public DataAvailabilityEventListenerDriver(DataAvailabilitySchedulingConfiguration config) {
     this.config = config;
     this.executorService = Executors.newFixedThreadPool(this.config.getNumParallelConsumer(),
-        new ThreadFactoryBuilder().setNameFormat("data-avail-event-consumer-%d").build());
-    this.consumerProps = new Properties();
-    this.consumerProps
-        .load(new FileInputStream(rootDir + "/" + this.config.getKafkaConsumerPropPath()));
-    this.listeners = new ArrayList<>();
-    DatasetTriggerInfoRepo
-        .init(config.getDatasetWhitelistUpdateFreqInMin(), config.getDataSourceWhitelist());
+        new ThreadFactoryBuilder()
+            .setNameFormat("data-avail-event-consumer-%d")
+            .build());
   }
 
   public void start() {
+    final String rootDir = System.getProperty("dw.rootDir");
+    try {
+      this.consumerProps
+          .load(new FileInputStream(rootDir + "/" + this.config.getKafkaConsumerPropPath()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    DatasetTriggerInfoRepo
+        .init(config.getDatasetWhitelistUpdateFreqInMin(), config.getDataSourceWhitelist());
+
     for (int i = 0; i < config.getNumParallelConsumer(); i++) {
       DataAvailabilityKafkaConsumer consumer = loadConsumer();
       List<DataAvailabilityEventFilter> filters = loadFilters();

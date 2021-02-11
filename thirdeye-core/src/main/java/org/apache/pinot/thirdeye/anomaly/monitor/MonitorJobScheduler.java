@@ -19,14 +19,18 @@
 
 package org.apache.pinot.thirdeye.anomaly.monitor;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import javax.annotation.Nullable;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class MonitorJobScheduler {
 
   private static final Logger LOG = LoggerFactory.getLogger(MonitorJobScheduler.class);
@@ -36,8 +40,10 @@ public class MonitorJobScheduler {
   private MonitorJobRunner monitorJobRunner;
   private MonitorJobContext monitorJobContext;
 
-  public MonitorJobScheduler(MonitorConfiguration monitorConfiguration) {
-    this.anomalyTaskDAO = DAORegistry.getInstance().getTaskDAO();
+  @Inject
+  public MonitorJobScheduler(@Nullable MonitorConfiguration monitorConfiguration,
+      final TaskManager taskManager) {
+    this.anomalyTaskDAO = taskManager;
     this.monitorConfiguration = monitorConfiguration;
     scheduledExecutorService = Executors.newScheduledThreadPool(10);
   }

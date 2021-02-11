@@ -46,6 +46,7 @@ public abstract class DeprecatedInjectorUtil {
     DeprecatedInjectorUtil.injector = injector;
   }
 
+  @Deprecated
   public static <T> T getInstance(Class<T> c) {
     return requireNonNull(injector, "Injector not initialized").getInstance(c);
   }

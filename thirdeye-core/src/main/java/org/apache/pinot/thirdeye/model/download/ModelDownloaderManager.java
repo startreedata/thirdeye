@@ -20,6 +20,8 @@
 
 package org.apache.pinot.thirdeye.model.download;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardService;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.slf4j.Logger;
@@ -39,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * models into a local destination path. The class names, the run frequency and the download path
  * can be configured.
  */
+@Singleton
 public class ModelDownloaderManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardService.class);
@@ -47,12 +51,27 @@ public class ModelDownloaderManager {
   private final Map<String, ModelDownloader> modelDownloaders;
   private final ScheduledExecutorService scheduledExecutorService;
 
-  public ModelDownloaderManager(List<ModelDownloaderConfiguration> modelDownloaderConfigs) {
-    this.configs = modelDownloaderConfigs;
+  @Inject
+  public ModelDownloaderManager(ThirdEyeWorkerConfiguration configuration) {
+    this.configs = configuration.getModelDownloaderConfig();
     this.modelDownloaders = new HashMap<>();
     this.scheduledExecutorService = Executors.newScheduledThreadPool(5);
+  }
 
+  /**
+   * start the model downloader manager
+   */
+  public void start() {
     constructModelDownloaders();
+
+    for (ModelDownloaderConfiguration config : this.configs) {
+      TimeGranularity runFrequency = config.getRunFrequency();
+      this.scheduledExecutorService.scheduleAtFixedRate(() -> {
+        LOG.info("running the model downloader: {}", config.getClassName());
+        this.modelDownloaders.get(config.getClassName())
+            .fetchModel(Paths.get(config.getDestinationPath()));
+      }, 0L, runFrequency.getSize(), runFrequency.getUnit());
+    }
   }
 
   private void constructModelDownloaders() {
@@ -65,20 +84,6 @@ public class ModelDownloaderManager {
       } catch (Exception e) {
         LOG.warn("Failed to initialize model downloader {}", config.getClassName(), e);
       }
-    }
-  }
-
-  /**
-   * start the model downloader manager
-   */
-  public void start() {
-    for (ModelDownloaderConfiguration config : this.configs) {
-      TimeGranularity runFrequency = config.getRunFrequency();
-      this.scheduledExecutorService.scheduleAtFixedRate(() -> {
-        LOG.info("running the model downloader: {}", config.getClassName());
-        this.modelDownloaders.get(config.getClassName())
-            .fetchModel(Paths.get(config.getDestinationPath()));
-      }, 0L, runFrequency.getSize(), runFrequency.getUnit());
     }
   }
 

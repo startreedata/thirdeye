@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
@@ -81,8 +82,14 @@ public class DataAvailabilityTaskSchedulerTest {
     metric2.setActive(true);
     metric2.setAlias("");
     metricId2 = metricConfigManager.save(metric2);
-    dataAvailabilityTaskScheduler = new DataAvailabilityTaskScheduler(60,
-        TimeUnit.DAYS.toSeconds(1), TimeUnit.MINUTES.toSeconds(30), TimeUnit.MINUTES.toSeconds(10));
+
+    dataAvailabilityTaskScheduler = new DataAvailabilityTaskScheduler(
+        new DataAvailabilitySchedulingConfiguration()
+            .setScheduleDelayInSec(60)
+            .setTaskTriggerFallBackTimeInSec(TimeUnit.DAYS.toSeconds(1))
+            .setSchedulingWindowInSec(TimeUnit.MINUTES.toSeconds(30))
+            .setScheduleDelayInSec(TimeUnit.MINUTES.toSeconds(10))
+    );
   }
 
   @AfterMethod

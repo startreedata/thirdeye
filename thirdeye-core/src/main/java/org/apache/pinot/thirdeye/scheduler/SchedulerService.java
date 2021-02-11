@@ -25,6 +25,8 @@ public class SchedulerService implements Managed {
   private final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver;
   private final ModelDownloaderManager modelDownloaderManager;
   private final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler;
+  private final SubscriptionCronScheduler subscriptionScheduler;
+  private final MockEventsLoader mockEventsLoader;
 
   @Inject
   public SchedulerService(final ThirdEyeWorkerConfiguration config,
@@ -34,7 +36,9 @@ public class SchedulerService implements Managed {
       final DetectionCronScheduler detectionScheduler,
       final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver,
       final ModelDownloaderManager modelDownloaderManager,
-      final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler) {
+      final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler,
+      final SubscriptionCronScheduler subscriptionScheduler,
+      final MockEventsLoader mockEventsLoader) {
     this.config = config;
     this.monitorJobScheduler = monitorJobScheduler;
     this.autoOnboardService = autoOnboardService;
@@ -44,6 +48,8 @@ public class SchedulerService implements Managed {
     this.dataAvailabilityEventListenerDriver = dataAvailabilityEventListenerDriver;
     this.modelDownloaderManager = modelDownloaderManager;
     this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
+    this.subscriptionScheduler = subscriptionScheduler;
+    this.mockEventsLoader = mockEventsLoader;
   }
 
   @Override
@@ -60,16 +66,12 @@ public class SchedulerService implements Managed {
       holidayEventsLoader.start();
     }
     if (config.isMockEventsLoader()) {
-      final MockEventsLoader mockEventsLoader = new MockEventsLoader(
-          config.getMockEventsLoaderConfiguration(),
-          eventManager);
       mockEventsLoader.run();
     }
     if (config.isDetectionPipeline()) {
       detectionScheduler.start();
     }
     if (config.isDetectionAlert()) {
-      final SubscriptionCronScheduler subscriptionScheduler = new SubscriptionCronScheduler();
       subscriptionScheduler.start();
     }
     if (config.isDataAvailabilityEventListener()) {
@@ -96,6 +98,9 @@ public class SchedulerService implements Managed {
     }
     if (detectionScheduler != null) {
       detectionScheduler.shutdown();
+    }
+    if (config.isDetectionAlert()) {
+      subscriptionScheduler.shutdown();
     }
     if (dataAvailabilityEventListenerDriver != null) {
       dataAvailabilityEventListenerDriver.shutdown();

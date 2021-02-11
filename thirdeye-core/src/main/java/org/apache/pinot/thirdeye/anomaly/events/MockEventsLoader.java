@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.anomaly.events;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +54,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see org.apache.pinot.thirdeye.datasource.mock.MockThirdEyeDataSource
  */
+@Singleton
 public class MockEventsLoader implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(MockEventsLoader.class);
@@ -72,6 +75,7 @@ public class MockEventsLoader implements Runnable {
   MockEventsLoaderConfiguration configuration;
   EventManager eventDAO;
 
+  @Inject
   public MockEventsLoader(MockEventsLoaderConfiguration configuration, EventManager eventDAO) {
     this.configuration = configuration;
     this.eventDAO = eventDAO;

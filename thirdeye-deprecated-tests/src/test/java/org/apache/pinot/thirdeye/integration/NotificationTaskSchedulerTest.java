@@ -181,7 +181,8 @@ public class NotificationTaskSchedulerTest {
   }
 
   private void startAlertScheduler() throws SchedulerException {
-    alertJobScheduler = new SubscriptionCronScheduler();
+    alertJobScheduler = new SubscriptionCronScheduler(
+        DAORegistry.getInstance().getDetectionAlertConfigManager());
     alertJobScheduler.start();
   }
 

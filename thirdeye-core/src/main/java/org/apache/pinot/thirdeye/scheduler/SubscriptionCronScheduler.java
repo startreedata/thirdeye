@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.scheduler;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -31,7 +33,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.AbstractBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionAlertConfigBean;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertJob;
 import org.quartz.CronScheduleBuilder;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
  * alert jobs
  * in the cron scheduler.
  */
+@Singleton
 public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
 
   private static final Logger LOG = LoggerFactory.getLogger(SubscriptionCronScheduler.class);
@@ -63,14 +65,19 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   public static final String QUARTZ_SUBSCRIPTION_GROUPER = TaskConstants.TaskType.DETECTION_ALERT
       .toString();
 
-  final Scheduler scheduler;
+  private final Scheduler scheduler;
   private final ScheduledExecutorService scheduledExecutorService;
   private final SubscriptionGroupManager alertConfigDAO;
 
-  public SubscriptionCronScheduler() throws SchedulerException {
-    this.scheduler = StdSchedulerFactory.getDefaultScheduler();
+  @Inject
+  public SubscriptionCronScheduler(final SubscriptionGroupManager detectionAlertConfigManager) {
+    this.alertConfigDAO = detectionAlertConfigManager;
     this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-    this.alertConfigDAO = DAORegistry.getInstance().getDetectionAlertConfigManager();
+    try {
+      this.scheduler = StdSchedulerFactory.getDefaultScheduler();
+    } catch (SchedulerException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -197,4 +204,6 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
       // for all jobs with not isActive, and not isScheduled, no change required
     }
   }
+
+
 }

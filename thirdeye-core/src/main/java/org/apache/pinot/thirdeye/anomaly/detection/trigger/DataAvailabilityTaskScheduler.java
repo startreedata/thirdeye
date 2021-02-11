@@ -79,17 +79,26 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   private final TaskManager taskDAO;
   private final AlertManager detectionConfigDAO;
   private final DatasetConfigManager datasetConfigDAO;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   /**
    * Construct an instance of {@link DataAvailabilityTaskScheduler}
    *
+   * @param taskManager
+   * @param detectionConfigManager
+   * @param datasetConfigManager
+   * @param thirdEyeCacheRegistry
    * @param dataAvailabilitySchedulingConfiguration
    * @param sleepPerRunInSec delay after each run to avoid polling the database too often
    * @param fallBackTimeInSec global threshold for fallback if detection level one is not set
    */
   @Inject
   public DataAvailabilityTaskScheduler(
-      final DataAvailabilitySchedulingConfiguration config) {
+      final DataAvailabilitySchedulingConfiguration config,
+      final TaskManager taskManager,
+      final AlertManager detectionConfigManager,
+      final DatasetConfigManager datasetConfigManager,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     this.sleepPerRunInSec = config.getSchedulerDelayInSec();
     this.fallBackTimeInSec = config.getTaskTriggerFallBackTimeInSec();
     this.schedulingWindowInSec = config.getSchedulingWindowInSec();
@@ -97,9 +106,10 @@ public class DataAvailabilityTaskScheduler implements Runnable {
 
     this.detectionIdToLastTaskEndTimeMap = new HashMap<>();
     this.executorService = Executors.newSingleThreadScheduledExecutor();
-    this.taskDAO = DAORegistry.getInstance().getTaskDAO();
-    this.detectionConfigDAO = DAORegistry.getInstance().getDetectionConfigManager();
-    this.datasetConfigDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    this.taskDAO = taskManager;
+    this.detectionConfigDAO = detectionConfigManager;
+    this.datasetConfigDAO = datasetConfigManager;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   /**
@@ -118,7 +128,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
         long detectionConfigId = detectionConfig.getId();
         DetectionPipelineTaskInfo taskInfo = TaskUtils
             .buildTaskInfoFromDetectionConfig(detectionConfig, detectionEndTime,
-                DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+                thirdEyeCacheRegistry);
         if (!runningDetection.containsKey(detectionConfigId)) {
           if (isAllDatasetUpdated(detectionConfig, detection2DatasetMap.get(detectionConfig),
               datasetConfigMap)) {

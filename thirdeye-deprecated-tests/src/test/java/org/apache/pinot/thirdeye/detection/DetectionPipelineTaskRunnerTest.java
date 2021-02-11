@@ -27,10 +27,10 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -49,7 +49,7 @@ public class DetectionPipelineTaskRunnerTest {
   private DetectionPipelineTaskInfo info;
   private TaskContext context;
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private AlertManager detectionDAO;
   private MergedAnomalyResultManager anomalyDAO;
   private EvaluationManager evaluationDAO;
@@ -66,7 +66,7 @@ public class DetectionPipelineTaskRunnerTest {
 
     this.outputs = new ArrayList<>();
 
-    this.testDAOProvider = DAOTestBase.getInstance();
+    this.testDAOProvider = new TestDbEnv();
     this.detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
     this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
     this.evaluationDAO = DAORegistry.getInstance().getEvaluationManager();

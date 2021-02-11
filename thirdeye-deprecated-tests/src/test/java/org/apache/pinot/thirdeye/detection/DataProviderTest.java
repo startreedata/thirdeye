@@ -38,12 +38,12 @@ import org.apache.pinot.thirdeye.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
@@ -70,7 +70,7 @@ import org.testng.annotations.Test;
 
 public class DataProviderTest {
 
-  private DAOTestBase testBase;
+  private TestDbEnv testBase;
 
   private DataProvider provider;
 
@@ -82,7 +82,7 @@ public class DataProviderTest {
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
-    this.testBase = DAOTestBase.getInstance();
+    this.testBase = new TestDbEnv();
 
     DAORegistry reg = DAORegistry.getInstance();
     final EventManager eventDAO = reg.getEventDAO();

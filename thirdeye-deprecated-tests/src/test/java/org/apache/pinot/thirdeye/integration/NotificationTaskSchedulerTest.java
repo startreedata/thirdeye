@@ -24,13 +24,13 @@ import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
@@ -67,7 +67,7 @@ public class NotificationTaskSchedulerTest {
 
   private DetectionCronScheduler detectionJobScheduler = null;
   private SubscriptionCronScheduler alertJobScheduler = null;
-  private DAOTestBase testDAOProvider = null;
+  private TestDbEnv testDAOProvider = null;
   private DAORegistry daoRegistry = null;
   private MetricConfigManager metricDAO;
   private DatasetConfigManager datasetDAO;
@@ -80,7 +80,7 @@ public class NotificationTaskSchedulerTest {
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     daoRegistry = DAORegistry.getInstance();
     Assert.assertNotNull(daoRegistry.getJobDAO());
     initDao();

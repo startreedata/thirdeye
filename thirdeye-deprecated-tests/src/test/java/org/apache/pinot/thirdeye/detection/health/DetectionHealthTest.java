@@ -23,10 +23,10 @@ package org.apache.pinot.thirdeye.detection.health;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
 
 public class DetectionHealthTest {
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private MergedAnomalyResultManager anomalyDAO;
   private TaskManager taskDAO;
   private EvaluationManager evaluationDAO;
@@ -46,7 +46,7 @@ public class DetectionHealthTest {
 
   @BeforeMethod
   public void setUp() {
-    this.testDAOProvider = DAOTestBase.getInstance();
+    this.testDAOProvider = new TestDbEnv();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     this.anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     this.taskDAO = daoRegistry.getTaskDAO();

@@ -36,7 +36,7 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
@@ -73,7 +73,7 @@ public class DimensionsRecipientAlertFilterTest {
   private DetectionAlertFilter alertFilter;
   private MockDataProvider provider;
   private SubscriptionGroupDTO alertConfig;
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
 
   private long detectionConfigId1;
   private long detectionConfigId2;
@@ -84,7 +84,7 @@ public class DimensionsRecipientAlertFilterTest {
 
   @BeforeMethod
   public void beforeMethod() throws InterruptedException {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
 
     DetectionAlertRegistry.getInstance().registerAlertFilter("DIMENSIONS_ALERTER_PIPELINE",
         DimensionsRecipientAlertFilter.class.getName());

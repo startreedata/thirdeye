@@ -30,9 +30,9 @@ import org.apache.pinot.spi.data.FieldSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
 import org.apache.pinot.spi.data.Schema;
 import org.apache.pinot.thirdeye.common.metric.MetricType;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
@@ -51,13 +51,13 @@ public class AutoOnboardPinotMetricsServiceTest {
   private final String newTimeColumnName = "timestampInEpoch";
   private Schema schema;
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private DatasetConfigManager datasetConfigDAO;
   private MetricConfigManager metricConfigDAO;
 
   @BeforeMethod
   void beforeMethod() throws Exception {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     datasetConfigDAO = daoRegistry.getDatasetConfigDAO();
     metricConfigDAO = daoRegistry.getMetricConfigDAO();

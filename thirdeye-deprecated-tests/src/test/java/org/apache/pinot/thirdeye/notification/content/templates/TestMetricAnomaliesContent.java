@@ -50,12 +50,12 @@ import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -85,7 +85,7 @@ public class TestMetricAnomaliesContent {
   private final String dashboardHost = "http://localhost:8080/dashboard";
   private final String detectionConfigFile = "/sample-detection-config.yml";
   private final ObjectMapper mapper = new ObjectMapper();
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private AlertManager detectionConfigDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
   private MetricConfigManager metricDAO;
@@ -96,7 +96,7 @@ public class TestMetricAnomaliesContent {
 
   @BeforeMethod
   public void beforeMethod() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     detectionConfigDAO = daoRegistry.getDetectionConfigManager();
     mergedAnomalyResultDAO = daoRegistry.getMergedAnomalyResultDAO();

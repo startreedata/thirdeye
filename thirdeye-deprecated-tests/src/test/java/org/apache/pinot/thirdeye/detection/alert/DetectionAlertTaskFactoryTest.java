@@ -10,8 +10,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 
 public class DetectionAlertTaskFactoryTest {
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private SubscriptionGroupDTO alertConfigDTO;
   private SubscriptionGroupManager alertConfigDAO;
   private Map<String, Object> alerters;
@@ -42,7 +42,7 @@ public class DetectionAlertTaskFactoryTest {
     alerters.put("randomScheme", randomAlerter);
     alerters.put("anotherRandomScheme", anotherRandomAlerter);
 
-    this.testDAOProvider = DAOTestBase.getInstance();
+    this.testDAOProvider = new TestDbEnv();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     this.alertConfigDAO = daoRegistry.getDetectionAlertConfigManager();
     this.alertConfigDTO = new SubscriptionGroupDTO();

@@ -33,8 +33,8 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -55,13 +55,13 @@ public class TestHierarchicalAnomaliesContent {
   private static final String TEST = "test";
   private final int id = 0;
   private final String dashboardHost = "http://localhost:8080/dashboard";
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
   private AnomalyFunctionManager anomalyFunctionDAO;
 
   @BeforeClass
   public void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     mergedAnomalyResultDAO = daoRegistry.getMergedAnomalyResultDAO();
     anomalyFunctionDAO = daoRegistry.getAnomalyFunctionDAO();

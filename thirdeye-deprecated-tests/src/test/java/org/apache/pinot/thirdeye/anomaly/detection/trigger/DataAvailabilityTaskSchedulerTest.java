@@ -32,10 +32,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -55,7 +55,7 @@ public class DataAvailabilityTaskSchedulerTest {
       .getLogger(DataAvailabilityTaskSchedulerTest.class);
   private static final long TEST_TIME = System.currentTimeMillis();
   private static final String TEST_DATASET_PREFIX = "ds_trigger_scheduler_";
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler;
   private AlertManager detectionConfigDAO;
   private long metricId1;
@@ -63,7 +63,7 @@ public class DataAvailabilityTaskSchedulerTest {
 
   @BeforeMethod
   public void beforeMethod() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     detectionConfigDAO = DAORegistry.getInstance().getDetectionConfigManager();
     MetricConfigManager metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
     final String TEST_METRIC_PREFIX = "metric_trigger_scheduler_";

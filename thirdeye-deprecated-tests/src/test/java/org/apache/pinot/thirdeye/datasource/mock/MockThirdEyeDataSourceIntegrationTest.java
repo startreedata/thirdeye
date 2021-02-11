@@ -30,9 +30,9 @@ import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.RequestContainer;
 import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
 
 public class MockThirdEyeDataSourceIntegrationTest {
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private DAORegistry daoRegistry;
 
   private Long metricPurchasesId;
@@ -98,7 +98,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
 
   @BeforeClass
   void beforeMethod() throws Exception {
-    this.testDAOProvider = DAOTestBase.getInstance();
+    this.testDAOProvider = new TestDbEnv();
     this.daoRegistry = DAORegistry.getInstance();
 
     URL dataSourcesConfig = this.getClass().getResource("data-sources-config.yml");

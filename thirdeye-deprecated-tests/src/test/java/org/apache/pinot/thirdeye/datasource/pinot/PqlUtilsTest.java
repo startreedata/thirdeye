@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -49,12 +49,12 @@ public class PqlUtilsTest {
   private static final String COLLECTION = "collection";
   private static final MetricDataset METRIC = new MetricDataset("metric", COLLECTION);
 
-  private DAOTestBase base;
+  private TestDbEnv base;
   private Long metricId;
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
-    this.base = DAOTestBase.getInstance();
+    this.base = new TestDbEnv();
 
     LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito
         .mock(LoadingCache.class);

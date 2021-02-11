@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -57,12 +57,12 @@ public class DetectionConfigValidatorTest {
   private Map<String, Object> yamlConfig1;
   private Map<String, Object> yamlConfig2;
   private DataProvider provider;
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private DAORegistry daoRegistry;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     daoRegistry = DAORegistry.getInstance();
   }
 

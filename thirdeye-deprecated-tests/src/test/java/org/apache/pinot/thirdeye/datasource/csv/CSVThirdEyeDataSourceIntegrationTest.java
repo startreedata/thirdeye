@@ -16,6 +16,7 @@
 
 package org.apache.pinot.thirdeye.datasource.csv;
 
+import com.google.inject.Injector;
 import java.net.URL;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +25,7 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.RequestContainer;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -39,18 +40,16 @@ import org.testng.annotations.Test;
 
 public class CSVThirdEyeDataSourceIntegrationTest {
 
-  private DAOTestBase testDAOProvider;
   private DAORegistry daoRegistry;
 
   @BeforeMethod
   void beforeMethod() {
-    testDAOProvider = DAOTestBase.getInstance();
-    daoRegistry = DAORegistry.getInstance();
+    final Injector injector = new TestDbEnv().getInjector();
+    daoRegistry = injector.getInstance(DAORegistry.class);
   }
 
   @AfterMethod(alwaysRun = true)
   void afterMethod() {
-    testDAOProvider.cleanup();
   }
 
   @Test
@@ -78,19 +77,19 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     ThirdEyeConfiguration thirdEyeConfiguration = new ThirdEyeConfiguration();
     thirdEyeConfiguration.setDataSources(dataSourcesConfig.toString());
 
-    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-        .initializeCaches(thirdEyeConfiguration);
-    ThirdEyeCacheRegistry cacheRegistry = DeprecatedInjectorUtil
+    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = DeprecatedInjectorUtil
         .getInstance(ThirdEyeCacheRegistry.class);
+
+    thirdEyeCacheRegistry.initializeCaches(thirdEyeConfiguration);
 
     MetricSlice slice = MetricSlice.from(configDTO.getId(), 0, 7200000);
     RequestContainer requestContainer = MockThirdEyeDataSourceIntegrationTest
         .makeAggregateRequest(slice, Collections.emptyList(), -1, "ref",
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
-    ThirdEyeResponse response = cacheRegistry.getDataSourceCache()
+            thirdEyeCacheRegistry);
+    ThirdEyeResponse response = thirdEyeCacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+        thirdEyeCacheRegistry);
 
     Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
         Collections.singletonList(1503d));

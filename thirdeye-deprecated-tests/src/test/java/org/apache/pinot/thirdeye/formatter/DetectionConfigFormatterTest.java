@@ -39,7 +39,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -50,12 +50,12 @@ import org.testng.annotations.Test;
 
 public class DetectionConfigFormatterTest {
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private DAORegistry daoRegistry;
 
   @BeforeMethod
   public void setUp() {
-    this.testDAOProvider = DAOTestBase.getInstance();
+    this.testDAOProvider = new TestDbEnv();
     this.daoRegistry = DAORegistry.getInstance();
   }
 

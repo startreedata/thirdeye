@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -36,12 +36,12 @@ public class DetectionConfigTranslatorTest {
   private Map<String, Object> yamlConfig;
   private DataProvider provider;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private DAORegistry daoRegistry;
 
   @BeforeClass
   void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     daoRegistry = DAORegistry.getInstance();
   }
 

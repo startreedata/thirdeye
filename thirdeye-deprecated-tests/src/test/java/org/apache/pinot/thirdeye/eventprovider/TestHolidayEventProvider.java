@@ -23,8 +23,8 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.events.EventFilter;
 import org.apache.pinot.thirdeye.anomaly.events.EventType;
 import org.apache.pinot.thirdeye.anomaly.events.HolidayEventProvider;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.joda.time.DateTime;
@@ -44,12 +44,12 @@ public class TestHolidayEventProvider {
     long hoursAgo3 = new DateTime().minusHours(3).getMillis();
     long hoursAgo2 = new DateTime().minusHours(2).getMillis();
 
-    private DAOTestBase testDAOProvider;
+    private TestDbEnv testDAOProvider;
     private EventManager eventDAO;
 
     @BeforeClass
     void beforeClass() {
-      testDAOProvider = DAOTestBase.getInstance();
+      testDAOProvider = new TestDbEnv();
       DAORegistry daoRegistry = DAORegistry.getInstance();
       eventDAO = daoRegistry.getEventDAO();
       holidayEventProvider = new HolidayEventProvider();

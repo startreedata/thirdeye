@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.client.Client;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
@@ -32,12 +32,12 @@ import org.testng.annotations.Test;
 
 public class TestThirdEyeRcaRestClient {
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private long anomalyId;
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
-    this.testDAOProvider = DAOTestBase.getInstance();
+    this.testDAOProvider = new TestDbEnv();
     DAORegistry daoRegistry = DAORegistry.getInstance();
 
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();

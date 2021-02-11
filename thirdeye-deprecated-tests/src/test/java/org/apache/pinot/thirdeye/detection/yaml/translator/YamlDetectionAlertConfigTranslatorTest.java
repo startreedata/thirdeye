@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.Constants.SubjectType;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -41,7 +41,7 @@ import org.yaml.snakeyaml.Yaml;
 
 public class YamlDetectionAlertConfigTranslatorTest {
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private AlertManager alertManager;
 
   @Test
@@ -127,7 +127,7 @@ public class YamlDetectionAlertConfigTranslatorTest {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     DAORegistry daoRegistry = DAORegistry.getInstance();
     alertManager = daoRegistry.getDetectionConfigManager();
     AlertDTO alertDTO = new AlertDTO();

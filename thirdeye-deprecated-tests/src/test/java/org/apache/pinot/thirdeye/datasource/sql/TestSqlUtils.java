@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -48,11 +48,11 @@ public class TestSqlUtils {
 
   private MetricDataset metricDataset;
   private MetricFunction metricFunction;
-  private DAOTestBase daoTestBase;
+  private TestDbEnv testDbEnv;
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
-    this.daoTestBase = DAOTestBase.getInstance();
+    this.testDbEnv = new TestDbEnv();
     this.metricDataset = new MetricDataset(metric, dataset);
 
     LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito
@@ -86,7 +86,7 @@ public class TestSqlUtils {
   @AfterMethod
   public void afterMethod() {
     try {
-      this.daoTestBase.cleanup();
+      this.testDbEnv.cleanup();
     } catch (Exception ignore) {
     }
   }

@@ -16,8 +16,8 @@
 
 package org.apache.pinot.thirdeye.datalayer;
 
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -26,11 +26,11 @@ import org.testng.annotations.Test;
 
 public class DAOProviderUtilTest {
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
 
   @BeforeClass
   public void beforeClass() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
   }
 
   @AfterClass(alwaysRun = true)

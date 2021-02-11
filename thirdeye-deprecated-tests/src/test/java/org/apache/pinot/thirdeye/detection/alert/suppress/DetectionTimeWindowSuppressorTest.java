@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 
 public class DetectionTimeWindowSuppressorTest {
 
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private Set<MergedAnomalyResultDTO> anomalies;
   private SubscriptionGroupDTO config;
 
@@ -87,7 +87,7 @@ public class DetectionTimeWindowSuppressorTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    this.testDAOProvider = DAOTestBase.getInstance();
+    this.testDAOProvider = new TestDbEnv();
   }
 
   @BeforeMethod

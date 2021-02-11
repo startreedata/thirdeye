@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DatasetTriggerInfoRepo;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -40,11 +40,11 @@ public class DatasetTriggerInfoRepoTest {
   private static final String TEST_DATA_SOURCE = "TestSource";
   private static final String TEST_DATASET_PREFIX = "test_dataset_";
   private static final String TEST_METRIC_PREFIX = "test_metric_";
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
 
   @BeforeMethod
   public void BeforeMethod() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     AlertManager alertManager = DAORegistry.getInstance().getDetectionConfigManager();
     MetricConfigManager metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
     DatasetConfigManager datasetConfigDAO = DAORegistry.getInstance().getDatasetConfigDAO();

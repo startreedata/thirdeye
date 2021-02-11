@@ -31,19 +31,19 @@ import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
-public class DAOTestBase {
+public class TestDbEnv {
 
   private static int counter;
+  private final Injector injector;
 
-  private DAOTestBase() {
-    init();
+  public TestDbEnv() {
+    final DataSource dataSource = createDataSource();
+    injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
+
+    DeprecatedInjectorUtil.setInjector(injector);
   }
 
-  public static DAOTestBase getInstance() {
-    return new DAOTestBase();
-  }
-
-  protected void init() {
+  private DataSource createDataSource() {
     final DatabaseConfiguration dbConfig = new DatabaseConfiguration()
         .setUrl(String.format("jdbc:h2:mem:testdb%d;DB_CLOSE_DELAY=-1", counter++))
         .setUser("ignoreUser")
@@ -52,11 +52,10 @@ public class DAOTestBase {
     final DataSource dataSource = createDataSource(dbConfig);
     try {
       setupSchema(dataSource);
-    } catch (SQLException  | IOException e) {
+    } catch (SQLException | IOException e) {
       throw new RuntimeException(e);
     }
-    final Injector injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
-    DeprecatedInjectorUtil.setInjector(injector);
+    return dataSource;
   }
 
   public void cleanup() {
@@ -96,5 +95,9 @@ public class DAOTestBase {
     scriptRunner.setDelimiter(";");
     scriptRunner.setLogWriter(new PrintWriter(new NullWriter()));
     scriptRunner.runScript(new FileReader(createSchemaUrl.getFile()));
+  }
+
+  public Injector getInjector() {
+    return injector;
   }
 }

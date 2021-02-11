@@ -26,9 +26,9 @@ import org.apache.pinot.thirdeye.anomaly.detection.trigger.filter.DataAvailabili
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.filter.OnTimeFilter;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DatasetTriggerInfoRepo;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -46,13 +46,13 @@ public class DataAvailabilityEventListenerTest {
   static String TEST_DATA_SOURCE = "TestSource";
   static String TEST_DATASET_PREFIX = "ds_trigger_listener_";
   static String TEST_METRIC_PREFIX = "metric_trigger_listener_";
-  private DAOTestBase testDAOProvider;
+  private TestDbEnv testDAOProvider;
   private DataAvailabilityEventListener _dataAvailabilityEventListener;
   private final MockConsumerDataAvailability consumer = new MockConsumerDataAvailability();
 
   @BeforeMethod
   public void beforeMethod() {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
     AlertManager alertManager = DAORegistry.getInstance().getDetectionConfigManager();
     MetricConfigManager metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
     DatasetConfigManager datasetConfigDAO = DAORegistry.getInstance().getDatasetConfigDAO();

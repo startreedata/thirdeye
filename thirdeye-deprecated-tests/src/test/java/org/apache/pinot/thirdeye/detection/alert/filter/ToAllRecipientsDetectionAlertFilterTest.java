@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.datalayer.bao.DAOTestBase;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -59,7 +59,7 @@ public class ToAllRecipientsDetectionAlertFilterTest {
   private static final Set<String> PROP_BCC_VALUE = new HashSet<>(
       Arrays.asList("bcctest@test.com", "bcctest@test.org"));
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
-  private DAOTestBase testDAOProvider = null;
+  private TestDbEnv testDAOProvider = null;
 
   private DetectionAlertFilter alertFilter;
   private List<MergedAnomalyResultDTO> detection1Anomalies;
@@ -76,7 +76,7 @@ public class ToAllRecipientsDetectionAlertFilterTest {
 
   @BeforeMethod
   public void beforeMethod() throws InterruptedException {
-    testDAOProvider = DAOTestBase.getInstance();
+    testDAOProvider = new TestDbEnv();
 
     AlertDTO detectionConfig1 = new AlertDTO();
     detectionConfig1.setName("test detection 1");

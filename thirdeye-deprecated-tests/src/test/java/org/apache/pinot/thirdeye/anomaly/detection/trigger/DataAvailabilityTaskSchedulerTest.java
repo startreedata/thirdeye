@@ -92,7 +92,7 @@ public class DataAvailabilityTaskSchedulerTest {
             .setSchedulingWindowInSec(TimeUnit.MINUTES.toSeconds(30))
             .setScheduleDelayInSec(TimeUnit.MINUTES.toSeconds(10)), DAORegistry.getInstance().getTaskDAO(),
         DAORegistry.getInstance().getDetectionConfigManager(), DAORegistry.getInstance().getDatasetConfigDAO(),
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class), DAORegistry.getInstance().getMetricConfigDAO()
     );
   }
 

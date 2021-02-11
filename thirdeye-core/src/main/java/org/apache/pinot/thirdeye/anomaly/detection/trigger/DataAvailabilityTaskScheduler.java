@@ -42,19 +42,18 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskInfoFactory;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,18 +75,20 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   // Fallback runs based on the last task run (successful or not).
   private final Map<Long, Long> detectionIdToLastTaskEndTimeMap;
 
-  private final TaskManager taskDAO;
-  private final AlertManager detectionConfigDAO;
-  private final DatasetConfigManager datasetConfigDAO;
+  private final TaskManager taskManager;
+  private final AlertManager alertManager;
+  private final DatasetConfigManager datasetConfigManager;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private final MetricConfigManager metricConfigManager;
 
   /**
    * Construct an instance of {@link DataAvailabilityTaskScheduler}
    *
    * @param taskManager
-   * @param detectionConfigManager
+   * @param alertManager
    * @param datasetConfigManager
    * @param thirdEyeCacheRegistry
+   * @param metricConfigManager
    * @param dataAvailabilitySchedulingConfiguration
    * @param sleepPerRunInSec delay after each run to avoid polling the database too often
    * @param fallBackTimeInSec global threshold for fallback if detection level one is not set
@@ -96,9 +97,10 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   public DataAvailabilityTaskScheduler(
       final DataAvailabilitySchedulingConfiguration config,
       final TaskManager taskManager,
-      final AlertManager detectionConfigManager,
+      final AlertManager alertManager,
       final DatasetConfigManager datasetConfigManager,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final MetricConfigManager metricConfigManager) {
     this.sleepPerRunInSec = config.getSchedulerDelayInSec();
     this.fallBackTimeInSec = config.getTaskTriggerFallBackTimeInSec();
     this.schedulingWindowInSec = config.getSchedulingWindowInSec();
@@ -106,10 +108,11 @@ public class DataAvailabilityTaskScheduler implements Runnable {
 
     this.detectionIdToLastTaskEndTimeMap = new HashMap<>();
     this.executorService = Executors.newSingleThreadScheduledExecutor();
-    this.taskDAO = taskManager;
-    this.detectionConfigDAO = detectionConfigManager;
-    this.datasetConfigDAO = datasetConfigManager;
+    this.taskManager = taskManager;
+    this.alertManager = alertManager;
+    this.datasetConfigManager = datasetConfigManager;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+    this.metricConfigManager = metricConfigManager;
   }
 
   /**
@@ -187,7 +190,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       Map<AlertDTO, Set<String>> dataset2DetectionMap,
       Map<String, DatasetConfigDTO> datasetConfigMap) {
     Map<Long, Set<String>> metricCache = new HashMap<>();
-    List<AlertDTO> detectionConfigs = detectionConfigDAO.findAllActive()
+    List<AlertDTO> detectionConfigs = alertManager.findAllActive()
         .stream().filter(DetectionConfigBean::isDataAvailabilitySchedule)
         .collect(Collectors.toList());
     for (AlertDTO detectionConfig : detectionConfigs) {
@@ -198,9 +201,9 @@ public class DataAvailabilityTaskScheduler implements Runnable {
         MetricEntity me = MetricEntity.fromURN(urn);
         if (!metricCache.containsKey(me.getId())) {
           datasets.addAll(ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
-              datasetConfigDAO,
-              DAORegistry.getInstance().getMetricConfigDAO(),
-              DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class))
+              datasetConfigManager,
+              metricConfigManager,
+              thirdEyeCacheRegistry)
               .stream().map(DatasetConfigDTO::getDataset).collect(Collectors.toList()));
           // cache the mapping in memory to avoid duplicate retrieval
           metricCache.put(me.getId(), datasets);
@@ -216,7 +219,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       dataset2DetectionMap.put(detectionConfig, datasets);
       for (String dataset : datasets) {
         if (!datasetConfigMap.containsKey(dataset)) {
-          DatasetConfigDTO datasetConfig = datasetConfigDAO.findByDataset(dataset);
+          DatasetConfigDTO datasetConfig = datasetConfigManager.findByDataset(dataset);
           datasetConfigMap.put(dataset, datasetConfig);
         }
       }
@@ -227,7 +230,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     List<TaskConstants.TaskStatus> statusList = new ArrayList<>();
     statusList.add(TaskConstants.TaskStatus.WAITING);
     statusList.add(TaskConstants.TaskStatus.RUNNING);
-    List<TaskDTO> tasks = taskDAO
+    List<TaskDTO> tasks = taskManager
         .findByStatusesAndTypeWithinDays(statusList, TaskConstants.TaskType.DETECTION,
             (int) TimeUnit.MILLISECONDS.toDays(CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW));
     Map<Long, TaskDTO> res = new HashMap<>(tasks.size());
@@ -239,7 +242,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
 
   private void loadLatestTaskCreateTime(AlertDTO detectionConfig) throws Exception {
     long detectionConfigId = detectionConfig.getId();
-    List<TaskDTO> tasks = taskDAO
+    List<TaskDTO> tasks = taskManager
         .findByNameOrderByCreateTime(TaskConstants.TaskType.DETECTION.toString() +
             "_" + detectionConfigId, 1, false);
     if (tasks.size() == 0) {

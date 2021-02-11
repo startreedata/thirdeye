@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.dashboard;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +32,6 @@ import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -134,51 +132,32 @@ public class Utils {
       long unitTimeGranularityMillis = timeGranularity.getUnit().toMillis(1);
       int size = (int) Math
           .ceil((double) targetIntervalDuration / (double) unitTimeGranularityMillis);
-      String newTimeGranularityString = size + "_" + timeGranularity.getUnit();
-      return newTimeGranularityString;
+      return size + "_" + timeGranularity.getUnit();
     } else {
       return timeGranularityString;
     }
-  }
-
-  public static List<MetricExpression> convertToMetricExpressions(
-      List<MetricFunction> metricFunctions) {
-    List<MetricExpression> metricExpressions = new ArrayList<>();
-    for (MetricFunction function : metricFunctions) {
-      metricExpressions.add(new MetricExpression(function.getMetricName(), function.getDataset()));
-    }
-    return metricExpressions;
   }
 
   /*
    * This method returns the time zone of the data in this collection
    */
   public static DateTimeZone getDataTimeZone(String collection) {
-    String timezone = TimeSpec.DEFAULT_TIMEZONE;
+    DatasetConfigDTO datasetConfig = null;
     try {
-      DatasetConfigDTO datasetConfig;
-      LoadingCache<String, DatasetConfigDTO> datasetConfigCache = DeprecatedInjectorUtil
-          .getInstance(ThirdEyeCacheRegistry.class)
-          .getDatasetConfigCache();
-      if (datasetConfigCache != null && datasetConfigCache.get(collection) != null) {
-        datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-            .getDatasetConfigCache().get(collection);
-      } else {
-        datasetConfig = DAORegistry.getInstance().getDatasetConfigDAO().findByDataset(collection);
-      }
-      if (datasetConfig != null) {
-        timezone = datasetConfig.getTimezone();
-      }
+      datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+          .getDatasetConfigCache().get(collection);
     } catch (ExecutionException e) {
       LOG.error("Exception while getting dataset config for {}", collection);
     }
+    final String timezone = datasetConfig != null
+        ? datasetConfig.getTimezone()
+        : TimeSpec.DEFAULT_TIMEZONE;
     return DateTimeZone.forID(timezone);
   }
 
-  public static <T extends Object> List<T> sublist(List<T> input, int startIndex, int length) {
+  public static <T> List<T> sublist(List<T> input, int startIndex, int length) {
     startIndex = Math.min(startIndex, input.size());
-    int endIndex = Math.min(startIndex + length, input.size());
-    List<T> subList = Lists.newArrayList(input).subList(startIndex, endIndex);
-    return subList;
+    final int endIndex = Math.min(startIndex + length, input.size());
+    return Lists.newArrayList(input).subList(startIndex, endIndex);
   }
 }

@@ -50,7 +50,6 @@ import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.detector.function.AnomalyFunctionFactory;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -242,13 +241,11 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
    */
   private Double getAvgComparisonBaseline(MergedAnomalyResultDTO anomaly, CompareMode compareMode,
       long start, long end) throws Exception {
-    AnomalyFunctionFactory anomalyFunctionFactory = new AnomalyFunctionFactory(
-        thirdEyeAnomalyConfig.getFunctionConfigPath());
     AnomalyFunctionDTO anomalyFunction = anomaly.getFunction();
     DatasetConfigDTO datasetConfigDTO = DAORegistry.getInstance().getDatasetConfigDAO()
         .findByDataset(anomalyFunction.getCollection());
     AnomalyDetectionInputContextBuilder contextBuilder = new AnomalyDetectionInputContextBuilder(
-        anomalyFunctionFactory, dataSourceCache,
+        dataSourceCache,
         thirdEyeCacheRegistry);
     contextBuilder.setFunction(anomalyFunction);
 

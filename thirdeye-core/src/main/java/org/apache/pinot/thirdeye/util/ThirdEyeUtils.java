@@ -52,6 +52,7 @@ import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -224,10 +225,12 @@ public abstract class ThirdEyeUtils {
     return datasetConfig;
   }
 
-  public static List<DatasetConfigDTO> getDatasetConfigsFromMetricUrn(String metricUrn) {
-    DatasetConfigManager datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
+  public static List<DatasetConfigDTO> getDatasetConfigsFromMetricUrn(String metricUrn,
+      final DatasetConfigManager datasetConfigManager,
+      final MetricConfigManager metricConfigManager,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     MetricEntity me = MetricEntity.fromURN(metricUrn);
-    MetricConfigDTO metricConfig = DAORegistry.getInstance().getMetricConfigDAO()
+    MetricConfigDTO metricConfig = metricConfigManager
         .findById(me.getId());
     if (metricConfig == null) {
       return new ArrayList<>();
@@ -239,7 +242,7 @@ public abstract class ThirdEyeUtils {
       MetricExpression metricExpression = ThirdEyeUtils
           .getMetricExpressionFromMetricConfig(metricConfig);
       List<MetricFunction> functions = metricExpression.computeMetricFunctions(
-          DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+          thirdEyeCacheRegistry);
       return functions.stream().map(
           f -> datasetConfigManager.findByDataset(f.getDataset())).collect(Collectors.toList());
     }
@@ -257,7 +260,10 @@ public abstract class ThirdEyeUtils {
     Set<String> metricUrns = DetectionConfigFormatter
         .extractMetricUrnsFromProperties(config.getProperties());
     for (String urn : metricUrns) {
-      List<DatasetConfigDTO> datasets = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn);
+      List<DatasetConfigDTO> datasets = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
+          DAORegistry.getInstance().getDatasetConfigDAO(),
+          DAORegistry.getInstance().getMetricConfigDAO(),
+          DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
       for (DatasetConfigDTO dataset : datasets) {
         maxExpectedDelay = Math.max(dataset.getExpectedDelay().toMillis(), maxExpectedDelay);
       }

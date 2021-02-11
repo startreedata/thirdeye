@@ -32,8 +32,10 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +113,10 @@ public class DatasetTriggerInfoRepo {
           // the metric is already visited before, so skipping.
           continue;
         }
-        List<DatasetConfigDTO> datasetConfigs = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn);
+        List<DatasetConfigDTO> datasetConfigs = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
+            DAORegistry.getInstance().getDatasetConfigDAO(),
+            DAORegistry.getInstance().getMetricConfigDAO(),
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
         for (DatasetConfigDTO datasetConfig : datasetConfigs) {
           String datasetName = datasetConfig.getDataset();
           if (!datasetRefreshTimeMap.containsKey(datasetName)

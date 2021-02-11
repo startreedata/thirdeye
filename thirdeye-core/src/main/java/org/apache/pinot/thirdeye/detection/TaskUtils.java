@@ -100,8 +100,8 @@ public class TaskUtils {
 
   public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO configDTO,
       long end) {
-    long delay = getDetectionExpectedDelay(configDTO);
-    long start = Math.max(configDTO.getLastTimestamp(),
+    final long delay = getDetectionExpectedDelay(configDTO);
+    final long start = Math.max(configDTO.getLastTimestamp(),
         end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
     return new DetectionPipelineTaskInfo(configDTO.getId(), start, end);
   }

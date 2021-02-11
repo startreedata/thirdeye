@@ -52,9 +52,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean.DimensionAsMetricProperties;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -124,7 +122,8 @@ public class SqlUtils {
     String selectionClause = getSelectionClause(metricConfig, metricFunction, groupBy, timeGranularity, dataTimeSpec);
 
     sb.append("SELECT ").append(selectionClause).append(" FROM ").append(dataset);
-    String betweenClause = getBetweenClause(startTime, endTimeExclusive, dataTimeSpec, dataset);
+    String betweenClause = getBetweenClause(startTime, endTimeExclusive, dataTimeSpec,
+        metricFunction.getDatasetConfig());
     sb.append(" WHERE ").append(betweenClause);
 
     String dimensionWhereClause = getDimensionWhereClause(filterSet);
@@ -259,7 +258,8 @@ public class SqlUtils {
     String selectionClause = getDimensionAsMetricSelectionClause(metricFunction,
         metricValuesColumn);
     sb.append("SELECT ").append(selectionClause).append(" FROM ").append(dataset);
-    String betweenClause = getBetweenClause(startTime, endTimeExclusive, dataTimeSpec, dataset);
+    String betweenClause = getBetweenClause(startTime, endTimeExclusive, dataTimeSpec,
+        metricFunction.getDatasetConfig());
     sb.append(" WHERE ").append(betweenClause);
 
     String metricWhereClause = getMetricWhereClause(metricConfig, metricFunction, metricNames,
@@ -330,7 +330,7 @@ public class SqlUtils {
   }
 
   static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeSpec,
-      String dataset) {
+      final DatasetConfigDTO datasetConfig) {
     TimeGranularity dataGranularity = timeSpec.getDataGranularity();
     long dataGranularityMillis = dataGranularity.toMillis();
 
@@ -355,8 +355,7 @@ public class SqlUtils {
     // we maintain this behavior for backward compatibility.
 
     DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(timeFormat)
-        .withZone(Utils.getDateTimeZone(dataset,
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)));
+        .withZone(Utils.getDateTimeZone(datasetConfig));
     String startUnits = inputDataDateTimeFormatter.print(start);
     String endUnits = inputDataDateTimeFormatter.print(endExclusive);
 

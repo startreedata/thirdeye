@@ -68,7 +68,6 @@ public class PinotDataSourceTimeQuery {
    * Returns the earliest time in millis for a dataset in pinot
    *
    * @return min (earliest) date time in millis. Returns 0 if dataset is not found
-   * @param datasetConfig
    */
   public long getMinDateTime(final DatasetConfigDTO datasetConfig) {
     return queryTimeSpecFromPinot("min", datasetConfig);
@@ -83,9 +82,10 @@ public class PinotDataSourceTimeQuery {
       TimeSpec timeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 
       long cutoffTime = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
-      String timeClause = SqlUtils
-          .getBetweenClause(new DateTime(0, DateTimeZone.UTC),
-              new DateTime(cutoffTime, DateTimeZone.UTC), timeSpec, dataset);
+      String timeClause = SqlUtils.getBetweenClause(new DateTime(0, DateTimeZone.UTC),
+          new DateTime(cutoffTime, DateTimeZone.UTC),
+          timeSpec,
+          datasetConfig);
 
       String maxTimePql = String
           .format(TIME_QUERY_TEMPLATE, functionName, timeSpec.getColumnName(), dataset, timeClause);

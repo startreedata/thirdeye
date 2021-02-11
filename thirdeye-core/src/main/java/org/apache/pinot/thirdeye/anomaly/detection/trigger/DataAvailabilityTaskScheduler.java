@@ -45,11 +45,13 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,7 +179,10 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       for (String urn : metricUrns) {
         MetricEntity me = MetricEntity.fromURN(urn);
         if (!metricCache.containsKey(me.getId())) {
-          datasets.addAll(ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn)
+          datasets.addAll(ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
+              datasetConfigDAO,
+              DAORegistry.getInstance().getMetricConfigDAO(),
+              DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class))
               .stream().map(DatasetConfigDTO::getDataset).collect(Collectors.toList()));
           // cache the mapping in memory to avoid duplicate retrieval
           metricCache.put(me.getId(), datasets);

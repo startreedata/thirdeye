@@ -23,7 +23,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
@@ -86,9 +85,9 @@ public class PqlUtilsTest {
   }
 
   @Test(dataProvider = "betweenClauseArgs")
-  public void getBetweenClause(DateTime start, DateTime end, TimeSpec timeSpec, String expected)
-      throws ExecutionException {
-    String betweenClause = SqlUtils.getBetweenClause(start, end, timeSpec, "collection");
+  public void getBetweenClause(DateTime start, DateTime end, TimeSpec timeSpec, String expected) {
+    String betweenClause = SqlUtils.getBetweenClause(start, end, timeSpec,
+        new DatasetConfigDTO());
     Assert.assertEquals(betweenClause, expected);
   }
 

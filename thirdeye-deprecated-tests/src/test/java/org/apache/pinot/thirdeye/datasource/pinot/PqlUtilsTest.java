@@ -183,7 +183,8 @@ public class PqlUtilsTest {
   @Test
   public void testLimit() throws Exception {
     MetricFunction metricFunction = new MetricFunction(MetricAggFunction.AVG,
-        METRIC.getMetricName(), this.metricId, COLLECTION, null, null);
+        METRIC.getMetricName(), this.metricId, COLLECTION,
+        newMetricConfig("name"), null);
 
     TimeSpec timeSpec = new TimeSpec("Date",
             TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
@@ -205,10 +206,20 @@ public class PqlUtilsTest {
 
   }
 
+  private MetricConfigDTO newMetricConfig(final String name) {
+    final MetricConfigDTO dto = new MetricConfigDTO();
+    dto.setName(name);
+    return dto;
+  }
+
   @Test
   public void testLimitDefault() throws Exception {
-    MetricFunction metricFunction = new MetricFunction(MetricAggFunction.AVG,
-        METRIC.getMetricName(), this.metricId, COLLECTION, null, null);
+    final MetricFunction metricFunction = new MetricFunction(MetricAggFunction.AVG,
+        METRIC.getMetricName(),
+        this.metricId,
+        COLLECTION,
+        newMetricConfig(METRIC.getMetricName()),
+        null);
 
     TimeSpec timeSpec = new TimeSpec("Date",
             TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);

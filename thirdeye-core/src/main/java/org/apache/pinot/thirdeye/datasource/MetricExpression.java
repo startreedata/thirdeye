@@ -25,10 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import parsii.eval.Expression;
 import parsii.eval.Parser;
 import parsii.eval.Scope;
@@ -43,6 +47,7 @@ import parsii.tokenizer.ParseException;
  * For other cases, it can be derived from the metric id in the expression
  */
 public class MetricExpression {
+  private static final Logger LOG = LoggerFactory.getLogger(MetricExpression.class);
 
   private static final String COUNT_METRIC = "__COUNT";
   private static final String COUNT_METRIC_ESCAPED = "A__COUNT";
@@ -135,8 +140,16 @@ public class MetricExpression {
         if (metricToken.equals(COUNT_METRIC_ESCAPED)) {
           metricToken = COUNT_METRIC;
         } else {
-          metricConfig = ThirdEyeUtils
-              .getMetricConfigFromNameAndDataset(metricToken, metricDataset);
+          try {
+            metricConfig = thirdEyeCacheRegistry
+                .getMetricConfigCache()
+                .get(new MetricDataset(metricToken, metricDataset));
+          } catch (ExecutionException e) {
+            LOG.error("Exception while fetching metric by name {} and dataset {}",
+                metricToken,
+                metricDataset,
+                e);
+          }
           metricId = metricConfig.getId();
           metricDataset = metricConfig.getDataset();
         }

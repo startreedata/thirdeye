@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +55,6 @@ import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -95,8 +93,11 @@ public class SqlUtils {
    * time within the requested date range. </br>
    * Due to the summation, all metric column values can be assumed to be doubles.
    */
-  public static String getSql(ThirdEyeRequest request, MetricFunction metricFunction,
-      Multimap<String, String> filterSet, Map<String, Map<String, Object[]>> filterContextMap, TimeSpec dataTimeSpec) throws ExecutionException, IOException, ClassNotFoundException {
+  public static String getSql(ThirdEyeRequest request,
+      MetricFunction metricFunction,
+      Multimap<String, String> filterSet,
+      Map<String, Map<String, Object[]>> filterContextMap,
+      TimeSpec dataTimeSpec) throws IOException, ClassNotFoundException {
     // TODO handle request.getFilterClause()
 
     return getSql(metricFunction, request.getStartTimeInclusive(), request.getEndTimeExclusive(),
@@ -116,8 +117,7 @@ public class SqlUtils {
       TimeSpec dataTimeSpec,
       int limit) throws IOException, ClassNotFoundException {
 
-    //TODO: couldn't use metricFunction.getMetricConfig() because of tests.
-    MetricConfigDTO metricConfig = ThirdEyeUtils.getMetricConfigFromNameAndDataset(metricFunction.getMetricName(), metricFunction.getDataset());
+    MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
     String dataset = metricFunction.getDataset();
 
     StringBuilder sb = new StringBuilder();

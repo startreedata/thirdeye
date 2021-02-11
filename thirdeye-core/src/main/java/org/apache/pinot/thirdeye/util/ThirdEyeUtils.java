@@ -273,20 +273,6 @@ public abstract class ThirdEyeUtils {
     return metricConfig;
   }
 
-  public static MetricConfigDTO getMetricConfigFromNameAndDataset(String metricName,
-      String dataset) {
-    MetricConfigDTO metricConfig = null;
-    try {
-      metricConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-          .getMetricConfigCache()
-          .get(new MetricDataset(metricName, dataset));
-    } catch (ExecutionException e) {
-      LOG.error("Exception while fetching metric by name {} and dataset {}", metricName, dataset,
-          e);
-    }
-    return metricConfig;
-  }
-
   /**
    * Get rounded double value, according to the value of the double.
    * Max rounding will be up to 4 decimals

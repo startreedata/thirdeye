@@ -26,6 +26,8 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -42,7 +44,8 @@ public class DetectionPipelineJob implements Job {
 
   @Override
   public void execute(JobExecutionContext jobExecutionContext) {
-    DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfo(jobExecutionContext);
+    DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfo(jobExecutionContext,
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     // if a task is pending and not time out yet, don't schedule more
     String jobName = String.format("%s_%d", TaskConstants.TaskType.DETECTION, taskInfo.configId);

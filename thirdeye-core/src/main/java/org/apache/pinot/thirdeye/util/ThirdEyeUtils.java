@@ -253,9 +253,11 @@ public abstract class ThirdEyeUtils {
    * This delay should be the longest of the expected delay of the underline datasets.
    *
    * @param config The detection config.
+   * @param thirdEyeCacheRegistry
    * @return The expected delay for this alert in milliseconds.
    */
-  public static long getDetectionExpectedDelay(AlertDTO config) {
+  public static long getDetectionExpectedDelay(AlertDTO config,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     long maxExpectedDelay = 0;
     Set<String> metricUrns = DetectionConfigFormatter
         .extractMetricUrnsFromProperties(config.getProperties());
@@ -263,7 +265,7 @@ public abstract class ThirdEyeUtils {
       List<DatasetConfigDTO> datasets = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
           DAORegistry.getInstance().getDatasetConfigDAO(),
           DAORegistry.getInstance().getMetricConfigDAO(),
-          DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+          thirdEyeCacheRegistry);
       for (DatasetConfigDTO dataset : datasets) {
         maxExpectedDelay = Math.max(dataset.getExpectedDelay().toMillis(), maxExpectedDelay);
       }

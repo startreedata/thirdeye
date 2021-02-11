@@ -110,7 +110,8 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       try {
         long detectionConfigId = detectionConfig.getId();
         DetectionPipelineTaskInfo taskInfo = TaskUtils
-            .buildTaskInfoFromDetectionConfig(detectionConfig, detectionEndTime);
+            .buildTaskInfoFromDetectionConfig(detectionConfig, detectionEndTime,
+                DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
         if (!runningDetection.containsKey(detectionConfigId)) {
           if (isAllDatasetUpdated(detectionConfig, detection2DatasetMap.get(detectionConfig),
               datasetConfigMap)) {

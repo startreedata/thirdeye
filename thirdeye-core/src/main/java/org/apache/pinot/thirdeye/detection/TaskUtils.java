@@ -33,6 +33,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.slf4j.Logger;
@@ -90,17 +91,20 @@ public class TaskUtils {
     return Long.valueOf(id);
   }
 
-  public static DetectionPipelineTaskInfo buildTaskInfo(JobExecutionContext jobExecutionContext) {
+  public static DetectionPipelineTaskInfo buildTaskInfo(JobExecutionContext jobExecutionContext,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     JobKey jobKey = jobExecutionContext.getJobDetail().getKey();
     Long id = getIdFromJobKey(jobKey.getName());
     AlertDTO configDTO = DAORegistry.getInstance().getDetectionConfigManager().findById(id);
 
-    return buildTaskInfoFromDetectionConfig(configDTO, System.currentTimeMillis());
+    return buildTaskInfoFromDetectionConfig(configDTO, System.currentTimeMillis(),
+        thirdEyeCacheRegistry);
   }
 
   public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO configDTO,
-      long end) {
-    final long delay = getDetectionExpectedDelay(configDTO);
+      long end, final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+    final long delay = getDetectionExpectedDelay(configDTO,
+        thirdEyeCacheRegistry);
     final long start = Math.max(configDTO.getLastTimestamp(),
         end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
     return new DetectionPipelineTaskInfo(configDTO.getId(), start, end);

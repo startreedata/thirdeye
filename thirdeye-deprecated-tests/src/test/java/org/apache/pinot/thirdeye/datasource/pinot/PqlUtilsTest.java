@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
+import static org.mockito.Mockito.mock;
+
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -56,12 +58,10 @@ public class PqlUtilsTest {
   public void beforeMethod() throws Exception {
     this.base = new TestDbEnv();
 
-    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito
-        .mock(LoadingCache.class);
+    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = mock(LoadingCache.class);
     Mockito.when(mockDatasetConfigCache.get(COLLECTION)).thenReturn(new DatasetConfigDTO());
 
-    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = Mockito
-        .mock(LoadingCache.class);
+    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = mock(LoadingCache.class);
     Mockito.when(mockMetricConfigCache.get(METRIC)).thenReturn(new MetricConfigDTO());
 
     DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)

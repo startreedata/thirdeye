@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
@@ -53,7 +52,7 @@ public class ThirdEyeResultSetUtils {
 
   public static List<String[]> parseResultSets(ThirdEyeRequest request,
       Map<MetricFunction, List<ThirdEyeResultSet>> metricFunctionToResultSetList,
-      String sourceName) throws ExecutionException {
+      String sourceName) {
 
     int numGroupByKeys = 0;
     boolean hasGroupBy = false;
@@ -81,15 +80,14 @@ public class ThirdEyeResultSetUtils {
 
       MetricFunction metricFunction = entry.getKey();
 
-      String dataset = metricFunction.getDataset();
       DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
       TimeSpec dataTimeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 
-      TimeGranularity dataGranularity = null;
       long startTime = request.getStartTimeInclusive().getMillis();
-      DateTimeZone dateTimeZone = Utils.getDataTimeZone(dataset);
+      DateTimeZone dateTimeZone = Utils.getDateTimeZone(datasetConfig);
       DateTime startDateTime = new DateTime(startTime, dateTimeZone);
-      dataGranularity = dataTimeSpec.getDataGranularity();
+
+      TimeGranularity dataGranularity = dataTimeSpec.getDataGranularity();
       boolean isISOFormat = false;
       DateTimeFormatter inputDataDateTimeFormatter = null;
       String timeFormat = dataTimeSpec.getFormat();

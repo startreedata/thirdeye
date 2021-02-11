@@ -111,7 +111,7 @@ public class PinotDataSourceTimeQuery {
         LOGGER.error("Failed to get latest max time for dataset {} with SQL: {}", dataset,
             maxTimePinotQuery.getQuery());
       } else {
-        DateTimeZone timeZone = Utils.getDataTimeZone(dataset);
+        DateTimeZone timeZone = Utils.getDateTimeZone(datasetConfig);
 
         long endTime = new Double(resultSetGroup.get(0).getDouble(0)).longValue();
         // endTime + 1 to make sure we cover the time range of that time value.

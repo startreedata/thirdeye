@@ -141,14 +141,17 @@ public class Utils {
   /*
    * This method returns the time zone of the data in this collection
    */
-  public static DateTimeZone getDataTimeZone(String collection) {
+  public static DateTimeZone getDateTimeZone(String collection,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     DatasetConfigDTO datasetConfig = null;
     try {
-      datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
-          .getDatasetConfigCache().get(collection);
-    } catch (ExecutionException e) {
+      datasetConfig = thirdEyeCacheRegistry.getDatasetConfigCache().get(collection); } catch (ExecutionException e) {
       LOG.error("Exception while getting dataset config for {}", collection);
     }
+    return getDateTimeZone(datasetConfig);
+  }
+
+  public static DateTimeZone getDateTimeZone(final DatasetConfigDTO datasetConfig) {
     final String timezone = datasetConfig != null
         ? datasetConfig.getTimezone()
         : TimeSpec.DEFAULT_TIMEZONE;

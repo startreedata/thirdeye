@@ -301,7 +301,8 @@ public class AnomalyDetectionInputContextBuilder {
         startEndTimeRanges.size(), metricsToRetrieve, filters);
 
     // NOTE: another ThirdEye-esque hack. This code is to be deprecated, so no value in refactoring it.
-    DateTimeZone timeZone = Utils.getDataTimeZone(anomalyFunctionSpec.getCollection());
+    DateTimeZone timeZone = Utils.getDateTimeZone(anomalyFunctionSpec.getCollection(),
+        thirdEyeCacheRegistry);
 
     // MultiQuery request
     List<Future<TimeSeriesResponse>> futureResponses = new ArrayList<>();

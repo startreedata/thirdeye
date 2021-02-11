@@ -301,7 +301,7 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     String dataset = datasetConfig.getName();
     LOG.info("Getting max data time for " + dataset);
     TimeSpec timeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
-    DateTimeZone timeZone = Utils.getDataTimeZone(dataset);
+    DateTimeZone timeZone = Utils.getDateTimeZone(datasetConfig);
     long maxTime = 0;
 
     String sourceName = dataset.split("\\.")[0];

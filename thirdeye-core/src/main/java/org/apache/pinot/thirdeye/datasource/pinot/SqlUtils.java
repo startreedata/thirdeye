@@ -53,7 +53,9 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean.DimensionAsMetricProperties;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -104,9 +106,15 @@ public class SqlUtils {
         request.getLimit());
   }
 
-  private static String getSql(MetricFunction metricFunction, DateTime startTime,
-      DateTime endTimeExclusive, Multimap<String, String> filterSet, Map<String, Map<String, Object[]>> filterContextMap, List<String> groupBy,
-      TimeGranularity timeGranularity, TimeSpec dataTimeSpec, int limit) throws ExecutionException, IOException, ClassNotFoundException {
+  private static String getSql(MetricFunction metricFunction,
+      DateTime startTime,
+      DateTime endTimeExclusive,
+      Multimap<String, String> filterSet,
+      Map<String, Map<String, Object[]>> filterContextMap,
+      List<String> groupBy,
+      TimeGranularity timeGranularity,
+      TimeSpec dataTimeSpec,
+      int limit) throws IOException, ClassNotFoundException {
 
     //TODO: couldn't use metricFunction.getMetricConfig() because of tests.
     MetricConfigDTO metricConfig = ThirdEyeUtils.getMetricConfigFromNameAndDataset(metricFunction.getMetricName(), metricFunction.getDataset());
@@ -215,19 +223,34 @@ public class SqlUtils {
     }
 
     String dimensionAsMetricPql = getDimensionAsMetricSql(metricFunction,
-        request.getStartTimeInclusive(), request.getEndTimeExclusive(), filterSet, filterContextMap,
-        request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec,
-        metricNamesList, metricNamesColumnsList, metricValuesColumn, request.getLimit());
+        request.getStartTimeInclusive(),
+        request.getEndTimeExclusive(),
+        filterSet,
+        filterContextMap,
+        request.getGroupBy(),
+        request.getGroupByTimeGranularity(),
+        dataTimeSpec,
+        metricNamesList,
+        metricNamesColumnsList,
+        metricValuesColumn,
+        request.getLimit());
 
     return dimensionAsMetricPql;
   }
 
-  private static String getDimensionAsMetricSql(MetricFunction metricFunction, DateTime startTime,
-      DateTime endTimeExclusive, Multimap<String, String> filterSet, Map<String, Map<String, Object[]>> filterContextMap, List<String> groupBy,
-      TimeGranularity timeGranularity, TimeSpec dataTimeSpec, List<String> metricNames,
+  private static String getDimensionAsMetricSql(MetricFunction metricFunction,
+      DateTime startTime,
+      DateTime endTimeExclusive,
+      Multimap<String, String> filterSet,
+      Map<String, Map<String, Object[]>> filterContextMap,
+      List<String> groupBy,
+      TimeGranularity timeGranularity,
+      TimeSpec dataTimeSpec,
+      List<String> metricNames,
       List<String> metricNamesColumns,
-      String metricValuesColumn, int limit)
-          throws ExecutionException, IOException, ClassNotFoundException {
+      String metricValuesColumn,
+      int limit)
+      throws IOException, ClassNotFoundException {
 
     MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
     String dataset = metricFunction.getDataset();
@@ -307,8 +330,7 @@ public class SqlUtils {
   }
 
   static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeSpec,
-      String dataset)
-      throws ExecutionException {
+      String dataset) {
     TimeGranularity dataGranularity = timeSpec.getDataGranularity();
     long dataGranularityMillis = dataGranularity.toMillis();
 
@@ -333,7 +355,8 @@ public class SqlUtils {
     // we maintain this behavior for backward compatibility.
 
     DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(timeFormat)
-        .withZone(Utils.getDataTimeZone(dataset));
+        .withZone(Utils.getDateTimeZone(dataset,
+            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)));
     String startUnits = inputDataDateTimeFormatter.print(start);
     String endUnits = inputDataDateTimeFormatter.print(endExclusive);
 

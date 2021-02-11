@@ -396,12 +396,12 @@ public class CallGraphPipeline extends Pipeline {
    * @param timeoutTimestamp timestamp for ultimate timeout
    * @return response as formatted dataframe
    */
-  private static DataFrame getResponse(Future<ThirdEyeResponse> response,
+  private DataFrame getResponse(Future<ThirdEyeResponse> response,
       RequestContainer container,
       List<String> dimensions, long timeoutTimestamp) throws Exception {
     return DataFrameUtils
         .evaluateResponse(response.get(makeTimeout(timeoutTimestamp), TimeUnit.MILLISECONDS),
-            container)
+            container, thirdEyeCacheRegistry)
         .dropSeries(COL_TIME)
         .setIndex(dimensions);
   }

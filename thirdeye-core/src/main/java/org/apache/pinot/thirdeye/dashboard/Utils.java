@@ -96,11 +96,12 @@ public class Utils {
   }
 
   public static List<MetricFunction> computeMetricFunctionsFromExpressions(
-      List<MetricExpression> metricExpressions) {
+      List<MetricExpression> metricExpressions, final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     Set<MetricFunction> metricFunctions = new HashSet<>();
 
     for (MetricExpression expression : metricExpressions) {
-      metricFunctions.addAll(expression.computeMetricFunctions());
+      metricFunctions.addAll(expression.computeMetricFunctions(
+          thirdEyeCacheRegistry));
     }
     return Lists.newArrayList(metricFunctions);
   }

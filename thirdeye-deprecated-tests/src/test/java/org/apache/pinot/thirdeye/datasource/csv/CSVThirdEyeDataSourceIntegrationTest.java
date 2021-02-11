@@ -89,7 +89,8 @@ public class CSVThirdEyeDataSourceIntegrationTest {
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
     ThirdEyeResponse response = cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
-    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
+    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
         Collections.singletonList(1503d));

@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
@@ -131,17 +130,20 @@ public class DataFrameUtils {
    *
    * @param df thirdeye response dataframe
    * @param expressions collection of metric expressions
+   * @param thirdEyeCacheRegistry
    * @return augmented dataframe
    * @throws Exception if the metric expression cannot be computed
    */
   public static DataFrame evaluateExpressions(DataFrame df,
-      Collection<MetricExpression> expressions) throws Exception {
+      Collection<MetricExpression> expressions,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) throws Exception {
     if (expressions.size() != 1) {
       throw new IllegalArgumentException("Requires exactly one expression");
     }
 
     MetricExpression me = expressions.iterator().next();
-    Collection<MetricFunction> functions = me.computeMetricFunctions();
+    Collection<MetricFunction> functions = me.computeMetricFunctions(
+        thirdEyeCacheRegistry);
 
     Map<String, Double> context = new HashMap<>();
     double[] values = new double[df.size()];
@@ -188,15 +190,18 @@ public class DataFrameUtils {
    *
    * @param response thirdeye client response
    * @param rc RequestContainer
+   * @param thirdEyeCacheRegistry
    * @return response as dataframe
    * @see DataFrameUtils#makeAggregateRequest(MetricSlice, List, int, String, MetricConfigManager,
    *     DatasetConfigManager)
    * @see DataFrameUtils#makeTimeSeriesRequest(MetricSlice, String, MetricConfigManager,
    *     DatasetConfigManager)
    */
-  public static DataFrame evaluateResponse(ThirdEyeResponse response, RequestContainer rc)
+  public static DataFrame evaluateResponse(ThirdEyeResponse response, RequestContainer rc,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
-    return evaluateExpressions(parseResponse(response), rc.getExpressions());
+    return evaluateExpressions(parseResponse(response), rc.getExpressions(),
+        thirdEyeCacheRegistry);
   }
 
   /**
@@ -207,13 +212,16 @@ public class DataFrameUtils {
    *
    * @param response thirdeye client response
    * @param rc TimeSeriesRequestContainer
+   * @param thirdEyeCacheRegistry
    * @return response as dataframe
    * @see DataFrameUtils#makeTimeSeriesRequest(MetricSlice, String, MetricConfigManager,
    *     DatasetConfigManager)
    */
-  public static DataFrame evaluateResponse(ThirdEyeResponse response, TimeSeriesRequestContainer rc)
+  public static DataFrame evaluateResponse(ThirdEyeResponse response, TimeSeriesRequestContainer rc,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
-    return makeTimestamps(evaluateExpressions(parseResponse(response), rc.getExpressions()),
+    return makeTimestamps(evaluateExpressions(parseResponse(response), rc.getExpressions(),
+        thirdEyeCacheRegistry),
         rc.start, rc.getInterval());
   }
 
@@ -281,8 +289,9 @@ public class DataFrameUtils {
     MetricSlice alignedSlice = MetricSlice
         .from(slice.metricId, start.getMillis(), end.getMillis(), slice.filters, slice.granularity);
 
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(alignedSlice, metric, dataset, expressions,
-        metricDAO)
+    ThirdEyeRequest request = makeThirdEyeRequestBuilder(alignedSlice, dataset, expressions,
+        thirdEyeCacheRegistry
+    )
         .setGroupByTimeGranularity(granularity)
         .build(reference);
 
@@ -333,8 +342,9 @@ public class DataFrameUtils {
         .withFields(makeOrigin(period.getPeriodType()));
     DateTime end = new DateTime(slice.end, timezone).withFields(makeOrigin(period.getPeriodType()));
 
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, metric, dataset, expressions,
-        metricDAO)
+    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, dataset, expressions,
+        thirdEyeCacheRegistry
+    )
         .setGroupByTimeGranularity(granularity)
         .build(reference);
 
@@ -379,8 +389,9 @@ public class DataFrameUtils {
         metric.getDefaultAggFunction(), metric.getDataset(),
         thirdEyeCacheRegistry);
 
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, metric, dataset, expressions,
-        metricDAO)
+    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, dataset, expressions,
+        thirdEyeCacheRegistry
+    )
         .setGroupBy(dimensions)
         .setLimit(limit)
         .build(reference);
@@ -455,18 +466,20 @@ public class DataFrameUtils {
    * Helper: Returns a pre-populated ThirdeyeRequestBuilder instance. Removes invalid filter values.
    *
    * @param slice metric data slice
-   * @param metric metric dto
    * @param dataset dataset dto
    * @param expressions metric expressions
-   * @param metricDAO metric config DAO
+   * @param thirdEyeCacheRegistry
    * @return ThirdeyeRequestBuilder
    */
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
-      MetricSlice slice, MetricConfigDTO metric, DatasetConfigDTO dataset,
-      List<MetricExpression> expressions, MetricConfigManager metricDAO) throws ExecutionException {
+      MetricSlice slice,
+      DatasetConfigDTO dataset,
+      List<MetricExpression> expressions,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     List<MetricFunction> functions = new ArrayList<>();
     for (MetricExpression exp : expressions) {
-      functions.addAll(exp.computeMetricFunctions());
+      functions.addAll(exp.computeMetricFunctions(
+          thirdEyeCacheRegistry));
     }
 
     return ThirdEyeRequest.newBuilder()

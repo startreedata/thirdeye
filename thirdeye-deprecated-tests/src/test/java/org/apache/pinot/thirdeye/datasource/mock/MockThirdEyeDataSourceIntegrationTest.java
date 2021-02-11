@@ -182,7 +182,8 @@ public class MockThirdEyeDataSourceIntegrationTest {
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
     ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
-    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
+    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     Assert.assertTrue(df.getDouble(DataFrame.COL_VALUE, 0) > 0);
   }
@@ -196,7 +197,8 @@ public class MockThirdEyeDataSourceIntegrationTest {
             DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
     ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
-    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
+    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     Assert.assertEquals(df.size(), 9);
     Assert.assertEquals(new HashSet<>(df.getStrings("country").toList()),
@@ -215,7 +217,8 @@ public class MockThirdEyeDataSourceIntegrationTest {
     TimeSeriesRequestContainer requestContainer = makeTimeSeriesRequest(slice, "ref");
     ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
-    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer);
+    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     Assert.assertEquals(df.size(), 2);
     Assert.assertTrue(df.getLong(DataFrame.COL_TIME, 0) > 0);
@@ -247,19 +250,22 @@ public class MockThirdEyeDataSourceIntegrationTest {
         cacheRegistry);
     ThirdEyeResponse resBasic = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(reqBasic.getRequest());
-    DataFrame dfBasic = DataFrameUtils.evaluateResponse(resBasic, reqBasic);
+    DataFrame dfBasic = DataFrameUtils.evaluateResponse(resBasic, reqBasic,
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     RequestContainer reqMobile = makeAggregateRequest(sliceMobile, Collections.emptyList(), -1, "ref",
         cacheRegistry);
     ThirdEyeResponse resMobile = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(reqMobile.getRequest());
-    DataFrame dfMobile = DataFrameUtils.evaluateResponse(resMobile, reqMobile);
+    DataFrame dfMobile = DataFrameUtils.evaluateResponse(resMobile, reqMobile,
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     RequestContainer reqDesktop = makeAggregateRequest(sliceDesktop, Collections.emptyList(), -1, "ref",
         cacheRegistry);
     ThirdEyeResponse resDesktop = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(reqDesktop.getRequest());
-    DataFrame dfDesktop = DataFrameUtils.evaluateResponse(resDesktop, reqDesktop);
+    DataFrame dfDesktop = DataFrameUtils.evaluateResponse(resDesktop, reqDesktop,
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
 
     Assert.assertTrue(
         dfBasic.getDouble(DataFrame.COL_VALUE, 0) >= dfMobile.getDouble(DataFrame.COL_VALUE, 0));

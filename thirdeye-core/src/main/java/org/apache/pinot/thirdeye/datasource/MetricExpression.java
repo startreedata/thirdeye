@@ -49,7 +49,7 @@ public class MetricExpression {
 
   private final String expressionName;
   private final String expression;
-  private MetricAggFunction aggFunction = MetricAggFunction.SUM;
+  private final MetricAggFunction aggFunction;
   private final String dataset;
 
   public MetricExpression(String expression, String dataset) {
@@ -66,59 +66,6 @@ public class MetricExpression {
     this.expression = expression;
     this.aggFunction = aggFunction;
     this.dataset = dataset;
-  }
-
-  public String getExpressionName() {
-    return expressionName;
-  }
-
-  public String getExpression() {
-    return expression;
-  }
-
-  public String getDataset() {
-    return dataset;
-  }
-
-  @Override
-  public String toString() {
-    return expression;
-  }
-
-  public List<MetricFunction> computeMetricFunctions() {
-    try {
-      Scope scope = Scope.create();
-      Set<String> metricTokens = new TreeSet<>(); // can be either metric names or ids ! :-/
-
-      // expression parser errors out on variables starting with _
-      // we're replacing the __COUNT default metric, with an escaped string
-      // after evaluating, we replace the escaped string back with the original
-      String modifiedExpressions = expression.replace(COUNT_METRIC, COUNT_METRIC_ESCAPED);
-
-      Parser.parse(modifiedExpressions, scope);
-      metricTokens = scope.getLocalNames();
-
-      ArrayList<MetricFunction> metricFunctions = new ArrayList<>();
-      for (String metricToken : metricTokens) {
-        Long metricId = null;
-        MetricConfigDTO metricConfig = null;
-        String metricDataset = dataset;
-        if (metricToken.equals(COUNT_METRIC_ESCAPED)) {
-          metricToken = COUNT_METRIC;
-        } else {
-          metricConfig = ThirdEyeUtils.getMetricConfigFromNameAndDataset(metricToken, metricDataset);
-          metricId = metricConfig.getId();
-          metricDataset = metricConfig.getDataset();
-        }
-        DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(metricDataset);
-        metricFunctions.add(
-            new MetricFunction(aggFunction, metricToken, metricId, metricDataset, metricConfig,
-                datasetConfig));
-      }
-      return metricFunctions;
-    } catch (ParseException e) {
-      throw new RuntimeException("Exception parsing expressionString:" + expression, e);
-    }
   }
 
   public static double evaluateExpression(MetricExpression expression, Map<String, Double> context)
@@ -148,13 +95,64 @@ public class MetricExpression {
     return expression.evaluate();
   }
 
-  public static void main(String[] args) throws Exception {
-    String expressionString = "(successCount)/(__COUNT)";
-    MetricExpression expression = new MetricExpression("Approval_Rate", expressionString);
-    Map<String, Double> metricValueContext = new HashMap<>();
-    metricValueContext.put("__COUNT", 0d);
-    metricValueContext.put("successCount", 0d);
-    double result = MetricExpression.evaluateExpression(expressionString, metricValueContext);
-    System.out.println(Double.isInfinite(result));
+  public String getExpressionName() {
+    return expressionName;
+  }
+
+  public String getExpression() {
+    return expression;
+  }
+
+  public String getDataset() {
+    return dataset;
+  }
+
+  @Override
+  public String toString() {
+    return expression;
+  }
+
+  public List<MetricFunction> computeMetricFunctions(
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry
+  ) {
+    try {
+      Scope scope = Scope.create();
+      Set<String> metricTokens = new TreeSet<>(); // can be either metric names or ids ! :-/
+
+      // expression parser errors out on variables starting with _
+      // we're replacing the __COUNT default metric, with an escaped string
+      // after evaluating, we replace the escaped string back with the original
+      String modifiedExpressions = expression.replace(COUNT_METRIC, COUNT_METRIC_ESCAPED);
+
+      Parser.parse(modifiedExpressions, scope);
+      metricTokens = scope.getLocalNames();
+
+      ArrayList<MetricFunction> metricFunctions = new ArrayList<>();
+      for (String metricToken : metricTokens) {
+        Long metricId = null;
+        MetricConfigDTO metricConfig = null;
+        String metricDataset = dataset;
+        if (metricToken.equals(COUNT_METRIC_ESCAPED)) {
+          metricToken = COUNT_METRIC;
+        } else {
+          metricConfig = ThirdEyeUtils
+              .getMetricConfigFromNameAndDataset(metricToken, metricDataset);
+          metricId = metricConfig.getId();
+          metricDataset = metricConfig.getDataset();
+        }
+        DatasetConfigDTO datasetConfig = ThirdEyeUtils.getDatasetConfigFromName(metricDataset,
+            thirdEyeCacheRegistry);
+
+        metricFunctions.add(new MetricFunction(aggFunction,
+            metricToken,
+            metricId,
+            metricDataset,
+            metricConfig,
+            datasetConfig));
+      }
+      return metricFunctions;
+    } catch (ParseException e) {
+      throw new RuntimeException("Exception parsing expressionString:" + expression, e);
+    }
   }
 }

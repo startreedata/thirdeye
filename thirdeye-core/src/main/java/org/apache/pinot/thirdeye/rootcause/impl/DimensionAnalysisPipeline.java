@@ -179,7 +179,7 @@ public class DimensionAnalysisPipeline extends Pipeline {
             this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
-    DataFrame raw = DataFrameUtils.evaluateResponse(res, rc);
+    DataFrame raw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
 
     DataFrame out = new DataFrame();
     out.addSeries(dimension, raw.getStrings(dimension));

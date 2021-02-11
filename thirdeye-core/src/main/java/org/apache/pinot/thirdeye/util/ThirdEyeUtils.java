@@ -212,10 +212,11 @@ public abstract class ThirdEyeUtils {
     return datasetName + MetricConfigBean.ALIAS_JOINER + metricName;
   }
 
-  public static DatasetConfigDTO getDatasetConfigFromName(String dataset) {
+  public static DatasetConfigDTO getDatasetConfigFromName(String dataset,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     DatasetConfigDTO datasetConfig = null;
     try {
-      datasetConfig = DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+      datasetConfig = thirdEyeCacheRegistry
           .getDatasetConfigCache().get(dataset);
     } catch (ExecutionException e) {
       LOG.error("Exception in getting dataset config {} from cache", dataset, e);
@@ -237,7 +238,8 @@ public abstract class ThirdEyeUtils {
     } else {
       MetricExpression metricExpression = ThirdEyeUtils
           .getMetricExpressionFromMetricConfig(metricConfig);
-      List<MetricFunction> functions = metricExpression.computeMetricFunctions();
+      List<MetricFunction> functions = metricExpression.computeMetricFunctions(
+          DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
       return functions.stream().map(
           f -> datasetConfigManager.findByDataset(f.getDataset())).collect(Collectors.toList());
     }

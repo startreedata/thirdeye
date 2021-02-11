@@ -691,7 +691,8 @@ public class AnomalyDetectionInputContextBuilder {
       List<String> groupByDimensions, boolean endTimeInclusive)
       throws ExecutionException {
 
-    TimeSeriesHandler timeSeriesHandler = new TimeSeriesHandler(dataSourceCache);
+    TimeSeriesHandler timeSeriesHandler = new TimeSeriesHandler(dataSourceCache,
+        thirdEyeCacheRegistry);
 
     // Seed request with top-level...
     TimeSeriesRequest seedRequest = new TimeSeriesRequest();

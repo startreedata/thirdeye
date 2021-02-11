@@ -116,7 +116,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
       RequestContainer rc = requests.get(dimension);
       ThirdEyeResponse res = responses.get(dimension)
           .get(makeTimeout(deadline), TimeUnit.MILLISECONDS);
-      DataFrame dfRaw = DataFrameUtils.evaluateResponse(res, rc);
+      DataFrame dfRaw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
       DataFrame dfResult = new DataFrame()
           .addSeries(COL_DIMENSION_NAME, StringSeries.fillValues(dfRaw.size(), dimension))
           .addSeries(COL_DIMENSION_VALUE, dfRaw.get(dimension))
@@ -163,7 +163,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
         .makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref", this.metricDAO,
             this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
-    return DataFrameUtils.evaluateResponse(res, rc);
+    return DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
   }
 
   private static long makeTimeout(long deadline) {

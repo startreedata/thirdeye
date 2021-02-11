@@ -186,7 +186,7 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
       String id = response.getRequest().getRequestReference();
       DataFrame df;
       try {
-        df = DataFrameUtils.evaluateResponse(response, requests.get(id));
+        df = DataFrameUtils.evaluateResponse(response, requests.get(id), thirdEyeCacheRegistry);
       } catch (Exception e) {
         LOG.warn("Could not parse response for '{}'. Skipping.", id, e);
         continue;

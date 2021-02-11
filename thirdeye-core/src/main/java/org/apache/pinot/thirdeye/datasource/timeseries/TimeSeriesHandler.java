@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -35,6 +34,7 @@ import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest.ThirdEyeRequestBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
@@ -49,13 +49,16 @@ public class TimeSeriesHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesHandler.class);
   private final TimeSeriesResponseParser defaultTimeseriesResponseParser;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   private final DataSourceCache dataSourceCache;
   private ExecutorService executorService;
 
-  public TimeSeriesHandler(DataSourceCache dataSourceCache) {
+  public TimeSeriesHandler(DataSourceCache dataSourceCache,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     this.dataSourceCache = dataSourceCache;
     defaultTimeseriesResponseParser = new UITimeSeriesResponseParser(dataSourceCache);
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   /**
@@ -103,7 +106,8 @@ public class TimeSeriesHandler {
       throws Exception {
     // compute list of derived expressions
     List<MetricFunction> metricFunctionsFromExpressions =
-        Utils.computeMetricFunctionsFromExpressions(timeSeriesRequest.getMetricExpressions());
+        Utils.computeMetricFunctionsFromExpressions(timeSeriesRequest.getMetricExpressions(),
+            thirdEyeCacheRegistry);
     Set<String> metricNameSet = new HashSet<>();
     for (MetricFunction function : metricFunctionsFromExpressions) {
       metricNameSet.add(function.getMetricName());
@@ -161,15 +165,13 @@ public class TimeSeriesHandler {
     }
 
     Future<TimeSeriesResponse> responseFuture = executorService
-        .submit(new Callable<TimeSeriesResponse>() {
-          public TimeSeriesResponse call() {
-            try {
-              return TimeSeriesHandler.this.handle(timeSeriesRequest, timeSeriesResponseParser);
-            } catch (Exception e) {
-              LOG.warn("Failed to retrieve time series of the request: {}", timeSeriesRequest);
-            }
-            return null;
+        .submit(() -> {
+          try {
+            return TimeSeriesHandler.this.handle(timeSeriesRequest, timeSeriesResponseParser);
+          } catch (Exception e) {
+            LOG.warn("Failed to retrieve time series of the request: {}", timeSeriesRequest);
           }
+          return null;
         });
 
     return responseFuture;
@@ -191,7 +193,7 @@ public class TimeSeriesHandler {
     AnomalyUtils.safelyShutdownExecutionService(executorService, this.getClass());
   }
 
-  private static ThirdEyeRequest createThirdEyeRequest(String requestReference,
+  private ThirdEyeRequest createThirdEyeRequest(String requestReference,
       TimeSeriesRequest timeSeriesRequest, DateTime start, DateTime end) {
     ThirdEyeRequestBuilder requestBuilder = ThirdEyeRequest.newBuilder();
     requestBuilder.setStartTimeInclusive(start);
@@ -201,7 +203,7 @@ public class TimeSeriesHandler {
     requestBuilder.setGroupByTimeGranularity(timeSeriesRequest.getAggregationTimeGranularity());
     List<MetricExpression> metricExpressions = timeSeriesRequest.getMetricExpressions();
     List<MetricFunction> metricFunctionsFromExpressions =
-        Utils.computeMetricFunctionsFromExpressions(metricExpressions);
+        Utils.computeMetricFunctionsFromExpressions(metricExpressions, thirdEyeCacheRegistry);
     requestBuilder.setMetricFunctions(metricFunctionsFromExpressions);
     requestBuilder.setDataSource(
         ThirdEyeUtils.getDataSourceFromMetricFunctions(metricFunctionsFromExpressions));

@@ -135,7 +135,8 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
       List<MetricExpression> metricExpressions =
           Utils.convertToMetricExpressions(cubeSpec.getMetric(), MetricAggFunction.SUM, dataset,
               thirdEyeCacheRegistry);
-      List<MetricFunction> metricFunctions = metricExpressions.get(0).computeMetricFunctions();
+      List<MetricFunction> metricFunctions = metricExpressions.get(0).computeMetricFunctions(
+          thirdEyeCacheRegistry);
 
       ThirdEyeRequest.ThirdEyeRequestBuilder builder = ThirdEyeRequest.newBuilder();
 

@@ -31,6 +31,7 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
@@ -50,8 +51,10 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final EvaluationManager evaluationManager;
   private final DetectionPipelineFactory detectionPipelineFactory;
   private final ModelMaintenanceFlow modelMaintenanceFlow;
+  private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
 
   /**
+   * @param anomalySubscriptionGroupNotificationManager
    * @param alertManager detection config DAO
    * @param mergedAnomalyResultManager merged anomaly DAO
    * @param evaluationManager the evaluation DAO
@@ -62,12 +65,14 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       MergedAnomalyResultManager mergedAnomalyResultManager,
       EvaluationManager evaluationManager,
       DetectionPipelineFactory detectionPipelineFactory,
-      ModelRetuneFlow modelMaintenanceFlow) {
+      ModelRetuneFlow modelMaintenanceFlow,
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
     this.alertManager = alertManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.evaluationManager = evaluationManager;
     this.detectionPipelineFactory = detectionPipelineFactory;
     this.modelMaintenanceFlow = modelMaintenanceFlow;
+    this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
   }
 
   @Override
@@ -140,7 +145,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     for (MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
       // if an anomaly should be re-notified, update the notification lookup table in the database
       if (anomaly.isRenotify()) {
-        DetectionUtils.renotifyAnomaly(anomaly);
+        DetectionUtils.renotifyAnomaly(anomaly,
+            anomalySubscriptionGroupNotificationManager);
       }
     }
   }

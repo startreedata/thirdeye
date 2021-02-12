@@ -118,7 +118,7 @@ public class DetectionAlertTaskFactoryTest {
   /**
    * Load the default thirdeye email alerter if no scheme is not configured
    */
-  @Test
+  @Test(enabled = false)
   public void testLoadDefaultAlertSchemes() throws Exception {
     SubscriptionGroupDTO alertConfig = createAlertConfig(Collections.emptyMap(),
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");

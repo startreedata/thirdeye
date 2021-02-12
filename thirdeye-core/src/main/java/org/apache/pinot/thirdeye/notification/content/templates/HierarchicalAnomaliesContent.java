@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.notification.content.templates;
 
+import static java.util.Comparator.comparingDouble;
+
 import com.google.common.base.Joiner;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,13 +44,13 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
@@ -79,19 +81,21 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
   private Set<EventDTO> relatedEvents;
 
   public HierarchicalAnomaliesContent(final DataSourceCache dataSourceCache,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super(DAORegistry.getInstance().getMetricConfigDAO());
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager) {
+    super(metricConfigManager);
     this.dataSourceCache = dataSourceCache;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
-    datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
+    this.datasetConfigManager = datasetConfigManager;
   }
 
   @Override
   public void init(Properties properties, ThirdEyeWorkerConfiguration config) {
     super.init(properties, config);
     relatedEvents = new HashSet<>();
-    presentSeasonalValues = Boolean
-        .valueOf(properties.getProperty(PRESENT_SEASONAL_VALUES, DEFAULT_PRESENT_SEASONAL_VALUES));
+    presentSeasonalValues = Boolean.parseBoolean(
+        properties.getProperty(PRESENT_SEASONAL_VALUES, DEFAULT_PRESENT_SEASONAL_VALUES));
   }
 
   @Override
@@ -108,12 +112,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
     SortedMap<String, List<AnomalyReportEntity>> leafAnomalyDetails = new TreeMap<>();
     List<String> anomalyIds = new ArrayList<>();
     List<AnomalyResult> anomalyList = new ArrayList<>(anomalies);
-    Collections.sort(anomalyList, new Comparator<AnomalyResult>() {
-      @Override
-      public int compare(AnomalyResult o1, AnomalyResult o2) {
-        return Double.compare(o1.getWeight(), o2.getWeight());
-      }
-    });
+    anomalyList.sort(comparingDouble(AnomalyResult::getWeight));
 
     for (AnomalyResult anomalyResult : anomalyList) {
       if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {

@@ -85,7 +85,8 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
 
   public DetectionEmailAlerter(SubscriptionGroupDTO subsConfig,
       ThirdEyeWorkerConfiguration thirdeyeConfig,
-      DetectionAlertFilterResult result, final MetricConfigManager metricConfigManager) {
+      DetectionAlertFilterResult result,
+      final MetricConfigManager metricConfigManager) {
     super(subsConfig, result, metricConfigManager);
     this.teConfig = thirdeyeConfig;
     this.smtpConfig = SmtpConfiguration

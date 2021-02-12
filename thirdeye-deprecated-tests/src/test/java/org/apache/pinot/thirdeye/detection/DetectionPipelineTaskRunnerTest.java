@@ -87,7 +87,8 @@ public class DetectionPipelineTaskRunnerTest {
         this.anomalyDAO,
         this.evaluationDAO,
         this.loader,
-        new ModelRetuneFlow(this.provider, new DetectionRegistry())
+        new ModelRetuneFlow(this.provider, new DetectionRegistry()),
+        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager()
     );
 
     this.info = new DetectionPipelineTaskInfo();

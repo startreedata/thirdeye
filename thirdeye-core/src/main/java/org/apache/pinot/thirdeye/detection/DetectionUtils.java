@@ -42,7 +42,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificat
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
 import org.apache.pinot.thirdeye.detection.spec.RuleBaselineProviderSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.BaseComponent;
@@ -428,11 +427,10 @@ public class DetectionUtils {
    *
    * @param anomaly the anomaly to be notified.
    */
-  public static void renotifyAnomaly(MergedAnomalyResultDTO anomaly) {
-    AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationDAO =
-        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager();
+  public static void renotifyAnomaly(MergedAnomalyResultDTO anomaly,
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
     List<AnomalySubscriptionGroupNotificationDTO> subscriptionGroupNotificationDTOs =
-        anomalySubscriptionGroupNotificationDAO
+        anomalySubscriptionGroupNotificationManager
             .findByPredicate(Predicate.EQ("anomalyId", anomaly.getId()));
     AnomalySubscriptionGroupNotificationDTO anomalyNotificationDTO;
     if (subscriptionGroupNotificationDTOs.isEmpty()) {
@@ -446,6 +444,6 @@ public class DetectionUtils {
       anomalyNotificationDTO = subscriptionGroupNotificationDTOs.get(0);
       anomalyNotificationDTO.setNotifiedSubscriptionGroupIds(Collections.emptyList());
     }
-    anomalySubscriptionGroupNotificationDAO.save(anomalyNotificationDTO);
+    anomalySubscriptionGroupNotificationManager.save(anomalyNotificationDTO);
   }
 }

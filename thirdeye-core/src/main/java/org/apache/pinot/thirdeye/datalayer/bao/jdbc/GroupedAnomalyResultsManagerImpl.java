@@ -34,7 +34,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.GroupedAnomalyResultsBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.modelmapper.ModelMapper;
 
 @Singleton
@@ -42,10 +41,13 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
     implements GroupedAnomalyResultsManager {
 
   protected static final ModelMapper MODEL_MAPPER = new ModelMapper();
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
   @Inject
-  public GroupedAnomalyResultsManagerImpl(GenericPojoDao genericPojoDao) {
+  public GroupedAnomalyResultsManagerImpl(GenericPojoDao genericPojoDao,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
     super(GroupedAnomalyResultsDTO.class, GroupedAnomalyResultsBean.class, genericPojoDao);
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
   @Override
@@ -151,9 +153,7 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
       List<MergedAnomalyResultBean> list =
           genericPojoDao
               .get(groupedAnomalyResultsBean.getAnomalyResultsId(), MergedAnomalyResultBean.class);
-      MergedAnomalyResultManager mergedAnomalyDAO = DAORegistry.getInstance()
-          .getMergedAnomalyResultDAO();
-      List<MergedAnomalyResultDTO> mergedAnomalyResults = mergedAnomalyDAO
+      List<MergedAnomalyResultDTO> mergedAnomalyResults = mergedAnomalyResultManager
           .convertMergedAnomalyBean2DTO(list);
       groupedAnomalyResultsDTO.setAnomalyResults(mergedAnomalyResults);
     }

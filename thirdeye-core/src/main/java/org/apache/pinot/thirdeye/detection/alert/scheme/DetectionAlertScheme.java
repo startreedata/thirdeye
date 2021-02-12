@@ -51,7 +51,8 @@ public abstract class DetectionAlertScheme {
       DetectionAlertFilterResult result,
       final MetricConfigManager metricConfigManager,
       final AlertManager detectionConfigManager,
-      final EventManager eventManager, final MergedAnomalyResultManager mergedAnomalyResultManager) {
+      final EventManager eventManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
     this.subsConfig = subsConfig;
     this.result = result;
     this.metricConfigManager = metricConfigManager;

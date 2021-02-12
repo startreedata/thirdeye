@@ -26,6 +26,8 @@ import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionCo
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -43,9 +45,13 @@ public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<Sub
   private static final Logger LOG = LoggerFactory.getLogger(SubscriptionConfigValidator.class);
   private static final String DEFAULT_SUBSCRIPTION_CONFIG_SCHEMA_PATH =
       "/validators/subscription/subscription-config-schema.json";
+  private final AlertManager detectionConfigManager;
+  private final ApplicationManager applicationManager;
 
   public SubscriptionConfigValidator() {
     super(DEFAULT_SUBSCRIPTION_CONFIG_SCHEMA_PATH);
+    detectionConfigManager = DAORegistry.getInstance().getDetectionConfigManager();
+    applicationManager = DAORegistry.getInstance().getApplicationDAO();
   }
 
   /**
@@ -77,7 +83,7 @@ public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<Sub
     List<String> detectionNames = ConfigUtils
         .getList(subscriptionConfigMap.get(PROP_DETECTION_NAMES));
     for (String detectionName : detectionNames) {
-      ConfigValidationUtils.checkArgument(!DAORegistry.getInstance().getDetectionConfigManager()
+      ConfigValidationUtils.checkArgument(!detectionConfigManager
               .findByPredicate(Predicate.EQ("name", detectionName)).isEmpty(),
           "Cannot find detection " + detectionName + " - Please ensure the detections listed under "
               + PROP_DETECTION_NAMES + " exist and are correctly configured.");
@@ -86,7 +92,7 @@ public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<Sub
     // application should exist in our registry
     String applicationName = MapUtils.getString(subscriptionConfigMap, PROP_APPLICATION);
     ConfigValidationUtils.checkArgument(
-        !DAORegistry.getInstance().getApplicationDAO().findByName(applicationName).isEmpty(),
+        !applicationManager.findByName(applicationName).isEmpty(),
         "Application name doesn't exist in our registry. Please use an existing application name or"
             + " reach out to the ThirdEye team to setup a new one.");
 

@@ -40,7 +40,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertSnapshotManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detector.email.filter.AlertFilter;
 import org.apache.pinot.thirdeye.detector.email.filter.AlertFilterFactory;
 import org.joda.time.DateTime;
@@ -52,28 +51,31 @@ public class UnionAnomalyFeed implements AnomalyFeed {
   public static final TimeGranularity EXPIRE_TIME = TimeGranularity.fromString("7_DAYS");
   private static final Logger LOG = LoggerFactory.getLogger(UnionAnomalyFeed.class);
 
-  private AlertSnapshotManager alertSnapshotDAO;
-  private AlertFilterFactory alertFilterFactory;
-
+  private final AlertSnapshotManager alertSnapshotManager;
   private final List<AnomalyFetcher> anomalyFetchers;
   private final List<AlertFilter> alertCandidatesFilters;
-  private AlertSnapshotDTO alertSnapshot;
   private final DateTime alertTime;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
-  public UnionAnomalyFeed() {
+  private AlertFilterFactory alertFilterFactory;
+  private AlertSnapshotDTO alertSnapshot;
+
+  public UnionAnomalyFeed(final AlertSnapshotManager alertSnapshotManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
     this.anomalyFetchers = new ArrayList<>();
     this.alertCandidatesFilters = new ArrayList<>();
     this.alertTime = DateTime.now();
+    this.alertSnapshotManager = alertSnapshotManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
   @Override
   public void init(AlertFilterFactory alertFilterFactory, AnomalyFeedConfig anomalyFeedConfig) {
-    this.alertSnapshotDAO = DAORegistry.getInstance().getAlertSnapshotDAO();
     this.alertFilterFactory = alertFilterFactory;
     AnomalySource anomalySourceType = anomalyFeedConfig.getAnomalySourceType();
     String anomalySource = anomalyFeedConfig.getAnomalySource();
     if (anomalyFeedConfig.getAlertSnapshotId() != null) {
-      alertSnapshot = alertSnapshotDAO.findById(anomalyFeedConfig.getAlertSnapshotId());
+      alertSnapshot = alertSnapshotManager.findById(anomalyFeedConfig.getAlertSnapshotId());
     }
     if (alertSnapshot == null) { // null handling
       LOG.error("Alert snapshot is null.");
@@ -138,12 +140,10 @@ public class UnionAnomalyFeed implements AnomalyFeed {
     }
 
     updateSnapshot(alertTime, new ArrayList<>(alertedAnomalies));
-    alertSnapshotDAO.update(alertSnapshot);
+    alertSnapshotManager.update(alertSnapshot);
   }
 
   public void updateSnapshot(DateTime alertTime, List<MergedAnomalyResultDTO> alertedAnomalies) {
-    MergedAnomalyResultManager mergedAnomalyResultDAO = DAORegistry.getInstance()
-        .getMergedAnomalyResultDAO();
     // Set the lastNotifyTime to current time if there is alerted anomalies
     if (alertedAnomalies.size() > 0) {
       alertSnapshot.setLastNotifyTime(alertTime.getMillis());
@@ -167,7 +167,7 @@ public class UnionAnomalyFeed implements AnomalyFeed {
 
       // Set notified flag
       anomaly.setNotified(true);
-      mergedAnomalyResultDAO.update(anomaly);
+      mergedAnomalyResultManager.update(anomaly);
     }
 
     // cleanup stale status in snapshot

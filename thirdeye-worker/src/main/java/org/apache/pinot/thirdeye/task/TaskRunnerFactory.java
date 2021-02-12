@@ -24,78 +24,45 @@ import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorTaskRunner;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskRunner;
-import org.apache.pinot.thirdeye.detection.ModelRetuneFlow;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskFactory;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskRunner;
-import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.dataquality.DataQualityPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskRunner;
 
 @Singleton
 public class TaskRunnerFactory {
 
-  private final AlertManager detectionConfigManager;
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final EvaluationManager evaluationManager;
-  private final DataProvider dataProvider;
-  private final SubscriptionGroupManager subscriptionGroupManager;
-  private final DetectionPipelineFactory detectionPipelineFactory;
   private final DAORegistry daoRegistry;
-  private final DetectionAlertTaskFactory detectionAlertTaskFactory;
+  private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
+  private final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner;
+  private final DetectionAlertTaskRunner detectionAlertTaskRunner;
+  private final YamlOnboardingTaskRunner yamlOnboardingTaskRunner;
 
   @Inject
   public TaskRunnerFactory(
-      final AlertManager detectionConfigManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final EvaluationManager evaluationManager,
-      final DataProvider dataProvider,
-      final SubscriptionGroupManager subscriptionGroupManager,
-      final DetectionPipelineFactory detectionPipelineFactory,
       final DAORegistry daoRegistry,
-      final DetectionAlertTaskFactory detectionAlertTaskFactory) {
-    this.detectionConfigManager = detectionConfigManager;
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.evaluationManager = evaluationManager;
-    this.dataProvider = dataProvider;
-    this.subscriptionGroupManager = subscriptionGroupManager;
-    this.detectionPipelineFactory = detectionPipelineFactory;
+      final DetectionPipelineTaskRunner detectionPipelineTaskRunner,
+      final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner,
+      final DetectionAlertTaskRunner detectionAlertTaskRunner,
+      final YamlOnboardingTaskRunner yamlOnboardingTaskRunner) {
     this.daoRegistry = daoRegistry;
-    this.detectionAlertTaskFactory = detectionAlertTaskFactory;
+    this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
+    this.dataQualityPipelineTaskRunner = dataQualityPipelineTaskRunner;
+    this.detectionAlertTaskRunner = detectionAlertTaskRunner;
+    this.yamlOnboardingTaskRunner = yamlOnboardingTaskRunner;
   }
 
   public TaskRunner get(TaskType taskType) {
     switch (taskType) {
       case DATA_QUALITY:
-        return new DataQualityPipelineTaskRunner(
-            detectionPipelineFactory,
-            detectionConfigManager,
-            mergedAnomalyResultManager
-        );
+        return dataQualityPipelineTaskRunner;
       case DETECTION:
-        return new DetectionPipelineTaskRunner(detectionConfigManager,
-            mergedAnomalyResultManager,
-            evaluationManager,
-            detectionPipelineFactory,
-            dataProvider,
-            new ModelRetuneFlow(dataProvider, new DetectionRegistry()));
+        return detectionPipelineTaskRunner;
       case DETECTION_ALERT:
-        return new DetectionAlertTaskRunner(detectionAlertTaskFactory,
-            subscriptionGroupManager,
-            mergedAnomalyResultManager);
+        return detectionAlertTaskRunner;
       case YAML_DETECTION_ONBOARD:
-        return new YamlOnboardingTaskRunner(
-            dataProvider,
-            mergedAnomalyResultManager,
-            detectionConfigManager,
-            detectionPipelineFactory);
+        return yamlOnboardingTaskRunner;
       case MONITOR:
         return new MonitorTaskRunner(daoRegistry);
       default:

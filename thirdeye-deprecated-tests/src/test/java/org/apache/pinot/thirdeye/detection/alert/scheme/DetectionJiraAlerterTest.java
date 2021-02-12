@@ -133,7 +133,7 @@ public class DetectionJiraAlerterTest {
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
     DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO,
-        this.thirdEyeConfig, null);
+        this.thirdEyeConfig, null, DAORegistry.getInstance().getMetricConfigDAO());
     alertTaskInfo.run();
   }
 
@@ -163,7 +163,7 @@ public class DetectionJiraAlerterTest {
 
     DetectionJiraAlerter jiraAlerter = new DetectionJiraAlerter(this.alertConfigDTO,
         this.thirdEyeConfig,
-        notificationResults, jiraClient) {
+        notificationResults, jiraClient, DAORegistry.getInstance().getMetricConfigDAO()) {
       @Override
       protected BaseNotificationContent getNotificationContent(Properties emailClientConfigs) {
         return metricAnomaliesContent;

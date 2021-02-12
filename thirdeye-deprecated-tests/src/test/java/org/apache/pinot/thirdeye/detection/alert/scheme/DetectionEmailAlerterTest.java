@@ -143,7 +143,7 @@ public class DetectionEmailAlerterTest {
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
     DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO,
-        this.thirdEyeConfig, null);
+        this.thirdEyeConfig, null, DAORegistry.getInstance().getMetricConfigDAO());
     alertTaskInfo.run();
   }
 
@@ -167,7 +167,7 @@ public class DetectionEmailAlerterTest {
     MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient);
 
     DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(this.alertConfigDTO,
-        this.thirdEyeConfig, notificationResults) {
+        this.thirdEyeConfig, notificationResults, DAORegistry.getInstance().getMetricConfigDAO()) {
       @Override
       protected HtmlEmail getHtmlContent(EmailEntity emailEntity) {
         return htmlEmail;

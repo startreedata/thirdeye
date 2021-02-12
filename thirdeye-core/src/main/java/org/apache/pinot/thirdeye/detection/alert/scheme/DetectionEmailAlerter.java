@@ -40,9 +40,9 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -85,8 +85,8 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
 
   public DetectionEmailAlerter(SubscriptionGroupDTO subsConfig,
       ThirdEyeWorkerConfiguration thirdeyeConfig,
-      DetectionAlertFilterResult result) {
-    super(subsConfig, result, DAORegistry.getInstance().getMetricConfigDAO());
+      DetectionAlertFilterResult result, final MetricConfigManager metricConfigManager) {
+    super(subsConfig, result, metricConfigManager);
     this.teConfig = thirdeyeConfig;
     this.smtpConfig = SmtpConfiguration
         .createFromProperties(this.teConfig.getAlerterConfiguration().get(SMTP_CONFIG_KEY));

@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
@@ -81,20 +81,14 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
 
   public DetectionJiraAlerter(SubscriptionGroupDTO subsConfig,
       ThirdEyeWorkerConfiguration thirdeyeConfig,
-      DetectionAlertFilterResult result, ThirdEyeJiraClient jiraClient) {
-    super(subsConfig, result, DAORegistry.getInstance().getMetricConfigDAO());
+      DetectionAlertFilterResult result, ThirdEyeJiraClient jiraClient,
+      final MetricConfigManager metricConfigManager) {
+    super(subsConfig, result, metricConfigManager);
     this.teConfig = thirdeyeConfig;
 
     this.jiraAdminConfig = JiraConfiguration
         .createFromProperties(this.teConfig.getAlerterConfiguration().get(JIRA_CONFIG_KEY));
     this.jiraClient = jiraClient;
-  }
-
-  public DetectionJiraAlerter(SubscriptionGroupDTO subsConfig,
-      ThirdEyeWorkerConfiguration thirdeyeConfig,
-      DetectionAlertFilterResult result) throws Exception {
-    this(subsConfig, thirdeyeConfig, result, new ThirdEyeJiraClient(JiraConfiguration
-        .createFromProperties(thirdeyeConfig.getAlerterConfiguration().get(JIRA_CONFIG_KEY))));
   }
 
   private void updateJiraAlert(Issue issue, JiraEntity jiraEntity) {

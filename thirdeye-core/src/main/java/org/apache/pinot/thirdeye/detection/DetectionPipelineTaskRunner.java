@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.detection;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
@@ -38,6 +40,7 @@ import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class DetectionPipelineTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
@@ -45,30 +48,25 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final EvaluationManager evaluationManager;
-  private final DetectionPipelineFactory loader;
-  private final DataProvider provider;
+  private final DetectionPipelineFactory detectionPipelineFactory;
   private final ModelMaintenanceFlow modelMaintenanceFlow;
 
   /**
-   * Alternate constructor for dependency injection.
-   *
    * @param alertManager detection config DAO
    * @param mergedAnomalyResultManager merged anomaly DAO
    * @param evaluationManager the evaluation DAO
-   * @param loader pipeline loader
-   * @param provider pipeline data provider
+   * @param detectionPipelineFactory pipeline loader
    */
+  @Inject
   public DetectionPipelineTaskRunner(AlertManager alertManager,
       MergedAnomalyResultManager mergedAnomalyResultManager,
       EvaluationManager evaluationManager,
-      DetectionPipelineFactory loader,
-      DataProvider provider,
+      DetectionPipelineFactory detectionPipelineFactory,
       ModelRetuneFlow modelMaintenanceFlow) {
     this.alertManager = alertManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.evaluationManager = evaluationManager;
-    this.loader = loader;
-    this.provider = provider;
+    this.detectionPipelineFactory = detectionPipelineFactory;
     this.modelMaintenanceFlow = modelMaintenanceFlow;
   }
 
@@ -86,10 +84,10 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           info.start,
           info.end);
 
-      final DetectionPipeline pipeline = this.loader.get(new DetectionPipelineContext()
-              .setAlert(config)
-              .setStart(info.getStart())
-              .setEnd(info.getEnd())
+      final DetectionPipeline pipeline = detectionPipelineFactory.get(new DetectionPipelineContext()
+          .setAlert(config)
+          .setStart(info.getStart())
+          .setEnd(info.getEnd())
       );
       final DetectionPipelineResult result = pipeline.run();
 

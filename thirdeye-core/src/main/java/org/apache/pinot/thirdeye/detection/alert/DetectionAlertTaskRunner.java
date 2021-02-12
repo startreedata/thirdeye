@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * alert filter to get
  * mappings from anomalies to recipients and then send email to the recipients.
  */
+@Singleton
 public class DetectionAlertTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertTaskRunner.class);
@@ -49,6 +52,7 @@ public class DetectionAlertTaskRunner implements TaskRunner {
   private final SubscriptionGroupManager subscriptionConfigDAO;
   private final MergedAnomalyResultManager mergedAnomalyDAO;
 
+  @Inject
   public DetectionAlertTaskRunner(final DetectionAlertTaskFactory detectionAlertTaskFactory,
       final SubscriptionGroupManager detectionAlertConfigManager,
       final MergedAnomalyResultManager mergedAnomalyResultDAO) {

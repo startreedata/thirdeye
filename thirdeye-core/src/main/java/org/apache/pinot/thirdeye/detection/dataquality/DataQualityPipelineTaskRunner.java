@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.dataquality;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Ths class is responsible for running the data quality tasks
  */
+@Singleton
 public class DataQualityPipelineTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataQualityPipelineTaskRunner.class);
@@ -59,6 +62,7 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
    * @see DAORegistry
    * @see ThirdEyeCacheRegistry
    */
+  @Inject
   public DataQualityPipelineTaskRunner(final DetectionPipelineFactory detectionPipelineFactory,
       final AlertManager detectionConfigManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {

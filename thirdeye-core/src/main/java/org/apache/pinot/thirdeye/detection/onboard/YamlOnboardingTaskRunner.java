@@ -20,6 +20,8 @@
 
 package org.apache.pinot.thirdeye.detection.onboard;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
@@ -45,14 +47,17 @@ import org.slf4j.LoggerFactory;
  * It will replay the detection pipeline and the re-tune the pipeline.
  * Because for some pipeline component, tuning is depend on replay result
  */
+@Singleton
 public class YamlOnboardingTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(YamlOnboardingTaskRunner.class);
+
   private final AlertManager detectionDAO;
   private final MergedAnomalyResultManager anomalyDAO;
   private final DetectionPipelineFactory loader;
   private final DataProvider provider;
 
+  @Inject
   public YamlOnboardingTaskRunner(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager,

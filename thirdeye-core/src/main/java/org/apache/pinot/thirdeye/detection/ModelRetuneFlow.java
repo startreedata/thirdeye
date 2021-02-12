@@ -25,6 +25,8 @@ package org.apache.pinot.thirdeye.detection;
 import static org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil.detectionRetuneCounter;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -46,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * model evaluators for
  * the detection config and automatically re-tunes the model.
  */
+@Singleton
 public class ModelRetuneFlow implements ModelMaintenanceFlow {
 
   private static final int DEFAULT_TUNING_WINDOW_DAYS = 28;
@@ -54,6 +57,7 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
   private final DataProvider provider;
   private final DetectionRegistry detectionRegistry;
 
+  @Inject
   public ModelRetuneFlow(DataProvider provider, DetectionRegistry detectionRegistry) {
     this.provider = provider;
     this.detectionRegistry = detectionRegistry;

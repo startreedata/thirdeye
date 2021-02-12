@@ -165,7 +165,9 @@ public class TestEntityGroupKeyContent {
 
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(new Properties(), new EntityGroupKeyContent(
-        DAORegistry.getInstance().getMetricConfigDAO()),
+        DAORegistry.getInstance().getMetricConfigDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getEventDAO()),
         thirdeyeAnomalyConfig,
         DaoTestUtils.getTestNotificationConfig("Test Config"));
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);
@@ -289,7 +291,9 @@ public class TestEntityGroupKeyContent {
     props.put(PROP_ENTITY_WHITELIST, "metric-X");
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(props, new EntityGroupKeyContent(
-        DAORegistry.getInstance().getMetricConfigDAO()),
+        DAORegistry.getInstance().getMetricConfigDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getEventDAO()),
         thirdeyeAnomalyConfig,
         DaoTestUtils.getTestNotificationConfig("Test Config"));
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);

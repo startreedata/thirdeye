@@ -49,6 +49,7 @@ import org.apache.pinot.thirdeye.anomaly.events.HolidayEventProvider;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -89,6 +90,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
   private static final String DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
   private static final String RAW_VALUE_FORMAT = "%.0f";
   private static final String PERCENTAGE_FORMAT = "%.2f %%";
+  private final EventManager eventManager;
 
   protected boolean includeSentAnomaliesOnly;
   protected DateTimeZone dateTimeZone;
@@ -100,8 +102,10 @@ public abstract class BaseNotificationContent implements NotificationContent {
   protected ThirdEyeWorkerConfiguration thirdEyeAnomalyConfig;
   protected Properties properties;
 
-  protected BaseNotificationContent(final MetricConfigManager metricConfigManager) {
+  protected BaseNotificationContent(final MetricConfigManager metricConfigManager,
+      final EventManager eventManager) {
     metricDAO = metricConfigManager;
+    this.eventManager = eventManager;
   }
 
   /**
@@ -482,7 +486,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
 
     LOG.info("Fetching holidays with preEventCrawlOffset {} and postEventCrawlOffset {}",
         preEventCrawlOffset, postEventCrawlOffset);
-    return new HolidayEventProvider().getEvents(eventFilter);
+    return new HolidayEventProvider(eventManager).getEvents(eventFilter);
   }
 
   /**

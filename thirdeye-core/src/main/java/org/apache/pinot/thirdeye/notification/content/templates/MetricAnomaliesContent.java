@@ -38,12 +38,13 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.joda.time.DateTime;
@@ -60,20 +61,23 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
   private AlertManager configDAO = null;
   private ThirdEyeRcaRestClient rcaClient;
 
-  public MetricAnomaliesContent() {
-    super(DAORegistry.getInstance().getMetricConfigDAO());
+  public MetricAnomaliesContent(final MetricConfigManager metricConfigManager,
+      final EventManager eventManager) {
+    super(metricConfigManager, eventManager);
   }
 
   // For testing
-  public MetricAnomaliesContent(ThirdEyeRcaRestClient rcaClient) {
-    super(DAORegistry.getInstance().getMetricConfigDAO());
+  public MetricAnomaliesContent(ThirdEyeRcaRestClient rcaClient,
+      final MetricConfigManager metricConfigManager, final EventManager eventManager,
+      final AlertManager detectionConfigManager) {
+    this(metricConfigManager, eventManager);
+    this.configDAO = detectionConfigManager;
     this.rcaClient = rcaClient;
   }
 
   @Override
   public void init(Properties properties, ThirdEyeWorkerConfiguration configuration) {
     super.init(properties, configuration);
-    this.configDAO = DAORegistry.getInstance().getDetectionConfigManager();
 
     if (this.rcaClient == null) {
       final ThirdEyePrincipal principal = new ThirdEyePrincipal(

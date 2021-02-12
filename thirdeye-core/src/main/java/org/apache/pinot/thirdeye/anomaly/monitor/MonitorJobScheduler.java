@@ -23,10 +23,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import javax.annotation.Nullable;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.JobManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,14 +36,18 @@ public class MonitorJobScheduler {
   private final ScheduledExecutorService scheduledExecutorService;
   private final TaskManager anomalyTaskDAO;
   private final MonitorConfiguration monitorConfiguration;
+  private final JobManager jobManager;
   private MonitorJobRunner monitorJobRunner;
   private MonitorJobContext monitorJobContext;
 
   @Inject
-  public MonitorJobScheduler(@Nullable MonitorConfiguration monitorConfiguration,
-      final TaskManager taskManager) {
+  public MonitorJobScheduler(MonitorConfiguration monitorConfiguration,
+      final TaskManager taskManager,
+      final JobManager jobManager) {
     this.anomalyTaskDAO = taskManager;
     this.monitorConfiguration = monitorConfiguration;
+    this.jobManager = jobManager;
+
     scheduledExecutorService = Executors.newScheduledThreadPool(10);
   }
 
@@ -54,7 +57,7 @@ public class MonitorJobScheduler {
     monitorJobContext = new MonitorJobContext();
     monitorJobContext.setTaskDAO(anomalyTaskDAO);
     monitorJobContext.setMonitorConfiguration(monitorConfiguration);
-    monitorJobContext.setJobDAO(DAORegistry.getInstance().getJobDAO());
+    monitorJobContext.setJobDAO(jobManager);
 
     monitorJobRunner = new MonitorJobRunner(monitorJobContext);
     scheduledExecutorService

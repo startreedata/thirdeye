@@ -37,12 +37,12 @@ import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.alert.util.AlertScreenshotHelper;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
@@ -80,14 +80,15 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
   private final Map<String, String> anomalyToChildIdsMap = new HashMap<>();
   private final List<String> entityWhitelist = new ArrayList<>();
 
-  public EntityGroupKeyContent(final MetricConfigManager metricConfigDAO) {
-    super(metricConfigDAO);
+  public EntityGroupKeyContent(final MetricConfigManager metricConfigDAO,
+      final AlertManager detectionConfigManager, final EventManager eventManager) {
+    super(metricConfigDAO, eventManager);
+    this.configDAO = detectionConfigManager;
   }
 
   @Override
   public void init(Properties properties, ThirdEyeWorkerConfiguration config) {
     super.init(properties, config);
-    this.configDAO = DAORegistry.getInstance().getDetectionConfigManager();
     if (properties.containsKey(PROP_ENTITY_WHITELIST)) {
       // Support only one whitelist entity. This can be extended in the future.
       entityWhitelist.add(properties.get(PROP_ENTITY_WHITELIST).toString());

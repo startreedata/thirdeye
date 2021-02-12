@@ -230,7 +230,9 @@ public class TestMetricAnomaliesContent {
 
     Map<String, Object> expectedResponse = new HashMap<>();
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
-    MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient);
+    MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
+        DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager());
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(new Properties(), metricAnomaliesContent,
         thirdeyeAnomalyConfig, DaoTestUtils.getTestNotificationConfig("Test Config"));

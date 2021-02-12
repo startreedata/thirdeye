@@ -9,7 +9,9 @@ public class RandomAlerter extends DetectionAlertScheme {
 
   public RandomAlerter(SubscriptionGroupDTO subsConfig, ThirdEyeWorkerConfiguration thirdeyeConfig,
       DetectionAlertFilterResult result) {
-    super(subsConfig, result, DAORegistry.getInstance().getMetricConfigDAO());
+    super(subsConfig, result, DAORegistry.getInstance().getMetricConfigDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getEventDAO());
   }
 
   @Override

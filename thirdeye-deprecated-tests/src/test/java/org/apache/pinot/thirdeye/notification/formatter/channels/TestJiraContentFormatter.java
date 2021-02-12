@@ -163,7 +163,9 @@ public class TestJiraContentFormatter {
     Map<String, Object> expectedResponse = new HashMap<>();
     expectedResponse.put("cubeResults", "{}");
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
-    this.metricAnomaliesContent = new MetricAnomaliesContent(rcaClient);
+    this.metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
+        DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager());
   }
 
   @AfterClass(alwaysRun = true)

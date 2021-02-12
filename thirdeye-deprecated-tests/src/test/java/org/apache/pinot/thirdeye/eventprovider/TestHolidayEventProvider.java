@@ -52,7 +52,7 @@ public class TestHolidayEventProvider {
       testDAOProvider = new TestDbEnv();
       DAORegistry daoRegistry = DAORegistry.getInstance();
       eventDAO = daoRegistry.getEventDAO();
-      holidayEventProvider = new HolidayEventProvider();
+      holidayEventProvider = new HolidayEventProvider(DAORegistry.getInstance().getEventDAO());
     }
 
     @AfterClass(alwaysRun = true)

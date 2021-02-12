@@ -133,7 +133,9 @@ public class DetectionJiraAlerterTest {
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
     DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO,
-        this.thirdEyeConfig, null, DAORegistry.getInstance().getMetricConfigDAO());
+        this.thirdEyeConfig, null, DAORegistry.getInstance().getMetricConfigDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getEventDAO());
     alertTaskInfo.run();
   }
 
@@ -159,11 +161,15 @@ public class DetectionJiraAlerterTest {
     Map<String, Object> expectedResponse = new HashMap<>();
     expectedResponse.put("cubeResults", new HashMap<>());
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
-    MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient);
+    MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
+        DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager());
 
     DetectionJiraAlerter jiraAlerter = new DetectionJiraAlerter(this.alertConfigDTO,
         this.thirdEyeConfig,
-        notificationResults, jiraClient, DAORegistry.getInstance().getMetricConfigDAO()) {
+        notificationResults, jiraClient, DAORegistry.getInstance().getMetricConfigDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getEventDAO()) {
       @Override
       protected BaseNotificationContent getNotificationContent(Properties emailClientConfigs) {
         return metricAnomaliesContent;

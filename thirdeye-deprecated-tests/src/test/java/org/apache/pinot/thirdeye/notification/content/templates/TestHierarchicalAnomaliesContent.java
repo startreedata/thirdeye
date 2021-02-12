@@ -161,7 +161,8 @@ public class TestHierarchicalAnomaliesContent {
         contentFormatter = new EmailContentFormatter(new Properties(),
         new HierarchicalAnomaliesContent(thirdEyeCacheRegistry.getDataSourceCache(),
             thirdEyeCacheRegistry, DAORegistry.getInstance().getMetricConfigDAO(),
-            DAORegistry.getInstance().getDatasetConfigDAO()),
+            DAORegistry.getInstance().getDatasetConfigDAO(),
+            DAORegistry.getInstance().getEventDAO()),
         thirdeyeAnomalyConfig, notificationConfigDTO);
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);
 

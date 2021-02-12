@@ -19,20 +19,15 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
@@ -109,46 +104,6 @@ public class EntityMappingPipeline extends Pipeline {
     this.isCollector = isCollector;
     this.direction = direction;
     this.iterations = iterations;
-  }
-
-  /**
-   * Alternate constructor for use by RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_MAPPING_TYPE}, {@code
-   *     PROP_IS_REWRITER=false}, {@code PROP_MATCH_PREFIX=false}, {@code PROP_IS_COLLECTOR=false},
-   *     {@code PROP_DIRECTION=REGULAR}, {@code PROP_ITERATIONS=1})
-   */
-  public EntityMappingPipeline(String outputName, Set<String> inputNames,
-      Map<String, Object> properties) throws IOException {
-    super(outputName, inputNames);
-
-    this.entityDAO = DAORegistry.getInstance().getEntityToEntityMappingDAO();
-    this.isRewriter = MapUtils.getBoolean(properties, PROP_IS_REWRITER, PROP_IS_REWRITER_DEFAULT);
-    this.matchPrefix = MapUtils
-        .getBoolean(properties, PROP_MATCH_PREFIX, PROP_MATCH_PREFIX_DEFAULT);
-    this.isCollector = MapUtils
-        .getBoolean(properties, PROP_IS_COLLECTOR, PROP_IS_COLLECTOR_DEFAULT);
-    this.direction = MapUtils.getString(properties, PROP_DIRECTION, PROP_DIRECTION_DEFAULT);
-    this.iterations = MapUtils.getInteger(properties, PROP_ITERATIONS, PROP_ITERATIONS_DEFAULT);
-
-    if (!Arrays.asList(PROP_DIRECTION_REGULAR, PROP_DIRECTION_REVERSE, PROP_DIRECTION_BOTH)
-        .contains(this.direction)) {
-      throw new IllegalArgumentException(String.format("Unknown direction '%s'", this.direction));
-    }
-
-    if (properties.containsKey(PROP_INPUT_FILTERS)) {
-      this.inputFilters = new HashSet<>((Collection<String>) properties.get(PROP_INPUT_FILTERS));
-    } else {
-      this.inputFilters = new HashSet<>();
-    }
-
-    if (properties.containsKey(PROP_OUTPUT_FILTERS)) {
-      this.outputFilters = new HashSet<>((Collection<String>) properties.get(PROP_OUTPUT_FILTERS));
-    } else {
-      this.outputFilters = new HashSet<>();
-    }
   }
 
   @Override

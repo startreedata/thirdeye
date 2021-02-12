@@ -24,20 +24,17 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
@@ -83,31 +80,6 @@ public class MetricMappingPipeline extends Pipeline {
     this.mappingDAO = mappingDAO;
     this.includeFilters = includeFilters;
     this.excludeMetrics = excludeMetrics;
-  }
-
-  /**
-   * Alternate constructor for RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_INCLUDE_FILTERS}, {@code
-   *     PROP_EXCLUDE_METRICS})
-   */
-  public MetricMappingPipeline(String outputName, Set<String> inputNames,
-      Map<String, Object> properties) {
-    super(outputName, inputNames);
-    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.mappingDAO = DAORegistry.getInstance().getEntityToEntityMappingDAO();
-    this.includeFilters = MapUtils
-        .getBooleanValue(properties, PROP_INCLUDE_FILTERS, PROP_INCLUDE_FILTERS_DEFAULT);
-
-    if (properties.containsKey(PROP_EXCLUDE_METRICS)) {
-      this.excludeMetrics = new HashSet<>(
-          (Collection<String>) properties.get(PROP_EXCLUDE_METRICS));
-    } else {
-      this.excludeMetrics = PROP_EXCLUDE_METRICS_DEFAULT;
-    }
   }
 
   @Override

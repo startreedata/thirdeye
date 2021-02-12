@@ -26,12 +26,14 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 
 public class HistoricalAnomalyEventProvider implements EventDataProvider<EventDTO> {
 
-  private final MergedAnomalyResultManager mergedAnomalyDAO = DAORegistry.getInstance()
-      .getMergedAnomalyResultDAO();
+  private final MergedAnomalyResultManager mergedAnomalyDAO;
+
+  public HistoricalAnomalyEventProvider(final MergedAnomalyResultManager mergedAnomalyResultDAO) {
+    mergedAnomalyDAO = mergedAnomalyResultDAO;
+  }
 
   @Override
   public List<EventDTO> getEvents(EventFilter eventFilter) {

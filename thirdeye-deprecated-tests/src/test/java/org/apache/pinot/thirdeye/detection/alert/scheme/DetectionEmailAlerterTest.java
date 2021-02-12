@@ -143,7 +143,9 @@ public class DetectionEmailAlerterTest {
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
     DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO,
-        this.thirdEyeConfig, null, DAORegistry.getInstance().getMetricConfigDAO());
+        this.thirdEyeConfig, null, DAORegistry.getInstance().getMetricConfigDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getEventDAO());
     alertTaskInfo.run();
   }
 
@@ -164,10 +166,14 @@ public class DetectionEmailAlerterTest {
 
     Map<String, Object> expectedResponse = new HashMap<>();
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
-    MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient);
+    MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
+        DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager());
 
     DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(this.alertConfigDTO,
-        this.thirdEyeConfig, notificationResults, DAORegistry.getInstance().getMetricConfigDAO()) {
+        this.thirdEyeConfig, notificationResults, DAORegistry.getInstance().getMetricConfigDAO(),
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getEventDAO()) {
       @Override
       protected HtmlEmail getHtmlContent(EmailEntity emailEntity) {
         return htmlEmail;

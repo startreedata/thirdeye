@@ -22,6 +22,8 @@ package org.apache.pinot.thirdeye.detection.alert.scheme;
 import java.util.Comparator;
 import java.util.Properties;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
@@ -33,27 +35,26 @@ import org.slf4j.LoggerFactory;
 
 public abstract class DetectionAlertScheme {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertScheme.class);
-
-  private final MetricConfigManager metricConfigManager;
-  protected final SubscriptionGroupDTO subsConfig;
-  protected final DetectionAlertFilterResult result;
-
   public static final String PROP_TEMPLATE = "template";
-
   protected static final Comparator<AnomalyResult> COMPARATOR_DESC =
       (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime());
+  private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertScheme.class);
+  protected final SubscriptionGroupDTO subsConfig;
+  protected final DetectionAlertFilterResult result;
+  private final MetricConfigManager metricConfigManager;
+  private final AlertManager detectionConfigManager;
+  private final EventManager eventManager;
 
-  public enum AlertTemplate {
-    DEFAULT_EMAIL,
-    ENTITY_GROUPBY_REPORT
-  }
-
-  public DetectionAlertScheme(SubscriptionGroupDTO subsConfig, DetectionAlertFilterResult result,
-      final MetricConfigManager metricConfigManager) {
+  public DetectionAlertScheme(SubscriptionGroupDTO subsConfig,
+      DetectionAlertFilterResult result,
+      final MetricConfigManager metricConfigManager,
+      final AlertManager detectionConfigManager,
+      final EventManager eventManager) {
     this.subsConfig = subsConfig;
     this.result = result;
     this.metricConfigManager = metricConfigManager;
+    this.detectionConfigManager = detectionConfigManager;
+    this.eventManager = eventManager;
   }
 
   public abstract void run() throws Exception;
@@ -75,11 +76,12 @@ public abstract class DetectionAlertScheme {
     BaseNotificationContent content;
     switch (template) {
       case DEFAULT_EMAIL:
-        content = new MetricAnomaliesContent();
+        content = new MetricAnomaliesContent(metricConfigManager, eventManager);
         break;
 
       case ENTITY_GROUPBY_REPORT:
-        content = new EntityGroupKeyContent(metricConfigManager);
+        content = new EntityGroupKeyContent(metricConfigManager, detectionConfigManager,
+            eventManager);
         break;
 
       default:
@@ -108,5 +110,10 @@ public abstract class DetectionAlertScheme {
 
   protected BaseNotificationContent getNotificationContent(Properties alertSchemeClientConfigs) {
     return buildNotificationContent(alertSchemeClientConfigs);
+  }
+
+  public enum AlertTemplate {
+    DEFAULT_EMAIL,
+    ENTITY_GROUPBY_REPORT
   }
 }

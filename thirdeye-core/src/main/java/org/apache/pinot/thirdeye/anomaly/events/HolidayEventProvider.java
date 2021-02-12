@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.anomaly.events;
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,11 @@ public class HolidayEventProvider implements EventDataProvider<EventDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(HolidayEventProvider.class);
 
-  private final EventManager eventDAO = DAORegistry.getInstance().getEventDAO();
+  private final EventManager eventDAO;
+
+  public HolidayEventProvider(final EventManager eventManager) {
+    eventDAO = eventManager;
+  }
 
   @Override
   public List<EventDTO> getEvents(EventFilter eventFilter) {

@@ -50,6 +50,7 @@ import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
@@ -90,7 +91,9 @@ public abstract class BaseNotificationContent implements NotificationContent {
   private static final String DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
   private static final String RAW_VALUE_FORMAT = "%.0f";
   private static final String PERCENTAGE_FORMAT = "%.2f %%";
+  protected final MetricConfigManager metricConfigManager;
   private final EventManager eventManager;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
   protected boolean includeSentAnomaliesOnly;
   protected DateTimeZone dateTimeZone;
@@ -98,14 +101,15 @@ public abstract class BaseNotificationContent implements NotificationContent {
   protected Period preEventCrawlOffset;
   protected Period postEventCrawlOffset;
   protected String imgPath = null;
-  protected MetricConfigManager metricDAO;
   protected ThirdEyeWorkerConfiguration thirdEyeAnomalyConfig;
   protected Properties properties;
 
   protected BaseNotificationContent(final MetricConfigManager metricConfigManager,
-      final EventManager eventManager) {
-    metricDAO = metricConfigManager;
+      final EventManager eventManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    this.metricConfigManager = metricConfigManager;
     this.eventManager = eventManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
   /**
@@ -370,7 +374,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
         datasets.add(mergedAnomaly.getCollection());
         metrics.add(mergedAnomaly.getMetric());
 
-        MetricConfigDTO metric = this.metricDAO
+        MetricConfigDTO metric = this.metricConfigManager
             .findByMetricAndDataset(mergedAnomaly.getMetric(), mergedAnomaly.getCollection());
         if (metric != null) {
           metricsMap.put(metric.getId().toString(), metric);
@@ -389,7 +393,6 @@ public abstract class BaseNotificationContent implements NotificationContent {
       Collection<AnomalyResult> anomalies) {
     Map<String, Object> templateData = new HashMap<>();
 
-    DateTimeZone timeZone = DateTimeZone.forTimeZone(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
     List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
 
     // Calculate start and end time of the anomalies
@@ -409,7 +412,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
     }
 
     PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(
-        new DummyAlertFilter(), mergedAnomalyResults);
+        mergedAnomalyResults, new DummyAlertFilter(),
+        mergedAnomalyResultManager);
 
     templateData.put("anomalyCount", anomalies.size());
     templateData.put("startTime", getDateString(startTime));

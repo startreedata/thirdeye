@@ -39,6 +39,7 @@ import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
@@ -62,15 +63,18 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
   private ThirdEyeRcaRestClient rcaClient;
 
   public MetricAnomaliesContent(final MetricConfigManager metricConfigManager,
-      final EventManager eventManager) {
-    super(metricConfigManager, eventManager);
+      final EventManager eventManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    super(metricConfigManager, eventManager, mergedAnomalyResultManager);
   }
 
   // For testing
   public MetricAnomaliesContent(ThirdEyeRcaRestClient rcaClient,
-      final MetricConfigManager metricConfigManager, final EventManager eventManager,
-      final AlertManager detectionConfigManager) {
-    this(metricConfigManager, eventManager);
+      final MetricConfigManager metricConfigManager,
+      final EventManager eventManager,
+      final AlertManager detectionConfigManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    this(metricConfigManager, eventManager, mergedAnomalyResultManager);
     this.configDAO = detectionConfigManager;
     this.rcaClient = rcaClient;
   }

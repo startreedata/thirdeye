@@ -165,7 +165,8 @@ public class TestJiraContentFormatter {
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
     this.metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
         DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager());
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO());
   }
 
   @AfterClass(alwaysRun = true)

@@ -24,6 +24,7 @@ import java.util.Properties;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
@@ -44,17 +45,19 @@ public abstract class DetectionAlertScheme {
   private final MetricConfigManager metricConfigManager;
   private final AlertManager detectionConfigManager;
   private final EventManager eventManager;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
   public DetectionAlertScheme(SubscriptionGroupDTO subsConfig,
       DetectionAlertFilterResult result,
       final MetricConfigManager metricConfigManager,
       final AlertManager detectionConfigManager,
-      final EventManager eventManager) {
+      final EventManager eventManager, final MergedAnomalyResultManager mergedAnomalyResultManager) {
     this.subsConfig = subsConfig;
     this.result = result;
     this.metricConfigManager = metricConfigManager;
     this.detectionConfigManager = detectionConfigManager;
     this.eventManager = eventManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
   public abstract void run() throws Exception;
@@ -76,12 +79,13 @@ public abstract class DetectionAlertScheme {
     BaseNotificationContent content;
     switch (template) {
       case DEFAULT_EMAIL:
-        content = new MetricAnomaliesContent(metricConfigManager, eventManager);
+        content = new MetricAnomaliesContent(metricConfigManager, eventManager,
+            mergedAnomalyResultManager);
         break;
 
       case ENTITY_GROUPBY_REPORT:
         content = new EntityGroupKeyContent(metricConfigManager, detectionConfigManager,
-            eventManager);
+            eventManager, mergedAnomalyResultManager);
         break;
 
       default:

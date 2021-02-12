@@ -145,7 +145,8 @@ public class DetectionEmailAlerterTest {
     DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO,
         this.thirdEyeConfig, null, DAORegistry.getInstance().getMetricConfigDAO(),
         DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getEventDAO());
+        DAORegistry.getInstance().getEventDAO(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO());
     alertTaskInfo.run();
   }
 
@@ -168,12 +169,14 @@ public class DetectionEmailAlerterTest {
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
     MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
         DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager());
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO());
 
     DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(this.alertConfigDTO,
         this.thirdEyeConfig, notificationResults, DAORegistry.getInstance().getMetricConfigDAO(),
         DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getEventDAO()) {
+        DAORegistry.getInstance().getEventDAO(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO()) {
       @Override
       protected HtmlEmail getHtmlContent(EmailEntity emailEntity) {
         return htmlEmail;

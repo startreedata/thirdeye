@@ -19,13 +19,12 @@
 
 package org.apache.pinot.thirdeye.detector.email.filter;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datalayer.pojo.MergedAnomalyResultBean;
 
 public class UserReportUtils {
 
@@ -36,23 +35,18 @@ public class UserReportUtils {
    * reach more than 50% of user report region,
    * return user report anomaly as qualified, otherwise return false
    *
+   * @param mergedAnomalyResultManager
    * @param alertFilter alert filter to evaluate system detected anoamlies isQualified
    */
   public static Boolean isUserReportAnomalyIsQualified(AlertFilter alertFilter,
-      MergedAnomalyResultDTO userReportAnomaly) {
-    MergedAnomalyResultManager mergedAnomalyDAO = DAORegistry.getInstance()
-        .getMergedAnomalyResultDAO();
-    List<MergedAnomalyResultDTO> systemAnomalies = mergedAnomalyDAO
+      MergedAnomalyResultDTO userReportAnomaly,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    List<MergedAnomalyResultDTO> systemAnomalies = mergedAnomalyResultManager
         .findByFunctionId(userReportAnomaly.getFunction().getId());
     long startTime = userReportAnomaly.getStartTime();
     long endTime = userReportAnomaly.getEndTime();
     long qualifiedRegion = 0;
-    Collections.sort(systemAnomalies, new Comparator<MergedAnomalyResultDTO>() {
-      @Override
-      public int compare(MergedAnomalyResultDTO o1, MergedAnomalyResultDTO o2) {
-        return Long.compare(o1.getStartTime(), o2.getStartTime());
-      }
-    });
+    systemAnomalies.sort(Comparator.comparingLong(MergedAnomalyResultBean::getStartTime));
     for (MergedAnomalyResultDTO anomalyResult : systemAnomalies) {
       if (anomalyResult.getAnomalyResultSource()
           .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION)

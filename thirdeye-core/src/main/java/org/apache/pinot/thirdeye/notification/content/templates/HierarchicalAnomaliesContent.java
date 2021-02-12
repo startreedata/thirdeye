@@ -45,6 +45,7 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -84,8 +85,9 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
   public HierarchicalAnomaliesContent(final DataSourceCache dataSourceCache,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager, final EventManager eventManager) {
-    super(metricConfigManager, eventManager);
+      final DatasetConfigManager datasetConfigManager, final EventManager eventManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    super(metricConfigManager, eventManager, mergedAnomalyResultManager);
     this.dataSourceCache = dataSourceCache;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
     this.datasetConfigManager = datasetConfigManager;

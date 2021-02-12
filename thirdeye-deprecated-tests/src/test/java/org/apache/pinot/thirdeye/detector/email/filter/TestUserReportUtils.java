@@ -64,11 +64,14 @@ public class TestUserReportUtils {
       MergedAnomalyResultDTO userReportAnomalyFailRecovered) throws Exception {
     AlertFilter alertFilter = new DummyAlertFilter();
     Assert.assertFalse(UserReportUtils
-        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyEmptyDimension));
+        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyEmptyDimension, DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO()));
     Assert.assertTrue(UserReportUtils
-        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyWithDimension));
+        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyWithDimension, DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO()));
     Assert.assertFalse(UserReportUtils
-        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyFailRecovered));
+        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyFailRecovered, DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO()));
   }
 
   @DataProvider(name = "provideAnomaliesWithUserReport")

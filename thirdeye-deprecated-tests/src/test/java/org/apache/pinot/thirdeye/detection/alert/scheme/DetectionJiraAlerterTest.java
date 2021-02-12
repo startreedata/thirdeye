@@ -135,7 +135,8 @@ public class DetectionJiraAlerterTest {
     DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO,
         this.thirdEyeConfig, null, DAORegistry.getInstance().getMetricConfigDAO(),
         DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getEventDAO());
+        DAORegistry.getInstance().getEventDAO(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO());
     alertTaskInfo.run();
   }
 
@@ -163,13 +164,15 @@ public class DetectionJiraAlerterTest {
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
     MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
         DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager());
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO());
 
     DetectionJiraAlerter jiraAlerter = new DetectionJiraAlerter(this.alertConfigDTO,
         this.thirdEyeConfig,
         notificationResults, jiraClient, DAORegistry.getInstance().getMetricConfigDAO(),
         DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getEventDAO()) {
+        DAORegistry.getInstance().getEventDAO(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO()) {
       @Override
       protected BaseNotificationContent getNotificationContent(Properties emailClientConfigs) {
         return metricAnomaliesContent;

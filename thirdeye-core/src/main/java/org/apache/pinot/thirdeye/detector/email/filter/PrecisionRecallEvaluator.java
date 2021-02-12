@@ -31,6 +31,7 @@ import java.util.Properties;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.constant.AnomalyFeedbackType;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
 /**
@@ -40,62 +41,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
  * 2) Alert Filter evaluation: calculate performance of alert filter on a list of anomalies
  */
 public class PrecisionRecallEvaluator {
-
-  /**
-   * Using this constructor, PrecisionRecallEvaluator will be relying on anomalies' "notified" flag
-   * in order to get the performance of whole anomaly detection system
-   *
-   * @param anomalies The list of anomalies to be evaluated
-   */
-  public PrecisionRecallEvaluator(List<MergedAnomalyResultDTO> anomalies) {
-    init(anomalies);
-  }
-
-  /**
-   * Using this constructor, PrecisionRecallEvaluator will be relying on the alert filter used for
-   * the anomalies
-   *
-   * @param anomalies The list of anomalies to be evaluated
-   * @param alertFilterFactory the instance of alert filter factory
-   */
-  public PrecisionRecallEvaluator(List<MergedAnomalyResultDTO> anomalies,
-      AlertFilterFactory alertFilterFactory) {
-    if (alertFilterFactory == null) {
-      throw new NullPointerException("Alert filter factory cannot be null");
-    }
-    this.alertFilterFactory = alertFilterFactory;
-    this.useAlertFilterOnAnomaly = true;
-    this.isProjected = true;
-    init(anomalies);
-  }
-
-  /**
-   * Using this constructor, PrecisionRecallEvaluator will be evaluating performance of given alert
-   * filter
-   * By comparing alert filter's "isQualified" and labels among the list of anomalies, get the
-   * performance statistics for this alert filter
-   *
-   * @param alertFilter the alert filter to be evaluated
-   * @param anomalies the list of anomalies as data for alert filter
-   */
-  public PrecisionRecallEvaluator(AlertFilter alertFilter, List<MergedAnomalyResultDTO> anomalies) {
-    this.alertFilter = alertFilter;
-    this.isProjected = true;
-    init(anomalies);
-  }
-
-  protected AlertFilter alertFilter;
-  protected boolean useAlertFilterOnAnomaly = false;
-  protected AlertFilterFactory alertFilterFactory;
-
-  protected int notifiedTrueAnomaly; // Anomaly is labeled as true and is notified
-  protected int notifiedTrueAnomalyNewTrend; // Anomaly is labeled as TRUE_NEW_TREND and is notified
-  protected int notifiedFalseAlarm;  // Anomaly is labeled as false and is notified
-  protected int notifiedNotLabeled;  // Anomaly is notified, but not labeled
-  protected int userReportTrueAnomaly; // Anomaly is user reported: true anomaly that was not sent out
-  protected int userReportTrueAnomalyNewTrend; // Anomaly is user reported: true anomaly new trend that was not sent out
-  protected boolean isProjected = false;
-  // isProjected to indicate if calculating system performance or alert filter's projected performance
 
   public static final String PRECISION = "precision";
   public static final String WEIGHTED_PRECISION = "weightedPrecision";
@@ -107,9 +52,48 @@ public class PrecisionRecallEvaluator {
   public static final String FALSEALARM = "falseAlarm";
   public static final String NEWTREND = "newTrend";
   public static final String USER_REPORT = "userReportAnomaly";
-
   public static final Double WEIGHT_OF_NULL_LABEL = 0.5;
+
+  protected final AlertFilter alertFilter;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+
+  protected boolean useAlertFilterOnAnomaly = false;
+  protected AlertFilterFactory alertFilterFactory;
+  protected int notifiedTrueAnomaly; // Anomaly is labeled as true and is notified
+  protected int notifiedTrueAnomalyNewTrend; // Anomaly is labeled as TRUE_NEW_TREND and is notified
+  protected int notifiedFalseAlarm;  // Anomaly is labeled as false and is notified
+  protected int notifiedNotLabeled;  // Anomaly is notified, but not labeled
+  protected int userReportTrueAnomaly; // Anomaly is user reported: true anomaly that was not sent out
+  protected int userReportTrueAnomalyNewTrend; // Anomaly is user reported: true anomaly new trend that was not sent out
+
+  // isProjected to indicate if calculating system performance or alert filter's projected performance
+  protected boolean isProjected;
+
+  /**
+   * Using this constructor, PrecisionRecallEvaluator will be evaluating performance of given alert
+   * filter
+   * By comparing alert filter's "isQualified" and labels among the list of anomalies, get the
+   * performance statistics for this alert filter
+   *  @param anomalies the list of anomalies as data for alert filter
+   * @param alertFilter the alert filter to be evaluated
+   * @param mergedAnomalyResultManager
+   */
+  public PrecisionRecallEvaluator(List<MergedAnomalyResultDTO> anomalies,
+      final AlertFilter alertFilter,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.alertFilter = alertFilter;
+    this.isProjected = true;
+    init(anomalies);
+  }
   // the weight used for NA labeled data point when calculating precision
+
+  public static List<String> getPropertyNames() {
+    return Collections.unmodifiableList(new ArrayList<>(
+        Arrays.asList(RESPONSE_RATE, PRECISION, WEIGHTED_PRECISION, RECALL, TOTALALERTS,
+            TOTALRESPONSES, TRUEANOMALIES,
+            FALSEALARM, NEWTREND, USER_REPORT)));
+  }
 
   public double getPrecision() {
     if (getTotalAlerts() == 0) {
@@ -229,7 +213,8 @@ public class PrecisionRecallEvaluator {
             userReportTrueAnomalyNewTrend++;
           }
         } else {
-          if (isUserReportAnomalyIsQualified(alertFilterOfAnomaly, anomaly)) {
+          if (isUserReportAnomalyIsQualified(alertFilterOfAnomaly, anomaly,
+              mergedAnomalyResultManager)) {
             notifiedTrueAnomaly++;
           } else {
             userReportTrueAnomaly++;
@@ -284,12 +269,5 @@ public class PrecisionRecallEvaluator {
     evals.put(NEWTREND, getTrueAnomalyNewTrend());
     evals.put(USER_REPORT, getUserReportAnomaly());
     return evals;
-  }
-
-  public static List<String> getPropertyNames() {
-    return Collections.unmodifiableList(new ArrayList<>(
-        Arrays.asList(RESPONSE_RATE, PRECISION, WEIGHTED_PRECISION, RECALL, TOTALALERTS,
-            TOTALRESPONSES, TRUEANOMALIES,
-            FALSEALARM, NEWTREND, USER_REPORT)));
   }
 }

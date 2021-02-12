@@ -162,7 +162,8 @@ public class TestHierarchicalAnomaliesContent {
         new HierarchicalAnomaliesContent(thirdEyeCacheRegistry.getDataSourceCache(),
             thirdEyeCacheRegistry, DAORegistry.getInstance().getMetricConfigDAO(),
             DAORegistry.getInstance().getDatasetConfigDAO(),
-            DAORegistry.getInstance().getEventDAO()),
+            DAORegistry.getInstance().getEventDAO(),
+            DAORegistry.getInstance().getMergedAnomalyResultDAO()),
         thirdeyeAnomalyConfig, notificationConfigDTO);
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);
 

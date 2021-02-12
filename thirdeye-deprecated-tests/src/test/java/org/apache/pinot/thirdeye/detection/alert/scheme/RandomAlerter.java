@@ -11,7 +11,8 @@ public class RandomAlerter extends DetectionAlertScheme {
       DetectionAlertFilterResult result) {
     super(subsConfig, result, DAORegistry.getInstance().getMetricConfigDAO(),
         DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getEventDAO());
+        DAORegistry.getInstance().getEventDAO(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO());
   }
 
   @Override

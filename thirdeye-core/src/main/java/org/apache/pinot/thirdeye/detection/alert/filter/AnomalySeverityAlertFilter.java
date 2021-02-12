@@ -29,11 +29,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -86,16 +86,20 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
   private final List<Long> detectionConfigIds;
 
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationDAO;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
   public AnomalySeverityAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
-      long endTime) {
+      long endTime,
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
     super(provider, config, endTime);
     this.severityRecipients = ConfigUtils
         .getList(this.config.getProperties().get(PROP_SEVERITY_RECIPIENTS));
     this.detectionConfigIds = ConfigUtils
         .getLongs(this.config.getProperties().get(PROP_DETECTION_CONFIG_IDS));
     this.anomalySubscriptionGroupNotificationDAO =
-        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager();
+        anomalySubscriptionGroupNotificationManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
   @Override
@@ -163,6 +167,6 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
       }
     }
     return anomalyIds.isEmpty() ? Collections.emptyList()
-        : DAORegistry.getInstance().getMergedAnomalyResultDAO().findByIds(anomalyIds);
+        : mergedAnomalyResultManager.findByIds(anomalyIds);
   }
 }

@@ -30,7 +30,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
@@ -53,11 +52,15 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
    * Constructor for dependency injection
    *
    * @param metadataSourceConfig meta data source config
+   * @param metricConfigManager
+   * @param datasetConfigManager
    */
-  public AutoOnboardMockDataSource(MetadataSourceConfig metadataSourceConfig) {
+  public AutoOnboardMockDataSource(MetadataSourceConfig metadataSourceConfig,
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager) {
     super(metadataSourceConfig);
-    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    this.metricDAO = metricConfigManager;
+    this.datasetDAO = datasetConfigManager;
     this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
         MockThirdEyeDataSource.class.getSimpleName());
   }

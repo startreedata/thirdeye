@@ -164,7 +164,8 @@ public class TestEntityGroupKeyContent {
     anomalies.add(parentGroupedAnomaly);
 
     EmailContentFormatter
-        contentFormatter = new EmailContentFormatter(new Properties(), new EntityGroupKeyContent(),
+        contentFormatter = new EmailContentFormatter(new Properties(), new EntityGroupKeyContent(
+        DAORegistry.getInstance().getMetricConfigDAO()),
         thirdeyeAnomalyConfig,
         DaoTestUtils.getTestNotificationConfig("Test Config"));
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);
@@ -287,7 +288,8 @@ public class TestEntityGroupKeyContent {
     Properties props = new Properties();
     props.put(PROP_ENTITY_WHITELIST, "metric-X");
     EmailContentFormatter
-        contentFormatter = new EmailContentFormatter(props, new EntityGroupKeyContent(),
+        contentFormatter = new EmailContentFormatter(props, new EntityGroupKeyContent(
+        DAORegistry.getInstance().getMetricConfigDAO()),
         thirdeyeAnomalyConfig,
         DaoTestUtils.getTestNotificationConfig("Test Config"));
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);

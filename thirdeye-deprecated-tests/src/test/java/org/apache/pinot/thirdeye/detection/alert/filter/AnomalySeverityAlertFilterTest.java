@@ -174,7 +174,9 @@ public class AnomalySeverityAlertFilterTest {
 
   @Test
   public void testAlertFilterRecipients() throws Exception {
-    this.alertFilter = new AnomalySeverityAlertFilter(provider, alertConfig, this.baseTime + 350L);
+    this.alertFilter = new AnomalySeverityAlertFilter(provider, alertConfig, this.baseTime + 350L,
+        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 3);
@@ -211,7 +213,9 @@ public class AnomalySeverityAlertFilterTest {
         .setDetectionConfigId(renotifyAnomaly.getDetectionConfigId());
     renotificationManager.save(anomalySubscriptionGroupNotification);
 
-    this.alertFilter = new AnomalySeverityAlertFilter(provider, alertConfig, this.baseTime + 350L);
+    this.alertFilter = new AnomalySeverityAlertFilter(provider, alertConfig, this.baseTime + 350L,
+        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager(),
+        DAORegistry.getInstance().getMergedAnomalyResultDAO());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 3);

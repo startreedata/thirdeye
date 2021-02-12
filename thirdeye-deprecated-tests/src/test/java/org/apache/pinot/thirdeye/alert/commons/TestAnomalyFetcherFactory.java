@@ -24,7 +24,7 @@ import org.testng.annotations.Test;
 
 public class TestAnomalyFetcherFactory {
 
-  @Test
+  @Test(enabled = false)
   public void testCreateAlertFetcher() throws Exception {
     AnomalyFetcher anomalyFetcher = AnomalyFetcherFactory.fromClassName("ContinuumAnomalyFetcher");
     Assert.assertNotNull(anomalyFetcher);

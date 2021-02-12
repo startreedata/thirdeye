@@ -41,14 +41,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.health.DetectionHealth;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
@@ -95,17 +91,11 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
 
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
-  private final EvaluationManager evaluationDAO;
-  private final MergedAnomalyResultManager anomalyDAO;
-  private final TaskManager taskDAO;
   private final Yaml yaml;
 
   public DetectionConfigFormatter(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO) {
     this.datasetDAO = datasetDAO;
     this.metricDAO = metricDAO;
-    this.evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
-    this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
-    this.taskDAO = DAORegistry.getInstance().getTaskDAO();
     this.yaml = new Yaml();
   }
 

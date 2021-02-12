@@ -35,6 +35,7 @@ import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
@@ -81,7 +82,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
   public DetectionJiraAlerter(SubscriptionGroupDTO subsConfig,
       ThirdEyeWorkerConfiguration thirdeyeConfig,
       DetectionAlertFilterResult result, ThirdEyeJiraClient jiraClient) {
-    super(subsConfig, result);
+    super(subsConfig, result, DAORegistry.getInstance().getMetricConfigDAO());
     this.teConfig = thirdeyeConfig;
 
     this.jiraAdminConfig = JiraConfiguration

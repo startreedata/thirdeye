@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.anomaly.detection.trigger;
 
+import static org.testng.Assert.assertEquals;
+
+import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,10 +35,8 @@ import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -46,16 +47,21 @@ public class DataAvailabilityEventListenerTest {
   static String TEST_DATA_SOURCE = "TestSource";
   static String TEST_DATASET_PREFIX = "ds_trigger_listener_";
   static String TEST_METRIC_PREFIX = "metric_trigger_listener_";
-  private TestDbEnv testDAOProvider;
-  private DataAvailabilityEventListener _dataAvailabilityEventListener;
+
   private final MockConsumerDataAvailability consumer = new MockConsumerDataAvailability();
+  private DatasetTriggerInfoRepo datasetTriggerInfoRepo;
+  private TestDbEnv testDAOProvider;
+  private DataAvailabilityEventListener dataAvailabilityEventListener;
+  private DatasetConfigManager datasetConfigManager;
 
   @BeforeMethod
   public void beforeMethod() {
     testDAOProvider = new TestDbEnv();
-    AlertManager alertManager = DAORegistry.getInstance().getDetectionConfigManager();
-    MetricConfigManager metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetConfigDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    final Injector injector = testDAOProvider.getInjector();
+    AlertManager alertManager = injector.getInstance(AlertManager.class);
+    MetricConfigManager metricConfigManager = injector.getInstance(MetricConfigManager.class);
+    datasetConfigManager = injector.getInstance(DatasetConfigManager.class);
+    datasetTriggerInfoRepo = injector.getInstance(DatasetTriggerInfoRepo.class);
 
     MetricConfigDTO metric1 = new MetricConfigDTO();
     metric1.setDataset(TEST_DATASET_PREFIX + 1);
@@ -86,69 +92,65 @@ public class DataAvailabilityEventListenerTest {
     ds1.setDataset(TEST_DATASET_PREFIX + 1);
     ds1.setDataSource(TEST_DATA_SOURCE);
     ds1.setLastRefreshTime(1000);
-    datasetConfigDAO.save(ds1);
+    datasetConfigManager.save(ds1);
 
     DatasetConfigDTO ds2 = new DatasetConfigDTO();
     ds2.setDataset(TEST_DATASET_PREFIX + 2);
     ds2.setDataSource(TEST_DATA_SOURCE);
     ds2.setLastRefreshTime(2000);
-    datasetConfigDAO.save(ds2);
+    datasetConfigManager.save(ds2);
 
-    DatasetTriggerInfoRepo.init(100, Collections.singletonList(TEST_DATA_SOURCE));
+    datasetTriggerInfoRepo.init(Collections.singletonList(TEST_DATA_SOURCE));
     List<DataAvailabilityEventFilter> filters = new ArrayList<>();
-    filters.add(new OnTimeFilter());
-    filters.add(new ActiveDatasetFilter());
-    _dataAvailabilityEventListener = new DataAvailabilityEventListener(consumer, filters, 0, 5_000);
+    filters.add(new OnTimeFilter(datasetTriggerInfoRepo));
+    filters.add(new ActiveDatasetFilter(datasetTriggerInfoRepo));
+    dataAvailabilityEventListener = new DataAvailabilityEventListener(consumer,
+        filters,
+        0,
+        5_000,
+        datasetConfigManager,
+        datasetTriggerInfoRepo);
   }
 
   @Test
   public void testUpdateOneDataset() throws InterruptedException {
-    _dataAvailabilityEventListener.processOneBatch();
-    DatasetConfigManager datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
+    dataAvailabilityEventListener.processOneBatch();
     DatasetConfigDTO dataset1 = datasetConfigManager.findByDataset(TEST_DATASET_PREFIX + 1);
     DatasetConfigDTO dataset2 = datasetConfigManager.findByDataset(TEST_DATASET_PREFIX + 2);
-    DatasetTriggerInfoRepo datasetTriggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
-    Assert
-        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 2000);
-    Assert
-        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 3000);
-    Assert.assertEquals(dataset1.getLastRefreshTime(), 2000);
-    Assert.assertEquals(dataset2.getLastRefreshTime(), 3000);
+
+    assertEquals(this.datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 2000);
+    assertEquals(this.datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 3000);
+    assertEquals(dataset1.getLastRefreshTime(), 2000);
+    assertEquals(dataset2.getLastRefreshTime(), 3000);
   }
 
   @Test(dependsOnMethods = {"testUpdateOneDataset"})
   public void testUpdateTwoDataset() throws InterruptedException {
-    _dataAvailabilityEventListener.processOneBatch();
-    DatasetConfigManager datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
+    dataAvailabilityEventListener.processOneBatch();
     DatasetConfigDTO dataset1 = datasetConfigManager.findByDataset(TEST_DATASET_PREFIX + 1);
     DatasetConfigDTO dataset2 = datasetConfigManager.findByDataset(TEST_DATASET_PREFIX + 2);
-    DatasetTriggerInfoRepo datasetTriggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
-    Assert
-        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 3000);
-    Assert
-        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 3000);
-    Assert.assertEquals(dataset1.getLastRefreshTime(), 3000);
-    Assert.assertEquals(dataset2.getLastRefreshTime(), 3000);
+
+    assertEquals(this.datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 3000);
+    assertEquals(this.datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 3000);
+    assertEquals(dataset1.getLastRefreshTime(), 3000);
+    assertEquals(dataset2.getLastRefreshTime(), 3000);
   }
 
   @Test(dependsOnMethods = {"testUpdateTwoDataset"})
   public void testNoUpdate() throws InterruptedException {
-    _dataAvailabilityEventListener.processOneBatch();
-    DatasetConfigManager datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
+    dataAvailabilityEventListener.processOneBatch();
     DatasetConfigDTO dataset1 = datasetConfigManager.findByDataset(TEST_DATASET_PREFIX + 1);
     DatasetConfigDTO dataset2 = datasetConfigManager.findByDataset(TEST_DATASET_PREFIX + 2);
-    DatasetTriggerInfoRepo datasetTriggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
-    Assert
-        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 1000);
-    Assert
-        .assertEquals(datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 2000);
-    Assert.assertEquals(dataset1.getLastRefreshTime(), 1000);
-    Assert.assertEquals(dataset2.getLastRefreshTime(), 2000);
+
+    assertEquals(this.datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 1), 1000);
+    assertEquals(this.datasetTriggerInfoRepo.getLastUpdateTimestamp(TEST_DATASET_PREFIX + 2), 2000);
+    assertEquals(dataset1.getLastRefreshTime(), 1000);
+    assertEquals(dataset2.getLastRefreshTime(), 2000);
   }
 
   @AfterMethod()
   public void afterMethod() {
-    _dataAvailabilityEventListener.close();
+    dataAvailabilityEventListener.close();
     testDAOProvider.cleanup();
   }
 }

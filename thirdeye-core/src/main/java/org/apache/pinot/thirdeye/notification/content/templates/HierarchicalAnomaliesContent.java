@@ -41,6 +41,7 @@ import org.apache.pinot.thirdeye.anomaly.detection.AnomalyDetectionInputContextB
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
@@ -73,13 +74,16 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
   private static final String DEFAULT_PRESENT_SEASONAL_VALUES = "false";
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final DataSourceCache dataSourceCache;
+  private final DatasetConfigManager datasetConfigManager;
   private boolean presentSeasonalValues;
   private Set<EventDTO> relatedEvents;
 
   public HierarchicalAnomaliesContent(final DataSourceCache dataSourceCache,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+    super(DAORegistry.getInstance().getMetricConfigDAO());
     this.dataSourceCache = dataSourceCache;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+    datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
   }
 
   @Override
@@ -241,11 +245,12 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
   private Double getAvgComparisonBaseline(MergedAnomalyResultDTO anomaly, CompareMode compareMode,
       long start, long end) throws Exception {
     AnomalyFunctionDTO anomalyFunction = anomaly.getFunction();
-    DatasetConfigDTO datasetConfigDTO = DAORegistry.getInstance().getDatasetConfigDAO()
+    DatasetConfigDTO datasetConfigDTO = datasetConfigManager
         .findByDataset(anomalyFunction.getCollection());
     AnomalyDetectionInputContextBuilder contextBuilder = new AnomalyDetectionInputContextBuilder(
         dataSourceCache,
-        thirdEyeCacheRegistry);
+        thirdEyeCacheRegistry,
+        datasetConfigManager);
     contextBuilder.setFunction(anomalyFunction);
 
     DateTimeZone timeZone = DateTimeZone.forID(datasetConfigDTO.getTimezone());

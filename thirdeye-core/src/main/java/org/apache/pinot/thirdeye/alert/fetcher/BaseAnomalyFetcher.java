@@ -28,7 +28,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,10 +42,11 @@ public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
 
   protected Properties properties;
   protected AnomalyFetcherConfig anomalyFetcherConfig;
-  protected MergedAnomalyResultManager mergedAnomalyResultDAO;
+  protected MergedAnomalyResultManager mergedAnomalyResultManager;
   protected boolean active = true;
 
-  public BaseAnomalyFetcher() {
+  public BaseAnomalyFetcher(final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
   public static String getSnapshotKey(MergedAnomalyResultDTO anomaly) {
@@ -55,7 +55,6 @@ public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
 
   @Override
   public void init(AnomalyFetcherConfig anomalyFetcherConfig) {
-    mergedAnomalyResultDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
     this.anomalyFetcherConfig = anomalyFetcherConfig;
     this.properties = ThirdEyeSpiUtils
         .decodeCompactedProperties(anomalyFetcherConfig.getProperties());

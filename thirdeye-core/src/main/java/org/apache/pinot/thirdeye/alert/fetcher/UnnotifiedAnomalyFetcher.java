@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyNotifiedStatus;
 import org.apache.pinot.thirdeye.alert.commons.AnomalySource;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
@@ -47,8 +48,8 @@ public class UnnotifiedAnomalyFetcher extends BaseAnomalyFetcher {
 
   public static final String DEFAULT_MAXIMUM_ANOMALY_LOOK_BACK_LENGTH = "1_DAYS";
 
-  public UnnotifiedAnomalyFetcher() {
-    super();
+  public UnnotifiedAnomalyFetcher(final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    super(mergedAnomalyResultManager);
   }
 
   /**
@@ -83,7 +84,7 @@ public class UnnotifiedAnomalyFetcher extends BaseAnomalyFetcher {
         Predicate.GE("createTime",
             new Timestamp(current.minus(maxAnomalyLookBack).getMillis())));
     Set<MergedAnomalyResultDTO> alertCandidates = new HashSet<>(
-        mergedAnomalyResultDAO.findByPredicate(predicate));
+        mergedAnomalyResultManager.findByPredicate(predicate));
 
     // parse snapshot to a map, getting the last notified time of given metric::dimension pair
     Multimap<String, AnomalyNotifiedStatus> snapshot = alertSnapShot.getSnapshot();

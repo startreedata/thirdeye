@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.filter.DataAvailabilityEventFilter;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DatasetTriggerInfoRepo;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,10 +50,16 @@ public class DataAvailabilityEventListenerDriver {
   private final DataAvailabilitySchedulingConfiguration config;
   private final Properties consumerProps = new Properties();
   private final List<DataAvailabilityEventListener> listeners = new ArrayList<>();
+  private final DatasetConfigManager datasetConfigManager;
+  private final DatasetTriggerInfoRepo datasetTriggerInfoRepo;
 
   @Inject
-  public DataAvailabilityEventListenerDriver(DataAvailabilitySchedulingConfiguration config) {
+  public DataAvailabilityEventListenerDriver(DataAvailabilitySchedulingConfiguration config,
+      final DatasetConfigManager datasetConfigManager,
+      final DatasetTriggerInfoRepo datasetTriggerInfoRepo) {
     this.config = config;
+    this.datasetConfigManager = datasetConfigManager;
+    this.datasetTriggerInfoRepo = datasetTriggerInfoRepo;
     this.executorService = Executors.newFixedThreadPool(this.config.getNumParallelConsumer(),
         new ThreadFactoryBuilder()
             .setNameFormat("data-avail-event-consumer-%d")
@@ -68,14 +75,18 @@ public class DataAvailabilityEventListenerDriver {
       throw new RuntimeException(e);
     }
 
-    DatasetTriggerInfoRepo
-        .init(config.getDatasetWhitelistUpdateFreqInMin(), config.getDataSourceWhitelist());
+    datasetTriggerInfoRepo
+        .init(config.getDataSourceWhitelist());
 
     for (int i = 0; i < config.getNumParallelConsumer(); i++) {
       DataAvailabilityKafkaConsumer consumer = loadConsumer();
       List<DataAvailabilityEventFilter> filters = loadFilters();
-      DataAvailabilityEventListener listener = new DataAvailabilityEventListener(consumer, filters,
-          config.getSleepTimeWhenNoEventInMilli(), config.getConsumerPollTimeInMilli());
+      DataAvailabilityEventListener listener = new DataAvailabilityEventListener(consumer,
+          filters,
+          config.getSleepTimeWhenNoEventInMilli(),
+          config.getConsumerPollTimeInMilli(),
+          datasetConfigManager,
+          datasetTriggerInfoRepo);
       listeners.add(listener);
       executorService.submit(listener);
     }

@@ -62,7 +62,8 @@ public class AutoOnboardPinotMetricsServiceTest {
     datasetConfigDAO = daoRegistry.getDatasetConfigDAO();
     metricConfigDAO = daoRegistry.getMetricConfigDAO();
     testAutoLoadPinotMetricsService = new AutoOnboardPinotMetadataSource(new MetadataSourceConfig(),
-        null);
+        null, DAORegistry.getInstance().getDatasetConfigDAO(),
+        DAORegistry.getInstance().getMetricConfigDAO());
     schema = Schema
         .fromInputSteam(ClassLoader.getSystemResourceAsStream("sample-pinot-schema.json"));
     Map<String, String> pinotCustomConfigs = new HashMap<>();

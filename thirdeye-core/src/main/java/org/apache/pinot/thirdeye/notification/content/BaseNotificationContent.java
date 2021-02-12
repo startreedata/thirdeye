@@ -54,7 +54,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detector.email.filter.DummyAlertFilter;
 import org.apache.pinot.thirdeye.detector.email.filter.PrecisionRecallEvaluator;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
@@ -100,6 +99,10 @@ public abstract class BaseNotificationContent implements NotificationContent {
   protected MetricConfigManager metricDAO;
   protected ThirdEyeWorkerConfiguration thirdEyeAnomalyConfig;
   protected Properties properties;
+
+  protected BaseNotificationContent(final MetricConfigManager metricConfigManager) {
+    metricDAO = metricConfigManager;
+  }
 
   /**
    * Generate subject based on configuration.
@@ -151,10 +154,8 @@ public abstract class BaseNotificationContent implements NotificationContent {
    * Convert the duration into hours, represented in String
    */
   protected static String getTimeDiffInHours(long start, long end) {
-    double duration = Double.valueOf((end - start) / 1000) / 3600;
-    String durationString =
-        ThirdEyeUtils.getRoundedValue(duration) + ((duration == 1) ? (" hour") : (" hours"));
-    return durationString;
+    double duration = (double) ((end - start) / 1000) / 3600;
+    return ThirdEyeUtils.getRoundedValue(duration) + ((duration == 1) ? (" hour") : (" hours"));
   }
 
   /**
@@ -321,9 +322,9 @@ public abstract class BaseNotificationContent implements NotificationContent {
     this.properties = properties;
     this.thirdEyeAnomalyConfig = config;
 
-    this.includeSentAnomaliesOnly = Boolean.valueOf(
+    this.includeSentAnomaliesOnly = Boolean.parseBoolean(
         properties.getProperty(INCLUDE_SENT_ANOMALY_ONLY, DEFAULT_INCLUDE_SENT_ANOMALY_ONLY));
-    this.includeSummary = Boolean.valueOf(
+    this.includeSummary = Boolean.parseBoolean(
         properties.getProperty(INCLUDE_SUMMARY, DEFAULT_INCLUDE_SUMMARY));
     this.dateTimeZone = DateTimeZone.forID(properties.getProperty(TIME_ZONE, DEFAULT_TIME_ZONE));
 
@@ -337,8 +338,6 @@ public abstract class BaseNotificationContent implements NotificationContent {
     if (properties.getProperty(POST_EVENT_CRAWL_OFFSET) != null) {
       this.postEventCrawlOffset = Period.parse(properties.getProperty(POST_EVENT_CRAWL_OFFSET));
     }
-
-    this.metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
   }
 
   public String getSnaphotPath() {

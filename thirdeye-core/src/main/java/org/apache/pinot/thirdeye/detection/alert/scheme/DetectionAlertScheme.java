@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.detection.alert.scheme;
 import java.util.Comparator;
 import java.util.Properties;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
@@ -34,6 +35,7 @@ public abstract class DetectionAlertScheme {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertScheme.class);
 
+  private final MetricConfigManager metricConfigManager;
   protected final SubscriptionGroupDTO subsConfig;
   protected final DetectionAlertFilterResult result;
 
@@ -47,9 +49,11 @@ public abstract class DetectionAlertScheme {
     ENTITY_GROUPBY_REPORT
   }
 
-  public DetectionAlertScheme(SubscriptionGroupDTO subsConfig, DetectionAlertFilterResult result) {
+  public DetectionAlertScheme(SubscriptionGroupDTO subsConfig, DetectionAlertFilterResult result,
+      final MetricConfigManager metricConfigManager) {
     this.subsConfig = subsConfig;
     this.result = result;
+    this.metricConfigManager = metricConfigManager;
   }
 
   public abstract void run() throws Exception;
@@ -61,7 +65,7 @@ public abstract class DetectionAlertScheme {
   /**
    * Plug the appropriate template based on configuration.
    */
-  public static BaseNotificationContent buildNotificationContent(
+  public BaseNotificationContent buildNotificationContent(
       Properties alertSchemeClientConfigs) {
     AlertTemplate template = AlertTemplate.DEFAULT_EMAIL;
     if (alertSchemeClientConfigs != null && alertSchemeClientConfigs.containsKey(PROP_TEMPLATE)) {
@@ -75,7 +79,7 @@ public abstract class DetectionAlertScheme {
         break;
 
       case ENTITY_GROUPBY_REPORT:
-        content = new EntityGroupKeyContent();
+        content = new EntityGroupKeyContent(metricConfigManager);
         break;
 
       default:

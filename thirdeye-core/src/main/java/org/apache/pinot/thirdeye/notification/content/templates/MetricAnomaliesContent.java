@@ -61,10 +61,12 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
   private ThirdEyeRcaRestClient rcaClient;
 
   public MetricAnomaliesContent() {
+    super(DAORegistry.getInstance().getMetricConfigDAO());
   }
 
   // For testing
   public MetricAnomaliesContent(ThirdEyeRcaRestClient rcaClient) {
+    super(DAORegistry.getInstance().getMetricConfigDAO());
     this.rcaClient = rcaClient;
   }
 

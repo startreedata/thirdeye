@@ -40,10 +40,10 @@ import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.dashboard.Utils;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -67,14 +67,17 @@ public class AnomalyDetectionInputContextBuilder {
 
   private final DataSourceCache dataSourceCache;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private final DatasetConfigManager datasetConfigManager;
 
   private AnomalyDetectionInputContext anomalyDetectionInputContext;
   private AnomalyFunctionDTO anomalyFunctionSpec;
 
   public AnomalyDetectionInputContextBuilder(final DataSourceCache dataSourceCache,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final DatasetConfigManager datasetConfigManager) {
     this.dataSourceCache = dataSourceCache;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+    this.datasetConfigManager = datasetConfigManager;
   }
 
   /**
@@ -102,8 +105,7 @@ public class AnomalyDetectionInputContextBuilder {
     this.anomalyFunctionSpec = anomalyFunctionSpec;
     this.anomalyDetectionInputContext = anomalyDetectionInputContext;
     final String dataset = this.anomalyFunctionSpec.getCollection();
-    DatasetConfigDTO datasetConfig = DAORegistry.getInstance().getDatasetConfigDAO()
-        .findByDataset(dataset);
+    DatasetConfigDTO datasetConfig = datasetConfigManager.findByDataset(dataset);
     if (datasetConfig == null) {
       LOG.error("Dataset [" + dataset + "] is not found");
       throw new IllegalArgumentException(

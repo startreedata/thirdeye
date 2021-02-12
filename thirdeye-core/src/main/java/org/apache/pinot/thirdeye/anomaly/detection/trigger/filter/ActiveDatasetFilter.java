@@ -27,9 +27,14 @@ import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DatasetTriggerI
  */
 public class ActiveDatasetFilter implements DataAvailabilityEventFilter {
 
+  private final DatasetTriggerInfoRepo datasetTriggerInfoRepo;
+
+  public ActiveDatasetFilter(final DatasetTriggerInfoRepo datasetTriggerInfoRepo) {
+    this.datasetTriggerInfoRepo = datasetTriggerInfoRepo;
+  }
+
   @Override
   public boolean isPassed(DataAvailabilityEvent e) {
-    DatasetTriggerInfoRepo triggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
-    return triggerInfoRepo.isDatasetActive(e.getDatasetName());
+    return datasetTriggerInfoRepo.isDatasetActive(e.getDatasetName());
   }
 }

@@ -10,7 +10,6 @@ import org.apache.pinot.thirdeye.anomaly.events.HolidayEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorJobScheduler;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardService;
-import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.model.download.ModelDownloaderManager;
 
 @Singleton
@@ -19,7 +18,6 @@ public class SchedulerService implements Managed {
   private final ThirdEyeWorkerConfiguration config;
   private final MonitorJobScheduler monitorJobScheduler;
   private final AutoOnboardService autoOnboardService;
-  private final EventManager eventManager;
   private final HolidayEventsLoader holidayEventsLoader;
   private final DetectionCronScheduler detectionScheduler;
   private final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver;
@@ -31,7 +29,7 @@ public class SchedulerService implements Managed {
   @Inject
   public SchedulerService(final ThirdEyeWorkerConfiguration config,
       final MonitorJobScheduler monitorJobScheduler,
-      final AutoOnboardService autoOnboardService, final EventManager eventManager,
+      final AutoOnboardService autoOnboardService,
       final HolidayEventsLoader holidayEventsLoader,
       final DetectionCronScheduler detectionScheduler,
       final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver,
@@ -42,7 +40,6 @@ public class SchedulerService implements Managed {
     this.config = config;
     this.monitorJobScheduler = monitorJobScheduler;
     this.autoOnboardService = autoOnboardService;
-    this.eventManager = eventManager;
     this.holidayEventsLoader = holidayEventsLoader;
     this.detectionScheduler = detectionScheduler;
     this.dataAvailabilityEventListenerDriver = dataAvailabilityEventListenerDriver;

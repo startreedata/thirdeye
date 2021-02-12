@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.anomaly.detection.trigger.utils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -29,13 +31,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,20 +46,31 @@ import org.slf4j.LoggerFactory;
  * This class is to refresh a list of active dataset and its latest timestamp in memory so that
  * it can be used for event-driven scheduling.
  */
+@Singleton
 public class DatasetTriggerInfoRepo {
 
   private static final Logger LOG = LoggerFactory.getLogger(DatasetTriggerInfoRepo.class);
-  private static DatasetTriggerInfoRepo _instance = null;
-  private static Set<String> dataSourceWhitelist = new HashSet<>();
-  private static int refreshFreqInMin = 30;
+
   private final Map<String, Long> datasetRefreshTimeMap;
   private final ScheduledThreadPoolExecutor executorService;
   private final AlertManager detectionConfigDAO;
+  private final DatasetConfigManager datasetConfigManager;
+  private final MetricConfigManager metricConfigManager;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private final int refreshFreqInMin = 1;
+  private Set<String> dataSourceWhitelist = new HashSet<>();
 
-  private DatasetTriggerInfoRepo() {
-    this.detectionConfigDAO = DAORegistry.getInstance().getDetectionConfigManager();
+  @Inject
+  private DatasetTriggerInfoRepo(final AlertManager detectionConfigManager,
+      final DatasetConfigManager datasetConfigManager,
+      final MetricConfigManager metricConfigManager,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+    this.detectionConfigDAO = detectionConfigManager;
+    this.datasetConfigManager = datasetConfigManager;
+    this.metricConfigManager = metricConfigManager;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+
     this.datasetRefreshTimeMap = new ConcurrentHashMap<>();
-    this.updateFreshTimeMap(); // initial refresh
     this.executorService = new ScheduledThreadPoolExecutor(1, r -> {
       Thread t = Executors.defaultThreadFactory().newThread(r);
       t.setDaemon(true);
@@ -67,20 +80,9 @@ public class DatasetTriggerInfoRepo {
         this::updateFreshTimeMap, refreshFreqInMin, refreshFreqInMin, TimeUnit.MINUTES);
   }
 
-  public static void init(int refreshFreqInMin, Collection<String> dataSourceWhitelist) {
-    DatasetTriggerInfoRepo.refreshFreqInMin = refreshFreqInMin;
-    DatasetTriggerInfoRepo.dataSourceWhitelist = new HashSet<>(dataSourceWhitelist);
-  }
-
-  public static DatasetTriggerInfoRepo getInstance() {
-    if (_instance == null) {
-      synchronized (DatasetTriggerInfoRepo.class) {
-        if (_instance == null) {
-          _instance = new DatasetTriggerInfoRepo();
-        }
-      }
-    }
-    return _instance;
+  public void init(Collection<String> dataSourceWhitelist) {
+    this.dataSourceWhitelist = new HashSet<>(dataSourceWhitelist);
+    this.updateFreshTimeMap(); // initial refresh
   }
 
   public boolean isDatasetActive(String dataset) {
@@ -97,7 +99,6 @@ public class DatasetTriggerInfoRepo {
 
   public void close() {
     executorService.shutdown();
-    _instance = null;
   }
 
   private void updateFreshTimeMap() {
@@ -114,9 +115,9 @@ public class DatasetTriggerInfoRepo {
           continue;
         }
         List<DatasetConfigDTO> datasetConfigs = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
-            DAORegistry.getInstance().getDatasetConfigDAO(),
-            DAORegistry.getInstance().getMetricConfigDAO(),
-            DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+            datasetConfigManager,
+            metricConfigManager,
+            thirdEyeCacheRegistry);
         for (DatasetConfigDTO datasetConfig : datasetConfigs) {
           String datasetName = datasetConfig.getDataset();
           if (!datasetRefreshTimeMap.containsKey(datasetName)

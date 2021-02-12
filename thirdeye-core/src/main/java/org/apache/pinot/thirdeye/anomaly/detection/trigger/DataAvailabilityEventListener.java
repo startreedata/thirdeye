@@ -24,7 +24,6 @@ import org.apache.pinot.thirdeye.anomaly.detection.trigger.filter.DataAvailabili
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DatasetTriggerInfoRepo;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +44,14 @@ public class DataAvailabilityEventListener implements Runnable {
 
   public DataAvailabilityEventListener(DataAvailabilityKafkaConsumer consumer,
       List<DataAvailabilityEventFilter> filters,
-      long sleepTimeInMilli, long pollTimeInMilli) {
+      long sleepTimeInMilli,
+      long pollTimeInMilli,
+      final DatasetConfigManager datasetConfigManager,
+      final DatasetTriggerInfoRepo datasetTriggerInfoRepo) {
     this.consumer = consumer;
     this.filters = filters;
-    this.datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.datasetTriggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
+    this.datasetConfigManager = datasetConfigManager;
+    this.datasetTriggerInfoRepo = datasetTriggerInfoRepo;
     this.sleepTimeInMilli = sleepTimeInMilli;
     this.pollTimeInMilli = pollTimeInMilli;
   }

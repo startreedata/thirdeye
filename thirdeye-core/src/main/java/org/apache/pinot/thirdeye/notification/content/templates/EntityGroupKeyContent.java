@@ -37,6 +37,7 @@ import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomaly.alert.util.AlertScreenshotHelper;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -79,7 +80,8 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
   private final Map<String, String> anomalyToChildIdsMap = new HashMap<>();
   private final List<String> entityWhitelist = new ArrayList<>();
 
-  public EntityGroupKeyContent() {
+  public EntityGroupKeyContent(final MetricConfigManager metricConfigDAO) {
+    super(metricConfigDAO);
   }
 
   @Override

@@ -30,7 +30,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.annotation.AlertSuppressor;
@@ -64,9 +63,12 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
 
   // The acceptable deviation from the dropped/risen value during the suppression period (ex: 0.1 for +/- 10%)
   static final String ACCEPTABLE_DEVIATION_KEY = "acceptableDeviation";
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
-  public DetectionAlertTimeWindowSuppressor(SubscriptionGroupDTO config) {
+  public DetectionAlertTimeWindowSuppressor(SubscriptionGroupDTO config,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
     super(config);
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
   private boolean isAnomalySuppressedByThreshold(double anomalyWeight,
@@ -76,7 +78,7 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
     if (anomalyWeight <= (expectedDropOrSpike + acceptableDeviation)
         && anomalyWeight >= (expectedDropOrSpike - acceptableDeviation)) {
       LOG.info(
-          "Anomaly id {} falls within the specified thresholds (anomalyWeight = {}, expectedDropOrSpike = {},"
+          "Anomaly falls within the specified thresholds (anomalyWeight = {}, expectedDropOrSpike = {},"
               + " acceptableDeviation = {})", anomalyWeight, expectedDropOrSpike,
           acceptableDeviation);
       return true;
@@ -116,8 +118,6 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
 
   private void filterOutSuppressedAnomalies(final Set<MergedAnomalyResultDTO> anomalies) {
     Iterator<MergedAnomalyResultDTO> anomaliesIt = anomalies.iterator();
-    MergedAnomalyResultManager anomalyMergedResultDAO = DAORegistry.getInstance()
-        .getMergedAnomalyResultDAO();
 
     List<Map<String, Object>> suppressWindowPropsList
         = ConfigUtils.getList(
@@ -142,7 +142,7 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
           feedback.setComment("Suppressed anomaly. Auto-labeling as true anomaly.");
 
           anomaly.setFeedback(feedback);
-          anomalyMergedResultDAO.updateAnomalyFeedback(anomaly);
+          mergedAnomalyResultManager.updateAnomalyFeedback(anomaly);
         }
       }
     }

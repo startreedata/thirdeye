@@ -27,9 +27,15 @@ import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DatasetTriggerI
  */
 public class OnTimeFilter implements DataAvailabilityEventFilter {
 
+  private final DatasetTriggerInfoRepo datasetTriggerInfoRepo;
+
+  public OnTimeFilter(final DatasetTriggerInfoRepo datasetTriggerInfoRepo) {
+    this.datasetTriggerInfoRepo = datasetTriggerInfoRepo;
+  }
+
   @Override
   public boolean isPassed(DataAvailabilityEvent e) {
-    DatasetTriggerInfoRepo triggerInfoRepo = DatasetTriggerInfoRepo.getInstance();
-    return (e.getHighWatermark() > triggerInfoRepo.getLastUpdateTimestamp(e.getDatasetName()));
+    return (e.getHighWatermark() > datasetTriggerInfoRepo
+        .getLastUpdateTimestamp(e.getDatasetName()));
   }
 }

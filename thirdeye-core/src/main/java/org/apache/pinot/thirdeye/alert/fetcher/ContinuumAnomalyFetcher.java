@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.alert.commons.AnomalyNotifiedStatus;
 import org.apache.pinot.thirdeye.alert.commons.AnomalySource;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
@@ -46,8 +47,8 @@ public class ContinuumAnomalyFetcher extends BaseAnomalyFetcher {
 
   public static final String DEFAULT_REALERT_FREQUENCY = "1_DAYS";
 
-  public ContinuumAnomalyFetcher() {
-    super();
+  public ContinuumAnomalyFetcher(final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    super(mergedAnomalyResultManager);
   }
 
   /**
@@ -82,7 +83,7 @@ public class ContinuumAnomalyFetcher extends BaseAnomalyFetcher {
     Predicate predicate = Predicate.AND(anomalySourceType.getPredicate(anomalySource),
         Predicate.GE("endTime", lastNotifyTime));
     Set<MergedAnomalyResultDTO> alertCandidates = new HashSet<>(
-        mergedAnomalyResultDAO.findByPredicate(predicate));
+        mergedAnomalyResultManager.findByPredicate(predicate));
 
     Multimap<String, AnomalyNotifiedStatus> snapshot = alertSnapShot.getSnapshot();
     if (snapshot.size() == 0) {

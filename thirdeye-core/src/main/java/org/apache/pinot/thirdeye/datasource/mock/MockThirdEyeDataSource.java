@@ -53,6 +53,8 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.StringSeries;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
@@ -98,6 +100,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   final String name;
 
   final CSVThirdEyeDataSource delegate;
+  private MetricConfigManager metricConfigManager;
+  private DatasetConfigManager datasetConfigManager;
 
   /**
    * This constructor is invoked by Java Reflection to initialize a ThirdEyeDataSource.
@@ -224,9 +228,11 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
       MetadataSourceConfig metadataSourceConfig = new MetadataSourceConfig();
       metadataSourceConfig.setProperties(properties);
 
+      metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
+      datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
       AutoOnboardMockDataSource onboarding = new AutoOnboardMockDataSource(metadataSourceConfig,
-          DAORegistry.getInstance().getMetricConfigDAO(),
-          DAORegistry.getInstance().getDatasetConfigDAO());
+          metricConfigManager,
+          datasetConfigManager);
 
       onboarding.runAdhoc();
     }
@@ -268,7 +274,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
 
             SqlUtils.createTableOverride(h2DataSource, tableName, dataset.getTimeColumn(), metrics,
                 dataset.getDimensions());
-            SqlUtils.onBoardSqlDataset(dataset);
+            SqlUtils.onBoardSqlDataset(dataset, metricConfigManager,
+                datasetConfigManager);
 
             DateTimeFormatter fmt = DateTimeFormat.forPattern(dataset.getTimeFormat())
                 .withZone(DateTimeZone.forID(dataset.getTimezone()));

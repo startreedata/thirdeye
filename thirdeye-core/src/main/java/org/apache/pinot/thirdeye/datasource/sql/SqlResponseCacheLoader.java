@@ -36,6 +36,8 @@ import java.util.Scanner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.dashboard.Utils;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
@@ -87,7 +89,9 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
   private static String h2Url;
   DataSource h2DataSource;
 
-  public SqlResponseCacheLoader(Map<String, Object> properties) throws Exception {
+  public SqlResponseCacheLoader(Map<String, Object> properties,
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager) throws Exception {
 
     // Init Presto datasources
     if (properties.containsKey(PRESTO)) {
@@ -226,7 +230,9 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
 
             SqlUtils.createTableOverride(h2DataSource, tableName, dataset.getTimeColumn(), metrics,
                 dataset.getDimensions());
-            SqlUtils.onBoardSqlDataset(dataset);
+            SqlUtils.onBoardSqlDataset(dataset,
+                metricConfigManager,
+                datasetConfigManager);
 
             DateTimeFormatter fmt = DateTimeFormat.forPattern(dataset.getTimeFormat())
                 .withZone(DateTimeZone.forID(dataset.getTimezone()));

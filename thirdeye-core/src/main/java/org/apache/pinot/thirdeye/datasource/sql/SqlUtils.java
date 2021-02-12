@@ -44,7 +44,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -171,10 +170,12 @@ public class SqlUtils {
    * just update them.
    *
    * @param dataset SqlDataset Object
+   * @param metricConfigManager
+   * @param datasetConfigManager
    */
-  public static void onBoardSqlDataset(SqlDataset dataset) {
-    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+  public static void onBoardSqlDataset(SqlDataset dataset,
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager) {
     List<MetricConfigDTO> metricConfigs = new ArrayList<>();
 
     String datasetName = dataset.getTableName();
@@ -183,7 +184,7 @@ public class SqlUtils {
 
     Period granularity = ConfigUtils.parsePeriod(dataset.getGranularity());
 
-    DatasetConfigDTO datasetConfig = datasetDAO.findByDataset(datasetName);
+    DatasetConfigDTO datasetConfig = datasetConfigManager.findByDataset(datasetName);
 
     if (datasetConfig == null) {
       datasetConfig = new DatasetConfigDTO();
@@ -198,12 +199,9 @@ public class SqlUtils {
     datasetConfig.setTimeColumn(dataset.getTimeColumn());
     datasetConfig.setTimeFormat(dataset.getTimeFormat());
 
-    List<String> sortedMetrics = new ArrayList<>(dataset.getMetrics().keySet());
-
-    Collections.sort(sortedMetrics);
-
     for (Map.Entry<String, MetricAggFunction> metric : dataset.getMetrics().entrySet()) {
-      MetricConfigDTO metricConfig = metricDAO.findByMetricAndDataset(metric.getKey(), datasetName);
+      MetricConfigDTO metricConfig = metricConfigManager
+          .findByMetricAndDataset(metric.getKey(), datasetName);
       if (metricConfig == null) {
         metricConfig = new MetricConfigDTO();
       }
@@ -216,7 +214,7 @@ public class SqlUtils {
     }
 
     for (MetricConfigDTO metricConfig : metricConfigs) {
-      Long id = metricDAO.save(metricConfig);
+      Long id = metricConfigManager.save(metricConfig);
       if (id != null) {
         LOG.info("Created metric '{}' with id {}", metricConfig.getAlias(), id);
       } else {
@@ -226,7 +224,7 @@ public class SqlUtils {
       }
     }
 
-    Long id = datasetDAO.save(datasetConfig);
+    Long id = datasetConfigManager.save(datasetConfig);
     if (id != null) {
       LOG.info("Created dataset '{}' with id {}", datasetConfig.getDataset(), id);
     } else {

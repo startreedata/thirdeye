@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
@@ -47,7 +48,9 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
   private final String name;
 
   public SqlThirdEyeDataSource(Map<String, Object> properties) throws Exception {
-    sqlResponseCacheLoader = new SqlResponseCacheLoader(properties);
+    sqlResponseCacheLoader = new SqlResponseCacheLoader(properties,
+        DAORegistry.getInstance().getMetricConfigDAO(),
+        DAORegistry.getInstance().getDatasetConfigDAO());
     sqlResponseCache = ThirdEyeUtils.buildResponseCache(sqlResponseCacheLoader);
     name = MapUtils.getString(properties, "name", SqlThirdEyeDataSource.class.getSimpleName());
   }

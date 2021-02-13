@@ -192,7 +192,7 @@ describe("Subscription Groups Util", () => {
     test("getSubscriptionGroupAlertName should return approopriate name for subscription group alert", () => {
         expect(
             getSubscriptionGroupAlertName(mockSubscriptionGroupAlert1)
-        ).toEqual("testAlertName2");
+        ).toEqual("testName2");
     });
 
     test("filterSubscriptionGroups should return empty array for invalid subscription group card data array", () => {
@@ -260,7 +260,7 @@ const mockEmptySubscriptionGroupAlert = {
 
 const mockSubscriptionGroup1 = {
     id: 1,
-    name: "testSubscriptionGroupName1",
+    name: "testName1",
     alerts: [
         {
             id: 2,
@@ -281,7 +281,7 @@ const mockSubscriptionGroup1 = {
 
 const mockSubscriptionGroup2 = {
     id: 5,
-    name: "testSubscriptionGroupName5",
+    name: "testName5",
     alerts: [] as Alert[],
     notificationSchemes: {},
 } as SubscriptionGroup;
@@ -290,34 +290,34 @@ const mockSubscriptionGroups = [mockSubscriptionGroup1, mockSubscriptionGroup2];
 
 const mockAlert1 = {
     id: 2,
-    name: "testAlertName2",
+    name: "testName2",
 } as Alert;
 
 const mockAlert2 = {
     id: 3,
-    name: "testAlertName3",
+    name: "testName3",
 } as Alert;
 
 const mockAlert3 = {
     id: 6,
-    name: "testAlertName6",
+    name: "testName6",
 } as Alert;
 
 const mockAlerts = [mockAlert1, mockAlert2, mockAlert3];
 
 const mockSubscriptionGroupAlert1 = {
     id: 2,
-    name: "testAlertName2",
+    name: "testName2",
 };
 
 const mockSubscriptionGroupAlert2 = {
     id: 3,
-    name: "testAlertName3",
+    name: "testName3",
 };
 
 const mockSubscriptionGroupAlert3 = {
     id: 6,
-    name: "testAlertName6",
+    name: "testName6",
 };
 
 const mockSubscriptionGroupAlerts = [
@@ -328,15 +328,15 @@ const mockSubscriptionGroupAlerts = [
 
 const mockSubscriptionGroupCardData1 = {
     id: 1,
-    name: "testSubscriptionGroupName1",
+    name: "testName1",
     alerts: [
         {
             id: 2,
-            name: "testAlertName2",
+            name: "testName2",
         },
         {
             id: 3,
-            name: "testAlertName3",
+            name: "testName3",
         },
     ],
     emails: ["testEmail1", "testEmail2"],
@@ -345,7 +345,7 @@ const mockSubscriptionGroupCardData1 = {
 
 const mockSubscriptionGroupCardData2 = {
     id: 5,
-    name: "testSubscriptionGroupName5",
+    name: "testName5",
     alerts: [],
     emails: [],
     subscriptionGroup: mockSubscriptionGroup2,

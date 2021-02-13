@@ -214,11 +214,11 @@ const mockEmptyAlertSubscriptionGroup = {
 
 const mockAlert1 = {
     id: 1,
-    name: "testAlertName1",
+    name: "testName1",
     active: true,
     owner: {
         id: 2,
-        principal: "testOwnerName2",
+        principal: "testPrincipal2",
     },
     nodes: {
         alertNode1: {
@@ -226,10 +226,10 @@ const mockAlert1 = {
             subType: "testSubType1",
             metric: {
                 id: 3,
-                name: "testMetricName3",
+                name: "testName3",
                 dataset: {
                     id: 4,
-                    name: "testDatasetName4",
+                    name: "testName4",
                 },
             },
         } as AlertNode,
@@ -238,7 +238,7 @@ const mockAlert1 = {
             subType: "testSubType2",
             metric: {
                 id: 5,
-                name: "testMetricName5",
+                name: "testName5",
             },
         } as AlertNode,
         alertNode3: {
@@ -250,7 +250,7 @@ const mockAlert1 = {
 
 const mockAlert2 = {
     id: 6,
-    name: "testAlertName6",
+    name: "testName6",
     active: false,
 } as Alert;
 
@@ -258,7 +258,7 @@ const mockAlerts = [mockAlert1, mockAlert2];
 
 const mockSubscriptionGroup1 = {
     id: 7,
-    name: "testSubscriptionGroupName7",
+    name: "testName7",
     alerts: [
         {
             id: 1,
@@ -271,7 +271,7 @@ const mockSubscriptionGroup1 = {
 
 const mockSubscriptionGroup2 = {
     id: 8,
-    name: "testSubscriptionGroupName8",
+    name: "testName8",
     alerts: [
         {
             id: 1,
@@ -281,7 +281,7 @@ const mockSubscriptionGroup2 = {
 
 const mockSubscriptionGroup3 = {
     id: 9,
-    name: "testSubscriptionGroupName9",
+    name: "testName9",
 } as SubscriptionGroup;
 
 const mockSubscriptionGroups = [
@@ -292,35 +292,35 @@ const mockSubscriptionGroups = [
 
 const mockAlertCardData1 = {
     id: 1,
-    name: "testAlertName1",
+    name: "testName1",
     active: true,
     activeText: "label.active",
     userId: 2,
-    createdBy: "testOwnerName2",
+    createdBy: "testPrincipal2",
     detectionTypes: ["testSubType1"],
     filteredBy: ["testSubType2"],
     datasetAndMetrics: [
         {
             datasetId: 4,
-            datasetName: "testDatasetName4",
+            datasetName: "testName4",
             metricId: 3,
-            metricName: "testMetricName3",
+            metricName: "testName3",
         },
         {
             datasetId: -1,
             datasetName: "label.no-data-marker",
             metricId: 5,
-            metricName: "testMetricName5",
+            metricName: "testName5",
         },
     ],
     subscriptionGroups: [
         {
             id: 7,
-            name: "testSubscriptionGroupName7",
+            name: "testName7",
         },
         {
             id: 8,
-            name: "testSubscriptionGroupName8",
+            name: "testName8",
         },
     ],
     alert: mockAlert1,
@@ -328,7 +328,7 @@ const mockAlertCardData1 = {
 
 const mockAlertCardData2 = {
     id: 6,
-    name: "testAlertName6",
+    name: "testName6",
     active: false,
     activeText: "label.inactive",
     userId: -1,
@@ -339,7 +339,7 @@ const mockAlertCardData2 = {
     subscriptionGroups: [
         {
             id: 7,
-            name: "testSubscriptionGroupName7",
+            name: "testName7",
         },
     ],
     alert: mockAlert2,

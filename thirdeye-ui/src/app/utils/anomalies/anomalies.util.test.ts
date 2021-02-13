@@ -141,7 +141,7 @@ const mockAnomaly1 = {
     avgBaselineVal: 6,
     alert: {
         id: 7,
-        name: "testAlertName7",
+        name: "testName7",
     },
 } as Anomaly;
 
@@ -154,7 +154,7 @@ const mockAnomalies = [mockAnomaly1, mockAnomaly2];
 const mockAnomalyCardData1 = {
     id: 2,
     name: "label.anomaly label.anomaly-id",
-    alertName: "testAlertName7",
+    alertName: "testName7",
     alertId: 7,
     current: "5",
     predicted: "6",

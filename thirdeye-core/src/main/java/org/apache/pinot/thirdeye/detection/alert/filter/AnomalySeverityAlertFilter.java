@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
@@ -91,8 +92,10 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
   public AnomalySeverityAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
       long endTime,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(provider, config, endTime);
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AlertManager detectionConfigManager) {
+    super(provider, config, endTime, mergedAnomalyResultManager,
+        detectionConfigManager);
     this.severityRecipients = ConfigUtils
         .getList(this.config.getProperties().get(PROP_SEVERITY_RECIPIENTS));
     this.detectionConfigIds = ConfigUtils

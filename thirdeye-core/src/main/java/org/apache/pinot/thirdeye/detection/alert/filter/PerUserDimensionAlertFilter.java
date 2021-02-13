@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -65,8 +67,10 @@ public class PerUserDimensionAlertFilter extends StatefulDetectionAlertFilter {
   final List<Long> detectionConfigIds;
 
   public PerUserDimensionAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
-      long endTime) {
-    super(provider, config, endTime);
+      long endTime, final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AlertManager detectionConfigManager) {
+    super(provider, config, endTime, mergedAnomalyResultManager,
+        detectionConfigManager);
     Preconditions
         .checkNotNull(config.getProperties().get(PROP_DIMENSION), "Dimension name not specified");
 

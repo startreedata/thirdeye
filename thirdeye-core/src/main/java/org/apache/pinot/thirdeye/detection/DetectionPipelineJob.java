@@ -45,11 +45,15 @@ public class DetectionPipelineJob implements Job {
   @Override
   public void execute(JobExecutionContext jobExecutionContext) {
     DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfo(jobExecutionContext,
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class),
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getDatasetConfigDAO(),
+        DAORegistry.getInstance().getMetricConfigDAO());
 
     // if a task is pending and not time out yet, don't schedule more
     String jobName = String.format("%s_%d", TaskConstants.TaskType.DETECTION, taskInfo.configId);
-    if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DETECTION_TASK_TIMEOUT)) {
+    if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DETECTION_TASK_TIMEOUT,
+        taskDAO)) {
       LOG.info(
           "Skip scheduling detection task for {} with start time {}. Task is already in the queue.",
           jobName,

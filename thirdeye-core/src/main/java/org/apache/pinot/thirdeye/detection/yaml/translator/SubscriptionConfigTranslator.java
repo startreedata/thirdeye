@@ -35,7 +35,6 @@ import org.apache.pinot.thirdeye.Constants.SubjectType;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
 import org.apache.pinot.thirdeye.detection.validators.SubscriptionConfigValidator;
@@ -79,15 +78,12 @@ public class SubscriptionConfigTranslator extends
       Arrays.asList(PROP_RECIPIENTS, PROP_DIMENSION, PROP_DIMENSION_RECIPIENTS,
           PROP_SEVERITY_RECIPIENTS));
 
-  private final AlertManager detectionConfigDAO = DAORegistry.getInstance()
-      .getDetectionConfigManager();
+  private final AlertManager detectionConfigDAO;
 
-  public SubscriptionConfigTranslator(String yamlConfig) {
-    this(yamlConfig, new SubscriptionConfigValidator());
-  }
-
-  public SubscriptionConfigTranslator(String yamlConfig, SubscriptionConfigValidator validator) {
+  public SubscriptionConfigTranslator(String yamlConfig, SubscriptionConfigValidator validator,
+      final AlertManager detectionConfigManager) {
     super(yamlConfig, validator);
+    detectionConfigDAO = detectionConfigManager;
   }
 
   private Map<String, Object> buildAlerterProperties(Map<String, Object> alertYamlConfigs,

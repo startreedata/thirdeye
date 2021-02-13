@@ -58,7 +58,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
@@ -254,17 +253,21 @@ public abstract class ThirdEyeUtils {
    *
    * @param config The detection config.
    * @param thirdEyeCacheRegistry
+   * @param datasetConfigManager
+   * @param metricConfigManager
    * @return The expected delay for this alert in milliseconds.
    */
   public static long getDetectionExpectedDelay(AlertDTO config,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final DatasetConfigManager datasetConfigManager,
+      final MetricConfigManager metricConfigManager) {
     long maxExpectedDelay = 0;
     Set<String> metricUrns = DetectionConfigFormatter
         .extractMetricUrnsFromProperties(config.getProperties());
     for (String urn : metricUrns) {
       List<DatasetConfigDTO> datasets = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
-          DAORegistry.getInstance().getDatasetConfigDAO(),
-          DAORegistry.getInstance().getMetricConfigDAO(),
+          datasetConfigManager,
+          metricConfigManager,
           thirdEyeCacheRegistry);
       for (DatasetConfigDTO dataset : datasets) {
         maxExpectedDelay = Math.max(dataset.getExpectedDelay().toMillis(), maxExpectedDelay);
@@ -273,10 +276,11 @@ public abstract class ThirdEyeUtils {
     return maxExpectedDelay;
   }
 
-  public static MetricConfigDTO getMetricConfigFromId(Long metricId) {
+  public static MetricConfigDTO getMetricConfigFromId(Long metricId,
+      final MetricConfigManager metricConfigManager) {
     MetricConfigDTO metricConfig = null;
     if (metricId != null) {
-      metricConfig = DAORegistry.getInstance().getMetricConfigDAO().findById(metricId);
+      metricConfig = metricConfigManager.findById(metricId);
     }
     return metricConfig;
   }

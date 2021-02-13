@@ -30,7 +30,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
@@ -48,10 +47,11 @@ public class SubscriptionConfigValidator extends ThirdEyeUserConfigValidator<Sub
   private final AlertManager detectionConfigManager;
   private final ApplicationManager applicationManager;
 
-  public SubscriptionConfigValidator() {
+  public SubscriptionConfigValidator(final AlertManager detectionConfigManager,
+      final ApplicationManager applicationManager) {
     super(DEFAULT_SUBSCRIPTION_CONFIG_SCHEMA_PATH);
-    detectionConfigManager = DAORegistry.getInstance().getDetectionConfigManager();
-    applicationManager = DAORegistry.getInstance().getApplicationDAO();
+    this.detectionConfigManager = detectionConfigManager;
+    this.applicationManager = applicationManager;
   }
 
   /**

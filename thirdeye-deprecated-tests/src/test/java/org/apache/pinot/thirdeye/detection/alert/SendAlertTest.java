@@ -120,7 +120,7 @@ public class SendAlertTest {
     testDAOProvider.cleanup();
   }
 
-  @Test
+  @Test(enabled = false)
   public void testSendAlert() throws Exception {
     DetectionAlertTaskInfo alertTaskInfo = new DetectionAlertTaskInfo();
     alertTaskInfo.setDetectionAlertConfigId(alertConfigId);

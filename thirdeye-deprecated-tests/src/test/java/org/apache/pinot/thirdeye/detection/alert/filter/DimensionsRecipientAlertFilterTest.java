@@ -222,7 +222,8 @@ public class DimensionsRecipientAlertFilterTest {
   @Test
   public void testAlertFilterRecipients() throws Exception {
     this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
-        this.baseTime + 350L);
+        this.baseTime + 350L, DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
 
     // Send anomalies on un-configured dimensions to default recipients
@@ -270,7 +271,8 @@ public class DimensionsRecipientAlertFilterTest {
     this.alertConfig.getProperties()
         .put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId2));
     this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
-        this.baseTime + 250L);
+        this.baseTime + 250L, DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
 
     // Check if there are 2 anomalies in this window
     DetectionAlertFilterResult result = this.alertFilter.run();
@@ -323,7 +325,8 @@ public class DimensionsRecipientAlertFilterTest {
     Thread.sleep(1);
 
     this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
-        System.currentTimeMillis());
+        System.currentTimeMillis(), DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 2);
 

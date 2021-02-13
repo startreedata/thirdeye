@@ -87,7 +87,9 @@ public class YamlDetectionAlertConfigTranslatorTest {
     doNothing().when(validateMocker).staticValidation(new Yaml().dump(alertYamlConfigs));
 
     String yamlConfig = new Yaml().dump(alertYamlConfigs);
-    SubscriptionGroupDTO alertConfig = new SubscriptionConfigTranslator(yamlConfig, validateMocker)
+    SubscriptionGroupDTO alertConfig = new SubscriptionConfigTranslator(yamlConfig, validateMocker,
+        DAORegistry.getInstance()
+            .getDetectionConfigManager())
         .translate();
 
     Assert.assertTrue(alertConfig.isActive());

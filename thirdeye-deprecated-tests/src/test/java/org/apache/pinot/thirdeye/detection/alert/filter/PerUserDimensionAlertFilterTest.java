@@ -149,7 +149,9 @@ public class PerUserDimensionAlertFilterTest {
 
   @Test
   public void testAlertFilterRecipients() throws Exception {
-    this.alertFilter = new PerUserDimensionAlertFilter(provider, alertConfig, this.baseTime + 350L);
+    this.alertFilter = new PerUserDimensionAlertFilter(provider, alertConfig, this.baseTime + 350L,
+        DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 3);

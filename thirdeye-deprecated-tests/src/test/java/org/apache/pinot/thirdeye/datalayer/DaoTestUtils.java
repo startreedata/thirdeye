@@ -56,10 +56,12 @@ import org.apache.pinot.thirdeye.datalayer.dto.OnboardDatasetMetricDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
 import org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator;
+import org.apache.pinot.thirdeye.detection.validators.SubscriptionConfigValidator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator;
 import org.apache.pinot.thirdeye.detector.email.filter.AlphaBetaAlertFilter;
@@ -96,7 +98,12 @@ public class DaoTestUtils {
 
     String yamlConfig = IOUtils.toString(DaoTestUtils.class.getResourceAsStream(alertConfigFile));
 
-    SubscriptionGroupDTO alertConfig = new SubscriptionConfigTranslator(yamlConfig).translate();
+    SubscriptionGroupDTO alertConfig = new SubscriptionConfigTranslator(
+        yamlConfig, new SubscriptionConfigValidator(
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getApplicationDAO()), DAORegistry.getInstance()
+            .getDetectionConfigManager())
+        .translate();
     alertConfig.setCronExpression("0/10 * * * * ?");
     return alertConfig;
   }

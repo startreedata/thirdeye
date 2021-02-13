@@ -48,6 +48,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
@@ -81,18 +82,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final MetricConfigManager metricConfigManager;
 
-  /**
-   * Construct an instance of {@link DataAvailabilityTaskScheduler}
-   *
-   * @param taskManager
-   * @param alertManager
-   * @param datasetConfigManager
-   * @param thirdEyeCacheRegistry
-   * @param metricConfigManager
-   * @param dataAvailabilitySchedulingConfiguration
-   * @param sleepPerRunInSec delay after each run to avoid polling the database too often
-   * @param fallBackTimeInSec global threshold for fallback if detection level one is not set
-   */
+
   @Inject
   public DataAvailabilityTaskScheduler(
       final DataAvailabilitySchedulingConfiguration config,
@@ -131,14 +121,15 @@ public class DataAvailabilityTaskScheduler implements Runnable {
         long detectionConfigId = detectionConfig.getId();
         DetectionPipelineTaskInfo taskInfo = TaskUtils
             .buildTaskInfoFromDetectionConfig(detectionConfig, detectionEndTime,
-                thirdEyeCacheRegistry);
+                thirdEyeCacheRegistry, DAORegistry.getInstance().getDatasetConfigDAO(),
+                DAORegistry.getInstance().getMetricConfigDAO());
         if (!runningDetection.containsKey(detectionConfigId)) {
           if (isAllDatasetUpdated(detectionConfig, detection2DatasetMap.get(detectionConfig),
               datasetConfigMap)) {
             if (isWithinSchedulingWindow(detection2DatasetMap.get(detectionConfig),
                 datasetConfigMap)) {
               //TODO: additional check is required if detection is based on aggregated value across multiple data points
-              createDetectionTask(taskInfo);
+              createDetectionTask(taskInfo, DAORegistry.getInstance().getTaskDAO());
               detectionIdToLastTaskEndTimeMap.put(detectionConfig.getId(), taskInfo.getEnd());
               ThirdeyeMetricsUtil.eventScheduledTaskCounter.inc();
               taskCount++;
@@ -154,9 +145,9 @@ public class DataAvailabilityTaskScheduler implements Runnable {
           if (needFallback(detectionConfig)) {
             LOG.info("Scheduling a task for detection {} due to the fallback mechanism.",
                 detectionConfigId);
-            createDetectionTask(taskInfo);
+            createDetectionTask(taskInfo, taskManager);
             if (DetectionUtils.isDataQualityCheckEnabled(detectionConfig)) {
-              createDataQualityTask(taskInfo);
+              createDataQualityTask(taskInfo, taskManager);
               LOG.info(
                   "Scheduling a task for data sla check on detection config {} due to the fallback mechanism.",
                   detectionConfigId);

@@ -156,12 +156,22 @@ public class SqlUtils {
    * time within the requested date range. </br>
    * Due to the summation, all metric column values can be assumed to be doubles.
    */
-  public static String getSql(ThirdEyeRequest request, MetricFunction metricFunction,
-      Multimap<String, String> filterSet, TimeSpec dataTimeSpec, String sourceName) {
-    return getSql(metricFunction, request.getStartTimeInclusive(), request.getEndTimeExclusive(),
+  public static String getSql(ThirdEyeRequest request,
+      MetricFunction metricFunction,
+      Multimap<String, String> filterSet,
+      TimeSpec dataTimeSpec,
+      String sourceName,
+      final MetricConfigManager metricConfigManager) {
+    return getSql(metricFunction,
+        request.getStartTimeInclusive(),
+        request.getEndTimeExclusive(),
         filterSet,
-        request.getGroupBy(), request.getGroupByTimeGranularity(), dataTimeSpec, request.getLimit(),
-        sourceName);
+        request.getGroupBy(),
+        request.getGroupByTimeGranularity(),
+        dataTimeSpec,
+        request.getLimit(),
+        sourceName,
+        metricConfigManager);
   }
 
   /**
@@ -234,12 +244,20 @@ public class SqlUtils {
     }
   }
 
-  private static String getSql(MetricFunction metricFunction, DateTime startTime,
-      DateTime endTimeExclusive, Multimap<String, String> filterSet, List<String> groupBy,
-      TimeGranularity timeGranularity, TimeSpec dataTimeSpec, int limit, String sourceName) {
+  private static String getSql(MetricFunction metricFunction,
+      DateTime startTime,
+      DateTime endTimeExclusive,
+      Multimap<String, String> filterSet,
+      List<String> groupBy,
+      TimeGranularity timeGranularity,
+      TimeSpec dataTimeSpec,
+      int limit,
+      String sourceName,
+      final MetricConfigManager metricConfigManager) {
 
     MetricConfigDTO metricConfig = ThirdEyeUtils
-        .getMetricConfigFromId(metricFunction.getMetricId());
+        .getMetricConfigFromId(metricFunction.getMetricId(),
+            metricConfigManager);
     String dataset = metricFunction.getDataset();
 
     StringBuilder sb = new StringBuilder();

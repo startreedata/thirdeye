@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.detection.alert;
 
 import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,13 +29,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 
@@ -49,10 +48,15 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
 
   // Time beyond which we do not want to notify anomalies
   private static final long ANOMALY_NOTIFICATION_LOOKBACK_TIME = TimeUnit.DAYS.toMillis(14);
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AlertManager detectionConfigManager;
 
   public StatefulDetectionAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
-      long endTime) {
+      long endTime, final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AlertManager detectionConfigManager) {
     super(provider, config, endTime);
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.detectionConfigManager = detectionConfigManager;
   }
 
   protected final Set<MergedAnomalyResultDTO> filter(Map<Long, Long> vectorClocks) {
@@ -60,7 +64,7 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
     Set<MergedAnomalyResultDTO> allAnomalies = new HashSet<>();
     for (Long detectionId : vectorClocks.keySet()) {
       // Ignore disabled detections
-      AlertDTO detection = DAORegistry.getInstance().getDetectionConfigManager()
+      AlertDTO detection = detectionConfigManager
           .findById(detectionId);
       if (detection == null || !detection.isActive()) {
         continue;
@@ -72,24 +76,18 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
         startTime = this.endTime - ANOMALY_NOTIFICATION_LOOKBACK_TIME;
       }
 
-      Collection<MergedAnomalyResultDTO> candidates = DAORegistry.getInstance()
-          .getMergedAnomalyResultDAO()
+      Collection<MergedAnomalyResultDTO> candidates = mergedAnomalyResultManager
           .findByCreatedTimeInRangeAndDetectionConfigId(startTime + 1, this.endTime, detectionId);
 
       long finalStartTime = startTime;
       Collection<MergedAnomalyResultDTO> anomalies =
-          Collections2.filter(candidates, new Predicate<MergedAnomalyResultDTO>() {
-            @Override
-            public boolean apply(@Nullable MergedAnomalyResultDTO anomaly) {
-              return anomaly != null && !anomaly.isChild()
-                  && !AlertUtils.hasFeedback(anomaly)
-                  && anomaly.getCreatedTime() > finalStartTime
-                  && (anomaly.getAnomalyResultSource()
-                  .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) ||
-                  anomaly.getAnomalyResultSource()
-                      .equals(AnomalyResultSource.DATA_QUALITY_DETECTION));
-            }
-          });
+          Collections2.filter(candidates, anomaly -> anomaly != null && !anomaly.isChild()
+              && !AlertUtils.hasFeedback(anomaly)
+              && anomaly.getCreatedTime() > finalStartTime
+              && (anomaly.getAnomalyResultSource()
+              .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) ||
+              anomaly.getAnomalyResultSource()
+                  .equals(AnomalyResultSource.DATA_QUALITY_DETECTION)));
 
       allAnomalies.addAll(anomalies);
     }

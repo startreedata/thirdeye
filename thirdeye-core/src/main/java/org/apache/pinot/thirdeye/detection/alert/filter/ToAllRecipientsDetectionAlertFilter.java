@@ -24,6 +24,8 @@ import com.google.common.collect.SetMultimap;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
@@ -49,8 +51,10 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
   List<Long> detectionConfigIds;
 
   public ToAllRecipientsDetectionAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
-      long endTime) {
-    super(provider, config, endTime);
+      long endTime, final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AlertManager detectionConfigManager) {
+    super(provider, config, endTime, mergedAnomalyResultManager,
+        detectionConfigManager);
 
     this.recipients = HashMultimap.create(
         ConfigUtils.getMultimap(this.config.getProperties().get(PROP_RECIPIENTS)));

@@ -72,7 +72,7 @@ public class DetectionAlertTaskFactoryTest {
     return this.alertConfigDTO;
   }
 
-  @Test
+  @Test(enabled = false)
   public void testLoadAlertFilter() throws Exception {
     SubscriptionGroupDTO alertConfig = createAlertConfig(alerters,
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");

@@ -29,10 +29,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
@@ -60,9 +63,9 @@ public class TaskUtils {
   }
 
   public static boolean checkTaskAlreadyRun(String jobName, DetectionPipelineTaskInfo taskInfo,
-      long timeout) {
+      long timeout, final TaskManager taskManager) {
     // check if a task for this detection pipeline is already scheduled
-    List<TaskDTO> scheduledTasks = DAORegistry.getInstance().getTaskDAO()
+    List<TaskDTO> scheduledTasks = taskManager
         .findByPredicate(Predicate.AND(
             Predicate.EQ("name", jobName),
             Predicate.OR(
@@ -92,37 +95,47 @@ public class TaskUtils {
   }
 
   public static DetectionPipelineTaskInfo buildTaskInfo(JobExecutionContext jobExecutionContext,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry, final AlertManager detectionConfigManager,
+      final DatasetConfigManager datasetConfigManager,
+      final MetricConfigManager metricConfigManager) {
     JobKey jobKey = jobExecutionContext.getJobDetail().getKey();
     Long id = getIdFromJobKey(jobKey.getName());
-    AlertDTO configDTO = DAORegistry.getInstance().getDetectionConfigManager().findById(id);
+    AlertDTO configDTO = detectionConfigManager.findById(id);
 
     return buildTaskInfoFromDetectionConfig(configDTO, System.currentTimeMillis(),
-        thirdEyeCacheRegistry);
+        thirdEyeCacheRegistry, datasetConfigManager,
+        metricConfigManager);
   }
 
   public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO configDTO,
-      long end, final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      long end, final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final DatasetConfigManager datasetConfigManager,
+      final MetricConfigManager metricConfigManager) {
     final long delay = getDetectionExpectedDelay(configDTO,
-        thirdEyeCacheRegistry);
+        thirdEyeCacheRegistry, datasetConfigManager,
+        metricConfigManager);
     final long start = Math.max(configDTO.getLastTimestamp(),
         end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
     return new DetectionPipelineTaskInfo(configDTO.getId(), start, end);
   }
 
-  public static long createDetectionTask(DetectionPipelineTaskInfo taskInfo) {
-    return TaskUtils.createTask(TaskConstants.TaskType.DETECTION, taskInfo);
+  public static long createDetectionTask(DetectionPipelineTaskInfo taskInfo,
+      final TaskManager taskManager) {
+    return TaskUtils.createTask(TaskConstants.TaskType.DETECTION, taskInfo,
+        taskManager);
   }
 
-  public static long createDataQualityTask(DetectionPipelineTaskInfo taskInfo) {
-    return TaskUtils.createTask(TaskConstants.TaskType.DATA_QUALITY, taskInfo);
+  public static long createDataQualityTask(DetectionPipelineTaskInfo taskInfo,
+      final TaskManager taskManager) {
+    return TaskUtils.createTask(TaskConstants.TaskType.DATA_QUALITY, taskInfo,
+        taskManager);
   }
 
   /**
    * Creates a generic task and saves it.
    */
   public static long createTask(TaskConstants.TaskType taskType,
-      DetectionPipelineTaskInfo taskInfo) {
+      DetectionPipelineTaskInfo taskInfo, final TaskManager taskManager) {
     String taskInfoJson = null;
     try {
       taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
@@ -132,7 +145,7 @@ public class TaskUtils {
     }
 
     TaskDTO taskDTO = TaskUtils.buildTask(taskInfo.getConfigId(), taskInfoJson, taskType);
-    long id = DAORegistry.getInstance().getTaskDAO().save(taskDTO);
+    long id = taskManager.save(taskDTO);
     LOG.info("Created {} task {} with taskId {}", taskType, taskDTO, id);
     return id;
   }

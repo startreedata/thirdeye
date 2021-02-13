@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.detection.dataquality;
 
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
@@ -43,18 +44,22 @@ public class DataQualityPipelineJob implements Job {
   @Override
   public void execute(JobExecutionContext jobExecutionContext) {
     DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfo(jobExecutionContext,
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class),
+        DAORegistry.getInstance().getDetectionConfigManager(),
+        DAORegistry.getInstance().getDatasetConfigDAO(),
+        DAORegistry.getInstance().getMetricConfigDAO());
 
     // if a task is pending and not time out yet, don't schedule more
     String jobName = String
         .format("%s_%d", TaskConstants.TaskType.DATA_QUALITY, taskInfo.getConfigId());
-    if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DATA_AVAILABILITY_TASK_TIMEOUT)) {
+    if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DATA_AVAILABILITY_TASK_TIMEOUT,
+        DAORegistry.getInstance().getTaskDAO())) {
       LOG.info("Skip scheduling {} task for {} with start time {}. Task is already in the queue.",
           TaskConstants.TaskType.DATA_QUALITY, jobName, taskInfo.getStart());
       return;
     }
 
-    TaskUtils.createDataQualityTask(taskInfo);
+    TaskUtils.createDataQualityTask(taskInfo, DAORegistry.getInstance().getTaskDAO());
   }
 }
 

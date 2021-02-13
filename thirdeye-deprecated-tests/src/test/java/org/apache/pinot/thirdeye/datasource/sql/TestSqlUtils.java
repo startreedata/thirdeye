@@ -108,7 +108,8 @@ public class TestSqlUtils {
     String timeFormat = TimeSpec.SINCE_EPOCH_FORMAT;
     TimeSpec timeSpec = new TimeSpec("date", timeGranularity, timeFormat);
     String actualSql = SqlUtils
-        .getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset);
+        .getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset,
+            DAORegistry.getInstance().getMetricConfigDAO());
     String expected = "SELECT date, country, SUM(metric) FROM table WHERE  date = 18383 GROUP BY date, country ORDER BY SUM(metric) DESC LIMIT 100";
     Assert.assertEquals(actualSql, expected);
   }
@@ -129,7 +130,8 @@ public class TestSqlUtils {
     String timeFormat = TimeSpec.SINCE_EPOCH_FORMAT;
     TimeSpec timeSpec = new TimeSpec("date", timeGranularity, timeFormat);
     String actual = SqlUtils
-        .getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset);
+        .getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset,
+            DAORegistry.getInstance().getMetricConfigDAO());
     String expected = "SELECT date, country, SUM(metric) FROM table WHERE  date = 18383 GROUP BY date, country LIMIT 100000";
     Assert.assertEquals(actual, expected);
   }

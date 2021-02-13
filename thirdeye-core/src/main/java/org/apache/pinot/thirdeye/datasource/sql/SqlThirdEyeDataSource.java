@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
@@ -43,14 +45,18 @@ import org.slf4j.LoggerFactory;
 public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   private static final Logger LOG = LoggerFactory.getLogger(SqlThirdEyeDataSource.class);
+  private final MetricConfigManager metricConfigManager;
+  private final DatasetConfigManager datasetConfigManager;
   protected LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> sqlResponseCache;
   private final SqlResponseCacheLoader sqlResponseCacheLoader;
   private final String name;
 
   public SqlThirdEyeDataSource(Map<String, Object> properties) throws Exception {
+    metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
+    datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
     sqlResponseCacheLoader = new SqlResponseCacheLoader(properties,
-        DAORegistry.getInstance().getMetricConfigDAO(),
-        DAORegistry.getInstance().getDatasetConfigDAO());
+        metricConfigManager,
+        datasetConfigManager);
     sqlResponseCache = ThirdEyeUtils.buildResponseCache(sqlResponseCacheLoader);
     name = MapUtils.getString(properties, "name", SqlThirdEyeDataSource.class.getSimpleName());
   }
@@ -80,11 +86,16 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
         String dbName = tableComponents[1];
 
         String sqlQuery = SqlUtils
-            .getSql(request, metricFunction, request.getFilterSet(), dataTimeSpec, sourceName);
+            .getSql(request, metricFunction, request.getFilterSet(), dataTimeSpec, sourceName,
+                metricConfigManager);
         ThirdEyeResultSetGroup thirdEyeResultSetGroup = executeSQL(
-            new SqlQuery(sqlQuery, sourceName, dbName,
-                metricFunction.getMetricName(), request.getGroupBy(),
-                request.getGroupByTimeGranularity(), dataTimeSpec));
+            new SqlQuery(sqlQuery,
+                sourceName,
+                dbName,
+                metricFunction.getMetricName(),
+                request.getGroupBy(),
+                request.getGroupByTimeGranularity(),
+                dataTimeSpec));
 
         metricFunctionToResultSetList.put(metricFunction, thirdEyeResultSetGroup.getResultSets());
       }

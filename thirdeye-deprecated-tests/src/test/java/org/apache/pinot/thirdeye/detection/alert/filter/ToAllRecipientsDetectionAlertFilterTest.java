@@ -176,7 +176,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
   @Test
   public void testGetAlertFilterResult() throws Exception {
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, this.alertConfig,
-        this.baseTime + 350L);
+        this.baseTime + 350L, DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
     DetectionAlertFilterNotification notification = AlertFilterUtils.makeEmailNotifications(
         this.alertConfig, PROP_TO_VALUE, PROP_CC_VALUE, PROP_BCC_VALUE);
@@ -195,7 +196,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
   public void testGetAlertFilterResultWithJira() throws Exception {
     SubscriptionGroupDTO alertConfig = createDetectionAlertConfigWithJira();
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, alertConfig,
-        this.baseTime + 350L);
+        this.baseTime + 350L, DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     DetectionAlertFilterNotification notification = AlertFilterUtils
@@ -227,7 +229,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     Thread.sleep(1);  // Make sure the next anomaly is not created at the same time as watermark
 
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, this.alertConfig,
-        System.currentTimeMillis());
+        System.currentTimeMillis(), DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     DetectionAlertFilterNotification notification = AlertFilterUtils.makeEmailNotifications(
@@ -258,7 +261,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     this.alertConfig.setProperties(properties);
 
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, this.alertConfig,
-        this.baseTime + 25L);
+        this.baseTime + 25L, DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
 
     DetectionAlertFilterNotification notification = AlertFilterUtils.makeEmailNotifications(
@@ -297,7 +301,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     this.detection3Anomalies.add(anomalyWithNullFeedback);
 
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, this.alertConfig,
-        System.currentTimeMillis());
+        System.currentTimeMillis(), DAORegistry.getInstance()
+            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 1);
 

@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 
 public class TestAnomalyFeedFactory {
 
-  @Test
+  @Test(enabled = false)
   public void testCreateAlertFeed() throws Exception {
     AnomalyFeed anomalyFeed = AnomalyFeedFactory.fromClassName("UnionAnomalyFeed");
     Assert.assertNotNull(anomalyFeed);

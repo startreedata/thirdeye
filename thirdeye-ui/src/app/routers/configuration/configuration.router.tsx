@@ -10,7 +10,6 @@ import { Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { AppRoute, getConfigurationPath } from "../../utils/routes/routes.util";
-import { MetricsRouter } from "../metrics-router/metrics-router";
 
 const ConfigurationPage = lazy(() =>
     import(
@@ -22,6 +21,12 @@ const SubscriptionGroupsRouter = lazy(() =>
     import(
         /* webpackChunkName: "subscription-groups-router" */ "../subscription-groups/subscription-groups.router"
     ).then((module) => ({ default: module.SubscriptionGroupsRouter }))
+);
+
+const MetricsRouter = lazy(() =>
+    import(
+        /* webpackChunkName: "metrics-router" */ "../metrics/metrics.router"
+    ).then((module) => ({ default: module.MetricsRouter }))
 );
 
 const PageNotFoundPage = lazy(() =>

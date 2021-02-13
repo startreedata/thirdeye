@@ -22,7 +22,6 @@ export const AppRoute = {
     METRICS: "/configuration/metrics",
     METRICS_ALL: "/configuration/metrics/all",
     METRICS_DETAIL: `/configuration/metrics/detail/id/${ROUTE_PLACEHOLDER_ID}`,
-    METRICS_UPDATE: `/configuration/metrics/update/id/${ROUTE_PLACEHOLDER_ID}`,
     SIGN_IN: "/signIn",
     SIGN_OUT: "/signOut",
 } as const;
@@ -118,15 +117,8 @@ export const getMetricsAllPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.METRICS_ALL);
 };
 
-export const getMetricsDetailsPath = (id: number): string => {
+export const getMetricsDetailPath = (id: number): string => {
     let path: string = AppRoute.METRICS_DETAIL;
-    path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
-
-    return createPathWithRecognizedQueryString(path);
-};
-
-export const getMetricsUpdatePath = (id: number): string => {
-    let path: string = AppRoute.METRICS_UPDATE;
     path = path.replace(ROUTE_PLACEHOLDER_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);

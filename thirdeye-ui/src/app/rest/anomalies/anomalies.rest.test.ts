@@ -28,7 +28,7 @@ describe("Anomalies REST", () => {
     test("getAnomaly should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
-        await expect(getAnomaly(1)).rejects.toThrow("testErrorMessage");
+        await expect(getAnomaly(1)).rejects.toThrow("testError");
     });
 
     test("getAllAnomalies should invoke axios.get with appropriate input and return appropriate anomaly array", async () => {
@@ -44,7 +44,7 @@ describe("Anomalies REST", () => {
     test("getAllAnomalies should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
-        await expect(getAllAnomalies()).rejects.toThrow("testErrorMessage");
+        await expect(getAllAnomalies()).rejects.toThrow("testError");
     });
 
     test("getAnomaliesByTime should invoke axios.get with appropriate input and return appropriate anomaly array", async () => {
@@ -64,9 +64,7 @@ describe("Anomalies REST", () => {
     test("getAnomaliesByTime should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
-        await expect(getAnomaliesByTime(1, 2)).rejects.toThrow(
-            "testErrorMessage"
-        );
+        await expect(getAnomaliesByTime(1, 2)).rejects.toThrow("testError");
     });
 
     test("getAnomaliesByAlertId should invoke axios.get with appropriate input and return appropriate anomaly array", async () => {
@@ -84,9 +82,7 @@ describe("Anomalies REST", () => {
     test("getAnomaliesByAlertId should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
-        await expect(getAnomaliesByAlertId(1)).rejects.toThrow(
-            "testErrorMessage"
-        );
+        await expect(getAnomaliesByAlertId(1)).rejects.toThrow("testError");
     });
 
     test("getAnomaliesByAlertIdAndTime should invoke axios.get with appropriate input and return appropriate anomaly array", async () => {
@@ -107,7 +103,7 @@ describe("Anomalies REST", () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getAnomaliesByAlertIdAndTime(1, 2, 3)).rejects.toThrow(
-            "testErrorMessage"
+            "testError"
         );
     });
 
@@ -124,7 +120,7 @@ describe("Anomalies REST", () => {
     test("deleteAnomaly should throw encountered error", async () => {
         jest.spyOn(axios, "delete").mockRejectedValue(mockError);
 
-        await expect(deleteAnomaly(1)).rejects.toThrow("testErrorMessage");
+        await expect(deleteAnomaly(1)).rejects.toThrow("testError");
     });
 });
 
@@ -132,4 +128,4 @@ const mockAnomalyResponse = {
     id: 1,
 };
 
-const mockError = new Error("testErrorMessage");
+const mockError = new Error("testError");

@@ -14,7 +14,8 @@ module.exports = {
         "<rootDir>/src/app/**/*.{ts,tsx}", // All files in subdirectories under src/app
         "!<rootDir>/src/app/*", // Exclude files directly under src/app
         "!<rootDir>/src/app/locale/**", // Exclude locale files
-        "!<rootDir>/src/app/utils/material-ui/**", // Exclute Material-UI theme files
+        "!<rootDir>/src/app/utils/material-ui/**", // Exclude Material-UI theme files
+        "!<rootDir>/src/app/rest/dto/**", // Exclude backend DTOs
     ],
 
     // TypeScript

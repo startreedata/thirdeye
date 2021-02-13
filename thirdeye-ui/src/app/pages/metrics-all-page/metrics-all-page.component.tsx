@@ -6,7 +6,7 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { MetricsList } from "../../components/metrics-list/metrics-list.component";
 import { MetricsListData } from "../../components/metrics-list/metrics-list.interfaces";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { getAllMetrics } from "../../rest/metrics-rest/metrics-rest";
+import { getAllMetrics } from "../../rest/metrics/metrics.rest";
 import { getMetricTableDatas } from "../../utils/metrics-util/metrics-util";
 import { getMetricsAllPath } from "../../utils/routes/routes.util";
 

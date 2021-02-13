@@ -11,6 +11,9 @@ import {
     getBasePath,
     getConfigurationPath,
     getHomePath,
+    getMetricsAllPath,
+    getMetricsDetailPath,
+    getMetricsPath,
     getSignInPath,
     getSignOutPath,
     getSubscriptionGroupsAllPath,
@@ -104,6 +107,24 @@ describe("Routes Util", () => {
     test("getSubscriptionGroupsUpdatePath should return appropriate path with appropriate query string", () => {
         expect(getSubscriptionGroupsUpdatePath(1)).toEqual(
             "/configuration/subscriptionGroups/update/id/1?testQueryString"
+        );
+    });
+
+    test("getMetricsPath should return appropriate path with appropriate query string", () => {
+        expect(getMetricsPath()).toEqual(
+            "/configuration/metrics?testQueryString"
+        );
+    });
+
+    test("getMetricsAllPath should return appropriate path with appropriate query string", () => {
+        expect(getMetricsAllPath()).toEqual(
+            "/configuration/metrics/all?testQueryString"
+        );
+    });
+
+    test("getMetricsDetailPath should return appropriate path with appropriate query string", () => {
+        expect(getMetricsDetailPath(1)).toEqual(
+            "/configuration/metrics/detail/id/1?testQueryString"
         );
     });
 

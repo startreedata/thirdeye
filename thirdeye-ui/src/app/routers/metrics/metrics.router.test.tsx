@@ -3,7 +3,7 @@ import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { AppRoute } from "../../utils/routes/routes.util";
-import { ConfigurationRouter } from "./configuration.router";
+import { MetricsRouter } from "./metrics.router";
 
 jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
     useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
@@ -30,6 +30,7 @@ jest.mock("../../utils/routes/routes.util", () => ({
         unknown
     >),
     getConfigurationPath: jest.fn().mockReturnValue("testConfigurationPath"),
+    getMetricsPath: jest.fn().mockReturnValue("testMetricsPath"),
 }));
 
 jest.mock(
@@ -39,24 +40,18 @@ jest.mock(
     })
 );
 
+jest.mock("../../pages/metrics-all-page/metrics-all-page.component", () => ({
+    MetricsAllPage: jest.fn().mockReturnValue(<>testMetricsAllPage</>),
+}));
+
 jest.mock(
-    "../../pages/configuration-page/configuration-page.component",
+    "../../pages/metrics-detail-page/metrics-detail-page.component",
     () => ({
-        ConfigurationPage: jest
+        MetricsDetailPage: jest
             .fn()
-            .mockReturnValue(<>testConfigurationPage</>),
+            .mockReturnValue(<>testMetricsDetailPage</>),
     })
 );
-
-jest.mock("../subscription-groups/subscription-groups.router", () => ({
-    SubscriptionGroupsRouter: jest
-        .fn()
-        .mockReturnValue(<>testSubscriptionGroupsRouter</>),
-}));
-
-jest.mock("../metrics/metrics.router", () => ({
-    MetricsRouter: jest.fn().mockReturnValue(<>testMetricsRouter</>),
-}));
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
@@ -65,11 +60,11 @@ jest.mock(
     })
 );
 
-describe("Configuration Router", () => {
+describe("Metrics Router", () => {
     test("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
-                <ConfigurationRouter />
+                <MetricsRouter />
             </MemoryRouter>
         );
 
@@ -79,7 +74,7 @@ describe("Configuration Router", () => {
     test("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
-                <ConfigurationRouter />
+                <MetricsRouter />
             </MemoryRouter>
         );
 
@@ -92,31 +87,36 @@ describe("Configuration Router", () => {
             breadcrumbs[0] &&
             breadcrumbs[0].onClick &&
             breadcrumbs[0].onClick();
+        breadcrumbs &&
+            breadcrumbs[1] &&
+            breadcrumbs[1].onClick &&
+            breadcrumbs[1].onClick();
 
-        expect(breadcrumbs).toHaveLength(1);
+        expect(breadcrumbs).toHaveLength(2);
         expect(breadcrumbs[0].text).toEqual("label.configuration");
         expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenCalledWith("testConfigurationPath");
+        expect(mockPush).toHaveBeenNthCalledWith(1, "testConfigurationPath");
+        expect(breadcrumbs[1].text).toEqual("label.metrics");
+        expect(breadcrumbs[1].onClick).toBeDefined();
+        expect(mockPush).toHaveBeenNthCalledWith(2, "testMetricsPath");
     });
 
-    test("should render configuration page at exact configuration path", async () => {
+    test("should render metrics all page at exact metrics path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
-                <ConfigurationRouter />
+            <MemoryRouter initialEntries={[AppRoute.METRICS]}>
+                <MetricsRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testConfigurationPage")
+            screen.findByText("testMetricsAllPage")
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid configuration path", async () => {
+    test("should render page not found page at invalid metrics path", async () => {
         render(
-            <MemoryRouter
-                initialEntries={[`${AppRoute.CONFIGURATION}/testPath`]}
-            >
-                <ConfigurationRouter />
+            <MemoryRouter initialEntries={[`${AppRoute.METRICS}/testPath`]}>
+                <MetricsRouter />
             </MemoryRouter>
         );
 
@@ -125,60 +125,60 @@ describe("Configuration Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should direct exact subscription groups path to subscription groups router", async () => {
+    test("should render metrics all page at exact metrics all path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS]}>
-                <ConfigurationRouter />
+            <MemoryRouter initialEntries={[AppRoute.METRICS_ALL]}>
+                <MetricsRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testSubscriptionGroupsRouter")
+            screen.findByText("testMetricsAllPage")
         ).resolves.toBeInTheDocument();
     });
 
-    test("should direct subscription groups path to subscription groups router", async () => {
+    test("should render page not found page at invalid metrics all path", async () => {
+        render(
+            <MemoryRouter initialEntries={[`${AppRoute.METRICS_ALL}/testPath`]}>
+                <MetricsRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
+    });
+
+    test("should render metrics detail page at exact metrics detail path", async () => {
+        render(
+            <MemoryRouter initialEntries={[AppRoute.METRICS_DETAIL]}>
+                <MetricsRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testMetricsDetailPage")
+        ).resolves.toBeInTheDocument();
+    });
+
+    test("should render page not found page at invalid metrics detail path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.SUBSCRIPTION_GROUPS}/testPath`]}
+                initialEntries={[`${AppRoute.METRICS_DETAIL}/testPath`]}
             >
-                <ConfigurationRouter />
+                <MetricsRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testSubscriptionGroupsRouter")
-        ).resolves.toBeInTheDocument();
-    });
-
-    test("should direct exact metrics path to metrics router", async () => {
-        render(
-            <MemoryRouter initialEntries={[AppRoute.METRICS]}>
-                <ConfigurationRouter />
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testMetricsRouter")
-        ).resolves.toBeInTheDocument();
-    });
-
-    test("should direct metrics path to metrics router", async () => {
-        render(
-            <MemoryRouter initialEntries={[`${AppRoute.METRICS}/testPath`]}>
-                <ConfigurationRouter />
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testMetricsRouter")
+            screen.findByText("testPageNotFoundPage")
         ).resolves.toBeInTheDocument();
     });
 
     test("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
-                <ConfigurationRouter />
+                <MetricsRouter />
             </MemoryRouter>
         );
 
@@ -190,7 +190,7 @@ describe("Configuration Router", () => {
     test("should render page not found page by default", async () => {
         render(
             <MemoryRouter>
-                <ConfigurationRouter />
+                <MetricsRouter />
             </MemoryRouter>
         );
 

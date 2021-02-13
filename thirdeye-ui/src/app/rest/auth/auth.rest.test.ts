@@ -24,7 +24,7 @@ describe("Auth REST", () => {
     test("login should throw encountered error", async () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
-        await expect(login()).rejects.toThrow("testErrorMessage");
+        await expect(login()).rejects.toThrow("testError");
     });
 
     test("logout should invoke axios.post with appropriate input", async () => {
@@ -38,7 +38,7 @@ describe("Auth REST", () => {
     test("logout should throw encountered error", async () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
-        await expect(logout()).rejects.toThrow("testErrorMessage");
+        await expect(logout()).rejects.toThrow("testError");
     });
 });
 
@@ -48,7 +48,7 @@ mockAuthRequest.append("principal", "admin");
 mockAuthRequest.append("password", "password");
 
 const mockAuthResponse = {
-    accessToken: "testAccessTokenResponse",
+    accessToken: "testAccessToken",
 };
 
-const mockError = new Error("testErrorMessage");
+const mockError = new Error("testError");

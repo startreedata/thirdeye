@@ -1,7 +1,20 @@
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { AppRoute, getMetricsAllPath } from "../../utils/routes/routes.util";
+import {
+    AppRoute,
+    getConfigurationPath,
+    getMetricsAllPath,
+    getMetricsPath,
+} from "../../utils/routes/routes.util";
 
 const MetricsAllPage = lazy(() =>
     import(
@@ -9,16 +22,10 @@ const MetricsAllPage = lazy(() =>
     ).then((module) => ({ default: module.MetricsAllPage }))
 );
 
-const MetricsDetailsPage = lazy(() =>
+const MetricsDetailPage = lazy(() =>
     import(
-        /* webpackChunkName: "metrics-detail-page" */ "../../pages/metrics-detail-page/metrics-details-page.component"
-    ).then((module) => ({ default: module.MetricsDetailsPage }))
-);
-
-const MetricsUpdatePage = lazy(() =>
-    import(
-        /* webpackChunkName: "metrics-update-page" */ "../../pages/metrics-update-page/metrics-update-page.component"
-    ).then((module) => ({ default: module.MetricsUpdatePage }))
+        /* webpackChunkName: "metrics-detail-page" */ "../../pages/metrics-detail-page/metrics-detail-page.component"
+    ).then((module) => ({ default: module.MetricsDetailPage }))
 );
 
 const PageNotFoundPage = lazy(() =>
@@ -28,6 +35,29 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const MetricsRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
+    const history = useHistory();
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        setRouterBreadcrumbs([
+            {
+                text: t("label.configuration"),
+                onClick: () => history.push(getConfigurationPath()),
+            },
+            {
+                text: t("label.metrics"),
+                onClick: () => history.push(getMetricsPath()),
+            },
+        ]);
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return <LoadingIndicator />;
+    }
+
     return (
         <Suspense fallback={<LoadingIndicator />}>
             <Switch>
@@ -44,18 +74,11 @@ export const MetricsRouter: FunctionComponent = () => {
                     path={AppRoute.METRICS_ALL}
                 />
 
-                {/* Metrics details path */}
+                {/* Metrics detail path */}
                 <Route
                     exact
-                    component={MetricsDetailsPage}
+                    component={MetricsDetailPage}
                     path={AppRoute.METRICS_DETAIL}
-                />
-
-                {/* Metrics update path */}
-                <Route
-                    exact
-                    component={MetricsUpdatePage}
-                    path={AppRoute.METRICS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}

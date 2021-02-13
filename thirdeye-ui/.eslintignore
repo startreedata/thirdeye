@@ -16,7 +16,7 @@ tsbuildinfo/
 
 # Jest (ESLint rules don't agree with how these configs are written)
 jest.config.js
-src/test/
+src/test/unit
 
 # webpack (ESLint rules don't agree with how these configs are written)
 webpack.config.dev.js

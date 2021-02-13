@@ -224,7 +224,7 @@ export const AppBar: FunctionComponent = () => {
 
                             {/* Create subscription group */}
                             <MenuItem onClick={onCreateSubscriptionGroup}>
-                                {"Create Subscription Group"}
+                                {t("label.create-subscription-group")}
                             </MenuItem>
                         </Menu>
                     </>

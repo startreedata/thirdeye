@@ -50,7 +50,7 @@ const QuickFilters = ({ filters }: Props): ReactElement => {
                 <Box className={classes.box}>
                     <Typography variant="subtitle1">Quick Filters</Typography>
                     <Typography variant="subtitle2">
-                        <Link href={"#"} underline={"none"}>
+                        <Link href="#" underline="none">
                             Clear Filters
                         </Link>
                     </Typography>

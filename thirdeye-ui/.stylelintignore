@@ -15,4 +15,4 @@ target/
 tsbuildinfo/
 
 # Jest
-src/test/coverage/
+src/test/unit/coverage/

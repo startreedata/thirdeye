@@ -111,13 +111,9 @@ export const Legend: FunctionComponent<LegendProps> = (props: LegendProps) => {
                                             alertEvaluationTimeSeriesLegendClasses.disabledlegendItemLabel
                                     )}
                                 >
-                                    {
-                                        <Typography variant="subtitle2">
-                                            {t(
-                                                `label.${kebabCase(label.text)}`
-                                            )}
-                                        </Typography>
-                                    }
+                                    <Typography variant="subtitle2">
+                                        {t(`label.${kebabCase(label.text)}`)}
+                                    </Typography>
                                 </LegendLabel>
                             </LegendItem>
                         ))}

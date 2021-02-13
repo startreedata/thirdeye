@@ -3,6 +3,6 @@
     "recommendations": [
         "dbaeumer.vscode-eslint", // ESLint
         "stylelint.vscode-stylelint", // stylelint
-        "esbenp.prettier-vscode" // Prettier - Code formatter
+        "esbenp.prettier-vscode" // Prettier
     ]
 }

@@ -1,0 +1,44 @@
+---
+extends:
+    - stylelint-config-recommended
+    - prettier
+    - stylelint-config-prettier
+
+rules:
+    # Disallow double slash comments
+    no-invalid-double-slash-comments: true
+
+    # Require whitespace padding in comments
+    comment-whitespace-inside: always
+
+    # Require an empty line before rules except rules that follow comments
+    rule-empty-line-before:
+        - always
+        - ignore: after-comment
+
+    # Require lowercase property/values
+    property-case: lower
+    value-keyword-case: lower
+    function-name-case: lower
+    selector-pseudo-class-case: lower
+    selector-pseudo-element-case: lower
+    selector-type-case: lower
+    media-feature-name-case: lower
+    at-rule-name-case: lower
+    unit-case: lower
+    color-hex-case: lower
+
+    # Require long notation for hex colors
+    color-hex-length: long
+
+    # Require a leading zero for fractional numbers less than 1
+    number-leading-zero: always
+
+    # Disallow trailing zreos in numbers
+    number-no-trailing-zeros: true
+
+    # Require generic family in list of font family names
+    font-family-no-missing-generic-family-keyword: true
+
+    # Require quotes around font family names where needed
+    font-family-name-quotes: always-where-required

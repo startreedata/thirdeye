@@ -1,14 +1,15 @@
 FROM nginx:1.19.5-alpine
 
 RUN addgroup -S thirdeye && \
-  adduser -S thirdeye -G thirdeye && \
-  chown thirdeye:thirdeye /home/thirdeye
+    adduser -S thirdeye -G thirdeye && \
+    chown thirdeye:thirdeye /home/thirdeye
 
 USER thirdeye
+
 WORKDIR /home/thirdeye
 
 RUN mkdir -p nginx/conf.d && \
-  mkdir nginx/log
+    mkdir nginx/log
 
 COPY dist/ /etc/nginx/html/
 COPY docker/nginx.conf /etc/nginx/nginx.conf

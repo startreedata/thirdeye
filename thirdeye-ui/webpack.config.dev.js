@@ -26,31 +26,30 @@ module.exports = {
     // Loaders
     module: {
         rules: [
+            // .ts and .tsx files to be handled by ts-loader
             {
-                // .ts and .tsx files to be handled by ts-loader
                 test: /\.(ts|tsx)$/,
                 loader: "ts-loader",
                 options: {
-                    // Speed up compilation in development mode
-                    transpileOnly: true,
+                    transpileOnly: true, // Speed up compilation in development mode
                 },
                 exclude: /node_modules/, // Just the source code
             },
+            // .css and .scss files to be handled by sass-loader
             {
-                // .css and .scss files to be handled by sass-loader
                 test: /\.(css|scss)$/,
                 use: ["style-loader", "css-loader", "sass-loader"],
                 // No exclude, may need to handle files outside the source code
                 // (from node_modules)
             },
+            // .svg files to be handled by @svgr/webpack
             {
-                // .svg files to be handled by @svgr/webpack
                 test: /\.svg$/,
                 use: ["@svgr/webpack", "url-loader"],
                 exclude: /node_modules/, // Just the source code
             },
+            // Font files to be handled by file-loader
             {
-                // Font files to be handled by file-loader
                 test: /\.ttf$/,
                 use: [
                     {
@@ -77,8 +76,8 @@ module.exports = {
         new CleanWebpackPlugin({
             verbose: true,
         }),
-        // In development mode, fork TypeScript checking to run in another thread and not block
-        // main transpilation
+        // In development mode, fork TypeScript checking to run in another thread and not block main
+        // transpilation
         new ForkTsCheckerWebpackPlugin({
             eslint: {
                 files: "**/*.{ts,tsx,js}",
@@ -114,6 +113,8 @@ module.exports = {
             name: "@cortexdata/thirdeye-ui [dev]",
             color: "#6EC4D1",
         }),
+        // Automatic Node.js polyfills removed in webpack 5
+        // Material-UI Data Grid requires Process
         new webpack.ProvidePlugin({
             process: "process/browser",
         }),
@@ -128,7 +129,6 @@ module.exports = {
         historyApiFallback: {
             disableDotRule: true,
         },
-
         // Proxy configuration
         proxy: [
             {

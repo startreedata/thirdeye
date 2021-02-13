@@ -25,27 +25,27 @@ module.exports = {
     // Loaders
     module: {
         rules: [
+            // .ts and .tsx files to be handled by ts-loader
             {
-                // .ts and .tsx files to be handled by ts-loader
                 test: /\.(ts|tsx)$/,
                 loader: "ts-loader",
                 exclude: /node_modules/, // Just the source code
             },
+            // .css and .scss files to be handled by sass-loader
             {
-                // .css and .scss files to be handled by sass-loader
                 test: /\.(css|scss)$/,
                 use: ["style-loader", "css-loader", "sass-loader"],
                 // No exclude, may need to handle files outside the source code
                 // (from node_modules)
             },
+            // .svg files to be handled by @svgr/webpack
             {
-                // .svg files to be handled by @svgr/webpack
                 test: /\.svg$/,
                 use: ["@svgr/webpack", "url-loader"],
                 exclude: /node_modules/, // Just the source code
             },
+            // Font files to be handled by file-loader
             {
-                // Font files to be handled by file-loader
                 test: /\.ttf$/,
                 use: [
                     {
@@ -102,6 +102,8 @@ module.exports = {
             name: "@cortexdata/thirdeye-ui [prod]",
             color: "#6EC4D1",
         }),
+        // Automatic Node.js polyfills removed in webpack 5
+        // Material-UI Data Grid requires Process
         new webpack.ProvidePlugin({
             process: "process/browser",
         }),

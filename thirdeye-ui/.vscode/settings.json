@@ -4,8 +4,8 @@
     "editor.formatOnSave": true,
 
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true, // eslint --fix on save
-        "source.fixAll.stylelint": true, // stylelint --fix on save
+        "source.fixAll.eslint": true, // Run ESLint on save
+        "source.fixAll.stylelint": true, // Run stylelint on save
         "source.organizeImports": true // Organize imports on save
     },
 

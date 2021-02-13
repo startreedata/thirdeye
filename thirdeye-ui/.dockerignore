@@ -1,3 +1,4 @@
+# Ignore everything other than docker and distribution files
 **
-!dist
 !docker
+!dist

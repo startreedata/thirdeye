@@ -16,9 +16,12 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import static org.mockito.Mockito.mock;
+
 import java.net.URL;
 import java.time.Duration;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.testng.annotations.Test;
 
 public class AutoOnboardServiceTest {
@@ -34,7 +37,8 @@ public class AutoOnboardServiceTest {
     URL url = AutoOnboardServiceTest.class.getResource("/data-sources/data-sources-config-1.yml");
     thirdEyeWorkerConfiguration.setDataSources(url.getPath());
 
-    AutoOnboardService autoOnboardService = new AutoOnboardService(thirdEyeWorkerConfiguration);
+    AutoOnboardService autoOnboardService = new AutoOnboardService(mock(DataSourcesLoader.class),
+        thirdEyeWorkerConfiguration);
     autoOnboardService.start();
 
     Thread.sleep(2000);

@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ public class AutoOnboardService implements Runnable {
   private final ScheduledExecutorService scheduledExecutorService;
 
   private final List<AutoOnboard> autoOnboardServices = new ArrayList<>();
+  private final DataSourcesLoader dataSourcesLoader;
   private final ThirdEyeWorkerConfiguration config;
 
   /**
@@ -52,7 +54,10 @@ public class AutoOnboardService implements Runnable {
    * if availble
    */
   @Inject
-  public AutoOnboardService(ThirdEyeWorkerConfiguration config) {
+  public AutoOnboardService(
+      final DataSourcesLoader dataSourcesLoader,
+      ThirdEyeWorkerConfiguration config) {
+    this.dataSourcesLoader = dataSourcesLoader;
     this.config = config;
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
   }
@@ -73,7 +78,7 @@ public class AutoOnboardService implements Runnable {
   public void run() {
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
         .getDataSourceToAutoOnboardMap(
-            requireNonNull(config.getDataSourcesAsUrl()));
+            requireNonNull(config.getDataSourcesAsUrl()), dataSourcesLoader);
 
     for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {
       autoOnboardServices.addAll(autoOnboards);

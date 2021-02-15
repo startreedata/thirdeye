@@ -28,7 +28,6 @@ import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
@@ -55,9 +54,8 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
   public void init(final ThirdEyeDataSourceContext context) {
     Map<String, Object> properties = context.getProperties();
 
-    metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
-    final DatasetConfigManager datasetConfigManager = DAORegistry.getInstance()
-        .getDatasetConfigDAO();
+    metricConfigManager = context.getMetricConfigManager();
+    final DatasetConfigManager datasetConfigManager = context.getDatasetConfigManager();
     sqlResponseCacheLoader = new SqlResponseCacheLoader(properties,
         metricConfigManager,
         datasetConfigManager);

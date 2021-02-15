@@ -48,7 +48,6 @@ import org.apache.pinot.thirdeye.dataframe.Series.StringConditional;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
@@ -102,7 +101,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
     }
 
     this.datasets = dataframes;
-    this.translator = new DAOTranslator(DAORegistry.getInstance().getMetricConfigDAO());
+    this.translator = new DAOTranslator(context.getMetricConfigManager());
     this.name = MapUtils.getString(properties, "name", CSVThirdEyeDataSource.class.getSimpleName());
   }
 

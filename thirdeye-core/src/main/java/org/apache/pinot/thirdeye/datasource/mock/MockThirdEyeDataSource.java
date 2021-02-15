@@ -56,7 +56,6 @@ import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
@@ -226,8 +225,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
       MetadataSourceConfig metadataSourceConfig = new MetadataSourceConfig();
       metadataSourceConfig.setProperties(properties);
 
-      metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
-      datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
+      metricConfigManager = context.getMetricConfigManager();;
+      datasetConfigManager = context.getDatasetConfigManager();
       AutoOnboardMockDataSource onboarding = new AutoOnboardMockDataSource(metadataSourceConfig,
           metricConfigManager,
           datasetConfigManager);

@@ -24,21 +24,37 @@ import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class contains helper classes to load/transform datasources from file
  */
+@Singleton
 public class DataSourcesLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataSourcesLoader.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
+
+  private final MetricConfigManager metricConfigManager;
+  private final DatasetConfigManager datasetConfigManager;
+
+  @Inject
+  public DataSourcesLoader(
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager) {
+    this.metricConfigManager = metricConfigManager;
+    this.datasetConfigManager = datasetConfigManager;
+  }
 
   /**
    * Returns datasources config from yml file
@@ -76,7 +92,10 @@ public class DataSourcesLoader {
         ThirdEyeDataSource thirdeyeDataSource = (ThirdEyeDataSource) constructor
             .newInstance();
         thirdeyeDataSource.init(new ThirdEyeDataSourceContext()
-            .setProperties(properties));
+            .setProperties(properties)
+            .setMetricConfigManager(metricConfigManager)
+            .setDatasetConfigManager(datasetConfigManager)
+        );
         // use class simple name as key, this enforces that there cannot be more than one data source of the same type
         String name = thirdeyeDataSource.getName();
         if (dataSourceMap.containsKey(name)) {

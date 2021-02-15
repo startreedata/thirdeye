@@ -69,13 +69,16 @@ public class ThirdEyeCacheRegistry {
   private LoadingCache<String, Long> datasetMaxDataTimeCache;
   private LoadingCache<String, String> dimensionFiltersCache;
   private DatasetListCache datasetsCache;
+  private final DataSourcesLoader dataSourcesLoader;
 
   @Inject
   public ThirdEyeCacheRegistry(
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final DataSourcesLoader dataSourcesLoader) {
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
+    this.dataSourcesLoader = dataSourcesLoader;
   }
 
   /**
@@ -101,13 +104,12 @@ public class ThirdEyeCacheRegistry {
   }
 
   public DataSourceCache buildQueryCache(final URL dataSourcesUrl) {
-    final DataSourcesLoader loader = new DataSourcesLoader();
     final DataSourcesConfiguration dataSourcesConfiguration = requireNonNull(
-        loader.fromDataSourcesUrl(dataSourcesUrl),
+        dataSourcesLoader.fromDataSourcesUrl(dataSourcesUrl),
         "Could not create data sources from path " + dataSourcesUrl);
 
     // Query Cache
-    final Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = loader
+    final Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = dataSourcesLoader
         .getDataSourceMap(dataSourcesConfiguration);
     return new DataSourceCache(thirdEyeDataSourcesMap);
   }

@@ -41,10 +41,11 @@ public class AutoOnboardUtility {
   private static final String DEFAULT_ALERT_GROUP_PREFIX = "auto_onboard_dataset_";
   private static final String DEFAULT_ALERT_GROUP_SUFFIX = "_alert";
 
-  public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(URL dataSourcesUrl) {
+  public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(URL dataSourcesUrl,
+      final DataSourcesLoader dataSourcesLoader) {
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = new HashMap<>();
 
-    DataSourcesConfiguration dataSourcesConfiguration = new DataSourcesLoader().fromDataSourcesUrl(dataSourcesUrl);
+    DataSourcesConfiguration dataSourcesConfiguration = dataSourcesLoader.fromDataSourcesUrl(dataSourcesUrl);
     if (dataSourcesConfiguration == null) {
       throw new IllegalStateException(
           "Could not create data sources config from path " + dataSourcesUrl);

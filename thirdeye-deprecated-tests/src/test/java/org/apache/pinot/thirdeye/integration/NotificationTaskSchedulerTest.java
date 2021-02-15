@@ -16,25 +16,28 @@
 
 package org.apache.pinot.thirdeye.integration;
 
+import static org.apache.pinot.thirdeye.Constants.CTX_INJECTOR;
 import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestDatasetConfig;
 import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestMetricConfig;
 import static org.mockito.Mockito.mock;
 
+import com.google.inject.Injector;
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
@@ -68,7 +71,6 @@ public class NotificationTaskSchedulerTest {
   private DetectionCronScheduler detectionJobScheduler = null;
   private SubscriptionCronScheduler alertJobScheduler = null;
   private TestDbEnv testDAOProvider = null;
-  private DAORegistry daoRegistry = null;
   private MetricConfigManager metricDAO;
   private DatasetConfigManager datasetDAO;
   private EventManager eventDAO;
@@ -77,13 +79,30 @@ public class NotificationTaskSchedulerTest {
   private EvaluationManager evaluationDAO;
   private ApplicationManager appDAO;
   private long detectionId;
+  private AlertManager alertManager;
+  private SubscriptionGroupManager subscriptionGroupManager;
 
   @BeforeClass
   void beforeClass() {
     testDAOProvider = new TestDbEnv();
-    daoRegistry = DAORegistry.getInstance();
-    Assert.assertNotNull(daoRegistry.getJobDAO());
-    initDao();
+    Injector injector = testDAOProvider.getInjector();
+
+    metricDAO = injector.getInstance(MetricConfigManager.class);
+    datasetDAO = injector.getInstance(DatasetConfigManager.class);
+    eventDAO = injector.getInstance(EventManager.class);
+    taskDAO = injector.getInstance(TaskManager.class);
+    anomalyDAO = injector.getInstance(MergedAnomalyResultManager.class);
+    evaluationDAO = injector.getInstance(EvaluationManager.class);
+    appDAO = injector.getInstance(ApplicationManager.class);
+    alertManager = injector.getInstance(AlertManager.class);
+    subscriptionGroupManager = injector.getInstance(SubscriptionGroupManager.class);
+
+    alertJobScheduler = injector.getInstance(SubscriptionCronScheduler.class);
+    alertJobScheduler.addToContext(CTX_INJECTOR, injector);
+
+    detectionJobScheduler = injector.getInstance(DetectionCronScheduler.class);
+    detectionJobScheduler.addToContext(CTX_INJECTOR, injector);
+
     initRegistries();
   }
 
@@ -99,17 +118,6 @@ public class NotificationTaskSchedulerTest {
         .registerAlertScheme("EMAIL", DetectionEmailAlerter.class.getName());
     DetectionAlertRegistry.getInstance().registerAlertFilter("DEFAULT_ALERTER_PIPELINE",
         ToAllRecipientsDetectionAlertFilter.class.getName());
-  }
-
-  void initDao() {
-    daoRegistry = DAORegistry.getInstance();
-    metricDAO = daoRegistry.getMetricConfigDAO();
-    datasetDAO = daoRegistry.getDatasetConfigDAO();
-    eventDAO = daoRegistry.getEventDAO();
-    taskDAO = daoRegistry.getTaskDAO();
-    anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
-    evaluationDAO = daoRegistry.getEvaluationManager();
-    appDAO = daoRegistry.getApplicationDAO();
   }
 
   private void cleanup_schedulers() throws SchedulerException {
@@ -139,10 +147,11 @@ public class NotificationTaskSchedulerTest {
         mock(TimeSeriesCacheBuilder.class),
         mock(AnomaliesCacheBuilder.class));
 
-    detectionId = daoRegistry.getDetectionConfigManager()
+    detectionId = alertManager
         .save(DaoTestUtils.getTestDetectionConfig(provider, detectionConfigFile));
+
     // create test alert configuration
-    daoRegistry.getDetectionAlertConfigManager()
+    subscriptionGroupManager
         .save(DaoTestUtils.getTestDetectionAlertConfig(alertConfigFile));
   }
 
@@ -152,10 +161,10 @@ public class NotificationTaskSchedulerTest {
     setup();
 
     // start detection scheduler
-    startDetectionScheduler();
+    detectionJobScheduler.start();
 
     // start alert scheduler
-    startAlertScheduler();
+    alertJobScheduler.start();
 
     // check only detection task is created, but detection alert task is not created
     Thread.sleep(10000);
@@ -178,17 +187,5 @@ public class NotificationTaskSchedulerTest {
     Assert.assertTrue(tasks.size() > 0);
     Assert.assertTrue(
         tasks.stream().anyMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION_ALERT));
-  }
-
-  private void startAlertScheduler() throws SchedulerException {
-    alertJobScheduler = new SubscriptionCronScheduler(
-        DAORegistry.getInstance().getDetectionAlertConfigManager());
-    alertJobScheduler.start();
-  }
-
-  private void startDetectionScheduler() throws Exception {
-    detectionJobScheduler = new DetectionCronScheduler(
-        DAORegistry.getInstance().getDetectionConfigManager());
-    detectionJobScheduler.start();
   }
 }

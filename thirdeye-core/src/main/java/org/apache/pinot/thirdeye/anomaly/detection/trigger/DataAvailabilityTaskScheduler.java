@@ -48,7 +48,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
@@ -120,16 +119,18 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       try {
         long detectionConfigId = detectionConfig.getId();
         DetectionPipelineTaskInfo taskInfo = TaskUtils
-            .buildTaskInfoFromDetectionConfig(detectionConfig, detectionEndTime,
-                thirdEyeCacheRegistry, DAORegistry.getInstance().getDatasetConfigDAO(),
-                DAORegistry.getInstance().getMetricConfigDAO());
+            .buildTaskInfoFromDetectionConfig(detectionConfig,
+                detectionEndTime,
+                thirdEyeCacheRegistry,
+                datasetConfigManager,
+                metricConfigManager);
         if (!runningDetection.containsKey(detectionConfigId)) {
           if (isAllDatasetUpdated(detectionConfig, detection2DatasetMap.get(detectionConfig),
               datasetConfigMap)) {
             if (isWithinSchedulingWindow(detection2DatasetMap.get(detectionConfig),
                 datasetConfigMap)) {
               //TODO: additional check is required if detection is based on aggregated value across multiple data points
-              createDetectionTask(taskInfo, DAORegistry.getInstance().getTaskDAO());
+              createDetectionTask(taskInfo, taskManager);
               detectionIdToLastTaskEndTimeMap.put(detectionConfig.getId(), taskInfo.getEnd());
               ThirdeyeMetricsUtil.eventScheduledTaskCounter.inc();
               taskCount++;

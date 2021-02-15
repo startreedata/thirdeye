@@ -2,6 +2,7 @@
   {
     "name": "newAlert",
     "description": "This is the detection used by online service",
+    "cron": "0 0/1 * 1/1 * ? * ",
     "nodes": {
       "d1": {
         "type": "DETECTION",

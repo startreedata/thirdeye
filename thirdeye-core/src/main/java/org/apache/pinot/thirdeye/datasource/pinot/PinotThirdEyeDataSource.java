@@ -26,7 +26,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -50,6 +49,7 @@ import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
@@ -69,49 +69,11 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private static final String PINOT = "Pinot";
   private static final String PINOT_QUERY_FORMAT = "pql";
 
-  private final String name;
-  private final PinotResponseCacheLoader pinotResponseCacheLoader;
-
-  protected LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
-  protected PinotDataSourceTimeQuery pinotDataSourceTimeQuery;
-  protected PinotDataSourceDimensionFilters pinotDataSourceDimensionFilters;
-
-  /**
-   * Construct a Pinot data source, which connects to a Pinot controller, using {@link
-   * PinotThirdEyeDataSourceConfig}.
-   *
-   * @param pinotThirdEyeDataSourceConfig the configuration that provides the information of the
-   *     Pinot controller.
-   * @throws Exception when failed to connect to the controller.
-   */
-  public PinotThirdEyeDataSource(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig)
-      throws Exception {
-    pinotResponseCacheLoader = new PinotControllerResponseCacheLoader(
-        pinotThirdEyeDataSourceConfig);
-    pinotResponseCache = ThirdEyeUtils.buildResponseCache(pinotResponseCacheLoader);
-
-    pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
-    pinotDataSourceDimensionFilters = new PinotDataSourceDimensionFilters(this);
-    name = pinotThirdEyeDataSourceConfig.getName() != null ? pinotThirdEyeDataSourceConfig.getName()
-        : PinotThirdEyeDataSource.class.getSimpleName();
-  }
-
-  /**
-   * This constructor is invoked by Java Reflection for initialize a ThirdEyeDataSource.
-   *
-   * @param properties the property to initialize this data source.
-   */
-  public PinotThirdEyeDataSource(Map<String, Object> properties) throws Exception {
-    Preconditions.checkNotNull(properties, "Data source property cannot be empty.");
-
-    pinotResponseCacheLoader = getCacheLoaderInstance(properties);
-    pinotResponseCacheLoader.init(properties);
-    pinotResponseCache = ThirdEyeUtils.buildResponseCache(pinotResponseCacheLoader);
-
-    pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
-    pinotDataSourceDimensionFilters = new PinotDataSourceDimensionFilters(this);
-    name = MapUtils.getString(properties, "name", PinotThirdEyeDataSource.class.getSimpleName());
-  }
+  private String name;
+  private PinotResponseCacheLoader pinotResponseCacheLoader;
+  private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
+  private PinotDataSourceTimeQuery pinotDataSourceTimeQuery;
+  private PinotDataSourceDimensionFilters pinotDataSourceDimensionFilters;
 
   /**
    * Constructs a PinotResponseCacheLoader from the given property map and initialize the loader
@@ -124,14 +86,12 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    */
   static PinotResponseCacheLoader getCacheLoaderInstance(Map<String, Object> properties)
       throws Exception {
-    final String cacheLoaderClassName;
-    if (properties.containsKey(CACHE_LOADER_CLASS_NAME_STRING)) {
-      cacheLoaderClassName = properties.get(CACHE_LOADER_CLASS_NAME_STRING).toString();
-    } else {
-      cacheLoaderClassName = PinotControllerResponseCacheLoader.class.getName();
-    }
+    final String cacheLoaderClassName = properties.containsKey(CACHE_LOADER_CLASS_NAME_STRING)
+        ? properties.get(CACHE_LOADER_CLASS_NAME_STRING).toString()
+        : PinotControllerResponseCacheLoader.class.getName();
+
     LOG.info("Constructing cache loader: {}", cacheLoaderClassName);
-    Class<?> aClass = null;
+    Class<?> aClass;
     try {
       aClass = Class.forName(cacheLoaderClassName);
     } catch (Throwable throwable) {
@@ -139,10 +99,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       aClass = PinotControllerResponseCacheLoader.class;
     }
     LOG.info("Initiating cache loader: {}", aClass.getName());
-    Constructor<?> constructor = aClass.getConstructor();
-    PinotResponseCacheLoader pinotResponseCacheLoader = (PinotResponseCacheLoader) constructor
-        .newInstance();
-    return pinotResponseCacheLoader;
+    return (PinotResponseCacheLoader) aClass.getConstructor().newInstance();
   }
 
   /**
@@ -209,6 +166,24 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     }
 
     return decoratedFilterSet;
+  }
+
+  @Override
+  public void init(final ThirdEyeDataSourceContext context) {
+    Map<String, Object> properties = requireNonNull(context.getProperties(),
+        "Data source property cannot be empty.");
+
+    try {
+      pinotResponseCacheLoader = getCacheLoaderInstance(properties);
+      pinotResponseCacheLoader.init(properties);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    pinotResponseCache = ThirdEyeUtils.buildResponseCache(pinotResponseCacheLoader);
+
+    pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
+    pinotDataSourceDimensionFilters = new PinotDataSourceDimensionFilters(this);
+    name = MapUtils.getString(properties, "name", PinotThirdEyeDataSource.class.getSimpleName());
   }
 
   @Override

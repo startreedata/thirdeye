@@ -91,7 +91,7 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
 
   public SqlResponseCacheLoader(Map<String, Object> properties,
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) throws Exception {
+      final DatasetConfigManager datasetConfigManager) {
 
     // Init Presto datasources
     if (properties.containsKey(PRESTO)) {
@@ -254,7 +254,7 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
           }
         } catch (Exception e) {
           LOG.error(e.getMessage());
-          throw e;
+          throw new RuntimeException(e);
         }
       }
     }

@@ -63,7 +63,8 @@ public class DataSourcesLoader {
   public Map<String, ThirdEyeDataSource> getDataSourceMap(
       DataSourcesConfiguration dataSourcesConfiguration) {
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
-    if (!optional(dataSourcesConfiguration.getDataSourceConfigs()).filter(l -> l.size() > 0).isPresent()) {
+    if (!optional(dataSourcesConfiguration.getDataSourceConfigs()).filter(l -> l.size() > 0)
+        .isPresent()) {
       return dataSourceMap;
     }
     for (DataSourceConfig dataSourceConfig : dataSourcesConfiguration.getDataSourceConfigs()) {
@@ -71,9 +72,11 @@ public class DataSourcesLoader {
       Map<String, Object> properties = dataSourceConfig.getProperties();
       try {
         LOG.info("Creating thirdeye datasource {} with properties '{}'", className, properties);
-        Constructor<?> constructor = Class.forName(className).getConstructor(Map.class);
+        Constructor<?> constructor = Class.forName(className).getConstructor();
         ThirdEyeDataSource thirdeyeDataSource = (ThirdEyeDataSource) constructor
-            .newInstance(properties);
+            .newInstance();
+        thirdeyeDataSource.init(new ThirdEyeDataSourceContext()
+            .setProperties(properties));
         // use class simple name as key, this enforces that there cannot be more than one data source of the same type
         String name = thirdeyeDataSource.getName();
         if (dataSourceMap.containsKey(name)) {

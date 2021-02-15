@@ -59,6 +59,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
@@ -92,24 +93,21 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   private static final String PROP_DATASET_METRICS = "metrics";
   private static final DateTime MIN_DATETIME = DateTime.parse("1970-01-01");
 
-  final Map<String, MockDataset> datasets;
+  Map<String, MockDataset> datasets;
 
-  final Map<String, DataFrame> datasetData;
-  final Map<Long, String> metricNameMap;
+  Map<String, DataFrame> datasetData;
+  Map<Long, String> metricNameMap;
 
-  final String name;
+  String name;
 
-  final CSVThirdEyeDataSource delegate;
+  CSVThirdEyeDataSource delegate;
   private MetricConfigManager metricConfigManager;
   private DatasetConfigManager datasetConfigManager;
 
-  /**
-   * This constructor is invoked by Java Reflection to initialize a ThirdEyeDataSource.
-   *
-   * @param properties the properties to initialize this data source with
-   * @throws Exception if properties cannot be parsed
-   */
-  public MockThirdEyeDataSource(Map<String, Object> properties) throws Exception {
+  @Override
+  public void init(final ThirdEyeDataSourceContext context) {
+    Map<String, Object> properties = context.getProperties();
+
     this.name = MapUtils
         .getString(properties, "name", MockThirdEyeDataSource.class.getSimpleName());
 
@@ -240,7 +238,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
     loadMockCSVData(properties);
   }
 
-  private void loadMockCSVData(Map<String, Object> properties) throws Exception {
+  private void loadMockCSVData(Map<String, Object> properties) {
     if (properties.containsKey(H2)) {
       DataSource h2DataSource = new DataSource();
       Map<String, Object> objMap = ConfigUtils.getMap(properties.get(H2));
@@ -306,7 +304,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
           }
         } catch (Exception e) {
           LOG.error(e.getMessage());
-          throw e;
+          throw new RuntimeException(e);
         }
       }
     }

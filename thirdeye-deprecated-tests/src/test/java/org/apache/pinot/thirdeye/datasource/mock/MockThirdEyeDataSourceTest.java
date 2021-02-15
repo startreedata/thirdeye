@@ -12,6 +12,7 @@ import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.testng.Assert;
@@ -44,8 +45,9 @@ public class MockThirdEyeDataSourceTest {
       Map<String, List<Map<String, Map<String, Object>>>> config =
           (Map<String, List<Map<String, Map<String, Object>>>>) yaml.load(dataReader);
 
-      this.dataSource = new MockThirdEyeDataSource(
-          config.get("dataSourceConfigs").get(0).get("properties"));
+      this.dataSource = new MockThirdEyeDataSource();
+      this.dataSource.init(new ThirdEyeDataSourceContext()
+      .setProperties(config.get("dataSourceConfigs").get(0).get("properties")));
     }
   }
 

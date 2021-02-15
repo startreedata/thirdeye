@@ -23,6 +23,7 @@ import static org.apache.pinot.thirdeye.dataframe.Series.SeriesType.STRING;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -50,6 +51,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 
@@ -65,9 +67,14 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
    */
   public static final String COL_TIMESTAMP = "timestamp";
 
-  private final Map<String, DataFrame> datasets;
-  private final TranslateDelegator translator; // The Translator from metric Id to metric name.
-  private final String name; // datasource name
+  private Map<String, DataFrame> datasets;
+  private TranslateDelegator translator; // The Translator from metric Id to metric name.
+  private String name; // datasource name
+
+  @SuppressWarnings("unused")
+  public CSVThirdEyeDataSource() {
+    // Used to instantiate the class.
+  }
 
   /**
    * This constructor is invoked by fromUrl
@@ -81,18 +88,16 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
     this.name = CSVThirdEyeDataSource.class.getSimpleName();
   }
 
-  /**
-   * This constructor is invoked by Java Reflection for initialize a ThirdEyeDataSource.
-   *
-   * @param properties the property to initialize this data source
-   * @throws Exception the exception
-   */
-  public CSVThirdEyeDataSource(Map<String, Object> properties) throws Exception {
+  @Override
+  public void init(ThirdEyeDataSourceContext context) {
+    Map<String, Object> properties = context.getProperties();
     Map<String, DataFrame> dataframes = new HashMap<>();
     for (Map.Entry<String, Object> property : properties.entrySet()) {
       try (InputStreamReader reader = new InputStreamReader(
           makeUrlFromPath(property.getValue().toString()).openStream())) {
         dataframes.put(property.getKey(), DataFrame.fromCsv(reader));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
     }
 

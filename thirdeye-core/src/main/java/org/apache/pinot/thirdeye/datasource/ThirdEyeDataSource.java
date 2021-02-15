@@ -30,6 +30,13 @@ public interface ThirdEyeDataSource {
    */
   String getName();
 
+  /**
+   * Initilize the data source
+   *
+   * @param context Provides initialization parameters and relevant services.
+   */
+  void init(ThirdEyeDataSourceContext context);
+
   ThirdEyeResponse execute(ThirdEyeRequest request) throws Exception;
 
   List<String> getDatasets() throws Exception;

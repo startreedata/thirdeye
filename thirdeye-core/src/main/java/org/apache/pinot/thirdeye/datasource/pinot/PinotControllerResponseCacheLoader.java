@@ -66,27 +66,6 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   private final AtomicInteger activeConnections = new AtomicInteger();
 
   /**
-   * Constructs a empty {@link PinotControllerResponseCacheLoader}. Please use init() to setup the
-   * connection of the
-   * constructed cache loader.
-   */
-  public PinotControllerResponseCacheLoader() {
-  }
-
-  /**
-   * Constructs a {@link PinotControllerResponseCacheLoader} using the given data source config.
-   *
-   * @param pinotThirdEyeDataSourceConfig the data source config that provides controller's
-   *     information.
-   * @throws Exception when an error occurs connecting to the Pinot controller.
-   */
-  public PinotControllerResponseCacheLoader(
-      PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig)
-      throws Exception {
-    this.init(pinotThirdEyeDataSourceConfig);
-  }
-
-  /**
    * Initializes the cache loader using the given property map.
    *
    * @param properties the property map that provides controller's information.
@@ -185,25 +164,15 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   }
 
   private static Connection[] fromHostList(final String[] thirdeyeBrokers) throws Exception {
-    Callable<Connection> callable = new Callable<Connection>() {
-      @Override
-      public Connection call() throws Exception {
-        return ConnectionFactory.fromHostList(thirdeyeBrokers);
-      }
-    };
+    Callable<Connection> callable = () -> ConnectionFactory.fromHostList(thirdeyeBrokers);
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
 
   private static Connection[] fromZookeeper(
       final PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
-    Callable<Connection> callable = new Callable<Connection>() {
-      @Override
-      public Connection call() throws Exception {
-        return ConnectionFactory.fromZookeeper(
-            pinotThirdEyeDataSourceConfig.getZookeeperUrl()
-                + "/" + pinotThirdEyeDataSourceConfig.getClusterName());
-      }
-    };
+    Callable<Connection> callable = () -> ConnectionFactory.fromZookeeper(
+        pinotThirdEyeDataSourceConfig.getZookeeperUrl()
+            + "/" + pinotThirdEyeDataSourceConfig.getClusterName());
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
 

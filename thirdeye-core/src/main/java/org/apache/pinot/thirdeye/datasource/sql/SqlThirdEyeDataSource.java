@@ -33,6 +33,7 @@ import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
@@ -45,15 +46,18 @@ import org.slf4j.LoggerFactory;
 public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   private static final Logger LOG = LoggerFactory.getLogger(SqlThirdEyeDataSource.class);
-  private final MetricConfigManager metricConfigManager;
-  private final DatasetConfigManager datasetConfigManager;
-  protected LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> sqlResponseCache;
-  private final SqlResponseCacheLoader sqlResponseCacheLoader;
-  private final String name;
+  private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> sqlResponseCache;
+  private MetricConfigManager metricConfigManager;
+  private SqlResponseCacheLoader sqlResponseCacheLoader;
+  private String name;
 
-  public SqlThirdEyeDataSource(Map<String, Object> properties) throws Exception {
+  @Override
+  public void init(final ThirdEyeDataSourceContext context) {
+    Map<String, Object> properties = context.getProperties();
+
     metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
-    datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
+    final DatasetConfigManager datasetConfigManager = DAORegistry.getInstance()
+        .getDatasetConfigDAO();
     sqlResponseCacheLoader = new SqlResponseCacheLoader(properties,
         metricConfigManager,
         datasetConfigManager);

@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.worker;
 
+import static org.apache.pinot.thirdeye.Constants.CTX_INJECTOR;
 import static org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.readPersistenceConfig;
 
 import com.google.inject.Guice;
@@ -44,7 +45,9 @@ import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SchedulerService;
+import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
 import org.apache.pinot.thirdeye.task.TaskDriver;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
@@ -98,6 +101,12 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
 
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
     schedulerService = injector.getInstance(SchedulerService.class);
+
+    injector.getInstance(DetectionCronScheduler.class)
+        .addToContext(CTX_INJECTOR, injector);
+
+    injector.getInstance(SubscriptionCronScheduler.class)
+        .addToContext(CTX_INJECTOR, injector);
 
     env.lifecycle().manage(lifecycleManager(config));
   }

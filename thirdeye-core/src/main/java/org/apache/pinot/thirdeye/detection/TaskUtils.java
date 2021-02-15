@@ -95,24 +95,29 @@ public class TaskUtils {
   }
 
   public static DetectionPipelineTaskInfo buildTaskInfo(JobExecutionContext jobExecutionContext,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry, final AlertManager detectionConfigManager,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final AlertManager detectionConfigManager,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
     JobKey jobKey = jobExecutionContext.getJobDetail().getKey();
     Long id = getIdFromJobKey(jobKey.getName());
     AlertDTO configDTO = detectionConfigManager.findById(id);
 
-    return buildTaskInfoFromDetectionConfig(configDTO, System.currentTimeMillis(),
-        thirdEyeCacheRegistry, datasetConfigManager,
+    return buildTaskInfoFromDetectionConfig(configDTO,
+        System.currentTimeMillis(),
+        thirdEyeCacheRegistry,
+        datasetConfigManager,
         metricConfigManager);
   }
 
   public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO configDTO,
-      long end, final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      long end,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
     final long delay = getDetectionExpectedDelay(configDTO,
-        thirdEyeCacheRegistry, datasetConfigManager,
+        thirdEyeCacheRegistry,
+        datasetConfigManager,
         metricConfigManager);
     final long start = Math.max(configDTO.getLastTimestamp(),
         end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);

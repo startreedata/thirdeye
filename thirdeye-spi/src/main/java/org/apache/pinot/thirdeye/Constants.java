@@ -24,6 +24,9 @@ public interface Constants {
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
   String NO_AUTH_USER = "no-auth-user";
 
+  // Used in Quartz Scheduler context
+  String CTX_INJECTOR = "CTX_INJECTOR";
+
   enum JobStatus {
     SCHEDULED,
     COMPLETED,

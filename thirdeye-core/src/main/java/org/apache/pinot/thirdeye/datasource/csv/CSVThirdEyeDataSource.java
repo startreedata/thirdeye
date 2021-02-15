@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.datasource.csv;
 
 import static org.apache.pinot.thirdeye.dataframe.Series.SeriesType.STRING;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
 import java.io.InputStreamReader;
@@ -35,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
@@ -44,6 +42,9 @@ import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.Grouping;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.Series;
+import org.apache.pinot.thirdeye.dataframe.Series.LongConditional;
+import org.apache.pinot.thirdeye.dataframe.Series.StringConditional;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -64,22 +65,41 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
    */
   public static final String COL_TIMESTAMP = "timestamp";
 
-  public static final String DATA_SOURCE_NAME = CSVThirdEyeDataSource.class.getSimpleName();
+  private final Map<String, DataFrame> datasets;
+  private final TranslateDelegator translator; // The Translator from metric Id to metric name.
+  private final String name; // datasource name
 
   /**
-   * The Data sets.
+   * This constructor is invoked by fromUrl
+   *
+   * @param datasets the data sets
+   * @param metricNameMap the static metric Id to metric name mapping.
    */
-  Map<String, DataFrame> dataSets;
+  CSVThirdEyeDataSource(Map<String, DataFrame> datasets, Map<Long, String> metricNameMap) {
+    this.datasets = datasets;
+    this.translator = new StaticTranslator(metricNameMap);
+    this.name = CSVThirdEyeDataSource.class.getSimpleName();
+  }
 
   /**
-   * The Translator from metric Id to metric name.
+   * This constructor is invoked by Java Reflection for initialize a ThirdEyeDataSource.
+   *
+   * @param properties the property to initialize this data source
+   * @throws Exception the exception
    */
-  TranslateDelegator translator;
+  public CSVThirdEyeDataSource(Map<String, Object> properties) throws Exception {
+    Map<String, DataFrame> dataframes = new HashMap<>();
+    for (Map.Entry<String, Object> property : properties.entrySet()) {
+      try (InputStreamReader reader = new InputStreamReader(
+          makeUrlFromPath(property.getValue().toString()).openStream())) {
+        dataframes.put(property.getKey(), DataFrame.fromCsv(reader));
+      }
+    }
 
-  /**
-   * DataSource name
-   */
-  String name;
+    this.datasets = dataframes;
+    this.translator = new DAOTranslator(DAORegistry.getInstance().getMetricConfigDAO());
+    this.name = MapUtils.getString(properties, "name", CSVThirdEyeDataSource.class.getSimpleName());
+  }
 
   /**
    * Factory method of CSVThirdEyeDataSource. Construct a CSVThirdEyeDataSource using data frames.
@@ -115,38 +135,6 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   /**
-   * This constructor is invoked by fromUrl
-   *
-   * @param dataSets the data sets
-   * @param metricNameMap the static metric Id to metric name mapping.
-   */
-  CSVThirdEyeDataSource(Map<String, DataFrame> dataSets, Map<Long, String> metricNameMap) {
-    this.dataSets = dataSets;
-    this.translator = new StaticTranslator(metricNameMap);
-    this.name = CSVThirdEyeDataSource.class.getSimpleName();
-  }
-
-  /**
-   * This constructor is invoked by Java Reflection for initialize a ThirdEyeDataSource.
-   *
-   * @param properties the property to initialize this data source
-   * @throws Exception the exception
-   */
-  public CSVThirdEyeDataSource(Map<String, Object> properties) throws Exception {
-    Map<String, DataFrame> dataframes = new HashMap<>();
-    for (Map.Entry<String, Object> property : properties.entrySet()) {
-      try (InputStreamReader reader = new InputStreamReader(
-          makeUrlFromPath(property.getValue().toString()).openStream())) {
-        dataframes.put(property.getKey(), DataFrame.fromCsv(reader));
-      }
-    }
-
-    this.dataSets = dataframes;
-    this.translator = new DAOTranslator();
-    this.name = MapUtils.getString(properties, "name", CSVThirdEyeDataSource.class.getSimpleName());
-  }
-
-  /**
    * Return the name of CSVThirdEyeDataSource.
    *
    * @return the name of this CSVThirdEyeDataSource
@@ -177,25 +165,19 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
             String.format("Aggregation function '%s' not supported yet.", aggFunction));
       }
 
-      DataFrame data = dataSets.get(function.getDataset());
+      DataFrame data = datasets.get(function.getDataset());
 
       // filter constraints
       if (request.getStartTimeInclusive() != null) {
-        data = data.filter(new Series.LongConditional() {
-          @Override
-          public boolean apply(long... values) {
-            return values[0] >= request.getStartTimeInclusive().getMillis();
-          }
-        }, COL_TIMESTAMP);
+        data = data.filter(
+            (LongConditional) values -> values[0] >= request.getStartTimeInclusive().getMillis(),
+            COL_TIMESTAMP);
       }
 
       if (request.getEndTimeExclusive() != null) {
-        data = data.filter(new Series.LongConditional() {
-          @Override
-          public boolean apply(long... values) {
-            return values[0] < request.getEndTimeExclusive().getMillis();
-          }
-        }, COL_TIMESTAMP);
+        data = data.filter(
+            (LongConditional) values -> values[0] < request.getEndTimeExclusive().getMillis(),
+            COL_TIMESTAMP);
       }
 
       if (request.getFilterSet() != null) {
@@ -225,16 +207,13 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
               dataFrameGrouping.aggregate(aggregationExps).getSeries().get("key").getObjects()
                   .toListTyped();
           for (final DataFrame.Tuple key : tuples) {
-            DataFrame filteredData = data.filter(new Series.StringConditional() {
-              @Override
-              public boolean apply(String... values) {
-                for (int i = 0; i < groupByColumns.length; i++) {
-                  if (values[i] != key.getValues()[i]) {
-                    return false;
-                  }
+            DataFrame filteredData = data.filter((StringConditional) values -> {
+              for (int i = 0; i < groupByColumns.length; i++) {
+                if (values[i] != key.getValues()[i]) {
+                  return false;
                 }
-                return true;
               }
+              return true;
             }, groupByColumns);
             filteredData = filteredData.dropNull()
                 .groupByInterval(COL_TIMESTAMP, request.getGroupByTimeGranularity().toMillis())
@@ -291,7 +270,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public List<String> getDatasets() throws Exception {
-    return new ArrayList<>(dataSets.keySet());
+    return new ArrayList<>(datasets.keySet());
   }
 
   @Override
@@ -306,19 +285,20 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    if (!dataSets.containsKey(datasetConfig.getName())) {
+    if (!datasets.containsKey(datasetConfig.getName())) {
       throw new IllegalArgumentException();
     }
-    return dataSets.get(datasetConfig.getName()).getLongs(COL_TIMESTAMP).max().longValue();
+    return datasets.get(datasetConfig.getName()).getLongs(COL_TIMESTAMP).max().longValue();
   }
 
   @Override
-  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig) throws Exception {
+  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
+      throws Exception {
     String dataset = datasetConfig.getName();
-    if (!dataSets.containsKey(dataset)) {
+    if (!datasets.containsKey(dataset)) {
       throw new IllegalArgumentException();
     }
-    Map<String, Series> data = dataSets.get(dataset).getSeries();
+    Map<String, Series> data = datasets.get(dataset).getSeries();
     Map<String, List<String>> output = new HashMap<>();
     for (Map.Entry<String, Series> entry : data.entrySet()) {
       if (entry.getValue().type() == STRING) {
@@ -326,6 +306,32 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
       }
     }
     return output;
+  }
+
+  private URL makeUrlFromPath(String input) {
+    try {
+      return new URL(input);
+    } catch (MalformedURLException ignore) {
+      // ignore
+    }
+    return this.getClass().getResource(input);
+  }
+
+  /**
+   * Returns a filter function with inclusion and exclusion support
+   *
+   * @param values dimension filter values
+   * @return StringConditional
+   */
+  private Series.StringConditional makeFilter(Collection<String> values) {
+    final Set<String> exclusions = new HashSet<>(
+        Collections2.filter(values, s -> s != null && s.startsWith("!")));
+
+    final Set<String> inclusions = new HashSet<>(values);
+    inclusions.removeAll(exclusions);
+
+    return values1 -> (inclusions.isEmpty() || inclusions.contains(values1[0])) && !exclusions
+        .contains("!" + values1[0]);
   }
 
   private interface TranslateDelegator {
@@ -341,13 +347,19 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
 
   private static class DAOTranslator implements TranslateDelegator {
 
+    private final MetricConfigManager metricConfigManager;
+
+    public DAOTranslator(final MetricConfigManager metricConfigManager) {
+      this.metricConfigManager = metricConfigManager;
+    }
+
     /**
      * The translator that maps metric id to metric name based on a configDTO.
      */
 
     @Override
     public String translate(Long metricId) {
-      MetricConfigDTO configDTO = DAORegistry.getInstance().getMetricConfigDAO().findById(metricId);
+      MetricConfigDTO configDTO = metricConfigManager.findById(metricId);
       if (configDTO == null) {
         throw new IllegalArgumentException(String.format("Can not find metric id %d", metricId));
       }
@@ -375,42 +387,6 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
     public String translate(Long metricId) {
       return staticMap.get(metricId);
     }
-  }
-
-  private URL makeUrlFromPath(String input) {
-    try {
-      return new URL(input);
-    } catch (MalformedURLException ignore) {
-      // ignore
-    }
-    return this.getClass().getResource(input);
-  }
-
-  /**
-   * Returns a filter function with inclusion and exclusion support
-   *
-   * @param values dimension filter values
-   * @return StringConditional
-   */
-  private Series.StringConditional makeFilter(Collection<String> values) {
-    final Set<String> exclusions = new HashSet<>(
-        Collections2.filter(values, new Predicate<String>() {
-          @Override
-          public boolean apply(@Nullable String s) {
-            return s != null && s.startsWith("!");
-          }
-        }));
-
-    final Set<String> inclusions = new HashSet<>(values);
-    inclusions.removeAll(exclusions);
-
-    return new Series.StringConditional() {
-      @Override
-      public boolean apply(String... values) {
-        return (inclusions.isEmpty() || inclusions.contains(values[0])) && !exclusions
-            .contains("!" + values[0]);
-      }
-    };
   }
 }
 

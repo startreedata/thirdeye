@@ -32,9 +32,8 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificat
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
-import org.quartz.Job;
+import org.apache.pinot.thirdeye.scheduler.ThirdEyeAbstractJob;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -44,29 +43,24 @@ import org.slf4j.LoggerFactory;
  * The Detection alert job that run by the cron scheduler.
  * This job put detection alert task into database which can be picked up by works later.
  */
-public class DetectionAlertJob implements Job {
+public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertJob.class);
-  private final SubscriptionGroupManager alertConfigDAO;
-  private final TaskManager taskDAO;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private final MergedAnomalyResultManager anomalyDAO;
-  private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationDAO;
-
-  public DetectionAlertJob() {
-    this.alertConfigDAO = DAORegistry.getInstance().getDetectionAlertConfigManager();
-    this.taskDAO = DAORegistry.getInstance().getTaskDAO();
-    this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
-    this.anomalySubscriptionGroupNotificationDAO = DAORegistry.getInstance()
-        .getAnomalySubscriptionGroupNotificationManager();
-  }
 
   @Override
-  public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-    LOG.debug("Running " + jobExecutionContext.getJobDetail().getKey().getName());
-    String jobKey = jobExecutionContext.getJobDetail().getKey().getName();
-    long detectionAlertConfigId = TaskUtils.getIdFromJobKey(jobKey);
-    SubscriptionGroupDTO configDTO = alertConfigDAO.findById(detectionAlertConfigId);
+  public void execute(JobExecutionContext ctx) throws JobExecutionException {
+    final SubscriptionGroupManager alertConfigDAO = getInstance(ctx,
+        SubscriptionGroupManager.class);
+    final MergedAnomalyResultManager anomalyDAO = getInstance(ctx,
+        MergedAnomalyResultManager.class);
+    final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationDAO =
+        getInstance(ctx, AnomalySubscriptionGroupNotificationManager.class);
+    final TaskManager taskDAO = getInstance(ctx, TaskManager.class);
+
+    final String jobKey = ctx.getJobDetail().getKey().getName();
+    final long detectionAlertConfigId = TaskUtils.getIdFromJobKey(jobKey);
+    final SubscriptionGroupDTO configDTO = alertConfigDAO.findById(detectionAlertConfigId);
     if (configDTO == null) {
       LOG.error("Subscription config {} does not exist", detectionAlertConfigId);
     }
@@ -89,7 +83,8 @@ public class DetectionAlertJob implements Job {
       return;
     }
 
-    if (configDTO != null && !needNotification(configDTO)) {
+    if (configDTO != null && !needNotification(configDTO, anomalyDAO,
+        anomalySubscriptionGroupNotificationDAO)) {
       LOG.info("Skip scheduling subscription task {}. No anomaly to notify.", jobName);
       return;
     }
@@ -127,7 +122,9 @@ public class DetectionAlertJob implements Job {
    * @param configDTO The Subscription Configuration.
    * @return true if it needs notification task. false otherwise.
    */
-  private boolean needNotification(SubscriptionGroupDTO configDTO) {
+  private boolean needNotification(SubscriptionGroupDTO configDTO,
+      final MergedAnomalyResultManager anomalyDAO,
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
     Map<Long, Long> vectorLocks = configDTO.getVectorClocks();
     for (Map.Entry<Long, Long> vectorLock : vectorLocks.entrySet()) {
       long configId = vectorLock.getKey();
@@ -140,7 +137,7 @@ public class DetectionAlertJob implements Job {
     }
     // in addition to checking the watermarks, check if any anomalies need to be re-notified by querying the anomaly subscription group notification table
     List<AnomalySubscriptionGroupNotificationDTO> anomalySubscriptionGroupNotifications =
-        this.anomalySubscriptionGroupNotificationDAO.findByPredicate(
+        anomalySubscriptionGroupNotificationManager.findByPredicate(
             Predicate.IN("detectionConfigId", vectorLocks.keySet().toArray()));
     return !anomalySubscriptionGroupNotifications.isEmpty();
   }

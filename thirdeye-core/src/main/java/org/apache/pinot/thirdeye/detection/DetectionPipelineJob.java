@@ -23,37 +23,37 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
-import org.quartz.Job;
+import org.apache.pinot.thirdeye.scheduler.ThirdEyeAbstractJob;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DetectionPipelineJob implements Job {
+public class DetectionPipelineJob extends ThirdEyeAbstractJob {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineJob.class);
-
-  private final TaskManager taskDAO = DAORegistry.getInstance().getTaskDAO();
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final long DETECTION_TASK_TIMEOUT = TimeUnit.DAYS.toMillis(1);
 
   @Override
-  public void execute(JobExecutionContext jobExecutionContext) {
-    DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfo(jobExecutionContext,
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class),
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getDatasetConfigDAO(),
-        DAORegistry.getInstance().getMetricConfigDAO());
+  public void execute(JobExecutionContext ctx) {
+    final DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfo(ctx,
+        getInstance(ctx, ThirdEyeCacheRegistry.class),
+        getInstance(ctx, AlertManager.class),
+        getInstance(ctx, DatasetConfigManager.class),
+        getInstance(ctx, MetricConfigManager.class));
+
+    final TaskManager taskManager = getInstance(ctx, TaskManager.class);
 
     // if a task is pending and not time out yet, don't schedule more
     String jobName = String.format("%s_%d", TaskConstants.TaskType.DETECTION, taskInfo.configId);
-    if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DETECTION_TASK_TIMEOUT,
-        taskDAO)) {
+    if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DETECTION_TASK_TIMEOUT, taskManager)) {
       LOG.info(
           "Skip scheduling detection task for {} with start time {}. Task is already in the queue.",
           jobName,
@@ -71,7 +71,7 @@ public class DetectionPipelineJob implements Job {
 
     TaskDTO taskDTO = TaskUtils
         .buildTask(taskInfo.configId, taskInfoJson, TaskConstants.TaskType.DETECTION);
-    long taskId = taskDAO.save(taskDTO);
+    long taskId = taskManager.save(taskDTO);
     LOG.info("Created {} task {} with taskId {}", TaskConstants.TaskType.DETECTION, taskDTO,
         taskId);
   }

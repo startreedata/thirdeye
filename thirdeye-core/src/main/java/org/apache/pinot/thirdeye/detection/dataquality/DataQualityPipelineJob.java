@@ -21,12 +21,14 @@ package org.apache.pinot.thirdeye.detection.dataquality;
 
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
-import org.quartz.Job;
+import org.apache.pinot.thirdeye.scheduler.ThirdEyeAbstractJob;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,31 +37,32 @@ import org.slf4j.LoggerFactory;
  * The data quality job submitted to the scheduler. This job creates data quality tasks which
  * the runners will later pick and execute.
  */
-public class DataQualityPipelineJob implements Job {
+public class DataQualityPipelineJob extends ThirdEyeAbstractJob {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataQualityPipelineJob.class);
 
   private static final long DATA_AVAILABILITY_TASK_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
 
   @Override
-  public void execute(JobExecutionContext jobExecutionContext) {
-    DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfo(jobExecutionContext,
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class),
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getDatasetConfigDAO(),
-        DAORegistry.getInstance().getMetricConfigDAO());
+  public void execute(JobExecutionContext ctx) {
+    DetectionPipelineTaskInfo taskInfo = TaskUtils.buildTaskInfo(ctx,
+        getInstance(ctx, ThirdEyeCacheRegistry.class),
+        getInstance(ctx, AlertManager.class),
+        getInstance(ctx, DatasetConfigManager.class),
+        getInstance(ctx, MetricConfigManager.class));
 
     // if a task is pending and not time out yet, don't schedule more
     String jobName = String
         .format("%s_%d", TaskConstants.TaskType.DATA_QUALITY, taskInfo.getConfigId());
+    final TaskManager taskManager = getInstance(ctx, TaskManager.class);
     if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DATA_AVAILABILITY_TASK_TIMEOUT,
-        DAORegistry.getInstance().getTaskDAO())) {
+        taskManager)) {
       LOG.info("Skip scheduling {} task for {} with start time {}. Task is already in the queue.",
           TaskConstants.TaskType.DATA_QUALITY, jobName, taskInfo.getStart());
       return;
     }
 
-    TaskUtils.createDataQualityTask(taskInfo, DAORegistry.getInstance().getTaskDAO());
+    TaskUtils.createDataQualityTask(taskInfo, taskManager);
   }
 }
 

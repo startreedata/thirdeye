@@ -34,6 +34,8 @@ import org.quartz.SchedulerException;
  */
 public interface ThirdEyeCronScheduler extends Runnable {
 
+  void addToContext(String identifier, Object instance);
+
   // Initialize and prepare the scheduler
   void start() throws SchedulerException;
 

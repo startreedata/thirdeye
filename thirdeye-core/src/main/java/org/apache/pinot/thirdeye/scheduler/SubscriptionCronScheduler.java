@@ -81,6 +81,15 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   @Override
+  public void addToContext(final String identifier, final Object instance) {
+    try {
+      scheduler.getContext().put(identifier, instance);
+    } catch (SchedulerException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
   public void start() throws SchedulerException {
     this.scheduler.start();
     this.scheduledExecutorService

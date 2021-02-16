@@ -38,7 +38,7 @@ public class TestThirdEyeRcaRestClient {
   @BeforeMethod
   public void beforeMethod() throws Exception {
     this.testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
 
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setCollection("collection");

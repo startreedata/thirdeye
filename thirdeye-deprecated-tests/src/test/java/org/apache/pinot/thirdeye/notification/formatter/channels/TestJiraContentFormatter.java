@@ -100,7 +100,7 @@ public class TestJiraContentFormatter {
   @BeforeMethod
   public void beforeMethod() throws Exception {
     testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     this.alertConfigDAO = daoRegistry.getDetectionAlertConfigManager();
     this.anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     this.detectionDAO = daoRegistry.getDetectionConfigManager();
@@ -164,9 +164,9 @@ public class TestJiraContentFormatter {
     expectedResponse.put("cubeResults", "{}");
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
     this.metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
-        DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO());
+        TestDbEnv.getInstance().getMetricConfigDAO(), TestDbEnv.getInstance().getEventDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO());
   }
 
   @AfterClass(alwaysRun = true)

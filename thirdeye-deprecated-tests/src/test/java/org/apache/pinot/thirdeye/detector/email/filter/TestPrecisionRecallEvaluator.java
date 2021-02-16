@@ -48,7 +48,7 @@ public class TestPrecisionRecallEvaluator {
   @BeforeClass
   void beforeClass() {
     testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     mergedAnomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     anomalyFunctionDAO = daoRegistry.getAnomalyFunctionDAO();
   }
@@ -77,7 +77,7 @@ public class TestPrecisionRecallEvaluator {
       throws Exception {
     // test anomalies when no feedback, and no user report anomaly
     PrecisionRecallEvaluator evaluator = new PrecisionRecallEvaluator(anomalyResultDTOS, null,
-        DAORegistry.getInstance().getMergedAnomalyResultDAO());
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO());
     assertEquals(evaluator.getPrecision(), 0.0, 0.0001);
     assertTrue(Double.isNaN(evaluator.getRecall()));
     assertTrue(Double.isNaN(evaluator.getPrecisionInResponse()));
@@ -120,7 +120,7 @@ public class TestPrecisionRecallEvaluator {
     anomalyResultDTOS.add(notifiedTrueAnomaly);
     anomalyResultDTOS.add(userReportAnomaly);
     PrecisionRecallEvaluator evaluator = new PrecisionRecallEvaluator(anomalyResultDTOS, alertFilter,
-        DAORegistry.getInstance().getMergedAnomalyResultDAO());
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO());
     assertEquals(evaluator.getPrecision(), 0.2, 0.0001);
     assertEquals(evaluator.getRecall(), 1, 0.00001);
     assertEquals(evaluator.getWeightedPrecision(), 0.3076, 0.0001);

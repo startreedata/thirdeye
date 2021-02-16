@@ -88,7 +88,7 @@ public class YamlDetectionAlertConfigTranslatorTest {
 
     String yamlConfig = new Yaml().dump(alertYamlConfigs);
     SubscriptionGroupDTO alertConfig = new SubscriptionConfigTranslator(yamlConfig, validateMocker,
-        DAORegistry.getInstance()
+        TestDbEnv.getInstance()
             .getDetectionConfigManager())
         .translate();
 
@@ -130,7 +130,7 @@ public class YamlDetectionAlertConfigTranslatorTest {
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
     testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     alertManager = daoRegistry.getDetectionConfigManager();
     AlertDTO alertDTO = new AlertDTO();
     alertDTO.setName("test_pipeline_1");

@@ -97,7 +97,7 @@ public class TestMetricAnomaliesContent {
   @BeforeMethod
   public void beforeMethod() {
     testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     detectionConfigDAO = daoRegistry.getDetectionConfigManager();
     mergedAnomalyResultDAO = daoRegistry.getMergedAnomalyResultDAO();
     metricDAO = daoRegistry.getMetricConfigDAO();
@@ -231,9 +231,9 @@ public class TestMetricAnomaliesContent {
     Map<String, Object> expectedResponse = new HashMap<>();
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
     MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
-        DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO());
+        TestDbEnv.getInstance().getMetricConfigDAO(), TestDbEnv.getInstance().getEventDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO());
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(new Properties(), metricAnomaliesContent,
         thirdeyeAnomalyConfig, DaoTestUtils.getTestNotificationConfig("Test Config"));

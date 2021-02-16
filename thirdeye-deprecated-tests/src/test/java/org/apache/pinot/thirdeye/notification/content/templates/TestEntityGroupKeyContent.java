@@ -72,7 +72,7 @@ public class TestEntityGroupKeyContent {
   @BeforeMethod
   public void beforeMethod() {
     testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     detectionDAO = daoRegistry.getDetectionConfigManager();
     mergedAnomalyResultDAO = daoRegistry.getMergedAnomalyResultDAO();
     metricDAO = daoRegistry.getMetricConfigDAO();
@@ -165,10 +165,10 @@ public class TestEntityGroupKeyContent {
 
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(new Properties(), new EntityGroupKeyContent(
-        DAORegistry.getInstance().getMetricConfigDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO()),
+        TestDbEnv.getInstance().getMetricConfigDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager(),
+        TestDbEnv.getInstance().getEventDAO(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO()),
         thirdeyeAnomalyConfig,
         DaoTestUtils.getTestNotificationConfig("Test Config"));
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);
@@ -292,10 +292,10 @@ public class TestEntityGroupKeyContent {
     props.put(PROP_ENTITY_WHITELIST, "metric-X");
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(props, new EntityGroupKeyContent(
-        DAORegistry.getInstance().getMetricConfigDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO()),
+        TestDbEnv.getInstance().getMetricConfigDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager(),
+        TestDbEnv.getInstance().getEventDAO(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO()),
         thirdeyeAnomalyConfig,
         DaoTestUtils.getTestNotificationConfig("Test Config"));
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);

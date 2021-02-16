@@ -31,7 +31,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -80,13 +79,13 @@ public class PerUserDimensionAlertFilterTest {
     AlertDTO detectionConfig1 = new AlertDTO();
     detectionConfig1.setName("test detection 1");
     detectionConfig1.setActive(true);
-    this.detectionConfigId1 = DAORegistry.getInstance().getDetectionConfigManager()
+    this.detectionConfigId1 = TestDbEnv.getInstance().getDetectionConfigManager()
         .save(detectionConfig1);
 
     AlertDTO detectionConfig2 = new AlertDTO();
     detectionConfig2.setName("test detection 2");
     detectionConfig2.setActive(true);
-    this.detectionConfigId2 = DAORegistry.getInstance().getDetectionConfigManager()
+    this.detectionConfigId2 = TestDbEnv.getInstance().getDetectionConfigManager()
         .save(detectionConfig2);
 
     PROP_ID_VALUE = Arrays.asList(this.detectionConfigId1, this.detectionConfigId2);
@@ -150,8 +149,8 @@ public class PerUserDimensionAlertFilterTest {
   @Test
   public void testAlertFilterRecipients() throws Exception {
     this.alertFilter = new PerUserDimensionAlertFilter(provider, alertConfig, this.baseTime + 350L,
-        DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
+        TestDbEnv.getInstance()
+            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 3);

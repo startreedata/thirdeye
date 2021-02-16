@@ -41,7 +41,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
@@ -80,9 +79,9 @@ public class DataQualityTaskRunnerTest {
   @BeforeMethod
   public void beforeMethod() throws Exception {
     this.testDAOProvider = new TestDbEnv();
-    this.detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
-    this.datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
-    this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
+    this.detectionDAO = TestDbEnv.getInstance().getDetectionConfigManager();
+    this.datasetDAO = TestDbEnv.getInstance().getDatasetConfigDAO();
+    this.anomalyDAO = TestDbEnv.getInstance().getMergedAnomalyResultDAO();
 
     DetectionRegistry.registerComponent(DataSlaQualityChecker.class.getName(), "DATA_SLA");
     DetectionRegistry.registerComponent(ThresholdRuleDetector.class.getName(), "THRESHOLD");

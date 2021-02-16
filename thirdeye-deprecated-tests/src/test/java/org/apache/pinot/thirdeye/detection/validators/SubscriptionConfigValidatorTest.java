@@ -63,7 +63,7 @@ public class SubscriptionConfigValidatorTest {
   @BeforeClass
   void beforeClass() {
     testDAOProvider = new TestDbEnv();
-    daoRegistry = DAORegistry.getInstance();
+    daoRegistry = TestDbEnv.getInstance();
   }
 
   @AfterClass(alwaysRun = true)

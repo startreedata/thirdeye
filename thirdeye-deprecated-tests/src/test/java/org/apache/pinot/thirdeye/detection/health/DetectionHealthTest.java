@@ -47,7 +47,7 @@ public class DetectionHealthTest {
   @BeforeMethod
   public void setUp() {
     this.testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     this.anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     this.taskDAO = daoRegistry.getTaskDAO();
     this.evaluationDAO = daoRegistry.getEvaluationManager();

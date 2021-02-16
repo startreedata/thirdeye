@@ -19,7 +19,6 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.testng.Assert;
@@ -132,7 +131,7 @@ public class DetectionTimeWindowSuppressorTest {
     result.addMapping(new DetectionAlertFilterNotification(subsConfig), anomalies);
 
     DetectionAlertTimeWindowSuppressor suppressor = new DetectionAlertTimeWindowSuppressor(config,
-        DAORegistry.getInstance()
+        TestDbEnv.getInstance()
             .getMergedAnomalyResultDAO());
     DetectionAlertFilterResult resultsAfterSuppress = suppressor.run(result);
 
@@ -170,7 +169,7 @@ public class DetectionTimeWindowSuppressorTest {
     result.addMapping(new DetectionAlertFilterNotification(subsConfig), anomalies);
 
     DetectionAlertTimeWindowSuppressor suppressor = new DetectionAlertTimeWindowSuppressor(config,
-        DAORegistry.getInstance()
+        TestDbEnv.getInstance()
             .getMergedAnomalyResultDAO());
     DetectionAlertFilterResult resultsAfterSuppress = suppressor.run(result);
 

@@ -62,7 +62,7 @@ public class TestHierarchicalAnomaliesContent {
   @BeforeClass
   public void beforeClass() {
     testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     mergedAnomalyResultDAO = daoRegistry.getMergedAnomalyResultDAO();
     anomalyFunctionDAO = daoRegistry.getAnomalyFunctionDAO();
   }
@@ -160,10 +160,10 @@ public class TestHierarchicalAnomaliesContent {
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(new Properties(),
         new HierarchicalAnomaliesContent(thirdEyeCacheRegistry.getDataSourceCache(),
-            thirdEyeCacheRegistry, DAORegistry.getInstance().getMetricConfigDAO(),
-            DAORegistry.getInstance().getDatasetConfigDAO(),
-            DAORegistry.getInstance().getEventDAO(),
-            DAORegistry.getInstance().getMergedAnomalyResultDAO()),
+            thirdEyeCacheRegistry, TestDbEnv.getInstance().getMetricConfigDAO(),
+            TestDbEnv.getInstance().getDatasetConfigDAO(),
+            TestDbEnv.getInstance().getEventDAO(),
+            TestDbEnv.getInstance().getMergedAnomalyResultDAO()),
         thirdeyeAnomalyConfig, notificationConfigDTO);
     EmailEntity emailEntity = contentFormatter.getEmailEntity(anomalies);
 

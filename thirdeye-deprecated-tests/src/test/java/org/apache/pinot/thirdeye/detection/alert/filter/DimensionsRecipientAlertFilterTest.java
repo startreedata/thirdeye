@@ -42,7 +42,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -89,13 +88,13 @@ public class DimensionsRecipientAlertFilterTest {
     DetectionAlertRegistry.getInstance().registerAlertFilter("DIMENSIONS_ALERTER_PIPELINE",
         DimensionsRecipientAlertFilter.class.getName());
 
-    ApplicationManager appDAO = DAORegistry.getInstance().getApplicationDAO();
+    ApplicationManager appDAO = TestDbEnv.getInstance().getApplicationDAO();
     ApplicationDTO app = new ApplicationDTO();
     app.setApplication("test_application");
     app.setRecipients("test@thirdeye.com");
     appDAO.save(app);
 
-    AlertManager detDAO = DAORegistry.getInstance().getDetectionConfigManager();
+    AlertManager detDAO = TestDbEnv.getInstance().getDetectionConfigManager();
     AlertDTO detectionConfig1 = new AlertDTO();
     detectionConfig1.setName("test detection 1");
     detectionConfig1.setActive(true);
@@ -222,8 +221,8 @@ public class DimensionsRecipientAlertFilterTest {
   @Test
   public void testAlertFilterRecipients() throws Exception {
     this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
-        this.baseTime + 350L, DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
+        this.baseTime + 350L, TestDbEnv.getInstance()
+            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
 
     // Send anomalies on un-configured dimensions to default recipients
@@ -271,8 +270,8 @@ public class DimensionsRecipientAlertFilterTest {
     this.alertConfig.getProperties()
         .put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId2));
     this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
-        this.baseTime + 250L, DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
+        this.baseTime + 250L, TestDbEnv.getInstance()
+            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
 
     // Check if there are 2 anomalies in this window
     DetectionAlertFilterResult result = this.alertFilter.run();
@@ -291,7 +290,7 @@ public class DimensionsRecipientAlertFilterTest {
     MergedAnomalyResultDTO anomalyResultDTO = this.detectedAnomalies.get(3);
     anomalyResultDTO.setChild(true);
     anomalyResultDTO.setDetectionConfigId(null);
-    DAORegistry.getInstance().getMergedAnomalyResultDAO().update(anomalyResultDTO);
+    TestDbEnv.getInstance().getMergedAnomalyResultDAO().update(anomalyResultDTO);
 
     result = this.alertFilter.run();
 
@@ -325,8 +324,8 @@ public class DimensionsRecipientAlertFilterTest {
     Thread.sleep(1);
 
     this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
-        System.currentTimeMillis(), DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
+        System.currentTimeMillis(), TestDbEnv.getInstance()
+            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 2);
 

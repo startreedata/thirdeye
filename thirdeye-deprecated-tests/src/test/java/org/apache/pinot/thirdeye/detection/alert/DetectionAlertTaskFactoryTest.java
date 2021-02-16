@@ -43,7 +43,7 @@ public class DetectionAlertTaskFactoryTest {
     alerters.put("anotherRandomScheme", anotherRandomAlerter);
 
     this.testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     this.alertConfigDAO = daoRegistry.getDetectionAlertConfigManager();
     this.alertConfigDTO = new SubscriptionGroupDTO();
 

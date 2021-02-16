@@ -58,12 +58,12 @@ public class AutoOnboardPinotMetricsServiceTest {
   @BeforeMethod
   void beforeMethod() throws Exception {
     testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     datasetConfigDAO = daoRegistry.getDatasetConfigDAO();
     metricConfigDAO = daoRegistry.getMetricConfigDAO();
     testAutoLoadPinotMetricsService = new AutoOnboardPinotMetadataSource(new MetadataSourceConfig(),
-        null, DAORegistry.getInstance().getDatasetConfigDAO(),
-        DAORegistry.getInstance().getMetricConfigDAO());
+        null, TestDbEnv.getInstance().getDatasetConfigDAO(),
+        TestDbEnv.getInstance().getMetricConfigDAO());
     schema = Schema
         .fromInputSteam(ClassLoader.getSystemResourceAsStream("sample-pinot-schema.json"));
     Map<String, String> pinotCustomConfigs = new HashMap<>();

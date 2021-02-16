@@ -32,7 +32,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -65,9 +64,9 @@ public class DetectionPipelineTaskRunnerTest {
     this.outputs = new ArrayList<>();
 
     this.testDAOProvider = new TestDbEnv();
-    this.detectionDAO = DAORegistry.getInstance().getDetectionConfigManager();
-    this.anomalyDAO = DAORegistry.getInstance().getMergedAnomalyResultDAO();
-    this.evaluationDAO = DAORegistry.getInstance().getEvaluationManager();
+    this.detectionDAO = TestDbEnv.getInstance().getDetectionConfigManager();
+    this.anomalyDAO = TestDbEnv.getInstance().getMergedAnomalyResultDAO();
+    this.evaluationDAO = TestDbEnv.getInstance().getEvaluationManager();
     this.provider = new MockDataProvider();
     this.loader = new MockPipelineLoader(this.runs, this.outputs, provider);
 
@@ -88,7 +87,7 @@ public class DetectionPipelineTaskRunnerTest {
         this.evaluationDAO,
         this.loader,
         new ModelRetuneFlow(this.provider, new DetectionRegistry()),
-        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager()
+        TestDbEnv.getInstance().getAnomalySubscriptionGroupNotificationManager()
     );
 
     this.info = new DetectionPipelineTaskInfo();

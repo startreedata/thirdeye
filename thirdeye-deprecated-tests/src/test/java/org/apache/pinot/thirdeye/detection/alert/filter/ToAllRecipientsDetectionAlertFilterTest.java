@@ -32,7 +32,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
@@ -81,25 +80,25 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     AlertDTO detectionConfig1 = new AlertDTO();
     detectionConfig1.setName("test detection 1");
     detectionConfig1.setActive(true);
-    this.detectionConfigId1 = DAORegistry.getInstance().getDetectionConfigManager()
+    this.detectionConfigId1 = TestDbEnv.getInstance().getDetectionConfigManager()
         .save(detectionConfig1);
 
     AlertDTO detectionConfig2 = new AlertDTO();
     detectionConfig2.setName("test detection 2");
     detectionConfig2.setActive(true);
-    this.detectionConfigId2 = DAORegistry.getInstance().getDetectionConfigManager()
+    this.detectionConfigId2 = TestDbEnv.getInstance().getDetectionConfigManager()
         .save(detectionConfig2);
 
     AlertDTO detectionConfig3 = new AlertDTO();
     detectionConfig3.setName("test detection 3");
     detectionConfig3.setActive(true);
-    this.detectionConfigId3 = DAORegistry.getInstance().getDetectionConfigManager()
+    this.detectionConfigId3 = TestDbEnv.getInstance().getDetectionConfigManager()
         .save(detectionConfig3);
 
     AlertDTO detectionConfig = new AlertDTO();
     detectionConfig.setName("test detection 0");
     detectionConfig.setActive(true);
-    this.detectionConfigId = DAORegistry.getInstance().getDetectionConfigManager()
+    this.detectionConfigId = TestDbEnv.getInstance().getDetectionConfigManager()
         .save(detectionConfig);
 
     PROP_ID_VALUE = Arrays.asList(this.detectionConfigId1, this.detectionConfigId2);
@@ -176,8 +175,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
   @Test
   public void testGetAlertFilterResult() throws Exception {
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, this.alertConfig,
-        this.baseTime + 350L, DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
+        this.baseTime + 350L, TestDbEnv.getInstance()
+            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
     DetectionAlertFilterNotification notification = AlertFilterUtils.makeEmailNotifications(
         this.alertConfig, PROP_TO_VALUE, PROP_CC_VALUE, PROP_BCC_VALUE);
@@ -196,8 +195,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
   public void testGetAlertFilterResultWithJira() throws Exception {
     SubscriptionGroupDTO alertConfig = createDetectionAlertConfigWithJira();
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, alertConfig,
-        this.baseTime + 350L, DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
+        this.baseTime + 350L, TestDbEnv.getInstance()
+            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     DetectionAlertFilterNotification notification = AlertFilterUtils
@@ -229,8 +228,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     Thread.sleep(1);  // Make sure the next anomaly is not created at the same time as watermark
 
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, this.alertConfig,
-        System.currentTimeMillis(), DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
+        System.currentTimeMillis(), TestDbEnv.getInstance()
+            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     DetectionAlertFilterNotification notification = AlertFilterUtils.makeEmailNotifications(
@@ -261,8 +260,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     this.alertConfig.setProperties(properties);
 
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, this.alertConfig,
-        this.baseTime + 25L, DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
+        this.baseTime + 25L, TestDbEnv.getInstance()
+            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
 
     DetectionAlertFilterNotification notification = AlertFilterUtils.makeEmailNotifications(
@@ -301,8 +300,8 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     this.detection3Anomalies.add(anomalyWithNullFeedback);
 
     this.alertFilter = new ToAllRecipientsDetectionAlertFilter(this.provider, this.alertConfig,
-        System.currentTimeMillis(), DAORegistry.getInstance()
-            .getMergedAnomalyResultDAO(), DAORegistry.getInstance().getDetectionConfigManager());
+        System.currentTimeMillis(), TestDbEnv.getInstance()
+            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 1);
 

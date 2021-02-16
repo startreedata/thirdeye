@@ -41,7 +41,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
@@ -67,8 +66,8 @@ public class DataAvailabilityTaskSchedulerTest {
   @BeforeMethod
   public void beforeMethod() {
     testDAOProvider = new TestDbEnv();
-    detectionConfigDAO = DAORegistry.getInstance().getDetectionConfigManager();
-    MetricConfigManager metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
+    detectionConfigDAO = TestDbEnv.getInstance().getDetectionConfigManager();
+    MetricConfigManager metricConfigManager = TestDbEnv.getInstance().getMetricConfigDAO();
     final String TEST_METRIC_PREFIX = "metric_trigger_scheduler_";
 
     MetricConfigDTO metric1 = new MetricConfigDTO();
@@ -90,9 +89,9 @@ public class DataAvailabilityTaskSchedulerTest {
             .setScheduleDelayInSec(60)
             .setTaskTriggerFallBackTimeInSec(TimeUnit.DAYS.toSeconds(1))
             .setSchedulingWindowInSec(TimeUnit.MINUTES.toSeconds(30))
-            .setScheduleDelayInSec(TimeUnit.MINUTES.toSeconds(10)), DAORegistry.getInstance().getTaskDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager(), DAORegistry.getInstance().getDatasetConfigDAO(),
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class), DAORegistry.getInstance().getMetricConfigDAO()
+            .setScheduleDelayInSec(TimeUnit.MINUTES.toSeconds(10)), TestDbEnv.getInstance().getTaskDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager(), TestDbEnv.getInstance().getDatasetConfigDAO(),
+        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class), TestDbEnv.getInstance().getMetricConfigDAO()
     );
   }
 
@@ -109,7 +108,7 @@ public class DataAvailabilityTaskSchedulerTest {
     createDataset(1, TEST_TIME, tenMinAgo);
     createDataset(2, TEST_TIME, tenMinAgo);
     dataAvailabilityTaskScheduler.run();
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 1);
     TaskDTO task = tasks.get(0);
@@ -130,7 +129,7 @@ public class DataAvailabilityTaskSchedulerTest {
     createDataset(1, TEST_TIME, tenMinAgo);
     createDataset(2, TEST_TIME, tenMinAgo);
     dataAvailabilityTaskScheduler.run();
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 3);
     Assert.assertEquals(tasks.get(0).getStatus(), TaskConstants.TaskStatus.WAITING);
@@ -156,7 +155,7 @@ public class DataAvailabilityTaskSchedulerTest {
     List<AlertDTO> detectionConfigs = detectionConfigDAO.findAll();
     Assert.assertEquals(detectionConfigs.size(), 2);
     dataAvailabilityTaskScheduler.run();
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 2);
   }
@@ -175,7 +174,7 @@ public class DataAvailabilityTaskSchedulerTest {
     createDetectionTask(detection2, oneDayAgo - 60_000, TaskConstants.TaskStatus.COMPLETED);
     createDetectionTask(detection3, oneDayAgo - 60_000, TaskConstants.TaskStatus.COMPLETED);
     dataAvailabilityTaskScheduler.run();
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 5);
     Assert.assertEquals(
@@ -197,7 +196,7 @@ public class DataAvailabilityTaskSchedulerTest {
     createDataset(2, TEST_TIME, tenMinAgo);
     createDetectionTask(detection1, oneDayAgo, TaskConstants.TaskStatus.RUNNING);
     dataAvailabilityTaskScheduler.run();
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 3);
     List<TaskDTO> waitingTasks = tasks.stream()
@@ -225,7 +224,7 @@ public class DataAvailabilityTaskSchedulerTest {
     long detection2 = createDetection(2, metrics2, oneDayAgo, 0);
     createDataset(1, TEST_TIME, halfHourAgo);
     createDataset(2, TEST_TIME, tenMinAgo);
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     Assert.assertEquals(taskManager.findAll().size(), 0);
     dataAvailabilityTaskScheduler.run();
     List<TaskDTO> tasks = taskManager.findAll();
@@ -242,7 +241,7 @@ public class DataAvailabilityTaskSchedulerTest {
     long halfHourAgo = TEST_TIME - TimeUnit.MINUTES.toMillis(30);
     createDataset(1, TEST_TIME, halfHourAgo);
     createDetectionTask(detection1, oneDayAgo - 60_000, TaskConstants.TaskStatus.COMPLETED);
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     dataAvailabilityTaskScheduler.run();
     List<TaskDTO> tasks = taskManager.findAll();
     List<TaskDTO> waitingTasks = tasks.stream()
@@ -266,7 +265,7 @@ public class DataAvailabilityTaskSchedulerTest {
     long halfHourAgo = TEST_TIME - TimeUnit.MINUTES.toMillis(30);
     createDataset(1, TEST_TIME, halfHourAgo);
     createDetectionTask(detection1, oneDayAgo - 60_000, TaskConstants.TaskStatus.COMPLETED);
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     dataAvailabilityTaskScheduler.run();
     List<TaskDTO> tasks = taskManager.findAll();
     List<TaskDTO> waitingTasks = tasks.stream()
@@ -291,14 +290,14 @@ public class DataAvailabilityTaskSchedulerTest {
     long halfDayAgo = TEST_TIME - TimeUnit.HOURS.toMillis(12);
     long detection1 = createDetection(1, metrics1, halfDayAgo, 0);
     createDataset(1, TEST_TIME, fiveMinAgo);
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     dataAvailabilityTaskScheduler.run();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 0);
   }
 
   private long createDataset(int intSuffix, long refreshTime, long refreshEventTime) {
-    DatasetConfigManager datasetConfigDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    DatasetConfigManager datasetConfigDAO = TestDbEnv.getInstance().getDatasetConfigDAO();
     DatasetConfigDTO ds1 = new DatasetConfigDTO();
     ds1.setDataset(TEST_DATASET_PREFIX + intSuffix);
     ds1.setLastRefreshTime(refreshTime);
@@ -333,7 +332,7 @@ public class DataAvailabilityTaskSchedulerTest {
 
   private long createDetectionTask(long detectionId, long createTime,
       TaskConstants.TaskStatus status) {
-    TaskManager taskManager = DAORegistry.getInstance().getTaskDAO();
+    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     TaskDTO task = new TaskDTO();
     DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo(detectionId, createTime - 1,
         createTime);

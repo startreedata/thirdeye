@@ -70,8 +70,8 @@ public class MockThirdEyeDataSourceIntegrationTest {
    */
   public static TimeSeriesRequestContainer makeTimeSeriesRequest(MetricSlice slice,
       String reference) throws Exception {
-    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    MetricConfigManager metricDAO = TestDbEnv.getInstance().getMetricConfigDAO();
+    DatasetConfigManager datasetDAO = TestDbEnv.getInstance().getDatasetConfigDAO();
     return DataFrameUtils.makeTimeSeriesRequest(slice, reference, metricDAO, datasetDAO,
         DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
   }
@@ -89,8 +89,8 @@ public class MockThirdEyeDataSourceIntegrationTest {
    */
   public static RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
       int limit, String reference, final ThirdEyeCacheRegistry thirdEyeCacheRegistry) throws Exception {
-    MetricConfigManager metricDAO = DAORegistry.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = DAORegistry.getInstance().getDatasetConfigDAO();
+    MetricConfigManager metricDAO = TestDbEnv.getInstance().getMetricConfigDAO();
+    DatasetConfigManager datasetDAO = TestDbEnv.getInstance().getDatasetConfigDAO();
     return DataFrameUtils
         .makeAggregateRequest(slice, dimensions, limit, reference, metricDAO, datasetDAO,
         thirdEyeCacheRegistry);
@@ -99,7 +99,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
   @BeforeClass
   void beforeMethod() throws Exception {
     this.testDAOProvider = new TestDbEnv();
-    this.daoRegistry = DAORegistry.getInstance();
+    this.daoRegistry = TestDbEnv.getInstance();
 
     URL dataSourcesConfig = this.getClass().getResource("data-sources-config.yml");
 

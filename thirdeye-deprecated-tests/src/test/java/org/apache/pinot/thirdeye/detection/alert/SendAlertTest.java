@@ -63,7 +63,7 @@ public class SendAlertTest {
   @BeforeMethod
   public void beforeMethod() throws Exception {
     this.testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     this.alertConfigDAO = daoRegistry.getDetectionAlertConfigManager();
     this.anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     this.detectionDAO = daoRegistry.getDetectionConfigManager();
@@ -111,8 +111,8 @@ public class SendAlertTest {
     this.dataSetDAO.save(datasetConfigDTO);
 
     this.taskRunner = new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(null),
-        DAORegistry.getInstance().getDetectionAlertConfigManager(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO());
+        TestDbEnv.getInstance().getDetectionAlertConfigManager(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO());
   }
 
   @AfterMethod(alwaysRun = true)

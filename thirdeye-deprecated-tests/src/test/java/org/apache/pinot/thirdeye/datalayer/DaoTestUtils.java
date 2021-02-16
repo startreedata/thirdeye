@@ -43,6 +43,7 @@ import org.apache.pinot.thirdeye.anomaly.override.OverrideConfigHelper;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.common.metric.MetricType;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
@@ -56,7 +57,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.OnboardDatasetMetricDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
@@ -100,8 +100,8 @@ public class DaoTestUtils {
 
     SubscriptionGroupDTO alertConfig = new SubscriptionConfigTranslator(
         yamlConfig, new SubscriptionConfigValidator(
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getApplicationDAO()), DAORegistry.getInstance()
+        TestDbEnv.getInstance().getDetectionConfigManager(),
+        TestDbEnv.getInstance().getApplicationDAO()), TestDbEnv.getInstance()
             .getDetectionConfigManager())
         .translate();
     alertConfig.setCronExpression("0/10 * * * * ?");

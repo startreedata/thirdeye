@@ -25,7 +25,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.spi.InitialContextFactory;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class ThirdEyeAuthenticatorLdapTest {
   public void setup() {
     List<String> domains = Arrays.asList(DOMAIN1, DOMAIN2);
     thirdEyeAuthenticatorLdap = new ThirdEyeLdapAuthenticator(domains, "ldaps://someLdap",
-        DAORegistry.getInstance().getSessionDAO());
+        TestDbEnv.getInstance().getSessionDAO());
     thirdEyeAuthenticatorLdap
         .setInitialContextFactory(MockInitialDirContextFactory.class.getName());
   }

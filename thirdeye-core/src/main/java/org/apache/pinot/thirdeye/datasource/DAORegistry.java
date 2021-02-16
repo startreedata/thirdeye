@@ -43,7 +43,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.RootcauseTemplateManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 
 @Singleton
 public class DAORegistry {
@@ -117,15 +116,6 @@ public class DAORegistry {
     this.evaluationManager = evaluationManager;
     this.onlineDetectionDataManager = onlineDetectionDataManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
-  }
-
-  /**
-   * Use dependency injection instead of using this as a singleton instance.
-   * @return the singleton instance maintained by the {@link DeprecatedInjectorUtil} class
-   */
-  @Deprecated
-  public static DAORegistry getInstance() {
-    return DeprecatedInjectorUtil.getInstance(DAORegistry.class);
   }
 
   public AnomalyFunctionManager getAnomalyFunctionDAO() {

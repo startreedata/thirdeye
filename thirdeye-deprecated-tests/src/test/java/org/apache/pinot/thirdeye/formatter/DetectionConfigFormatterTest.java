@@ -56,7 +56,7 @@ public class DetectionConfigFormatterTest {
   @BeforeMethod
   public void setUp() {
     this.testDAOProvider = new TestDbEnv();
-    this.daoRegistry = DAORegistry.getInstance();
+    this.daoRegistry = TestDbEnv.getInstance();
   }
 
   @Test

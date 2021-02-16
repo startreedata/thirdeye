@@ -38,7 +38,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -82,13 +81,13 @@ public class AnomalySeverityAlertFilterTest {
     AlertDTO detectionConfig1 = new AlertDTO();
     detectionConfig1.setName("test detection 1");
     detectionConfig1.setActive(true);
-    long detectionConfigId1 = DAORegistry.getInstance().getDetectionConfigManager()
+    long detectionConfigId1 = TestDbEnv.getInstance().getDetectionConfigManager()
         .save(detectionConfig1);
 
     AlertDTO detectionConfig2 = new AlertDTO();
     detectionConfig2.setName("test detection 2");
     detectionConfig2.setActive(true);
-    long detectionConfigId2 = DAORegistry.getInstance().getDetectionConfigManager()
+    long detectionConfigId2 = TestDbEnv.getInstance().getDetectionConfigManager()
         .save(detectionConfig2);
 
     detectionConfigIds = Arrays.asList(detectionConfigId1, detectionConfigId2);
@@ -175,9 +174,9 @@ public class AnomalySeverityAlertFilterTest {
   @Test
   public void testAlertFilterRecipients() throws Exception {
     this.alertFilter = new AnomalySeverityAlertFilter(provider, alertConfig, this.baseTime + 350L,
-        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager());
+        TestDbEnv.getInstance().getAnomalySubscriptionGroupNotificationManager(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 3);
@@ -206,7 +205,7 @@ public class AnomalySeverityAlertFilterTest {
   @Test
   public void testRenotifyAnomaly() throws Exception {
     AnomalySubscriptionGroupNotificationManager renotificationManager =
-        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager();
+        TestDbEnv.getInstance().getAnomalySubscriptionGroupNotificationManager();
     AnomalySubscriptionGroupNotificationDTO anomalySubscriptionGroupNotification =
         new AnomalySubscriptionGroupNotificationDTO();
     anomalySubscriptionGroupNotification.setAnomalyId(renotifyAnomaly.getId());
@@ -215,9 +214,9 @@ public class AnomalySeverityAlertFilterTest {
     renotificationManager.save(anomalySubscriptionGroupNotification);
 
     this.alertFilter = new AnomalySeverityAlertFilter(provider, alertConfig, this.baseTime + 350L,
-        DAORegistry.getInstance().getAnomalySubscriptionGroupNotificationManager(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager());
+        TestDbEnv.getInstance().getAnomalySubscriptionGroupNotificationManager(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 3);

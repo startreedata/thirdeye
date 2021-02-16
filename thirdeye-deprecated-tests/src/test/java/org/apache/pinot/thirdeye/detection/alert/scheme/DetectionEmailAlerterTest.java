@@ -77,7 +77,7 @@ public class DetectionEmailAlerterTest {
   @BeforeMethod
   public void beforeMethod() {
     this.testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     this.alertConfigDAO = daoRegistry.getDetectionAlertConfigManager();
     this.anomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     this.detectionDAO = daoRegistry.getDetectionConfigManager();
@@ -143,10 +143,10 @@ public class DetectionEmailAlerterTest {
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
     DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.alertConfigDTO,
-        this.thirdEyeConfig, null, DAORegistry.getInstance().getMetricConfigDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO());
+        this.thirdEyeConfig, null, TestDbEnv.getInstance().getMetricConfigDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager(),
+        TestDbEnv.getInstance().getEventDAO(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO());
     alertTaskInfo.run();
   }
 
@@ -168,15 +168,15 @@ public class DetectionEmailAlerterTest {
     Map<String, Object> expectedResponse = new HashMap<>();
     ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
     MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
-        DAORegistry.getInstance().getMetricConfigDAO(), DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO());
+        TestDbEnv.getInstance().getMetricConfigDAO(), TestDbEnv.getInstance().getEventDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO());
 
     DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(this.alertConfigDTO,
-        this.thirdEyeConfig, notificationResults, DAORegistry.getInstance().getMetricConfigDAO(),
-        DAORegistry.getInstance().getDetectionConfigManager(),
-        DAORegistry.getInstance().getEventDAO(),
-        DAORegistry.getInstance().getMergedAnomalyResultDAO()) {
+        this.thirdEyeConfig, notificationResults, TestDbEnv.getInstance().getMetricConfigDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager(),
+        TestDbEnv.getInstance().getEventDAO(),
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO()) {
       @Override
       protected HtmlEmail getHtmlContent(EmailEntity emailEntity) {
         return htmlEmail;

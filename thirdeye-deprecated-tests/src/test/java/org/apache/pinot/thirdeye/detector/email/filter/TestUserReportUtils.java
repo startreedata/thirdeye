@@ -47,7 +47,7 @@ public class TestUserReportUtils {
   @BeforeClass
   void beforeClass() {
     testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = DAORegistry.getInstance();
+    DAORegistry daoRegistry = TestDbEnv.getInstance();
     mergedAnomalyDAO = daoRegistry.getMergedAnomalyResultDAO();
     anomalyFunctionDAO = daoRegistry.getAnomalyFunctionDAO();
   }
@@ -64,13 +64,13 @@ public class TestUserReportUtils {
       MergedAnomalyResultDTO userReportAnomalyFailRecovered) throws Exception {
     AlertFilter alertFilter = new DummyAlertFilter();
     Assert.assertFalse(UserReportUtils
-        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyEmptyDimension, DAORegistry.getInstance()
+        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyEmptyDimension, TestDbEnv.getInstance()
             .getMergedAnomalyResultDAO()));
     Assert.assertTrue(UserReportUtils
-        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyWithDimension, DAORegistry.getInstance()
+        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyWithDimension, TestDbEnv.getInstance()
             .getMergedAnomalyResultDAO()));
     Assert.assertFalse(UserReportUtils
-        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyFailRecovered, DAORegistry.getInstance()
+        .isUserReportAnomalyIsQualified(alertFilter, userReportAnomalyFailRecovered, TestDbEnv.getInstance()
             .getMergedAnomalyResultDAO()));
   }
 

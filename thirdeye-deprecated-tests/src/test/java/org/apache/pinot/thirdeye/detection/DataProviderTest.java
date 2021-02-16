@@ -84,7 +84,7 @@ public class DataProviderTest {
   public void beforeMethod() throws Exception {
     this.testBase = new TestDbEnv();
 
-    DAORegistry reg = DAORegistry.getInstance();
+    DAORegistry reg = TestDbEnv.getInstance();
     final EventManager eventDAO = reg.getEventDAO();
     final MergedAnomalyResultManager anomalyDAO = reg.getMergedAnomalyResultDAO();
     final MetricConfigManager metricDAO = reg.getMetricConfigDAO();
@@ -197,8 +197,8 @@ public class DataProviderTest {
 
     // time series loader
     DefaultTimeSeriesLoader timeSeriesLoader = new DefaultTimeSeriesLoader(
-        DAORegistry.getInstance().getMetricConfigDAO(),
-        DAORegistry.getInstance().getDatasetConfigDAO(),
+        TestDbEnv.getInstance().getMetricConfigDAO(),
+        TestDbEnv.getInstance().getDatasetConfigDAO(),
         cacheRegistry.getDataSourceCache(),
         cacheRegistry.getTimeSeriesCache(),
         cacheRegistry);

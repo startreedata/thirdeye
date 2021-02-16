@@ -30,7 +30,6 @@ import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
@@ -73,7 +72,7 @@ public class PqlUtilsTest {
     metricConfigDTO.setName(METRIC.getMetricName());
     metricConfigDTO.setAlias(METRIC.getDataset() + "::" + METRIC.getMetricName());
 
-    this.metricId = DAORegistry.getInstance().getMetricConfigDAO().save(metricConfigDTO);
+    this.metricId = TestDbEnv.getInstance().getMetricConfigDAO().save(metricConfigDTO);
   }
 
   @AfterMethod

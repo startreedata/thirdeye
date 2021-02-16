@@ -28,6 +28,7 @@ import org.apache.commons.io.output.NullWriter;
 import org.apache.pinot.thirdeye.datalayer.ScriptRunner;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
@@ -41,6 +42,15 @@ public class TestDbEnv {
     injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
 
     DeprecatedInjectorUtil.setInjector(injector);
+  }
+
+  /**
+   * Use dependency injection instead of using this as a singleton instance.
+   * @return the singleton instance maintained by the {@link DeprecatedInjectorUtil} class
+   */
+  @Deprecated
+  public static DAORegistry getInstance() {
+    return DeprecatedInjectorUtil.getInstance(DAORegistry.class);
   }
 
   private DataSource createDataSource() {

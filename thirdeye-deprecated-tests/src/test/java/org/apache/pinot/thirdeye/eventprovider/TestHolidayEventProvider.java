@@ -50,9 +50,9 @@ public class TestHolidayEventProvider {
     @BeforeClass
     void beforeClass() {
       testDAOProvider = new TestDbEnv();
-      DAORegistry daoRegistry = DAORegistry.getInstance();
+      DAORegistry daoRegistry = TestDbEnv.getInstance();
       eventDAO = daoRegistry.getEventDAO();
-      holidayEventProvider = new HolidayEventProvider(DAORegistry.getInstance().getEventDAO());
+      holidayEventProvider = new HolidayEventProvider(TestDbEnv.getInstance().getEventDAO());
     }
 
     @AfterClass(alwaysRun = true)

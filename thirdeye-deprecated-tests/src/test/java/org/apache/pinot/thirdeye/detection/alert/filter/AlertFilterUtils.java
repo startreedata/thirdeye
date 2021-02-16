@@ -32,10 +32,10 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
@@ -123,12 +123,12 @@ public class AlertFilterUtils {
     anomaly.setCreatedBy(NO_AUTH_USER);
     anomaly.setUpdatedBy(NO_AUTH_USER);
     anomaly.setSeverityLabel(severity);
-    anomaly.setId(DAORegistry.getInstance().getMergedAnomalyResultDAO().save(anomaly));
+    anomaly.setId(TestDbEnv.getInstance().getMergedAnomalyResultDAO().save(anomaly));
 
     if (feedback != null) {
       anomaly.setFeedback(feedback);
       anomaly.setDimensions(null);
-      DAORegistry.getInstance().getMergedAnomalyResultDAO().updateAnomalyFeedback(anomaly);
+      TestDbEnv.getInstance().getMergedAnomalyResultDAO().updateAnomalyFeedback(anomaly);
     }
 
     return anomaly;

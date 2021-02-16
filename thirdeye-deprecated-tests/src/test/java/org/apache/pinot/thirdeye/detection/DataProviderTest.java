@@ -62,7 +62,6 @@ import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
@@ -180,7 +179,7 @@ public class DataProviderTest {
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
     final DataSourceCache dataSourceCache = new DataSourceCache(dataSourceMap);
 
-    ThirdEyeCacheRegistry cacheRegistry = DeprecatedInjectorUtil
+    ThirdEyeCacheRegistry cacheRegistry = TestDbEnv
         .getInstance(ThirdEyeCacheRegistry.class);
     cacheRegistry.registerMetricConfigCache(mockMetricConfigCache);
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);

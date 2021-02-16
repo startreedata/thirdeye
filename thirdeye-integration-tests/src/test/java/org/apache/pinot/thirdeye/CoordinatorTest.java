@@ -3,7 +3,6 @@ package org.apache.pinot.thirdeye;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil.getInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.io.Resources;
@@ -17,7 +16,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.assertj.core.api.Assertions;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -81,13 +79,9 @@ public class CoordinatorTest {
 
   @Test
   public void testDataSourcesLoaded() {
-    final ThirdEyeCacheRegistry instance = getInstance(ThirdEyeCacheRegistry.class);
     // A single datasource must exist in the db for the tests to proceed
     Assertions.assertThat(db.executeSql("SELECT * From dataset_config_index").length())
         .isGreaterThan(0);
-
-    assertThat(instance).isNotNull();
-    assertThat(instance.getDataSourceCache()).isNotNull();
   }
 
   @Test(dependsOnMethods = "testDataSourcesLoaded")

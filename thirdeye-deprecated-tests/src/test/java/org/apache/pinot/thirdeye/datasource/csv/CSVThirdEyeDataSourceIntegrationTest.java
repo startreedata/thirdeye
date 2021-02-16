@@ -32,7 +32,6 @@ import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.mock.MockThirdEyeDataSourceIntegrationTest;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -77,7 +76,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     ThirdEyeConfiguration thirdEyeConfiguration = new ThirdEyeConfiguration();
     thirdEyeConfiguration.setDataSources(dataSourcesConfig.toString());
 
-    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = DeprecatedInjectorUtil
+    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = TestDbEnv
         .getInstance(ThirdEyeCacheRegistry.class);
 
     thirdEyeCacheRegistry.initializeCaches(thirdEyeConfiguration);

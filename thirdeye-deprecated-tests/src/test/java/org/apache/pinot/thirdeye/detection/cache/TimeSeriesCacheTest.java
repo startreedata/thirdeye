@@ -37,6 +37,7 @@ import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
@@ -46,7 +47,6 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -107,8 +107,8 @@ public class TimeSeriesCacheTest {
     this.executor = Executors.newSingleThreadExecutor();
 
     this.cache = new DefaultTimeSeriesCache(metricDAO, datasetDAO, dataSourceCache, cacheDAO,
-        executor, DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class));
-    DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class)
+        executor, TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+    TestDbEnv.getInstance(ThirdEyeCacheRegistry.class)
         .registerTimeSeriesCache(this.cache);
   }
 

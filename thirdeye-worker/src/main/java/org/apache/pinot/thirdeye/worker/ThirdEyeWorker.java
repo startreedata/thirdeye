@@ -50,7 +50,6 @@ import org.apache.pinot.thirdeye.scheduler.SchedulerService;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
 import org.apache.pinot.thirdeye.task.TaskDriver;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +96,6 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
 
     injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource, config));
-    DeprecatedInjectorUtil.setInjector(injector);
 
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
     schedulerService = injector.getInstance(SchedulerService.class);

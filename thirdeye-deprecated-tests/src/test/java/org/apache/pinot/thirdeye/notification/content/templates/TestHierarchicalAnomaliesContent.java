@@ -43,7 +43,6 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.notification.ContentFormatterUtils;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.Assert;
@@ -155,7 +154,7 @@ public class TestHierarchicalAnomaliesContent {
     SubscriptionGroupDTO notificationConfigDTO = DaoTestUtils
         .getTestNotificationConfig("Test Config");
 
-    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = DeprecatedInjectorUtil
+    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = TestDbEnv
         .getInstance(ThirdEyeCacheRegistry.class);
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(new Properties(),

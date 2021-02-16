@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.FileReader;
@@ -29,28 +31,34 @@ import org.apache.pinot.thirdeye.datalayer.ScriptRunner;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class TestDbEnv {
 
   private static int counter;
+  private static Injector injectorStatic;
   private final Injector injector;
 
   public TestDbEnv() {
     final DataSource dataSource = createDataSource();
     injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
 
-    DeprecatedInjectorUtil.setInjector(injector);
+    // TODO suvodeep legacy code. To be cleaned up.
+    injectorStatic = injector;
   }
 
   /**
-   * Use dependency injection instead of using this as a singleton instance.
-   * @return the singleton instance maintained by the {@link DeprecatedInjectorUtil} class
+   * Legacy. To be deleted
+   * @return the singleton instance maintained by the {@link TestDbEnv} class
    */
   @Deprecated
   public static DAORegistry getInstance() {
-    return DeprecatedInjectorUtil.getInstance(DAORegistry.class);
+    return getInstance(DAORegistry.class);
+  }
+
+  @Deprecated
+  public static <T> T getInstance(Class<T> c) {
+    return requireNonNull(injectorStatic, "Injector not initialized").getInstance(c);
   }
 
   private DataSource createDataSource() {

@@ -43,7 +43,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -91,7 +90,7 @@ public class DataAvailabilityTaskSchedulerTest {
             .setSchedulingWindowInSec(TimeUnit.MINUTES.toSeconds(30))
             .setScheduleDelayInSec(TimeUnit.MINUTES.toSeconds(10)), TestDbEnv.getInstance().getTaskDAO(),
         TestDbEnv.getInstance().getDetectionConfigManager(), TestDbEnv.getInstance().getDatasetConfigDAO(),
-        DeprecatedInjectorUtil.getInstance(ThirdEyeCacheRegistry.class), TestDbEnv.getInstance().getMetricConfigDAO()
+        TestDbEnv.getInstance(ThirdEyeCacheRegistry.class), TestDbEnv.getInstance().getMetricConfigDAO()
     );
   }
 

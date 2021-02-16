@@ -16,7 +16,6 @@ import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.resources.RootResource;
-import org.apache.pinot.thirdeye.util.DeprecatedInjectorUtil;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.slf4j.Logger;
@@ -53,7 +52,6 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,
         dataSource));
-    DeprecatedInjectorUtil.setInjector(injector);
 
     // Initialize ThirdEyeCacheRegistry
     injector

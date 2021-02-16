@@ -52,7 +52,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean.DimensionAsMetricProperties;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.slf4j.Logger;
@@ -78,8 +77,6 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
   private final String dataSourceName;
 
   private final AutoOnboardPinotMetricsUtils autoLoadPinotMetricsUtils;
-  private final DatasetConfigManager datasetConfigManager;
-  private final MetricConfigManager metricConfigManager;
 
   public AutoOnboardPinotMetadataSource(MetadataSourceConfig metadataSourceConfig)
       throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
@@ -90,8 +87,6 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
       throw e;
     }
-    datasetConfigManager = DAORegistry.getInstance().getDatasetConfigDAO();
-    metricConfigManager = DAORegistry.getInstance().getMetricConfigDAO();
     this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
         PinotThirdEyeDataSource.class.getSimpleName());
   }

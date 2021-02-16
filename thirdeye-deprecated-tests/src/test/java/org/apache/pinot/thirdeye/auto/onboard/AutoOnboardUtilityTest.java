@@ -37,7 +37,9 @@ public class AutoOnboardUtilityTest {
     Map<String, List<AutoOnboard>> dsToOnboardsMap = AutoOnboardUtility
         .getDataSourceToAutoOnboardMap(url, new DataSourcesLoader(
             mock(MetricConfigManager.class),
-            mock(DatasetConfigManager.class)));
+            mock(DatasetConfigManager.class)),
+            mock(MetricConfigManager.class),
+            mock(DatasetConfigManager.class));
 
     // Assert two data sources (PinotThirdEyeDataSource, CSVThirdEyeDataSource)
     Assert.assertEquals(dsToOnboardsMap.keySet().size(), 2);
@@ -81,7 +83,9 @@ public class AutoOnboardUtilityTest {
     Map<String, List<AutoOnboard>> dsToOnboardsMap = AutoOnboardUtility
         .getDataSourceToAutoOnboardMap(url, new DataSourcesLoader(
             mock(MetricConfigManager.class),
-            mock(DatasetConfigManager.class)));
+            mock(DatasetConfigManager.class)),
+            mock(MetricConfigManager.class),
+            mock(DatasetConfigManager.class));
 
     // Assert no metadata loaders
     Assert.assertEquals(dsToOnboardsMap.keySet().size(), 0);

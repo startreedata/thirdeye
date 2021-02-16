@@ -19,14 +19,19 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
 
 /**
  * This is the abstract parent class for all auto-onboard metadata services for various datasources
  */
 public abstract class AutoOnboard {
 
-  private final MetadataSourceConfig metadataSourceConfig;
+  protected final MetadataSourceConfig metadataSourceConfig;
+  protected MetricConfigManager metricConfigManager;
+  protected DatasetConfigManager datasetConfigManager;
 
   public AutoOnboard(MetadataSourceConfig metadataSourceConfig) {
     this.metadataSourceConfig = metadataSourceConfig;
@@ -34,6 +39,11 @@ public abstract class AutoOnboard {
 
   public MetadataSourceConfig getMetadataSourceConfig() {
     return metadataSourceConfig;
+  }
+
+  public void init(ThirdEyeDataSourceContext context) {
+    metricConfigManager = context.getMetricConfigManager();
+    datasetConfigManager = context.getDatasetConfigManager();
   }
 
   /**

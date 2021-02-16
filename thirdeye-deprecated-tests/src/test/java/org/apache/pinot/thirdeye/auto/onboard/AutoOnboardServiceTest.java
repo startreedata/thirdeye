@@ -21,6 +21,8 @@ import static org.mockito.Mockito.mock;
 import java.net.URL;
 import java.time.Duration;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.testng.annotations.Test;
 
@@ -38,7 +40,9 @@ public class AutoOnboardServiceTest {
     thirdEyeWorkerConfiguration.setDataSources(url.getPath());
 
     AutoOnboardService autoOnboardService = new AutoOnboardService(mock(DataSourcesLoader.class),
-        thirdEyeWorkerConfiguration);
+        thirdEyeWorkerConfiguration,
+        mock(MetricConfigManager.class),
+        mock(DatasetConfigManager.class));
     autoOnboardService.start();
 
     Thread.sleep(2000);

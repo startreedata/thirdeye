@@ -22,6 +22,8 @@ package org.apache.pinot.thirdeye.datasource;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 
 /**
  * This class defines the config of a metadata loader used in thirdeye
@@ -29,8 +31,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public class MetadataSourceConfig {
 
+  private MetricConfigManager metricConfigManager;
+  private DatasetConfigManager datasetConfigManager;
   private String className;
   private Map<String, Object> properties = new HashMap<>();
+
 
   public MetadataSourceConfig() {
 
@@ -41,20 +46,43 @@ public class MetadataSourceConfig {
     this.properties = properties;
   }
 
+  public MetricConfigManager getMetricConfigManager() {
+    return metricConfigManager;
+  }
+
+  public MetadataSourceConfig setMetricConfigManager(
+      final MetricConfigManager metricConfigManager) {
+    this.metricConfigManager = metricConfigManager;
+    return this;
+  }
+
+  public DatasetConfigManager getDatasetConfigManager() {
+    return datasetConfigManager;
+  }
+
+  public MetadataSourceConfig setDatasetConfigManager(
+      final DatasetConfigManager datasetConfigManager) {
+    this.datasetConfigManager = datasetConfigManager;
+    return this;
+  }
+
   public String getClassName() {
     return className;
   }
 
-  public void setClassName(String className) {
+  public MetadataSourceConfig setClassName(final String className) {
     this.className = className;
+    return this;
   }
 
   public Map<String, Object> getProperties() {
     return properties;
   }
 
-  public void setProperties(Map<String, Object> properties) {
+  public MetadataSourceConfig setProperties(
+      final Map<String, Object> properties) {
     this.properties = properties;
+    return this;
   }
 
   @Override

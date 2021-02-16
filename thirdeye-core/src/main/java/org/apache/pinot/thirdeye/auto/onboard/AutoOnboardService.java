@@ -30,6 +30,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +50,8 @@ public class AutoOnboardService implements Runnable {
   private final List<AutoOnboard> autoOnboardServices = new ArrayList<>();
   private final DataSourcesLoader dataSourcesLoader;
   private final ThirdEyeWorkerConfiguration config;
+  private final MetricConfigManager metricConfigManager;
+  private final DatasetConfigManager datasetConfigManager;
 
   /**
    * Reads data sources configs and instantiates the constructors for auto load of all data sources,
@@ -56,9 +60,13 @@ public class AutoOnboardService implements Runnable {
   @Inject
   public AutoOnboardService(
       final DataSourcesLoader dataSourcesLoader,
-      ThirdEyeWorkerConfiguration config) {
+      ThirdEyeWorkerConfiguration config,
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.config = config;
+    this.metricConfigManager = metricConfigManager;
+    this.datasetConfigManager = datasetConfigManager;
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
   }
 
@@ -78,7 +86,8 @@ public class AutoOnboardService implements Runnable {
   public void run() {
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
         .getDataSourceToAutoOnboardMap(
-            requireNonNull(config.getDataSourcesAsUrl()), dataSourcesLoader);
+            requireNonNull(config.getDataSourcesAsUrl()), dataSourcesLoader, metricConfigManager,
+            datasetConfigManager);
 
     for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {
       autoOnboardServices.addAll(autoOnboards);

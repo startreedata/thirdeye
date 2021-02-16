@@ -20,12 +20,10 @@
 package org.apache.pinot.thirdeye.anomaly.task;
 
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 
 public class TaskContext {
 
   private ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration;
-  private DAORegistry daoRegistry;
 
   public ThirdEyeWorkerConfiguration getThirdEyeWorkerConfiguration() {
     return thirdEyeWorkerConfiguration;
@@ -34,15 +32,6 @@ public class TaskContext {
   public TaskContext setThirdEyeWorkerConfiguration(
       ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration) {
     this.thirdEyeWorkerConfiguration = thirdEyeWorkerConfiguration;
-    return this;
-  }
-
-  public DAORegistry getDaoRegistry() {
-    return daoRegistry;
-  }
-
-  public TaskContext setDaoRegistry(final DAORegistry daoRegistry) {
-    this.daoRegistry = daoRegistry;
     return this;
   }
 }

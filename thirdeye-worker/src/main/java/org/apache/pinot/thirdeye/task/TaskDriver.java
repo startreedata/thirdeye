@@ -33,7 +33,6 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +54,6 @@ public class TaskDriver {
   @Inject
   public TaskDriver(final ThirdEyeWorkerConfiguration workerConfiguration,
       final TaskManager taskManager,
-      final DAORegistry daoRegistry,
       final TaskRunnerFactory taskRunnerFactory) {
     this.taskManager = taskManager;
     config = workerConfiguration.getTaskDriverConfiguration();
@@ -74,9 +72,7 @@ public class TaskDriver {
             .setDaemon(true)
             .build());
 
-    taskContext = new TaskContext()
-        .setThirdEyeWorkerConfiguration(workerConfiguration)
-        .setDaoRegistry(daoRegistry);
+    taskContext = new TaskContext().setThirdEyeWorkerConfiguration(workerConfiguration);
 
     this.taskRunnerFactory = taskRunnerFactory;
   }

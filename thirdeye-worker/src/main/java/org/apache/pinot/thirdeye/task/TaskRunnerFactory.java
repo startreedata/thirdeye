@@ -24,7 +24,6 @@ import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorTaskRunner;
 import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskRunner;
 import org.apache.pinot.thirdeye.detection.dataquality.DataQualityPipelineTaskRunner;
@@ -33,24 +32,24 @@ import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskRunner;
 @Singleton
 public class TaskRunnerFactory {
 
-  private final DAORegistry daoRegistry;
   private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
   private final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner;
   private final DetectionAlertTaskRunner detectionAlertTaskRunner;
   private final YamlOnboardingTaskRunner yamlOnboardingTaskRunner;
+  private final MonitorTaskRunner monitorTaskRunner;
 
   @Inject
   public TaskRunnerFactory(
-      final DAORegistry daoRegistry,
       final DetectionPipelineTaskRunner detectionPipelineTaskRunner,
       final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner,
       final DetectionAlertTaskRunner detectionAlertTaskRunner,
-      final YamlOnboardingTaskRunner yamlOnboardingTaskRunner) {
-    this.daoRegistry = daoRegistry;
+      final YamlOnboardingTaskRunner yamlOnboardingTaskRunner,
+      final MonitorTaskRunner monitorTaskRunner) {
     this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
     this.dataQualityPipelineTaskRunner = dataQualityPipelineTaskRunner;
     this.detectionAlertTaskRunner = detectionAlertTaskRunner;
     this.yamlOnboardingTaskRunner = yamlOnboardingTaskRunner;
+    this.monitorTaskRunner = monitorTaskRunner;
   }
 
   public TaskRunner get(TaskType taskType) {
@@ -64,7 +63,7 @@ public class TaskRunnerFactory {
       case YAML_DETECTION_ONBOARD:
         return yamlOnboardingTaskRunner;
       case MONITOR:
-        return new MonitorTaskRunner(daoRegistry);
+        return monitorTaskRunner;
       default:
         throw new RuntimeException("Invalid TaskType: " + taskType);
     }

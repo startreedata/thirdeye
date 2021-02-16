@@ -22,6 +22,8 @@ package org.apache.pinot.thirdeye.anomaly.monitor;
 import static org.apache.pinot.thirdeye.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_CONFIG_KEY;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,31 +46,53 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
+import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.bao.JobManager;
+import org.apache.pinot.thirdeye.datalayer.bao.OnlineDetectionDataManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class MonitorTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(MonitorJobRunner.class);
   private static final long MAX_TASK_TIME = TimeUnit.HOURS.toMillis(6);
   private static final long MAX_FAILED_DISABLE_DAYS = 30;
-  private final DAORegistry daoRegistry;
+
   private final TaskManager taskManager;
   private final JobManager jobManager;
-  private ThirdEyeWorkerConfiguration thirdeyeConfig;
+  private final ThirdEyeWorkerConfiguration workerConfiguration;
+  private final AlertManager alertManager;
+  private final DetectionStatusManager detectionStatusManager;
+  private final EvaluationManager evaluationManager;
+  private final OnlineDetectionDataManager onlineDetectionDataManager;
+  private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
 
-  public MonitorTaskRunner(final DAORegistry daoRegistry) {
-    this.daoRegistry = daoRegistry;
-    this.taskManager = daoRegistry.getTaskDAO();
-    this.jobManager = daoRegistry.getJobDAO();
+  @Inject
+  public MonitorTaskRunner(final ThirdEyeWorkerConfiguration workerConfiguration,
+      final TaskManager taskManager,
+      final JobManager jobManager,
+      final AlertManager alertManager,
+      final DetectionStatusManager detectionStatusManager,
+      final EvaluationManager evaluationManager,
+      final OnlineDetectionDataManager onlineDetectionDataManager,
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
+    this.taskManager = taskManager;
+    this.jobManager = jobManager;
+    this.workerConfiguration = workerConfiguration;
+    this.alertManager = alertManager;
+    this.detectionStatusManager = detectionStatusManager;
+    this.evaluationManager = evaluationManager;
+    this.onlineDetectionDataManager = onlineDetectionDataManager;
+    this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
   }
 
   @Override
@@ -76,7 +100,6 @@ public class MonitorTaskRunner implements TaskRunner {
 
     MonitorTaskInfo monitorTaskInfo = (MonitorTaskInfo) taskInfo;
     MonitorType monitorType = monitorTaskInfo.getMonitorType();
-    thirdeyeConfig = taskContext.getThirdEyeWorkerConfiguration();
     if (monitorType.equals(MonitorType.UPDATE)) {
       executeMonitorUpdate(monitorTaskInfo);
     } else if (monitorType.equals(MonitorType.EXPIRE)) {
@@ -157,8 +180,7 @@ public class MonitorTaskRunner implements TaskRunner {
    * since then.
    */
   private void disableLongFailedAlerts() {
-    AlertManager detectionDAO = daoRegistry.getDetectionConfigManager();
-    List<AlertDTO> detectionConfigs = detectionDAO.findAllActive();
+    List<AlertDTO> detectionConfigs = alertManager.findAllActive();
     long currentTimeMillis = System.currentTimeMillis();
     long maxTaskFailMillis = TimeUnit.DAYS.toMillis(MAX_FAILED_DISABLE_DAYS);
     for (AlertDTO config : detectionConfigs) {
@@ -173,7 +195,7 @@ public class MonitorTaskRunner implements TaskRunner {
               lastTaskExecutionTime == -1L
                   || lastTaskExecutionTime <= currentTimeMillis - maxTaskFailMillis)) {
             config.setActive(false);
-            detectionDAO.update(config);
+            alertManager.update(config);
             sendDisableAlertNotificationEmail(config);
             LOG.info("Disabled alert {} since it failed more than {} days. "
                     + "Task last update time: {}. Last success task execution time: {}",
@@ -195,7 +217,7 @@ public class MonitorTaskRunner implements TaskRunner {
             + "Here is the link for your alert: https://thirdeye.corp.linkedin.com/app/#/manage/explore/%d",
         MAX_FAILED_DISABLE_DAYS, config.getId());
     Set<String> recipients = EmailUtils
-        .getValidEmailAddresses(thirdeyeConfig.getFailureToAddress());
+        .getValidEmailAddresses(workerConfiguration.getFailureToAddress());
     if (config.getCreatedBy() != null && !config.getCreatedBy().equals(NO_AUTH_USER)) {
       recipients.add(config.getCreatedBy());
     }
@@ -204,9 +226,10 @@ public class MonitorTaskRunner implements TaskRunner {
     }
     EmailHelper.sendEmailWithTextBody(email,
         SmtpConfiguration
-            .createFromProperties(thirdeyeConfig.getAlerterConfiguration().get(SMTP_CONFIG_KEY)),
+            .createFromProperties(
+                workerConfiguration.getAlerterConfiguration().get(SMTP_CONFIG_KEY)),
         subject,
-        textBody, thirdeyeConfig.getFailureFromAddress(),
+        textBody, workerConfiguration.getFailureFromAddress(),
         new DetectionAlertFilterRecipients(recipients));
   }
 
@@ -244,7 +267,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
     // Delete expired detection status.
     try {
-      int deletedDetectionStatus = daoRegistry.getDetectionStatusDAO()
+      int deletedDetectionStatus = detectionStatusManager
           .deleteRecordsOlderThanDays(monitorTaskInfo.getDetectionStatusRetentionDays());
       LOG.info("Deleted {} detection status that are older than {} days.", deletedDetectionStatus,
           monitorTaskInfo.getDetectionStatusRetentionDays());
@@ -254,7 +277,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
     // Delete old evaluations.
     try {
-      int deletedEvaluations = daoRegistry.getEvaluationManager()
+      int deletedEvaluations = evaluationManager
           .deleteRecordsOlderThanDays(monitorTaskInfo.getDefaultRetentionDays());
       LOG.info("Deleted {} evaluations that are older than {} days.", deletedEvaluations,
           monitorTaskInfo.getDefaultRetentionDays());
@@ -264,7 +287,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
     // Delete expired online detection data
     try {
-      int deletedOnlineDetectionDatas = daoRegistry.getOnlineDetectionDataManager()
+      int deletedOnlineDetectionDatas = onlineDetectionDataManager
           .deleteRecordsOlderThanDays(monitorTaskInfo.getDefaultRetentionDays());
       LOG.info("Deleted {} online detection data that are older than {} days.",
           deletedOnlineDetectionDatas, monitorTaskInfo.getDefaultRetentionDays());
@@ -274,7 +297,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
     // Delete old anomaly subscription notifications.
     try {
-      int deletedRecords = daoRegistry.getAnomalySubscriptionGroupNotificationManager()
+      int deletedRecords = anomalySubscriptionGroupNotificationManager
           .deleteRecordsOlderThanDays(monitorTaskInfo.getDefaultRetentionDays());
       LOG.info("Deleted {} anomaly subscription notifications that are older than {} days.",
           deletedRecords,

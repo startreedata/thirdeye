@@ -33,8 +33,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
@@ -58,9 +56,6 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
   /**
    * Default constructor for ThirdEye task execution framework.
    * Loads dependencies from DAORegitry and CacheRegistry
-   *
-   * @see DAORegistry
-   * @see ThirdEyeCacheRegistry
    */
   @Inject
   public DataQualityPipelineTaskRunner(final DetectionPipelineFactory detectionPipelineFactory,

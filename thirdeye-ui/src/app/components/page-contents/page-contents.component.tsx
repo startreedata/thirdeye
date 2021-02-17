@@ -38,7 +38,7 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
     const commonClasses = useCommonStyles();
     const [documentTitle, setDocumentTitle] = useState("");
     const [showHeader, setShowHeader] = useState(true);
-    const [headerWidth, setHeaderWidth] = useState(
+    const [headerWidth, setHeaderWidth] = useState<number>(
         Dimension.WIDTH_PAGE_CONTENTS_DEFAULT
     );
     const [pageContentsScrollTop, setPageContentsScrollTop] = useState(0);

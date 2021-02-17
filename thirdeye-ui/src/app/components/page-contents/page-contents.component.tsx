@@ -18,6 +18,7 @@ import React, {
 } from "react";
 import { Helmet } from "react-helmet";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
+import { Dimension } from "../../utils/material-ui/dimension.util";
 import { getDocumentTitle } from "../../utils/page/page.util";
 import {
     AppBreadcrumbs,
@@ -37,7 +38,9 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
     const commonClasses = useCommonStyles();
     const [documentTitle, setDocumentTitle] = useState("");
     const [showHeader, setShowHeader] = useState(true);
-    const [headerWidth, setHeaderWidth] = useState(0);
+    const [headerWidth, setHeaderWidth] = useState(
+        Dimension.WIDTH_PAGE_CONTENTS_DEFAULT
+    );
     const [pageContentsScrollTop, setPageContentsScrollTop] = useState(0);
     const { routerBreadcrumbs, pageBreadcrumbs } = useAppBreadcrumbs();
     const {

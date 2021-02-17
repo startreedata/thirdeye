@@ -1,12 +1,13 @@
 import { IconButton, InputAdornment, TextField } from "@material-ui/core";
-import { Close, Search } from "@material-ui/icons";
+import CloseIcon from "@material-ui/icons/Close";
+import SearchIcon from "@material-ui/icons/Search";
 import { debounce } from "lodash";
 import React, {
     ChangeEvent,
-    createRef,
     FunctionComponent,
     useCallback,
     useEffect,
+    useRef,
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,7 +25,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     props: SearchBarProps
 ) => {
     const [searchText, setSearchText] = useState("");
-    const inputRef = createRef<HTMLInputElement>();
+    const inputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -41,7 +42,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         }
     }, []);
 
-    const onSearchInputChange = (
+    const handleSearchInputChange = (
         event: ChangeEvent<HTMLInputElement>
     ): void => {
         // Update search text and arrange to send event with a delay to account for a burst of
@@ -49,7 +50,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         updateSearchText(event.currentTarget.value, true);
     };
 
-    const onClearSearch = (): void => {
+    const handleSearchClear = (): void => {
         // Update search text and arrange to send event immediately
         updateSearchText("", false);
 
@@ -92,14 +93,13 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     ]);
 
     return (
-        // Search bar
         <TextField
             fullWidth
             InputProps={{
                 startAdornment: (
                     // Search icon
                     <InputAdornment position="start">
-                        <Search />
+                        <SearchIcon />
                     </InputAdornment>
                 ),
                 endAdornment: (
@@ -111,8 +111,8 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 
                         {/* Clear search button */}
                         <InputAdornment position="end">
-                            <IconButton onClick={onClearSearch}>
-                                <Close />
+                            <IconButton onClick={handleSearchClear}>
+                                <CloseIcon />
                             </IconButton>
                         </InputAdornment>
                     </>
@@ -120,10 +120,10 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
             }}
             autoFocus={props.autoFocus}
             inputRef={inputRef}
-            label={props.searchLabel ? props.searchLabel : t("label.search")}
+            label={props.searchLabel || t("label.search")}
             value={searchText}
             variant="outlined"
-            onChange={onSearchInputChange}
+            onChange={handleSearchInputChange}
         />
     );
 };

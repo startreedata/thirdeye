@@ -3,6 +3,8 @@ import { NavigateNext } from "@material-ui/icons";
 import React, { FunctionComponent } from "react";
 import { BreadcrumbsProps } from "./breadcrumbs.interfaces";
 
+const MAX_ITEMS = 5;
+
 export const Breadcrumbs: FunctionComponent<BreadcrumbsProps> = (
     props: BreadcrumbsProps
 ) => {
@@ -14,7 +16,7 @@ export const Breadcrumbs: FunctionComponent<BreadcrumbsProps> = (
                     ? props.trailingSeparator
                         ? props.maxItems + 1
                         : props.maxItems
-                    : 5
+                    : MAX_ITEMS
             }
             separator={<NavigateNext fontSize="small" />}
         >

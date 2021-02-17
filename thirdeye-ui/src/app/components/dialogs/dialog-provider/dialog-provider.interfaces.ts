@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 export interface DialogProviderProps {
-    children?: ReactNode;
+    children: ReactNode;
 }
 
 export interface UseDialogProps {

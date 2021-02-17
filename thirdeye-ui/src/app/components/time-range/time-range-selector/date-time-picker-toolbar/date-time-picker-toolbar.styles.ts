@@ -8,15 +8,17 @@ export const useDateTimePickerToolbarStyles = makeStyles({
         minHeight: "36px",
     },
     link: {
+        display: "flex",
+        alignSelf: "center",
         marginRight: "8px",
         "&:last-of-type": {
             marginRight: "0px",
         },
     },
-    selectedLink: {
-        fontWeight: "bold",
-    },
-    rightAlign: {
+    linkRightAligned: {
         marginLeft: "auto",
+    },
+    linkSelected: {
+        fontWeight: "bold",
     },
 });

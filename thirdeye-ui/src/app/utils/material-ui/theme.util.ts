@@ -13,8 +13,8 @@ import { typographyOptions } from "./typography.util";
 export const theme: Theme = createMuiTheme({
     palette: paletteOptions,
     props: {
-        MuiGrid: gridProps,
         MuiLink: linkProps,
+        MuiGrid: gridProps,
     },
     overrides: {
         MuiCssBaseline: cssBaselineClasses,

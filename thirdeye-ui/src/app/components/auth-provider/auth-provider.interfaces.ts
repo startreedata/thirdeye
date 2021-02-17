@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 export interface AuthProviderProps {
-    children?: ReactNode;
+    children: ReactNode;
 }
 
 export interface UseAuthProps {

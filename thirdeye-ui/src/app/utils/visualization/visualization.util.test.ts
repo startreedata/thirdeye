@@ -1,10 +1,7 @@
 import { ScaleTime } from "d3-scale";
 import { cloneDeep } from "lodash";
 import { Settings } from "luxon";
-import {
-    AlertEvaluationAnomalyPoint,
-    AlertEvaluationTimeSeriesPoint,
-} from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
+import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
@@ -12,11 +9,10 @@ import {
     DetectionEvaluation,
 } from "../../rest/dto/detection.interfaces";
 import {
-    filterAlertEvaluationAnomalyPointsByTime,
     filterAlertEvaluationTimeSeriesPointsByTime,
     formatDateTimeForAxis,
     formatLargeNumberForVisualization,
-    getAlertEvaluationAnomalyPoints,
+    getAlertEvaluationAnomalies,
     getAlertEvaluationTimeSeriesPointAtTime,
     getAlertEvaluationTimeSeriesPoints,
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
@@ -281,59 +277,57 @@ describe("Visualization Util", () => {
         );
     });
 
-    test("getAlertEvaluationAnomalyPoints should return empty array for invalid alert evaluation", () => {
+    test("getAlertEvaluationAnomalies should return empty array for invalid alert evaluation", () => {
         expect(
-            getAlertEvaluationAnomalyPoints(
-                (null as unknown) as AlertEvaluation
-            )
+            getAlertEvaluationAnomalies((null as unknown) as AlertEvaluation)
         ).toEqual([]);
     });
 
-    test("getAlertEvaluationAnomalyPoints should return empty array for invalid detection evaluation", () => {
+    test("getAlertEvaluationAnomalies should return empty array for invalid detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations = (null as unknown) as {
             [index: string]: DetectionEvaluation;
         };
 
-        expect(
-            getAlertEvaluationAnomalyPoints(mockAlertEvaluationCopy)
-        ).toEqual([]);
+        expect(getAlertEvaluationAnomalies(mockAlertEvaluationCopy)).toEqual(
+            []
+        );
     });
 
-    test("getAlertEvaluationAnomalyPoints should return empty array for empty detection evaluation", () => {
+    test("getAlertEvaluationAnomalies should return empty array for empty detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations = {};
 
-        expect(
-            getAlertEvaluationAnomalyPoints(mockAlertEvaluationCopy)
-        ).toEqual([]);
+        expect(getAlertEvaluationAnomalies(mockAlertEvaluationCopy)).toEqual(
+            []
+        );
     });
 
-    test("getAlertEvaluationAnomalyPoints should return empty array for invalid anomalies in detection evaluation", () => {
+    test("getAlertEvaluationAnomalies should return empty array for invalid anomalies in detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
             anomalies: (null as unknown) as Anomaly[],
         } as DetectionEvaluation;
 
-        expect(
-            getAlertEvaluationAnomalyPoints(mockAlertEvaluationCopy)
-        ).toEqual([]);
+        expect(getAlertEvaluationAnomalies(mockAlertEvaluationCopy)).toEqual(
+            []
+        );
     });
 
-    test("getAlertEvaluationAnomalyPoints should return empty array for empty anomalies in detection evaluation", () => {
+    test("getAlertEvaluationAnomalies should return empty array for empty anomalies in detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
             anomalies: [] as Anomaly[],
         } as DetectionEvaluation;
 
-        expect(
-            getAlertEvaluationAnomalyPoints(mockAlertEvaluationCopy)
-        ).toEqual([]);
+        expect(getAlertEvaluationAnomalies(mockAlertEvaluationCopy)).toEqual(
+            []
+        );
     });
 
-    test("getAlertEvaluationAnomalyPoints should return appropriate alert evaluation anomaly points for alert evaluation", () => {
-        expect(getAlertEvaluationAnomalyPoints(mockAlertEvaluation)).toEqual(
-            mockAlertEvaluationAnomalyPoints
+    test("getAlertEvaluationAnomalies should return appropriate alert evaluation anomalies points for alert evaluation", () => {
+        expect(getAlertEvaluationAnomalies(mockAlertEvaluation)).toEqual(
+            mockAnomalies
         );
     });
 
@@ -508,96 +502,6 @@ test("filterAlertEvaluationTimeSeriesPointsByTime should return appropriate aler
     ).toEqual([]);
 });
 
-test("filterAlertEvaluationAnomalyPointsByTime should return empty array for invalid alert evaluation anomaly points", () => {
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            (null as unknown) as AlertEvaluationAnomalyPoint[],
-            1,
-            2
-        )
-    ).toEqual([]);
-});
-
-test("filterAlertEvaluationAnomalyPointsByTime should return empty array for empty alert evaluation anomaly points", () => {
-    expect(filterAlertEvaluationAnomalyPointsByTime([], 1, 2)).toEqual([]);
-});
-
-test("filterAlertEvaluationAnomalyPointsByTime should return appropriate alert evaluation anomaly points for alert evaluation anomaly points and invalid start and end time", () => {
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            (null as unknown) as number,
-            1
-        )
-    ).toEqual(mockAlertEvaluationAnomalyPoints);
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            1,
-            (null as unknown) as number
-        )
-    ).toEqual(mockAlertEvaluationAnomalyPoints);
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            (null as unknown) as number,
-            (null as unknown) as number
-        )
-    ).toEqual(mockAlertEvaluationAnomalyPoints);
-});
-
-test("filterAlertEvaluationAnomalyPointsByTime should return appropriate alert evaluation anomaly points for alert evaluation anomaly points and start and end time", () => {
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            16,
-            16
-        )
-    ).toEqual([mockAlertEvaluationAnomalyPoint1]);
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            16,
-            20
-        )
-    ).toEqual(mockAlertEvaluationAnomalyPoints);
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            15,
-            25
-        )
-    ).toEqual(mockAlertEvaluationAnomalyPoints);
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            15,
-            18
-        )
-    ).toEqual([mockAlertEvaluationAnomalyPoint1]);
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            18,
-            25
-        )
-    ).toEqual([mockAlertEvaluationAnomalyPoint2]);
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            14,
-            15
-        )
-    ).toEqual([]);
-    expect(
-        filterAlertEvaluationAnomalyPointsByTime(
-            mockAlertEvaluationAnomalyPoints,
-            22,
-            14
-        )
-    ).toEqual([]);
-});
-
 test("getAlertEvaluationTimeSeriesPointAtTime should return null for invalid alert evaluation time series points", () => {
     expect(
         getAlertEvaluationTimeSeriesPointAtTime(
@@ -744,21 +648,18 @@ const mockAlertEvaluationTimeSeriesPoints = [
     mockAlertEvaluationTimeSeriesPoint3,
 ];
 
-const mockAlertEvaluationAnomalyPoint1 = {
+const mockAnomaly1 = {
     startTime: 16,
     endTime: 17,
-    current: 18,
-    baseline: 19,
-};
+    avgCurrentVal: 18,
+    avgBaselineVal: 19,
+} as Anomaly;
 
-const mockAlertEvaluationAnomalyPoint2 = {
+const mockAnomaly2 = {
     startTime: 20,
     endTime: 21,
-    current: 22,
-    baseline: 23,
-};
+    avgCurrentVal: 22,
+    avgBaselineVal: 23,
+} as Anomaly;
 
-const mockAlertEvaluationAnomalyPoints = [
-    mockAlertEvaluationAnomalyPoint1,
-    mockAlertEvaluationAnomalyPoint2,
-];
+const mockAnomalies = [mockAnomaly1, mockAnomaly2];

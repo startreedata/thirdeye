@@ -4,7 +4,7 @@ import {
     AccordionSummary,
     Typography,
 } from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { validateEmail } from "../../utils/validation/validation.util";
@@ -16,14 +16,14 @@ export const SubscriptionGroupEmailsAccordian: FunctionComponent<SubscriptionGro
 ) => {
     const { t } = useTranslation();
 
-    const onSubscriptionGroupEmailsChange = (emails: string[]): void => {
+    const handleSubscriptionGroupEmailsChange = (emails: string[]): void => {
         props.onChange && props.onChange(emails);
     };
 
     return (
         <Accordion defaultExpanded={props.defaultExpanded} variant="outlined">
             {/* Header */}
-            <AccordionSummary expandIcon={<ExpandMore />}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6">{props.title}</Typography>
             </AccordionSummary>
 
@@ -37,7 +37,7 @@ export const SubscriptionGroupEmailsAccordian: FunctionComponent<SubscriptionGro
                         props.subscriptionGroupCardData.emails
                     }
                     validateFn={validateEmail}
-                    onChange={onSubscriptionGroupEmailsChange}
+                    onChange={handleSubscriptionGroupEmailsChange}
                 />
             </AccordionDetails>
         </Accordion>

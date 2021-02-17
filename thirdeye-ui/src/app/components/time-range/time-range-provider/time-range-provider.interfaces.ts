@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 export interface TimeRangeProviderProps {
-    children?: ReactNode;
+    children: ReactNode;
 }
 
 export interface UseTimeRangeProps {

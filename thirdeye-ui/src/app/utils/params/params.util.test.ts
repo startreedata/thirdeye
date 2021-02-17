@@ -37,9 +37,7 @@ describe("Params Util", () => {
 
     afterAll(() => {
         // Restore global location object
-        Object.defineProperty(window, "location", {
-            value: systemLocation,
-        });
+        Object.defineProperty(window, "location", { value: systemLocation });
     });
 
     test("setSearchInQueryString should set appropriate search in query string", () => {

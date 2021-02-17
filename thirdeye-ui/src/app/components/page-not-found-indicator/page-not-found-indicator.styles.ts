@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 
 export const usePageNotFoundIndicatorStyles = makeStyles({
-    container: {
+    pageNotFoundIndicator: {
         height: "100%",
     },
 });

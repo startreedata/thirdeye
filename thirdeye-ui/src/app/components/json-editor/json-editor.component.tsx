@@ -42,30 +42,6 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
         initJSONInput();
     }, [props.value]);
 
-    const onEditorMouseEnter = (): void => {
-        setMouseHover(true);
-    };
-
-    const onEditorMouseLeave = (): void => {
-        setMouseHover(false);
-    };
-
-    const onBeforeCodeMirrorInputChange = (
-        _editor: Editor,
-        _data: EditorChange,
-        value: string
-    ): void => {
-        setValue(value);
-    };
-
-    const onCodeMirrorInputChange = (
-        _editor: Editor,
-        _data: EditorChange,
-        value: string
-    ): void => {
-        props.onChange && props.onChange(value);
-    };
-
     const initJSONInput = (): void => {
         if (typeof props.value === "string") {
             // Format string if possible
@@ -94,9 +70,32 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
         setValue("");
     };
 
+    const handleEditorMouseEnter = (): void => {
+        setMouseHover(true);
+    };
+
+    const handleEditorMouseLeave = (): void => {
+        setMouseHover(false);
+    };
+
+    const handleEditorInputBeforeChange = (
+        _editor: Editor,
+        _data: EditorChange,
+        value: string
+    ): void => {
+        setValue(value);
+    };
+
+    const handleEditorInputChange = (
+        _editor: Editor,
+        _data: EditorChange,
+        value: string
+    ): void => {
+        props.onChange && props.onChange(value);
+    };
+
     return (
         <>
-            {/* Editor */}
             <Box
                 border={Dimension.WIDTH_BORDER_DEFAULT}
                 borderColor={
@@ -107,12 +106,12 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
                         : Palette.COLOR_BORDER_DEFAULT
                 }
                 borderRadius={theme.shape.borderRadius}
-                onMouseEnter={onEditorMouseEnter}
-                onMouseLeave={onEditorMouseLeave}
+                onMouseEnter={handleEditorMouseEnter}
+                onMouseLeave={handleEditorMouseLeave}
             >
                 <Suspense fallback={<LoadingIndicator />}>
                     <CodeMirror
-                        className={jsonEditorClasses.container}
+                        className={jsonEditorClasses.editor}
                         options={
                             {
                                 tabSize: 2,
@@ -136,15 +135,15 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
                             } as EditorConfiguration
                         }
                         value={value}
-                        onBeforeChange={onBeforeCodeMirrorInputChange}
-                        onChange={onCodeMirrorInputChange}
+                        onBeforeChange={handleEditorInputBeforeChange}
+                        onChange={handleEditorInputChange}
                     />
                 </Suspense>
             </Box>
 
             {/* Helper text */}
             <FormHelperText error={props.error}>
-                {props.helperText || ""}
+                {props.helperText}
             </FormHelperText>
         </>
     );

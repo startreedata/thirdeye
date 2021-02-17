@@ -63,9 +63,7 @@ export const AlertsAllPage: FunctionComponent = () => {
         updateAlert(alertCardData.alert)
             .then((alert: Alert): void => {
                 enqueueSnackbar(
-                    t("message.update-success", {
-                        entity: t("label.alert"),
-                    }),
+                    t("message.update-success", { entity: t("label.alert") }),
                     getSuccessSnackbarOption()
                 );
 
@@ -74,9 +72,7 @@ export const AlertsAllPage: FunctionComponent = () => {
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.update-error", {
-                        entity: t("label.alert"),
-                    }),
+                    t("message.update-error", { entity: t("label.alert") }),
                     getErrorSnackbarOption()
                 );
             });
@@ -107,9 +103,7 @@ export const AlertsAllPage: FunctionComponent = () => {
         deleteAlert(alertCardData.id)
             .then((alert: Alert): void => {
                 enqueueSnackbar(
-                    t("message.delete-success", {
-                        entity: t("label.alert"),
-                    }),
+                    t("message.delete-success", { entity: t("label.alert") }),
                     getSuccessSnackbarOption()
                 );
 
@@ -118,9 +112,7 @@ export const AlertsAllPage: FunctionComponent = () => {
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.alert"),
-                    }),
+                    t("message.delete-error", { entity: t("label.alert") }),
                     getErrorSnackbarOption()
                 );
             });

@@ -2,7 +2,7 @@ import { Grid, useTheme } from "@material-ui/core";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import { ReactComponent as Metrics } from "../../../assets/images/metrics.svg";
+import { ReactComponent as Metrics } from "../../../assets/images/metric.svg";
 import { ReactComponent as SubscriptionGroups } from "../../../assets/images/subscription-group.svg";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { ButtonTile } from "../../components/button-tile/button-tile.component";

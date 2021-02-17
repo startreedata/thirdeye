@@ -122,7 +122,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         return newFilteredList.reverse();
     };
 
-    const onTransferListItem = (item: T): void => {
+    const handleTransfer = (item: T): void => {
         const key = props.listItemKeyFn(item);
         if (!key) {
             return;
@@ -144,7 +144,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         props.onChange && props.onChange([...newToListMap.values()]);
     };
 
-    const onRemoveListItem = (item: T): void => {
+    const handleRemove = (item: T): void => {
         const key = props.listItemKeyFn(item);
         if (!key) {
             return;
@@ -169,17 +169,17 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     return (
         <Grid container>
             {/* From-list*/}
-            <Grid item sm={6}>
-                <Grid container direction="column">
+            <Grid item sm={6} xs={12}>
+                <Grid container>
                     {/* Label */}
-                    <Grid item sm={12}>
+                    <Grid item xs={12}>
                         <Typography variant="subtitle1">
                             {props.fromLabel}
                         </Typography>
                     </Grid>
 
                     {/* Search */}
-                    <Grid item sm={12}>
+                    <Grid item xs={12}>
                         <SearchBar
                             searchLabel={t("label.search")}
                             searchStatusLabel={t("label.search-count", {
@@ -193,7 +193,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                     </Grid>
 
                     {/* List */}
-                    <Grid item sm={12}>
+                    <Grid item xs={12}>
                         <Card variant="outlined">
                             <CardContent className={transferListClasses.list}>
                                 <List dense>
@@ -204,7 +204,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                     button
                                                     key={index}
                                                     onClick={() =>
-                                                        onTransferListItem(
+                                                        handleTransfer(
                                                             fromListItem
                                                         )
                                                     }
@@ -231,7 +231,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                     <ListItemSecondaryAction>
                                                         <IconButton
                                                             onClick={() =>
-                                                                onTransferListItem(
+                                                                handleTransfer(
                                                                     fromListItem
                                                                 )
                                                             }
@@ -260,17 +260,17 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             </Grid>
 
             {/* To-list */}
-            <Grid item sm={6}>
-                <Grid container direction="column">
+            <Grid item sm={6} xs={12}>
+                <Grid container>
                     {/* Label */}
-                    <Grid item sm={12}>
+                    <Grid item xs={12}>
                         <Typography variant="subtitle1">
                             {props.toLabel}
                         </Typography>
                     </Grid>
 
                     {/* Search */}
-                    <Grid item sm={12}>
+                    <Grid item xs={12}>
                         <SearchBar
                             searchLabel={t("label.search")}
                             searchStatusLabel={t("label.search-count", {
@@ -284,7 +284,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                     </Grid>
 
                     {/* List */}
-                    <Grid item sm={12}>
+                    <Grid item xs={12}>
                         <Card variant="outlined">
                             <CardContent className={transferListClasses.list}>
                                 <List dense>
@@ -294,7 +294,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                 button
                                                 key={index}
                                                 onClick={() =>
-                                                    onRemoveListItem(toItem)
+                                                    handleRemove(toItem)
                                                 }
                                             >
                                                 <ListItemText
@@ -319,9 +319,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                 <ListItemSecondaryAction>
                                                     <IconButton
                                                         onClick={() =>
-                                                            onRemoveListItem(
-                                                                toItem
-                                                            )
+                                                            handleRemove(toItem)
                                                         }
                                                     >
                                                         <CloseIcon />

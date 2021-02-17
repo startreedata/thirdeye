@@ -13,7 +13,7 @@ export const PageNotFoundIndicator: FunctionComponent = () => {
         <Grid
             container
             alignItems="center"
-            className={pageNotFoundIndicatorClasses.container}
+            className={pageNotFoundIndicatorClasses.pageNotFoundIndicator}
             justify="center"
         >
             {/* Error code */}

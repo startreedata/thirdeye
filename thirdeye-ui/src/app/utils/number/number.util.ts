@@ -1,7 +1,7 @@
 import numbro from "numbro";
 
 // Returns formatted string representation of number
-// For example, mantissa = 2:
+// For example:
 // 10 -> 10
 // 1000 -> 1,000
 // 10.0 -> 10
@@ -51,7 +51,7 @@ export const formatLargeNumber = (
 };
 
 // Returns percentage string representation of number
-// For example, mantissa = 2::
+// For example:
 // 1 -> 100%
 // 10 -> 1,000%
 // 0.1 -> 10%

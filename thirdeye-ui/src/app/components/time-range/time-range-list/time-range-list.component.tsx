@@ -1,4 +1,10 @@
-import { List, ListItem, ListItemText, Tooltip } from "@material-ui/core";
+import {
+    List,
+    ListItem,
+    ListItemText,
+    ListSubheader,
+    Tooltip,
+} from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +26,7 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
         <List dense>
             {/* Recent custom time range durations label */}
             {!isEmpty(props.recentCustomTimeRangeDurations) && (
-                <ListItem>
+                <ListSubheader disableSticky>
                     <ListItemText
                         primary={t("label.recent-custom")}
                         primaryTypographyProps={{
@@ -28,7 +34,7 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
                             className: commonClasses.ellipsis,
                         }}
                     />
-                </ListItem>
+                </ListSubheader>
             )}
 
             {/* Recent custom time range durations */}

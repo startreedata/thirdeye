@@ -1,8 +1,8 @@
-import { makeStyles, Theme } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 import { codeTypographyOptions } from "../../utils/material-ui/typography.util";
 
-export const useJSONEditorStyles = makeStyles((theme: Theme) => ({
-    container: {
+export const useJSONEditorStyles = makeStyles((theme) => ({
+    editor: {
         // Override CodeMirror styles to better align with Material-UI theme
         "& .CodeMirror": {
             ...codeTypographyOptions.body2,

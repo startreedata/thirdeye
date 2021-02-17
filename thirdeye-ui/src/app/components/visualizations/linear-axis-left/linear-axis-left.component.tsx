@@ -4,6 +4,7 @@ import { formatLargeNumberForVisualization } from "../../../utils/visualization/
 import { LinearAxisLeftProps } from "./linear-axis-left.interfaces";
 import { useLinearAxisLeftStyles } from "./linear-axis-left.styles";
 
+// Customization of visx linear axis with formatted tick labels
 export const LinearAxisLeft: FunctionComponent<LinearAxisLeftProps> = (
     props: LinearAxisLeftProps
 ) => {

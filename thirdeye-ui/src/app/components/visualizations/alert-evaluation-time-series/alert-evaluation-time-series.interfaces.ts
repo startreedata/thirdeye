@@ -1,29 +1,30 @@
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
 export interface AlertEvaluationTimeSeriesProps {
     alertEvaluation: AlertEvaluation | null;
 }
 
 export interface AlertEvaluationTimeSeriesInternalProps {
-    height: number;
-    width: number;
+    parentHeight: number;
+    parentWidth: number;
     alertEvaluation: AlertEvaluation | null;
 }
 
-export interface AlertEvaluationTimeSeriesInternalState {
+export interface AlertEvaluationTimeSeriesState {
     loading: boolean;
     noData: boolean;
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[];
     filteredAlertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[];
-    alertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[];
-    filteredAlertEvaluationAnomalyPoints: AlertEvaluationAnomalyPoint[];
+    alertEvaluationAnomalies: Anomaly[];
+    filteredAlertEvaluationAnomalies: Anomaly[];
     currentPlotVisible: boolean;
     baselinePlotVisible: boolean;
     upperAndLowerBoundPlotVisible: boolean;
     anomaliesPlotVisible: boolean;
 }
 
-export enum AlertEvaluationTimeSeriesInternalStateAction {
+export enum AlertEvaluationTimeSeriesStateAction {
     UPDATE,
     TOGGLE_CURRENT_PLOT_VISIBLE,
     TOGGLE_BASELINE_PLOT_VISIBLE,
@@ -31,7 +32,7 @@ export enum AlertEvaluationTimeSeriesInternalStateAction {
     TOGGLE_ANOMALIES_PLOT_VISIBLE,
 }
 
-export enum AlertEvaluationTimeSeriesPlot {
+export enum AlertEvaluationTimeSeriesPlotLine {
     CURRENT = "CURRENT",
     BASELINE = "BASELINE",
     UPPER_AND_LOWER_BOUND = "UPPER_AND_LOWER_BOUND",
@@ -44,20 +45,4 @@ export interface AlertEvaluationTimeSeriesPoint {
     expected: number;
     upperBound: number;
     lowerBound: number;
-}
-
-export interface AlertEvaluationAnomalyPoint {
-    startTime: number;
-    endTime: number;
-    current: number;
-    baseline: number;
-}
-
-export interface AlertEvaluationTimeSeriesTooltipPoint {
-    timestamp: number;
-    current: number;
-    expected: number;
-    upperBound: number;
-    lowerBound: number;
-    anomalies: AlertEvaluationAnomalyPoint[];
 }

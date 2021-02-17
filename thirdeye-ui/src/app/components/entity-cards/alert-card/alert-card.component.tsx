@@ -21,7 +21,7 @@ import {
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
-import { ExpandableDetails } from "../expandable-details/expandable-details.components";
+import { ExpandableDetails } from "../expandable-details/expandable-details.component";
 import {
     AlertCardProps,
     AlertDatasetAndMetric,

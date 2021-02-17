@@ -1,18 +1,21 @@
 import {
     AppBar as MuiAppBar,
     Fab,
+    Hidden,
     IconButton,
     Link,
     Menu,
     MenuItem,
     Toolbar,
 } from "@material-ui/core";
-import { Add, Person } from "@material-ui/icons";
+import AddIcon from "@material-ui/icons/Add";
+import MenuIcon from "@material-ui/icons/Menu";
+import PersonIcon from "@material-ui/icons/Person";
 import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
-import { ReactComponent as ThirdEye } from "../../../assets/images/third-eye.svg";
+import { ReactComponent as ThirdEyeIcon } from "../../../assets/images/third-eye.svg";
 import {
     AppRoute,
     getAlertsCreatePath,
@@ -25,11 +28,13 @@ import {
     getSignOutPath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
+import { AppBarDrawer } from "../app-bar-drawer/app-bar-drawer.component";
 import { useAuth } from "../auth-provider/auth-provider.component";
 import { useAppBarStyles } from "./app-bar.styles";
 
 export const AppBar: FunctionComponent = () => {
     const appBarClasses = useAppBarStyles();
+    const [appBarDrawerOpen, setAppBarDrawerOpen] = useState(false);
     const [
         shortcutOptionsAnchorElement,
         setShortcutOptionsAnchorElement,
@@ -43,62 +48,71 @@ export const AppBar: FunctionComponent = () => {
     const location = useLocation();
     const { t } = useTranslation();
 
-    const onLogoClick = (): void => {
+    const handleAppBarDrawerClick = (): void => {
+        setAppBarDrawerOpen(true);
+    };
+
+    const handleAppBarDrawerClose = (): void => {
+        setAppBarDrawerOpen(false);
+    };
+
+    const handleLogoClick = (): void => {
         history.push(getBasePath());
     };
 
-    const onHomeClick = (): void => {
+    const handleHomeClick = (): void => {
         history.push(getHomePath());
     };
 
-    const onAlertsClick = (): void => {
+    const handleAlertsClick = (): void => {
         history.push(getAlertsPath());
     };
 
-    const onAnomaliesClick = (): void => {
+    const handleAnomaliesClick = (): void => {
         history.push(getAnomaliesAllPath());
     };
 
-    const onConfigurationClick = (): void => {
+    const handleConfigurationClick = (): void => {
         history.push(getConfigurationPath());
     };
 
-    const onSignInClick = (): void => {
+    const handleSignInClick = (): void => {
         history.push(getSignInPath());
     };
 
-    const onShortcutOptionsClick = (event: MouseEvent<HTMLElement>): void => {
+    const handleShortcutOptionsClick = (
+        event: MouseEvent<HTMLElement>
+    ): void => {
         setShortcutOptionsAnchorElement(event.currentTarget);
     };
 
-    const onCloseShortcutOptions = (): void => {
+    const handleShortcutOptionsClose = (): void => {
         setShortcutOptionsAnchorElement(null);
     };
 
-    const onCreateAlert = (): void => {
+    const handleCreateAlert = (): void => {
         history.push(getAlertsCreatePath());
-
-        onCloseShortcutOptions();
+        handleShortcutOptionsClose();
     };
 
-    const onCreateSubscriptionGroup = (): void => {
+    const handleCreateSubscriptionGroup = (): void => {
         history.push(getSubscriptionGroupsCreatePath());
-
-        onCloseShortcutOptions();
+        handleShortcutOptionsClose();
     };
 
-    const onAccountOptionsClick = (event: MouseEvent<HTMLElement>): void => {
+    const handleAccountOptionsClick = (
+        event: MouseEvent<HTMLElement>
+    ): void => {
         setAccountOptionsAnchorElement(event.currentTarget);
     };
 
-    const onCloseAccountOptions = (): void => {
+    const handleAccountOptionsClose = (): void => {
         setAccountOptionsAnchorElement(null);
     };
 
-    const onSignOut = (): void => {
+    const handleSignOut = (): void => {
         history.push(getSignOutPath());
-
-        onCloseAccountOptions();
+        handleAccountOptionsClose();
     };
 
     const isRouteCurrent = (route: string): boolean => {
@@ -106,83 +120,101 @@ export const AppBar: FunctionComponent = () => {
     };
 
     return (
-        <MuiAppBar className={appBarClasses.container} elevation={6}>
+        <MuiAppBar className={appBarClasses.appBar} elevation={6}>
             <Toolbar>
+                {/* App bar drawer */}
+                <Hidden smUp>
+                    <IconButton
+                        className={appBarClasses.link}
+                        size="medium"
+                        onClick={handleAppBarDrawerClick}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+
+                    <AppBarDrawer
+                        open={appBarDrawerOpen}
+                        onClose={handleAppBarDrawerClose}
+                    />
+                </Hidden>
+
                 {/* ThirdEye logo */}
                 <Link
                     className={appBarClasses.link}
                     component="button"
-                    onClick={onLogoClick}
+                    onClick={handleLogoClick}
                 >
-                    <ThirdEye width={48} />
+                    <ThirdEyeIcon width={48} />
                 </Link>
 
-                {/* Home */}
-                <Link
-                    className={appBarClasses.link}
-                    color={
-                        isRouteCurrent(AppRoute.HOME)
-                            ? "textPrimary"
-                            : "primary"
-                    }
-                    component="button"
-                    variant="subtitle1"
-                    onClick={onHomeClick}
-                >
-                    {t("label.home")}
-                </Link>
+                <Hidden xsDown>
+                    {/* Home */}
+                    <Link
+                        className={appBarClasses.link}
+                        color={
+                            isRouteCurrent(AppRoute.HOME)
+                                ? "textPrimary"
+                                : "primary"
+                        }
+                        component="button"
+                        variant="subtitle1"
+                        onClick={handleHomeClick}
+                    >
+                        {t("label.home")}
+                    </Link>
 
-                {/* Alerts */}
-                <Link
-                    className={appBarClasses.link}
-                    color={
-                        isRouteCurrent(AppRoute.ALERTS)
-                            ? "textPrimary"
-                            : "primary"
-                    }
-                    component="button"
-                    variant="subtitle1"
-                    onClick={onAlertsClick}
-                >
-                    {t("label.alerts")}
-                </Link>
+                    {/* Alerts */}
+                    <Link
+                        className={appBarClasses.link}
+                        color={
+                            isRouteCurrent(AppRoute.ALERTS)
+                                ? "textPrimary"
+                                : "primary"
+                        }
+                        component="button"
+                        variant="subtitle1"
+                        onClick={handleAlertsClick}
+                    >
+                        {t("label.alerts")}
+                    </Link>
 
-                {/* Anomalies */}
-                <Link
-                    className={appBarClasses.link}
-                    color={
-                        isRouteCurrent(AppRoute.ANOMALIES)
-                            ? "textPrimary"
-                            : "primary"
-                    }
-                    component="button"
-                    variant="subtitle1"
-                    onClick={onAnomaliesClick}
-                >
-                    {t("label.anomalies")}
-                </Link>
+                    {/* Anomalies */}
+                    <Link
+                        className={appBarClasses.link}
+                        color={
+                            isRouteCurrent(AppRoute.ANOMALIES)
+                                ? "textPrimary"
+                                : "primary"
+                        }
+                        component="button"
+                        variant="subtitle1"
+                        onClick={handleAnomaliesClick}
+                    >
+                        {t("label.anomalies")}
+                    </Link>
 
-                {/* Configuration */}
-                <Link
-                    className={appBarClasses.link}
-                    color={
-                        isRouteCurrent(AppRoute.CONFIGURATION)
-                            ? "textPrimary"
-                            : "primary"
-                    }
-                    component="button"
-                    variant="subtitle1"
-                    onClick={onConfigurationClick}
-                >
-                    {t("label.configuration")}
-                </Link>
+                    {/* Configuration */}
+                    <Link
+                        className={appBarClasses.link}
+                        color={
+                            isRouteCurrent(AppRoute.CONFIGURATION)
+                                ? "textPrimary"
+                                : "primary"
+                        }
+                        component="button"
+                        variant="subtitle1"
+                        onClick={handleConfigurationClick}
+                    >
+                        {t("label.configuration")}
+                    </Link>
+                </Hidden>
 
                 {!authDisabled && !authenticated && (
                     // Sign in
                     <Link
                         className={classnames(
                             appBarClasses.link,
-                            appBarClasses.rightAlign
+                            appBarClasses.linkRightAligned
                         )}
                         color={
                             isRouteCurrent(AppRoute.SIGN_IN)
@@ -191,7 +223,7 @@ export const AppBar: FunctionComponent = () => {
                         }
                         component="button"
                         variant="subtitle1"
-                        onClick={onSignInClick}
+                        onClick={handleSignInClick}
                     >
                         {t("label.sign-in")}
                     </Link>
@@ -203,27 +235,27 @@ export const AppBar: FunctionComponent = () => {
                         <Fab
                             className={classnames(
                                 appBarClasses.link,
-                                appBarClasses.rightAlign
+                                appBarClasses.linkRightAligned
                             )}
                             color="primary"
                             size="small"
-                            onClick={onShortcutOptionsClick}
+                            onClick={handleShortcutOptionsClick}
                         >
-                            <Add />
+                            <AddIcon />
                         </Fab>
 
                         <Menu
                             anchorEl={shortcutOptionsAnchorElement}
                             open={Boolean(shortcutOptionsAnchorElement)}
-                            onClose={onCloseShortcutOptions}
+                            onClose={handleShortcutOptionsClose}
                         >
                             {/* Create alert */}
-                            <MenuItem onClick={onCreateAlert}>
+                            <MenuItem onClick={handleCreateAlert}>
                                 {t("label.create-alert")}
                             </MenuItem>
 
                             {/* Create subscription group */}
-                            <MenuItem onClick={onCreateSubscriptionGroup}>
+                            <MenuItem onClick={handleCreateSubscriptionGroup}>
                                 {t("label.create-subscription-group")}
                             </MenuItem>
                         </Menu>
@@ -235,19 +267,19 @@ export const AppBar: FunctionComponent = () => {
                         {/* Account options */}
                         <IconButton
                             className={appBarClasses.link}
-                            size="small"
-                            onClick={onAccountOptionsClick}
+                            size="medium"
+                            onClick={handleAccountOptionsClick}
                         >
-                            <Person />
+                            <PersonIcon />
                         </IconButton>
 
                         <Menu
                             anchorEl={accountOptionsAnchorElement}
                             open={Boolean(accountOptionsAnchorElement)}
-                            onClose={onCloseAccountOptions}
+                            onClose={handleAccountOptionsClose}
                         >
                             {/* Sign out */}
-                            <MenuItem onClick={onSignOut}>
+                            <MenuItem onClick={handleSignOut}>
                                 {t("label.sign-out")}
                             </MenuItem>
                         </Menu>

@@ -1,11 +1,12 @@
-import { darken, lighten, makeStyles, Theme } from "@material-ui/core";
+import { darken, lighten, makeStyles } from "@material-ui/core";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 
-export const useSnackbarProviderStyles = makeStyles((theme: Theme) => ({
-    container: {
-        width: Dimension.WIDTH_SNACKBAR_DEFAULT,
+export const useSnackbarProviderStyles = makeStyles((theme) => ({
+    snackbarProvider: {
+        width: `${Dimension.WIDTH_SNACKBAR_DEFAULT}px`,
     },
     success: {
+        ...theme.typography.body2,
         color: `${
             theme.palette.type === "light"
                 ? darken(theme.palette.success.main, 0.6)
@@ -16,9 +17,9 @@ export const useSnackbarProviderStyles = makeStyles((theme: Theme) => ({
                 ? lighten(theme.palette.success.main, 0.9)
                 : darken(theme.palette.success.main, 0.9)
         } !important`,
-        ...theme.typography.body2,
     },
     error: {
+        ...theme.typography.body2,
         color: `${
             theme.palette.type === "light"
                 ? darken(theme.palette.error.main, 0.6)
@@ -29,9 +30,9 @@ export const useSnackbarProviderStyles = makeStyles((theme: Theme) => ({
                 ? lighten(theme.palette.error.main, 0.9)
                 : darken(theme.palette.error.main, 0.9)
         } !important`,
-        ...theme.typography.body2,
     },
     warning: {
+        ...theme.typography.body2,
         color: `${
             theme.palette.type === "light"
                 ? darken(theme.palette.warning.main, 0.6)
@@ -42,9 +43,9 @@ export const useSnackbarProviderStyles = makeStyles((theme: Theme) => ({
                 ? lighten(theme.palette.warning.main, 0.9)
                 : darken(theme.palette.warning.main, 0.9)
         } !important`,
-        ...theme.typography.body2,
     },
     info: {
+        ...theme.typography.body2,
         color: `${
             theme.palette.type === "light"
                 ? darken(theme.palette.info.main, 0.6)
@@ -55,6 +56,5 @@ export const useSnackbarProviderStyles = makeStyles((theme: Theme) => ({
                 ? lighten(theme.palette.info.main, 0.9)
                 : darken(theme.palette.info.main, 0.9)
         } !important`,
-        ...theme.typography.body2,
     },
 }));

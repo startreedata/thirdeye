@@ -1,5 +1,6 @@
+import bounds from "binary-search-bounds";
 import i18n from "i18next";
-import { isEmpty } from "lodash";
+import { cloneDeep, isEmpty } from "lodash";
 import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
@@ -8,7 +9,7 @@ import { formatLargeNumber, formatPercentage } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const getAnomalyName = (anomaly: Anomaly): string => {
-    if (!anomaly) {
+    if (!anomaly || !anomaly.id) {
         return i18n.t("label.anomaly");
     }
 
@@ -150,4 +151,119 @@ export const filterAnomalies = (
     }
 
     return filteredAnomalyCardDatas;
+};
+
+export const filterAnomaliesByTime = (
+    anomalies: Anomaly[],
+    startTime: number,
+    endTime: number
+): Anomaly[] => {
+    if (!anomalies) {
+        return [];
+    }
+
+    if (!startTime || !endTime) {
+        return anomalies;
+    }
+
+    // Anomalies may not be sorted, sort by anomaly start time
+    let sortedAnomalies = cloneDeep(anomalies).sort(
+        anomaliesStartTimeComparator
+    );
+
+    // Search last anomaly with start time less than or equal to filter end time
+    const indexByStartTime = bounds.le(
+        sortedAnomalies,
+        { startTime: endTime } as Anomaly,
+        anomaliesStartTimeComparator
+    );
+    if (indexByStartTime === -1) {
+        // Not found
+        return [];
+    }
+
+    // Remove anomalies with start time beyond filter end time
+    sortedAnomalies = sortedAnomalies.slice(0, indexByStartTime + 1);
+
+    // Sort by anomaly end time
+    sortedAnomalies.sort(anomaliesEndTimeComparator);
+
+    // Search first anomaly with end time greater than or equal to filter start time
+    const indexByEndTime = bounds.ge(
+        sortedAnomalies,
+        { endTime: startTime } as Anomaly,
+        anomaliesEndTimeComparator
+    );
+
+    // Remove anomalies with end time before filter start time
+    sortedAnomalies = sortedAnomalies.slice(
+        indexByEndTime,
+        sortedAnomalies.length
+    );
+
+    return sortedAnomalies;
+};
+
+export const getAnomaliesAtTime = (
+    anomalies: Anomaly[],
+    time: number
+): Anomaly[] => {
+    if (!anomalies) {
+        return [];
+    }
+
+    if (!time) {
+        return anomalies;
+    }
+
+    // Anomalies may not be sorted, sort by anomaly start time
+    let sortedAnomalies = cloneDeep(anomalies).sort(
+        anomaliesStartTimeComparator
+    );
+
+    // Search last anomaly with start time less than or equal to filter time
+    const indexByStartTime = bounds.le(
+        sortedAnomalies,
+        { startTime: time } as Anomaly,
+        anomaliesStartTimeComparator
+    );
+    if (indexByStartTime === -1) {
+        // Not found
+        return [];
+    }
+
+    // Remove anomalies with start time beyond filter time
+    sortedAnomalies = sortedAnomalies.slice(0, indexByStartTime + 1);
+
+    // Sort by anomaly end time
+    sortedAnomalies.sort(anomaliesEndTimeComparator);
+
+    // Search first anomaly with end time greater than or equal to filter time
+    const indexByEndTime = bounds.ge(
+        sortedAnomalies,
+        { endTime: time } as Anomaly,
+        anomaliesEndTimeComparator
+    );
+
+    // Remove anomalies with end time before filter time
+    sortedAnomalies = sortedAnomalies.slice(
+        indexByEndTime,
+        sortedAnomalies.length
+    );
+
+    return sortedAnomalies;
+};
+
+const anomaliesStartTimeComparator = (
+    anomaly1: Anomaly,
+    anomaly2: Anomaly
+): number => {
+    return anomaly1.startTime - anomaly2.startTime;
+};
+
+const anomaliesEndTimeComparator = (
+    anomaly1: Anomaly,
+    anomaly2: Anomaly
+): number => {
+    return anomaly1.endTime - anomaly2.endTime;
 };

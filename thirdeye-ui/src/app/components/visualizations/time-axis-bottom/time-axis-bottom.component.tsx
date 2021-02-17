@@ -1,3 +1,4 @@
+import { withWidth } from "@material-ui/core";
 import { AxisBottom, Text, TickRendererProps } from "@visx/visx";
 import React, { FunctionComponent, ReactNode } from "react";
 import {
@@ -9,7 +10,7 @@ import { TimeAxisBottomProps } from "./time-axis-bottom.interfaces";
 import { useTimeAxisBottomStyles } from "./time-axis-bottom.styles";
 
 // Customization of visx time axis with formatted tick labels based on scale domain interval
-export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
+const TimeAxisBottomInternal: FunctionComponent<TimeAxisBottomProps> = (
     props: TimeAxisBottomProps
 ) => {
     const timeAxisBottomClasses = useTimeAxisBottomStyles();
@@ -19,7 +20,17 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
     };
 
     const getTickValues = (): number[] => {
-        return getTimeTickValuesForAxis(props.numTicks as number, props.scale);
+        // Determine number of ticks to display based on input or screen width
+        let numTicks = props.numTicks;
+        if (!numTicks && props.width === "xs") {
+            numTicks = 3;
+        } else if (!numTicks && props.width === "sm") {
+            numTicks = 4;
+        } else if (!numTicks && props.width === "md") {
+            numTicks = 6;
+        }
+
+        return getTimeTickValuesForAxis(numTicks as number, props.scale);
     };
 
     // Renders formatted date from tick renderer props based on whether or not it contains
@@ -84,3 +95,5 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
         />
     );
 };
+
+export const TimeAxisBottom = withWidth()(TimeAxisBottomInternal);

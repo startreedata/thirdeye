@@ -4,6 +4,7 @@ export interface ButtonTileProps {
     icon?: SvgIconComponent | SvgComponent;
     iconColor?: string;
     text: string;
+    textColor?: string;
     disabled?: boolean;
     onClick: () => void;
 }

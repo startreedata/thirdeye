@@ -1,35 +1,35 @@
 import produce from "immer";
 import {
-    AlertEvaluationTimeSeriesInternalState,
-    AlertEvaluationTimeSeriesInternalStateAction,
+    AlertEvaluationTimeSeriesState,
+    AlertEvaluationTimeSeriesStateAction,
 } from "./alert-evaluation-time-series.interfaces";
 
-export const alertEvaluationTimeSeriesInternalReducer = (
-    state: AlertEvaluationTimeSeriesInternalState,
+export const alertEvaluationTimeSeriesReducer = (
+    state: AlertEvaluationTimeSeriesState,
     action: {
-        type: AlertEvaluationTimeSeriesInternalStateAction;
-        payload?: Partial<AlertEvaluationTimeSeriesInternalState>;
+        type: AlertEvaluationTimeSeriesStateAction;
+        payload?: Partial<AlertEvaluationTimeSeriesState>;
     }
-): AlertEvaluationTimeSeriesInternalState => {
+): AlertEvaluationTimeSeriesState => {
     return produce(state, (draft) => {
         switch (action && action.type) {
-            case AlertEvaluationTimeSeriesInternalStateAction.UPDATE:
+            case AlertEvaluationTimeSeriesStateAction.UPDATE:
                 draft = { ...draft, ...action.payload };
 
                 return draft;
-            case AlertEvaluationTimeSeriesInternalStateAction.TOGGLE_CURRENT_PLOT_VISIBLE:
+            case AlertEvaluationTimeSeriesStateAction.TOGGLE_CURRENT_PLOT_VISIBLE:
                 draft.currentPlotVisible = !draft.currentPlotVisible;
 
                 return;
-            case AlertEvaluationTimeSeriesInternalStateAction.TOGGLE_BASELINE_PLOT_VISIBLE:
+            case AlertEvaluationTimeSeriesStateAction.TOGGLE_BASELINE_PLOT_VISIBLE:
                 draft.baselinePlotVisible = !draft.baselinePlotVisible;
 
                 return;
-            case AlertEvaluationTimeSeriesInternalStateAction.TOGGLE_UPPER_AND_LOWER_BOUND_PLOT_VISIBLE:
+            case AlertEvaluationTimeSeriesStateAction.TOGGLE_UPPER_AND_LOWER_BOUND_PLOT_VISIBLE:
                 draft.upperAndLowerBoundPlotVisible = !draft.upperAndLowerBoundPlotVisible;
 
                 return;
-            case AlertEvaluationTimeSeriesInternalStateAction.TOGGLE_ANOMALIES_PLOT_VISIBLE:
+            case AlertEvaluationTimeSeriesStateAction.TOGGLE_ANOMALIES_PLOT_VISIBLE:
                 draft.anomaliesPlotVisible = !draft.anomaliesPlotVisible;
 
                 return;

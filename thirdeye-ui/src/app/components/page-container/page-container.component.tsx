@@ -9,12 +9,12 @@ export const PageContainer: FunctionComponent<PageContainerProps> = (
     const pageContainerClasses = usePageContainerStyles();
 
     return (
-        <div className={pageContainerClasses.outerContainer}>
-            {/* Required to clip the subsequent container under app bar */}
+        <div className={pageContainerClasses.pageContainer}>
+            {/* Required to clip the container under app bar */}
             <Toolbar />
 
             {/* Contents */}
-            <div className={pageContainerClasses.innerContainer}>
+            <div className={pageContainerClasses.contents}>
                 {props.children}
             </div>
         </div>

@@ -26,16 +26,24 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
     const [backdrop, setBackdrop] = useState(props.startMaximized);
 
     useEffect(() => {
-        addDocumentListener();
+        addDocumentKeyDownListener();
 
-        return removeDocumentListener;
+        return removeDocumentKeyDownListener;
     }, []);
 
-    const onMaximizeToggle = (): void => {
+    const addDocumentKeyDownListener = (): void => {
+        document.addEventListener("keydown", handleKeyDown);
+    };
+
+    const removeDocumentKeyDownListener = (): void => {
+        document.removeEventListener("keydown", handleKeyDown);
+    };
+
+    const handleMaximizeToggle = (): void => {
         setMaximized((maximized) => !maximized);
     };
 
-    const onMaximizeToggleStart = (): void => {
+    const handleMaximizeToggleStart = (): void => {
         // If this is the beginning of maximize animation, turn on backdrop
         // Else, don't change the backdrop
         if (maximized) {
@@ -43,7 +51,7 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
         }
     };
 
-    const onMaximizeToggleComplete = (): void => {
+    const handleMaximizeToggleComplete = (): void => {
         // If this is the end of restore animation, turn off backdrop
         // Else, don't change the backdrop
         if (!maximized) {
@@ -51,47 +59,41 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
         }
     };
 
-    const onKeyDown = (event: KeyboardEvent): void => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
         if (event.key === "Escape") {
             setMaximized(false);
         }
     };
 
-    const addDocumentListener = (): void => {
-        document.addEventListener("keydown", onKeyDown);
-    };
-
-    const removeDocumentListener = (): void => {
-        document.removeEventListener("keydown", onKeyDown);
-    };
-
     return (
         <>
+            {/* Visualization card */}
             <Flipper
                 flipKey={maximized}
-                onComplete={onMaximizeToggleComplete}
-                onStart={onMaximizeToggleStart}
+                onComplete={handleMaximizeToggleComplete}
+                onStart={handleMaximizeToggleStart}
             >
                 <Flipped flipId="visualizationCard">
                     <Card
                         className={
                             maximized
-                                ? visualizationCardClasses.cardMaximize
+                                ? visualizationCardClasses.cardMaximized
                                 : visualizationCardClasses.card
                         }
                         elevation={24} // Same as Material-UI dialog
                         variant={maximized ? "elevation" : "outlined"}
                     >
-                        {/* Visualization card */}
                         <CardHeader
                             action={
                                 <Grid container alignItems="center" spacing={0}>
                                     {/* Stale label */}
-                                    <Grid item>
-                                        <FormHelperText error>
-                                            {props.staleLabel}
-                                        </FormHelperText>
-                                    </Grid>
+                                    {props.stale && (
+                                        <Grid item>
+                                            <FormHelperText error>
+                                                {props.staleLabel}
+                                            </FormHelperText>
+                                        </Grid>
+                                    )}
 
                                     {/* Refresh button */}
                                     {props.showRefreshButton && (
@@ -108,7 +110,7 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                                     {props.showMaximizeButton && (
                                         <Grid item>
                                             <IconButton
-                                                onClick={onMaximizeToggle}
+                                                onClick={handleMaximizeToggle}
                                             >
                                                 {/* Maximize button */}
                                                 {!maximized && (

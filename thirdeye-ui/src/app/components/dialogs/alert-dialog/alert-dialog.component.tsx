@@ -1,12 +1,10 @@
 import {
-    Box,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Grid,
 } from "@material-ui/core";
 import React, { FunctionComponent, useContext } from "react";
 import { useTranslation } from "react-i18next";
@@ -16,12 +14,12 @@ export const AlertDialog: FunctionComponent = () => {
     const { visible, hideDialog, dialogData } = useContext(DialogContext);
     const { t } = useTranslation();
 
-    const onClose = (): void => {
+    const handleClose = (): void => {
         dialogData && dialogData.onCancel && dialogData.onCancel();
         hideDialog();
     };
 
-    const onOk = (): void => {
+    const handleOk = (): void => {
         dialogData && dialogData.onOk && dialogData.onOk();
         hideDialog();
     };
@@ -34,7 +32,7 @@ export const AlertDialog: FunctionComponent = () => {
                     fullWidth
                     maxWidth="xs"
                     open={visible}
-                    onClose={onClose}
+                    onClose={handleClose}
                 >
                     {/* Header */}
                     {dialogData.title && (
@@ -48,33 +46,23 @@ export const AlertDialog: FunctionComponent = () => {
 
                     {/* Controls */}
                     <DialogActions>
-                        <Box margin={1} marginTop={0}>
-                            <Grid container justify="flex-end">
-                                {/* Cancel button */}
-                                <Grid item>
-                                    <Button
-                                        color="primary"
-                                        variant="outlined"
-                                        onClick={onClose}
-                                    >
-                                        {dialogData.cancelButtonLabel ||
-                                            t("label.cancel")}
-                                    </Button>
-                                </Grid>
+                        {/* Cancel button */}
+                        <Button
+                            color="primary"
+                            variant="outlined"
+                            onClick={handleClose}
+                        >
+                            {dialogData.cancelButtonLabel || t("label.cancel")}
+                        </Button>
 
-                                {/* Ok button */}
-                                <Grid item>
-                                    <Button
-                                        color="primary"
-                                        variant="contained"
-                                        onClick={onOk}
-                                    >
-                                        {dialogData.okButtonLabel ||
-                                            t("label.ok")}
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                        </Box>
+                        {/* Ok button */}
+                        <Button
+                            color="primary"
+                            variant="contained"
+                            onClick={handleOk}
+                        >
+                            {dialogData.okButtonLabel || t("label.ok")}
+                        </Button>
                     </DialogActions>
                 </Dialog>
             )}

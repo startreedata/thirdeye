@@ -7,7 +7,7 @@ export const tooltipClasses = {
         color: Palette.COLOR_BACKGROUND_TOOLTIP,
     },
     tooltip: {
-        backgroundColor: Palette.COLOR_BACKGROUND_TOOLTIP,
         ...typographyOptions.body2,
+        backgroundColor: Palette.COLOR_BACKGROUND_TOOLTIP,
     },
 };

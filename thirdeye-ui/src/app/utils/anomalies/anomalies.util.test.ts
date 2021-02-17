@@ -5,6 +5,8 @@ import {
     createAlertEvaluation,
     createEmptyAnomalyCardData,
     filterAnomalies,
+    filterAnomaliesByTime,
+    getAnomaliesAtTime,
     getAnomalyCardData,
     getAnomalyCardDatas,
     getAnomalyName,
@@ -36,13 +38,15 @@ describe("Anomalies Util", () => {
         );
     });
 
+    test("getAnomalyName should return appropriate name for anomaly with invalid id", () => {
+        expect(getAnomalyName({} as Anomaly)).toEqual("label.anomaly");
+    });
+
     test("getAnomalyName should return appropriate name for anomaly", () => {
-        expect(getAnomalyName(mockAnomaly)).toEqual(
+        expect(getAnomalyName(mockAnomaly1)).toEqual(
             "label.anomaly label.anomaly-id"
         );
-        expect(i18n.t).toHaveBeenCalledWith("label.anomaly-id", {
-            id: 1,
-        });
+        expect(i18n.t).toHaveBeenCalledWith("label.anomaly-id", { id: 2 });
     });
 
     test("createEmptyAnomalyCardData should create appropriate anomaly card data", () => {
@@ -113,11 +117,79 @@ describe("Anomalies Util", () => {
             mockAnomalyCardData1,
         ]);
     });
-});
 
-const mockAnomaly = {
-    id: 1,
-} as Anomaly;
+    test("filterAnomaliesByTime should return empty array for invalid anomalies", () => {
+        expect(
+            filterAnomaliesByTime((null as unknown) as Anomaly[], 1, 2)
+        ).toEqual([]);
+    });
+
+    test("filterAnomaliesByTime should return empty array for empty anomalies", () => {
+        expect(filterAnomaliesByTime([], 1, 2)).toEqual([]);
+    });
+
+    test("filterAnomaliesByTime should return appropriate anomaly array for anomalies and invalid start and end time", () => {
+        expect(
+            filterAnomaliesByTime(mockAnomalies, (null as unknown) as number, 1)
+        ).toEqual(mockAnomalies);
+        expect(
+            filterAnomaliesByTime(mockAnomalies, 1, (null as unknown) as number)
+        ).toEqual(mockAnomalies);
+        expect(
+            filterAnomaliesByTime(
+                mockAnomalies,
+                (null as unknown) as number,
+                (null as unknown) as number
+            )
+        ).toEqual(mockAnomalies);
+    });
+
+    test("filterAnomaliesByTime should return appropriate anomaly array for anomalies and start and end time", () => {
+        expect(filterAnomaliesByTime(mockAnomalies, 3, 3)).toEqual([
+            mockAnomaly1,
+        ]);
+        expect(filterAnomaliesByTime(mockAnomalies, 3, 9)).toEqual([
+            mockAnomaly1,
+            mockAnomaly2,
+        ]);
+        expect(filterAnomaliesByTime(mockAnomalies, 2, 11)).toEqual([
+            mockAnomaly1,
+            mockAnomaly2,
+        ]);
+        expect(filterAnomaliesByTime(mockAnomalies, 3.2, 3.8)).toEqual([
+            mockAnomaly1,
+        ]);
+        expect(filterAnomaliesByTime(mockAnomalies, 5, 11)).toEqual([
+            mockAnomaly2,
+        ]);
+        expect(filterAnomaliesByTime(mockAnomalies, 1, 2)).toEqual([]);
+        expect(filterAnomaliesByTime(mockAnomalies, 11, 12)).toEqual([]);
+    });
+
+    test("getAnomaliesAtTime should return empty array for invalid anomalies", () => {
+        expect(getAnomaliesAtTime((null as unknown) as Anomaly[], 1)).toEqual(
+            []
+        );
+    });
+
+    test("getAnomaliesAtTime should return empty array for empty anomalies", () => {
+        expect(getAnomaliesAtTime([], 1)).toEqual([]);
+    });
+
+    test("getAnomaliesAtTime should return appropriate anomaly array for anomalies and invalid time", () => {
+        expect(
+            getAnomaliesAtTime(mockAnomalies, (null as unknown) as number)
+        ).toEqual(mockAnomalies);
+    });
+
+    test("getAnomaliesAtTime should return appropriate anomaly array for anomalies and time", () => {
+        expect(getAnomaliesAtTime(mockAnomalies, 3)).toEqual([mockAnomaly1]);
+        expect(getAnomaliesAtTime(mockAnomalies, 10)).toEqual([mockAnomaly2]);
+        expect(getAnomaliesAtTime(mockAnomalies, 2)).toEqual([]);
+        expect(getAnomaliesAtTime(mockAnomalies, 11)).toEqual([]);
+        expect(getAnomaliesAtTime(mockAnomalies, 6)).toEqual([]);
+    });
+});
 
 const mockEmptyAnomalyCardData = {
     id: -1,
@@ -147,9 +219,15 @@ const mockAnomaly1 = {
 
 const mockAnomaly2 = {
     id: 8,
+    startTime: 9,
+    endTime: 10,
 } as Anomaly;
 
-const mockAnomalies = [mockAnomaly1, mockAnomaly2];
+const mockAnomaly3 = {
+    id: 11,
+} as Anomaly;
+
+const mockAnomalies = [mockAnomaly1, mockAnomaly2, mockAnomaly3];
 
 const mockAnomalyCardData1 = {
     id: 2,
@@ -174,11 +252,29 @@ const mockAnomalyCardData2 = {
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
     negativeDeviation: false,
+    duration: "9 10",
+    startTime: "9",
+    endTime: "10",
+};
+
+const mockAnomalyCardData3 = {
+    id: 11,
+    name: "label.anomaly label.anomaly-id",
+    alertName: "label.no-data-marker",
+    alertId: -1,
+    current: "label.no-data-marker",
+    predicted: "label.no-data-marker",
+    deviation: "label.no-data-marker",
+    negativeDeviation: false,
     duration: "label.no-data-marker",
     startTime: "label.no-data-marker",
     endTime: "label.no-data-marker",
 };
 
-const mockAnomalyCardDatas = [mockAnomalyCardData1, mockAnomalyCardData2];
+const mockAnomalyCardDatas = [
+    mockAnomalyCardData1,
+    mockAnomalyCardData2,
+    mockAnomalyCardData3,
+];
 
 const mockSearchWords = ["name6", "name7"];

@@ -82,9 +82,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         deleteAnomaly(anomalyCardData.id)
             .then((): void => {
                 enqueueSnackbar(
-                    t("message.delete-success", {
-                        entity: t("label.anomaly"),
-                    }),
+                    t("message.delete-success", { entity: t("label.anomaly") }),
                     getSuccessSnackbarOption()
                 );
 
@@ -93,9 +91,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.anomaly"),
-                    }),
+                    t("message.delete-error", { entity: t("label.anomaly") }),
                     getErrorSnackbarOption()
                 );
             });

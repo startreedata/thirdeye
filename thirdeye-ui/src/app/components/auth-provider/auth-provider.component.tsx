@@ -68,12 +68,7 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
         return <></>;
     }
 
-    return (
-        <>
-            {/* Contents */}
-            {props.children}
-        </>
-    );
+    return <>{props.children}</>;
 };
 
 export const useAuth = (): UseAuthProps => {

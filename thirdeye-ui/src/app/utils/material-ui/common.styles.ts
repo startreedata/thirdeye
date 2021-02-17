@@ -11,11 +11,6 @@ export const useCommonStyles = makeStyles({
         overflow: "hidden",
         textOverflow: "ellipsis",
     },
-    cardContentBottomPaddingDisable: {
-        "&:last-child": {
-            paddingBottom: "0px",
-        },
-    },
     backdrop: {
         backgroundColor: "rgba(0, 0, 0, 0.5)",
     },

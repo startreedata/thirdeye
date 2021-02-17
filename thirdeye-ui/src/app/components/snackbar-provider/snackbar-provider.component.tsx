@@ -1,10 +1,10 @@
 import { IconButton } from "@material-ui/core";
-import { Close } from "@material-ui/icons";
+import CloseIcon from "@material-ui/icons/Close";
 import {
     SnackbarKey,
     SnackbarProvider as NotistackSnackbarProvider,
 } from "notistack";
-import React, { createRef, FunctionComponent } from "react";
+import React, { FunctionComponent, useRef } from "react";
 import { SnackbarProviderProps } from "./snackbar-provider.interfaces";
 import { useSnackbarProviderStyles } from "./snackbar-provider.styles";
 
@@ -12,9 +12,9 @@ export const SnackbarProvider: FunctionComponent<SnackbarProviderProps> = (
     props: SnackbarProviderProps
 ) => {
     const snackbarProviderClasses = useSnackbarProviderStyles();
-    const snackbarProviderRef = createRef<NotistackSnackbarProvider>();
+    const snackbarProviderRef = useRef<NotistackSnackbarProvider>(null);
 
-    const onCloseSnackbar = (key: SnackbarKey): void => {
+    const handleSnackbarClose = (key: SnackbarKey): void => {
         snackbarProviderRef &&
             snackbarProviderRef.current &&
             snackbarProviderRef.current.closeSnackbar(key);
@@ -28,10 +28,10 @@ export const SnackbarProvider: FunctionComponent<SnackbarProviderProps> = (
                 return (
                     <IconButton
                         onClick={(): void => {
-                            onCloseSnackbar(key);
+                            handleSnackbarClose(key);
                         }}
                     >
-                        <Close />
+                        <CloseIcon />
                     </IconButton>
                 );
             }}
@@ -41,7 +41,7 @@ export const SnackbarProvider: FunctionComponent<SnackbarProviderProps> = (
                 vertical: "top",
             }}
             autoHideDuration={3500}
-            className={snackbarProviderClasses.container}
+            className={snackbarProviderClasses.snackbarProvider}
             classes={{
                 variantSuccess: snackbarProviderClasses.success,
                 variantError: snackbarProviderClasses.error,
@@ -50,7 +50,6 @@ export const SnackbarProvider: FunctionComponent<SnackbarProviderProps> = (
             }}
             ref={snackbarProviderRef}
         >
-            {/* Contents */}
             {props.children}
         </NotistackSnackbarProvider>
     );

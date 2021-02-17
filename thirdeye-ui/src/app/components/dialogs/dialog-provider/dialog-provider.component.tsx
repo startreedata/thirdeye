@@ -34,13 +34,12 @@ export const DialogProvider: FunctionComponent<DialogProviderProps> = (
 
     return (
         <DialogContext.Provider value={dialogContextProps}>
+            {props.children}
+
             {/* Alert dialog */}
-            {dialogData && dialogData.type === DialogType.ALERT && visible && (
+            {visible && dialogData && dialogData.type === DialogType.ALERT && (
                 <AlertDialog />
             )}
-
-            {/* Contents */}
-            {props.children}
         </DialogContext.Provider>
     );
 };

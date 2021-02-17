@@ -1,19 +1,19 @@
-import { makeStyles, Theme } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 
-export const useAppBarStyles = makeStyles((theme: Theme) => ({
-    container: {
+export const useAppBarStyles = makeStyles((theme) => ({
+    appBar: {
         backgroundColor: theme.palette.background.default,
         zIndex: theme.zIndex.drawer + 1, // App bar to be always above drawer
     },
     link: {
         display: "flex",
+        alignSelf: "center",
         marginRight: "16px",
         "&:last-of-type": {
             marginRight: "0px",
         },
     },
-    rightAlign: {
+    linkRightAligned: {
         marginLeft: "auto",
-        marginRight: "16px",
     },
 }));

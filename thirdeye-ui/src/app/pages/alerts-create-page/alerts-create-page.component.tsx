@@ -48,9 +48,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
         createAlert(alert)
             .then((alert: Alert): void => {
                 enqueueSnackbar(
-                    t("message.create-success", {
-                        entity: t("label.alert"),
-                    }),
+                    t("message.create-success", { entity: t("label.alert") }),
                     getSuccessSnackbarOption()
                 );
 
@@ -96,9 +94,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.create-error", {
-                        entity: t("label.alert"),
-                    }),
+                    t("message.create-error", { entity: t("label.alert") }),
                     getErrorSnackbarOption()
                 );
             });

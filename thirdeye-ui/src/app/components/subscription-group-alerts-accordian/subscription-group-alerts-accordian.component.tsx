@@ -4,7 +4,7 @@ import {
     AccordionSummary,
     Typography,
 } from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -21,7 +21,7 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
 ) => {
     const { t } = useTranslation();
 
-    const onSubscriptionGroupAlertsChange = (
+    const handleSubscriptionGroupAlertsChange = (
         subscriptionGroupAlerts: SubscriptionGroupAlert[]
     ): void => {
         props.onChange && props.onChange(subscriptionGroupAlerts);
@@ -30,7 +30,7 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
     return (
         <Accordion defaultExpanded={props.defaultExpanded} variant="outlined">
             {/* Header */}
-            <AccordionSummary expandIcon={<ExpandMore />}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6">{props.title}</Typography>
             </AccordionSummary>
 
@@ -46,7 +46,7 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
                         props.subscriptionGroupCardData &&
                         props.subscriptionGroupCardData.alerts
                     }
-                    onChange={onSubscriptionGroupAlertsChange}
+                    onChange={handleSubscriptionGroupAlertsChange}
                 />
             </AccordionDetails>
         </Accordion>

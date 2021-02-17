@@ -11,15 +11,17 @@ import {
     ListItemText,
     TextField,
 } from "@material-ui/core";
-import { Close, SubdirectoryArrowLeft } from "@material-ui/icons";
+import CloseIcon from "@material-ui/icons/Close";
+import SubdirectoryArrowLeftIcon from "@material-ui/icons/SubdirectoryArrowLeft";
 import React, {
-    createRef,
     FunctionComponent,
     KeyboardEvent,
     useEffect,
+    useRef,
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";
 
@@ -27,9 +29,10 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     props: EditableListProps
 ) => {
     const editableListClasses = useEditableListStyles();
+    const commonClasses = useCommonStyles();
     const [list, setList] = useState<string[]>([]);
     const [helperText, setHelperText] = useState("");
-    const inputRef = createRef<HTMLInputElement>();
+    const inputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -37,13 +40,15 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         setList(props.list || []);
     }, [props.list]);
 
-    const onInputKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
+    const handleInputKeyDown = (
+        event: KeyboardEvent<HTMLInputElement>
+    ): void => {
         if (event.key === "Enter") {
-            onAddListItem();
+            handleAdd();
         }
     };
 
-    const onAddListItem = (): void => {
+    const handleAdd = (): void => {
         if (!inputRef || !inputRef.current || !inputRef.current.value) {
             return;
         }
@@ -70,15 +75,6 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         props.onChange && props.onChange(newList);
     };
 
-    const onRemoveListItem = (index: number) => (): void => {
-        const newList = [...list];
-        newList.splice(index, 1);
-        setList(newList);
-
-        // Notify
-        props.onChange && props.onChange(list);
-    };
-
     const reset = (): void => {
         if (!inputRef || !inputRef.current || !inputRef.current.value) {
             return;
@@ -92,18 +88,27 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         inputRef.current.focus();
     };
 
+    const handleRemove = (index: number) => (): void => {
+        const newList = [...list];
+        newList.splice(index, 1);
+        setList(newList);
+
+        // Notify
+        props.onChange && props.onChange(newList);
+    };
+
     return (
         <Grid container>
             {/* Input */}
-            <Grid item sm={9}>
+            <Grid item sm={10} xs={9}>
                 <TextField
                     fullWidth
                     InputProps={{
                         endAdornment: (
                             // Add button
                             <InputAdornment position="end">
-                                <IconButton onClick={onAddListItem}>
-                                    <SubdirectoryArrowLeft />
+                                <IconButton onClick={handleAdd}>
+                                    <SubdirectoryArrowLeftIcon />
                                 </IconButton>
                             </InputAdornment>
                         ),
@@ -113,27 +118,27 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                     inputRef={inputRef}
                     label={props.inputLabel || t("label.add")}
                     variant="outlined"
-                    onKeyDown={onInputKeyDown}
+                    onKeyDown={handleInputKeyDown}
                 />
             </Grid>
 
             {/* Add button */}
-            <Grid item sm={3}>
+            <Grid item sm={2} xs={3}>
                 <Button
                     fullWidth
                     className={editableListClasses.addButton}
                     color="primary"
                     variant="outlined"
-                    onClick={onAddListItem}
+                    onClick={handleAdd}
                 >
                     {props.addButtonLabel || t("label.add")}
                 </Button>
             </Grid>
 
             {/* List */}
-            <Grid item sm={12}>
+            <Grid item xs={12}>
                 <Card variant="outlined">
-                    <CardContent className={editableListClasses.listContainer}>
+                    <CardContent className={editableListClasses.list}>
                         <List dense>
                             {list &&
                                 list.map((listItem, index) => (
@@ -143,18 +148,16 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                                             primaryTypographyProps={{
                                                 variant: "body1",
                                                 className:
-                                                    editableListClasses.listItem,
+                                                    commonClasses.ellipsis,
                                             }}
                                         />
 
                                         {/* Remove button */}
                                         <ListItemSecondaryAction>
                                             <IconButton
-                                                onClick={onRemoveListItem(
-                                                    index
-                                                )}
+                                                onClick={handleRemove(index)}
                                             >
-                                                <Close />
+                                                <CloseIcon />
                                             </IconButton>
                                         </ListItemSecondaryAction>
                                     </ListItem>

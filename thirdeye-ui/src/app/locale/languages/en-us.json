@@ -25,6 +25,7 @@
         "update": "Update",
         "delete": "Delete",
         "no-data-marker": "-",
+        "time-range": "Time Range",
         "customize-time-range": "Customize Time Range",
         "start-time-end-time": "{{startTime}} - {{endTime}}",
         "last-15-minutes": "Last 15 Minutes",
@@ -43,13 +44,16 @@
         "last-year": "Last Year",
         "custom": "Custom",
         "recent-custom": "Recent Custom",
+        "from": "From",
+        "to": "To",
         "apply": "Apply",
         "ok": "Ok",
         "cancel": "Cancel",
         "search": "Search",
+        "search-count": "Showing {{count}} of {{total}}",
+        "more-count": "+ {{count}} more",
 
         "search-alerts": "Search Alerts",
-        "search-count": "Showing {{count}} of {{total}}",
         "summary": "Summary",
         "view-details": "View Details",
         "activate-alert": "Activate Alert",
@@ -130,6 +134,7 @@
         "threshold": "Threshold"
     },
     "message": {
+        "error": "Error",
         "page-not-found": "Requested page could not be found",
         "sign-in-error": "Unable to sign in",
         "signed-out": "You have been signed out",

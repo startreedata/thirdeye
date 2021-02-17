@@ -19,27 +19,27 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
 ) => {
     const dateTimePickerToolbarClasses = useDateTimePickerToolbarStyles();
 
-    const onMonthClick = (): void => {
+    const handleMonthClick = (): void => {
         props.setOpenView && props.setOpenView("month");
     };
 
-    const onDayClick = (): void => {
+    const handleDayClick = (): void => {
         props.setOpenView && props.setOpenView("date");
     };
 
-    const onYearClick = (): void => {
+    const handleYearClick = (): void => {
         props.setOpenView && props.setOpenView("year");
     };
 
-    const onHourClick = (): void => {
+    const handleHourClick = (): void => {
         props.setOpenView && props.setOpenView("hours");
     };
 
-    const onMinuteClick = (): void => {
+    const handleMinuteClick = (): void => {
         props.setOpenView && props.setOpenView("minutes");
     };
 
-    const onMeridiemClick = (): void => {
+    const handleMeridiemClick = (): void => {
         props.date &&
             props.onChange &&
             props.onChange(
@@ -55,42 +55,39 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
         >
             {/* Month */}
             <Link
-                className={classnames(
-                    dateTimePickerToolbarClasses.link,
-                    props.openView === "month" &&
-                        dateTimePickerToolbarClasses.selectedLink
-                )}
+                className={classnames(dateTimePickerToolbarClasses.link, {
+                    [dateTimePickerToolbarClasses.linkSelected]:
+                        props.openView === "month",
+                })}
                 component="button"
                 variant="subtitle1"
-                onClick={onMonthClick}
+                onClick={handleMonthClick}
             >
                 {props.date && formatMonth(props.date.toMillis())}
             </Link>
 
             {/* Day */}
             <Link
-                className={classnames(
-                    dateTimePickerToolbarClasses.link,
-                    props.openView === "date" &&
-                        dateTimePickerToolbarClasses.selectedLink
-                )}
+                className={classnames(dateTimePickerToolbarClasses.link, {
+                    [dateTimePickerToolbarClasses.linkSelected]:
+                        props.openView === "date",
+                })}
                 component="button"
                 variant="subtitle1"
-                onClick={onDayClick}
+                onClick={handleDayClick}
             >
                 {props.date && formatDay(props.date.toMillis())}
             </Link>
 
             {/* Year */}
             <Link
-                className={classnames(
-                    dateTimePickerToolbarClasses.link,
-                    props.openView === "year" &&
-                        dateTimePickerToolbarClasses.selectedLink
-                )}
+                className={classnames(dateTimePickerToolbarClasses.link, {
+                    [dateTimePickerToolbarClasses.linkSelected]:
+                        props.openView === "year",
+                })}
                 component="button"
                 variant="subtitle1"
-                onClick={onYearClick}
+                onClick={handleYearClick}
             >
                 {props.date && formatYear(props.date.toMillis())}
             </Link>
@@ -98,28 +95,29 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
             {/* Hour */}
             <Link
                 className={classnames(
-                    dateTimePickerToolbarClasses.rightAlign,
                     dateTimePickerToolbarClasses.link,
-                    props.openView === "hours" &&
-                        dateTimePickerToolbarClasses.selectedLink
+                    dateTimePickerToolbarClasses.linkRightAligned,
+                    {
+                        [dateTimePickerToolbarClasses.linkSelected]:
+                            props.openView === "hours",
+                    }
                 )}
                 component="button"
                 variant="subtitle1"
-                onClick={onHourClick}
+                onClick={handleHourClick}
             >
                 {props.date && formatHour(props.date.toMillis())}
             </Link>
 
             {/* Minute */}
             <Link
-                className={classnames(
-                    dateTimePickerToolbarClasses.link,
-                    props.openView === "minutes" &&
-                        dateTimePickerToolbarClasses.selectedLink
-                )}
+                className={classnames(dateTimePickerToolbarClasses.link, {
+                    [dateTimePickerToolbarClasses.linkSelected]:
+                        props.openView === "minutes",
+                })}
                 component="button"
                 variant="subtitle1"
-                onClick={onMinuteClick}
+                onClick={handleMinuteClick}
             >
                 {props.date && formatMinute(props.date.toMillis())}
             </Link>
@@ -129,7 +127,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 className={dateTimePickerToolbarClasses.link}
                 component="button"
                 variant="subtitle1"
-                onClick={onMeridiemClick}
+                onClick={handleMeridiemClick}
             >
                 {props.date && formatMeridiem(props.date.toMillis())}
             </Link>

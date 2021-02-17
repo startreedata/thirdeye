@@ -39,6 +39,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 
+
 public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter {
 
   public static final String PROP_TO = "to";
@@ -87,7 +88,9 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
               && (anomaly.getAnomalyResultSource()
               .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) ||
               anomaly.getAnomalyResultSource()
-                  .equals(AnomalyResultSource.DATA_QUALITY_DETECTION)));
+                  .equals(AnomalyResultSource.DATA_QUALITY_DETECTION) ||
+              anomaly.getAnomalyResultSource()
+                  .equals(AnomalyResultSource.ANOMALY_REPLAY)));
 
       allAnomalies.addAll(anomalies);
     }

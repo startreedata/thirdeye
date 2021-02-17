@@ -4,6 +4,7 @@ import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toAlertSchemes;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toSubscriptionGroupDTO;
@@ -44,6 +45,7 @@ public class SubscriptionGroupResource extends
   protected SubscriptionGroupDTO createDto(final ThirdEyePrincipal principal,
       final SubscriptionGroupApi api) {
     ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
+    ensureExists(api.getCron());
     ensure(
         subscriptionGroupManager.findByPredicate(Predicate.EQ("name", api.getName())).size() == 0,
         ERR_DUPLICATE_NAME);

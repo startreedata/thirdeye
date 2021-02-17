@@ -175,10 +175,10 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
     }
   }
 
-  private void createOrUpdateAlertJob(Set<JobKey> scheduledJobs, SubscriptionGroupDTO alertConfig)
+  private void createOrUpdateAlertJob(Set<JobKey> scheduledJobs, SubscriptionGroupDTO subscriptionGroupDTO)
       throws SchedulerException {
-    Long id = alertConfig.getId();
-    boolean isActive = alertConfig.isActive();
+    Long id = subscriptionGroupDTO.getId();
+    boolean isActive = subscriptionGroupDTO.isActive();
 
     JobKey key = new JobKey(getJobKey(id, TaskConstants.TaskType.DETECTION_ALERT),
         QUARTZ_SUBSCRIPTION_GROUPER);
@@ -187,7 +187,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
 
     if (isActive) {
       if (isScheduled) {
-        String cronInDatabase = alertConfig.getCronExpression();
+        String cronInDatabase = subscriptionGroupDTO.getCronExpression();
 
         List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(key);
         CronTrigger cronTrigger = (CronTrigger) triggers.get(0);
@@ -199,11 +199,11 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
                   + "Restarting schedule",
               id, key, cronInSchedule, cronInDatabase);
           stopJob(key);
-          startJob(alertConfig, job);
+          startJob(subscriptionGroupDTO, job);
         }
       } else {
         LOG.info("Found active but not scheduled {}", id);
-        startJob(alertConfig, job);
+        startJob(subscriptionGroupDTO, job);
       }
     } else {
       if (isScheduled) {

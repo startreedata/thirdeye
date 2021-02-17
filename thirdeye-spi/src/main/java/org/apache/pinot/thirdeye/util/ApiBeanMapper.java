@@ -39,6 +39,11 @@ import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 
 public abstract class ApiBeanMapper {
 
+  private static final String DEFAULT_ALERTER_PIPELINE_CLASS_NAME  = "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter";
+  private static final String DEFAULT_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
+  private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
+  private static final String PROP_CLASS_NAME = "className";
+
   private static Boolean boolApi(final boolean value) {
     return value ? true : null;
   }
@@ -259,6 +264,7 @@ public abstract class ApiBeanMapper {
     final SubscriptionGroupDTO dto = new SubscriptionGroupDTO();
     dto.setId(api.getId());
     dto.setName(api.getName());
+    dto.setActive(optional(api.getActive()).orElse(true));
 
     optional(api.getApplication())
         .map(ApplicationApi::getName)
@@ -266,7 +272,8 @@ public abstract class ApiBeanMapper {
 
     // TODO spyne implement translation of alert schemes, suppressors etc.
 
-    dto.setProperties(new HashMap<>());
+    dto.setType(optional(api.getType()).orElse(DEFAULT_ALERTER_PIPELINE));
+    dto.setProperties(buildProperties());
 
     final List<Long> alertIds = optional(api.getAlerts())
         .orElse(Collections.emptyList())
@@ -275,24 +282,45 @@ public abstract class ApiBeanMapper {
         .collect(Collectors.toList());
 
     dto.getProperties().put("detectionConfigIds", alertIds);
+    dto.setCronExpression(api.getCron());
 
     if (api.getNotificationSchemes() != null) {
       dto.setAlertSchemes(toAlertSchemes(api.getNotificationSchemes()));
     }
 
+    dto.setVectorClocks(toVectorClocks(alertIds));
     return dto;
   }
 
-  public static ImmutableMap<String, Object> toAlertSchemes(
+  private static Map<String, Object> buildProperties() {
+    Map<String, Object> properties = new HashMap<>();
+    properties.put(PROP_CLASS_NAME,  DEFAULT_ALERTER_PIPELINE_CLASS_NAME);
+    return properties;
+  }
+
+  private static Map<Long, Long> toVectorClocks(List<Long> detectionIds) {
+    long currentTimestamp = 0L;
+    Map<Long, Long> vectorClocks = new HashMap<>();
+    for (long detectionConfigId : detectionIds) {
+      vectorClocks.put(detectionConfigId, currentTimestamp);
+    }
+    return vectorClocks;
+  }
+
+  public static Map<String, Object> toAlertSchemes(
       final NotificationSchemesApi notificationSchemes) {
     final EmailSchemeApi email = notificationSchemes.getEmail();
-    return ImmutableMap.of(
-        "emailScheme", ImmutableMap.of(
-            "recipients", ImmutableMap.of(
+    Map<String, Object> alertSchemes = new HashMap<>();
+    Map<String, Object> emailNotificationInfo = new HashMap<>();
+    Map<String, Object> recipientsInfo = ImmutableMap.of(
                 "to", optional(email.getTo()).orElse(Collections.emptyList()),
                 "cc", optional(email.getCc()).orElse(Collections.emptyList()),
                 "bcc", optional(email.getBcc()).orElse(Collections.emptyList())
-            )));
+    );
+    emailNotificationInfo.put("recipients", recipientsInfo);
+    emailNotificationInfo.put(PROP_CLASS_NAME,  DEFAULT_ALERT_SCHEME_CLASS_NAME);
+    alertSchemes.put("emailScheme", emailNotificationInfo);
+    return alertSchemes;
   }
 
   public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {

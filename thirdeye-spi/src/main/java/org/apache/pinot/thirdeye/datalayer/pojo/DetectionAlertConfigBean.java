@@ -42,6 +42,7 @@ public class DetectionAlertConfigBean extends AbstractBean {
   String cronExpression;
   String application;
   String yaml;
+  String type;
 
   Map<String, Object> alertSchemes;
   Map<String, Object> alertSuppressors;
@@ -105,6 +106,15 @@ public class DetectionAlertConfigBean extends AbstractBean {
 
   public DetectionAlertConfigBean setYaml(final String yaml) {
     this.yaml = yaml;
+    return this;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public DetectionAlertConfigBean setType(String type) {
+    this.type = type;
     return this;
   }
 

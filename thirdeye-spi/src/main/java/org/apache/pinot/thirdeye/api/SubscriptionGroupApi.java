@@ -10,9 +10,12 @@ public class SubscriptionGroupApi implements ThirdEyeApi {
 
   private Long id;
   private String name;
+  private Boolean active;
+  private String type;
 
   private ApplicationApi application;
   private List<AlertApi> alerts;
+  private String cron;
 
   private Date created;
   private Date updated;
@@ -31,6 +34,24 @@ public class SubscriptionGroupApi implements ThirdEyeApi {
 
   public String getName() {
     return name;
+  }
+
+  public Boolean getActive() {
+    return active;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public SubscriptionGroupApi setType(String type) {
+    this.type = type;
+    return this;
+  }
+
+  public SubscriptionGroupApi setActive(Boolean active) {
+    this.active = active;
+    return this;
   }
 
   public SubscriptionGroupApi setName(final String name) {
@@ -55,6 +76,15 @@ public class SubscriptionGroupApi implements ThirdEyeApi {
   public SubscriptionGroupApi setAlerts(
       final List<AlertApi> alerts) {
     this.alerts = alerts;
+    return this;
+  }
+
+  public String getCron() {
+    return cron;
+  }
+
+  public SubscriptionGroupApi setCron(String cron) {
+    this.cron = cron;
     return this;
   }
 

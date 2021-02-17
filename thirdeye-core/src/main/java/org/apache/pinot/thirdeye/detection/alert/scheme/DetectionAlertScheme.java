@@ -81,7 +81,7 @@ public abstract class DetectionAlertScheme {
     switch (template) {
       case DEFAULT_EMAIL:
         content = new MetricAnomaliesContent(metricConfigManager, eventManager,
-            mergedAnomalyResultManager);
+            mergedAnomalyResultManager, detectionConfigManager);
         break;
 
       case ENTITY_GROUPBY_REPORT:

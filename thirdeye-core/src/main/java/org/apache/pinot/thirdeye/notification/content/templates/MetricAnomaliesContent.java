@@ -64,8 +64,10 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
 
   public MetricAnomaliesContent(final MetricConfigManager metricConfigManager,
       final EventManager eventManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AlertManager detectionConfigManager) {
     super(metricConfigManager, eventManager, mergedAnomalyResultManager);
+    this.configDAO = detectionConfigManager;
   }
 
   // For testing
@@ -74,8 +76,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       final EventManager eventManager,
       final AlertManager detectionConfigManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this(metricConfigManager, eventManager, mergedAnomalyResultManager);
-    this.configDAO = detectionConfigManager;
+    this(metricConfigManager, eventManager, mergedAnomalyResultManager, detectionConfigManager);
     this.rcaClient = rcaClient;
   }
 

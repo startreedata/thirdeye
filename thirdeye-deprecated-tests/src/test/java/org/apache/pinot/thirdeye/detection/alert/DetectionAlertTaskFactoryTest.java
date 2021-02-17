@@ -10,6 +10,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
@@ -47,7 +51,11 @@ public class DetectionAlertTaskFactoryTest {
     this.alertConfigDAO = daoRegistry.getDetectionAlertConfigManager();
     this.alertConfigDTO = new SubscriptionGroupDTO();
 
-    detectionAlertTaskFactory = new DetectionAlertTaskFactory(mock(DataProvider.class));
+    detectionAlertTaskFactory = new DetectionAlertTaskFactory(mock(DataProvider.class),
+            mock(MergedAnomalyResultManager.class),
+            mock(AlertManager.class),
+            mock(MetricConfigManager.class),
+            mock(EventManager.class));
   }
 
   @AfterClass(alwaysRun = true)

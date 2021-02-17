@@ -29,6 +29,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
@@ -47,10 +51,22 @@ public class DetectionAlertTaskFactory {
   private static final String DEFAULT_ALERT_SCHEME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
 
   private final DataProvider provider;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AlertManager alertManager;
+  private final MetricConfigManager metricConfigManager;
+  private final EventManager eventManager;
 
   @Inject
-  public DetectionAlertTaskFactory(final DataProvider provider) {
+  public DetectionAlertTaskFactory(final DataProvider provider,
+                                   final MergedAnomalyResultManager mergedAnomalyResultManager,
+                                   final AlertManager alertManager,
+                                   final MetricConfigManager metricConfigManager,
+                                   final EventManager eventManager) {
     this.provider = provider;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.alertManager = alertManager;
+    this.metricConfigManager = metricConfigManager;
+    this.eventManager = eventManager;
   }
 
   public DetectionAlertFilter loadAlertFilter(SubscriptionGroupDTO alertConfig, long endTime)
@@ -59,8 +75,8 @@ public class DetectionAlertTaskFactory {
     String className = alertConfig.getProperties().get(PROP_CLASS_NAME).toString();
     LOG.debug("Loading Alert Filter : {}", className);
     Constructor<?> constructor = Class.forName(className)
-        .getConstructor(DataProvider.class, SubscriptionGroupDTO.class, long.class);
-    return (DetectionAlertFilter) constructor.newInstance(provider, alertConfig, endTime);
+        .getConstructor(DataProvider.class, SubscriptionGroupDTO.class, long.class, MergedAnomalyResultManager.class, AlertManager.class);
+    return (DetectionAlertFilter) constructor.newInstance(provider, alertConfig, endTime, this.mergedAnomalyResultManager, this.alertManager);
   }
 
   public Set<DetectionAlertScheme> loadAlertSchemes(SubscriptionGroupDTO alertConfig,
@@ -83,9 +99,9 @@ public class DetectionAlertTaskFactory {
           .forName(ConfigUtils.getMap(alertSchemes.get(alertSchemeType))
               .get(PROP_CLASS_NAME).toString().trim())
           .getConstructor(SubscriptionGroupDTO.class, ThirdEyeWorkerConfiguration.class,
-              DetectionAlertFilterResult.class);
+              DetectionAlertFilterResult.class, MetricConfigManager.class, AlertManager.class, EventManager.class, MergedAnomalyResultManager.class);
       detectionAlertSchemeSet
-          .add((DetectionAlertScheme) constructor.newInstance(alertConfig, thirdeyeConfig, result));
+          .add((DetectionAlertScheme) constructor.newInstance(alertConfig, thirdeyeConfig, result, this.metricConfigManager, this.alertManager, this.eventManager, this.mergedAnomalyResultManager));
     }
     return detectionAlertSchemeSet;
   }

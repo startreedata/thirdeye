@@ -1,3 +1,4 @@
+import { Box } from "@material-ui/core";
 import BaseBrush, { BaseBrushState } from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import {
@@ -52,6 +53,7 @@ import {
     AlertEvaluationTimeSeriesStateAction,
 } from "./alert-evaluation-time-series.interfaces";
 import { alertEvaluationTimeSeriesReducer } from "./alert-evaluation-time-series.reducer";
+import { useAlertEvaluationTimeSeriesStyles } from "./alert-evaluation-time-series.styles";
 
 const PADDING_TOP_SVG = 10;
 const PADDING_BOTTOM_SVG = 30;
@@ -81,6 +83,7 @@ export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSer
 const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSeriesInternalProps> = (
     props: AlertEvaluationTimeSeriesInternalProps
 ) => {
+    const alertEvaluationTimeSeriesClasses = useAlertEvaluationTimeSeriesStyles();
     const [
         {
             loading,
@@ -454,98 +457,105 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             }
             top={tooltipTop}
         >
-            {/* SVG container with parent dimensions */}
-            <svg height={svgHeight} width={svgWidth}>
-                {/* Time series */}
-                <Group left={PADDING_LEFT_SVG} top={PADDING_TOP_SVG}>
-                    {/* Time series plot */}
-                    <AlertEvaluationTimeSeriesPlot
-                        alertEvaluationAnomalies={
-                            filteredAlertEvaluationAnomalies
-                        }
-                        alertEvaluationTimeSeriesPoints={
-                            filteredAlertEvaluationTimeSeriesPoints
-                        }
-                        anomalies={anomaliesPlotVisible}
-                        baseline={baselinePlotVisible}
-                        current={currentPlotVisible}
-                        upperAndLowerBound={upperAndLowerBoundPlotVisible}
-                        xScale={timeSeriesXScale}
-                        yScale={timeSeriesYScale}
-                    />
-
-                    {/* X axis */}
-                    <TimeAxisBottom
-                        scale={timeSeriesXScale}
-                        top={timeSeriesYMax}
-                    />
-
-                    {/* Y axis */}
-                    <LinearAxisLeft scale={timeSeriesYScale} />
-
-                    {/* Mouse hover marker  */}
-                    <MouseHoverMarker
-                        x={tooltipData && tooltipData.timestamp}
-                        xScale={timeSeriesXScale}
-                        y={tooltipData && tooltipData.current}
-                        yScale={timeSeriesYScale}
-                        onMouseLeave={handleTimeSeriesMouseLeave}
-                        onMouseMove={handleTimeSeriesMouseMove}
-                    />
-                </Group>
-
-                {/* Brush */}
-                <Group
-                    left={PADDING_LEFT_SVG}
-                    top={timeSeriesHeight + HEIGHT_SEPARATOR_TIME_SERIES_BRUSH}
-                >
-                    {/* Time series in the brush to be always visible and slightly transparent */}
-                    <Group opacity={0.6}>
+            {/* SVG container with calculated SVG bounds */}
+            <Box height={svgHeight} width="100%">
+                <svg className={alertEvaluationTimeSeriesClasses.svg}>
+                    {/* Time series */}
+                    <Group left={PADDING_LEFT_SVG} top={PADDING_TOP_SVG}>
                         {/* Time series plot */}
                         <AlertEvaluationTimeSeriesPlot
-                            anomalies
-                            baseline
-                            current
-                            upperAndLowerBound
-                            alertEvaluationAnomalies={alertEvaluationAnomalies}
-                            alertEvaluationTimeSeriesPoints={
-                                alertEvaluationTimeSeriesPoints
+                            alertEvaluationAnomalies={
+                                filteredAlertEvaluationAnomalies
                             }
-                            xScale={brushXScale}
-                            yScale={brushYScale}
+                            alertEvaluationTimeSeriesPoints={
+                                filteredAlertEvaluationTimeSeriesPoints
+                            }
+                            anomalies={anomaliesPlotVisible}
+                            baseline={baselinePlotVisible}
+                            current={currentPlotVisible}
+                            upperAndLowerBound={upperAndLowerBoundPlotVisible}
+                            xScale={timeSeriesXScale}
+                            yScale={timeSeriesYScale}
+                        />
+
+                        {/* X axis */}
+                        <TimeAxisBottom
+                            scale={timeSeriesXScale}
+                            top={timeSeriesYMax}
+                        />
+
+                        {/* Y axis */}
+                        <LinearAxisLeft scale={timeSeriesYScale} />
+
+                        {/* Mouse hover marker  */}
+                        <MouseHoverMarker
+                            x={tooltipData && tooltipData.timestamp}
+                            xScale={timeSeriesXScale}
+                            y={tooltipData && tooltipData.current}
+                            yScale={timeSeriesYScale}
+                            onMouseLeave={handleTimeSeriesMouseLeave}
+                            onMouseMove={handleTimeSeriesMouseMove}
                         />
                     </Group>
 
                     {/* Brush */}
-                    <Brush
-                        height={brushYMax}
-                        innerRef={brushRef}
-                        margin={{
-                            top:
-                                timeSeriesHeight +
-                                HEIGHT_SEPARATOR_TIME_SERIES_BRUSH,
-                            left: PADDING_LEFT_SVG,
-                            right: PADDING_RIGHT_SVG,
-                            bottom: 0,
-                        }}
-                        selectedBoxStyle={{
-                            fill: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
-                            fillOpacity: 0.4,
-                            strokeOpacity: 1,
-                            stroke: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
-                            strokeWidth:
-                                Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
-                        }}
-                        width={brushXMax}
-                        xScale={brushXScale}
-                        yScale={brushYScale}
-                        onChange={handleBrushChangeDebounced}
-                    />
+                    <Group
+                        left={PADDING_LEFT_SVG}
+                        top={
+                            timeSeriesHeight +
+                            HEIGHT_SEPARATOR_TIME_SERIES_BRUSH
+                        }
+                    >
+                        <Group opacity={0.6}>
+                            {/* Time series plot */}
+                            <AlertEvaluationTimeSeriesPlot
+                                anomalies
+                                baseline
+                                current
+                                upperAndLowerBound
+                                alertEvaluationAnomalies={
+                                    alertEvaluationAnomalies
+                                }
+                                alertEvaluationTimeSeriesPoints={
+                                    alertEvaluationTimeSeriesPoints
+                                }
+                                xScale={brushXScale}
+                                yScale={brushYScale}
+                            />
+                        </Group>
 
-                    {/* X axis */}
-                    <TimeAxisBottom scale={brushXScale} top={brushYMax} />
-                </Group>
-            </svg>
+                        {/* Brush */}
+                        <Brush
+                            height={brushYMax}
+                            innerRef={brushRef}
+                            margin={{
+                                top:
+                                    timeSeriesHeight +
+                                    HEIGHT_SEPARATOR_TIME_SERIES_BRUSH,
+                                left: PADDING_LEFT_SVG,
+                                right: PADDING_RIGHT_SVG,
+                                bottom: 0,
+                            }}
+                            selectedBoxStyle={{
+                                fill: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+                                fillOpacity: 0.4,
+                                strokeOpacity: 1,
+                                stroke:
+                                    Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+                                strokeWidth:
+                                    Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
+                            }}
+                            width={brushXMax}
+                            xScale={brushXScale}
+                            yScale={brushYScale}
+                            onChange={handleBrushChangeDebounced}
+                        />
+
+                        {/* X axis */}
+                        <TimeAxisBottom scale={brushXScale} top={brushYMax} />
+                    </Group>
+                </svg>
+            </Box>
 
             {/* Legend */}
             <AlertEvaluationTimeSeriesLegend

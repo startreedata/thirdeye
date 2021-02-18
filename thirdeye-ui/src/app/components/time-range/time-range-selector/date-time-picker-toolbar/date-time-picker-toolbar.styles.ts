@@ -1,10 +1,10 @@
 import { makeStyles } from "@material-ui/core";
 
 export const useDateTimePickerToolbarStyles = makeStyles({
-    toolbar: {
+    dateTimePickerToolbar: {
         marginBottom: "-10px", // Minimize whitespace between toolbar and calendar
     },
-    toolbarDense: {
+    dateTimePickerToolbarDense: {
         minHeight: "36px",
     },
     link: {

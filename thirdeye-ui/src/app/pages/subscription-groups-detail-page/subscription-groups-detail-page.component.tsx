@@ -250,7 +250,6 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                     {/* Subscription Group */}
                     <Grid item sm={12}>
                         <SubscriptionGroupCard
-                            hideViewDetailsLinks
                             subscriptionGroupCardData={
                                 subscriptionGroupCardData
                             }

@@ -4,7 +4,10 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { getAnomalyName } from "../../../../utils/anomalies/anomalies.util";
 import { formatDateAndTime } from "../../../../utils/date-time/date-time.util";
-import { formatLargeNumber } from "../../../../utils/number/number.util";
+import {
+    formatLargeNumber,
+    formatNumber,
+} from "../../../../utils/number/number.util";
 import { AlertEvaluationTimeSeriesTooltipProps } from "./alert-evaluation-time-series-tooltip.interfaces";
 import { useAlertEvaluationTimeSeriesTooltipStyles } from "./alert-evaluation-time-series-tooltip.styles";
 
@@ -250,11 +253,12 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluation
                                         <Grid item>
                                             <Typography variant="subtitle2">
                                                 {t("label.more-count", {
-                                                    count:
+                                                    count: formatNumber(
                                                         props
                                                             .alertEvaluationTimeSeriesTooltipPoint
                                                             .anomalies.length -
-                                                        1,
+                                                            1
+                                                    ) as never,
                                                 })}
                                             </Typography>
                                         </Grid>

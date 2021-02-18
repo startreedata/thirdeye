@@ -3,7 +3,7 @@ import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfac
 export interface SubscriptionGroupCardProps {
     subscriptionGroupCardData: SubscriptionGroupCardData;
     searchWords?: string[];
-    hideViewDetailsLinks?: boolean;
+    showViewDetails?: boolean;
     onDelete?: (subscriptionGroupCardData: SubscriptionGroupCardData) => void;
 }
 

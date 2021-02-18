@@ -15,7 +15,6 @@ import { produce } from "immer";
 import { isEmpty } from "lodash";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
@@ -24,7 +23,6 @@ import { useTransferListStyles } from "./transfer-list.styles";
 
 export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     const transferListClasses = useTransferListStyles();
-    const commonClasses = useCommonStyles();
     const [fromListMap, setFromListMap] = useState<Map<string | number, T>>(
         new Map()
     );
@@ -222,8 +220,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                         }
                                                         primaryTypographyProps={{
                                                             variant: "body1",
-                                                            className:
-                                                                commonClasses.ellipsis,
+                                                            noWrap: true,
                                                         }}
                                                     />
 
@@ -310,8 +307,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                     }
                                                     primaryTypographyProps={{
                                                         variant: "body1",
-                                                        className:
-                                                            commonClasses.ellipsis,
+                                                        noWrap: true,
                                                     }}
                                                 />
 

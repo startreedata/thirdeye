@@ -172,7 +172,6 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                     {/* Anomaly */}
                     <Grid item sm={12}>
                         <AnomalyCard
-                            hideViewDetailsLinks
                             anomalyCardData={anomalyCardData}
                             onDelete={onDeleteAnomaly}
                         />

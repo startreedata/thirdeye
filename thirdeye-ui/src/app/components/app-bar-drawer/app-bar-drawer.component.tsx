@@ -13,12 +13,18 @@ import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
 import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
+import { ReactComponent as MetricIcon } from "../../../assets/images/metric.svg";
+import { ReactComponent as SubscriptionGroupIcon } from "../../../assets/images/subscription-group.svg";
+import { ReactComponent as ThirdEyeIcon } from "../../../assets/images/third-eye.svg";
 import {
     AppRoute,
     getAlertsPath,
     getAnomaliesAllPath,
+    getBasePath,
     getConfigurationPath,
     getHomePath,
+    getMetricsPath,
+    getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
 import { AppBarDrawerProps } from "./app-bar-drawer.interfaces";
 import { useAppBarDrawerStyles } from "./app-bar-drawer.styles";
@@ -31,6 +37,11 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
     const location = useLocation();
     const theme = useTheme();
     const { t } = useTranslation();
+
+    const handleThirdEyeClick = (): void => {
+        history.push(getBasePath());
+        props.onClose && props.onClose();
+    };
 
     const handleHomeClick = (): void => {
         history.push(getHomePath());
@@ -52,6 +63,16 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
         props.onClose && props.onClose();
     };
 
+    const handleSubscriptionGroupsClick = (): void => {
+        history.push(getSubscriptionGroupsPath());
+        props.onClose && props.onClose();
+    };
+
+    const handleMetricsClick = (): void => {
+        history.push(getMetricsPath());
+        props.onClose && props.onClose();
+    };
+
     const isRouteCurrent = (route: string): boolean => {
         return location.pathname.indexOf(route) === 0;
     };
@@ -64,12 +85,22 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
             onClose={props.onClose}
         >
             <List>
+                {/* ThirdEye */}
+                <ListItem button divider onClick={handleThirdEyeClick}>
+                    <ListItemIcon>
+                        <ThirdEyeIcon width={24} />
+                    </ListItemIcon>
+
+                    <ListItemText
+                        primary={t("label.thirdeye")}
+                        primaryTypographyProps={{
+                            variant: "subtitle1",
+                        }}
+                    />
+                </ListItem>
+
                 {/* Home */}
-                <ListItem
-                    button
-                    selected={isRouteCurrent(AppRoute.HOME)}
-                    onClick={handleHomeClick}
-                >
+                <ListItem button onClick={handleHomeClick}>
                     <ListItemIcon>
                         <HomeIcon color="action" />
                     </ListItemIcon>
@@ -86,11 +117,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                 </ListItem>
 
                 {/* Alerts */}
-                <ListItem
-                    button
-                    selected={isRouteCurrent(AppRoute.ALERTS)}
-                    onClick={handleAlertsClick}
-                >
+                <ListItem button onClick={handleAlertsClick}>
                     <ListItemIcon>
                         <AlertIcon
                             fill={theme.palette.action.active}
@@ -110,11 +137,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                 </ListItem>
 
                 {/* Anomalies */}
-                <ListItem
-                    button
-                    selected={isRouteCurrent(AppRoute.ANOMALIES)}
-                    onClick={handleAnomaliesClick}
-                >
+                <ListItem button onClick={handleAnomaliesClick}>
                     <ListItemIcon>
                         <AnomalyIcon
                             fill={theme.palette.action.active}
@@ -134,11 +157,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                 </ListItem>
 
                 {/* Configuration */}
-                <ListItem
-                    button
-                    selected={isRouteCurrent(AppRoute.CONFIGURATION)}
-                    onClick={handleConfigurationClick}
-                >
+                <ListItem button divider onClick={handleConfigurationClick}>
                     <ListItemIcon>
                         <SettingsIcon color="action" />
                     </ListItemIcon>
@@ -148,6 +167,54 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                         primaryTypographyProps={{
                             variant: "subtitle1",
                             color: isRouteCurrent(AppRoute.CONFIGURATION)
+                                ? "textPrimary"
+                                : "primary",
+                        }}
+                    />
+                </ListItem>
+
+                {/* Subscription groups */}
+                <ListItem
+                    button
+                    className={appBarDrawerClasses.listItemNested}
+                    onClick={handleSubscriptionGroupsClick}
+                >
+                    <ListItemIcon>
+                        <SubscriptionGroupIcon
+                            fill={theme.palette.action.active}
+                            width={24}
+                        />
+                    </ListItemIcon>
+
+                    <ListItemText
+                        primary={t("label.subscription-groups")}
+                        primaryTypographyProps={{
+                            variant: "subtitle1",
+                            color: isRouteCurrent(AppRoute.SUBSCRIPTION_GROUPS)
+                                ? "textPrimary"
+                                : "primary",
+                        }}
+                    />
+                </ListItem>
+
+                {/* Metrics */}
+                <ListItem
+                    button
+                    className={appBarDrawerClasses.listItemNested}
+                    onClick={handleMetricsClick}
+                >
+                    <ListItemIcon>
+                        <MetricIcon
+                            fill={theme.palette.action.active}
+                            width={24}
+                        />
+                    </ListItemIcon>
+
+                    <ListItemText
+                        primary={t("label.metrics")}
+                        primaryTypographyProps={{
+                            variant: "subtitle1",
+                            color: isRouteCurrent(AppRoute.METRICS)
                                 ? "textPrimary"
                                 : "primary",
                         }}

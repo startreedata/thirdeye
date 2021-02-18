@@ -1,6 +1,6 @@
-import { makeStyles, Theme } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 
-export const useAnomalyCardStyles = makeStyles((theme: Theme) => ({
+export const useAnomalyCardStyles = makeStyles((theme) => ({
     deviation: {
         color: theme.palette.error.main,
     },

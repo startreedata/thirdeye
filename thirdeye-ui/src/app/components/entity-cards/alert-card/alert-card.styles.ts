@@ -1,10 +1,10 @@
-import { makeStyles, Theme } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 
-export const useAlertCardStyles = makeStyles((theme: Theme) => ({
-    activeText: {
+export const useAlertCardStyles = makeStyles((theme) => ({
+    active: {
         color: theme.palette.success.main,
     },
-    inactiveText: {
+    inactive: {
         color: theme.palette.text.disabled,
     },
 }));

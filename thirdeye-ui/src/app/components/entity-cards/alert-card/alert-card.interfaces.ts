@@ -3,7 +3,7 @@ import { Alert } from "../../../rest/dto/alert.interfaces";
 export interface AlertCardProps {
     alertCardData: AlertCardData;
     searchWords?: string[];
-    hideViewDetailsLinks?: boolean;
+    showViewDetails?: boolean;
     onChange?: (alertCardData: AlertCardData) => void;
     onDelete?: (alertCardData: AlertCardData) => void;
 }

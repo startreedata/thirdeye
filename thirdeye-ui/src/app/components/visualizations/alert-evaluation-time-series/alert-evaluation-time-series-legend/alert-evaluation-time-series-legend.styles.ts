@@ -9,6 +9,10 @@ export const useAlertEvaluationTimeSeriesLegendStyles = makeStyles((theme) => ({
     },
     legendItem: {
         cursor: "pointer",
+        paddingRight: "10px",
+        "&:last-of-type": {
+            paddingRight: "0px",
+        },
     },
     legendItemLabel: {
         paddingLeft: "10px",

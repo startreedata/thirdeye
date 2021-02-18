@@ -13,11 +13,11 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
     main: {
         display: "flex",
         flexDirection: "column",
+        paddingLeft: "16px",
+        paddingRight: "16px",
     },
     mainExpanded: {
         flexGrow: 1, // Container to occupy available area
-        paddingLeft: "16px",
-        paddingRight: "16px",
     },
     mainCenterAligned: {
         width: `${Dimension.WIDTH_PAGE_CONTENTS_DEFAULT}px`,
@@ -46,5 +46,6 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
         display: "flex",
         flexDirection: "column",
         flexGrow: 1, // Container to occupy available area
+        paddingBottom: "16px",
     },
 }));

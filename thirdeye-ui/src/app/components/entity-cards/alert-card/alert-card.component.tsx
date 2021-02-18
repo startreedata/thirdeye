@@ -10,7 +10,7 @@ import {
     MenuItem,
     Typography,
 } from "@material-ui/core";
-import { MoreVert } from "@material-ui/icons";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -19,9 +19,8 @@ import {
     getAlertsUpdatePath,
     getSubscriptionGroupsDetailPath,
 } from "../../../utils/routes/routes.util";
-import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
-import { ExpandableDetails } from "../expandable-details/expandable-details.component";
+import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import {
     AlertCardProps,
     AlertDatasetAndMetric,
@@ -37,48 +36,43 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         alertOptionsAnchorElement,
         setAlertOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
-    const [expand, setExpand] = useState(false);
     const history = useHistory();
     const { t } = useTranslation();
 
-    const onAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
+    const handleAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
         setAlertOptionsAnchorElement(event.currentTarget);
     };
 
-    const onCloseAlertOptions = (): void => {
+    const handleAlertOptionsClose = (): void => {
         setAlertOptionsAnchorElement(null);
     };
 
-    const onViewAlertDetails = (): void => {
+    const handleAlertViewDetails = (): void => {
         history.push(getAlertsDetailPath(props.alertCardData.id));
-
-        onCloseAlertOptions();
+        handleAlertOptionsClose();
     };
 
-    const onAlertStateToggle = (): void => {
-        if (props.alertCardData && props.alertCardData.alert) {
-            props.alertCardData.alert.active = !props.alertCardData.alert
-                .active;
+    const handleAlertStateToggle = (): void => {
+        if (!props.alertCardData.alert) {
+            return;
         }
 
+        props.alertCardData.alert.active = !props.alertCardData.alert.active;
         props.onChange && props.onChange(props.alertCardData);
-
-        onCloseAlertOptions();
+        handleAlertOptionsClose();
     };
 
-    const onEditAlert = (): void => {
+    const handleAlertEdit = (): void => {
         history.push(getAlertsUpdatePath(props.alertCardData.id));
-
-        onCloseAlertOptions();
+        handleAlertOptionsClose();
     };
 
-    const onDeleteAlert = (): void => {
+    const handleAlertDelete = (): void => {
         props.onDelete && props.onDelete(props.alertCardData);
-
-        onCloseAlertOptions();
+        handleAlertOptionsClose();
     };
 
-    const onViewSubscriptionGroupDetails = (
+    const handleSubscriptionGroupViewDetails = (
         subscriptionGroup: AlertSubscriptionGroup
     ): void => {
         if (!subscriptionGroup) {
@@ -88,208 +82,168 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         history.push(getSubscriptionGroupsDetailPath(subscriptionGroup.id));
     };
 
-    const getDataSetAndMetricValues = (
-        value: AlertDatasetAndMetric
+    const getAlertDataSetAndMetric = (
+        alertDatasetAndMetric: AlertDatasetAndMetric
     ): string => {
-        if (!value) {
+        if (!alertDatasetAndMetric) {
             return "";
         }
 
         return t("label.dataset-/-metric-values", {
-            dataset: value.datasetName,
-            metric: value.metricName,
+            dataset: alertDatasetAndMetric.datasetName,
+            metric: alertDatasetAndMetric.metricName,
         });
     };
 
-    const getSubscriptionGroupValue = (
-        value: AlertSubscriptionGroup
+    const getAlertSubscriptionGroupName = (
+        alertSubscriptionGroup: AlertSubscriptionGroup
     ): string => {
-        if (!value) {
+        if (!alertSubscriptionGroup) {
             return "";
         }
 
-        return value.name;
+        return alertSubscriptionGroup.name;
     };
 
     return (
         <Card variant="outlined">
-            {props.alertCardData && (
-                <>
-                    <CardHeader
-                        disableTypography
-                        action={
-                            <Grid container alignItems="center" spacing={0}>
-                                {/* Active/inactive */}
-                                <Grid item>
-                                    <Typography
-                                        className={
-                                            props.alertCardData.active
-                                                ? alertCardClasses.activeText
-                                                : alertCardClasses.inactiveText
-                                        }
-                                        variant="h6"
-                                    >
-                                        <TextHighlighter
-                                            searchWords={props.searchWords}
-                                            text={
-                                                props.alertCardData.activeText
-                                            }
-                                        />
-                                    </Typography>
-                                </Grid>
-
-                                {/* Alert options button */}
-                                <Grid item>
-                                    <IconButton onClick={onAlertOptionsClick}>
-                                        <MoreVert />
-                                    </IconButton>
-                                </Grid>
-                            </Grid>
-                        }
-                        title={
-                            <>
-                                {/* Summary */}
-                                {props.hideViewDetailsLinks && (
-                                    <Typography variant="h6">
-                                        {t("label.summary")}
-                                    </Typography>
-                                )}
-
-                                {/* Alert name */}
-                                {!props.hideViewDetailsLinks && (
-                                    <Link
-                                        component="button"
-                                        variant="h6"
-                                        onClick={onViewAlertDetails}
-                                    >
-                                        <TextHighlighter
-                                            searchWords={props.searchWords}
-                                            text={props.alertCardData.name}
-                                        />
-                                    </Link>
-                                )}
-                            </>
-                        }
-                    />
-
-                    <Menu
-                        anchorEl={alertOptionsAnchorElement}
-                        open={Boolean(alertOptionsAnchorElement)}
-                        onClose={onCloseAlertOptions}
-                    >
-                        {/* View details */}
-                        {!props.hideViewDetailsLinks && (
-                            <MenuItem onClick={onViewAlertDetails}>
-                                {t("label.view-details")}
-                            </MenuItem>
-                        )}
-
-                        {/* Activate/deactivete alert */}
-                        <MenuItem onClick={onAlertStateToggle}>
-                            {props.alertCardData.active
-                                ? t("label.deactivate-alert")
-                                : t("label.activate-alert")}
-                        </MenuItem>
-
-                        {/* Edit alert */}
-                        <MenuItem onClick={onEditAlert}>
-                            {t("label.edit-alert")}
-                        </MenuItem>
-
-                        {/* Delete alert */}
-                        <MenuItem onClick={onDeleteAlert}>
-                            {t("label.delete-alert")}
-                        </MenuItem>
-                    </Menu>
-                </>
-            )}
-
-            <CardContent>
-                {props.alertCardData && (
-                    <Grid container>
-                        <Grid container item sm={12}>
-                            {/* Created by */}
-                            <Grid item sm={4}>
-                                <Typography variant="subtitle2">
-                                    {t("label.created-by")}
-                                </Typography>
-
+            <CardHeader
+                action={
+                    <Grid container alignItems="center" spacing={0}>
+                        {/* Active/inactive */}
+                        <Grid item>
+                            <Typography
+                                className={
+                                    props.alertCardData.active
+                                        ? alertCardClasses.active
+                                        : alertCardClasses.inactive
+                                }
+                                variant="h6"
+                            >
                                 <TextHighlighter
                                     searchWords={props.searchWords}
-                                    text={props.alertCardData.createdBy}
+                                    text={props.alertCardData.activeText}
                                 />
-                            </Grid>
+                            </Typography>
                         </Grid>
 
-                        {/* Separator */}
-                        <Grid item sm={12}>
-                            <Divider variant="fullWidth" />
-                        </Grid>
+                        {/* Alert options button */}
+                        <Grid item>
+                            <IconButton onClick={handleAlertOptionsClick}>
+                                <MoreVertIcon />
+                            </IconButton>
 
-                        <Grid container item sm={12}>
-                            {/* Detection type */}
-                            <Grid item sm={3}>
-                                <ExpandableDetails<string>
-                                    expand={expand}
-                                    label={t("label.detection-type")}
-                                    searchWords={props.searchWords}
-                                    valueTextFn={(value: string): string => {
-                                        return value || "";
-                                    }}
-                                    values={props.alertCardData.detectionTypes}
-                                    onChange={setExpand}
-                                />
-                            </Grid>
+                            <Menu
+                                anchorEl={alertOptionsAnchorElement}
+                                open={Boolean(alertOptionsAnchorElement)}
+                                onClose={handleAlertOptionsClose}
+                            >
+                                {/* View details */}
+                                {props.showViewDetails && (
+                                    <MenuItem onClick={handleAlertViewDetails}>
+                                        {t("label.view-details")}
+                                    </MenuItem>
+                                )}
 
-                            {/* Dataset / Metric */}
-                            <Grid item sm={3}>
-                                <ExpandableDetails<AlertDatasetAndMetric>
-                                    expand={expand}
-                                    label={t("label.dataset-/-metric")}
-                                    searchWords={props.searchWords}
-                                    valueTextFn={getDataSetAndMetricValues}
-                                    values={
-                                        props.alertCardData.datasetAndMetrics
-                                    }
-                                    onChange={setExpand}
-                                />
-                            </Grid>
+                                {/* Activate/deactivete alert */}
+                                <MenuItem onClick={handleAlertStateToggle}>
+                                    {props.alertCardData.active
+                                        ? t("label.deactivate-alert")
+                                        : t("label.activate-alert")}
+                                </MenuItem>
 
-                            {/* Filtered by */}
-                            <Grid item sm={3}>
-                                <ExpandableDetails<string>
-                                    expand={expand}
-                                    label={t("label.filtered-by")}
-                                    searchWords={props.searchWords}
-                                    valueTextFn={(value: string): string => {
-                                        return value || "";
-                                    }}
-                                    values={props.alertCardData.filteredBy}
-                                    onChange={setExpand}
-                                />
-                            </Grid>
+                                {/* Edit alert */}
+                                <MenuItem onClick={handleAlertEdit}>
+                                    {t("label.edit-alert")}
+                                </MenuItem>
 
-                            {/* Subscription groups */}
-                            <Grid item sm={3}>
-                                <ExpandableDetails<AlertSubscriptionGroup>
-                                    link
-                                    expand={expand}
-                                    label={t("label.subscription-groups")}
-                                    searchWords={props.searchWords}
-                                    valueTextFn={getSubscriptionGroupValue}
-                                    values={
-                                        props.alertCardData.subscriptionGroups
-                                    }
-                                    onChange={setExpand}
-                                    onLinkClick={onViewSubscriptionGroupDetails}
-                                />
-                            </Grid>
+                                {/* Delete alert */}
+                                <MenuItem onClick={handleAlertDelete}>
+                                    {t("label.delete-alert")}
+                                </MenuItem>
+                            </Menu>
                         </Grid>
                     </Grid>
-                )}
+                }
+                title={
+                    <>
+                        {/* Alert name */}
+                        {props.showViewDetails && (
+                            <Link onClick={handleAlertViewDetails}>
+                                <TextHighlighter
+                                    searchWords={props.searchWords}
+                                    text={props.alertCardData.name}
+                                />
+                            </Link>
+                        )}
 
-                {/* No data available message */}
-                {!props.alertCardData && <NoDataIndicator />}
+                        {/* Summary */}
+                        {!props.showViewDetails && t("label.summary")}
+                    </>
+                }
+                titleTypographyProps={{ variant: "h6" }}
+            />
+
+            <CardContent>
+                <Grid container>
+                    {/* Created by */}
+                    <Grid item md={3} sm={6} xs={12}>
+                        <NameValueDisplayCard<string>
+                            name={t("label.created-by")}
+                            searchWords={props.searchWords}
+                            values={[props.alertCardData.createdBy]}
+                        />
+                    </Grid>
+
+                    {/* Separator */}
+                    <Grid item xs={12}>
+                        <Divider variant="fullWidth" />
+                    </Grid>
+
+                    {/* Detection type */}
+                    <Grid item md={3} sm={6} xs={12}>
+                        <NameValueDisplayCard<string>
+                            showCount
+                            name={t("label.detection-type")}
+                            searchWords={props.searchWords}
+                            values={props.alertCardData.detectionTypes}
+                        />
+                    </Grid>
+
+                    {/* Dataset / Metric */}
+                    <Grid item md={3} sm={6} xs={12}>
+                        <NameValueDisplayCard<AlertDatasetAndMetric>
+                            showCount
+                            name={t("label.dataset-/-metric")}
+                            searchWords={props.searchWords}
+                            valueTextFn={getAlertDataSetAndMetric}
+                            values={props.alertCardData.datasetAndMetrics}
+                        />
+                    </Grid>
+
+                    {/* Filtered by */}
+                    <Grid item md={3} sm={6} xs={12}>
+                        <NameValueDisplayCard<string>
+                            showCount
+                            name={t("label.filtered-by")}
+                            searchWords={props.searchWords}
+                            values={props.alertCardData.filteredBy}
+                        />
+                    </Grid>
+
+                    {/* Subscription groups */}
+                    <Grid item md={3} sm={6} xs={12}>
+                        <NameValueDisplayCard<AlertSubscriptionGroup>
+                            link
+                            showCount
+                            name={t("label.subscription-groups")}
+                            searchWords={props.searchWords}
+                            valueTextFn={getAlertSubscriptionGroupName}
+                            values={props.alertCardData.subscriptionGroups}
+                            onClick={handleSubscriptionGroupViewDetails}
+                        />
+                    </Grid>
+                </Grid>
             </CardContent>
         </Card>
     );

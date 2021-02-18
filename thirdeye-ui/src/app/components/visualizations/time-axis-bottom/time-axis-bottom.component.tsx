@@ -9,6 +9,11 @@ import {
 import { TimeAxisBottomProps } from "./time-axis-bottom.interfaces";
 import { useTimeAxisBottomStyles } from "./time-axis-bottom.styles";
 
+const NUM_TICKS_XS = 4;
+const NUM_TICKS_SM = 5;
+const NUM_TICKS_MD = 8;
+const NUM_TICKS_LG = 9;
+
 // Customization of visx time axis with formatted tick labels based on scale domain interval
 const TimeAxisBottomInternal: FunctionComponent<TimeAxisBottomProps> = (
     props: TimeAxisBottomProps
@@ -23,11 +28,13 @@ const TimeAxisBottomInternal: FunctionComponent<TimeAxisBottomProps> = (
         // Determine number of ticks to display based on input or screen width
         let numTicks = props.numTicks;
         if (!numTicks && props.width === "xs") {
-            numTicks = 3;
+            numTicks = NUM_TICKS_XS;
         } else if (!numTicks && props.width === "sm") {
-            numTicks = 4;
+            numTicks = NUM_TICKS_SM;
         } else if (!numTicks && props.width === "md") {
-            numTicks = 6;
+            numTicks = NUM_TICKS_MD;
+        } else if (!numTicks && props.width === "lg") {
+            numTicks = NUM_TICKS_LG;
         }
 
         return getTimeTickValuesForAxis(numTicks as number, props.scale);

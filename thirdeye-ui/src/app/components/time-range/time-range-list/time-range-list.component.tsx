@@ -8,7 +8,6 @@ import {
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { useCommonStyles } from "../../../utils/material-ui/common.styles";
 import {
     formatTimeRange,
     formatTimeRangeDuration,
@@ -19,7 +18,6 @@ import { TimeRangeListProps } from "./time-range-list.interfaces";
 export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
     props: TimeRangeListProps
 ) => {
-    const commonClasses = useCommonStyles();
     const { t } = useTranslation();
 
     return (
@@ -31,7 +29,7 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
                         primary={t("label.recent-custom")}
                         primaryTypographyProps={{
                             variant: "overline",
-                            className: commonClasses.ellipsis,
+                            noWrap: true,
                         }}
                     />
                 </ListSubheader>
@@ -69,7 +67,7 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
                                     primaryTypographyProps={{
                                         variant: "button",
                                         color: "primary",
-                                        className: commonClasses.ellipsis,
+                                        noWrap: true,
                                     }}
                                 />
                             </ListItem>
@@ -101,7 +99,7 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
                             primaryTypographyProps={{
                                 variant: "button",
                                 color: "primary",
-                                className: commonClasses.ellipsis,
+                                noWrap: true,
                             }}
                         />
                     </ListItem>

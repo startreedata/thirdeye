@@ -126,7 +126,6 @@ export const AppBar: FunctionComponent = () => {
                 <Hidden smUp>
                     <IconButton
                         className={appBarClasses.link}
-                        size="medium"
                         onClick={handleAppBarDrawerClick}
                     >
                         <MenuIcon />
@@ -139,11 +138,7 @@ export const AppBar: FunctionComponent = () => {
                 </Hidden>
 
                 {/* ThirdEye logo */}
-                <Link
-                    className={appBarClasses.link}
-                    component="button"
-                    onClick={handleLogoClick}
-                >
+                <Link className={appBarClasses.link} onClick={handleLogoClick}>
                     <ThirdEyeIcon width={48} />
                 </Link>
 
@@ -156,7 +151,6 @@ export const AppBar: FunctionComponent = () => {
                                 ? "textPrimary"
                                 : "primary"
                         }
-                        component="button"
                         variant="subtitle1"
                         onClick={handleHomeClick}
                     >
@@ -171,7 +165,6 @@ export const AppBar: FunctionComponent = () => {
                                 ? "textPrimary"
                                 : "primary"
                         }
-                        component="button"
                         variant="subtitle1"
                         onClick={handleAlertsClick}
                     >
@@ -186,7 +179,6 @@ export const AppBar: FunctionComponent = () => {
                                 ? "textPrimary"
                                 : "primary"
                         }
-                        component="button"
                         variant="subtitle1"
                         onClick={handleAnomaliesClick}
                     >
@@ -201,7 +193,6 @@ export const AppBar: FunctionComponent = () => {
                                 ? "textPrimary"
                                 : "primary"
                         }
-                        component="button"
                         variant="subtitle1"
                         onClick={handleConfigurationClick}
                     >
@@ -221,7 +212,6 @@ export const AppBar: FunctionComponent = () => {
                                 ? "textPrimary"
                                 : "primary"
                         }
-                        component="button"
                         variant="subtitle1"
                         onClick={handleSignInClick}
                     >
@@ -267,7 +257,6 @@ export const AppBar: FunctionComponent = () => {
                         {/* Account options */}
                         <IconButton
                             className={appBarClasses.link}
-                            size="medium"
                             onClick={handleAccountOptionsClick}
                         >
                             <PersonIcon />

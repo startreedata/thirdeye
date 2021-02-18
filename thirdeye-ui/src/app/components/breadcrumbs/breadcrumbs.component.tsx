@@ -24,6 +24,7 @@ export const Breadcrumbs: FunctionComponent<BreadcrumbsProps> = (
             {props.breadcrumbs &&
                 props.breadcrumbs.map((breadcrumb, index) => (
                     <Link
+                        color={breadcrumb.onClick ? "primary" : "textSecondary"}
                         component="button"
                         disabled={!breadcrumb.onClick}
                         display="block"

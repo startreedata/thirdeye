@@ -14,6 +14,7 @@ import {
 import { formatLargeNumber } from "../number/number.util";
 
 export const SEPARATOR_DATE_TIME = "@";
+export const NUM_TICKS_DEFAULT = 8;
 
 // Returns abbreviated string representation of number
 // Equivalent to Number Util formatLargeNumber, but as required by D3
@@ -88,7 +89,7 @@ export const getTimeTickValuesForAxis = (
         return [];
     }
 
-    numTicks = numTicks || 8; // Default to 8 ticks
+    numTicks = numTicks || NUM_TICKS_DEFAULT;
     if (numTicks < 3) {
         // Just the scale domain start and end time
         return [scale.domain()[0].getTime(), scale.domain()[1].getTime()];

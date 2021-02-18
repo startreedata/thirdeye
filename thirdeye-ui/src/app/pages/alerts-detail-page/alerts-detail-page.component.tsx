@@ -220,7 +220,6 @@ export const AlertsDetailPage: FunctionComponent = () => {
                     {/* Alert */}
                     <Grid item sm={12}>
                         <AlertCard
-                            hideViewDetailsLinks
                             alertCardData={alertCardData}
                             onChange={onAlertChange}
                             onDelete={onDeleteAlert}

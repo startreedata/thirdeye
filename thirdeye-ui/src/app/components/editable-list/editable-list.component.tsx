@@ -21,7 +21,6 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";
 
@@ -29,7 +28,6 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     props: EditableListProps
 ) => {
     const editableListClasses = useEditableListStyles();
-    const commonClasses = useCommonStyles();
     const [list, setList] = useState<string[]>([]);
     const [helperText, setHelperText] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
@@ -147,8 +145,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                                             primary={listItem}
                                             primaryTypographyProps={{
                                                 variant: "body1",
-                                                className:
-                                                    commonClasses.ellipsis,
+                                                noWrap: true,
                                             }}
                                         />
 

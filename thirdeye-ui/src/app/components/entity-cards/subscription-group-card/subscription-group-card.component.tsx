@@ -7,9 +7,8 @@ import {
     Link,
     Menu,
     MenuItem,
-    Typography,
 } from "@material-ui/core";
-import { MoreVert } from "@material-ui/icons";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -18,9 +17,8 @@ import {
     getSubscriptionGroupsDetailPath,
     getSubscriptionGroupsUpdatePath,
 } from "../../../utils/routes/routes.util";
-import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
-import { ExpandableDetails } from "../expandable-details/expandable-details.component";
+import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardProps,
@@ -33,43 +31,39 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
         subscriptionGroupOptionsAnchorElement,
         setSubscriptionGroupOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
-    const [expand, setExpand] = useState(false);
     const history = useHistory();
     const { t } = useTranslation();
 
-    const onSubscriptionGroupOptionsClick = (
+    const handleSubscriptionGroupOptionsClick = (
         event: MouseEvent<HTMLElement>
     ): void => {
         setSubscriptionGroupOptionsAnchorElement(event.currentTarget);
     };
 
-    const onCloseSubscriptionGroupOptions = (): void => {
+    const handleSubscriptionGroupOptionsClose = (): void => {
         setSubscriptionGroupOptionsAnchorElement(null);
     };
 
-    const onViewSubscriptionGroupDetails = (): void => {
+    const handleSubscriptionGroupViewDetails = (): void => {
         history.push(
             getSubscriptionGroupsDetailPath(props.subscriptionGroupCardData.id)
         );
-
-        onCloseSubscriptionGroupOptions();
+        handleSubscriptionGroupOptionsClose();
     };
 
-    const onEditSubscriptionGroup = (): void => {
+    const handleSubscriptionGroupEdit = (): void => {
         history.push(
             getSubscriptionGroupsUpdatePath(props.subscriptionGroupCardData.id)
         );
-
-        onCloseSubscriptionGroupOptions();
+        handleSubscriptionGroupOptionsClose();
     };
 
-    const onDeleteSubscriptionGroup = (): void => {
+    const handleSubscriptionGroupDelete = (): void => {
         props.onDelete && props.onDelete(props.subscriptionGroupCardData);
-
-        onCloseSubscriptionGroupOptions();
+        handleSubscriptionGroupOptionsClose();
     };
 
-    const onViewAlertDetails = (alert: SubscriptionGroupAlert): void => {
+    const handleAlertViewDetails = (alert: SubscriptionGroupAlert): void => {
         if (!alert) {
             return;
         }
@@ -77,122 +71,108 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
         history.push(getAlertsDetailPath(alert.id));
     };
 
-    const getSubscribedAlertValue = (value: SubscriptionGroupAlert): string => {
-        if (!value) {
+    const getSubscriptionGroupAlertName = (
+        subscriptionGroupAlert: SubscriptionGroupAlert
+    ): string => {
+        if (!subscriptionGroupAlert) {
             return "";
         }
 
-        return value.name;
+        return subscriptionGroupAlert.name;
     };
 
     return (
         <Card variant="outlined">
             {props.subscriptionGroupCardData && (
-                <>
-                    <CardHeader
-                        disableTypography
-                        action={
-                            // Subscription group options button
+                <CardHeader
+                    action={
+                        <>
+                            {/* Subscription group options button */}
                             <IconButton
-                                onClick={onSubscriptionGroupOptionsClick}
+                                onClick={handleSubscriptionGroupOptionsClick}
                             >
-                                <MoreVert />
+                                <MoreVertIcon />
                             </IconButton>
-                        }
-                        title={
-                            <>
-                                {/* Summary */}
-                                {props.hideViewDetailsLinks && (
-                                    <Typography variant="h6">
-                                        {t("label.summary")}
-                                    </Typography>
-                                )}
 
-                                {/* Subscription group name */}
-                                {!props.hideViewDetailsLinks && (
-                                    <Link
-                                        component="button"
-                                        variant="h6"
-                                        onClick={onViewSubscriptionGroupDetails}
+                            <Menu
+                                anchorEl={subscriptionGroupOptionsAnchorElement}
+                                open={Boolean(
+                                    subscriptionGroupOptionsAnchorElement
+                                )}
+                                onClose={handleSubscriptionGroupOptionsClose}
+                            >
+                                {/* View details */}
+                                {props.showViewDetails && (
+                                    <MenuItem
+                                        onClick={
+                                            handleSubscriptionGroupViewDetails
+                                        }
                                     >
-                                        <TextHighlighter
-                                            searchWords={props.searchWords}
-                                            text={
-                                                props.subscriptionGroupCardData
-                                                    .name
-                                            }
-                                        />
-                                    </Link>
+                                        {t("label.view-details")}
+                                    </MenuItem>
                                 )}
-                            </>
-                        }
-                    />
-                    <Menu
-                        anchorEl={subscriptionGroupOptionsAnchorElement}
-                        open={Boolean(subscriptionGroupOptionsAnchorElement)}
-                        onClose={onCloseSubscriptionGroupOptions}
-                    >
-                        {/* View details */}
-                        {!props.hideViewDetailsLinks && (
-                            <MenuItem onClick={onViewSubscriptionGroupDetails}>
-                                {t("label.view-details")}
-                            </MenuItem>
-                        )}
 
-                        {/* Edit subscription group */}
-                        <MenuItem onClick={onEditSubscriptionGroup}>
-                            {t("label.edit-subscription-group")}
-                        </MenuItem>
+                                {/* Edit subscription group */}
+                                <MenuItem onClick={handleSubscriptionGroupEdit}>
+                                    {t("label.edit-subscription-group")}
+                                </MenuItem>
 
-                        {/* Delete subscription group */}
-                        <MenuItem onClick={onDeleteSubscriptionGroup}>
-                            {t("label.delete-subscription-group")}
-                        </MenuItem>
-                    </Menu>
-                </>
+                                {/* Delete subscription group */}
+                                <MenuItem
+                                    onClick={handleSubscriptionGroupDelete}
+                                >
+                                    {t("label.delete-subscription-group")}
+                                </MenuItem>
+                            </Menu>
+                        </>
+                    }
+                    title={
+                        <>
+                            {/* Subscription group name */}
+                            {props.showViewDetails && (
+                                <Link
+                                    onClick={handleSubscriptionGroupViewDetails}
+                                >
+                                    <TextHighlighter
+                                        searchWords={props.searchWords}
+                                        text={
+                                            props.subscriptionGroupCardData.name
+                                        }
+                                    />
+                                </Link>
+                            )}
+
+                            {/* Summary */}
+                            {!props.showViewDetails && t("label.summary")}
+                        </>
+                    }
+                    titleTypographyProps={{ variant: "h6" }}
+                />
             )}
 
             <CardContent>
-                {props.subscriptionGroupCardData && (
-                    <Grid container>
-                        <Grid container item sm={12}>
-                            {/* Subscribed alerts */}
-                            <Grid item sm={6}>
-                                <ExpandableDetails<SubscriptionGroupAlert>
-                                    link
-                                    expand={expand}
-                                    label={t("label.subscribed-alerts")}
-                                    searchWords={props.searchWords}
-                                    valueTextFn={getSubscribedAlertValue}
-                                    values={
-                                        props.subscriptionGroupCardData.alerts
-                                    }
-                                    onChange={setExpand}
-                                    onLinkClick={onViewAlertDetails}
-                                />
-                            </Grid>
-
-                            {/* Subscribed emails */}
-                            <Grid item sm={6}>
-                                <ExpandableDetails<string>
-                                    expand={expand}
-                                    label={t("label.subscribed-emails")}
-                                    searchWords={props.searchWords}
-                                    valueTextFn={(value: string): string => {
-                                        return value || "";
-                                    }}
-                                    values={
-                                        props.subscriptionGroupCardData.emails
-                                    }
-                                    onChange={setExpand}
-                                />
-                            </Grid>
-                        </Grid>
+                <Grid container>
+                    {/* Subscribed alerts */}
+                    <Grid item sm={6} xs={12}>
+                        <NameValueDisplayCard<SubscriptionGroupAlert>
+                            link
+                            name={t("subscribed-alerts")}
+                            searchWords={props.searchWords}
+                            valueTextFn={getSubscriptionGroupAlertName}
+                            values={props.subscriptionGroupCardData.alerts}
+                            onClick={handleAlertViewDetails}
+                        />
                     </Grid>
-                )}
 
-                {/* No data available message */}
-                {!props.subscriptionGroupCardData && <NoDataIndicator />}
+                    {/* Subscribed emails */}
+                    <Grid item sm={6} xs={12}>
+                        <NameValueDisplayCard<string>
+                            name={t("subscribed-emails")}
+                            searchWords={props.searchWords}
+                            values={props.subscriptionGroupCardData.emails}
+                        />
+                    </Grid>
+                </Grid>
             </CardContent>
         </Card>
     );

@@ -2,7 +2,8 @@
 export const Color = {
     BLACK_1: "#000000",
     GREY_1: "#BDBDBD",
-    GREY_2: "#333333",
+    GREY_2: "#E8E8E8",
+    GREY_3: "#333333",
     WHITE_1: "#FFFFFF",
     GREEN_1: "#15C39B",
     GREEN_2: "#008757",

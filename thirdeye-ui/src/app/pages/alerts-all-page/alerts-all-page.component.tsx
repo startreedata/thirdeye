@@ -213,6 +213,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                         (filteredAlertCardData, index) => (
                             <Grid item key={index} sm={12}>
                                 <AlertCard
+                                    showViewDetails
                                     alertCardData={filteredAlertCardData}
                                     searchWords={searchWords}
                                     onChange={onAlertChange}

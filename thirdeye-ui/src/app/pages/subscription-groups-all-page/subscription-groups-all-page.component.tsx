@@ -195,6 +195,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                         (filteredSubscriptionGroupCardData, index) => (
                             <Grid item key={index} sm={12}>
                                 <SubscriptionGroupCard
+                                    showViewDetails
                                     searchWords={searchWords}
                                     subscriptionGroupCardData={
                                         filteredSubscriptionGroupCardData

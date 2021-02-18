@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.datalayer.pojo.AlertNodeType.DETECTION;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.api.NotificationSchemesApi;
 import org.apache.pinot.thirdeye.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.api.TimeColumnApi;
+import org.apache.pinot.thirdeye.api.TimeWindowSuppressorApi;
 import org.apache.pinot.thirdeye.api.UserApi;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
@@ -39,6 +41,7 @@ import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 
 public abstract class ApiBeanMapper {
 
+  private static final String DEFAULT_ALERT_SUPPRESSOR = "org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor";
   private static final String DEFAULT_ALERTER_PIPELINE_CLASS_NAME  = "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter";
   private static final String DEFAULT_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
   private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
@@ -289,6 +292,7 @@ public abstract class ApiBeanMapper {
     }
 
     dto.setVectorClocks(toVectorClocks(alertIds));
+    dto.setAlertSuppressors(toAlertSuppressors(api.getAlertSuppressors()));
     return dto;
   }
 
@@ -322,6 +326,15 @@ public abstract class ApiBeanMapper {
     alertSchemes.put("emailScheme", emailNotificationInfo);
     return alertSchemes;
   }
+
+  public static Map<String, Object> toAlertSuppressors(final TimeWindowSuppressorApi timeWindowSuppressorApi) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    Map<String, Object> alertSuppressors = objectMapper.convertValue(timeWindowSuppressorApi, Map.class);
+    alertSuppressors.put(PROP_CLASS_NAME, DEFAULT_ALERT_SUPPRESSOR);
+    return alertSuppressors;
+  }
+
+
 
   public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
     return new AnomalyApi()

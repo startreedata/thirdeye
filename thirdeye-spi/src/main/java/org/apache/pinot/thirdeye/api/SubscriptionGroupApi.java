@@ -22,6 +22,7 @@ public class SubscriptionGroupApi implements ThirdEyeApi {
   private UserApi owner;
 
   private NotificationSchemesApi notificationSchemes;
+  private TimeWindowSuppressorApi alertSuppressors;
 
   public Long getId() {
     return id;
@@ -122,6 +123,15 @@ public class SubscriptionGroupApi implements ThirdEyeApi {
   public SubscriptionGroupApi setNotificationSchemes(
       final NotificationSchemesApi notificationSchemes) {
     this.notificationSchemes = notificationSchemes;
+    return this;
+  }
+
+  public TimeWindowSuppressorApi getAlertSuppressors() {
+    return alertSuppressors;
+  }
+
+  public SubscriptionGroupApi setAlertSuppressors(TimeWindowSuppressorApi alertSuppressors) {
+    this.alertSuppressors = alertSuppressors;
     return this;
   }
 }

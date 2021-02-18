@@ -123,9 +123,9 @@ public class DetectionAlertTaskFactory {
       Constructor<?> constructor = Class
           .forName(ConfigUtils.getMap(alertSuppressors.get(alertSuppressor))
               .get(PROP_CLASS_NAME).toString().trim())
-          .getConstructor(SubscriptionGroupDTO.class);
+          .getConstructor(SubscriptionGroupDTO.class, MergedAnomalyResultManager.class);
       detectionAlertSuppressors
-          .add((DetectionAlertSuppressor) constructor.newInstance(alertConfig));
+          .add((DetectionAlertSuppressor) constructor.newInstance(alertConfig, this.mergedAnomalyResultManager));
     }
 
     return detectionAlertSuppressors;

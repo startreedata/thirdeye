@@ -126,7 +126,8 @@
 
         "id": "Id",
         "function": "Function",
-        "threshold": "Threshold"
+        "threshold": "Threshold",
+        "selected": "Selected"
     },
     "message": {
         "error": "Error",

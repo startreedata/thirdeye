@@ -1,17 +1,12 @@
-import { Grid } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
-import { SubscriptionGroupCardData } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { SearchBar } from "../../components/search-bar/search-bar.component";
+import { SubscriptionGroupList } from "../../components/subscription-group-list/subscription-group-list.component";
+import { SubscriptionGroupListData } from "../../components/subscription-group-list/subscription-group-list.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -23,24 +18,15 @@ import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
-import {
-    filterSubscriptionGroups,
-    getSubscriptionGroupCardDatas,
-} from "../../utils/subscription-groups/subscription-groups.util";
+import { getSubscriptionGroupListDatas } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [
-        subscriptionGroupCardDatas,
-        setSubscriptionGroupCardDatas,
-    ] = useState<SubscriptionGroupCardData[]>([]);
-    const [
-        filteredSubscriptionGroupCardDatas,
-        setfilteredSubscriptionGroupCardDatas,
-    ] = useState<SubscriptionGroupCardData[]>([]);
-    const [searchWords, setSearchWords] = useState<string[]>([]);
+        subscriptionGroupListDatas,
+        setSubscriptionGroupListDatas,
+    ] = useState<SubscriptionGroupListData[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
@@ -51,59 +37,37 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
 
     useEffect(() => {
         // Fetched subscription groups or search changed, reset
-        setfilteredSubscriptionGroupCardDatas(
-            filterSubscriptionGroups(subscriptionGroupCardDatas, searchWords)
-        );
-    }, [subscriptionGroupCardDatas, searchWords]);
+        setSubscriptionGroupListDatas(subscriptionGroupListDatas);
+    }, [subscriptionGroupListDatas]);
 
     const onDeleteSubscriptionGroup = (
-        subscriptionGroupCardData: SubscriptionGroupCardData
+        subscriptionGroupListData: SubscriptionGroupListData[]
     ): void => {
-        if (!subscriptionGroupCardData) {
+        if (isEmpty(subscriptionGroupListData)) {
             return;
         }
+        for (const subscriptionGroupData of subscriptionGroupListData) {
+            deleteSubscriptionGroup(subscriptionGroupData.id)
+                .then((subscriptionGroup: SubscriptionGroup): void => {
+                    enqueueSnackbar(
+                        t("message.delete-success", {
+                            entity: t("label.subscription-group"),
+                        }),
+                        getSuccessSnackbarOption()
+                    );
 
-        showDialog({
-            type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
-                name: subscriptionGroupCardData.name,
-            }),
-            okButtonLabel: t("label.delete"),
-            onOk: (): void => {
-                onDeleteSubscriptionGroupConfirmation(
-                    subscriptionGroupCardData
-                );
-            },
-        });
-    };
-
-    const onDeleteSubscriptionGroupConfirmation = (
-        subscriptionGroupCardData: SubscriptionGroupCardData
-    ): void => {
-        if (!subscriptionGroupCardData) {
-            return;
+                    // Remove deleted subscription group from fetched subscription groups
+                    removeSubscriptionGroupListData(subscriptionGroup);
+                })
+                .catch((): void => {
+                    enqueueSnackbar(
+                        t("message.delete-error", {
+                            entity: t("label.subscription-group"),
+                        }),
+                        getErrorSnackbarOption()
+                    );
+                });
         }
-
-        deleteSubscriptionGroup(subscriptionGroupCardData.id)
-            .then((subscriptionGroup: SubscriptionGroup): void => {
-                enqueueSnackbar(
-                    t("message.delete-success", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Remove deleted subscription group from fetched subscription groups
-                removeSubscriptionGroupCardData(subscriptionGroup);
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                );
-            });
     };
 
     const fetchAllSubscriptionGroups = (): void => {
@@ -126,8 +90,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                     fetchedAlerts = alertsResponse.value;
                 }
                 if (subscriptionGroupsResponse.status === "fulfilled") {
-                    setSubscriptionGroupCardDatas(
-                        getSubscriptionGroupCardDatas(
+                    setSubscriptionGroupListDatas(
+                        getSubscriptionGroupListDatas(
                             subscriptionGroupsResponse.value,
                             fetchedAlerts
                         )
@@ -139,20 +103,20 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             });
     };
 
-    const removeSubscriptionGroupCardData = (
+    const removeSubscriptionGroupListData = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
         if (!subscriptionGroup) {
             return;
         }
 
-        setSubscriptionGroupCardDatas((subscriptionGroupCardDatas) =>
-            subscriptionGroupCardDatas.filter(
+        setSubscriptionGroupListDatas((subscriptionGroupListDatas) =>
+            subscriptionGroupListDatas.filter(
                 (
-                    subscriptionGroupCardData: SubscriptionGroupCardData
+                    subscriptionGroupListData: SubscriptionGroupListData
                 ): boolean => {
                     return (
-                        subscriptionGroupCardData.id !== subscriptionGroup.id
+                        subscriptionGroupListData.id !== subscriptionGroup.id
                     );
                 }
             )
@@ -170,52 +134,10 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             maxRouterBreadcrumbs={1}
             title={t("label.subscription-groups")}
         >
-            <Grid container>
-                {/* Search */}
-                <Grid item sm={12}>
-                    <SearchBar
-                        autoFocus
-                        setSearchQueryString
-                        searchLabel={t("label.search-subscription-groups")}
-                        searchStatusLabel={t("label.search-count", {
-                            count: filteredSubscriptionGroupCardDatas
-                                ? filteredSubscriptionGroupCardDatas.length
-                                : 0,
-                            total: subscriptionGroupCardDatas
-                                ? subscriptionGroupCardDatas.length
-                                : 0,
-                        })}
-                        onChange={setSearchWords}
-                    />
-                </Grid>
-
-                {/* Subscription groups */}
-                {filteredSubscriptionGroupCardDatas &&
-                    filteredSubscriptionGroupCardDatas.map(
-                        (filteredSubscriptionGroupCardData, index) => (
-                            <Grid item key={index} sm={12}>
-                                <SubscriptionGroupCard
-                                    showViewDetails
-                                    searchWords={searchWords}
-                                    subscriptionGroupCardData={
-                                        filteredSubscriptionGroupCardData
-                                    }
-                                    onDelete={onDeleteSubscriptionGroup}
-                                />
-                            </Grid>
-                        )
-                    )}
-            </Grid>
-
-            {/* No data available message */}
-            {isEmpty(filteredSubscriptionGroupCardDatas) &&
-                isEmpty(searchWords) && <NoDataIndicator />}
-
-            {/* No search results available message */}
-            {isEmpty(filteredSubscriptionGroupCardDatas) &&
-                !isEmpty(searchWords) && (
-                    <NoDataIndicator text={t("message.no-search-results")} />
-                )}
+            <SubscriptionGroupList
+                subscriptionGroups={subscriptionGroupListDatas}
+                onDelete={onDeleteSubscriptionGroup}
+            />
         </PageContents>
     );
 };

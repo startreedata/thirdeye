@@ -5,6 +5,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import VisibilityIcon from "@material-ui/icons/Visibility";
+import { isEmpty } from "lodash";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -14,6 +15,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { theme } from "../../utils/material-ui/theme.util";
 import { filterMetrics } from "../../utils/metrics-util/metrics-util";
+import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { MetricsListData, MetricsListProps } from "./metrics-list.interfaces";
@@ -23,14 +25,16 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
     props: MetricsListProps
 ) => {
     const [selectedRows, setSelectedRows] = useState<RowId[]>([]);
-    const [filteredRows, setFilteredRows] = useState<MetricsListData[]>([]);
+    const [filteredRecords, setFilteredRecords] = useState<MetricsListData[]>(
+        []
+    );
     const [searchWords, setSearchWords] = useState<string[]>([]);
     const { t } = useTranslation();
 
     const metricListClasses = useMetricsListStyles();
 
     useEffect(() => {
-        setFilteredRows(filterMetrics(props.metrics, searchWords));
+        setFilteredRecords(filterMetrics(props.metrics, searchWords));
     }, [props.metrics, searchWords]);
 
     const renderCellWithHighlighter = (text: CellParams): ReactElement => (
@@ -106,68 +110,84 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
     };
 
     return (
-        <Grid container>
-            {/* Toolbar for table */}
-            <Toolbar className={metricListClasses.toolbar}>
-                {/* View button */}
-                <IconButton
-                    color="primary"
-                    disabled={selectedRows.length !== 1}
-                >
-                    <VisibilityIcon />
-                </IconButton>
-                {/* Edit button */}
-                <IconButton
-                    color="primary"
-                    disabled={selectedRows.length !== 1}
-                >
-                    <EditIcon />
-                </IconButton>
-                {/* Delete button */}
-                <IconButton
-                    color="primary"
-                    disabled={selectedRows.length === 0}
-                >
-                    <DeleteIcon />
-                </IconButton>
+        <>
+            <Grid container>
+                {/* Toolbar for table */}
+                <Toolbar className={metricListClasses.toolbar}>
+                    {/* View button */}
+                    <IconButton
+                        color="primary"
+                        disabled={selectedRows.length !== 1}
+                    >
+                        <VisibilityIcon />
+                    </IconButton>
+                    {/* Edit button */}
+                    <IconButton
+                        color="primary"
+                        disabled={selectedRows.length !== 1}
+                    >
+                        <EditIcon />
+                    </IconButton>
+                    {/* Delete button */}
+                    <IconButton
+                        color="primary"
+                        disabled={selectedRows.length === 0}
+                    >
+                        <DeleteIcon />
+                    </IconButton>
 
-                <Typography
-                    className={metricListClasses.rightAlign}
-                    color="textSecondary"
-                    variant="button"
-                >
-                    {selectedRows.length
-                        ? selectedRows.length + " selected"
-                        : ""}
-                </Typography>
+                    <Typography
+                        className={metricListClasses.rightAlign}
+                        color="textSecondary"
+                        variant="button"
+                    >
+                        {selectedRows.length
+                            ? selectedRows.length + " selected"
+                            : ""}
+                    </Typography>
 
-                {/* Searchbar */}
-                <Box className={metricListClasses.searchContainer}>
-                    <SearchBar
-                        searchStatusLabel={t("label.search-count", {
-                            count: filteredRows ? filteredRows.length : 0,
-                            total: props.metrics ? props.metrics.length : 0,
-                        })}
-                        onChange={handleSearch}
-                    />
-                </Box>
-            </Toolbar>
-            {/* 
-            {/* Table */}
-            <Grid item sm={12}>
-                <DataGrid
-                    autoHeight
-                    checkboxSelection
-                    disableColumnMenu
-                    hideFooter
-                    className={metricListClasses.root}
-                    columns={columns}
-                    rows={filteredRows}
-                    onSelectionChange={(rowSelection): void => {
-                        setSelectedRows(rowSelection.rowIds);
-                    }}
-                />
+                    {/* Searchbar */}
+                    <Box className={metricListClasses.searchContainer}>
+                        <SearchBar
+                            searchStatusLabel={t("label.search-count", {
+                                count: filteredRecords
+                                    ? filteredRecords.length
+                                    : 0,
+                                total: props.metrics ? props.metrics.length : 0,
+                            })}
+                            onChange={handleSearch}
+                        />
+                    </Box>
+                </Toolbar>
+
+                {/* Table */}
+                <Grid item sm={12}>
+                    {!isEmpty(filteredRecords) && (
+                        <DataGrid
+                            autoHeight
+                            checkboxSelection
+                            disableColumnMenu
+                            hideFooter
+                            className={metricListClasses.root}
+                            columns={columns}
+                            rows={filteredRecords}
+                            onSelectionChange={(rowSelection): void => {
+                                setSelectedRows(rowSelection.rowIds);
+                            }}
+                        />
+                    )}
+                </Grid>
             </Grid>
-        </Grid>
+
+            {/* No search results available message */}
+            {isEmpty(filteredRecords) && !isEmpty(searchWords) && (
+                <NoDataIndicator text={t("message.no-search-results")} />
+            )}
+
+            {/* No data available message */}
+            {isEmpty(filteredRecords) && isEmpty(searchWords) && (
+                <NoDataIndicator />
+            )}
+        </>
     );
 };

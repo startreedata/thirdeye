@@ -109,13 +109,19 @@ describe("Alerts Util", () => {
         expectedAlertCardData1.subscriptionGroups = [];
         const expectedAlertCardData2 = cloneDeep(mockAlertCardData2);
         expectedAlertCardData2.subscriptionGroups = [];
+        const expectedAlertCardData3 = cloneDeep(mockAlertCardData3);
+        expectedAlertCardData3.subscriptionGroups = [];
 
         expect(
             getAlertCardDatas(
                 mockAlerts,
                 (null as unknown) as SubscriptionGroup[]
             )
-        ).toEqual([expectedAlertCardData1, expectedAlertCardData2]);
+        ).toEqual([
+            expectedAlertCardData1,
+            expectedAlertCardData2,
+            expectedAlertCardData3,
+        ]);
     });
 
     test("getAlertCardDatas should return appropriate alert card data array for alerts and empty subscription groups", () => {
@@ -123,10 +129,13 @@ describe("Alerts Util", () => {
         expectedAlertCardData1.subscriptionGroups = [];
         const expectedAlertCardData2 = cloneDeep(mockAlertCardData2);
         expectedAlertCardData2.subscriptionGroups = [];
+        const expectedAlertCardData3 = cloneDeep(mockAlertCardData3);
+        expectedAlertCardData3.subscriptionGroups = [];
 
         expect(getAlertCardDatas(mockAlerts, [])).toEqual([
             expectedAlertCardData1,
             expectedAlertCardData2,
+            expectedAlertCardData3,
         ]);
     });
 
@@ -161,6 +170,7 @@ describe("Alerts Util", () => {
     test("filterAlerts should return appropriate alert card data array for alert card data array and search words", () => {
         expect(filterAlerts(mockAlertCardDatas, mockSearchWords)).toEqual([
             mockAlertCardData1,
+            mockAlertCardData2,
         ]);
     });
 });
@@ -214,74 +224,92 @@ const mockEmptyAlertSubscriptionGroup = {
 
 const mockAlert1 = {
     id: 1,
-    name: "testName1",
+    name: "testNameAlert1",
     active: true,
     owner: {
         id: 2,
-        principal: "testPrincipal2",
+        principal: "testPrincipalOwner2",
     },
     nodes: {
         alertNode1: {
             type: AlertNodeType.DETECTION,
-            subType: "testSubType1",
+            subType: "testSubTypeAlertNode1",
             metric: {
                 id: 3,
-                name: "testName3",
+                name: "testNameMetric3",
                 dataset: {
                     id: 4,
-                    name: "testName4",
+                    name: "testNameDataset4",
                 },
             },
         } as AlertNode,
         alertNode2: {
-            type: AlertNodeType.FILTER,
-            subType: "testSubType2",
+            type: AlertNodeType.DETECTION,
+            subType: "testSubTypeAlertNode2",
             metric: {
                 id: 5,
-                name: "testName5",
+                dataset: {
+                    id: 6,
+                },
             },
         } as AlertNode,
         alertNode3: {
-            type: "testType3" as AlertNodeType,
-            subType: "testSubType3",
+            type: AlertNodeType.FILTER,
+            subType: "testSubTypeAlertNode3",
+            metric: {
+                id: 7,
+                name: "testNameMetric7",
+            },
+        } as AlertNode,
+        alertNode4: {
+            type: "testTypeAlertNode4" as AlertNodeType,
+            subType: "testSubTypeAlertNode4",
         } as AlertNode,
     } as { [index: string]: AlertNode },
 } as Alert;
 
 const mockAlert2 = {
-    id: 6,
-    name: "testName6",
+    id: 8,
     active: false,
+    owner: {
+        id: 9,
+    },
 } as Alert;
 
-const mockAlerts = [mockAlert1, mockAlert2];
+const mockAlert3 = {
+    id: 10,
+} as Alert;
+
+const mockAlerts = [mockAlert1, mockAlert2, mockAlert3];
 
 const mockSubscriptionGroup1 = {
-    id: 7,
-    name: "testName7",
+    id: 11,
+    name: "testNameSubscriptionGroup11",
     alerts: [
         {
             id: 1,
         },
         {
-            id: 6,
+            id: 8,
         },
     ],
 } as SubscriptionGroup;
 
 const mockSubscriptionGroup2 = {
-    id: 8,
-    name: "testName8",
+    id: 12,
     alerts: [
         {
             id: 1,
+        },
+        {
+            id: 13,
         },
     ],
 } as SubscriptionGroup;
 
 const mockSubscriptionGroup3 = {
-    id: 9,
-    name: "testName9",
+    id: 14,
+    name: "testNameSubscriptionGroup14",
 } as SubscriptionGroup;
 
 const mockSubscriptionGroups = [
@@ -292,43 +320,68 @@ const mockSubscriptionGroups = [
 
 const mockAlertCardData1 = {
     id: 1,
-    name: "testName1",
+    name: "testNameAlert1",
     active: true,
     activeText: "label.active",
     userId: 2,
-    createdBy: "testPrincipal2",
-    detectionTypes: ["testSubType1"],
-    filteredBy: ["testSubType2"],
+    createdBy: "testPrincipalOwner2",
+    detectionTypes: ["testSubTypeAlertNode1", "testSubTypeAlertNode2"],
+    filteredBy: ["testSubTypeAlertNode3"],
     datasetAndMetrics: [
         {
             datasetId: 4,
-            datasetName: "testName4",
+            datasetName: "testNameDataset4",
             metricId: 3,
-            metricName: "testName3",
+            metricName: "testNameMetric3",
+        },
+        {
+            datasetId: 6,
+            datasetName: "label.no-data-marker",
+            metricId: 5,
+            metricName: "label.no-data-marker",
         },
         {
             datasetId: -1,
             datasetName: "label.no-data-marker",
-            metricId: 5,
-            metricName: "testName5",
+            metricId: 7,
+            metricName: "testNameMetric7",
         },
     ],
     subscriptionGroups: [
         {
-            id: 7,
-            name: "testName7",
+            id: 11,
+            name: "testNameSubscriptionGroup11",
         },
         {
-            id: 8,
-            name: "testName8",
+            id: 12,
+            name: "label.no-data-marker",
         },
     ],
     alert: mockAlert1,
 };
 
 const mockAlertCardData2 = {
-    id: 6,
-    name: "testName6",
+    id: 8,
+    name: "label.no-data-marker",
+    active: false,
+    activeText: "label.inactive",
+    userId: 9,
+    createdBy: "label.no-data-marker",
+    detectionTypes: [],
+    filteredBy: [],
+    datasetAndMetrics: [],
+    subscriptionGroups: [
+        {
+            id: 11,
+            name: "testNameSubscriptionGroup11",
+        },
+    ],
+    alert: mockAlert2,
+};
+
+const mockAlertCardData3 = {
+    id: 10,
+    name: "label.no-data-marker",
     active: false,
     activeText: "label.inactive",
     userId: -1,
@@ -336,15 +389,14 @@ const mockAlertCardData2 = {
     detectionTypes: [],
     filteredBy: [],
     datasetAndMetrics: [],
-    subscriptionGroups: [
-        {
-            id: 7,
-            name: "testName7",
-        },
-    ],
-    alert: mockAlert2,
+    subscriptionGroups: [],
+    alert: mockAlert3,
 };
 
-const mockAlertCardDatas = [mockAlertCardData1, mockAlertCardData2];
+const mockAlertCardDatas = [
+    mockAlertCardData1,
+    mockAlertCardData2,
+    mockAlertCardData3,
+];
 
-const mockSearchWords = ["name1", "name9"];
+const mockSearchWords = ["testNameMetric3", "testNameSubscriptionGroup11"];

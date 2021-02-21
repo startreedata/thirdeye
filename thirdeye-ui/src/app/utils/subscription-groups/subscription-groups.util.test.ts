@@ -103,6 +103,10 @@ describe("Subscription Groups Util", () => {
             mockSubscriptionGroupCardData2
         );
         expectedSubscriptionGroupCardData2.alerts = [];
+        const expectedSubscriptionGroupCardData3 = cloneDeep(
+            mockSubscriptionGroupCardData3
+        );
+        expectedSubscriptionGroupCardData3.alerts = [];
 
         expect(
             getSubscriptionGroupCardDatas(
@@ -112,6 +116,7 @@ describe("Subscription Groups Util", () => {
         ).toEqual([
             expectedSubscriptionGroupCardData1,
             expectedSubscriptionGroupCardData2,
+            expectedSubscriptionGroupCardData3,
         ]);
     });
 
@@ -124,12 +129,17 @@ describe("Subscription Groups Util", () => {
             mockSubscriptionGroupCardData2
         );
         expectedSubscriptionGroupCardData2.alerts = [];
+        const expectedSubscriptionGroupCardData3 = cloneDeep(
+            mockSubscriptionGroupCardData3
+        );
+        expectedSubscriptionGroupCardData3.alerts = [];
 
         expect(
             getSubscriptionGroupCardDatas(mockSubscriptionGroups, [])
         ).toEqual([
             expectedSubscriptionGroupCardData1,
             expectedSubscriptionGroupCardData2,
+            expectedSubscriptionGroupCardData3,
         ]);
     });
 
@@ -151,17 +161,17 @@ describe("Subscription Groups Util", () => {
         );
     });
 
-    test("getSubscriptionGroupAlert should return empty array for invalid alerts", () => {
+    test("getSubscriptionGroupAlerts should return empty array for invalid alerts", () => {
         expect(
             getSubscriptionGroupAlerts((null as unknown) as Alert[])
         ).toEqual([]);
     });
 
-    test("getSubscriptionGroupAlert should return empty array for empty alerts", () => {
+    test("getSubscriptionGroupAlerts should return empty array for empty alerts", () => {
         expect(getSubscriptionGroupAlerts([])).toEqual([]);
     });
 
-    test("getSubscriptionGroupAlert should return appropriate subscription group alert array for alerts", () => {
+    test("getSubscriptionGroupAlerts should return appropriate subscription group alert array for alerts", () => {
         expect(getSubscriptionGroupAlerts(mockAlerts)).toEqual(
             mockSubscriptionGroupAlerts
         );
@@ -192,7 +202,7 @@ describe("Subscription Groups Util", () => {
     test("getSubscriptionGroupAlertName should return approopriate name for subscription group alert", () => {
         expect(
             getSubscriptionGroupAlertName(mockSubscriptionGroupAlert1)
-        ).toEqual("testName2");
+        ).toEqual("testNameAlert2");
     });
 
     test("filterSubscriptionGroups should return empty array for invalid subscription group card data array", () => {
@@ -229,7 +239,10 @@ describe("Subscription Groups Util", () => {
                 mockSubscriptionGroupCardDatas,
                 mockSearchWords
             )
-        ).toEqual([mockSubscriptionGroupCardData1]);
+        ).toEqual([
+            mockSubscriptionGroupCardData1,
+            mockSubscriptionGroupCardData3,
+        ]);
     });
 });
 
@@ -239,8 +252,6 @@ const mockEmptySubscriptionGroup = {
     notificationSchemes: {
         email: {
             to: [],
-            cc: [],
-            bcc: [],
         },
     },
 };
@@ -260,7 +271,7 @@ const mockEmptySubscriptionGroupAlert = {
 
 const mockSubscriptionGroup1 = {
     id: 1,
-    name: "testName1",
+    name: "testNameSubscriptionGroup1",
     alerts: [
         {
             id: 2,
@@ -274,50 +285,60 @@ const mockSubscriptionGroup1 = {
     ],
     notificationSchemes: {
         email: {
-            to: ["testEmail1", "testEmail2"],
+            to: [
+                "testEmail1SubscriptionGroup1",
+                "testEmail2SubscriptionGroup1",
+            ],
         },
     },
 } as SubscriptionGroup;
 
 const mockSubscriptionGroup2 = {
     id: 5,
-    name: "testName5",
     alerts: [] as Alert[],
     notificationSchemes: {},
 } as SubscriptionGroup;
 
-const mockSubscriptionGroups = [mockSubscriptionGroup1, mockSubscriptionGroup2];
+const mockSubscriptionGroup3 = {
+    id: 6,
+    name: "testNameSubscriptionGroup6",
+} as SubscriptionGroup;
+
+const mockSubscriptionGroups = [
+    mockSubscriptionGroup1,
+    mockSubscriptionGroup2,
+    mockSubscriptionGroup3,
+];
 
 const mockAlert1 = {
     id: 2,
-    name: "testName2",
+    name: "testNameAlert2",
 } as Alert;
 
 const mockAlert2 = {
     id: 3,
-    name: "testName3",
 } as Alert;
 
 const mockAlert3 = {
     id: 6,
-    name: "testName6",
+    name: "testNameAlert6",
 } as Alert;
 
 const mockAlerts = [mockAlert1, mockAlert2, mockAlert3];
 
 const mockSubscriptionGroupAlert1 = {
     id: 2,
-    name: "testName2",
+    name: "testNameAlert2",
 };
 
 const mockSubscriptionGroupAlert2 = {
     id: 3,
-    name: "testName3",
+    name: "label.no-data-marker",
 };
 
 const mockSubscriptionGroupAlert3 = {
     id: 6,
-    name: "testName6",
+    name: "testNameAlert6",
 };
 
 const mockSubscriptionGroupAlerts = [
@@ -328,32 +349,41 @@ const mockSubscriptionGroupAlerts = [
 
 const mockSubscriptionGroupCardData1 = {
     id: 1,
-    name: "testName1",
+    name: "testNameSubscriptionGroup1",
     alerts: [
         {
             id: 2,
-            name: "testName2",
+            name: "testNameAlert2",
         },
         {
             id: 3,
-            name: "testName3",
+            name: "label.no-data-marker",
         },
     ],
-    emails: ["testEmail1", "testEmail2"],
+    emails: ["testEmail1SubscriptionGroup1", "testEmail2SubscriptionGroup1"],
     subscriptionGroup: mockSubscriptionGroup1,
 };
 
 const mockSubscriptionGroupCardData2 = {
     id: 5,
-    name: "testName5",
+    name: "label.no-data-marker",
     alerts: [],
     emails: [],
     subscriptionGroup: mockSubscriptionGroup2,
 };
 
+const mockSubscriptionGroupCardData3 = {
+    id: 6,
+    name: "testNameSubscriptionGroup6",
+    alerts: [],
+    emails: [],
+    subscriptionGroup: mockSubscriptionGroup3,
+};
+
 const mockSubscriptionGroupCardDatas = [
     mockSubscriptionGroupCardData1,
     mockSubscriptionGroupCardData2,
+    mockSubscriptionGroupCardData3,
 ];
 
-const mockSearchWords = ["name1", "name2"];
+const mockSearchWords = ["testNameAlert2", "testNameSubscriptionGroup6"];

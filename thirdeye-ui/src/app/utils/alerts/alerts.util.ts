@@ -114,7 +114,7 @@ export const getAlertCardDatas = (
         subscriptionGroups
     );
 
-    const alertCardDatas: AlertCardData[] = [];
+    const alertCardDatas = [];
     for (const alert of alerts) {
         alertCardDatas.push(
             getAlertCardDataInternal(alert, subscriptionGroupsToAlertIdsMap)
@@ -136,7 +136,7 @@ export const filterAlerts = (
         return alertCardDatas;
     }
 
-    const filteredAlertCardDatas: AlertCardData[] = [];
+    const filteredAlertCardDatas = [];
     for (const alertCardDta of alertCardDatas) {
         // Only the alert card data to be searched and not contained alert
         const alertCardDataCopy = cloneDeep(alertCardDta);
@@ -168,14 +168,15 @@ const getAlertCardDataInternal = (
     subscriptionGroupsToAlertIdsMap: Map<number, AlertSubscriptionGroup[]>
 ): AlertCardData => {
     const alertCardData = createEmptyAlertCardData();
+    const noDataMarker = i18n.t("label.no-data-marker");
 
     // Maintain a copy of alert
     alertCardData.alert = alert;
 
     // Basic properties
     alertCardData.id = alert.id;
-    alertCardData.name = alert.name;
-    alertCardData.active = alert.active;
+    alertCardData.name = alert.name || noDataMarker;
+    alertCardData.active = Boolean(alert.active);
     alertCardData.activeText = alert.active
         ? i18n.t("label.active")
         : i18n.t("label.inactive");
@@ -183,12 +184,14 @@ const getAlertCardDataInternal = (
     // User properties
     if (alert.owner) {
         alertCardData.userId = alert.owner.id;
-        alertCardData.createdBy = alert.owner.principal;
+        alertCardData.createdBy = alert.owner.principal || noDataMarker;
     }
 
     // Subscription groups
     alertCardData.subscriptionGroups =
-        subscriptionGroupsToAlertIdsMap.get(alert.id) || [];
+        (subscriptionGroupsToAlertIdsMap &&
+            subscriptionGroupsToAlertIdsMap.get(alert.id)) ||
+        [];
 
     // Detection, dataset and metric properties
     if (isEmpty(alert.nodes)) {
@@ -214,10 +217,11 @@ const getAlertCardDataInternal = (
         const datasetAndMetric = createEmptyAlertDatasetAndMetric();
         if (alertNode.metric.dataset) {
             datasetAndMetric.datasetId = alertNode.metric.dataset.id;
-            datasetAndMetric.datasetName = alertNode.metric.dataset.name;
+            datasetAndMetric.datasetName =
+                alertNode.metric.dataset.name || noDataMarker;
         }
         datasetAndMetric.metricId = alertNode.metric.id;
-        datasetAndMetric.metricName = alertNode.metric.name;
+        datasetAndMetric.metricName = alertNode.metric.name || noDataMarker;
 
         alertCardData.datasetAndMetrics.push(datasetAndMetric);
     }
@@ -241,7 +245,8 @@ const mapSubscriptionGroupsToAlertIds = (
 
         const alertSubscriptionGroup = createEmptyAlertSubscriptionGroup();
         alertSubscriptionGroup.id = subscriptionGroup.id;
-        alertSubscriptionGroup.name = subscriptionGroup.name;
+        alertSubscriptionGroup.name =
+            subscriptionGroup.name || i18n.t("label.no-data-marker");
 
         for (const alert of subscriptionGroup.alerts) {
             const subscriptionGroups = subscriptionGroupsToAlertIdsMap.get(

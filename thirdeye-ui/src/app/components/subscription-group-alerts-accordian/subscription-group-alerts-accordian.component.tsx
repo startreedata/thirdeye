@@ -37,7 +37,9 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
             {/* Subscription group alerts transfer list */}
             <AccordionDetails>
                 <TransferList<SubscriptionGroupAlert>
-                    fromLabel={t("label.all-alerts")}
+                    fromLabel={t("label.all-entity", {
+                        entity: t("label.alerts"),
+                    })}
                     fromList={getSubscriptionGroupAlerts(props.alerts)}
                     listItemKeyFn={getSubscriptionGroupAlertId}
                     listItemTextFn={getSubscriptionGroupAlertName}

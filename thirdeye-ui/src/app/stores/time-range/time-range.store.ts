@@ -9,7 +9,7 @@ import {
 import { TimeRangeStore } from "./time-range.interfaces";
 
 const LOCAL_STORAGE_KEY_TIME_RANGE = "LOCAL_STORAGE_KEY_TIME_RANGE";
-const MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS = 3;
+const MAX_ITEMS_RECENT_CUSTOM_TIME_RANGE_DURATIONS = 3;
 
 // App store for time range, persisted in browser local storage
 export const useTimeRangeStore = create<TimeRangeStore>(
@@ -35,11 +35,11 @@ export const useTimeRangeStore = create<TimeRangeStore>(
                         timeRangeDuration,
                     ];
 
-                    // Trim recent custom time range duration entries to set threshold
+                    // Trim recent custom time range duration items to set threshold
                     newRecentCustomTimeRangeDurations.splice(
                         0,
                         newRecentCustomTimeRangeDurations.length -
-                            MAX_ENTRIES_RECENT_CUSTOM_TIME_RANGE_DURATIONS
+                            MAX_ITEMS_RECENT_CUSTOM_TIME_RANGE_DURATIONS
                     );
 
                     set({

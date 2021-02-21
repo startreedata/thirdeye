@@ -227,7 +227,9 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
 
                         <Grid item sm={12}>
                             <TransferList<SubscriptionGroupAlert>
-                                fromLabel={t("label.all-alerts")}
+                                fromLabel={t("label.all-entity", {
+                                    entity: t("label.alerts"),
+                                })}
                                 fromList={getSubscriptionGroupAlerts(
                                     props.alerts
                                 )}
@@ -257,7 +259,9 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                         <Grid item sm={12}>
                             <EditableList
                                 addButtonLabel={t("label.add")}
-                                inputLabel={t("label.add-email")}
+                                inputLabel={t("label.add-entity", {
+                                    entity: t("label.email"),
+                                })}
                                 list={
                                     (newSubscriptionGroup &&
                                         newSubscriptionGroup.notificationSchemes

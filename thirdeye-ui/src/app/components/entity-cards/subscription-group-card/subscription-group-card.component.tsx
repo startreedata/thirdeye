@@ -17,6 +17,7 @@ import {
     getSubscriptionGroupsDetailPath,
     getSubscriptionGroupsUpdatePath,
 } from "../../../utils/routes/routes.util";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import {
@@ -45,6 +46,10 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
     };
 
     const handleSubscriptionGroupViewDetails = (): void => {
+        if (!props.subscriptionGroupCardData) {
+            return;
+        }
+
         history.push(
             getSubscriptionGroupsDetailPath(props.subscriptionGroupCardData.id)
         );
@@ -52,6 +57,10 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
     };
 
     const handleSubscriptionGroupEdit = (): void => {
+        if (!props.subscriptionGroupCardData) {
+            return;
+        }
+
         history.push(
             getSubscriptionGroupsUpdatePath(props.subscriptionGroupCardData.id)
         );
@@ -94,6 +103,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                 <MoreVertIcon />
                             </IconButton>
 
+                            {/* Subscription group options */}
                             <Menu
                                 anchorEl={subscriptionGroupOptionsAnchorElement}
                                 open={Boolean(
@@ -114,14 +124,18 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
 
                                 {/* Edit subscription group */}
                                 <MenuItem onClick={handleSubscriptionGroupEdit}>
-                                    {t("label.edit-subscription-group")}
+                                    {t("label.edit-entity", {
+                                        entity: t("label.subscription-group"),
+                                    })}
                                 </MenuItem>
 
                                 {/* Delete subscription group */}
                                 <MenuItem
                                     onClick={handleSubscriptionGroupDelete}
                                 >
-                                    {t("label.delete-subscription-group")}
+                                    {t("label.delete-entity", {
+                                        entity: t("label.subscription-group"),
+                                    })}
                                 </MenuItem>
                             </Menu>
                         </>
@@ -151,28 +165,33 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
             )}
 
             <CardContent>
-                <Grid container>
-                    {/* Subscribed alerts */}
-                    <Grid item sm={6} xs={12}>
-                        <NameValueDisplayCard<SubscriptionGroupAlert>
-                            link
-                            name={t("subscribed-alerts")}
-                            searchWords={props.searchWords}
-                            valueTextFn={getSubscriptionGroupAlertName}
-                            values={props.subscriptionGroupCardData.alerts}
-                            onClick={handleAlertViewDetails}
-                        />
-                    </Grid>
+                {props.subscriptionGroupCardData && (
+                    <Grid container>
+                        {/* Subscribed alerts */}
+                        <Grid item sm={6} xs={12}>
+                            <NameValueDisplayCard<SubscriptionGroupAlert>
+                                link
+                                name={t("label.subscribed-alerts")}
+                                searchWords={props.searchWords}
+                                valueRenderer={getSubscriptionGroupAlertName}
+                                values={props.subscriptionGroupCardData.alerts}
+                                onClick={handleAlertViewDetails}
+                            />
+                        </Grid>
 
-                    {/* Subscribed emails */}
-                    <Grid item sm={6} xs={12}>
-                        <NameValueDisplayCard<string>
-                            name={t("subscribed-emails")}
-                            searchWords={props.searchWords}
-                            values={props.subscriptionGroupCardData.emails}
-                        />
+                        {/* Subscribed emails */}
+                        <Grid item sm={6} xs={12}>
+                            <NameValueDisplayCard<string>
+                                name={t("label.subscribed-emails")}
+                                searchWords={props.searchWords}
+                                values={props.subscriptionGroupCardData.emails}
+                            />
+                        </Grid>
                     </Grid>
-                </Grid>
+                )}
+
+                {/* No data available */}
+                {!props.subscriptionGroupCardData && <NoDataIndicator />}
             </CardContent>
         </Card>
     );

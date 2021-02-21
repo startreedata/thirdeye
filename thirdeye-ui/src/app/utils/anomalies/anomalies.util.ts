@@ -13,7 +13,7 @@ export const getAnomalyName = (anomaly: Anomaly): string => {
         return i18n.t("label.anomaly");
     }
 
-    return `${i18n.t("label.anomaly")} ${i18n.t("label.anomaly-id", {
+    return `${i18n.t("label.anomaly")} ${i18n.t("label.entity-id", {
         id: anomaly.id,
     })}`;
 };
@@ -24,8 +24,8 @@ export const createEmptyAnomalyCardData = (): AnomalyCardData => {
     return {
         id: -1,
         name: noDataMarker,
-        alertName: noDataMarker,
         alertId: -1,
+        alertName: noDataMarker,
         current: noDataMarker,
         predicted: noDataMarker,
         deviation: noDataMarker,
@@ -57,14 +57,16 @@ export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
         return anomalyCardData;
     }
 
+    const noDataMarker = i18n.t("label.no-data-marker");
+
     // Basic properties
     anomalyCardData.id = anomaly.id;
     anomalyCardData.name = getAnomalyName(anomaly);
 
     // Alert properties
     if (anomaly.alert) {
-        anomalyCardData.alertName = anomaly.alert.name;
         anomalyCardData.alertId = anomaly.alert.id;
+        anomalyCardData.alertName = anomaly.alert.name || noDataMarker;
     }
 
     // Current and predicted values
@@ -110,7 +112,7 @@ export const getAnomalyCardDatas = (
         return [];
     }
 
-    const anomalyCardDatas: AnomalyCardData[] = [];
+    const anomalyCardDatas = [];
     for (const anomaly of anomalies) {
         anomalyCardDatas.push(getAnomalyCardData(anomaly));
     }
@@ -130,7 +132,7 @@ export const filterAnomalies = (
         return anomalyCardDatas;
     }
 
-    const filteredAnomalyCardDatas: AnomalyCardData[] = [];
+    const filteredAnomalyCardDatas = [];
     for (const anomaly of anomalyCardDatas) {
         for (const searchWord of searchWords) {
             if (

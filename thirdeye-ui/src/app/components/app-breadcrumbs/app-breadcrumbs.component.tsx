@@ -6,6 +6,8 @@ import {
     UseAppBreadcrumbsProps,
 } from "./app-breadcrumbs.interfaces";
 
+const MAX_ITEMS_APP_BREADCRUMBS = 4;
+
 export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
     props: AppBreadcrumbsProps
 ) => {
@@ -31,7 +33,7 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
                       ]
                     : [...routerBreadcrumbs, ...pageBreadcrumbs]
             }
-            maxItems={4}
+            maxItems={MAX_ITEMS_APP_BREADCRUMBS}
             variant="body2"
         />
     );

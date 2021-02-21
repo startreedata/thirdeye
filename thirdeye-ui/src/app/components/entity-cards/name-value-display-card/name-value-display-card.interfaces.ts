@@ -1,10 +1,13 @@
+import { ReactNode } from "react";
+
 export interface NameValueDisplayCardProps<T> {
     name: string;
     values: T[];
     showCount?: boolean;
     link?: boolean;
+    wrap?: boolean;
     searchWords?: string[];
     valueClassName?: string;
-    valueTextFn?: (value: T) => string; // Function that returns text to be displayed for value
+    valueRenderer?: (value: T) => ReactNode;
     onClick?: (value: T) => void;
 }

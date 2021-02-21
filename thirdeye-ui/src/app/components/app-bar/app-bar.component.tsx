@@ -241,12 +241,16 @@ export const AppBar: FunctionComponent = () => {
                         >
                             {/* Create alert */}
                             <MenuItem onClick={handleCreateAlert}>
-                                {t("label.create-alert")}
+                                {t("label.create-entity", {
+                                    entity: t("label.alert"),
+                                })}
                             </MenuItem>
 
                             {/* Create subscription group */}
                             <MenuItem onClick={handleCreateSubscriptionGroup}>
-                                {t("label.create-subscription-group")}
+                                {t("label.create-entity", {
+                                    entity: t("label.subscription-group"),
+                                })}
                             </MenuItem>
                         </Menu>
                     </>

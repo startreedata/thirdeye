@@ -31,7 +31,9 @@ export const SubscriptionGroupEmailsAccordian: FunctionComponent<SubscriptionGro
             <AccordionDetails>
                 <EditableList
                     addButtonLabel={t("label.add")}
-                    inputLabel={t("label.add-email")}
+                    inputLabel={t("label.add-entity", {
+                        entity: t("label.email"),
+                    })}
                     list={
                         props.subscriptionGroupCardData &&
                         props.subscriptionGroupCardData.emails

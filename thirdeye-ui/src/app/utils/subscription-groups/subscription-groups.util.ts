@@ -5,21 +5,22 @@ import {
     SubscriptionGroupCardData,
 } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    EmailScheme,
+    SubscriptionGroup,
+} from "../../rest/dto/subscription-group.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
-    return ({
+    return {
         name: "",
-        alerts: [],
+        alerts: [] as Alert[],
         notificationSchemes: {
-            email: {
+            email: ({
                 to: [],
-                cc: [],
-                bcc: [],
-            },
+            } as unknown) as EmailScheme,
         },
-    } as unknown) as SubscriptionGroup;
+    } as SubscriptionGroup;
 };
 
 export const createEmptySubscriptionGroupCardData = (): SubscriptionGroupCardData => {
@@ -73,7 +74,7 @@ export const getSubscriptionGroupCardDatas = (
         alerts
     );
 
-    const subscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
+    const subscriptionGroupCardDatas = [];
     for (const subscriptionGroup of subscriptionGroups) {
         subscriptionGroupCardDatas.push(
             getSubscriptionGroupCardDataInternal(
@@ -97,7 +98,7 @@ export const getSubscriptionGroupAlert = (
 
     // Basic properties
     subscriptionGroupAlert.id = alert.id;
-    subscriptionGroupAlert.name = alert.name;
+    subscriptionGroupAlert.name = alert.name || i18n.t("label.no-data-marker");
 
     return subscriptionGroupAlert;
 };
@@ -109,7 +110,7 @@ export const getSubscriptionGroupAlerts = (
         return [];
     }
 
-    const subscriptionGroupAlerts: SubscriptionGroupAlert[] = [];
+    const subscriptionGroupAlerts = [];
     for (const alert of alerts) {
         subscriptionGroupAlerts.push(getSubscriptionGroupAlert(alert));
     }
@@ -120,13 +121,21 @@ export const getSubscriptionGroupAlerts = (
 export const getSubscriptionGroupAlertId = (
     subscriptionGroupAlert: SubscriptionGroupAlert
 ): number => {
-    return (subscriptionGroupAlert && subscriptionGroupAlert.id) || -1;
+    if (!subscriptionGroupAlert) {
+        return -1;
+    }
+
+    return subscriptionGroupAlert.id;
 };
 
 export const getSubscriptionGroupAlertName = (
     subscriptionGroupAlert: SubscriptionGroupAlert
 ): string => {
-    return (subscriptionGroupAlert && subscriptionGroupAlert.name) || "";
+    if (!subscriptionGroupAlert) {
+        return "";
+    }
+
+    return subscriptionGroupAlert.name;
 };
 
 export const filterSubscriptionGroups = (
@@ -141,7 +150,7 @@ export const filterSubscriptionGroups = (
         return subscriptionGroupCardDatas;
     }
 
-    const filteredSubscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
+    const filteredSubscriptionGroupCardDatas = [];
     for (const subscriptionGroupCardData of subscriptionGroupCardDatas) {
         // Only the subscription group card data to be searched and not contained subscription group
         const subscriptionGroupCardDataCopy = cloneDeep(
@@ -177,21 +186,25 @@ const getSubscriptionGroupCardDataInternal = (
     alertsToSubscriptionGroupIdsMap: Map<number, SubscriptionGroupAlert[]>
 ): SubscriptionGroupCardData => {
     const subscriptionGroupCardData = createEmptySubscriptionGroupCardData();
+    const noDataMarker = i18n.t("label.no-data-marker");
 
     // Maintain a copy of subscription group
     subscriptionGroupCardData.subscriptionGroup = subscriptionGroup;
 
     // Basic properties
     subscriptionGroupCardData.id = subscriptionGroup.id;
-    subscriptionGroupCardData.name = subscriptionGroup.name;
+    subscriptionGroupCardData.name = subscriptionGroup.name || noDataMarker;
 
     // Alerts
     subscriptionGroupCardData.alerts =
-        alertsToSubscriptionGroupIdsMap.get(subscriptionGroup.id) || [];
+        (alertsToSubscriptionGroupIdsMap &&
+            alertsToSubscriptionGroupIdsMap.get(subscriptionGroup.id)) ||
+        [];
 
     // Emails
     subscriptionGroupCardData.emails =
-        (subscriptionGroup.notificationSchemes.email &&
+        (subscriptionGroup.notificationSchemes &&
+            subscriptionGroup.notificationSchemes.email &&
             subscriptionGroup.notificationSchemes.email.to) ||
         [];
 

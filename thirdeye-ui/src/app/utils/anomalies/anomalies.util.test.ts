@@ -44,9 +44,9 @@ describe("Anomalies Util", () => {
 
     test("getAnomalyName should return appropriate name for anomaly", () => {
         expect(getAnomalyName(mockAnomaly1)).toEqual(
-            "label.anomaly label.anomaly-id"
+            "label.anomaly label.entity-id"
         );
-        expect(i18n.t).toHaveBeenCalledWith("label.anomaly-id", { id: 2 });
+        expect(i18n.t).toHaveBeenCalledWith("label.entity-id", { id: 1 });
     });
 
     test("createEmptyAnomalyCardData should create appropriate anomaly card data", () => {
@@ -115,6 +115,7 @@ describe("Anomalies Util", () => {
     test("filterAnomalies should return appropriate anomaly card data array for anomaly card data array and search words", () => {
         expect(filterAnomalies(mockAnomalyCardDatas, mockSearchWords)).toEqual([
             mockAnomalyCardData1,
+            mockAnomalyCardData2,
         ]);
     });
 
@@ -145,25 +146,35 @@ describe("Anomalies Util", () => {
     });
 
     test("filterAnomaliesByTime should return appropriate anomaly array for anomalies and start and end time", () => {
+        expect(filterAnomaliesByTime(mockAnomalies, 2, 2)).toEqual([
+            mockAnomaly1,
+        ]);
+        expect(filterAnomaliesByTime(mockAnomalies, 2, 3)).toEqual([
+            mockAnomaly1,
+            mockAnomaly3,
+        ]);
         expect(filterAnomaliesByTime(mockAnomalies, 3, 3)).toEqual([
             mockAnomaly1,
+            mockAnomaly3,
         ]);
-        expect(filterAnomaliesByTime(mockAnomalies, 3, 9)).toEqual([
+        expect(filterAnomaliesByTime(mockAnomalies, 2, 9)).toEqual([
             mockAnomaly1,
+            mockAnomaly3,
             mockAnomaly2,
         ]);
-        expect(filterAnomaliesByTime(mockAnomalies, 2, 11)).toEqual([
+        expect(filterAnomaliesByTime(mockAnomalies, 1, 10)).toEqual([
             mockAnomaly1,
+            mockAnomaly3,
             mockAnomaly2,
         ]);
-        expect(filterAnomaliesByTime(mockAnomalies, 3.2, 3.8)).toEqual([
+        expect(filterAnomaliesByTime(mockAnomalies, 1, 2)).toEqual([
             mockAnomaly1,
         ]);
-        expect(filterAnomaliesByTime(mockAnomalies, 5, 11)).toEqual([
+        expect(filterAnomaliesByTime(mockAnomalies, 9, 10)).toEqual([
             mockAnomaly2,
         ]);
-        expect(filterAnomaliesByTime(mockAnomalies, 1, 2)).toEqual([]);
-        expect(filterAnomaliesByTime(mockAnomalies, 11, 12)).toEqual([]);
+        expect(filterAnomaliesByTime(mockAnomalies, 1, 1)).toEqual([]);
+        expect(filterAnomaliesByTime(mockAnomalies, 10, 10)).toEqual([]);
     });
 
     test("getAnomaliesAtTime should return empty array for invalid anomalies", () => {
@@ -183,11 +194,20 @@ describe("Anomalies Util", () => {
     });
 
     test("getAnomaliesAtTime should return appropriate anomaly array for anomalies and time", () => {
-        expect(getAnomaliesAtTime(mockAnomalies, 3)).toEqual([mockAnomaly1]);
-        expect(getAnomaliesAtTime(mockAnomalies, 10)).toEqual([mockAnomaly2]);
-        expect(getAnomaliesAtTime(mockAnomalies, 2)).toEqual([]);
-        expect(getAnomaliesAtTime(mockAnomalies, 11)).toEqual([]);
-        expect(getAnomaliesAtTime(mockAnomalies, 6)).toEqual([]);
+        expect(getAnomaliesAtTime(mockAnomalies, 2)).toEqual([mockAnomaly1]);
+        expect(getAnomaliesAtTime(mockAnomalies, 2.5)).toEqual([mockAnomaly1]);
+        expect(getAnomaliesAtTime(mockAnomalies, 3)).toEqual([
+            mockAnomaly1,
+            mockAnomaly3,
+        ]);
+        expect(getAnomaliesAtTime(mockAnomalies, 8)).toEqual([
+            mockAnomaly3,
+            mockAnomaly2,
+        ]);
+        expect(getAnomaliesAtTime(mockAnomalies, 8.5)).toEqual([mockAnomaly2]);
+        expect(getAnomaliesAtTime(mockAnomalies, 9)).toEqual([mockAnomaly2]);
+        expect(getAnomaliesAtTime(mockAnomalies, 1)).toEqual([]);
+        expect(getAnomaliesAtTime(mockAnomalies, 10)).toEqual([]);
     });
 });
 
@@ -206,62 +226,85 @@ const mockEmptyAnomalyCardData = {
 };
 
 const mockAnomaly1 = {
-    id: 2,
-    startTime: 3,
-    endTime: 4,
-    avgCurrentVal: 5,
-    avgBaselineVal: 6,
+    id: 1,
+    startTime: 2,
+    endTime: 3,
+    avgCurrentVal: 4,
+    avgBaselineVal: 5,
     alert: {
-        id: 7,
-        name: "testName7",
+        id: 6,
+        name: "testNameAlert6",
     },
 } as Anomaly;
 
 const mockAnomaly2 = {
-    id: 8,
-    startTime: 9,
-    endTime: 10,
+    id: 7,
+    startTime: 8,
+    endTime: 9,
+    alert: {
+        id: 10,
+    },
 } as Anomaly;
 
 const mockAnomaly3 = {
     id: 11,
+    startTime: 3,
+    endTime: 8,
 } as Anomaly;
 
-const mockAnomalies = [mockAnomaly1, mockAnomaly2, mockAnomaly3];
+const mockAnomaly4 = {
+    id: 12,
+} as Anomaly;
+
+const mockAnomalies = [mockAnomaly1, mockAnomaly2, mockAnomaly3, mockAnomaly4];
 
 const mockAnomalyCardData1 = {
-    id: 2,
-    name: "label.anomaly label.anomaly-id",
-    alertName: "testName7",
-    alertId: 7,
-    current: "5",
-    predicted: "6",
-    deviation: "-0.16666666666666666",
+    id: 1,
+    name: "label.anomaly label.entity-id",
+    alertId: 6,
+    alertName: "testNameAlert6",
+    current: "4",
+    predicted: "5",
+    deviation: "-0.2",
     negativeDeviation: true,
-    duration: "3 4",
-    startTime: "3",
-    endTime: "4",
+    duration: "2 3",
+    startTime: "2",
+    endTime: "3",
 };
 
 const mockAnomalyCardData2 = {
-    id: 8,
-    name: "label.anomaly label.anomaly-id",
+    id: 7,
+    name: "label.anomaly label.entity-id",
+    alertId: 10,
     alertName: "label.no-data-marker",
-    alertId: -1,
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
     negativeDeviation: false,
-    duration: "9 10",
-    startTime: "9",
-    endTime: "10",
+    duration: "8 9",
+    startTime: "8",
+    endTime: "9",
 };
 
 const mockAnomalyCardData3 = {
     id: 11,
-    name: "label.anomaly label.anomaly-id",
-    alertName: "label.no-data-marker",
+    name: "label.anomaly label.entity-id",
     alertId: -1,
+    alertName: "label.no-data-marker",
+    current: "label.no-data-marker",
+    predicted: "label.no-data-marker",
+    deviation: "label.no-data-marker",
+    negativeDeviation: false,
+    duration: "3 8",
+    startTime: "3",
+    endTime: "8",
+};
+
+const mockAnomalyCardData4 = {
+    id: 12,
+    name: "label.anomaly label.entity-id",
+    alertId: -1,
+    alertName: "label.no-data-marker",
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
@@ -275,6 +318,7 @@ const mockAnomalyCardDatas = [
     mockAnomalyCardData1,
     mockAnomalyCardData2,
     mockAnomalyCardData3,
+    mockAnomalyCardData4,
 ];
 
-const mockSearchWords = ["name6", "name7"];
+const mockSearchWords = ["testNameAlert6", "8 9"];

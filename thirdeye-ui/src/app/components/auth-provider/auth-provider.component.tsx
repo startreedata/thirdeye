@@ -48,12 +48,12 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
         setAxiosResponseInterceptorId(
             axios.interceptors.response.use(
                 getFulfilledResponseInterceptor(),
-                getRejectedResponseInterceptor(unauthenticatedAccessFn)
+                getRejectedResponseInterceptor(handleUnauthenticatedAccess)
             )
         );
     };
 
-    const unauthenticatedAccessFn = (): void => {
+    const handleUnauthenticatedAccess = (): void => {
         // Notify
         enqueueSnackbar(
             t("message.signed-out"),

@@ -9,6 +9,7 @@ import {
     Menu,
     MenuItem,
 } from "@material-ui/core";
+import { classnames } from "@material-ui/data-grid";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,7 @@ import {
     getAlertsDetailPath,
     getAnomaliesDetailPath,
 } from "../../../utils/routes/routes.util";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
@@ -44,6 +46,10 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
     };
 
     const handleAnomalyViewDetails = (): void => {
+        if (!props.anomalyCardData) {
+            return;
+        }
+
         history.push(getAnomaliesDetailPath(props.anomalyCardData.id));
         handleAnomalyOptionsClose();
     };
@@ -58,138 +64,156 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
     };
 
     const handleAlertViewDetails = (): void => {
+        if (!props.anomalyCardData) {
+            return;
+        }
+
         history.push(getAlertsDetailPath(props.anomalyCardData.alertId));
     };
 
     return (
         <Card variant="outlined">
-            <CardHeader
-                action={
-                    <>
-                        {/* Anomaly options button */}
-                        <IconButton onClick={handleAnomalyOptionsClick}>
-                            <MoreVertIcon />
-                        </IconButton>
+            {props.anomalyCardData && (
+                <CardHeader
+                    action={
+                        <>
+                            {/* Anomaly options button */}
+                            <IconButton onClick={handleAnomalyOptionsClick}>
+                                <MoreVertIcon />
+                            </IconButton>
 
-                        <Menu
-                            anchorEl={anomalyOptionsAnchorElement}
-                            open={Boolean(anomalyOptionsAnchorElement)}
-                            onClose={handleAnomalyOptionsClose}
-                        >
-                            {/* View details */}
-                            {props.showViewDetails && (
-                                <MenuItem onClick={handleAnomalyViewDetails}>
-                                    {t("label.view-details")}
+                            {/* Anomaly options */}
+                            <Menu
+                                anchorEl={anomalyOptionsAnchorElement}
+                                open={Boolean(anomalyOptionsAnchorElement)}
+                                onClose={handleAnomalyOptionsClose}
+                            >
+                                {/* View details */}
+                                {props.showViewDetails && (
+                                    <MenuItem
+                                        onClick={handleAnomalyViewDetails}
+                                    >
+                                        {t("label.view-details")}
+                                    </MenuItem>
+                                )}
+
+                                {/* Investigate anomaly*/}
+                                <MenuItem
+                                    disabled
+                                    onClick={handleAnomalyInvestigate}
+                                >
+                                    {t("label.investigate-entity", {
+                                        entity: t("label.anomaly"),
+                                    })}
                                 </MenuItem>
+
+                                {/* Delete anomaly */}
+                                <MenuItem onClick={handleAnomalyDelete}>
+                                    {t("label.delete-entity", {
+                                        entity: t("label.anomaly"),
+                                    })}
+                                </MenuItem>
+                            </Menu>
+                        </>
+                    }
+                    title={
+                        <>
+                            {/* Anomaly name */}
+                            {props.showViewDetails && (
+                                <Link onClick={handleAnomalyViewDetails}>
+                                    <TextHighlighter
+                                        searchWords={props.searchWords}
+                                        text={props.anomalyCardData.name}
+                                    />
+                                </Link>
                             )}
 
-                            {/* Investigate anomaly*/}
-                            <MenuItem
-                                disabled
-                                onClick={handleAnomalyInvestigate}
-                            >
-                                {t("label.investigate-anomaly")}
-                            </MenuItem>
-
-                            {/* Delete anomaly */}
-                            <MenuItem onClick={handleAnomalyDelete}>
-                                {t("label.delete-anomaly")}
-                            </MenuItem>
-                        </Menu>
-                    </>
-                }
-                title={
-                    <>
-                        {/* Anomaly name */}
-                        {props.showViewDetails && (
-                            <Link onClick={handleAnomalyViewDetails}>
-                                <TextHighlighter
-                                    searchWords={props.searchWords}
-                                    text={props.anomalyCardData.name}
-                                />
-                            </Link>
-                        )}
-
-                        {/* Summary */}
-                        {!props.showViewDetails && t("label.summary")}
-                    </>
-                }
-                titleTypographyProps={{ variant: "h6" }}
-            />
+                            {/* Summary */}
+                            {!props.showViewDetails && t("label.summary")}
+                        </>
+                    }
+                    titleTypographyProps={{ variant: "h6" }}
+                />
+            )}
 
             <CardContent>
-                <Grid container>
-                    {/* Alert */}
-                    <Grid item md={3} xs={6}>
-                        <NameValueDisplayCard<string>
-                            link
-                            name={t("label.alert")}
-                            searchWords={props.searchWords}
-                            values={[props.anomalyCardData.alertName]}
-                            onClick={handleAlertViewDetails}
-                        />
-                    </Grid>
+                {props.anomalyCardData && (
+                    <Grid container>
+                        {/* Alert */}
+                        <Grid item md={3} xs={6}>
+                            <NameValueDisplayCard<string>
+                                link
+                                name={t("label.alert")}
+                                searchWords={props.searchWords}
+                                values={[props.anomalyCardData.alertName]}
+                                onClick={handleAlertViewDetails}
+                            />
+                        </Grid>
 
-                    {/* Duration */}
-                    <Grid item md={3} xs={6}>
-                        <NameValueDisplayCard<string>
-                            name={t("label.duration")}
-                            searchWords={props.searchWords}
-                            values={[props.anomalyCardData.duration]}
-                        />
-                    </Grid>
+                        {/* Duration */}
+                        <Grid item md={3} xs={6}>
+                            <NameValueDisplayCard<string>
+                                name={t("label.duration")}
+                                searchWords={props.searchWords}
+                                values={[props.anomalyCardData.duration]}
+                            />
+                        </Grid>
 
-                    {/* Separator */}
-                    <Grid item xs={12}>
-                        <Divider variant="fullWidth" />
-                    </Grid>
+                        {/* Separator */}
+                        <Grid item xs={12}>
+                            <Divider variant="fullWidth" />
+                        </Grid>
 
-                    {/* Start */}
-                    <Grid item md={3} xs={6}>
-                        <NameValueDisplayCard<string>
-                            name={t("label.start")}
-                            searchWords={props.searchWords}
-                            values={[props.anomalyCardData.startTime]}
-                        />
-                    </Grid>
+                        {/* Start */}
+                        <Grid item md={3} xs={6}>
+                            <NameValueDisplayCard<string>
+                                name={t("label.start")}
+                                searchWords={props.searchWords}
+                                values={[props.anomalyCardData.startTime]}
+                            />
+                        </Grid>
 
-                    {/* End */}
-                    <Grid item md={3} xs={6}>
-                        <NameValueDisplayCard<string>
-                            name={t("label.end")}
-                            searchWords={props.searchWords}
-                            values={[props.anomalyCardData.endTime]}
-                        />
-                    </Grid>
+                        {/* End */}
+                        <Grid item md={3} xs={6}>
+                            <NameValueDisplayCard<string>
+                                name={t("label.end")}
+                                searchWords={props.searchWords}
+                                values={[props.anomalyCardData.endTime]}
+                            />
+                        </Grid>
 
-                    {/* Current / Predicted */}
-                    <Grid item md={3} xs={6}>
-                        <NameValueDisplayCard<string>
-                            name={t("label.current-/-predicted")}
-                            searchWords={props.searchWords}
-                            values={[
-                                t("label.current-/-predicted-values", {
-                                    current: props.anomalyCardData.current,
-                                    predicted: props.anomalyCardData.predicted,
-                                }),
-                            ]}
-                        />
-                    </Grid>
+                        {/* Current / Predicted */}
+                        <Grid item md={3} xs={6}>
+                            <NameValueDisplayCard<string>
+                                name={`${t("label.current")}${t(
+                                    "label.pair-separator"
+                                )}${t("label.predicted")}`}
+                                searchWords={props.searchWords}
+                                values={[
+                                    `${props.anomalyCardData.current}${t(
+                                        "label.pair-separator"
+                                    )}${props.anomalyCardData.predicted}`,
+                                ]}
+                            />
+                        </Grid>
 
-                    {/* Deviation */}
-                    <Grid item md={3} xs={6}>
-                        <NameValueDisplayCard<string>
-                            name={t("label.deviation")}
-                            searchWords={props.searchWords}
-                            valueClassName={
-                                props.anomalyCardData.negativeDeviation
-                                    ? anomalyCardClasses.deviation
-                                    : ""
-                            }
-                            values={[props.anomalyCardData.deviation]}
-                        />
+                        {/* Deviation */}
+                        <Grid item md={3} xs={6}>
+                            <NameValueDisplayCard<string>
+                                name={t("label.deviation")}
+                                searchWords={props.searchWords}
+                                valueClassName={classnames({
+                                    [anomalyCardClasses.deviation]:
+                                        props.anomalyCardData.negativeDeviation,
+                                })}
+                                values={[props.anomalyCardData.deviation]}
+                            />
+                        </Grid>
                     </Grid>
-                </Grid>
+                )}
+
+                {/* No data available */}
+                {!props.anomalyCardData && <NoDataIndicator />}
             </CardContent>
         </Card>
     );

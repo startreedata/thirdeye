@@ -8,8 +8,8 @@ export interface AnomalyCardProps {
 export interface AnomalyCardData {
     id: number;
     name: string;
-    alertName: string;
     alertId: number;
+    alertName: string;
     current: string;
     predicted: string;
     deviation: string;

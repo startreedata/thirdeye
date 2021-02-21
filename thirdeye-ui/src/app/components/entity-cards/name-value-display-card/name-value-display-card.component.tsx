@@ -9,7 +9,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { isEmpty } from "lodash";
-import React, { ReactElement } from "react";
+import React, { ReactElement, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCardProps } from "./name-value-display-card.interfaces";
@@ -21,17 +21,13 @@ export function NameValueDisplayCard<T>(
     const nameValueDisplayCardClasses = useNameValueDisplayCardStyles();
     const { t } = useTranslation();
 
-    const getValueText = (value: T): string => {
-        if (!value) {
-            return "";
+    const getValue = (value: T): ReactNode => {
+        if (props.valueRenderer) {
+            return props.valueRenderer(value);
         }
 
         if (typeof value === "string") {
             return value;
-        }
-
-        if (props.valueTextFn) {
-            return props.valueTextFn(value);
         }
 
         return "";
@@ -42,8 +38,13 @@ export function NameValueDisplayCard<T>(
             className={nameValueDisplayCardClasses.nameValueDisplayCard}
             variant="outlined"
         >
-            <CardContent>
-                <Grid container>
+            <CardContent
+                className={
+                    nameValueDisplayCardClasses.nameValueDisplayCardContent
+                }
+            >
+                <Grid container spacing={1}>
+                    {/* Name and count */}
                     <Grid item xs={12}>
                         <Grid
                             container
@@ -73,12 +74,13 @@ export function NameValueDisplayCard<T>(
                         </Grid>
                     </Grid>
 
-                    {/* Value */}
+                    {/* Values */}
                     <Grid item xs={12}>
                         <List
                             disablePadding
                             className={nameValueDisplayCardClasses.list}
                         >
+                            {/* Values */}
                             {props.values &&
                                 props.values.map((value, index) => (
                                     <ListItem
@@ -96,21 +98,41 @@ export function NameValueDisplayCard<T>(
                                                 <>
                                                     {/* Value as text */}
                                                     {!props.link && (
-                                                        <TextHighlighter
-                                                            searchWords={
-                                                                props.searchWords
-                                                            }
-                                                            text={getValueText(
+                                                        <>
+                                                            {/* Value as string */}
+                                                            {typeof getValue(
                                                                 value
+                                                            ) === "string" && (
+                                                                <TextHighlighter
+                                                                    searchWords={
+                                                                        props.searchWords
+                                                                    }
+                                                                    text={
+                                                                        getValue(
+                                                                            value
+                                                                        ) as string
+                                                                    }
+                                                                />
                                                             )}
-                                                        />
+
+                                                            {/* Value as component */}
+                                                            {typeof getValue(
+                                                                value
+                                                            ) !== "string" && (
+                                                                <>
+                                                                    {getValue(
+                                                                        value
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </>
                                                     )}
 
                                                     {/* Value as link */}
                                                     {props.link && (
                                                         <Link
-                                                            noWrap
                                                             display="block"
+                                                            noWrap={!props.wrap}
                                                             onClick={() =>
                                                                 props.onClick &&
                                                                 props.onClick(
@@ -118,21 +140,43 @@ export function NameValueDisplayCard<T>(
                                                                 )
                                                             }
                                                         >
-                                                            <TextHighlighter
-                                                                searchWords={
-                                                                    props.searchWords
-                                                                }
-                                                                text={getValueText(
+                                                            <>
+                                                                {/* Value as string */}
+                                                                {typeof getValue(
                                                                     value
+                                                                ) ===
+                                                                    "string" && (
+                                                                    <TextHighlighter
+                                                                        searchWords={
+                                                                            props.searchWords
+                                                                        }
+                                                                        text={
+                                                                            getValue(
+                                                                                value
+                                                                            ) as string
+                                                                        }
+                                                                    />
                                                                 )}
-                                                            />
+
+                                                                {/* Value as component */}
+                                                                {typeof getValue(
+                                                                    value
+                                                                ) !==
+                                                                    "string" && (
+                                                                    <>
+                                                                        {getValue(
+                                                                            value
+                                                                        )}
+                                                                    </>
+                                                                )}
+                                                            </>
                                                         </Link>
                                                     )}
                                                 </>
                                             }
                                             primaryTypographyProps={{
                                                 variant: "body1",
-                                                noWrap: true,
+                                                noWrap: !props.wrap,
                                                 className: props.valueClassName,
                                             }}
                                         />
@@ -151,15 +195,11 @@ export function NameValueDisplayCard<T>(
                                         className={
                                             nameValueDisplayCardClasses.listItemText
                                         }
-                                        primary={
-                                            <TextHighlighter
-                                                searchWords={props.searchWords}
-                                                text={t("label.no-data-marker")}
-                                            />
-                                        }
+                                        primary={t("label.no-data-marker")}
                                         primaryTypographyProps={{
                                             variant: "body1",
-                                            noWrap: true,
+                                            noWrap: !props.wrap,
+                                            className: props.valueClassName,
                                         }}
                                     />
                                 </ListItem>

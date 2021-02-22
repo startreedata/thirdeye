@@ -102,11 +102,6 @@ module.exports = {
             name: "@cortexdata/thirdeye-ui [prod]",
             color: "#6EC4D1",
         }),
-        // Automatic Node.js polyfills removed in webpack 5
-        // Material-UI Data Grid requires Process
-        new webpack.ProvidePlugin({
-            process: "process/browser",
-        }),
     ],
 
     // Source map

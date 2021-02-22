@@ -3,7 +3,7 @@ import { Dimension } from "../../utils/material-ui/dimension.util";
 
 export const useAppBarDrawerStyles = makeStyles((theme) => ({
     appBarDrawerPaper: {
-        width: `${Dimension.WIDTH_DRAWER_DEFAULT}px`,
+        width: Dimension.WIDTH_DRAWER_DEFAULT,
     },
     listItemNested: {
         paddingLeft: theme.spacing(4),

@@ -14,7 +14,7 @@ export const useMetricsListStyles = makeStyles({
         padding: theme.spacing(1),
     },
     rightAlign: {
-        marginRight: "16px",
+        marginRight: 16,
         marginLeft: "auto",
     },
     listContainer: {

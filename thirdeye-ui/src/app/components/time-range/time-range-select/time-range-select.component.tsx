@@ -22,7 +22,7 @@ export const TimeRangeSelect: FunctionComponent<TimeRangeSelectProps> = (
     const { t } = useTranslation();
 
     return (
-        <FormControl fullWidth={props.fullwidth} variant="outlined">
+        <FormControl fullWidth variant="outlined">
             {/* Label */}
             <InputLabel id="timeRangeSelectLabel">
                 {t("label.time-range")}

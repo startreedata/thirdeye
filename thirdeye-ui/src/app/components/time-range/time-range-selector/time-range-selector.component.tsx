@@ -158,7 +158,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     const handleApply = (): void => {
         // Notify that component time range duration has changed
         props.onChange && props.onChange(componentTimeRangeDuration);
-
         handleTimeRangeSelectorClose();
     };
 
@@ -179,10 +178,10 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                 </Grid>
             )}
 
-            {/* Time range selector button */}
             <Grid item>
+                {/* Time range selector button */}
                 <Button
-                    className={timeRangeSelectorClasses.button}
+                    className={timeRangeSelectorClasses.timeRangeSelectorButton}
                     color="primary"
                     variant="outlined"
                     onClick={handleTimeRangeSelectorClick}
@@ -254,7 +253,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                                         <Hidden smUp>
                                             <Grid item xs={12}>
                                                 <TimeRangeSelect
-                                                    fullwidth
                                                     recentCustomTimeRangeDurations={
                                                         props.recentCustomTimeRangeDurations
                                                     }
@@ -418,7 +416,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
             {/* Refresh button */}
             <Grid item>
                 <Button
-                    className={timeRangeSelectorClasses.button}
+                    className={timeRangeSelectorClasses.timeRangeSelectorButton}
                     color="primary"
                     variant="outlined"
                     onClick={props.onRefresh}

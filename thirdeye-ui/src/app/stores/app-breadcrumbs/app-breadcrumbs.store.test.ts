@@ -134,17 +134,17 @@ test("popPageBreadcrumb should update store appropriately", () => {
 });
 
 const mockRouterBreadcrumb1 = {
-    text: "testRouterBreadcrumbText1",
+    text: "testTextRouterBreadcrumb1",
 };
 
 const mockRouterBreadcrumb2 = {
-    text: "testRouterBreadcrumbText2",
+    text: "testTextRouterBreadcrumb2",
 };
 
 const mockPageBreadcrumb1 = {
-    text: "testPageBreadcrumbText1",
+    text: "testTextPageBreadcrumb1",
 };
 
 const mockPageBreadcrumb2 = {
-    text: "testPageBreadcrumbText2",
+    text: "testTextPageBreadcrumb2",
 };

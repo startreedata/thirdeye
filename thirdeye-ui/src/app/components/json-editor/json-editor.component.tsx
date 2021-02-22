@@ -27,7 +27,7 @@ const CodeMirror = lazy(() =>
     ).then((module) => ({ default: module.Controlled }))
 );
 
-const TAB_SIZE = 2;
+const TAB_SIZE_JSON_EDITOR = 2;
 
 export const JSONEditor: FunctionComponent<JSONEditorProps> = (
     props: JSONEditorProps
@@ -56,13 +56,13 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
             }
 
             // Valid JSON
-            setValue(JSON.stringify(jsonObject, null, TAB_SIZE));
+            setValue(JSON.stringify(jsonObject, null, TAB_SIZE_JSON_EDITOR));
 
             return;
         }
 
         if (typeof props.value === "object") {
-            setValue(JSON.stringify(props.value, null, TAB_SIZE));
+            setValue(JSON.stringify(props.value, null, TAB_SIZE_JSON_EDITOR));
 
             return;
         }
@@ -111,11 +111,11 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
             >
                 <Suspense fallback={<LoadingIndicator />}>
                     <CodeMirror
-                        className={jsonEditorClasses.editor}
+                        className={jsonEditorClasses.jsonEditor}
                         options={
                             {
-                                tabSize: 2,
-                                indentUnit: 2,
+                                tabSize: TAB_SIZE_JSON_EDITOR,
+                                indentUnit: TAB_SIZE_JSON_EDITOR,
                                 indentWithTabs: false,
                                 lineNumbers: true,
                                 lineWrapping: true,

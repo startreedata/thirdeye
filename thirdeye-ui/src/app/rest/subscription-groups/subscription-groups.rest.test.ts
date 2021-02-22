@@ -119,7 +119,7 @@ describe("Subscription Groups REST", () => {
         ).rejects.toThrow("testError");
     });
 
-    test("updateSubscriptionGroups should invoke axios.put with appropriate input and return appropriate subscription groups", async () => {
+    test("updateSubscriptionGroups should invoke axios.put with appropriate input and return appropriate subscription group array", async () => {
         jest.spyOn(axios, "put").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });

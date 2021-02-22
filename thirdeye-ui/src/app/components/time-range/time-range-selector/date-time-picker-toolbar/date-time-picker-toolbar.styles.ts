@@ -1,18 +1,16 @@
 import { makeStyles } from "@material-ui/core";
 
-export const useDateTimePickerToolbarStyles = makeStyles({
+export const useDateTimePickerToolbarStyles = makeStyles((theme) => ({
     dateTimePickerToolbar: {
-        marginBottom: "-10px", // Minimize whitespace between toolbar and calendar
+        marginBottom: -theme.spacing(1), // Minimize whitespace between toolbar and calendar
     },
     dateTimePickerToolbarDense: {
-        minHeight: "36px",
+        minHeight: 36,
     },
     link: {
-        display: "flex",
-        alignSelf: "center",
-        marginRight: "8px",
+        marginRight: theme.spacing(1),
         "&:last-of-type": {
-            marginRight: "0px",
+            marginRight: 0,
         },
     },
     linkRightAligned: {
@@ -21,4 +19,4 @@ export const useDateTimePickerToolbarStyles = makeStyles({
     linkSelected: {
         fontWeight: "bold",
     },
-});
+}));

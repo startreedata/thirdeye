@@ -29,11 +29,11 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
 
     useEffect(() => {
         setRouterBreadcrumbs([]);
-        initRedirectionURL();
+        initRedirectURL();
         setLoading(false);
     }, []);
 
-    const initRedirectionURL = (): void => {
+    const initRedirectURL = (): void => {
         if (
             location.pathname !== AppRoute.SIGN_IN &&
             location.pathname !== AppRoute.SIGN_OUT

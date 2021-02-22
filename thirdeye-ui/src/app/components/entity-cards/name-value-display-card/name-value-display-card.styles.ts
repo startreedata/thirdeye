@@ -12,14 +12,14 @@ export const useNameValueDisplayCardStyles = makeStyles((theme) => ({
         },
     },
     list: {
-        maxHeight: "90px",
+        maxHeight: 90,
         overflowY: "auto",
     },
     listItem: {
-        padding: "0px",
+        padding: 0,
     },
     listItemText: {
-        marginTop: "2px",
-        marginBottom: "2px",
+        marginTop: 2,
+        marginBottom: 2,
     },
 }));

@@ -13,6 +13,7 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import SubdirectoryArrowLeftIcon from "@material-ui/icons/SubdirectoryArrowLeft";
+import classnames from "classnames";
 import React, {
     FunctionComponent,
     KeyboardEvent,
@@ -21,6 +22,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";
 
@@ -28,6 +30,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     props: EditableListProps
 ) => {
     const editableListClasses = useEditableListStyles();
+    const commonClasses = useCommonStyles();
     const [list, setList] = useState<string[]>([]);
     const [helperText, setHelperText] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
@@ -136,16 +139,20 @@ export const EditableList: FunctionComponent<EditableListProps> = (
             {/* List */}
             <Grid item xs={12}>
                 <Card variant="outlined">
-                    <CardContent className={editableListClasses.list}>
-                        <List dense>
+                    <CardContent
+                        className={classnames(
+                            editableListClasses.list,
+                            commonClasses.cardContentBottomPaddingRemoved
+                        )}
+                    >
+                        <List disablePadding>
                             {list &&
                                 list.map((listItem, index) => (
-                                    <ListItem button key={index}>
+                                    <ListItem divider key={index}>
                                         <ListItemText
                                             primary={listItem}
                                             primaryTypographyProps={{
                                                 variant: "body1",
-                                                noWrap: true,
                                             }}
                                         />
 

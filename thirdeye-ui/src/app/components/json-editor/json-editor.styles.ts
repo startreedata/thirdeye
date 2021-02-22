@@ -2,7 +2,7 @@ import { makeStyles } from "@material-ui/core";
 import { codeTypographyOptions } from "../../utils/material-ui/typography.util";
 
 export const useJSONEditorStyles = makeStyles((theme) => ({
-    editor: {
+    jsonEditor: {
         // Override CodeMirror styles to better align with Material-UI theme
         "& .CodeMirror": {
             ...codeTypographyOptions.body2,

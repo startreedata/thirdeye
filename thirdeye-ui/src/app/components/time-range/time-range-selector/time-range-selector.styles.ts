@@ -1,28 +1,29 @@
 import { makeStyles } from "@material-ui/core";
 
+const HEIGHT_TIME_RANGE_SELECTOR_MD_UP = 427;
+
 export const useTimeRangeSelectorStyles = makeStyles((theme) => ({
-    button: {
-        minWidth: "0px",
-        padding: "6px",
+    timeRangeSelectorButton: {
+        minWidth: 0,
+        padding: theme.spacing(1),
     },
     timeRangeSelectorContents: {
         [theme.breakpoints.only("xs")]: {
-            width: "342px",
+            width: 342,
         },
         [theme.breakpoints.only("sm")]: {
-            height: "784px",
-            width: "465px",
+            width: 465,
         },
         [theme.breakpoints.up("sm")]: {
-            padding: "0px",
+            padding: 0,
         },
         [theme.breakpoints.up("md")]: {
-            height: "425px",
-            width: "828px",
+            height: HEIGHT_TIME_RANGE_SELECTOR_MD_UP,
+            width: 828,
         },
         "&:last-child": {
             [theme.breakpoints.up("sm")]: {
-                paddingBottom: "0px",
+                paddingBottom: 0,
             },
         },
     },
@@ -31,7 +32,7 @@ export const useTimeRangeSelectorStyles = makeStyles((theme) => ({
             height: "100%",
         },
         [theme.breakpoints.up("md")]: {
-            height: "425px",
+            height: HEIGHT_TIME_RANGE_SELECTOR_MD_UP,
             overflow: "auto",
         },
     },
@@ -47,19 +48,19 @@ export const useTimeRangeSelectorStyles = makeStyles((theme) => ({
     },
     startTimeCalendarLabel: {
         [theme.breakpoints.up("sm")]: {
-            marginTop: "12px",
-            marginLeft: "12px",
+            marginTop: 12,
+            marginLeft: 12,
         },
     },
     endTimeCalendarLabel: {
         [theme.breakpoints.up("sm")]: {
-            marginLeft: "12px",
+            marginLeft: 12,
         },
         [theme.breakpoints.up("md")]: {
-            marginTop: "12px",
+            marginTop: 12,
         },
     },
     calendar: {
-        width: "310px",
+        width: 310,
     },
 }));

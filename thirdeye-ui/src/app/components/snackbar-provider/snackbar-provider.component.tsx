@@ -23,18 +23,14 @@ export const SnackbarProvider: FunctionComponent<SnackbarProviderProps> = (
     return (
         <NotistackSnackbarProvider
             hideIconVariant
-            action={(key) => {
-                // Close button
-                return (
-                    <IconButton
-                        onClick={(): void => {
-                            handleSnackbarClose(key);
-                        }}
-                    >
+            action={(key) => (
+                <>
+                    {/* Close button */}
+                    <IconButton onClick={() => handleSnackbarClose(key)}>
                         <CloseIcon />
                     </IconButton>
-                );
-            }}
+                </>
+            )}
             anchorOrigin={{
                 // Snackbar to appear in top right corner
                 horizontal: "right",

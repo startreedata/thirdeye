@@ -5,6 +5,6 @@ export const useErrorIndicatorStyles = makeStyles({
         height: "100%",
     },
     icon: {
-        lineHeight: "1px",
+        lineHeight: 1,
     },
 });

@@ -8,25 +8,21 @@ export const ButtonTile: FunctionComponent<ButtonTileProps> = (
     props: ButtonTileProps
 ) => {
     const buttonTileClasses = useButtonTileStyles(props);
-    const [iconProperties, setIconProperties] = useState<
-        Record<string, unknown>
-    >();
+    const [iconProps, setIconProps] = useState<Record<string, unknown>>();
 
     useEffect(() => {
-        initIconProperties();
+        initIconProps();
     }, []);
 
-    const initIconProperties = (): void => {
-        // Icon properties are initialized here, SVG fill to be assigned only if icon color is
-        // provided
-        // This helps retain original SVG colors
-        const iconProperties: Record<string, unknown> = {};
-        iconProperties.fontSize = "large";
-        iconProperties.height = 50;
+    const initIconProps = (): void => {
+        // SVG fill to be assigned only if icon color is provided, to retain original SVG colors
+        const properties: Record<string, unknown> = {};
+        properties.fontSize = "large";
+        properties.height = 50;
         if (props.iconColor) {
-            iconProperties.fill = props.iconColor;
+            properties.fill = props.iconColor;
         }
-        setIconProperties(iconProperties);
+        setIconProps(properties);
     };
 
     return (
@@ -35,7 +31,7 @@ export const ButtonTile: FunctionComponent<ButtonTileProps> = (
             disabled={props.disabled}
             onClick={props.onClick}
         >
-            <Paper className={buttonTileClasses.button} elevation={2}>
+            <Paper className={buttonTileClasses.buttonTile} elevation={2}>
                 {/* Vertically center align icon and text */}
                 <Grid
                     container
@@ -57,21 +53,25 @@ export const ButtonTile: FunctionComponent<ButtonTileProps> = (
                                 })}
                             >
                                 <Grid item>
-                                    <props.icon {...iconProperties} />
+                                    <props.icon {...iconProps} />
                                 </Grid>
                             </Grid>
                         </Grid>
                     )}
 
                     {/* Text */}
-                    <Grid
-                        item
-                        className={
-                            props.textColor && buttonTileClasses.textColor
-                        }
-                    >
-                        <Typography variant="button">{props.text}</Typography>
-                    </Grid>
+                    {props.text && (
+                        <Grid
+                            item
+                            className={
+                                props.textColor && buttonTileClasses.textColor
+                            }
+                        >
+                            <Typography variant="button">
+                                {props.text}
+                            </Typography>
+                        </Grid>
+                    )}
                 </Grid>
             </Paper>
         </ButtonBase>

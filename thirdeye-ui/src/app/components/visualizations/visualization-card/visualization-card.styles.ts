@@ -10,14 +10,14 @@ export const useVisualizationCardStyles = makeStyles<
     VisualizationCardProps
 >((theme) => ({
     card: (props) => ({
-        height: `${HEIGHT_HEADER + props.visualizationHeight}px`,
+        height: HEIGHT_HEADER + props.visualizationHeight,
         willChange: "position, top, left, width, height, transform",
     }),
     cardMaximized: (props) => ({
         position: "fixed",
         top: "50%",
         left: "50%",
-        height: `${HEIGHT_HEADER + props.visualizationHeight}px`, // Required height
+        height: HEIGHT_HEADER + props.visualizationHeight, // Required height
         maxHeight: `calc(100% - ${
             PADDING_TOP_CARD_MAXIMIZED + PADDING_CARD_MAXIMIZED
         }px)`, // Available maxmized height, available height - top and bottom padding
@@ -28,15 +28,15 @@ export const useVisualizationCardStyles = makeStyles<
         willChange: "position, top, left, width, height, transform",
     }),
     header: {
-        height: `${HEIGHT_HEADER}px`,
+        height: HEIGHT_HEADER,
     },
     contents: (props) => ({
-        height: `${props.visualizationHeight}px`,
+        height: props.visualizationHeight,
     }),
     backdrop: {
         position: "fixed",
-        top: "0px",
-        left: "0px",
+        top: 0,
+        left: 0,
         height: "100%",
         width: "100%",
         zIndex: theme.zIndex.drawer + 2, // Backdrop to be always above app bar

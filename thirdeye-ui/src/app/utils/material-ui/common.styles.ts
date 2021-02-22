@@ -1,10 +1,15 @@
 import { makeStyles } from "@material-ui/core";
 
-export const useCommonStyles = makeStyles({
+export const useCommonStyles = makeStyles((theme) => ({
     gridLimitation: {
-        // Padding equivalent to default Grid spacing in Material-UI theme to avoid the effect of
-        // Material-UI Grid negative margins (https://material-ui.com/components/grid/#limitations)
-        padding: "8px",
+        // Padding to avoid the effect of Material-UI Grid negative margins
+        // (https://material-ui.com/components/grid/#limitations)
+        padding: theme.spacing(1),
+    },
+    cardContentBottomPaddingRemoved: {
+        "&:last-child": {
+            paddingBottom: 0,
+        },
     },
     ellipsis: {
         whiteSpace: "nowrap",
@@ -14,4 +19,4 @@ export const useCommonStyles = makeStyles({
     backdrop: {
         backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
-});
+}));

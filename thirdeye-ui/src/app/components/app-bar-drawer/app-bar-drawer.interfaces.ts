@@ -1,4 +1,4 @@
 export interface AppBarDrawerProps {
-    open?: boolean;
+    open: boolean;
     onClose?: () => void;
 }

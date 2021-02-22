@@ -21,16 +21,16 @@ const AlertsAllPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsAllPage }))
 );
 
-const AlertsCreatePage = lazy(() =>
-    import(
-        /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-page.component"
-    ).then((module) => ({ default: module.AlertsCreatePage }))
-);
-
 const AlertsDetailPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-detail-page" */ "../../pages/alerts-detail-page/alerts-detail-page.component"
     ).then((module) => ({ default: module.AlertsDetailPage }))
+);
+
+const AlertsCreatePage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-page.component"
+    ).then((module) => ({ default: module.AlertsCreatePage }))
 );
 
 const AlertsUpdatePage = lazy(() =>

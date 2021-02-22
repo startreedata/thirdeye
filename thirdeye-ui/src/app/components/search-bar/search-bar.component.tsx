@@ -20,12 +20,13 @@ import {
 import { SearchBarProps } from "./search-bar.interfaces";
 
 const DELIMITER_SEARCH_WORDS = " ";
+const DELAY_HANDLE_ON_CHANGE = 400;
 
 export const SearchBar: FunctionComponent<SearchBarProps> = (
     props: SearchBarProps
 ) => {
     const [searchText, setSearchText] = useState("");
-    const inputRef = useRef<HTMLInputElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -53,9 +54,10 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
     const handleSearchClear = (): void => {
         // Update search text and arrange to send event immediately
         updateSearchText("", false);
-
         // Set focus
-        inputRef && inputRef.current && inputRef.current.focus();
+        searchInputRef &&
+            searchInputRef.current &&
+            searchInputRef.current.focus();
     };
 
     const updateSearchText = (searchText: string, debounced: boolean): void => {
@@ -68,11 +70,11 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 
         // Depending on the flag, arrange to send change event immediately or with a delay
         debounced
-            ? sendOnChangeDebounced(searchWords)
-            : sendOnChange(searchWords);
+            ? handleOnChangeDebounced(searchWords)
+            : handleOnChange(searchWords);
     };
 
-    const sendOnChange = (searchWords: string[]): void => {
+    const handleOnChange = (searchWords: string[]): void => {
         props.onChange && props.onChange(searchWords);
 
         // Set search and search text in query string
@@ -86,11 +88,10 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         }
     };
 
-    const sendOnChangeDebounced = useCallback(debounce(sendOnChange, 400), [
-        props.onChange,
-        props.setSearchQueryString,
-        props.searchLabel,
-    ]);
+    const handleOnChangeDebounced = useCallback(
+        debounce(handleOnChange, DELAY_HANDLE_ON_CHANGE),
+        [props.onChange, props.setSearchQueryString, props.searchLabel]
+    );
 
     return (
         <TextField
@@ -119,7 +120,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
                 ),
             }}
             autoFocus={props.autoFocus}
-            inputRef={inputRef}
+            inputRef={searchInputRef}
             label={props.searchLabel || t("label.search")}
             value={searchText}
             variant="outlined"

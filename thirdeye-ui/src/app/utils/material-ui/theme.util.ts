@@ -3,6 +3,7 @@ import { buttonClasses } from "./button.util";
 import { cssBaselineClasses } from "./css-baseline.util";
 import { gridProps } from "./grid.util";
 import { linkClasses, linkProps } from "./link.util";
+import { listItemTextClasses } from "./list.util";
 import { paletteOptions } from "./palette.util";
 import { paperClasses } from "./paper.util";
 import { shapeOptions } from "./shape.util";
@@ -19,6 +20,7 @@ export const theme: Theme = createMuiTheme({
     overrides: {
         MuiCssBaseline: cssBaselineClasses,
         MuiPaper: paperClasses,
+        MuiListItemText: listItemTextClasses,
         MuiLink: linkClasses,
         MuiButton: buttonClasses,
         MuiTooltip: tooltipClasses,

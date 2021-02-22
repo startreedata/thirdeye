@@ -8,8 +8,8 @@ export interface DetectionEvaluation {
 
 export interface DetectionData {
     timestamp: number[];
-    upperBound: number[];
-    lowerBound: number[];
     current: number[];
     expected: number[];
+    upperBound: number[];
+    lowerBound: number[];
 }

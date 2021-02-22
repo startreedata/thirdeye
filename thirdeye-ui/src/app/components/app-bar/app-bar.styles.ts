@@ -8,9 +8,9 @@ export const useAppBarStyles = makeStyles((theme) => ({
     link: {
         display: "flex",
         alignSelf: "center",
-        marginRight: "16px",
+        marginRight: theme.spacing(2),
         "&:last-of-type": {
-            marginRight: "0px",
+            marginRight: 0,
         },
     },
     linkRightAligned: {

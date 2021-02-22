@@ -221,7 +221,7 @@ export const AppBar: FunctionComponent = () => {
 
                 {(authDisabled || authenticated) && (
                     <>
-                        {/* Shortcut options */}
+                        {/* Shortcut options button */}
                         <Fab
                             className={classnames(
                                 appBarClasses.link,
@@ -234,6 +234,7 @@ export const AppBar: FunctionComponent = () => {
                             <AddIcon />
                         </Fab>
 
+                        {/* Shortcut options */}
                         <Menu
                             anchorEl={shortcutOptionsAnchorElement}
                             open={Boolean(shortcutOptionsAnchorElement)}
@@ -258,7 +259,7 @@ export const AppBar: FunctionComponent = () => {
 
                 {!authDisabled && authenticated && (
                     <>
-                        {/* Account options */}
+                        {/* Account options button */}
                         <IconButton
                             className={appBarClasses.link}
                             onClick={handleAccountOptionsClick}
@@ -266,6 +267,7 @@ export const AppBar: FunctionComponent = () => {
                             <PersonIcon />
                         </IconButton>
 
+                        {/* Account options */}
                         <Menu
                             anchorEl={accountOptionsAnchorElement}
                             open={Boolean(accountOptionsAnchorElement)}

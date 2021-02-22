@@ -13,14 +13,14 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
     main: {
         display: "flex",
         flexDirection: "column",
-        paddingLeft: "16px",
-        paddingRight: "16px",
+        paddingLeft: 16,
+        paddingRight: 16,
     },
     mainExpanded: {
         flexGrow: 1, // Container to occupy available area
     },
     mainCenterAligned: {
-        width: `${Dimension.WIDTH_PAGE_CONTENTS_DEFAULT}px`,
+        width: Dimension.WIDTH_PAGE_CONTENTS_DEFAULT,
         marginLeft: "auto",
         marginRight: "auto",
     },
@@ -33,19 +33,19 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
     header: {
         display: "flex",
         width: "100%",
-        padding: "16px",
-        marginTop: "8px",
+        padding: 16,
+        marginTop: 8,
     },
     headerContents: {
-        height: "64px",
+        height: 64,
     },
     headerPlaceholder: {
-        minHeight: "110px",
+        minHeight: 110,
     },
     mainContents: {
         display: "flex",
         flexDirection: "column",
         flexGrow: 1, // Container to occupy available area
-        paddingBottom: "16px",
+        paddingBottom: 16,
     },
 }));

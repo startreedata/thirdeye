@@ -181,7 +181,7 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
         return (
             props.subscriptionGroupCardDatas.find(
                 (subscriptionGroupCardData) =>
-                    subscriptionGroupCardData.id !== id
+                    subscriptionGroupCardData.id === id
             ) || null
         );
     };

@@ -17,6 +17,7 @@ import {
     getSubscriptionGroupsDetailPath,
     getSubscriptionGroupsUpdatePath,
 } from "../../../utils/routes/routes.util";
+import { getSubscriptionGroupAlertName } from "../../../utils/subscription-groups/subscription-groups.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
@@ -72,22 +73,14 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
         handleSubscriptionGroupOptionsClose();
     };
 
-    const handleAlertViewDetails = (alert: SubscriptionGroupAlert): void => {
-        if (!alert) {
+    const handleAlertViewDetails = (
+        subscriptionGroupAlert: SubscriptionGroupAlert
+    ): void => {
+        if (!subscriptionGroupAlert) {
             return;
         }
 
-        history.push(getAlertsDetailPath(alert.id));
-    };
-
-    const getSubscriptionGroupAlertName = (
-        subscriptionGroupAlert: SubscriptionGroupAlert
-    ): string => {
-        if (!subscriptionGroupAlert) {
-            return "";
-        }
-
-        return subscriptionGroupAlert.name;
+        history.push(getAlertsDetailPath(subscriptionGroupAlert.id));
     };
 
     return (

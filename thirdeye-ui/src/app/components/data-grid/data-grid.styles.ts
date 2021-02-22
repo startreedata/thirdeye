@@ -1,7 +1,9 @@
 import { makeStyles } from "@material-ui/core";
+import { Border } from "../../utils/material-ui/border.util";
 
-export const dataGridStyles = makeStyles({
-    root: {
+export const useDataGridStyles = makeStyles((theme) => ({
+    dataGrid: {
+        border: Border.BORDER_DEFAULT,
         "& .MuiDataGrid-cell:focus": {
             outline: "none",
         },
@@ -9,4 +11,7 @@ export const dataGridStyles = makeStyles({
             outline: "none",
         },
     },
-});
+    rowSelectionStatus: {
+        padding: theme.spacing(2),
+    },
+}));

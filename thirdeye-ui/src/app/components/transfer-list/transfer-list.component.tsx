@@ -15,6 +15,7 @@ import { produce } from "immer";
 import { isEmpty } from "lodash";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getSearchStatusLabel } from "../../utils/search/search.util";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
@@ -41,12 +42,12 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     }, [props.fromList, props.toList]);
 
     useEffect(() => {
-        // List map or search words changed, populate filtered to-list
+        // List map or search changed, populate filtered to-list
         setFilteredToList(populateFilteredList(toListMap, toSearchWords));
     }, [toListMap, toSearchWords]);
 
     useEffect(() => {
-        // List map or search words changed, populate filtered from-list
+        // List map or search changed, populate filtered from-list
         setFilteredFromList(populateFilteredList(fromListMap, fromSearchWords));
     }, [fromListMap, fromSearchWords]);
 
@@ -180,12 +181,10 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                     <Grid item xs={12}>
                         <SearchBar
                             searchLabel={t("label.search")}
-                            searchStatusLabel={t("label.search-count", {
-                                count: filteredFromList
-                                    ? filteredFromList.length
-                                    : 0,
-                                total: fromListMap ? fromListMap.size : 0,
-                            })}
+                            searchStatusLabel={getSearchStatusLabel(
+                                filteredFromList ? filteredFromList.length : 0,
+                                fromListMap ? fromListMap.size : 0
+                            )}
                             onChange={setFromSearchWords}
                         />
                     </Grid>
@@ -270,12 +269,10 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                     <Grid item xs={12}>
                         <SearchBar
                             searchLabel={t("label.search")}
-                            searchStatusLabel={t("label.search-count", {
-                                count: filteredToList
-                                    ? filteredToList.length
-                                    : 0,
-                                total: toListMap ? toListMap.size : 0,
-                            })}
+                            searchStatusLabel={getSearchStatusLabel(
+                                filteredToList ? filteredToList.length : 0,
+                                toListMap ? toListMap.size : 0
+                            )}
                             onChange={setToSearchWords}
                         />
                     </Grid>

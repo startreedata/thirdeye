@@ -4,7 +4,6 @@ import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardData,
 } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
-import { SubscriptionGroupListData } from "../../components/subscription-group-list/subscription-group-list.interfaces";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     EmailScheme,
@@ -266,110 +265,4 @@ const mapAlertsToAlertIds = (
     }
 
     return alertsToAlertIdsMap;
-};
-
-export const createEmptySubscriptionGroupListData = (): SubscriptionGroupListData => {
-    return {
-        id: -1,
-        idText: "",
-        name: i18n.t("label.no-data-marker"),
-        alerts: [],
-        emails: [],
-    };
-};
-
-export const getSubscriptionGroupListDataInternal = (
-    subscriptionGroup: SubscriptionGroup,
-    alertsToSubscriptionGroupIdsMap: Map<number, SubscriptionGroupAlert[]>
-): SubscriptionGroupListData => {
-    const subscriptionGroupListData = createEmptySubscriptionGroupListData();
-
-    // Basic properties
-    subscriptionGroupListData.id = subscriptionGroup.id;
-    subscriptionGroupListData.idText = subscriptionGroup.id.toString();
-    subscriptionGroupListData.name = subscriptionGroup.name;
-
-    // Alerts
-    subscriptionGroupListData.alerts =
-        alertsToSubscriptionGroupIdsMap.get(subscriptionGroup.id) || [];
-
-    // Emails
-    subscriptionGroupListData.emails =
-        (subscriptionGroup.notificationSchemes.email &&
-            subscriptionGroup.notificationSchemes.email.to) ||
-        [];
-
-    return subscriptionGroupListData;
-};
-
-export const getSubscriptionGroupListDatas = (
-    subscriptionGroups: SubscriptionGroup[],
-    alerts: Alert[]
-): SubscriptionGroupListData[] => {
-    // Map alerts to subscription group ids
-    const alertsToSubscriptionGroupIdsMap = mapAlertsToSubscriptionGroupIds(
-        subscriptionGroups,
-        alerts
-    );
-    const subscriptionGroupListDatas: SubscriptionGroupListData[] = [];
-
-    if (isEmpty(subscriptionGroups)) {
-        return subscriptionGroupListDatas;
-    }
-
-    for (const subscriptionGroup of subscriptionGroups) {
-        subscriptionGroupListDatas.push(
-            getSubscriptionGroupListDataInternal(
-                subscriptionGroup,
-                alertsToSubscriptionGroupIdsMap
-            )
-        );
-    }
-
-    return subscriptionGroupListDatas;
-};
-
-export const filterSubscriptionGroupsList = (
-    subscriptionGroupListDatas: SubscriptionGroupListData[],
-    searchWords: string[]
-): SubscriptionGroupListData[] => {
-    const filteredSubscriptionGroupListDatas: SubscriptionGroupListData[] = [];
-
-    if (isEmpty(subscriptionGroupListDatas)) {
-        // No subscription groups List available, return empty result
-        return filteredSubscriptionGroupListDatas;
-    }
-
-    if (isEmpty(searchWords)) {
-        // No search words available, return original subscription groups List
-        return subscriptionGroupListDatas;
-    }
-
-    for (const subscriptionGroupTableData of subscriptionGroupListDatas) {
-        // Create a copy without original subscription group
-        const subscriptionGroupListDataCopy = cloneDeep(
-            subscriptionGroupTableData
-        );
-
-        for (const searchWord of searchWords) {
-            if (
-                deepSearchStringProperty(
-                    subscriptionGroupListDataCopy,
-                    // Check if string property value contains current search word
-                    (value) =>
-                        Boolean(value) &&
-                        value.toLowerCase().indexOf(searchWord.toLowerCase()) >
-                            -1
-                )
-            ) {
-                filteredSubscriptionGroupListDatas.push(
-                    subscriptionGroupTableData
-                );
-
-                break;
-            }
-        }
-    }
-
-    return filteredSubscriptionGroupListDatas;
 };

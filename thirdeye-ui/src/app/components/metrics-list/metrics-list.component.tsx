@@ -1,5 +1,5 @@
-import { Box, Grid, IconButton, Toolbar, Typography } from "@material-ui/core";
-import { CellParams, ColDef, DataGrid, RowId } from "@material-ui/data-grid";
+import { Box, Grid, IconButton, Toolbar } from "@material-ui/core";
+import { CellParams, ColDef, DataGrid } from "@material-ui/data-grid";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -24,7 +24,6 @@ import { useMetricsListStyles } from "./metrics-list.styles";
 export const MetricsList: FunctionComponent<MetricsListProps> = (
     props: MetricsListProps
 ) => {
-    const [selectedRows, setSelectedRows] = useState<RowId[]>([]);
     const [filteredRecords, setFilteredRecords] = useState<MetricsListData[]>(
         []
     );
@@ -115,36 +114,17 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
                 {/* Toolbar for table */}
                 <Toolbar className={metricListClasses.toolbar}>
                     {/* View button */}
-                    <IconButton
-                        color="primary"
-                        disabled={selectedRows.length !== 1}
-                    >
+                    <IconButton color="primary">
                         <VisibilityIcon />
                     </IconButton>
                     {/* Edit button */}
-                    <IconButton
-                        color="primary"
-                        disabled={selectedRows.length !== 1}
-                    >
+                    <IconButton color="primary">
                         <EditIcon />
                     </IconButton>
                     {/* Delete button */}
-                    <IconButton
-                        color="primary"
-                        disabled={selectedRows.length === 0}
-                    >
+                    <IconButton color="primary">
                         <DeleteIcon />
                     </IconButton>
-
-                    <Typography
-                        className={metricListClasses.rightAlign}
-                        color="textSecondary"
-                        variant="button"
-                    >
-                        {selectedRows.length
-                            ? selectedRows.length + " selected"
-                            : ""}
-                    </Typography>
 
                     {/* Searchbar */}
                     <Box className={metricListClasses.searchContainer}>
@@ -171,9 +151,6 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
                             className={metricListClasses.root}
                             columns={columns}
                             rows={filteredRecords}
-                            onSelectionChange={(rowSelection): void => {
-                                setSelectedRows(rowSelection.rowIds);
-                            }}
                         />
                     )}
                 </Grid>

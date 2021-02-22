@@ -22,6 +22,7 @@ import {
     filterAnomalies,
     getAnomalyCardDatas,
 } from "../../utils/anomalies/anomalies.util";
+import { getSearchStatusLabel } from "../../utils/search/search.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -146,14 +147,12 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                         autoFocus
                         setSearchQueryString
                         searchLabel={t("label.search-anomalies")}
-                        searchStatusLabel={t("label.search-count", {
-                            count: filteredAnomalyCardDatas
+                        searchStatusLabel={getSearchStatusLabel(
+                            filteredAnomalyCardDatas
                                 ? filteredAnomalyCardDatas.length
                                 : 0,
-                            total: anomalyCardDatas
-                                ? anomalyCardDatas.length
-                                : 0,
-                        })}
+                            anomalyCardDatas ? anomalyCardDatas.length : 0
+                        )}
                         onChange={setSearchWords}
                     />
                 </Grid>

@@ -1,5 +1,7 @@
 import flatten from "flat";
+import i18n from "i18next";
 import { isEmpty } from "lodash";
+import { formatNumber } from "../number/number.util";
 
 // Traverses all the properties of object, including those nested, in arrays and maps until it finds
 // a string property for which match function returns true
@@ -21,4 +23,11 @@ export const deepSearchStringProperty = <T>(
     }
 
     return null;
+};
+
+export const getSearchStatusLabel = (count: number, total: number): string => {
+    return i18n.t("label.search-count", {
+        count: formatNumber(count) as never,
+        total: formatNumber(total) as never,
+    });
 };

@@ -1,4 +1,13 @@
-import { deepSearchStringProperty } from "./search.util";
+import i18n from "i18next";
+import { deepSearchStringProperty, getSearchStatusLabel } from "./search.util";
+
+jest.mock("i18next", () => ({
+    t: jest.fn().mockImplementation((key) => key),
+}));
+
+jest.mock("../number/number.util", () => ({
+    formatNumber: jest.fn().mockImplementation((num) => num.toString()),
+}));
 
 describe("Search Util", () => {
     test("deepSearchStringProperty should return null for invalid object", () => {
@@ -79,6 +88,14 @@ describe("Search Util", () => {
             3,
             "testStringArrayProperty2"
         );
+    });
+
+    test("getSearchStatusLabel should return appropriate search status label for count and total", () => {
+        expect(getSearchStatusLabel(1, 2)).toEqual("label.search-count");
+        expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
+            count: "1",
+            total: "2",
+        });
     });
 });
 

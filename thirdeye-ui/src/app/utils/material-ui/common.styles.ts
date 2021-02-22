@@ -6,6 +6,11 @@ export const useCommonStyles = makeStyles({
         // Material-UI Grid negative margins (https://material-ui.com/components/grid/#limitations)
         padding: "8px",
     },
+    ellipsis: {
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+    },
     backdrop: {
         backgroundColor: "rgba(0, 0, 0, 0.5)",
     },

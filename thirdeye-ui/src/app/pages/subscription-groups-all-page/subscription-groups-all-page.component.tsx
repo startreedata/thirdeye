@@ -1,12 +1,12 @@
-import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
+import { SubscriptionGroupCardData } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { SubscriptionGroupList } from "../../components/subscription-group-list/subscription-group-list.component";
-import { SubscriptionGroupListData } from "../../components/subscription-group-list/subscription-group-list.interfaces";
+import { SubscriptionGroupsList } from "../../components/subscription-groups-list/subscription-groups-list.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -18,15 +18,15 @@ import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
-import { getSubscriptionGroupListDatas } from "../../utils/subscription-groups/subscription-groups.util";
+import { getSubscriptionGroupCardDatas } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
     const [
-        subscriptionGroupListDatas,
-        setSubscriptionGroupListDatas,
-    ] = useState<SubscriptionGroupListData[]>([]);
+        subscriptionGroupCardDatas,
+        setSubscriptionGroupCardDatas,
+    ] = useState<SubscriptionGroupCardData[] | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
@@ -35,42 +35,59 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         fetchAllSubscriptionGroups();
     }, []);
 
-    useEffect(() => {
-        // Fetched subscription groups or search changed, reset
-        setSubscriptionGroupListDatas(subscriptionGroupListDatas);
-    }, [subscriptionGroupListDatas]);
-
     const onDeleteSubscriptionGroup = (
-        subscriptionGroupListData: SubscriptionGroupListData[]
+        subscriptionGroupCardData: SubscriptionGroupCardData
     ): void => {
-        if (isEmpty(subscriptionGroupListData)) {
+        if (!subscriptionGroupCardData) {
             return;
         }
-        for (const subscriptionGroupData of subscriptionGroupListData) {
-            deleteSubscriptionGroup(subscriptionGroupData.id)
-                .then((subscriptionGroup: SubscriptionGroup): void => {
-                    enqueueSnackbar(
-                        t("message.delete-success", {
-                            entity: t("label.subscription-group"),
-                        }),
-                        getSuccessSnackbarOption()
-                    );
 
-                    // Remove deleted subscription group from fetched subscription groups
-                    removeSubscriptionGroupListData(subscriptionGroup);
-                })
-                .catch((): void => {
-                    enqueueSnackbar(
-                        t("message.delete-error", {
-                            entity: t("label.subscription-group"),
-                        }),
-                        getErrorSnackbarOption()
-                    );
-                });
+        showDialog({
+            type: DialogType.ALERT,
+            text: t("message.delete-confirmation", {
+                name: subscriptionGroupCardData.name,
+            }),
+            okButtonLabel: t("label.delete"),
+            onOk: (): void => {
+                onDeleteSubscriptionGroupConfirmation(
+                    subscriptionGroupCardData
+                );
+            },
+        });
+    };
+
+    const onDeleteSubscriptionGroupConfirmation = (
+        subscriptionGroupCardData: SubscriptionGroupCardData
+    ): void => {
+        if (!subscriptionGroupCardData) {
+            return;
         }
+
+        deleteSubscriptionGroup(subscriptionGroupCardData.id)
+            .then((subscriptionGroup: SubscriptionGroup): void => {
+                enqueueSnackbar(
+                    t("message.delete-success", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getSuccessSnackbarOption()
+                );
+
+                // Remove deleted subscription group from fetched subscription groups
+                removeSubscriptionGroupCardData(subscriptionGroup);
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.delete-error", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getErrorSnackbarOption()
+                );
+            });
     };
 
     const fetchAllSubscriptionGroups = (): void => {
+        setSubscriptionGroupCardDatas(null);
+        let fetchedSubscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
         Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
             .then(([subscriptionGroupsResponse, alertsResponse]): void => {
                 // Determine if any of the calls failed
@@ -90,42 +107,41 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                     fetchedAlerts = alertsResponse.value;
                 }
                 if (subscriptionGroupsResponse.status === "fulfilled") {
-                    setSubscriptionGroupListDatas(
-                        getSubscriptionGroupListDatas(
-                            subscriptionGroupsResponse.value,
-                            fetchedAlerts
-                        )
+                    fetchedSubscriptionGroupCardDatas = getSubscriptionGroupCardDatas(
+                        subscriptionGroupsResponse.value,
+                        fetchedAlerts
                     );
                 }
             })
             .finally((): void => {
-                setLoading(false);
+                setSubscriptionGroupCardDatas(
+                    fetchedSubscriptionGroupCardDatas
+                );
             });
     };
 
-    const removeSubscriptionGroupListData = (
+    const removeSubscriptionGroupCardData = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
         if (!subscriptionGroup) {
             return;
         }
 
-        setSubscriptionGroupListDatas((subscriptionGroupListDatas) =>
-            subscriptionGroupListDatas.filter(
-                (
-                    subscriptionGroupListData: SubscriptionGroupListData
-                ): boolean => {
-                    return (
-                        subscriptionGroupListData.id !== subscriptionGroup.id
-                    );
-                }
-            )
+        setSubscriptionGroupCardDatas(
+            (subscriptionGroupCardDatas) =>
+                subscriptionGroupCardDatas &&
+                subscriptionGroupCardDatas.filter(
+                    (
+                        subscriptionGroupCardData: SubscriptionGroupCardData
+                    ): boolean => {
+                        return (
+                            subscriptionGroupCardData.id !==
+                            subscriptionGroup.id
+                        );
+                    }
+                )
         );
     };
-
-    if (loading) {
-        return <LoadingIndicator />;
-    }
 
     return (
         <PageContents
@@ -134,8 +150,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             maxRouterBreadcrumbs={1}
             title={t("label.subscription-groups")}
         >
-            <SubscriptionGroupList
-                subscriptionGroups={subscriptionGroupListDatas}
+            <SubscriptionGroupsList
+                subscriptionGroupCardDatas={subscriptionGroupCardDatas}
                 onDelete={onDeleteSubscriptionGroup}
             />
         </PageContents>

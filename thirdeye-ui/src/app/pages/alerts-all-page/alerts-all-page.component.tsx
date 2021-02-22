@@ -25,6 +25,7 @@ import {
     getAlertCardData,
     getAlertCardDatas,
 } from "../../utils/alerts/alerts.util";
+import { getSearchStatusLabel } from "../../utils/search/search.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -197,12 +198,12 @@ export const AlertsAllPage: FunctionComponent = () => {
                         autoFocus
                         setSearchQueryString
                         searchLabel={t("label.search-alerts")}
-                        searchStatusLabel={t("label.search-count", {
-                            count: filteredAlertCardDatas
+                        searchStatusLabel={getSearchStatusLabel(
+                            filteredAlertCardDatas
                                 ? filteredAlertCardDatas.length
                                 : 0,
-                            total: alertCardDatas ? alertCardDatas.length : 0,
-                        })}
+                            alertCardDatas ? alertCardDatas.length : 0
+                        )}
                         onChange={setSearchWords}
                     />
                 </Grid>

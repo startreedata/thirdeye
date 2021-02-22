@@ -9,7 +9,6 @@ export const createEmptyMetricData = (): MetricsListData => {
 
     return {
         id: -1,
-        idText: "-1",
         name: noDataMarker,
         datasetName: noDataMarker,
         active: false,
@@ -23,7 +22,6 @@ export const createEmptyMetricData = (): MetricsListData => {
 export const getMetricTableDataInternal = (metric: Metric): MetricsListData => {
     const individualMetric: MetricsListData = createEmptyMetricData();
     individualMetric.id = metric.id;
-    individualMetric.idText = metric.id.toString();
     individualMetric.name = metric.name;
     individualMetric.datasetName = metric.dataset.name;
     individualMetric.active = metric.active;

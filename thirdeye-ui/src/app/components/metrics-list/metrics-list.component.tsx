@@ -1,10 +1,12 @@
-import { Box, Grid, IconButton, Toolbar } from "@material-ui/core";
-import { CellParams, ColDef, DataGrid } from "@material-ui/data-grid";
+import { Grid } from "@material-ui/core";
+import {
+    CellParams,
+    ColDef,
+    RowId,
+    SelectionModelChangeParams,
+} from "@material-ui/data-grid";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
-import DeleteIcon from "@material-ui/icons/Delete";
-import EditIcon from "@material-ui/icons/Edit";
-import VisibilityIcon from "@material-ui/icons/Visibility";
 import { isEmpty } from "lodash";
 import React, {
     FunctionComponent,
@@ -13,35 +15,43 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
 import { theme } from "../../utils/material-ui/theme.util";
 import { filterMetrics } from "../../utils/metrics-util/metrics-util";
-import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
+import { getMetricsDetailPath } from "../../utils/routes/routes.util";
+import { getSearchStatusLabel } from "../../utils/search/search.util";
+import { ActionCell } from "../data-grid/action-cell/action-cell.component";
+import { DataGrid } from "../data-grid/data-grid.component";
 import { SearchBar } from "../search-bar/search-bar.component";
-import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { MetricsListData, MetricsListProps } from "./metrics-list.interfaces";
 import { useMetricsListStyles } from "./metrics-list.styles";
 
 export const MetricsList: FunctionComponent<MetricsListProps> = (
     props: MetricsListProps
 ) => {
-    const [filteredRecords, setFilteredRecords] = useState<MetricsListData[]>(
-        []
-    );
+    const metricListClasses = useMetricsListStyles();
+    const [filteredMetricsListDatas, setFilteredMetricsListDatas] = useState<
+        MetricsListData[]
+    >([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
+    const [columns, setColumns] = useState<ColDef[]>([]);
+    const [dataGridSelectionModel, setDatagridSelectionModel] = useState<
+        RowId[]
+    >([]);
+    const history = useHistory();
     const { t } = useTranslation();
 
-    const metricListClasses = useMetricsListStyles();
-
     useEffect(() => {
-        setFilteredRecords(filterMetrics(props.metrics, searchWords));
+        initColumns();
+        setFilteredMetricsListDatas(
+            filterMetrics(props.metrics as MetricsListData[], searchWords)
+        );
     }, [props.metrics, searchWords]);
 
-    const renderCellWithHighlighter = (text: CellParams): ReactElement => (
-        <TextHighlighter
-            searchWords={searchWords}
-            text={text.value as string}
-        />
-    );
+    useEffect(() => {
+        // Search changed, re-initialize row selection
+        setDatagridSelectionModel([...dataGridSelectionModel]);
+    }, [searchWords]);
 
     const renderActiveCell = (text: CellParams): ReactElement => {
         return (
@@ -63,108 +73,139 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
         );
     };
 
-    const columns: ColDef[] = [
-        {
-            field: "idText",
-            headerName: t("label.id"),
-            align: "right",
-            flex: 0.5,
-            sortable: false,
-            renderCell: renderCellWithHighlighter,
-        },
-        {
-            field: "name",
-            headerName: t("label.name"),
-            flex: 1,
-            renderCell: renderCellWithHighlighter,
-        },
-        {
-            field: "datasetName",
-            headerName: t("label.dataset"),
-            flex: 1,
-            renderCell: renderCellWithHighlighter,
-        },
-        {
-            field: "active",
-            headerName: t("label.active"),
-            flex: 1,
-            renderCell: renderActiveCell,
-        },
-        {
-            field: "aggregationFunction",
-            headerName: t("label.function"),
-            flex: 1,
-            renderCell: renderCellWithHighlighter,
-        },
-        {
-            field: "rollupThresholdText",
-            headerName: t("label.threshold"),
-            flex: 1,
-            renderCell: renderCellWithHighlighter,
-        },
-    ];
+    const actionsRenderer = (params: CellParams): ReactElement => {
+        return (
+            <ActionCell
+                delete
+                edit
+                viewDetails
+                id={params.value as number}
+                onDelete={handleMetricDelete}
+                /* onEdit={handleMetricEdit} */
+                onViewDetails={handleMetricViewDetails}
+            />
+        );
+    };
 
-    const handleSearch = (searchWords: string[]): void => {
-        setSearchWords(searchWords);
+    const initColumns = (): void => {
+        const columns: ColDef[] = [
+            // Name
+            {
+                field: "name",
+                headerName: t("label.name"),
+                flex: 1,
+            },
+            // Dataset Name
+            {
+                field: "datasetName",
+                headerName: t("label.dataset"),
+                flex: 1,
+            },
+            // Active
+            {
+                field: "active",
+                headerName: t("label.active"),
+                flex: 1,
+                renderCell: renderActiveCell,
+            },
+            // Aggregation function
+            {
+                field: "aggregationFunction",
+                headerName: t("label.function"),
+                flex: 1,
+            },
+            // Rollup threshold
+            {
+                field: "rollupThresholdText",
+                headerName: t("label.threshold"),
+                flex: 1,
+            },
+            // Actions
+            {
+                field: "id",
+                type: "number",
+                headerName: t("label.actions"),
+                headerAlign: "right",
+                sortable: false,
+                flex: 1,
+                renderCell: actionsRenderer,
+            },
+        ];
+        setColumns(columns);
+    };
+
+    const handleMetricViewDetails = (id: number): void => {
+        history.push(getMetricsDetailPath(id));
+    };
+
+    /* const handleMetricEdit = (id: number): void => {
+        
+    };*/
+
+    const handleMetricDelete = (id: number): void => {
+        const metricsListData = getMetricTableData(id);
+        if (!metricsListData) {
+            return;
+        }
+
+        props.onDelete && props.onDelete(metricsListData);
+    };
+
+    const getMetricTableData = (id: number): MetricsListData | null => {
+        if (!props.metrics) {
+            return null;
+        }
+
+        return props.metrics.find((metric) => metric.id === id) || null;
+    };
+
+    const handleDataGridSelectionModelChange = (
+        param: SelectionModelChangeParams
+    ): void => {
+        setDatagridSelectionModel(param.selectionModel || []);
     };
 
     return (
-        <>
-            <Grid container>
-                {/* Toolbar for table */}
-                <Toolbar className={metricListClasses.toolbar}>
-                    {/* View button */}
-                    <IconButton color="primary">
-                        <VisibilityIcon />
-                    </IconButton>
-                    {/* Edit button */}
-                    <IconButton color="primary">
-                        <EditIcon />
-                    </IconButton>
-                    {/* Delete button */}
-                    <IconButton color="primary">
-                        <DeleteIcon />
-                    </IconButton>
-
-                    {/* Searchbar */}
-                    <Box className={metricListClasses.searchContainer}>
-                        <SearchBar
-                            searchStatusLabel={t("label.search-count", {
-                                count: filteredRecords
-                                    ? filteredRecords.length
-                                    : 0,
-                                total: props.metrics ? props.metrics.length : 0,
-                            })}
-                            onChange={handleSearch}
-                        />
-                    </Box>
-                </Toolbar>
-
-                {/* Table */}
-                <Grid item sm={12}>
-                    {!isEmpty(filteredRecords) && (
-                        <DataGrid
-                            autoHeight
-                            checkboxSelection
-                            disableColumnMenu
-                            hideFooter
-                            className={metricListClasses.root}
-                            columns={columns}
-                            rows={filteredRecords}
-                        />
+        <Grid
+            container
+            className={metricListClasses.metricsList}
+            direction="column"
+        >
+            {/* Search */}
+            <Grid item>
+                <SearchBar
+                    autoFocus
+                    setSearchQueryString
+                    searchLabel={t("label.search-entity", {
+                        entity: t("label.metrics"),
+                    })}
+                    searchStatusLabel={getSearchStatusLabel(
+                        filteredMetricsListDatas
+                            ? filteredMetricsListDatas.length
+                            : 0,
+                        props.metrics ? props.metrics.length : 0
                     )}
-                </Grid>
+                    onChange={setSearchWords}
+                />
             </Grid>
-
-            {/* No search results available message */}
-            {isEmpty(filteredRecords) && !isEmpty(searchWords) && (
-                <NoDataIndicator text={t("message.no-search-results")} />
-            )}
-
-            {/* No data available message */}
-            {isEmpty(filteredRecords) && isEmpty(searchWords) && (
-                <NoDataIndicator />
-            )}
-        </>
+            {/* Metrics list */}
+            <Grid item className={metricListClasses.list}>
+                <DataGrid
+                    columns={columns}
+                    loading={!props.metrics}
+                    noDataAvailableMessage={
+                        isEmpty(filteredMetricsListDatas) &&
+                        !isEmpty(searchWords)
+                            ? t("message.no-search-results")
+                            : ""
+                    }
+                    rowSelectionCount={dataGridSelectionModel.length}
+                    rows={filteredMetricsListDatas}
+                    searchWords={searchWords}
+                    selectionModel={dataGridSelectionModel}
+                    onSelectionModelChange={handleDataGridSelectionModelChange}
+                />
+            </Grid>
+        </Grid>
     );
 };

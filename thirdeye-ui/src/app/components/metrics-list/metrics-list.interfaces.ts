@@ -1,6 +1,5 @@
 export interface MetricsListData {
     id: number;
-    idText: string;
     name: string;
     datasetName: string;
     active: boolean;
@@ -12,4 +11,5 @@ export interface MetricsListData {
 
 export interface MetricsListProps {
     metrics: MetricsListData[];
+    onDelete?: (metricsListData: MetricsListData) => void;
 }

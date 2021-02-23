@@ -1,7 +1,7 @@
+import { CellParams } from "@material-ui/data-grid";
+
 export interface LinkCellProps<T> {
-    rowId: number;
-    value: T;
-    align?: string;
+    params: CellParams;
     searchWords?: string[];
     valueTextFn?: (value: T) => string;
     onClick?: (value: T, rowId: number) => void;

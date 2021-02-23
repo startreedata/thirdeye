@@ -1,5 +1,7 @@
+import { CellParams } from "@material-ui/data-grid";
+
 export interface ActionsCellProps {
-    rowId: number;
+    params: CellParams;
     viewDetails?: boolean;
     edit?: boolean;
     delete?: boolean;

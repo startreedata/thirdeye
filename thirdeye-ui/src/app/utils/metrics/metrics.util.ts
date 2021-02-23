@@ -6,6 +6,7 @@ import {
     Metric,
     MetricAggFunction,
 } from "../../rest/dto/metric.interfaces";
+import { formatNumber } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const createEmptyMetricCardData = (): MetricCardData => {
@@ -20,6 +21,7 @@ export const createEmptyMetricCardData = (): MetricCardData => {
         activeText: noDataMarker,
         aggregationColumn: noDataMarker,
         aggregationFunction: noDataMarker as MetricAggFunction,
+        viewCount: formatNumber(0),
         views: [],
     };
 };
@@ -64,6 +66,7 @@ export const getMetricCardData = (metric: Metric): MetricCardData => {
         return metricCardData;
     }
 
+    metricCardData.viewCount = formatNumber(metric.views.length);
     for (const view of metric.views) {
         const metricLocicalView = createEmptyMetricLogicalView();
         metricLocicalView.name = view.name || noDataMarker;

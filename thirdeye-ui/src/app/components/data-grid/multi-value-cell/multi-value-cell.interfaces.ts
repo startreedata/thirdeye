@@ -1,6 +1,7 @@
+import { CellParams } from "@material-ui/data-grid";
+
 export interface MultiValueCellProps<T> {
-    rowId: number;
-    values: T[];
+    params: CellParams;
     link?: boolean;
     searchWords?: string[];
     valueTextFn?: (value: T) => string;

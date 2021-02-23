@@ -1,17 +1,11 @@
 import { Grid } from "@material-ui/core";
 import {
-    CellParams,
     ColDef,
     RowId,
     SelectionModelChangeParams,
 } from "@material-ui/data-grid";
-import { isEmpty, toNumber } from "lodash";
-import React, {
-    FunctionComponent,
-    ReactElement,
-    useEffect,
-    useState,
-} from "react";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import {
@@ -24,10 +18,10 @@ import {
     filterSubscriptionGroups,
     getSubscriptionGroupAlertName,
 } from "../../utils/subscription-groups/subscription-groups.util";
-import { ActionsCell } from "../data-grid/actions-cell/actions-cell.component";
+import { actionsCellRenderer } from "../data-grid/actions-cell/actions-cell.component";
 import { DataGrid } from "../data-grid/data-grid.component";
-import { LinkCell } from "../data-grid/link-cell/link-cell.component";
-import { MultiValueCell } from "../data-grid/multi-value-cell/multi-value-cell.component";
+import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
+import { multiValueCellRenderer } from "../data-grid/multi-value-cell/multi-value-cell.component";
 import {
     SubscriptionGroupAlert,
     SubscriptionGroupCardData,
@@ -76,8 +70,13 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
                 type: "string",
                 headerName: t("label.name"),
                 sortable: true,
-                flex: 1,
-                renderCell: nameRenderer,
+                width: 150,
+                renderCell: (params) =>
+                    linkCellRenderer<string>(
+                        params,
+                        searchWords,
+                        handleSubscriptionGroupViewDetailsByNameAndId
+                    ),
             },
             // Alerts
             {
@@ -85,7 +84,15 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
                 headerName: t("label.subscribed-alerts"),
                 sortable: false,
                 flex: 1,
-                renderCell: alertsRenderer,
+                renderCell: (params) =>
+                    multiValueCellRenderer<SubscriptionGroupAlert>(
+                        params,
+                        true,
+                        searchWords,
+                        handleSubscriptionGroupViewDetailsById,
+                        handleAlertViewDetails,
+                        getSubscriptionGroupAlertName
+                    ),
             },
             // Emails
             {
@@ -93,70 +100,35 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
                 headerName: t("label.subscribed-emails"),
                 sortable: false,
                 flex: 1,
-                renderCell: emailsRenderer,
+                renderCell: (params) =>
+                    multiValueCellRenderer<string>(
+                        params,
+                        false,
+                        searchWords,
+                        handleSubscriptionGroupViewDetailsById
+                    ),
             },
             // Actions
             {
                 field: "id",
                 headerName: t("label.actions"),
-                headerAlign: "right",
+                align: "center",
+                headerAlign: "center",
                 sortable: false,
-                flex: 0.8,
-                renderCell: actionsRenderer,
+                width: 150,
+                renderCell: (params) =>
+                    actionsCellRenderer(
+                        params,
+                        true,
+                        true,
+                        true,
+                        handleSubscriptionGroupViewDetailsById,
+                        handleSubscriptionGroupEdit,
+                        handleSubscriptionGroupDelete
+                    ),
             },
         ];
         setDataGridColumns(columns);
-    };
-
-    const nameRenderer = (params: CellParams): ReactElement => {
-        return (
-            <LinkCell<string>
-                align={params.colDef && params.colDef.align}
-                rowId={toNumber(params.row && params.row.id)}
-                searchWords={searchWords}
-                value={params.value as string}
-                onClick={handleSubscriptionGroupViewDetailsByNameAndId}
-            />
-        );
-    };
-
-    const alertsRenderer = (params: CellParams): ReactElement => {
-        return (
-            <MultiValueCell<SubscriptionGroupAlert>
-                link
-                rowId={toNumber(params.row && params.row.id)}
-                searchWords={searchWords}
-                valueTextFn={getSubscriptionGroupAlertName}
-                values={params.value as SubscriptionGroupAlert[]}
-                onClick={handleAlertViewDetails}
-                onMore={handleSubscriptionGroupViewDetailsById}
-            />
-        );
-    };
-
-    const emailsRenderer = (params: CellParams): ReactElement => {
-        return (
-            <MultiValueCell<string>
-                rowId={toNumber(params.row && params.row.id)}
-                searchWords={searchWords}
-                values={params.value as string[]}
-                onMore={handleSubscriptionGroupViewDetailsById}
-            />
-        );
-    };
-
-    const actionsRenderer = (params: CellParams): ReactElement => {
-        return (
-            <ActionsCell
-                delete
-                edit
-                viewDetails
-                rowId={toNumber(params.value)}
-                onDelete={handleSubscriptionGroupDelete}
-                onEdit={handleSubscriptionGroupEdit}
-                onViewDetails={handleSubscriptionGroupViewDetailsById}
-            />
-        );
     };
 
     const handleSubscriptionGroupViewDetailsByNameAndId = (

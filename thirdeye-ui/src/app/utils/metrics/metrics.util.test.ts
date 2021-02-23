@@ -86,6 +86,7 @@ const mockEmptyMetricCardData = {
     activeText: "label.no-data-marker",
     aggregationColumn: "label.no-data-marker",
     aggregationFunction: "label.no-data-marker",
+    viewCount: "0",
     views: [],
 };
 
@@ -140,6 +141,7 @@ const mockMetricCardData1 = {
     activeText: "label.active",
     aggregationColumn: "testAggregationColumnMetric1",
     aggregationFunction: MetricAggFunction.AVG,
+    viewCount: "2",
     views: [
         {
             name: "testNameViews1Metric1",
@@ -161,6 +163,7 @@ const mockMetricCardData2 = {
     activeText: "label.inactive",
     aggregationColumn: "label.no-data-marker",
     aggregationFunction: "label.no-data-marker" as MetricAggFunction,
+    viewCount: "1",
     views: [
         {
             name: "label.no-data-marker",
@@ -178,6 +181,7 @@ const mockMetricCardData3 = {
     activeText: "label.inactive",
     aggregationColumn: "label.no-data-marker",
     aggregationFunction: "label.no-data-marker" as MetricAggFunction,
+    viewCount: "0",
     views: [],
 };
 

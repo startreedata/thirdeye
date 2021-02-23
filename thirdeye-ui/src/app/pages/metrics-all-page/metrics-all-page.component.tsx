@@ -1,120 +1,123 @@
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
+import { MetricCardData } from "../../components/entity-cards/metric-card/metric-card.interfaces";
 import { MetricsList } from "../../components/metrics-list/metrics-list.component";
-import { MetricsListData } from "../../components/metrics-list/metrics-list.interfaces";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { Metric } from "../../rest/dto/metric.interfaces";
 import { deleteMetric, getAllMetrics } from "../../rest/metrics/metrics.rest";
-import { getMetricTableDatas } from "../../utils/metrics-util/metrics-util";
-import { getMetricsAllPath } from "../../utils/routes/routes.util";
+import { getMetricCardDatas } from "../../utils/metrics/metrics.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
 
 export const MetricsAllPage: FunctionComponent = () => {
-    const [metricsTableDatas, setMetricsTableDatas] = useState<
-        Array<MetricsListData>
-    >([]);
+    const [metricCardDatas, setMetricCardDatas] = useState<
+        MetricCardData[] | null
+    >(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const history = useHistory();
+    const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
-    const { showDialog } = useDialog();
 
     useEffect(() => {
-        // Create page breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: t("label.all"),
-                onClick: (): void => {
-                    history.push(getMetricsAllPath());
-                },
-            },
-        ]);
-
-        fetchData();
+        setPageBreadcrumbs([]);
+        fetchAllMetrics();
     }, []);
 
-    const onDeleteMetric = (metricsListData: MetricsListData): void => {
-        if (!metricsListData) {
+    const onDeleteMetric = (metricCardData: MetricCardData): void => {
+        if (!metricCardData) {
             return;
         }
 
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", {
-                name: metricsListData.name,
+                name: metricCardData.name,
             }),
             okButtonLabel: t("label.delete"),
             onOk: (): void => {
-                onDeleteMetricConfirmation(metricsListData);
+                onDeleteMetricConfirmation(metricCardData);
             },
         });
     };
 
     const onDeleteMetricConfirmation = (
-        metricsListData: MetricsListData
+        metricCardData: MetricCardData
     ): void => {
-        if (!metricsListData) {
+        if (!metricCardData) {
             return;
         }
-        deleteMetric(metricsListData.id)
+
+        deleteMetric(metricCardData.id)
             .then((metric: Metric): void => {
                 enqueueSnackbar(
                     t("message.delete-success", {
-                        entity: t("label.metrics"),
+                        entity: t("label.metric"),
                     }),
                     getSuccessSnackbarOption()
                 );
 
-                // Remove deleted Metric from fetched metrics
-                removeMetricsCardData(metric);
+                // Remove deleted metric from fetched metrics
+                removeMetricCardData(metric);
             })
             .catch((): void => {
                 enqueueSnackbar(
                     t("message.delete-error", {
-                        entity: t("label.metrics"),
+                        entity: t("label.metric"),
                     }),
                     getErrorSnackbarOption()
                 );
             });
     };
 
-    const fetchData = async (): Promise<void> => {
-        try {
-            const data = await getAllMetrics();
-            setMetricsTableDatas(getMetricTableDatas(data));
-        } catch (error) {
-            console.log(error);
-        }
+    const fetchAllMetrics = (): void => {
+        setMetricCardDatas(null);
+        let fetchedMetricCardDatas: MetricCardData[] = [];
+        getAllMetrics()
+            .then((metrics: Metric[]): void => {
+                fetchedMetricCardDatas = getMetricCardDatas(metrics);
+            })
+            .catch((): void => {
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
+            })
+            .finally((): void => {
+                setMetricCardDatas(fetchedMetricCardDatas);
+            });
     };
 
-    const removeMetricsCardData = (metric: Metric): void => {
+    const removeMetricCardData = (metric: Metric): void => {
         if (!metric) {
             return;
         }
 
-        setMetricsTableDatas(
-            (metricListDatas) =>
-                metricListDatas &&
-                metricListDatas.filter(
-                    (metricListData: MetricsListData): boolean => {
-                        return metricListData.id !== metric.id;
+        setMetricCardDatas(
+            (metricCardDatas) =>
+                metricCardDatas &&
+                metricCardDatas.filter(
+                    (metricCardData: MetricCardData): boolean => {
+                        return metricCardData.id !== metric.id;
                     }
                 )
         );
     };
 
     return (
-        <PageContents centered title={t("label.metrics")}>
+        <PageContents
+            centered
+            hideTimeRange
+            maxRouterBreadcrumbs={1}
+            title={t("label.metrics")}
+        >
             <MetricsList
-                metrics={metricsTableDatas}
+                metricCardDatas={metricCardDatas}
                 onDelete={onDeleteMetric}
             />
         </PageContents>

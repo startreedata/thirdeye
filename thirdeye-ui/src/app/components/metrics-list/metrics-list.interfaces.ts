@@ -1,15 +1,6 @@
-export interface MetricsListData {
-    id: number;
-    name: string;
-    datasetName: string;
-    active: boolean;
-    activeText: string;
-    aggregationFunction: string;
-    rollupThreshold: number;
-    rollupThresholdText: string;
-}
+import { MetricCardData } from "../entity-cards/metric-card/metric-card.interfaces";
 
 export interface MetricsListProps {
-    metrics: MetricsListData[];
-    onDelete?: (metricsListData: MetricsListData) => void;
+    metricCardDatas: MetricCardData[] | null;
+    onDelete?: (metricsCardData: MetricCardData) => void;
 }

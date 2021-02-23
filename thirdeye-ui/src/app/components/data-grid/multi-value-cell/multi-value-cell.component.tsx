@@ -1,7 +1,9 @@
 import { Box, Grid, IconButton, Link, Typography } from "@material-ui/core";
+import { CellParams } from "@material-ui/data-grid";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import classnames from "classnames";
-import React, { Fragment, ReactElement } from "react";
+import { toNumber } from "lodash";
+import React, { Fragment, ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCommonStyles } from "../../../utils/material-ui/common.styles";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -10,10 +12,20 @@ import { useMultiValueCellStyles } from "./multi-value-cell.styles";
 
 const MAX_ITEMS_VALUES = 3;
 
-export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
+function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
     const multiValueCellClasses = useMultiValueCellStyles();
     const commonClasses = useCommonStyles();
+    const [values, setValues] = useState<T[]>([]);
+    const [rowId, setRowId] = useState(-1);
     const { t } = useTranslation();
+
+    useEffect(() => {
+        // Input cell parameters changed
+        setValues(props.params && ((props.params.value as unknown) as T[]));
+        setRowId(
+            toNumber(props.params && props.params.row && props.params.row.id)
+        );
+    }, [props.params]);
 
     const getValueText = (value: T): string => {
         if (props.valueTextFn) {
@@ -28,7 +40,7 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
     };
 
     const handleMore = (): void => {
-        props.onMore && props.onMore(props.rowId);
+        props.onMore && props.onMore(rowId);
     };
 
     return (
@@ -47,8 +59,8 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                     })}
                     xs={11}
                 >
-                    {props.values &&
-                        props.values
+                    {values &&
+                        values
                             .slice(0, MAX_ITEMS_VALUES)
                             .map((value, index) => (
                                 <Fragment key={index}>
@@ -65,10 +77,7 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                                         <Link
                                             onClick={() =>
                                                 props.onClick &&
-                                                props.onClick(
-                                                    value,
-                                                    props.rowId
-                                                )
+                                                props.onClick(value, rowId)
                                             }
                                         >
                                             <TextHighlighter
@@ -80,7 +89,7 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
 
                                     {/* Separator */}
                                     {index !==
-                                        props.values.slice(0, MAX_ITEMS_VALUES)
+                                        values.slice(0, MAX_ITEMS_VALUES)
                                             .length -
                                             1 && (
                                         <Typography
@@ -95,7 +104,7 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                 </Grid>
 
                 {/* More button */}
-                {props.values && props.values.length > MAX_ITEMS_VALUES && (
+                {values && values.length > MAX_ITEMS_VALUES && (
                     <Grid item xs={1}>
                         <IconButton size="small" onClick={handleMore}>
                             <MoreHorizIcon fontSize="small" />
@@ -104,5 +113,25 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                 )}
             </Grid>
         </Box>
+    );
+}
+
+export function multiValueCellRenderer<T>(
+    params: CellParams,
+    link?: boolean,
+    searchWords?: string[],
+    onMore?: (rowId: number) => void,
+    onClick?: (value: T, rowId: number) => void,
+    valueTextFn?: (value: T) => string
+): ReactElement {
+    return (
+        <MultiValueCell<T>
+            link={link}
+            params={params}
+            searchWords={searchWords}
+            valueTextFn={valueTextFn}
+            onClick={onClick}
+            onMore={onMore}
+        />
     );
 }

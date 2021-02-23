@@ -1,13 +1,14 @@
-import { Grid } from "@material-ui/core";
+import { Grid, useTheme } from "@material-ui/core";
 import {
     CellParams,
+    CellValue,
     ColDef,
     RowId,
     SelectionModelChangeParams,
 } from "@material-ui/data-grid";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
-import { isEmpty } from "lodash";
+import { isEmpty, toNumber } from "lodash";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -16,159 +17,207 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import { theme } from "../../utils/material-ui/theme.util";
-import { filterMetrics } from "../../utils/metrics-util/metrics-util";
+import { filterMetrics } from "../../utils/metrics/metrics.util";
 import { getMetricsDetailPath } from "../../utils/routes/routes.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
-import { ActionsCell } from "../data-grid/actions-cell/actions-cell.component";
+import { actionsCellRenderer } from "../data-grid/actions-cell/actions-cell.component";
+import { CustomCell } from "../data-grid/custom-cell/custom-cell.component";
 import { DataGrid } from "../data-grid/data-grid.component";
+import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
+import { MetricCardData } from "../entity-cards/metric-card/metric-card.interfaces";
 import { SearchBar } from "../search-bar/search-bar.component";
-import { MetricsListData, MetricsListProps } from "./metrics-list.interfaces";
+import { MetricsListProps } from "./metrics-list.interfaces";
 import { useMetricsListStyles } from "./metrics-list.styles";
 
 export const MetricsList: FunctionComponent<MetricsListProps> = (
     props: MetricsListProps
 ) => {
-    const metricListClasses = useMetricsListStyles();
-    const [filteredMetricsListDatas, setFilteredMetricsListDatas] = useState<
-        MetricsListData[]
+    const metricsListClasses = useMetricsListStyles();
+    const [filteredMetricCardDatas, setFilteredMetricCardDatas] = useState<
+        MetricCardData[]
     >([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
-    const [columns, setColumns] = useState<ColDef[]>([]);
-    const [dataGridSelectionModel, setDatagridSelectionModel] = useState<
+    const [dataGridColumns, setDataGridColumns] = useState<ColDef[]>([]);
+    const [dataGridSelectionModel, setDataGridSelectionModel] = useState<
         RowId[]
     >([]);
+    const theme = useTheme();
     const history = useHistory();
     const { t } = useTranslation();
 
     useEffect(() => {
-        initColumns();
-        setFilteredMetricsListDatas(
-            filterMetrics(props.metrics as MetricsListData[], searchWords)
+        // Input metrics or search changed, reset
+        initDataGridColumns();
+        setFilteredMetricCardDatas(
+            filterMetrics(
+                props.metricCardDatas as MetricCardData[],
+                searchWords
+            )
         );
-    }, [props.metrics, searchWords]);
+    }, [props.metricCardDatas, searchWords]);
 
     useEffect(() => {
         // Search changed, re-initialize row selection
-        setDatagridSelectionModel([...dataGridSelectionModel]);
+        setDataGridSelectionModel([...dataGridSelectionModel]);
     }, [searchWords]);
 
-    const renderActiveCell = (text: CellParams): ReactElement => {
-        return (
-            <>
-                {text.value ? (
-                    <CheckIcon
-                        style={{
-                            color: theme.palette.success.main,
-                        }}
-                    />
-                ) : (
-                    <CloseIcon
-                        style={{
-                            color: theme.palette.error.main,
-                        }}
-                    />
-                )}
-            </>
-        );
-    };
-
-    const actionsRenderer = (params: CellParams): ReactElement => {
-        return (
-            <ActionsCell
-                delete
-                edit
-                viewDetails
-                rowId={params.value as number}
-                onDelete={handleMetricDelete}
-                /* onEdit={handleMetricEdit} */
-                onViewDetails={handleMetricViewDetails}
-            />
-        );
-    };
-
-    const initColumns = (): void => {
+    const initDataGridColumns = (): void => {
         const columns: ColDef[] = [
             // Name
             {
                 field: "name",
+                type: "string",
                 headerName: t("label.name"),
-                flex: 1,
+                sortable: true,
+                width: 150,
+                renderCell: (params) =>
+                    linkCellRenderer<string>(
+                        params,
+                        searchWords,
+                        handleMetricViewDetailsByNameAndId
+                    ),
             },
-            // Dataset Name
+            // Dataset
             {
                 field: "datasetName",
+                type: "string",
                 headerName: t("label.dataset"),
-                flex: 1,
+                sortable: true,
+                width: 150,
             },
-            // Active
+            // Active/inactive
             {
                 field: "active",
+                type: "boolean",
                 headerName: t("label.active"),
+                align: "center",
+                headerAlign: "center",
+                sortable: true,
+                width: 80,
+                renderCell: metricStatusRenderer,
+                sortComparator: metricStatusComparator,
+            },
+            // Aggregation column
+            {
+                field: "aggregationColumn",
+                type: "string",
+                headerName: t("label.aggregation-column"),
+                sortable: true,
                 flex: 1,
-                renderCell: renderActiveCell,
             },
             // Aggregation function
             {
                 field: "aggregationFunction",
-                headerName: t("label.function"),
+                type: "string",
+                headerName: t("label.aggregation-function"),
+                sortable: true,
                 flex: 1,
             },
-            // Rollup threshold
+            // View count
             {
-                field: "rollupThresholdText",
-                headerName: t("label.threshold"),
-                flex: 1,
+                field: "viewCount",
+                type: "number",
+                headerName: t("label.views"),
+                align: "right",
+                headerAlign: "right",
+                sortable: true,
+                width: 80,
             },
             // Actions
             {
                 field: "id",
-                type: "number",
                 headerName: t("label.actions"),
-                headerAlign: "right",
+                align: "center",
+                headerAlign: "center",
                 sortable: false,
-                flex: 1,
-                renderCell: actionsRenderer,
+                width: 150,
+                renderCell: (params) =>
+                    actionsCellRenderer(
+                        params,
+                        true,
+                        false,
+                        true,
+                        handleMetricViewDetailsById,
+                        undefined,
+                        handleMetricDelete
+                    ),
             },
         ];
-        setColumns(columns);
+        setDataGridColumns(columns);
     };
 
-    const handleMetricViewDetails = (id: number): void => {
+    const metricStatusRenderer = (params: CellParams): ReactElement => {
+        return (
+            <CustomCell params={params}>
+                {/* Active */}
+                {params && params.value && (
+                    <CheckIcon
+                        className={metricsListClasses.activeInactiveIcon}
+                        htmlColor={theme.palette.success.main}
+                    />
+                )}
+
+                {/* Inactive */}
+                {!params ||
+                    (!params.value && (
+                        <CloseIcon
+                            className={metricsListClasses.activeInactiveIcon}
+                            htmlColor={theme.palette.error.main}
+                        />
+                    ))}
+            </CustomCell>
+        );
+    };
+
+    const metricStatusComparator = (
+        cellValue1: CellValue,
+        cellValue2: CellValue
+    ): number => {
+        return toNumber(cellValue1) - toNumber(cellValue2);
+    };
+
+    const handleMetricViewDetailsByNameAndId = (
+        _name: string,
+        id: number
+    ): void => {
         history.push(getMetricsDetailPath(id));
     };
 
-    /* const handleMetricEdit = (id: number): void => {
-        
-    };*/
+    const handleMetricViewDetailsById = (id: number): void => {
+        history.push(getMetricsDetailPath(id));
+    };
 
     const handleMetricDelete = (id: number): void => {
-        const metricsListData = getMetricTableData(id);
-        if (!metricsListData) {
+        const metricCardData = getMetricCardData(id);
+        if (!metricCardData) {
             return;
         }
 
-        props.onDelete && props.onDelete(metricsListData);
+        props.onDelete && props.onDelete(metricCardData);
     };
 
-    const getMetricTableData = (id: number): MetricsListData | null => {
-        if (!props.metrics) {
+    const getMetricCardData = (id: number): MetricCardData | null => {
+        if (!props.metricCardDatas) {
             return null;
         }
 
-        return props.metrics.find((metric) => metric.id === id) || null;
+        return (
+            props.metricCardDatas.find(
+                (metricCardData) => metricCardData.id === id
+            ) || null
+        );
     };
 
     const handleDataGridSelectionModelChange = (
         params: SelectionModelChangeParams
     ): void => {
-        setDatagridSelectionModel(params.selectionModel || []);
+        setDataGridSelectionModel(params.selectionModel || []);
     };
 
     return (
         <Grid
             container
-            className={metricListClasses.metricsList}
+            className={metricsListClasses.metricsList}
             direction="column"
         >
             {/* Search */}
@@ -180,26 +229,28 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
                         entity: t("label.metrics"),
                     })}
                     searchStatusLabel={getSearchStatusLabel(
-                        filteredMetricsListDatas
-                            ? filteredMetricsListDatas.length
+                        filteredMetricCardDatas
+                            ? filteredMetricCardDatas.length
                             : 0,
-                        props.metrics ? props.metrics.length : 0
+                        props.metricCardDatas ? props.metricCardDatas.length : 0
                     )}
                     onChange={setSearchWords}
                 />
             </Grid>
+
             {/* Metrics list */}
-            <Grid item className={metricListClasses.list}>
+            <Grid item className={metricsListClasses.list}>
                 <DataGrid
-                    columns={columns}
-                    loading={!props.metrics}
+                    checkboxSelection
+                    columns={dataGridColumns}
+                    loading={!props.metricCardDatas}
                     noDataAvailableMessage={
-                        isEmpty(filteredMetricsListDatas) &&
+                        isEmpty(filteredMetricCardDatas) &&
                         !isEmpty(searchWords)
                             ? t("message.no-search-results")
                             : ""
                     }
-                    rows={filteredMetricsListDatas}
+                    rows={filteredMetricCardDatas}
                     searchWords={searchWords}
                     selectionModel={dataGridSelectionModel}
                     onSelectionModelChange={handleDataGridSelectionModelChange}

@@ -19,5 +19,6 @@ export interface MetricCardData {
     activeText: string;
     aggregationColumn: string;
     aggregationFunction: MetricAggFunction;
+    viewCount: string;
     views: LogicalView[];
 }

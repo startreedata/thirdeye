@@ -5,6 +5,8 @@ import {
     ColDef,
     DataGrid as MuiDataGrid,
     GridOverlay,
+    RowId,
+    SelectionModelChangeParams,
 } from "@material-ui/data-grid";
 import React, {
     FunctionComponent,
@@ -30,12 +32,20 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
     const dataGridClasses = useDataGridStyles();
     const commonClasses = useCommonStyles();
     const [dataGridColumns, setDataGridColumns] = useState<ColDef[]>([]);
+    const [dataGridSelectionModel, setDatagridSelectionModel] = useState<
+        RowId[]
+    >([]);
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Input columns changed, initialize columns with text highlighter
+        // Input columns changed, initialize data grid columns with text highlighter
         initDataGridColumns();
     }, [props.columns]);
+
+    useEffect(() => {
+        // Input rows or selection model changed, reset data grid selection model
+        setDatagridSelectionModel(props.selectionModel || []);
+    }, [props.rows, props.selectionModel]);
 
     const initDataGridColumns = (): void => {
         if (!props.columns) {
@@ -72,7 +82,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
         );
     };
 
-    const loadingIndicatorRenderer: FunctionComponent = () => {
+    const loadingIndicatorRenderer = (): ReactElement => {
         return (
             <GridOverlay>
                 <LoadingIndicator />
@@ -80,7 +90,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
         );
     };
 
-    const noDataAvailableRenderer: FunctionComponent = () => {
+    const noDataAvailableRenderer = (): ReactElement => {
         return (
             <GridOverlay>
                 <NoDataIndicator text={props.noDataAvailableMessage} />
@@ -88,7 +98,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
         );
     };
 
-    const errorIndicatorRenderer: FunctionComponent = () => {
+    const errorIndicatorRenderer = (): ReactElement => {
         return (
             <GridOverlay>
                 <ErrorIndicator />
@@ -96,7 +106,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
         );
     };
 
-    const footerRenderer: FunctionComponent = () => {
+    const footerRenderer = (): ReactElement => {
         return (
             <Box
                 border={Dimension.WIDTH_BORDER_DEFAULT}
@@ -105,6 +115,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
                 borderLeft={0}
                 borderRight={0}
             >
+                {/* Row selection status */}
                 <Typography
                     className={dataGridClasses.rowSelectionStatus}
                     color="textSecondary"
@@ -112,7 +123,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
                 >
                     {t("label.selected-count", {
                         count: formatNumber(
-                            props.rowSelectionCount || 0
+                            dataGridSelectionModel.length || 0
                         ) as never,
                     })}
                 </Typography>
@@ -120,13 +131,17 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
         );
     };
 
+    const handleDataGridSelectionModelChange = (
+        params: SelectionModelChangeParams
+    ): void => {
+        setDatagridSelectionModel(params.selectionModel || []);
+        props.onSelectionModelChange && props.onSelectionModelChange(params);
+    };
+
     return (
         <MuiDataGrid
             {...props}
-            checkboxSelection
             disableColumnMenu
-            hideFooterPagination
-            hideFooterRowCount
             className={dataGridClasses.dataGrid}
             columns={dataGridColumns}
             components={{
@@ -135,7 +150,8 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
                 ErrorOverlay: errorIndicatorRenderer,
                 Footer: footerRenderer,
             }}
-            localeText={{ noRowsLabel: "" }}
+            selectionModel={dataGridSelectionModel}
+            onSelectionModelChange={handleDataGridSelectionModelChange}
         />
     );
 };

@@ -37,6 +37,7 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
             {/* Subscription group alerts transfer list */}
             <AccordionDetails>
                 <TransferList<SubscriptionGroupAlert>
+                    link
                     fromLabel={t("label.all-entity", {
                         entity: t("label.alerts"),
                     })}
@@ -48,7 +49,9 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
                         props.subscriptionGroupCardData &&
                         props.subscriptionGroupCardData.alerts
                     }
+                    // TODO handle link
                     onChange={handleSubscriptionGroupAlertsChange}
+                    onClick={() => console.log("Link clicked")}
                 />
             </AccordionDetails>
         </Accordion>

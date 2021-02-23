@@ -1,18 +1,21 @@
-import { Box, Grid, IconButton, Link } from "@material-ui/core";
+import { Box, Grid, IconButton, Link, Typography } from "@material-ui/core";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import classnames from "classnames";
 import React, { Fragment, ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { useCommonStyles } from "../../../utils/material-ui/common.styles";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { MultiValueCellProps } from "./multi-value-cell.interfaces";
+import { useMultiValueCellStyles } from "./multi-value-cell.styles";
 
 const MAX_ITEMS_VALUES = 3;
 
 export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
+    const multiValueCellClasses = useMultiValueCellStyles();
     const commonClasses = useCommonStyles();
     const { t } = useTranslation();
 
-    const getValue = (value: T): string => {
+    const getValueText = (value: T): string => {
         if (props.valueTextFn) {
             return props.valueTextFn(value);
         }
@@ -25,7 +28,7 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
     };
 
     const handleMore = (): void => {
-        props.onMore && props.onMore(props.id);
+        props.onMore && props.onMore(props.rowId);
     };
 
     return (
@@ -37,7 +40,13 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                 spacing={0}
             >
                 {/* Values */}
-                <Grid item className={commonClasses.ellipsis} xs={11}>
+                <Grid
+                    item
+                    className={classnames(commonClasses.ellipsis, {
+                        [multiValueCellClasses.values]: props.link, // Ellipsis to have same color as link
+                    })}
+                    xs={11}
+                >
                     {props.values &&
                         props.values
                             .slice(0, MAX_ITEMS_VALUES)
@@ -47,7 +56,7 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                                     {!props.link && (
                                         <TextHighlighter
                                             searchWords={props.searchWords}
-                                            text={getValue(value)}
+                                            text={getValueText(value)}
                                         />
                                     )}
 
@@ -56,12 +65,15 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                                         <Link
                                             onClick={() =>
                                                 props.onClick &&
-                                                props.onClick(value)
+                                                props.onClick(
+                                                    value,
+                                                    props.rowId
+                                                )
                                             }
                                         >
                                             <TextHighlighter
                                                 searchWords={props.searchWords}
-                                                text={getValue(value) as string}
+                                                text={getValueText(value)}
                                             />
                                         </Link>
                                     )}
@@ -71,18 +83,25 @@ export function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                                         props.values.slice(0, MAX_ITEMS_VALUES)
                                             .length -
                                             1 && (
-                                        <>{t("label.comma-separator")}</>
+                                        <Typography
+                                            color="textPrimary"
+                                            display="inline"
+                                        >
+                                            {t("label.comma-separator")}
+                                        </Typography>
                                     )}
                                 </Fragment>
                             ))}
                 </Grid>
 
                 {/* More button */}
-                <Grid item xs={1}>
-                    <IconButton size="small" onClick={handleMore}>
-                        <MoreHorizIcon />
-                    </IconButton>
-                </Grid>
+                {props.values && props.values.length > MAX_ITEMS_VALUES && (
+                    <Grid item xs={1}>
+                        <IconButton size="small" onClick={handleMore}>
+                            <MoreHorizIcon fontSize="small" />
+                        </IconButton>
+                    </Grid>
+                )}
             </Grid>
         </Box>
     );

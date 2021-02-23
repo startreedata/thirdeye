@@ -126,10 +126,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     };
 
     const getListItemKey = (listItem: T): string | number => {
-        if (!listItem) {
-            return "";
-        }
-
         if (props.listItemKeyFn) {
             return props.listItemKeyFn(listItem);
         }
@@ -142,10 +138,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
     };
 
     const getListItemText = (listItem: T): string => {
-        if (!listItem) {
-            return "";
-        }
-
         if (props.listItemTextFn) {
             return props.listItemTextFn(listItem);
         }

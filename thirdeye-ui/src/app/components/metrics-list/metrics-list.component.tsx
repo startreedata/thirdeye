@@ -20,7 +20,7 @@ import { theme } from "../../utils/material-ui/theme.util";
 import { filterMetrics } from "../../utils/metrics-util/metrics-util";
 import { getMetricsDetailPath } from "../../utils/routes/routes.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
-import { ActionCell } from "../data-grid/action-cell/action-cell.component";
+import { ActionsCell } from "../data-grid/actions-cell/actions-cell.component";
 import { DataGrid } from "../data-grid/data-grid.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { MetricsListData, MetricsListProps } from "./metrics-list.interfaces";
@@ -75,11 +75,11 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
 
     const actionsRenderer = (params: CellParams): ReactElement => {
         return (
-            <ActionCell
+            <ActionsCell
                 delete
                 edit
                 viewDetails
-                id={params.value as number}
+                rowId={params.value as number}
                 onDelete={handleMetricDelete}
                 /* onEdit={handleMetricEdit} */
                 onViewDetails={handleMetricViewDetails}
@@ -160,9 +160,9 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
     };
 
     const handleDataGridSelectionModelChange = (
-        param: SelectionModelChangeParams
+        params: SelectionModelChangeParams
     ): void => {
-        setDatagridSelectionModel(param.selectionModel || []);
+        setDatagridSelectionModel(params.selectionModel || []);
     };
 
     return (
@@ -199,7 +199,6 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
                             ? t("message.no-search-results")
                             : ""
                     }
-                    rowSelectionCount={dataGridSelectionModel.length}
                     rows={filteredMetricsListDatas}
                     searchWords={searchWords}
                     selectionModel={dataGridSelectionModel}

@@ -24,8 +24,9 @@ import {
     filterSubscriptionGroups,
     getSubscriptionGroupAlertName,
 } from "../../utils/subscription-groups/subscription-groups.util";
-import { ActionCell } from "../data-grid/action-cell/action-cell.component";
+import { ActionsCell } from "../data-grid/actions-cell/actions-cell.component";
 import { DataGrid } from "../data-grid/data-grid.component";
+import { LinkCell } from "../data-grid/link-cell/link-cell.component";
 import { MultiValueCell } from "../data-grid/multi-value-cell/multi-value-cell.component";
 import {
     SubscriptionGroupAlert,
@@ -44,8 +45,8 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
         setFilteredSubscriptionGroupCardDatas,
     ] = useState<SubscriptionGroupCardData[]>([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
-    const [columns, setColumns] = useState<ColDef[]>([]);
-    const [dataGridSelectionModel, setDatagridSelectionModel] = useState<
+    const [dataGridColumns, setDataGridColumns] = useState<ColDef[]>([]);
+    const [dataGridSelectionModel, setDataGridSelectionModel] = useState<
         RowId[]
     >([]);
     const history = useHistory();
@@ -53,7 +54,7 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
 
     useEffect(() => {
         // Input subscription groups or search changed, reset
-        initColumns();
+        initDataGridColumns();
         setFilteredSubscriptionGroupCardDatas(
             filterSubscriptionGroups(
                 props.subscriptionGroupCardDatas as SubscriptionGroupCardData[],
@@ -64,10 +65,10 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
 
     useEffect(() => {
         // Search changed, re-initialize row selection
-        setDatagridSelectionModel([...dataGridSelectionModel]);
+        setDataGridSelectionModel([...dataGridSelectionModel]);
     }, [searchWords]);
 
-    const initColumns = (): void => {
+    const initDataGridColumns = (): void => {
         const columns: ColDef[] = [
             // Name
             {
@@ -76,6 +77,7 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
                 headerName: t("label.name"),
                 sortable: true,
                 flex: 1,
+                renderCell: nameRenderer,
             },
             // Alerts
             {
@@ -96,7 +98,6 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
             // Actions
             {
                 field: "id",
-                type: "number",
                 headerName: t("label.actions"),
                 headerAlign: "right",
                 sortable: false,
@@ -104,18 +105,31 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
                 renderCell: actionsRenderer,
             },
         ];
-        setColumns(columns);
+        setDataGridColumns(columns);
+    };
+
+    const nameRenderer = (params: CellParams): ReactElement => {
+        return (
+            <LinkCell<string>
+                align={params.colDef && params.colDef.align}
+                rowId={toNumber(params.row && params.row.id)}
+                searchWords={searchWords}
+                value={params.value as string}
+                onClick={handleSubscriptionGroupViewDetailsByNameAndId}
+            />
+        );
     };
 
     const alertsRenderer = (params: CellParams): ReactElement => {
         return (
             <MultiValueCell<SubscriptionGroupAlert>
                 link
-                id={toNumber(params.row && params.row.id)}
+                rowId={toNumber(params.row && params.row.id)}
+                searchWords={searchWords}
                 valueTextFn={getSubscriptionGroupAlertName}
                 values={params.value as SubscriptionGroupAlert[]}
                 onClick={handleAlertViewDetails}
-                onMore={handleSubscriptionGroupViewDetails}
+                onMore={handleSubscriptionGroupViewDetailsById}
             />
         );
     };
@@ -123,28 +137,36 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
     const emailsRenderer = (params: CellParams): ReactElement => {
         return (
             <MultiValueCell<string>
-                id={toNumber(params.row && params.row.id)}
+                rowId={toNumber(params.row && params.row.id)}
+                searchWords={searchWords}
                 values={params.value as string[]}
-                onMore={handleSubscriptionGroupViewDetails}
+                onMore={handleSubscriptionGroupViewDetailsById}
             />
         );
     };
 
     const actionsRenderer = (params: CellParams): ReactElement => {
         return (
-            <ActionCell
+            <ActionsCell
                 delete
                 edit
                 viewDetails
-                id={params.value as number}
+                rowId={toNumber(params.value)}
                 onDelete={handleSubscriptionGroupDelete}
                 onEdit={handleSubscriptionGroupEdit}
-                onViewDetails={handleSubscriptionGroupViewDetails}
+                onViewDetails={handleSubscriptionGroupViewDetailsById}
             />
         );
     };
 
-    const handleSubscriptionGroupViewDetails = (id: number): void => {
+    const handleSubscriptionGroupViewDetailsByNameAndId = (
+        _name: string,
+        id: number
+    ): void => {
+        history.push(getSubscriptionGroupsDetailPath(id));
+    };
+
+    const handleSubscriptionGroupViewDetailsById = (id: number): void => {
         history.push(getSubscriptionGroupsDetailPath(id));
     };
 
@@ -187,9 +209,9 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
     };
 
     const handleDataGridSelectionModelChange = (
-        param: SelectionModelChangeParams
+        params: SelectionModelChangeParams
     ): void => {
-        setDatagridSelectionModel(param.selectionModel || []);
+        setDataGridSelectionModel(params.selectionModel || []);
     };
 
     return (
@@ -221,7 +243,8 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
             {/* Subscription groups list */}
             <Grid item className={subscriptionGroupsListClasses.list}>
                 <DataGrid
-                    columns={columns}
+                    checkboxSelection
+                    columns={dataGridColumns}
                     loading={!props.subscriptionGroupCardDatas}
                     noDataAvailableMessage={
                         isEmpty(filteredSubscriptionGroupCardDatas) &&
@@ -229,7 +252,6 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
                             ? t("message.no-search-results")
                             : ""
                     }
-                    rowSelectionCount={dataGridSelectionModel.length}
                     rows={filteredSubscriptionGroupCardDatas}
                     searchWords={searchWords}
                     selectionModel={dataGridSelectionModel}

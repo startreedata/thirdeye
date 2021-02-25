@@ -23,14 +23,18 @@ import static org.apache.pinot.thirdeye.Constants.GROUP_WRAPPER_PROP_DETECTOR_CO
 import static org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.Weigher;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,6 +78,7 @@ import org.slf4j.LoggerFactory;
 public abstract class ThirdEyeUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   /**
    * Returns or modifies a filter that can be for querying the results corresponding to the given
@@ -630,4 +635,32 @@ public abstract class ThirdEyeUtils {
     }
     return mergedTimeSeriesSnapshot;
   }
+
+  public static Multimap<String, String> convertToMultiMap(String json) {
+    ArrayListMultimap<String, String> multimap = ArrayListMultimap.create();
+    if (json == null) {
+      return multimap;
+    }
+    try {
+      TypeReference<Map<String, ArrayList<String>>> valueTypeRef =
+          new TypeReference<Map<String, ArrayList<String>>>() {
+          };
+      Map<String, ArrayList<String>> map;
+
+      map = OBJECT_MAPPER.readValue(json, valueTypeRef);
+      for (Map.Entry<String, ArrayList<String>> entry : map.entrySet()) {
+        ArrayList<String> valueList = entry.getValue();
+        ArrayList<String> trimmedList = new ArrayList<>();
+        for (String value : valueList) {
+          trimmedList.add(value.trim());
+        }
+        multimap.putAll(entry.getKey(), trimmedList);
+      }
+      return multimap;
+    } catch (IOException e) {
+      LOG.error("Error parsing json:{} message:{}", json, e.getMessage());
+    }
+    return multimap;
+  }
+
 }

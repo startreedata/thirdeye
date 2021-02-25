@@ -2,9 +2,11 @@ package org.apache.pinot.thirdeye;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
+import org.apache.pinot.thirdeye.resources.RootCauseResource;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeCoordinatorModule extends AbstractModule {
@@ -21,6 +23,10 @@ public class ThirdEyeCoordinatorModule extends AbstractModule {
   @Override
   protected void configure() {
     install(new ThirdEyeCoreModule(dataSource));
+
+    bind(RootCauseResource.class)
+        .toProvider(new RootCauseResourceProvider(configuration))
+        .in(Scopes.SINGLETON);
   }
 
   @Singleton

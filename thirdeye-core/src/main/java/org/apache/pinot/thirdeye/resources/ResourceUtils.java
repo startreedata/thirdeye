@@ -3,7 +3,10 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_UNEXPECTED;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
@@ -105,4 +108,23 @@ public class ResourceUtils {
         .build()
     );
   }
+
+  /**
+   * Return a list of parameters.
+   * Support both multi-entity notations:
+   * <br/><b>(1) comma-delimited:</b> {@code "urns=thirdeye:metric:123,thirdeye:metric:124"}
+   * <br/><b>(2) multi-param</b> {@code "urns=thirdeye:metric:123&urns=thirdeye:metric:124"}
+   *
+   * @param params input of params
+   * @return list of params
+   */
+  public static List<String> parseListParams(List<String> params) {
+    if (params == null){
+      return Collections.emptyList();
+    }
+    if (params.size() != 1)
+      return params;
+    return Arrays.asList(params.get(0).split(","));
+  }
+
 }

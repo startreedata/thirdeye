@@ -42,11 +42,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalySubscriptionGroupNotificat
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
-import org.apache.pinot.thirdeye.detection.spec.RuleBaselineProviderSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.BaseComponent;
-import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -243,61 +239,6 @@ public class DetectionUtils {
       return -1L;
     }
     return Collections.max(nestedLastTimeStamps);
-  }
-
-  /**
-   * Get the predicted baseline for a anomaly in a time range. Will return wo1w if baseline provider
-   * not available.
-   *
-   * @param anomaly the anomaly
-   * @param config the detection config
-   * @param start start time
-   * @param end end time
-   * @param loader detection pipeline loader
-   * @param provider data provider
-   * @return baseline time series
-   */
-  public static TimeSeries getBaselineTimeseries(MergedAnomalyResultDTO anomaly,
-      Multimap<String, String> filters, Long metricId, AlertDTO config,
-      long start, long end, DetectionPipelineFactory loader, DataProvider provider)
-      throws Exception {
-    String baselineProviderComponentName = anomaly.getProperties()
-        .get(PROP_BASELINE_PROVIDER_COMPONENT_NAME);
-    BaselineProvider baselineProvider = new RuleBaselineProvider();
-    TimeSeries returnTimeSeries;
-
-    if (baselineProviderComponentName != null && config != null &&
-        config.getComponentSpecs().containsKey(baselineProviderComponentName)) {
-      // load pipeline and init components
-      loader.get(new DetectionPipelineContext()
-          .setAlert(config)
-          .setStart(start)
-          .setEnd(end));
-      baselineProvider = (BaselineProvider) config.getComponents()
-          .get(baselineProviderComponentName);
-    } else {
-      // use wow instead
-      RuleBaselineProviderSpec spec = new RuleBaselineProviderSpec();
-      spec.setOffset("wo1w");
-      InputDataFetcher dataFetcher = new DefaultInputDataFetcher(provider, config.getId());
-      baselineProvider.init(spec, dataFetcher);
-    }
-
-    try {
-      returnTimeSeries = baselineProvider
-          .computePredictedTimeSeries(MetricSlice.from(metricId, start, end, filters));
-    } catch (Exception e) {
-      // send current if the predicted baseline can't be trained
-      BaselineProvider alternateProvider = new RuleBaselineProvider();
-      RuleBaselineProviderSpec spec = new RuleBaselineProviderSpec();
-      spec.setOffset("current");
-      InputDataFetcher dataFetcher = new DefaultInputDataFetcher(provider, config.getId());
-      alternateProvider.init(spec, dataFetcher);
-      returnTimeSeries = alternateProvider
-          .computePredictedTimeSeries(MetricSlice.from(metricId, start, end, filters));
-    }
-
-    return returnTimeSeries;
   }
 
   /**

@@ -9,6 +9,10 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import {
+    UiSubscriptionGroup,
+    UiSubscriptionGroupAlert,
+} from "../../rest/dto/ui-subscription-group.interfaces";
+import {
     getAlertsDetailPath,
     getSubscriptionGroupsDetailPath,
     getSubscriptionGroupsUpdatePath,
@@ -16,16 +20,12 @@ import {
 import { getSearchStatusLabel } from "../../utils/search/search.util";
 import {
     filterSubscriptionGroups,
-    getSubscriptionGroupAlertName,
+    getUiSubscriptionGroupAlertName,
 } from "../../utils/subscription-groups/subscription-groups.util";
 import { actionsCellRenderer } from "../data-grid/actions-cell/actions-cell.component";
 import { DataGrid } from "../data-grid/data-grid.component";
 import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
 import { multiValueCellRenderer } from "../data-grid/multi-value-cell/multi-value-cell.component";
-import {
-    SubscriptionGroupAlert,
-    SubscriptionGroupCardData,
-} from "../entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { SubscriptionGroupListProps } from "./subscription-group-list.interfaces";
 
@@ -33,9 +33,9 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     props: SubscriptionGroupListProps
 ) => {
     const [
-        filteredSubscriptionGroupCardDatas,
-        setFilteredSubscriptionGroupCardDatas,
-    ] = useState<SubscriptionGroupCardData[]>([]);
+        filteredUiSubscriptionGroups,
+        setFilteredUiSubscriptionGroups,
+    ] = useState<UiSubscriptionGroup[]>([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
     const [dataGridColumns, setDataGridColumns] = useState<ColDef[]>([]);
     const [dataGridSelectionModel, setDataGridSelectionModel] = useState<
@@ -47,13 +47,13 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     useEffect(() => {
         // Input subscription groups or search changed, reset
         initDataGridColumns();
-        setFilteredSubscriptionGroupCardDatas(
+        setFilteredUiSubscriptionGroups(
             filterSubscriptionGroups(
-                props.subscriptionGroupCardDatas as SubscriptionGroupCardData[],
+                props.uiSubscriptionGroups as UiSubscriptionGroup[],
                 searchWords
             )
         );
-    }, [props.subscriptionGroupCardDatas, searchWords]);
+    }, [props.uiSubscriptionGroups, searchWords]);
 
     useEffect(() => {
         // Search changed, reset data grid selection model
@@ -83,13 +83,13 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
                 headerName: t("label.subscribed-alerts"),
                 flex: 1,
                 renderCell: (params) =>
-                    multiValueCellRenderer<SubscriptionGroupAlert>(
+                    multiValueCellRenderer<UiSubscriptionGroupAlert>(
                         params,
                         true,
                         searchWords,
                         handleSubscriptionGroupViewDetailsById,
                         handleAlertClick,
-                        getSubscriptionGroupAlertName
+                        getUiSubscriptionGroupAlertName
                     ),
             },
             // Emails
@@ -145,37 +145,34 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     };
 
     const handleSubscriptionGroupDelete = (id: number): void => {
-        const subscriptionGroupCardData = getSubscriptionGroupCardData(id);
-        if (!subscriptionGroupCardData) {
+        const uiSubscriptionGroup = getUiSubscriptionGroup(id);
+        if (!uiSubscriptionGroup) {
             return;
         }
 
-        props.onDelete && props.onDelete(subscriptionGroupCardData);
+        props.onDelete && props.onDelete(uiSubscriptionGroup);
     };
 
-    const getSubscriptionGroupCardData = (
-        id: number
-    ): SubscriptionGroupCardData | null => {
-        if (!props.subscriptionGroupCardDatas) {
+    const getUiSubscriptionGroup = (id: number): UiSubscriptionGroup | null => {
+        if (!props.uiSubscriptionGroups) {
             return null;
         }
 
         return (
-            props.subscriptionGroupCardDatas.find(
-                (subscriptionGroupCardData) =>
-                    subscriptionGroupCardData.id === id
+            props.uiSubscriptionGroups.find(
+                (uiSubscriptionGroup) => uiSubscriptionGroup.id === id
             ) || null
         );
     };
 
     const handleAlertClick = (
-        subscriptionGroupAlert: SubscriptionGroupAlert
+        uiSubscriptionGroupAlert: UiSubscriptionGroupAlert
     ): void => {
-        if (!subscriptionGroupAlert) {
+        if (!uiSubscriptionGroupAlert) {
             return;
         }
 
-        history.push(getAlertsDetailPath(subscriptionGroupAlert.id));
+        history.push(getAlertsDetailPath(uiSubscriptionGroupAlert.id));
     };
 
     const handleDataGridSelectionModelChange = (
@@ -196,11 +193,11 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
                             entity: t("label.subscription-groups"),
                         })}
                         searchStatusLabel={getSearchStatusLabel(
-                            filteredSubscriptionGroupCardDatas
-                                ? filteredSubscriptionGroupCardDatas.length
+                            filteredUiSubscriptionGroups
+                                ? filteredUiSubscriptionGroups.length
                                 : 0,
-                            props.subscriptionGroupCardDatas
-                                ? props.subscriptionGroupCardDatas.length
+                            props.uiSubscriptionGroups
+                                ? props.uiSubscriptionGroups.length
                                 : 0
                         )}
                         onChange={setSearchWords}
@@ -214,14 +211,14 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
                     autoHeight
                     checkboxSelection
                     columns={dataGridColumns}
-                    loading={!props.subscriptionGroupCardDatas}
+                    loading={!props.uiSubscriptionGroups}
                     noDataAvailableMessage={
-                        isEmpty(filteredSubscriptionGroupCardDatas) &&
+                        isEmpty(filteredUiSubscriptionGroups) &&
                         !isEmpty(searchWords)
                             ? t("message.no-search-results")
                             : ""
                     }
-                    rows={filteredSubscriptionGroupCardDatas}
+                    rows={filteredUiSubscriptionGroups}
                     searchWords={searchWords}
                     selectionModel={dataGridSelectionModel}
                     onSelectionModelChange={handleDataGridSelectionModelChange}

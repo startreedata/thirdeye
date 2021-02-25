@@ -8,13 +8,13 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
-import { MetricCardData } from "../../components/entity-cards/metric-card/metric-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { Metric } from "../../rest/dto/metric.interfaces";
+import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getMetric } from "../../rest/metrics/metrics.rest";
-import { getMetricCardData } from "../../utils/metrics/metrics.util";
+import { getUiMetric } from "../../utils/metrics/metrics.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getMetricsAllPath } from "../../utils/routes/routes.util";
 import {
@@ -25,7 +25,7 @@ import { MetricsDetailPageParams } from "./metrics-detail-page.interfaces";
 
 export const MetricsDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [metricCardData, setMetricCardData] = useState<MetricCardData>();
+    const [uiMetric, setUiMetric] = useState<UiMetric>();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
@@ -38,31 +38,29 @@ export const MetricsDetailPage: FunctionComponent = () => {
         fetchMetric();
     }, []);
 
-    const onDeleteMetric = (metricCardData: MetricCardData): void => {
-        if (!metricCardData) {
+    const onDeleteMetric = (uiMetric: UiMetric): void => {
+        if (!uiMetric) {
             return;
         }
 
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", {
-                name: metricCardData.name,
+                name: uiMetric.name,
             }),
             okButtonLabel: t("label.delete"),
             onOk: (): void => {
-                onDeleteMetricConfirmation(metricCardData);
+                onDeleteMetricConfirmation(uiMetric);
             },
         });
     };
 
-    const onDeleteMetricConfirmation = (
-        metricCardData: MetricCardData
-    ): void => {
-        if (!metricCardData) {
+    const onDeleteMetricConfirmation = (uiMetric: UiMetric): void => {
+        if (!uiMetric) {
             return;
         }
 
-        deleteMetric(metricCardData.id)
+        deleteMetric(uiMetric.id)
             .then((): void => {
                 enqueueSnackbar(
                     t("message.delete-success", { entity: t("label.metric") }),
@@ -97,7 +95,7 @@ export const MetricsDetailPage: FunctionComponent = () => {
 
         getMetric(toNumber(params.id))
             .then((metric: Metric): void => {
-                setMetricCardData(getMetricCardData(metric));
+                setUiMetric(getUiMetric(metric));
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -118,14 +116,14 @@ export const MetricsDetailPage: FunctionComponent = () => {
         <PageContents
             centered
             hideTimeRange
-            title={metricCardData ? metricCardData.name : ""}
+            title={uiMetric ? uiMetric.name : ""}
         >
-            {metricCardData && (
+            {uiMetric && (
                 <Grid container>
                     {/* Metric */}
                     <Grid item sm={12}>
                         <MetricCard
-                            metricCardData={metricCardData}
+                            uiMetric={uiMetric}
                             onDelete={onDeleteMetric}
                         />
                     </Grid>
@@ -133,7 +131,7 @@ export const MetricsDetailPage: FunctionComponent = () => {
             )}
 
             {/* No data available message */}
-            {!metricCardData && <NoDataIndicator />}
+            {!uiMetric && <NoDataIndicator />}
         </PageContents>
     );
 };

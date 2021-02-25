@@ -17,6 +17,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { filterMetrics } from "../../utils/metrics/metrics.util";
 import { getMetricsDetailPath } from "../../utils/routes/routes.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
@@ -24,16 +25,13 @@ import { actionsCellRenderer } from "../data-grid/actions-cell/actions-cell.comp
 import { CustomCell } from "../data-grid/custom-cell/custom-cell.component";
 import { DataGrid } from "../data-grid/data-grid.component";
 import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
-import { MetricCardData } from "../entity-cards/metric-card/metric-card.interfaces";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { MetricListProps } from "./metric-list.interfaces";
 
 export const MetricList: FunctionComponent<MetricListProps> = (
     props: MetricListProps
 ) => {
-    const [filteredMetricCardDatas, setFilteredMetricCardDatas] = useState<
-        MetricCardData[]
-    >([]);
+    const [filteredUiMetrics, setFilteredUiMetrics] = useState<UiMetric[]>([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
     const [dataGridColumns, setDataGridColumns] = useState<ColDef[]>([]);
     const [dataGridSelectionModel, setDataGridSelectionModel] = useState<
@@ -46,13 +44,10 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     useEffect(() => {
         // Input metrics or search changed, reset
         initDataGridColumns();
-        setFilteredMetricCardDatas(
-            filterMetrics(
-                props.metricCardDatas as MetricCardData[],
-                searchWords
-            )
+        setFilteredUiMetrics(
+            filterMetrics(props.uiMetrics as UiMetric[], searchWords)
         );
-    }, [props.metricCardDatas, searchWords]);
+    }, [props.uiMetrics, searchWords]);
 
     useEffect(() => {
         // Search changed, reset data grid selection model
@@ -185,24 +180,20 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     };
 
     const handleMetricDelete = (id: number): void => {
-        const metricCardData = getMetricCardData(id);
-        if (!metricCardData) {
+        const uiMetric = getUiMetric(id);
+        if (!uiMetric) {
             return;
         }
 
-        props.onDelete && props.onDelete(metricCardData);
+        props.onDelete && props.onDelete(uiMetric);
     };
 
-    const getMetricCardData = (id: number): MetricCardData | null => {
-        if (!props.metricCardDatas) {
+    const getUiMetric = (id: number): UiMetric | null => {
+        if (!props.uiMetrics) {
             return null;
         }
 
-        return (
-            props.metricCardDatas.find(
-                (metricCardData) => metricCardData.id === id
-            ) || null
-        );
+        return props.uiMetrics.find((uiMetric) => uiMetric.id === id) || null;
     };
 
     const handleDataGridSelectionModelChange = (
@@ -223,12 +214,8 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                             entity: t("label.metrics"),
                         })}
                         searchStatusLabel={getSearchStatusLabel(
-                            filteredMetricCardDatas
-                                ? filteredMetricCardDatas.length
-                                : 0,
-                            props.metricCardDatas
-                                ? props.metricCardDatas.length
-                                : 0
+                            filteredUiMetrics ? filteredUiMetrics.length : 0,
+                            props.uiMetrics ? props.uiMetrics.length : 0
                         )}
                         onChange={setSearchWords}
                     />
@@ -241,14 +228,13 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                     autoHeight
                     checkboxSelection
                     columns={dataGridColumns}
-                    loading={!props.metricCardDatas}
+                    loading={!props.uiMetrics}
                     noDataAvailableMessage={
-                        isEmpty(filteredMetricCardDatas) &&
-                        !isEmpty(searchWords)
+                        isEmpty(filteredUiMetrics) && !isEmpty(searchWords)
                             ? t("message.no-search-results")
                             : ""
                     }
-                    rows={filteredMetricCardDatas}
+                    rows={filteredUiMetrics}
                     searchWords={searchWords}
                     selectionModel={dataGridSelectionModel}
                     onSelectionModelChange={handleDataGridSelectionModelChange}

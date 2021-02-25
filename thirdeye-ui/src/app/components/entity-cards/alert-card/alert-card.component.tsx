@@ -15,6 +15,10 @@ import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import {
+    UiAlertDatasetAndMetric,
+    UiAlertSubscriptionGroup,
+} from "../../../rest/dto/ui-alert.interfaces";
+import {
     getAlertsDetailPath,
     getAlertsUpdatePath,
     getSubscriptionGroupsDetailPath,
@@ -22,11 +26,7 @@ import {
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
-import {
-    AlertCardProps,
-    AlertDatasetAndMetric,
-    AlertSubscriptionGroup,
-} from "./alert-card.interfaces";
+import { AlertCardProps } from "./alert-card.interfaces";
 import { useAlertCardStyles } from "./alert-card.styles";
 
 export const AlertCard: FunctionComponent<AlertCardProps> = (
@@ -49,40 +49,40 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
     };
 
     const handleAlertViewDetails = (): void => {
-        if (!props.alertCardData) {
+        if (!props.uiAlert) {
             return;
         }
 
-        history.push(getAlertsDetailPath(props.alertCardData.id));
+        history.push(getAlertsDetailPath(props.uiAlert.id));
         handleAlertOptionsClose();
     };
 
     const handleAlertStateToggle = (): void => {
-        if (!props.alertCardData || !props.alertCardData.alert) {
+        if (!props.uiAlert || !props.uiAlert.alert) {
             return;
         }
 
-        props.alertCardData.alert.active = !props.alertCardData.alert.active;
-        props.onChange && props.onChange(props.alertCardData);
+        props.uiAlert.alert.active = !props.uiAlert.alert.active;
+        props.onChange && props.onChange(props.uiAlert);
         handleAlertOptionsClose();
     };
 
     const handleAlertEdit = (): void => {
-        if (!props.alertCardData) {
+        if (!props.uiAlert) {
             return;
         }
 
-        history.push(getAlertsUpdatePath(props.alertCardData.id));
+        history.push(getAlertsUpdatePath(props.uiAlert.id));
         handleAlertOptionsClose();
     };
 
     const handleAlertDelete = (): void => {
-        props.onDelete && props.onDelete(props.alertCardData);
+        props.onDelete && props.onDelete(props.uiAlert);
         handleAlertOptionsClose();
     };
 
     const handleSubscriptionGroupViewDetails = (
-        subscriptionGroup: AlertSubscriptionGroup
+        subscriptionGroup: UiAlertSubscriptionGroup
     ): void => {
         if (!subscriptionGroup) {
             return;
@@ -92,30 +92,30 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
     };
 
     const getAlertDataSetAndMetric = (
-        alertDatasetAndMetric: AlertDatasetAndMetric
+        uiAlertDatasetAndMetric: UiAlertDatasetAndMetric
     ): string => {
-        if (!alertDatasetAndMetric) {
+        if (!uiAlertDatasetAndMetric) {
             return "";
         }
 
-        return `${alertDatasetAndMetric.datasetName}${t(
+        return `${uiAlertDatasetAndMetric.datasetName}${t(
             "label.pair-separator"
-        )}${alertDatasetAndMetric.metricName}`;
+        )}${uiAlertDatasetAndMetric.metricName}`;
     };
 
-    const getAlertSubscriptionGroupName = (
-        alertSubscriptionGroup: AlertSubscriptionGroup
+    const getUiAlertSubscriptionGroupName = (
+        uiAlertSubscriptionGroup: UiAlertSubscriptionGroup
     ): string => {
-        if (!alertSubscriptionGroup) {
+        if (!uiAlertSubscriptionGroup) {
             return "";
         }
 
-        return alertSubscriptionGroup.name;
+        return uiAlertSubscriptionGroup.name;
     };
 
     return (
         <Card variant="outlined">
-            {props.alertCardData && (
+            {props.uiAlert && (
                 <CardHeader
                     action={
                         <Grid container alignItems="center" spacing={0}>
@@ -123,7 +123,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                             <Grid item>
                                 <Typography
                                     className={
-                                        props.alertCardData.active
+                                        props.uiAlert.active
                                             ? alertCardClasses.active
                                             : alertCardClasses.inactive
                                     }
@@ -131,7 +131,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 >
                                     <TextHighlighter
                                         searchWords={props.searchWords}
-                                        text={props.alertCardData.activeText}
+                                        text={props.uiAlert.activeText}
                                     />
                                 </Typography>
                             </Grid>
@@ -159,7 +159,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
 
                                     {/* Activate/deactivete alert */}
                                     <MenuItem onClick={handleAlertStateToggle}>
-                                        {props.alertCardData.active
+                                        {props.uiAlert.active
                                             ? t("label.deactivate-entity", {
                                                   entity: t("label.alert"),
                                               })
@@ -192,7 +192,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 <Link onClick={handleAlertViewDetails}>
                                     <TextHighlighter
                                         searchWords={props.searchWords}
-                                        text={props.alertCardData.name}
+                                        text={props.uiAlert.name}
                                     />
                                 </Link>
                             )}
@@ -206,14 +206,14 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             )}
 
             <CardContent>
-                {props.alertCardData && (
+                {props.uiAlert && (
                     <Grid container>
                         {/* Created by */}
                         <Grid item md={3} sm={6} xs={12}>
                             <NameValueDisplayCard<string>
                                 name={t("label.created-by")}
                                 searchWords={props.searchWords}
-                                values={[props.alertCardData.createdBy]}
+                                values={[props.uiAlert.createdBy]}
                             />
                         </Grid>
 
@@ -228,20 +228,20 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 showCount
                                 name={t("label.detection-type")}
                                 searchWords={props.searchWords}
-                                values={props.alertCardData.detectionTypes}
+                                values={props.uiAlert.detectionTypes}
                             />
                         </Grid>
 
                         {/* Dataset / Metric */}
                         <Grid item md={3} sm={6} xs={12}>
-                            <NameValueDisplayCard<AlertDatasetAndMetric>
+                            <NameValueDisplayCard<UiAlertDatasetAndMetric>
                                 showCount
                                 name={`${t("label.dataset")}${t(
                                     "label.pair-separator"
                                 )}${t("label.metric")}`}
                                 searchWords={props.searchWords}
                                 valueRenderer={getAlertDataSetAndMetric}
-                                values={props.alertCardData.datasetAndMetrics}
+                                values={props.uiAlert.datasetAndMetrics}
                             />
                         </Grid>
 
@@ -251,19 +251,19 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 showCount
                                 name={t("label.filtered-by")}
                                 searchWords={props.searchWords}
-                                values={props.alertCardData.filteredBy}
+                                values={props.uiAlert.filteredBy}
                             />
                         </Grid>
 
                         {/* Subscription groups */}
                         <Grid item md={3} sm={6} xs={12}>
-                            <NameValueDisplayCard<AlertSubscriptionGroup>
+                            <NameValueDisplayCard<UiAlertSubscriptionGroup>
                                 link
                                 showCount
                                 name={t("label.subscription-groups")}
                                 searchWords={props.searchWords}
-                                valueRenderer={getAlertSubscriptionGroupName}
-                                values={props.alertCardData.subscriptionGroups}
+                                valueRenderer={getUiAlertSubscriptionGroupName}
+                                values={props.uiAlert.subscriptionGroups}
                                 onClick={handleSubscriptionGroupViewDetails}
                             />
                         </Grid>
@@ -271,7 +271,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                 )}
 
                 {/* No data available */}
-                {!props.alertCardData && <NoDataIndicator />}
+                {!props.uiAlert && <NoDataIndicator />}
             </CardContent>
         </Card>
     );

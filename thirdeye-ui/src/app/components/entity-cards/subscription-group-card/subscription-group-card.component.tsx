@@ -12,19 +12,17 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { UiSubscriptionGroupAlert } from "../../../rest/dto/ui-subscription-group.interfaces";
 import {
     getAlertsDetailPath,
     getSubscriptionGroupsDetailPath,
     getSubscriptionGroupsUpdatePath,
 } from "../../../utils/routes/routes.util";
-import { getSubscriptionGroupAlertName } from "../../../utils/subscription-groups/subscription-groups.util";
+import { getUiSubscriptionGroupAlertName } from "../../../utils/subscription-groups/subscription-groups.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
-import {
-    SubscriptionGroupAlert,
-    SubscriptionGroupCardProps,
-} from "./subscription-group-card.interfaces";
+import { SubscriptionGroupCardProps } from "./subscription-group-card.interfaces";
 
 export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps> = (
     props: SubscriptionGroupCardProps
@@ -47,45 +45,45 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
     };
 
     const handleSubscriptionGroupViewDetails = (): void => {
-        if (!props.subscriptionGroupCardData) {
+        if (!props.uiSubscriptionGroup) {
             return;
         }
 
         history.push(
-            getSubscriptionGroupsDetailPath(props.subscriptionGroupCardData.id)
+            getSubscriptionGroupsDetailPath(props.uiSubscriptionGroup.id)
         );
         handleSubscriptionGroupOptionsClose();
     };
 
     const handleSubscriptionGroupEdit = (): void => {
-        if (!props.subscriptionGroupCardData) {
+        if (!props.uiSubscriptionGroup) {
             return;
         }
 
         history.push(
-            getSubscriptionGroupsUpdatePath(props.subscriptionGroupCardData.id)
+            getSubscriptionGroupsUpdatePath(props.uiSubscriptionGroup.id)
         );
         handleSubscriptionGroupOptionsClose();
     };
 
     const handleSubscriptionGroupDelete = (): void => {
-        props.onDelete && props.onDelete(props.subscriptionGroupCardData);
+        props.onDelete && props.onDelete(props.uiSubscriptionGroup);
         handleSubscriptionGroupOptionsClose();
     };
 
     const handleAlertViewDetails = (
-        subscriptionGroupAlert: SubscriptionGroupAlert
+        uiSubscriptionGroupAlert: UiSubscriptionGroupAlert
     ): void => {
-        if (!subscriptionGroupAlert) {
+        if (!uiSubscriptionGroupAlert) {
             return;
         }
 
-        history.push(getAlertsDetailPath(subscriptionGroupAlert.id));
+        history.push(getAlertsDetailPath(uiSubscriptionGroupAlert.id));
     };
 
     return (
         <Card variant="outlined">
-            {props.subscriptionGroupCardData && (
+            {props.uiSubscriptionGroup && (
                 <CardHeader
                     action={
                         <>
@@ -142,9 +140,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                                 >
                                     <TextHighlighter
                                         searchWords={props.searchWords}
-                                        text={
-                                            props.subscriptionGroupCardData.name
-                                        }
+                                        text={props.uiSubscriptionGroup.name}
                                     />
                                 </Link>
                             )}
@@ -158,16 +154,16 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
             )}
 
             <CardContent>
-                {props.subscriptionGroupCardData && (
+                {props.uiSubscriptionGroup && (
                     <Grid container>
                         {/* Subscribed alerts */}
                         <Grid item sm={6} xs={12}>
-                            <NameValueDisplayCard<SubscriptionGroupAlert>
+                            <NameValueDisplayCard<UiSubscriptionGroupAlert>
                                 link
                                 name={t("label.subscribed-alerts")}
                                 searchWords={props.searchWords}
-                                valueRenderer={getSubscriptionGroupAlertName}
-                                values={props.subscriptionGroupCardData.alerts}
+                                valueRenderer={getUiSubscriptionGroupAlertName}
+                                values={props.uiSubscriptionGroup.alerts}
                                 onClick={handleAlertViewDetails}
                             />
                         </Grid>
@@ -177,14 +173,14 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                             <NameValueDisplayCard<string>
                                 name={t("label.subscribed-emails")}
                                 searchWords={props.searchWords}
-                                values={props.subscriptionGroupCardData.emails}
+                                values={props.uiSubscriptionGroup.emails}
                             />
                         </Grid>
                     </Grid>
                 )}
 
                 {/* No data available */}
-                {!props.subscriptionGroupCardData && <NoDataIndicator />}
+                {!props.uiSubscriptionGroup && <NoDataIndicator />}
             </CardContent>
         </Card>
     );

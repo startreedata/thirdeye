@@ -7,7 +7,6 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
-import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
@@ -18,9 +17,10 @@ import {
     getAnomaliesByTime,
 } from "../../rest/anomalies/anomalies.rest";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     filterAnomalies,
-    getAnomalyCardDatas,
+    getUiAnomalies,
 } from "../../utils/anomalies/anomalies.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
 import {
@@ -30,12 +30,10 @@ import {
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [anomalyCardDatas, setAnomalyCardDatas] = useState<AnomalyCardData[]>(
+    const [uiAnomalys, setUiAnomalys] = useState<UiAnomaly[]>([]);
+    const [filteredUiAnomalys, setFilteredUiAnomalys] = useState<UiAnomaly[]>(
         []
     );
-    const [filteredAnomalyCardDatas, setFilteredAnomalyCardDatas] = useState<
-        AnomalyCardData[]
-    >([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
@@ -54,36 +52,32 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     useEffect(() => {
         // Fetched anomalies or search changed, reset
-        setFilteredAnomalyCardDatas(
-            filterAnomalies(anomalyCardDatas, searchWords)
-        );
-    }, [anomalyCardDatas, searchWords]);
+        setFilteredUiAnomalys(filterAnomalies(uiAnomalys, searchWords));
+    }, [uiAnomalys, searchWords]);
 
-    const onDeleteAnomaly = (anomalyCardData: AnomalyCardData): void => {
-        if (!anomalyCardData) {
+    const onDeleteAnomaly = (uiAnomaly: UiAnomaly): void => {
+        if (!uiAnomaly) {
             return;
         }
 
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", {
-                name: anomalyCardData.name,
+                name: uiAnomaly.name,
             }),
             okButtonLabel: t("label.delete"),
             onOk: (): void => {
-                onDeleteAnomalyConfirmation(anomalyCardData);
+                onDeleteAnomalyConfirmation(uiAnomaly);
             },
         });
     };
 
-    const onDeleteAnomalyConfirmation = (
-        anomalyCardData: AnomalyCardData
-    ): void => {
-        if (!anomalyCardData) {
+    const onDeleteAnomalyConfirmation = (uiAnomaly: UiAnomaly): void => {
+        if (!uiAnomaly) {
             return;
         }
 
-        deleteAnomaly(anomalyCardData.id)
+        deleteAnomaly(uiAnomaly.id)
             .then((anomaly: Anomaly): void => {
                 enqueueSnackbar(
                     t("message.delete-success", { entity: t("label.anomaly") }),
@@ -91,7 +85,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 );
 
                 // Remove deleted anomaly from fetched anomalies
-                removeAnomalyCardData(anomaly);
+                removeUiAnomaly(anomaly);
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -107,7 +101,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             timeRangeDuration.endTime
         )
             .then((anomalies: Anomaly[]): void => {
-                setAnomalyCardDatas(getAnomalyCardDatas(anomalies));
+                setUiAnomalys(getUiAnomalies(anomalies));
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -120,17 +114,15 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             });
     };
 
-    const removeAnomalyCardData = (anomaly: Anomaly): void => {
+    const removeUiAnomaly = (anomaly: Anomaly): void => {
         if (!anomaly) {
             return;
         }
 
-        setAnomalyCardDatas((anomalyCardDatas) =>
-            anomalyCardDatas.filter(
-                (anomalyCardData: AnomalyCardData): boolean => {
-                    return anomalyCardData.id !== anomaly.id;
-                }
-            )
+        setUiAnomalys((uiAnomalys) =>
+            uiAnomalys.filter((uiAnomaly: UiAnomaly): boolean => {
+                return uiAnomaly.id !== anomaly.id;
+            })
         );
     };
 
@@ -148,38 +140,34 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                         setSearchQueryString
                         searchLabel={t("label.search-anomalies")}
                         searchStatusLabel={getSearchStatusLabel(
-                            filteredAnomalyCardDatas
-                                ? filteredAnomalyCardDatas.length
-                                : 0,
-                            anomalyCardDatas ? anomalyCardDatas.length : 0
+                            filteredUiAnomalys ? filteredUiAnomalys.length : 0,
+                            uiAnomalys ? uiAnomalys.length : 0
                         )}
                         onChange={setSearchWords}
                     />
                 </Grid>
 
                 {/* Anomalies */}
-                {filteredAnomalyCardDatas &&
-                    filteredAnomalyCardDatas.map(
-                        (filteredAnomalyCardData, index) => (
-                            <Grid item key={index} sm={12}>
-                                <AnomalyCard
-                                    showViewDetails
-                                    anomalyCardData={filteredAnomalyCardData}
-                                    searchWords={searchWords}
-                                    onDelete={onDeleteAnomaly}
-                                />
-                            </Grid>
-                        )
-                    )}
+                {filteredUiAnomalys &&
+                    filteredUiAnomalys.map((filteredUiAnomaly, index) => (
+                        <Grid item key={index} sm={12}>
+                            <AnomalyCard
+                                showViewDetails
+                                searchWords={searchWords}
+                                uiAnomaly={filteredUiAnomaly}
+                                onDelete={onDeleteAnomaly}
+                            />
+                        </Grid>
+                    ))}
             </Grid>
 
             {/* No data available message */}
-            {isEmpty(filteredAnomalyCardDatas) && isEmpty(searchWords) && (
+            {isEmpty(filteredUiAnomalys) && isEmpty(searchWords) && (
                 <NoDataIndicator />
             )}
 
             {/* No search results available message */}
-            {isEmpty(filteredAnomalyCardDatas) && !isEmpty(searchWords) && (
+            {isEmpty(filteredUiAnomalys) && !isEmpty(searchWords) && (
                 <NoDataIndicator text={t("message.no-search-results")} />
             )}
         </PageContents>

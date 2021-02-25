@@ -35,8 +35,8 @@ export const SubscriptionGroupEmailsAccordian: FunctionComponent<SubscriptionGro
                         entity: t("label.email"),
                     })}
                     list={
-                        props.subscriptionGroupCardData &&
-                        props.subscriptionGroupCardData.emails
+                        props.uiSubscriptionGroup &&
+                        props.uiSubscriptionGroup.emails
                     }
                     validateFn={validateEmail}
                     onChange={handleSubscriptionGroupEmailsChange}

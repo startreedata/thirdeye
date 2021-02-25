@@ -15,18 +15,18 @@ import {
     EmailScheme,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
+import { UiSubscriptionGroupAlert } from "../../rest/dto/ui-subscription-group.interfaces";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import {
     createEmptySubscriptionGroup,
-    getSubscriptionGroupAlertId,
-    getSubscriptionGroupAlertName,
-    getSubscriptionGroupAlerts,
-    getSubscriptionGroupCardData,
+    getUiSubscriptionGroup,
+    getUiSubscriptionGroupAlertId,
+    getUiSubscriptionGroupAlertName,
+    getUiSubscriptionGroupAlerts,
 } from "../../utils/subscription-groups/subscription-groups.util";
 import { validateEmail } from "../../utils/validation/validation.util";
 import { EditableList } from "../editable-list/editable-list.component";
-import { SubscriptionGroupAlert } from "../entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { SubscriptionGroupPropertiesForm } from "./subscription-group-properties-form/subscription-group-properties-form.component";
 import { SubscriptionGroupRenderer } from "./subscription-group-renderer/subscription-group-renderer.component";
@@ -61,7 +61,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         // In case of input subscription group, alerts need to be configured for included alerts
         // don't carry name
         if (props.subscriptionGroup) {
-            newSubscriptionGroup.alerts = getSubscriptionGroupCardData(
+            newSubscriptionGroup.alerts = getUiSubscriptionGroup(
                 props.subscriptionGroup,
                 props.alerts
             ).alerts as Alert[];
@@ -85,13 +85,13 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         onNext();
     };
 
-    const onSubscriptionGroupAlertsChange = (
-        subscriptionGroupAlerts: SubscriptionGroupAlert[]
+    const onUiSubscriptionGroupAlertsChange = (
+        uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]
     ): void => {
         // Update subscription group with subscribed alerts
         setNewSubscriptionGroup(
             (newSubscriptionGroup): SubscriptionGroup => {
-                newSubscriptionGroup.alerts = subscriptionGroupAlerts as Alert[];
+                newSubscriptionGroup.alerts = uiSubscriptionGroupAlerts as Alert[];
 
                 return newSubscriptionGroup;
             }
@@ -226,23 +226,23 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                         </Grid>
 
                         <Grid item sm={12}>
-                            <TransferList<SubscriptionGroupAlert>
+                            <TransferList<UiSubscriptionGroupAlert>
                                 fromLabel={t("label.all-entity", {
                                     entity: t("label.alerts"),
                                 })}
-                                fromList={getSubscriptionGroupAlerts(
+                                fromList={getUiSubscriptionGroupAlerts(
                                     props.alerts
                                 )}
-                                listItemKeyFn={getSubscriptionGroupAlertId}
-                                listItemTextFn={getSubscriptionGroupAlertName}
+                                listItemKeyFn={getUiSubscriptionGroupAlertId}
+                                listItemTextFn={getUiSubscriptionGroupAlertName}
                                 toLabel={t("label.subscribed-alerts")}
                                 toList={
-                                    getSubscriptionGroupCardData(
+                                    getUiSubscriptionGroup(
                                         newSubscriptionGroup,
                                         props.alerts
                                     ).alerts
                                 }
-                                onChange={onSubscriptionGroupAlertsChange}
+                                onChange={onUiSubscriptionGroupAlertsChange}
                             />
                         </Grid>
 

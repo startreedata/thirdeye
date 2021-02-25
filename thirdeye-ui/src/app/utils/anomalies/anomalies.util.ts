@@ -1,9 +1,9 @@
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
 import { cloneDeep, isEmpty } from "lodash";
-import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { formatDateAndTime, formatDuration } from "../date-time/date-time.util";
 import { formatLargeNumber, formatPercentage } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
@@ -18,7 +18,7 @@ export const getAnomalyName = (anomaly: Anomaly): string => {
     })}`;
 };
 
-export const createEmptyAnomalyCardData = (): AnomalyCardData => {
+export const createEmptyUiAnomaly = (): UiAnomaly => {
     const noDataMarker = i18n.t("label.no-data-marker");
 
     return {
@@ -50,31 +50,31 @@ export const createAlertEvaluation = (
     } as AlertEvaluation;
 };
 
-export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
-    const anomalyCardData = createEmptyAnomalyCardData();
+export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
+    const uiAnomaly = createEmptyUiAnomaly();
 
     if (!anomaly) {
-        return anomalyCardData;
+        return uiAnomaly;
     }
 
     const noDataMarker = i18n.t("label.no-data-marker");
 
     // Basic properties
-    anomalyCardData.id = anomaly.id;
-    anomalyCardData.name = getAnomalyName(anomaly);
+    uiAnomaly.id = anomaly.id;
+    uiAnomaly.name = getAnomalyName(anomaly);
 
     // Alert properties
     if (anomaly.alert) {
-        anomalyCardData.alertId = anomaly.alert.id;
-        anomalyCardData.alertName = anomaly.alert.name || noDataMarker;
+        uiAnomaly.alertId = anomaly.alert.id;
+        uiAnomaly.alertName = anomaly.alert.name || noDataMarker;
     }
 
     // Current and predicted values
     if (anomaly.avgCurrentVal) {
-        anomalyCardData.current = formatLargeNumber(anomaly.avgCurrentVal);
+        uiAnomaly.current = formatLargeNumber(anomaly.avgCurrentVal);
     }
     if (anomaly.avgBaselineVal) {
-        anomalyCardData.predicted = formatLargeNumber(anomaly.avgBaselineVal);
+        uiAnomaly.predicted = formatLargeNumber(anomaly.avgBaselineVal);
     }
 
     // Calculate deviation if both current and average values are available
@@ -82,62 +82,57 @@ export const getAnomalyCardData = (anomaly: Anomaly): AnomalyCardData => {
         const deviation =
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
             anomaly.avgBaselineVal;
-        anomalyCardData.deviation = formatPercentage(deviation);
-        anomalyCardData.negativeDeviation = deviation < 0;
+        uiAnomaly.deviation = formatPercentage(deviation);
+        uiAnomaly.negativeDeviation = deviation < 0;
     }
 
     // Start and end time
     if (anomaly.startTime) {
-        anomalyCardData.startTime = formatDateAndTime(anomaly.startTime);
+        uiAnomaly.startTime = formatDateAndTime(anomaly.startTime);
     }
     if (anomaly.endTime) {
-        anomalyCardData.endTime = formatDateAndTime(anomaly.endTime);
+        uiAnomaly.endTime = formatDateAndTime(anomaly.endTime);
     }
 
     // Duration
     if (anomaly.startTime && anomaly.endTime) {
-        anomalyCardData.duration = formatDuration(
-            anomaly.startTime,
-            anomaly.endTime
-        );
+        uiAnomaly.duration = formatDuration(anomaly.startTime, anomaly.endTime);
     }
 
-    return anomalyCardData;
+    return uiAnomaly;
 };
 
-export const getAnomalyCardDatas = (
-    anomalies: Anomaly[]
-): AnomalyCardData[] => {
+export const getUiAnomalies = (anomalies: Anomaly[]): UiAnomaly[] => {
     if (isEmpty(anomalies)) {
         return [];
     }
 
-    const anomalyCardDatas = [];
+    const uiAnomalys = [];
     for (const anomaly of anomalies) {
-        anomalyCardDatas.push(getAnomalyCardData(anomaly));
+        uiAnomalys.push(getUiAnomaly(anomaly));
     }
 
-    return anomalyCardDatas;
+    return uiAnomalys;
 };
 
 export const filterAnomalies = (
-    anomalyCardDatas: AnomalyCardData[],
+    uiAnomalies: UiAnomaly[],
     searchWords: string[]
-): AnomalyCardData[] => {
-    if (isEmpty(anomalyCardDatas)) {
+): UiAnomaly[] => {
+    if (isEmpty(uiAnomalies)) {
         return [];
     }
 
     if (isEmpty(searchWords)) {
-        return anomalyCardDatas;
+        return uiAnomalies;
     }
 
-    const filteredAnomalyCardDatas = [];
-    for (const anomaly of anomalyCardDatas) {
+    const filteredUiAnomalies = [];
+    for (const uiAnomaly of uiAnomalies) {
         for (const searchWord of searchWords) {
             if (
                 deepSearchStringProperty(
-                    anomaly,
+                    uiAnomaly,
                     // Check if string property value contains current search word
                     (value) =>
                         Boolean(value) &&
@@ -145,14 +140,14 @@ export const filterAnomalies = (
                             -1
                 )
             ) {
-                filteredAnomalyCardDatas.push(anomaly);
+                filteredUiAnomalies.push(uiAnomaly);
 
                 break;
             }
         }
     }
 
-    return filteredAnomalyCardDatas;
+    return filteredUiAnomalies;
 };
 
 export const filterAnomaliesByTime = (

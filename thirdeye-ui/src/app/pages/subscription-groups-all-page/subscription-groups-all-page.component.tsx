@@ -4,12 +4,12 @@ import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { SubscriptionGroupCardData } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupList } from "../../components/subscription-group-list/subscription-group-list.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
@@ -18,13 +18,12 @@ import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
-import { getSubscriptionGroupCardDatas } from "../../utils/subscription-groups/subscription-groups.util";
+import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
-    const [
-        subscriptionGroupCardDatas,
-        setSubscriptionGroupCardDatas,
-    ] = useState<SubscriptionGroupCardData[] | null>(null);
+    const [uiSubscriptionGroups, setUiSubscriptionGroups] = useState<
+        UiSubscriptionGroup[] | null
+    >(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
@@ -36,34 +35,32 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     }, []);
 
     const onDeleteSubscriptionGroup = (
-        subscriptionGroupCardData: SubscriptionGroupCardData
+        uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
-        if (!subscriptionGroupCardData) {
+        if (!uiSubscriptionGroup) {
             return;
         }
 
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", {
-                name: subscriptionGroupCardData.name,
+                name: uiSubscriptionGroup.name,
             }),
             okButtonLabel: t("label.delete"),
             onOk: (): void => {
-                onDeleteSubscriptionGroupConfirmation(
-                    subscriptionGroupCardData
-                );
+                onDeleteSubscriptionGroupConfirmation(uiSubscriptionGroup);
             },
         });
     };
 
     const onDeleteSubscriptionGroupConfirmation = (
-        subscriptionGroupCardData: SubscriptionGroupCardData
+        uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
-        if (!subscriptionGroupCardData) {
+        if (!uiSubscriptionGroup) {
             return;
         }
 
-        deleteSubscriptionGroup(subscriptionGroupCardData.id)
+        deleteSubscriptionGroup(uiSubscriptionGroup.id)
             .then((subscriptionGroup: SubscriptionGroup): void => {
                 enqueueSnackbar(
                     t("message.delete-success", {
@@ -73,7 +70,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                 );
 
                 // Remove deleted subscription group from fetched subscription groups
-                removeSubscriptionGroupCardData(subscriptionGroup);
+                removeUiSubscriptionGroup(subscriptionGroup);
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -86,8 +83,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     };
 
     const fetchAllSubscriptionGroups = (): void => {
-        setSubscriptionGroupCardDatas(null);
-        let fetchedSubscriptionGroupCardDatas: SubscriptionGroupCardData[] = [];
+        setUiSubscriptionGroups(null);
+        let fetchedUiSubscriptionGroups: UiSubscriptionGroup[] = [];
         Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
             .then(([subscriptionGroupsResponse, alertsResponse]): void => {
                 // Determine if any of the calls failed
@@ -107,37 +104,30 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                     fetchedAlerts = alertsResponse.value;
                 }
                 if (subscriptionGroupsResponse.status === "fulfilled") {
-                    fetchedSubscriptionGroupCardDatas = getSubscriptionGroupCardDatas(
+                    fetchedUiSubscriptionGroups = getUiSubscriptionGroups(
                         subscriptionGroupsResponse.value,
                         fetchedAlerts
                     );
                 }
             })
             .finally((): void => {
-                setSubscriptionGroupCardDatas(
-                    fetchedSubscriptionGroupCardDatas
-                );
+                setUiSubscriptionGroups(fetchedUiSubscriptionGroups);
             });
     };
 
-    const removeSubscriptionGroupCardData = (
+    const removeUiSubscriptionGroup = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
         if (!subscriptionGroup) {
             return;
         }
 
-        setSubscriptionGroupCardDatas(
-            (subscriptionGroupCardDatas) =>
-                subscriptionGroupCardDatas &&
-                subscriptionGroupCardDatas.filter(
-                    (
-                        subscriptionGroupCardData: SubscriptionGroupCardData
-                    ): boolean => {
-                        return (
-                            subscriptionGroupCardData.id !==
-                            subscriptionGroup.id
-                        );
+        setUiSubscriptionGroups(
+            (uiSubscriptionGroups) =>
+                uiSubscriptionGroups &&
+                uiSubscriptionGroups.filter(
+                    (uiSubscriptionGroup: UiSubscriptionGroup): boolean => {
+                        return uiSubscriptionGroup.id !== subscriptionGroup.id;
                     }
                 )
         );
@@ -151,7 +141,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             title={t("label.subscription-groups")}
         >
             <SubscriptionGroupList
-                subscriptionGroupCardDatas={subscriptionGroupCardDatas}
+                uiSubscriptionGroups={uiSubscriptionGroups}
                 onDelete={onDeleteSubscriptionGroup}
             />
         </PageContents>

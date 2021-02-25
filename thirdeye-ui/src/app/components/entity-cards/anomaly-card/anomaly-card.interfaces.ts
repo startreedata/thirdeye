@@ -1,20 +1,8 @@
+import { UiAnomaly } from "../../../rest/dto/ui-anomaly.interfaces";
+
 export interface AnomalyCardProps {
-    anomalyCardData: AnomalyCardData;
+    uiAnomaly: UiAnomaly;
     searchWords?: string[];
     showViewDetails?: boolean;
-    onDelete?: (anomalyCardData: AnomalyCardData) => void;
-}
-
-export interface AnomalyCardData {
-    id: number;
-    name: string;
-    alertId: number;
-    alertName: string;
-    current: string;
-    predicted: string;
-    deviation: string;
-    negativeDeviation: boolean;
-    duration: string;
-    startTime: string;
-    endTime: string;
+    onDelete?: (uiAnomaly: UiAnomaly) => void;
 }

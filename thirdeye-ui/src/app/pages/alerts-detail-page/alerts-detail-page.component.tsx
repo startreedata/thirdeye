@@ -8,7 +8,6 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
-import { AlertCardData } from "../../components/entity-cards/alert-card/alert-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
@@ -22,10 +21,11 @@ import {
 } from "../../rest/alerts/alerts.rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     createAlertEvaluation,
-    getAlertCardData,
+    getUiAlert,
 } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";
@@ -37,7 +37,7 @@ import { AlertsDetailPageParams } from "./alerts-detail-page.interfaces";
 
 export const AlertsDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [alertCardData, setAlertCardData] = useState<AlertCardData>();
+    const [uiAlert, setUiAlert] = useState<UiAlert>();
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
@@ -61,14 +61,14 @@ export const AlertsDetailPage: FunctionComponent = () => {
     useEffect(() => {
         // Fetched alert or time range changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [alertCardData, timeRangeDuration]);
+    }, [uiAlert, timeRangeDuration]);
 
-    const onAlertChange = (alertCardData: AlertCardData): void => {
-        if (!alertCardData || !alertCardData.alert) {
+    const onAlertChange = (uiAlert: UiAlert): void => {
+        if (!uiAlert || !uiAlert.alert) {
             return;
         }
 
-        updateAlert(alertCardData.alert)
+        updateAlert(uiAlert.alert)
             .then((alert: Alert): void => {
                 enqueueSnackbar(
                     t("message.update-success", { entity: t("label.alert") }),
@@ -76,7 +76,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 );
 
                 // Replace updated alert as fetched alert
-                setAlertCardData(getAlertCardData(alert, subscriptionGroups));
+                setUiAlert(getUiAlert(alert, subscriptionGroups));
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -86,29 +86,29 @@ export const AlertsDetailPage: FunctionComponent = () => {
             });
     };
 
-    const onDeleteAlert = (alertCardData: AlertCardData): void => {
-        if (!alertCardData) {
+    const onDeleteAlert = (uiAlert: UiAlert): void => {
+        if (!uiAlert) {
             return;
         }
 
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", {
-                name: alertCardData.name,
+                name: uiAlert.name,
             }),
             okButtonLabel: t("label.delete"),
             onOk: (): void => {
-                onDeleteAlertConfirmation(alertCardData);
+                onDeleteAlertConfirmation(uiAlert);
             },
         });
     };
 
-    const onDeleteAlertConfirmation = (alertCardData: AlertCardData): void => {
-        if (!alertCardData) {
+    const onDeleteAlertConfirmation = (uiAlert: UiAlert): void => {
+        if (!uiAlert) {
             return;
         }
 
-        deleteAlert(alertCardData.id)
+        deleteAlert(uiAlert.id)
             .then((): void => {
                 enqueueSnackbar(
                     t("message.delete-success", { entity: t("label.alert") }),
@@ -165,8 +165,8 @@ export const AlertsDetailPage: FunctionComponent = () => {
                     setSubscriptionGroups(fetchedSubscriptionGroups);
                 }
                 if (alertResponse.status === "fulfilled") {
-                    setAlertCardData(
-                        getAlertCardData(
+                    setUiAlert(
+                        getUiAlert(
                             alertResponse.value,
                             fetchedSubscriptionGroups
                         )
@@ -182,7 +182,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
         setAlertEvaluation(null);
         let fetchedAlertEvaluation = {} as AlertEvaluation;
 
-        if (!alertCardData || !alertCardData.alert) {
+        if (!uiAlert || !uiAlert.alert) {
             setAlertEvaluation(fetchedAlertEvaluation);
 
             return;
@@ -190,7 +190,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
 
         getAlertEvaluation(
             createAlertEvaluation(
-                alertCardData.alert,
+                uiAlert.alert,
                 timeRangeDuration.startTime,
                 timeRangeDuration.endTime
             )
@@ -214,13 +214,13 @@ export const AlertsDetailPage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={alertCardData ? alertCardData.name : ""}>
-            {alertCardData && (
+        <PageContents centered title={uiAlert ? uiAlert.name : ""}>
+            {uiAlert && (
                 <Grid container>
                     {/* Alert */}
                     <Grid item sm={12}>
                         <AlertCard
-                            alertCardData={alertCardData}
+                            uiAlert={uiAlert}
                             onChange={onAlertChange}
                             onDelete={onDeleteAlert}
                         />
@@ -231,7 +231,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
                         <AlertEvaluationTimeSeriesCard
                             showMaximizeButton
                             alertEvaluation={alertEvaluation}
-                            maximizedTitle={alertCardData.name}
+                            maximizedTitle={uiAlert.name}
                             visualizationHeight={500}
                         />
                     </Grid>
@@ -239,7 +239,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
             )}
 
             {/* No data available message */}
-            {!alertCardData && <NoDataIndicator />}
+            {!uiAlert && <NoDataIndicator />}
         </PageContents>
     );
 };

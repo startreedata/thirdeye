@@ -1,13 +1,13 @@
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
-    SubscriptionGroupAlert,
-    SubscriptionGroupCardData,
-} from "../entity-cards/subscription-group-card/subscription-group-card.interfaces";
+    UiSubscriptionGroup,
+    UiSubscriptionGroupAlert,
+} from "../../rest/dto/ui-subscription-group.interfaces";
 
-export interface SubscriptionGroupAlertsAccordianProps {
-    subscriptionGroupCardData: SubscriptionGroupCardData;
+export interface UiSubscriptionGroupAlertsAccordianProps {
+    uiSubscriptionGroup: UiSubscriptionGroup;
     alerts: Alert[];
     title: string;
     defaultExpanded?: boolean;
-    onChange?: (subscriptionGroupAlerts: SubscriptionGroupAlert[]) => void;
+    onChange?: (uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]) => void;
 }

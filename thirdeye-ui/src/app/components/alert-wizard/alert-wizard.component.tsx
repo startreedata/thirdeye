@@ -13,10 +13,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import {
-    createDefaultAlert,
-    getAlertCardData,
-} from "../../utils/alerts/alerts.util";
+import { createDefaultAlert, getUiAlert } from "../../utils/alerts/alerts.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
@@ -164,7 +161,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
             return;
         }
 
-        const alertcard = getAlertCardData(props.alert, subs);
+        const alertcard = getUiAlert(props.alert, subs);
         if (isEmpty(alertcard.subscriptionGroups)) {
             // No groups sub
             return;

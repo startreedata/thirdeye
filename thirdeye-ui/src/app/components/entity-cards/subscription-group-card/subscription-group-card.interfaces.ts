@@ -1,21 +1,8 @@
-import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
+import { UiSubscriptionGroup } from "../../../rest/dto/ui-subscription-group.interfaces";
 
 export interface SubscriptionGroupCardProps {
-    subscriptionGroupCardData: SubscriptionGroupCardData;
+    uiSubscriptionGroup: UiSubscriptionGroup;
     searchWords?: string[];
     showViewDetails?: boolean;
-    onDelete?: (subscriptionGroupCardData: SubscriptionGroupCardData) => void;
-}
-
-export interface SubscriptionGroupCardData {
-    id: number;
-    name: string;
-    alerts: SubscriptionGroupAlert[];
-    emails: string[];
-    subscriptionGroup: SubscriptionGroup | null;
-}
-
-export interface SubscriptionGroupAlert {
-    id: number;
-    name: string;
+    onDelete?: (uiSubscriptionGroup: UiSubscriptionGroup) => void;
 }

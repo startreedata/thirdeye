@@ -1,15 +1,15 @@
 import i18n from "i18next";
 import { isEmpty } from "lodash";
-import { MetricCardData } from "../../components/entity-cards/metric-card/metric-card.interfaces";
 import {
     LogicalView,
     Metric,
     MetricAggFunction,
 } from "../../rest/dto/metric.interfaces";
+import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { formatNumber } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
-export const createEmptyMetricCardData = (): MetricCardData => {
+export const createEmptyUiMetric = (): UiMetric => {
     const noDataMarker = i18n.t("label.no-data-marker");
 
     return {
@@ -35,80 +35,79 @@ export const createEmptyMetricLogicalView = (): LogicalView => {
     };
 };
 
-export const getMetricCardData = (metric: Metric): MetricCardData => {
-    const metricCardData = createEmptyMetricCardData();
+export const getUiMetric = (metric: Metric): UiMetric => {
+    const uiMetric = createEmptyUiMetric();
 
     if (!metric) {
-        return metricCardData;
+        return uiMetric;
     }
 
     const noDataMarker = i18n.t("label.no-data-marker");
 
     // Basic properties
-    metricCardData.id = metric.id;
-    metricCardData.name = metric.name || noDataMarker;
-    metricCardData.active = Boolean(metric.active);
-    metricCardData.activeText = metric.active
+    uiMetric.id = metric.id;
+    uiMetric.name = metric.name || noDataMarker;
+    uiMetric.active = Boolean(metric.active);
+    uiMetric.activeText = metric.active
         ? i18n.t("label.active")
         : i18n.t("label.inactive");
-    metricCardData.aggregationColumn = metric.aggregationColumn || noDataMarker;
-    metricCardData.aggregationFunction =
-        metric.aggregationFunction || noDataMarker;
+    uiMetric.aggregationColumn = metric.aggregationColumn || noDataMarker;
+    uiMetric.aggregationFunction = metric.aggregationFunction || noDataMarker;
 
     // Dataset properties
     if (metric.dataset) {
-        metricCardData.datasetId = metric.dataset.id;
-        metricCardData.datasetName = metric.dataset.name || noDataMarker;
+        uiMetric.datasetId = metric.dataset.id;
+        uiMetric.datasetName = metric.dataset.name || noDataMarker;
     }
 
     // Logical view properties
     if (!metric.views) {
-        return metricCardData;
+        return uiMetric;
     }
 
-    metricCardData.viewCount = formatNumber(metric.views.length);
+    uiMetric.viewCount = formatNumber(metric.views.length);
     for (const view of metric.views) {
         const metricLocicalView = createEmptyMetricLogicalView();
         metricLocicalView.name = view.name || noDataMarker;
         metricLocicalView.query = view.query || noDataMarker;
 
-        metricCardData.views.push(metricLocicalView);
+        uiMetric.views.push(metricLocicalView);
     }
 
-    return metricCardData;
+    return uiMetric;
 };
 
-export const getMetricCardDatas = (metrics: Metric[]): MetricCardData[] => {
+export const getUiMetrics = (metrics: Metric[]): UiMetric[] => {
     if (isEmpty(metrics)) {
         return [];
     }
 
-    const metricCardDatas = [];
+    const uiMetrics = [];
     for (const metric of metrics) {
-        metricCardDatas.push(getMetricCardData(metric));
+        uiMetrics.push(getUiMetric(metric));
     }
 
-    return metricCardDatas;
+    return uiMetrics;
 };
 
 export const filterMetrics = (
-    metricCardDatas: MetricCardData[],
+    uiMetrics: UiMetric[],
     searchWords: string[]
-): MetricCardData[] => {
-    if (isEmpty(metricCardDatas)) {
+): UiMetric[] => {
+    if (isEmpty(uiMetrics)) {
         return [];
     }
 
     if (isEmpty(searchWords)) {
-        return metricCardDatas;
+        return uiMetrics;
     }
 
-    const filteredMetricCardDatas = [];
-    for (const metric of metricCardDatas) {
+    const filteredUiMetrics = [];
+    for (const uiMetric of uiMetrics) {
         for (const searchWord of searchWords) {
             if (
                 deepSearchStringProperty(
-                    metric,
+                    uiMetric,
                     // Check if string property value contains current search word
                     (value) =>
                         Boolean(value) &&
@@ -116,12 +115,12 @@ export const filterMetrics = (
                             -1
                 )
             ) {
-                filteredMetricCardDatas.push(metric);
+                filteredUiMetrics.push(uiMetric);
 
                 break;
             }
         }
     }
 
-    return filteredMetricCardDatas;
+    return filteredUiMetrics;
 };

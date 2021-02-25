@@ -8,36 +8,36 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { UiSubscriptionGroupAlert } from "../../rest/dto/ui-subscription-group.interfaces";
 import { getAlertsDetailPath } from "../../utils/routes/routes.util";
 import {
-    getSubscriptionGroupAlertId,
-    getSubscriptionGroupAlertName,
-    getSubscriptionGroupAlerts,
+    getUiSubscriptionGroupAlertId,
+    getUiSubscriptionGroupAlertName,
+    getUiSubscriptionGroupAlerts,
 } from "../../utils/subscription-groups/subscription-groups.util";
-import { SubscriptionGroupAlert } from "../entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
-import { SubscriptionGroupAlertsAccordianProps } from "./subscription-group-alerts-accordian.interfaces";
+import { UiSubscriptionGroupAlertsAccordianProps } from "./subscription-group-alerts-accordian.interfaces";
 
-export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGroupAlertsAccordianProps> = (
-    props: SubscriptionGroupAlertsAccordianProps
+export const UiSubscriptionGroupAlertsAccordian: FunctionComponent<UiSubscriptionGroupAlertsAccordianProps> = (
+    props: UiSubscriptionGroupAlertsAccordianProps
 ) => {
     const history = useHistory();
     const { t } = useTranslation();
 
     const handleAlertClick = (
-        subscriptionGroupAlert: SubscriptionGroupAlert
+        uiSubscriptionGroupAlert: UiSubscriptionGroupAlert
     ): void => {
-        if (!subscriptionGroupAlert) {
+        if (!uiSubscriptionGroupAlert) {
             return;
         }
 
-        history.push(getAlertsDetailPath(subscriptionGroupAlert.id));
+        history.push(getAlertsDetailPath(uiSubscriptionGroupAlert.id));
     };
 
-    const handleSubscriptionGroupAlertsChange = (
-        subscriptionGroupAlerts: SubscriptionGroupAlert[]
+    const handleUiSubscriptionGroupAlertsChange = (
+        uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]
     ): void => {
-        props.onChange && props.onChange(subscriptionGroupAlerts);
+        props.onChange && props.onChange(uiSubscriptionGroupAlerts);
     };
 
     return (
@@ -49,20 +49,20 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
 
             {/* Transfer list */}
             <AccordionDetails>
-                <TransferList<SubscriptionGroupAlert>
+                <TransferList<UiSubscriptionGroupAlert>
                     link
                     fromLabel={t("label.all-entity", {
                         entity: t("label.alerts"),
                     })}
-                    fromList={getSubscriptionGroupAlerts(props.alerts)}
-                    listItemKeyFn={getSubscriptionGroupAlertId}
-                    listItemTextFn={getSubscriptionGroupAlertName}
+                    fromList={getUiSubscriptionGroupAlerts(props.alerts)}
+                    listItemKeyFn={getUiSubscriptionGroupAlertId}
+                    listItemTextFn={getUiSubscriptionGroupAlertName}
                     toLabel={t("label.subscribed-alerts")}
                     toList={
-                        props.subscriptionGroupCardData &&
-                        props.subscriptionGroupCardData.alerts
+                        props.uiSubscriptionGroup &&
+                        props.uiSubscriptionGroup.alerts
                     }
-                    onChange={handleSubscriptionGroupAlertsChange}
+                    onChange={handleUiSubscriptionGroupAlertsChange}
                     onClick={handleAlertClick}
                 />
             </AccordionDetails>

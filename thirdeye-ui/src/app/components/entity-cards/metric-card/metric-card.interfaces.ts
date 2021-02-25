@@ -1,24 +1,8 @@
-import {
-    LogicalView,
-    MetricAggFunction,
-} from "../../../rest/dto/metric.interfaces";
+import { UiMetric } from "../../../rest/dto/ui-metric.interfaces";
 
 export interface MetricCardProps {
-    metricCardData: MetricCardData;
+    uiMetric: UiMetric;
     searchWords?: string[];
     showViewDetails?: boolean;
-    onDelete?: (metricCardData: MetricCardData) => void;
-}
-
-export interface MetricCardData {
-    id: number;
-    name: string;
-    datasetId: number;
-    datasetName: string;
-    active: boolean;
-    activeText: string;
-    aggregationColumn: string;
-    aggregationFunction: MetricAggFunction;
-    viewCount: string;
-    views: LogicalView[];
+    onDelete?: (uiMetric: UiMetric) => void;
 }

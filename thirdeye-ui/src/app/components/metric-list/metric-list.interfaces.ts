@@ -1,7 +1,7 @@
-import { MetricCardData } from "../entity-cards/metric-card/metric-card.interfaces";
+import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 
 export interface MetricListProps {
     hideSearchBar?: boolean;
-    metricCardDatas: MetricCardData[] | null;
-    onDelete?: (metricsCardData: MetricCardData) => void;
+    uiMetrics: UiMetric[] | null;
+    onDelete?: (metricsCardData: UiMetric) => void;
 }

@@ -8,7 +8,6 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
-import { AnomalyCardData } from "../../components/entity-cards/anomaly-card/anomaly-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
@@ -18,9 +17,10 @@ import { getAlertEvaluation } from "../../rest/alerts/alerts.rest";
 import { deleteAnomaly, getAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     createAlertEvaluation,
-    getAnomalyCardData,
+    getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getAnomaliesAllPath } from "../../utils/routes/routes.util";
@@ -32,7 +32,7 @@ import { AnomaliesDetailPageParams } from "./anomalies-detail-page.interfaces";
 
 export const AnomaliesDetailPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [anomalyCardData, setAnomalyCardData] = useState<AnomalyCardData>();
+    const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly>();
     const [
         alertEvaluation,
         setAlertEvaluation,
@@ -53,33 +53,31 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     useEffect(() => {
         // Fetched anomaly or time range changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [anomalyCardData, timeRangeDuration]);
+    }, [uiAnomaly, timeRangeDuration]);
 
-    const onDeleteAnomaly = (anomalyCardData: AnomalyCardData): void => {
-        if (!anomalyCardData) {
+    const onDeleteAnomaly = (uiAnomaly: UiAnomaly): void => {
+        if (!uiAnomaly) {
             return;
         }
 
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", {
-                name: anomalyCardData.name,
+                name: uiAnomaly.name,
             }),
             okButtonLabel: t("label.delete"),
             onOk: (): void => {
-                onDeleteAnomalyConfirmation(anomalyCardData);
+                onDeleteAnomalyConfirmation(uiAnomaly);
             },
         });
     };
 
-    const onDeleteAnomalyConfirmation = (
-        anomalyCardData: AnomalyCardData
-    ): void => {
-        if (!anomalyCardData) {
+    const onDeleteAnomalyConfirmation = (uiAnomaly: UiAnomaly): void => {
+        if (!uiAnomaly) {
             return;
         }
 
-        deleteAnomaly(anomalyCardData.id)
+        deleteAnomaly(uiAnomaly.id)
             .then((): void => {
                 enqueueSnackbar(
                     t("message.delete-success", { entity: t("label.anomaly") }),
@@ -114,7 +112,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
 
         getAnomaly(toNumber(params.id))
             .then((anomaly: Anomaly): void => {
-                setAnomalyCardData(getAnomalyCardData(anomaly));
+                setUiAnomaly(getUiAnomaly(anomaly));
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -131,7 +129,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         setAlertEvaluation(null);
         let fetchedAlertEvaluation = {} as AlertEvaluation;
 
-        if (!anomalyCardData) {
+        if (!uiAnomaly) {
             setAlertEvaluation(fetchedAlertEvaluation);
 
             return;
@@ -139,7 +137,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
 
         getAlertEvaluation(
             createAlertEvaluation(
-                anomalyCardData.alertId,
+                uiAnomaly.alertId,
                 timeRangeDuration.startTime,
                 timeRangeDuration.endTime
             )
@@ -163,16 +161,13 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents
-            centered
-            title={anomalyCardData ? anomalyCardData.name : ""}
-        >
-            {anomalyCardData && (
+        <PageContents centered title={uiAnomaly ? uiAnomaly.name : ""}>
+            {uiAnomaly && (
                 <Grid container>
                     {/* Anomaly */}
                     <Grid item sm={12}>
                         <AnomalyCard
-                            anomalyCardData={anomalyCardData}
+                            uiAnomaly={uiAnomaly}
                             onDelete={onDeleteAnomaly}
                         />
                     </Grid>
@@ -182,7 +177,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                         <AlertEvaluationTimeSeriesCard
                             showMaximizeButton
                             alertEvaluation={alertEvaluation}
-                            maximizedTitle={anomalyCardData.name}
+                            maximizedTitle={uiAnomaly.name}
                             visualizationHeight={500}
                         />
                     </Grid>
@@ -190,7 +185,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
             )}
 
             {/* No data available message */}
-            {!anomalyCardData && <NoDataIndicator />}
+            {!uiAnomaly && <NoDataIndicator />}
         </PageContents>
     );
 };

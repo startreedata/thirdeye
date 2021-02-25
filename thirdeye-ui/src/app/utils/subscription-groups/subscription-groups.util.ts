@@ -1,14 +1,14 @@
 import i18n from "i18next";
 import { cloneDeep, isEmpty } from "lodash";
-import {
-    SubscriptionGroupAlert,
-    SubscriptionGroupCardData,
-} from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     EmailScheme,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
+import {
+    UiSubscriptionGroup,
+    UiSubscriptionGroupAlert,
+} from "../../rest/dto/ui-subscription-group.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
@@ -23,7 +23,7 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
     } as SubscriptionGroup;
 };
 
-export const createEmptySubscriptionGroupCardData = (): SubscriptionGroupCardData => {
+export const createEmptyUiSubscriptionGroup = (): UiSubscriptionGroup => {
     return {
         id: -1,
         name: i18n.t("label.no-data-marker"),
@@ -33,19 +33,19 @@ export const createEmptySubscriptionGroupCardData = (): SubscriptionGroupCardDat
     };
 };
 
-export const createEmptySubscriptionGroupAlert = (): SubscriptionGroupAlert => {
+export const createEmptyUiSubscriptionGroupAlert = (): UiSubscriptionGroupAlert => {
     return {
         id: -1,
         name: i18n.t("label.no-data-marker"),
     };
 };
 
-export const getSubscriptionGroupCardData = (
+export const getUiSubscriptionGroup = (
     subscriptionGroup: SubscriptionGroup,
     alerts: Alert[]
-): SubscriptionGroupCardData => {
+): UiSubscriptionGroup => {
     if (!subscriptionGroup) {
-        return createEmptySubscriptionGroupCardData();
+        return createEmptyUiSubscriptionGroup();
     }
 
     // Map alerts to subscription group ids
@@ -54,16 +54,16 @@ export const getSubscriptionGroupCardData = (
         alerts
     );
 
-    return getSubscriptionGroupCardDataInternal(
+    return getUiSubscriptionGroupInternal(
         subscriptionGroup,
         alertsToSubscriptionGroupIdsMap
     );
 };
 
-export const getSubscriptionGroupCardDatas = (
+export const getUiSubscriptionGroups = (
     subscriptionGroups: SubscriptionGroup[],
     alerts: Alert[]
-): SubscriptionGroupCardData[] => {
+): UiSubscriptionGroup[] => {
     if (isEmpty(subscriptionGroups)) {
         return [];
     }
@@ -74,94 +74,93 @@ export const getSubscriptionGroupCardDatas = (
         alerts
     );
 
-    const subscriptionGroupCardDatas = [];
+    const uiSubscriptionGroups = [];
     for (const subscriptionGroup of subscriptionGroups) {
-        subscriptionGroupCardDatas.push(
-            getSubscriptionGroupCardDataInternal(
+        uiSubscriptionGroups.push(
+            getUiSubscriptionGroupInternal(
                 subscriptionGroup,
                 alertsToSubscriptionGroupIdsMap
             )
         );
     }
 
-    return subscriptionGroupCardDatas;
+    return uiSubscriptionGroups;
 };
 
-export const getSubscriptionGroupAlert = (
+export const getUiSubscriptionGroupAlert = (
     alert: Alert
-): SubscriptionGroupAlert => {
-    const subscriptionGroupAlert = createEmptySubscriptionGroupAlert();
+): UiSubscriptionGroupAlert => {
+    const uiSubscriptionGroupAlert = createEmptyUiSubscriptionGroupAlert();
 
     if (!alert) {
-        return subscriptionGroupAlert;
+        return uiSubscriptionGroupAlert;
     }
 
     // Basic properties
-    subscriptionGroupAlert.id = alert.id;
-    subscriptionGroupAlert.name = alert.name || i18n.t("label.no-data-marker");
+    uiSubscriptionGroupAlert.id = alert.id;
+    uiSubscriptionGroupAlert.name =
+        alert.name || i18n.t("label.no-data-marker");
 
-    return subscriptionGroupAlert;
+    return uiSubscriptionGroupAlert;
 };
 
-export const getSubscriptionGroupAlerts = (
+export const getUiSubscriptionGroupAlerts = (
     alerts: Alert[]
-): SubscriptionGroupAlert[] => {
+): UiSubscriptionGroupAlert[] => {
     if (isEmpty(alerts)) {
         return [];
     }
 
-    const subscriptionGroupAlerts = [];
+    const uiSubscriptionGroupAlerts = [];
     for (const alert of alerts) {
-        subscriptionGroupAlerts.push(getSubscriptionGroupAlert(alert));
+        uiSubscriptionGroupAlerts.push(getUiSubscriptionGroupAlert(alert));
     }
 
-    return subscriptionGroupAlerts;
+    return uiSubscriptionGroupAlerts;
 };
 
-export const getSubscriptionGroupAlertId = (
-    subscriptionGroupAlert: SubscriptionGroupAlert
+export const getUiSubscriptionGroupAlertId = (
+    uiSubscriptionGroupAlert: UiSubscriptionGroupAlert
 ): number => {
-    if (!subscriptionGroupAlert) {
+    if (!uiSubscriptionGroupAlert) {
         return -1;
     }
 
-    return subscriptionGroupAlert.id;
+    return uiSubscriptionGroupAlert.id;
 };
 
-export const getSubscriptionGroupAlertName = (
-    subscriptionGroupAlert: SubscriptionGroupAlert
+export const getUiSubscriptionGroupAlertName = (
+    uiSubscriptionGroupAlert: UiSubscriptionGroupAlert
 ): string => {
-    if (!subscriptionGroupAlert) {
+    if (!uiSubscriptionGroupAlert) {
         return "";
     }
 
-    return subscriptionGroupAlert.name;
+    return uiSubscriptionGroupAlert.name;
 };
 
 export const filterSubscriptionGroups = (
-    subscriptionGroupCardDatas: SubscriptionGroupCardData[],
+    uiSubscriptionGroups: UiSubscriptionGroup[],
     searchWords: string[]
-): SubscriptionGroupCardData[] => {
-    if (isEmpty(subscriptionGroupCardDatas)) {
+): UiSubscriptionGroup[] => {
+    if (isEmpty(uiSubscriptionGroups)) {
         return [];
     }
 
     if (isEmpty(searchWords)) {
-        return subscriptionGroupCardDatas;
+        return uiSubscriptionGroups;
     }
 
-    const filteredSubscriptionGroupCardDatas = [];
-    for (const subscriptionGroupCardData of subscriptionGroupCardDatas) {
-        // Only the subscription group card data to be searched and not contained subscription group
-        const subscriptionGroupCardDataCopy = cloneDeep(
-            subscriptionGroupCardData
-        );
-        subscriptionGroupCardDataCopy.subscriptionGroup = null;
+    const filteredUiSubscriptionGroups = [];
+    for (const uiSubscriptionGroup of uiSubscriptionGroups) {
+        // Only the UI subscription group to be searched and not contained subscription group
+        const uiSubscriptionGroupCopy = cloneDeep(uiSubscriptionGroup);
+        uiSubscriptionGroupCopy.subscriptionGroup = null;
 
         for (const searchWord of searchWords) {
             if (
                 deepSearchStringProperty(
-                    subscriptionGroupCardDataCopy,
+                    uiSubscriptionGroupCopy,
                     // Check if string property value contains current search word
                     (value) =>
                         Boolean(value) &&
@@ -169,52 +168,50 @@ export const filterSubscriptionGroups = (
                             -1
                 )
             ) {
-                filteredSubscriptionGroupCardDatas.push(
-                    subscriptionGroupCardData
-                );
+                filteredUiSubscriptionGroups.push(uiSubscriptionGroup);
 
                 break;
             }
         }
     }
 
-    return filteredSubscriptionGroupCardDatas;
+    return filteredUiSubscriptionGroups;
 };
 
-const getSubscriptionGroupCardDataInternal = (
+const getUiSubscriptionGroupInternal = (
     subscriptionGroup: SubscriptionGroup,
-    alertsToSubscriptionGroupIdsMap: Map<number, SubscriptionGroupAlert[]>
-): SubscriptionGroupCardData => {
-    const subscriptionGroupCardData = createEmptySubscriptionGroupCardData();
+    alertsToSubscriptionGroupIdsMap: Map<number, UiSubscriptionGroupAlert[]>
+): UiSubscriptionGroup => {
+    const uiSubscriptionGroup = createEmptyUiSubscriptionGroup();
     const noDataMarker = i18n.t("label.no-data-marker");
 
     // Maintain a copy of subscription group
-    subscriptionGroupCardData.subscriptionGroup = subscriptionGroup;
+    uiSubscriptionGroup.subscriptionGroup = subscriptionGroup;
 
     // Basic properties
-    subscriptionGroupCardData.id = subscriptionGroup.id;
-    subscriptionGroupCardData.name = subscriptionGroup.name || noDataMarker;
+    uiSubscriptionGroup.id = subscriptionGroup.id;
+    uiSubscriptionGroup.name = subscriptionGroup.name || noDataMarker;
 
     // Alerts
-    subscriptionGroupCardData.alerts =
+    uiSubscriptionGroup.alerts =
         (alertsToSubscriptionGroupIdsMap &&
             alertsToSubscriptionGroupIdsMap.get(subscriptionGroup.id)) ||
         [];
 
     // Emails
-    subscriptionGroupCardData.emails =
+    uiSubscriptionGroup.emails =
         (subscriptionGroup.notificationSchemes &&
             subscriptionGroup.notificationSchemes.email &&
             subscriptionGroup.notificationSchemes.email.to) ||
         [];
 
-    return subscriptionGroupCardData;
+    return uiSubscriptionGroup;
 };
 
 const mapAlertsToSubscriptionGroupIds = (
     subscriptionGroups: SubscriptionGroup[],
     alerts: Alert[]
-): Map<number, SubscriptionGroupAlert[]> => {
+): Map<number, UiSubscriptionGroupAlert[]> => {
     const alertsToSubscriptionGroupIdsMap = new Map();
 
     const alertToAlertIdsMap = mapAlertsToAlertIds(alerts);
@@ -233,12 +230,12 @@ const mapAlertsToSubscriptionGroupIds = (
                 continue;
             }
 
-            const subscriptionGroupAlerts = alertsToSubscriptionGroupIdsMap.get(
+            const uiSubscriptionGroupAlerts = alertsToSubscriptionGroupIdsMap.get(
                 subscriptionGroup.id
             );
-            if (subscriptionGroupAlerts) {
+            if (uiSubscriptionGroupAlerts) {
                 // Add to existing list
-                subscriptionGroupAlerts.push(mappedAlert);
+                uiSubscriptionGroupAlerts.push(mappedAlert);
             } else {
                 // Create and add to list
                 alertsToSubscriptionGroupIdsMap.set(subscriptionGroup.id, [
@@ -253,7 +250,7 @@ const mapAlertsToSubscriptionGroupIds = (
 
 const mapAlertsToAlertIds = (
     alerts: Alert[]
-): Map<number, SubscriptionGroupAlert> => {
+): Map<number, UiSubscriptionGroupAlert> => {
     const alertsToAlertIdsMap = new Map();
 
     if (isEmpty(alerts)) {
@@ -261,7 +258,7 @@ const mapAlertsToAlertIds = (
     }
 
     for (const alert of alerts) {
-        alertsToAlertIdsMap.set(alert.id, getSubscriptionGroupAlert(alert));
+        alertsToAlertIdsMap.set(alert.id, getUiSubscriptionGroupAlert(alert));
     }
 
     return alertsToAlertIdsMap;

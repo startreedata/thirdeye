@@ -1,7 +1,7 @@
-import { SubscriptionGroupCardData } from "../entity-cards/subscription-group-card/subscription-group-card.interfaces";
+import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 
 export interface SubscriptionGroupEmailsAccordianProps {
-    subscriptionGroupCardData: SubscriptionGroupCardData;
+    uiSubscriptionGroup: UiSubscriptionGroup;
     title: string;
     defaultExpanded?: boolean;
     onChange?: (emails: string[]) => void;

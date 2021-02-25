@@ -1,35 +1,9 @@
-import { Alert } from "../../../rest/dto/alert.interfaces";
+import { UiAlert } from "../../../rest/dto/ui-alert.interfaces";
 
 export interface AlertCardProps {
-    alertCardData: AlertCardData;
+    uiAlert: UiAlert;
     searchWords?: string[];
     showViewDetails?: boolean;
-    onChange?: (alertCardData: AlertCardData) => void;
-    onDelete?: (alertCardData: AlertCardData) => void;
-}
-
-export interface AlertCardData {
-    id: number;
-    name: string;
-    active: boolean;
-    activeText: string;
-    userId: number;
-    createdBy: string;
-    detectionTypes: string[];
-    filteredBy: string[];
-    datasetAndMetrics: AlertDatasetAndMetric[];
-    subscriptionGroups: AlertSubscriptionGroup[];
-    alert: Alert | null;
-}
-
-export interface AlertDatasetAndMetric {
-    datasetId: number;
-    datasetName: string;
-    metricId: number;
-    metricName: string;
-}
-
-export interface AlertSubscriptionGroup {
-    id: number;
-    name: string;
+    onChange?: (uiAlert: UiAlert) => void;
+    onDelete?: (uiAlert: UiAlert) => void;
 }

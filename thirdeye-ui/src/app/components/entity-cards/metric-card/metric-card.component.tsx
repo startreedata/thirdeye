@@ -42,22 +42,22 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
     };
 
     const handleMetricViewDetails = (): void => {
-        if (!props.metricCardData) {
+        if (!props.uiMetric) {
             return;
         }
 
-        history.push(getMetricsDetailPath(props.metricCardData.id));
+        history.push(getMetricsDetailPath(props.uiMetric.id));
         handleMetricOptionsClose();
     };
 
     const handleMetricDelete = (): void => {
-        props.onDelete && props.onDelete(props.metricCardData);
+        props.onDelete && props.onDelete(props.uiMetric);
         handleMetricOptionsClose();
     };
 
     return (
         <Card variant="outlined">
-            {props.metricCardData && (
+            {props.uiMetric && (
                 <CardHeader
                     action={
                         <Grid container alignItems="center" spacing={0}>
@@ -65,7 +65,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                             <Grid item>
                                 <Typography
                                     className={
-                                        props.metricCardData.active
+                                        props.uiMetric.active
                                             ? metricCardClasses.active
                                             : metricCardClasses.inactive
                                     }
@@ -73,7 +73,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                                 >
                                     <TextHighlighter
                                         searchWords={props.searchWords}
-                                        text={props.metricCardData.activeText}
+                                        text={props.uiMetric.activeText}
                                     />
                                 </Typography>
                             </Grid>
@@ -116,7 +116,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                                 <Link onClick={handleMetricViewDetails}>
                                     <TextHighlighter
                                         searchWords={props.searchWords}
-                                        text={props.metricCardData.name}
+                                        text={props.uiMetric.name}
                                     />
                                 </Link>
                             )}
@@ -130,14 +130,14 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
             )}
 
             <CardContent>
-                {props.metricCardData && (
+                {props.uiMetric && (
                     <Grid container>
                         {/* Dataset */}
                         <Grid item md={4} xs={12}>
                             <NameValueDisplayCard<string>
                                 name={t("label.dataset")}
                                 searchWords={props.searchWords}
-                                values={[props.metricCardData.datasetName]}
+                                values={[props.uiMetric.datasetName]}
                             />
                         </Grid>
 
@@ -146,9 +146,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                             <NameValueDisplayCard<string>
                                 name={t("label.aggregation-column")}
                                 searchWords={props.searchWords}
-                                values={[
-                                    props.metricCardData.aggregationColumn,
-                                ]}
+                                values={[props.uiMetric.aggregationColumn]}
                             />
                         </Grid>
 
@@ -157,13 +155,11 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                             <NameValueDisplayCard<string>
                                 name={t("label.aggregation-function")}
                                 searchWords={props.searchWords}
-                                values={[
-                                    props.metricCardData.aggregationFunction,
-                                ]}
+                                values={[props.uiMetric.aggregationFunction]}
                             />
                         </Grid>
 
-                        {!isEmpty(props.metricCardData.views) && (
+                        {!isEmpty(props.uiMetric.views) && (
                             <>
                                 <Grid item xs={12}>
                                     <Grid container alignItems="center">
@@ -182,28 +178,26 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                                 </Grid>
 
                                 {/* views */}
-                                {props.metricCardData.views.map(
-                                    (view, index) => (
-                                        <Grid item key={index} xs={12}>
-                                            <NameValueDisplayCard<string>
-                                                wrap
-                                                name={view.name}
-                                                searchWords={props.searchWords}
-                                                valueClassName={
-                                                    metricCardClasses.query
-                                                }
-                                                values={[view.query]}
-                                            />
-                                        </Grid>
-                                    )
-                                )}
+                                {props.uiMetric.views.map((view, index) => (
+                                    <Grid item key={index} xs={12}>
+                                        <NameValueDisplayCard<string>
+                                            wrap
+                                            name={view.name}
+                                            searchWords={props.searchWords}
+                                            valueClassName={
+                                                metricCardClasses.query
+                                            }
+                                            values={[view.query]}
+                                        />
+                                    </Grid>
+                                ))}
                             </>
                         )}
                     </Grid>
                 )}
 
                 {/* No data available */}
-                {!props.metricCardData && <NoDataIndicator />}
+                {!props.uiMetric && <NoDataIndicator />}
             </CardContent>
         </Card>
     );

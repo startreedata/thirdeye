@@ -1,17 +1,17 @@
 import i18n from "i18next";
 import { cloneDeep, isEmpty } from "lodash";
 import {
-    AlertCardData,
-    AlertDatasetAndMetric,
-    AlertSubscriptionGroup,
-} from "../../components/entity-cards/alert-card/alert-card.interfaces";
-import {
     Alert,
     AlertEvaluation,
     AlertNode,
     AlertNodeType,
 } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    UiAlert,
+    UiAlertDatasetAndMetric,
+    UiAlertSubscriptionGroup,
+} from "../../rest/dto/ui-alert.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const createDefaultAlert = (): Alert => {
@@ -37,7 +37,7 @@ export const createDefaultAlert = (): Alert => {
     } as Alert;
 };
 
-export const createEmptyAlertCardData = (): AlertCardData => {
+export const createEmptyUiAlert = (): UiAlert => {
     const noDataMarker = i18n.t("label.no-data-marker");
 
     return {
@@ -55,7 +55,7 @@ export const createEmptyAlertCardData = (): AlertCardData => {
     };
 };
 
-export const createEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
+export const createEmptyUiAlertDatasetAndMetric = (): UiAlertDatasetAndMetric => {
     const noDataMarker = i18n.t("label.no-data-marker");
 
     return {
@@ -66,7 +66,7 @@ export const createEmptyAlertDatasetAndMetric = (): AlertDatasetAndMetric => {
     };
 };
 
-export const createEmptyAlertSubscriptionGroup = (): AlertSubscriptionGroup => {
+export const createEmptyUiAlertSubscriptionGroup = (): UiAlertSubscriptionGroup => {
     return {
         id: -1,
         name: i18n.t("label.no-data-marker"),
@@ -85,12 +85,12 @@ export const createAlertEvaluation = (
     } as AlertEvaluation;
 };
 
-export const getAlertCardData = (
+export const getUiAlert = (
     alert: Alert,
     subscriptionGroups: SubscriptionGroup[]
-): AlertCardData => {
+): UiAlert => {
     if (!alert) {
-        return createEmptyAlertCardData();
+        return createEmptyUiAlert();
     }
 
     // Map subscription groups to alert ids
@@ -98,13 +98,13 @@ export const getAlertCardData = (
         subscriptionGroups
     );
 
-    return getAlertCardDataInternal(alert, subscriptionGroupsToAlertIdsMap);
+    return getUiAlertInternal(alert, subscriptionGroupsToAlertIdsMap);
 };
 
-export const getAlertCardDatas = (
+export const getUiAlerts = (
     alerts: Alert[],
     subscriptionGroups: SubscriptionGroup[]
-): AlertCardData[] => {
+): UiAlert[] => {
     if (isEmpty(alerts)) {
         return [];
     }
@@ -114,38 +114,38 @@ export const getAlertCardDatas = (
         subscriptionGroups
     );
 
-    const alertCardDatas = [];
+    const uiAlerts = [];
     for (const alert of alerts) {
-        alertCardDatas.push(
-            getAlertCardDataInternal(alert, subscriptionGroupsToAlertIdsMap)
+        uiAlerts.push(
+            getUiAlertInternal(alert, subscriptionGroupsToAlertIdsMap)
         );
     }
 
-    return alertCardDatas;
+    return uiAlerts;
 };
 
 export const filterAlerts = (
-    alertCardDatas: AlertCardData[],
+    uiAlerts: UiAlert[],
     searchWords: string[]
-): AlertCardData[] => {
-    if (isEmpty(alertCardDatas)) {
+): UiAlert[] => {
+    if (isEmpty(uiAlerts)) {
         return [];
     }
 
     if (isEmpty(searchWords)) {
-        return alertCardDatas;
+        return uiAlerts;
     }
 
-    const filteredAlertCardDatas = [];
-    for (const alertCardDta of alertCardDatas) {
-        // Only the alert card data to be searched and not contained alert
-        const alertCardDataCopy = cloneDeep(alertCardDta);
-        alertCardDataCopy.alert = null;
+    const filteredUiAlerts = [];
+    for (const uiAlert of uiAlerts) {
+        // Only the UI alert to be searched and not contained alert
+        const uiAlertCopy = cloneDeep(uiAlert);
+        uiAlertCopy.alert = null;
 
         for (const searchWord of searchWords) {
             if (
                 deepSearchStringProperty(
-                    alertCardDataCopy,
+                    uiAlertCopy,
                     // Check if string property value contains current search word
                     (value) =>
                         Boolean(value) &&
@@ -153,60 +153,60 @@ export const filterAlerts = (
                             -1
                 )
             ) {
-                filteredAlertCardDatas.push(alertCardDta);
+                filteredUiAlerts.push(uiAlert);
 
                 break;
             }
         }
     }
 
-    return filteredAlertCardDatas;
+    return filteredUiAlerts;
 };
 
-const getAlertCardDataInternal = (
+const getUiAlertInternal = (
     alert: Alert,
-    subscriptionGroupsToAlertIdsMap: Map<number, AlertSubscriptionGroup[]>
-): AlertCardData => {
-    const alertCardData = createEmptyAlertCardData();
+    subscriptionGroupsToAlertIdsMap: Map<number, UiAlertSubscriptionGroup[]>
+): UiAlert => {
+    const uiAlert = createEmptyUiAlert();
     const noDataMarker = i18n.t("label.no-data-marker");
 
     // Maintain a copy of alert
-    alertCardData.alert = alert;
+    uiAlert.alert = alert;
 
     // Basic properties
-    alertCardData.id = alert.id;
-    alertCardData.name = alert.name || noDataMarker;
-    alertCardData.active = Boolean(alert.active);
-    alertCardData.activeText = alert.active
+    uiAlert.id = alert.id;
+    uiAlert.name = alert.name || noDataMarker;
+    uiAlert.active = Boolean(alert.active);
+    uiAlert.activeText = alert.active
         ? i18n.t("label.active")
         : i18n.t("label.inactive");
 
     // User properties
     if (alert.owner) {
-        alertCardData.userId = alert.owner.id;
-        alertCardData.createdBy = alert.owner.principal || noDataMarker;
+        uiAlert.userId = alert.owner.id;
+        uiAlert.createdBy = alert.owner.principal || noDataMarker;
     }
 
     // Subscription groups
-    alertCardData.subscriptionGroups =
+    uiAlert.subscriptionGroups =
         (subscriptionGroupsToAlertIdsMap &&
             subscriptionGroupsToAlertIdsMap.get(alert.id)) ||
         [];
 
     // Detection, dataset and metric properties
     if (isEmpty(alert.nodes)) {
-        return alertCardData;
+        return uiAlert;
     }
 
     for (const alertNode of Object.values(alert.nodes)) {
         // Detection
         if (alertNode.type === AlertNodeType.DETECTION && alertNode.subType) {
-            alertCardData.detectionTypes.push(alertNode.subType);
+            uiAlert.detectionTypes.push(alertNode.subType);
         } else if (
             alertNode.type === AlertNodeType.FILTER &&
             alertNode.subType
         ) {
-            alertCardData.filteredBy.push(alertNode.subType);
+            uiAlert.filteredBy.push(alertNode.subType);
         }
 
         // Dataset and metric
@@ -214,24 +214,25 @@ const getAlertCardDataInternal = (
             continue;
         }
 
-        const datasetAndMetric = createEmptyAlertDatasetAndMetric();
+        const uiAlertDatasetAndMetric = createEmptyUiAlertDatasetAndMetric();
         if (alertNode.metric.dataset) {
-            datasetAndMetric.datasetId = alertNode.metric.dataset.id;
-            datasetAndMetric.datasetName =
+            uiAlertDatasetAndMetric.datasetId = alertNode.metric.dataset.id;
+            uiAlertDatasetAndMetric.datasetName =
                 alertNode.metric.dataset.name || noDataMarker;
         }
-        datasetAndMetric.metricId = alertNode.metric.id;
-        datasetAndMetric.metricName = alertNode.metric.name || noDataMarker;
+        uiAlertDatasetAndMetric.metricId = alertNode.metric.id;
+        uiAlertDatasetAndMetric.metricName =
+            alertNode.metric.name || noDataMarker;
 
-        alertCardData.datasetAndMetrics.push(datasetAndMetric);
+        uiAlert.datasetAndMetrics.push(uiAlertDatasetAndMetric);
     }
 
-    return alertCardData;
+    return uiAlert;
 };
 
 const mapSubscriptionGroupsToAlertIds = (
     subscriptionGroups: SubscriptionGroup[]
-): Map<number, AlertSubscriptionGroup[]> => {
+): Map<number, UiAlertSubscriptionGroup[]> => {
     const subscriptionGroupsToAlertIdsMap = new Map();
 
     if (isEmpty(subscriptionGroups)) {
@@ -243,9 +244,9 @@ const mapSubscriptionGroupsToAlertIds = (
             continue;
         }
 
-        const alertSubscriptionGroup = createEmptyAlertSubscriptionGroup();
-        alertSubscriptionGroup.id = subscriptionGroup.id;
-        alertSubscriptionGroup.name =
+        const uiAlertSubscriptionGroup = createEmptyUiAlertSubscriptionGroup();
+        uiAlertSubscriptionGroup.id = subscriptionGroup.id;
+        uiAlertSubscriptionGroup.name =
             subscriptionGroup.name || i18n.t("label.no-data-marker");
 
         for (const alert of subscriptionGroup.alerts) {
@@ -254,11 +255,11 @@ const mapSubscriptionGroupsToAlertIds = (
             );
             if (subscriptionGroups) {
                 // Add to existing list
-                subscriptionGroups.push(alertSubscriptionGroup);
+                subscriptionGroups.push(uiAlertSubscriptionGroup);
             } else {
                 // Create and add to list
                 subscriptionGroupsToAlertIdsMap.set(alert.id, [
-                    alertSubscriptionGroup,
+                    uiAlertSubscriptionGroup,
                 ]);
             }
         }

@@ -7,7 +7,6 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
-import { AlertCardData } from "../../components/entity-cards/alert-card/alert-card.interfaces";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
@@ -19,11 +18,12 @@ import {
 } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     filterAlerts,
-    getAlertCardData,
-    getAlertCardDatas,
+    getUiAlert,
+    getUiAlerts,
 } from "../../utils/alerts/alerts.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
 import {
@@ -33,10 +33,8 @@ import {
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [alertCardDatas, setAlertCardDatas] = useState<AlertCardData[]>([]);
-    const [filteredAlertCardDatas, setFilteredAlertCardDatas] = useState<
-        AlertCardData[]
-    >([]);
+    const [uiAlerts, setUiAlerts] = useState<UiAlert[]>([]);
+    const [filteredUiAlerts, setFilteredUiAlerts] = useState<UiAlert[]>([]);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
@@ -53,15 +51,15 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     useEffect(() => {
         // Fetched alerts or search changed, reset
-        setFilteredAlertCardDatas(filterAlerts(alertCardDatas, searchWords));
-    }, [alertCardDatas, searchWords]);
+        setFilteredUiAlerts(filterAlerts(uiAlerts, searchWords));
+    }, [uiAlerts, searchWords]);
 
-    const onAlertChange = (alertCardData: AlertCardData): void => {
-        if (!alertCardData || !alertCardData.alert) {
+    const onAlertChange = (uiAlert: UiAlert): void => {
+        if (!uiAlert || !uiAlert.alert) {
             return;
         }
 
-        updateAlert(alertCardData.alert)
+        updateAlert(uiAlert.alert)
             .then((alert: Alert): void => {
                 enqueueSnackbar(
                     t("message.update-success", { entity: t("label.alert") }),
@@ -69,7 +67,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                 );
 
                 // Replace updated alert in fetched alerts
-                replaceAlertCardData(alert);
+                replaceUiAlert(alert);
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -79,29 +77,29 @@ export const AlertsAllPage: FunctionComponent = () => {
             });
     };
 
-    const onDeleteAlert = (alertCardData: AlertCardData): void => {
-        if (!alertCardData) {
+    const onDeleteAlert = (uiAlert: UiAlert): void => {
+        if (!uiAlert) {
             return;
         }
 
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", {
-                name: alertCardData.name,
+                name: uiAlert.name,
             }),
             okButtonLabel: t("label.delete"),
             onOk: (): void => {
-                onDeleteAlertConfirmation(alertCardData);
+                onDeleteAlertConfirmation(uiAlert);
             },
         });
     };
 
-    const onDeleteAlertConfirmation = (alertCardData: AlertCardData): void => {
-        if (!alertCardData) {
+    const onDeleteAlertConfirmation = (uiAlert: UiAlert): void => {
+        if (!uiAlert) {
             return;
         }
 
-        deleteAlert(alertCardData.id)
+        deleteAlert(uiAlert.id)
             .then((alert: Alert): void => {
                 enqueueSnackbar(
                     t("message.delete-success", { entity: t("label.alert") }),
@@ -109,7 +107,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                 );
 
                 // Remove deleted alert from fetched alerts
-                removeAlertCardData(alert);
+                removeUiAlert(alert);
             })
             .catch((): void => {
                 enqueueSnackbar(
@@ -141,8 +139,8 @@ export const AlertsAllPage: FunctionComponent = () => {
                     setSubscriptionGroups(fetchedSubscriptionGroups);
                 }
                 if (alertsResponse.status === "fulfilled") {
-                    setAlertCardDatas(
-                        getAlertCardDatas(
+                    setUiAlerts(
+                        getUiAlerts(
                             alertsResponse.value,
                             fetchedSubscriptionGroups
                         )
@@ -154,33 +152,33 @@ export const AlertsAllPage: FunctionComponent = () => {
             });
     };
 
-    const replaceAlertCardData = (alert: Alert): void => {
+    const replaceUiAlert = (alert: Alert): void => {
         if (!alert) {
             return;
         }
 
-        setAlertCardDatas((alertCardDatas) =>
-            alertCardDatas.map(
-                (alertCardData: AlertCardData): AlertCardData => {
-                    if (alertCardData.id === alert.id) {
+        setUiAlerts((uiAlerts) =>
+            uiAlerts.map(
+                (uiAlert: UiAlert): UiAlert => {
+                    if (uiAlert.id === alert.id) {
                         // Replace
-                        return getAlertCardData(alert, subscriptionGroups);
+                        return getUiAlert(alert, subscriptionGroups);
                     }
 
-                    return alertCardData;
+                    return uiAlert;
                 }
             )
         );
     };
 
-    const removeAlertCardData = (alert: Alert): void => {
+    const removeUiAlert = (alert: Alert): void => {
         if (!alert) {
             return;
         }
 
-        setAlertCardDatas((alertCardDatas) =>
-            alertCardDatas.filter((alertCardData: AlertCardData): boolean => {
-                return alertCardData.id !== alert.id;
+        setUiAlerts((uiAlerts) =>
+            uiAlerts.filter((uiAlert: UiAlert): boolean => {
+                return uiAlert.id !== alert.id;
             })
         );
     };
@@ -199,39 +197,35 @@ export const AlertsAllPage: FunctionComponent = () => {
                         setSearchQueryString
                         searchLabel={t("label.search-alerts")}
                         searchStatusLabel={getSearchStatusLabel(
-                            filteredAlertCardDatas
-                                ? filteredAlertCardDatas.length
-                                : 0,
-                            alertCardDatas ? alertCardDatas.length : 0
+                            filteredUiAlerts ? filteredUiAlerts.length : 0,
+                            uiAlerts ? uiAlerts.length : 0
                         )}
                         onChange={setSearchWords}
                     />
                 </Grid>
 
                 {/* Alerts */}
-                {filteredAlertCardDatas &&
-                    filteredAlertCardDatas.map(
-                        (filteredAlertCardData, index) => (
-                            <Grid item key={index} sm={12}>
-                                <AlertCard
-                                    showViewDetails
-                                    alertCardData={filteredAlertCardData}
-                                    searchWords={searchWords}
-                                    onChange={onAlertChange}
-                                    onDelete={onDeleteAlert}
-                                />
-                            </Grid>
-                        )
-                    )}
+                {filteredUiAlerts &&
+                    filteredUiAlerts.map((filteredUiAlert, index) => (
+                        <Grid item key={index} sm={12}>
+                            <AlertCard
+                                showViewDetails
+                                searchWords={searchWords}
+                                uiAlert={filteredUiAlert}
+                                onChange={onAlertChange}
+                                onDelete={onDeleteAlert}
+                            />
+                        </Grid>
+                    ))}
             </Grid>
 
             {/* No data available message */}
-            {isEmpty(filteredAlertCardDatas) && isEmpty(searchWords) && (
+            {isEmpty(filteredUiAlerts) && isEmpty(searchWords) && (
                 <NoDataIndicator />
             )}
 
             {/* No search results available message */}
-            {isEmpty(filteredAlertCardDatas) && !isEmpty(searchWords) && (
+            {isEmpty(filteredUiAlerts) && !isEmpty(searchWords) && (
                 <NoDataIndicator text={t("message.no-search-results")} />
             )}
         </PageContents>

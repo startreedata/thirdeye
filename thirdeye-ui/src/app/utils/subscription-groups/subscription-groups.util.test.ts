@@ -1,21 +1,21 @@
 import { cloneDeep } from "lodash";
-import {
-    SubscriptionGroupAlert,
-    SubscriptionGroupCardData,
-} from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
+    UiSubscriptionGroup,
+    UiSubscriptionGroupAlert,
+} from "../../rest/dto/ui-subscription-group.interfaces";
+import {
     createEmptySubscriptionGroup,
-    createEmptySubscriptionGroupAlert,
-    createEmptySubscriptionGroupCardData,
+    createEmptyUiSubscriptionGroup,
+    createEmptyUiSubscriptionGroupAlert,
     filterSubscriptionGroups,
-    getSubscriptionGroupAlert,
-    getSubscriptionGroupAlertId,
-    getSubscriptionGroupAlertName,
-    getSubscriptionGroupAlerts,
-    getSubscriptionGroupCardData,
-    getSubscriptionGroupCardDatas,
+    getUiSubscriptionGroup,
+    getUiSubscriptionGroupAlert,
+    getUiSubscriptionGroupAlertId,
+    getUiSubscriptionGroupAlertName,
+    getUiSubscriptionGroupAlerts,
+    getUiSubscriptionGroups,
 } from "./subscription-groups.util";
 
 jest.mock("i18next", () => ({
@@ -29,220 +29,208 @@ describe("Subscription Groups Util", () => {
         );
     });
 
-    test("createEmptySubscriptionGroupCardData should create appropriate subscription group card data", () => {
-        expect(createEmptySubscriptionGroupCardData()).toEqual(
-            mockEmptySubscriptionGroupCardData
+    test("createEmptyUiSubscriptionGroup should create appropriate UI subscription group", () => {
+        expect(createEmptyUiSubscriptionGroup()).toEqual(
+            mockEmptyUiSubscriptionGroup
         );
     });
 
-    test("createEmptySubscriptionGroupAlert should create appropriate subscription group alert", () => {
-        expect(createEmptySubscriptionGroupAlert()).toEqual(
-            mockEmptySubscriptionGroupAlert
+    test("createEmptyUiSubscriptionGroupAlert should create appropriate UI subscription group alert", () => {
+        expect(createEmptyUiSubscriptionGroupAlert()).toEqual(
+            mockEmptyUiSubscriptionGroupAlert
         );
     });
 
-    test("getSubscriptionGroupCardData should return empty subscription group card data for invalid subscription group", () => {
+    test("getUiSubscriptionGroup should return empty UI subscription group for invalid subscription group", () => {
         expect(
-            getSubscriptionGroupCardData(
+            getUiSubscriptionGroup(
                 (null as unknown) as SubscriptionGroup,
                 mockAlerts
             )
-        ).toEqual(mockEmptySubscriptionGroupCardData);
+        ).toEqual(mockEmptyUiSubscriptionGroup);
     });
 
-    test("getSubscriptionGroupCardData should return appropriate subscription group card data for subscription group and invalid alerts", () => {
-        const expectedSubscriptionGroupCardData = cloneDeep(
-            mockSubscriptionGroupCardData1
-        );
-        expectedSubscriptionGroupCardData.alerts = [];
+    test("getUiSubscriptionGroup should return appropriate UI subscription group for subscription group and invalid alerts", () => {
+        const expectedUiSubscriptionGroup = cloneDeep(mockUiSubscriptionGroup1);
+        expectedUiSubscriptionGroup.alerts = [];
 
         expect(
-            getSubscriptionGroupCardData(
+            getUiSubscriptionGroup(
                 mockSubscriptionGroup1,
                 (null as unknown) as Alert[]
             )
-        ).toEqual(expectedSubscriptionGroupCardData);
+        ).toEqual(expectedUiSubscriptionGroup);
     });
 
-    test("getSubscriptionGroupCardData should return appropriate subscription group card data for subscription group and empty alerts", () => {
-        const expectedSubscriptionGroupCardData = cloneDeep(
-            mockSubscriptionGroupCardData1
+    test("getUiSubscriptionGroup should return appropriate UI subscription group for subscription group and empty alerts", () => {
+        const expectedUiSubscriptionGroup = cloneDeep(mockUiSubscriptionGroup1);
+        expectedUiSubscriptionGroup.alerts = [];
+
+        expect(getUiSubscriptionGroup(mockSubscriptionGroup1, [])).toEqual(
+            expectedUiSubscriptionGroup
         );
-        expectedSubscriptionGroupCardData.alerts = [];
-
-        expect(
-            getSubscriptionGroupCardData(mockSubscriptionGroup1, [])
-        ).toEqual(expectedSubscriptionGroupCardData);
     });
 
-    test("getSubscriptionGroupCardData should return appropriate subscription group card data for subscription group and alerts", () => {
+    test("getUiSubscriptionGroup should return appropriate UI subscription group for subscription group and alerts", () => {
         expect(
-            getSubscriptionGroupCardData(mockSubscriptionGroup1, mockAlerts)
-        ).toEqual(mockSubscriptionGroupCardData1);
+            getUiSubscriptionGroup(mockSubscriptionGroup1, mockAlerts)
+        ).toEqual(mockUiSubscriptionGroup1);
     });
 
-    test("getSubscriptionGroupCardDatas should return empty array for invalid subscription groups", () => {
+    test("getUiSubscriptionGroups should return empty array for invalid subscription groups", () => {
         expect(
-            getSubscriptionGroupCardDatas(
+            getUiSubscriptionGroups(
                 (null as unknown) as SubscriptionGroup[],
                 mockAlerts
             )
         ).toEqual([]);
     });
 
-    test("getSubscriptionGroupCardDatas should return empty array for empty subscription groups", () => {
-        expect(getSubscriptionGroupCardDatas([], mockAlerts)).toEqual([]);
+    test("getUiSubscriptionGroups should return empty array for empty subscription groups", () => {
+        expect(getUiSubscriptionGroups([], mockAlerts)).toEqual([]);
     });
 
-    test("getSubscriptionGroupCardDatas should return appropriate subscription group card data array for subscription groups and invalid alerts", () => {
-        const expectedSubscriptionGroupCardData1 = cloneDeep(
-            mockSubscriptionGroupCardData1
+    test("getUiSubscriptionGroups should return appropriate UI subscription groups for subscription groups and invalid alerts", () => {
+        const expectedUiSubscriptionGroup1 = cloneDeep(
+            mockUiSubscriptionGroup1
         );
-        expectedSubscriptionGroupCardData1.alerts = [];
-        const expectedSubscriptionGroupCardData2 = cloneDeep(
-            mockSubscriptionGroupCardData2
+        expectedUiSubscriptionGroup1.alerts = [];
+        const expectedUiSubscriptionGroup2 = cloneDeep(
+            mockUiSubscriptionGroup2
         );
-        expectedSubscriptionGroupCardData2.alerts = [];
-        const expectedSubscriptionGroupCardData3 = cloneDeep(
-            mockSubscriptionGroupCardData3
+        expectedUiSubscriptionGroup2.alerts = [];
+        const expectedUiSubscriptionGroup3 = cloneDeep(
+            mockUiSubscriptionGroup3
         );
-        expectedSubscriptionGroupCardData3.alerts = [];
+        expectedUiSubscriptionGroup3.alerts = [];
 
         expect(
-            getSubscriptionGroupCardDatas(
+            getUiSubscriptionGroups(
                 mockSubscriptionGroups,
                 (null as unknown) as Alert[]
             )
         ).toEqual([
-            expectedSubscriptionGroupCardData1,
-            expectedSubscriptionGroupCardData2,
-            expectedSubscriptionGroupCardData3,
+            expectedUiSubscriptionGroup1,
+            expectedUiSubscriptionGroup2,
+            expectedUiSubscriptionGroup3,
         ]);
     });
 
-    test("getSubscriptionGroupCardDatas should return appropriate subscription group card data array for subscription groups and empty alerts", () => {
-        const expectedSubscriptionGroupCardData1 = cloneDeep(
-            mockSubscriptionGroupCardData1
+    test("getUiSubscriptionGroups should return appropriate UI subscription groups for subscription groups and empty alerts", () => {
+        const expectedUiSubscriptionGroup1 = cloneDeep(
+            mockUiSubscriptionGroup1
         );
-        expectedSubscriptionGroupCardData1.alerts = [];
-        const expectedSubscriptionGroupCardData2 = cloneDeep(
-            mockSubscriptionGroupCardData2
+        expectedUiSubscriptionGroup1.alerts = [];
+        const expectedUiSubscriptionGroup2 = cloneDeep(
+            mockUiSubscriptionGroup2
         );
-        expectedSubscriptionGroupCardData2.alerts = [];
-        const expectedSubscriptionGroupCardData3 = cloneDeep(
-            mockSubscriptionGroupCardData3
+        expectedUiSubscriptionGroup2.alerts = [];
+        const expectedUiSubscriptionGroup3 = cloneDeep(
+            mockUiSubscriptionGroup3
         );
-        expectedSubscriptionGroupCardData3.alerts = [];
+        expectedUiSubscriptionGroup3.alerts = [];
 
-        expect(
-            getSubscriptionGroupCardDatas(mockSubscriptionGroups, [])
-        ).toEqual([
-            expectedSubscriptionGroupCardData1,
-            expectedSubscriptionGroupCardData2,
-            expectedSubscriptionGroupCardData3,
+        expect(getUiSubscriptionGroups(mockSubscriptionGroups, [])).toEqual([
+            expectedUiSubscriptionGroup1,
+            expectedUiSubscriptionGroup2,
+            expectedUiSubscriptionGroup3,
         ]);
     });
 
-    test("getSubscriptionGroupCardDatas should return appropriate subscription group card data array for subscription groups and alerts", () => {
+    test("getUiSubscriptionGroups should return appropriate UI subscription groups for subscription groups and alerts", () => {
         expect(
-            getSubscriptionGroupCardDatas(mockSubscriptionGroups, mockAlerts)
-        ).toEqual(mockSubscriptionGroupCardDatas);
+            getUiSubscriptionGroups(mockSubscriptionGroups, mockAlerts)
+        ).toEqual(mockUiSubscriptionGroups);
     });
 
-    test("getSubscriptionGroupAlert should return empty subscription group alert for invalid alert", () => {
-        expect(getSubscriptionGroupAlert((null as unknown) as Alert)).toEqual(
-            mockEmptySubscriptionGroupAlert
+    test("getUiSubscriptionGroupAlert should return empty UI subscription group alert for invalid alert", () => {
+        expect(getUiSubscriptionGroupAlert((null as unknown) as Alert)).toEqual(
+            mockEmptyUiSubscriptionGroupAlert
         );
     });
 
-    test("getSubscriptionGroupAlert should return appropriate subscription group alert for alert", () => {
-        expect(getSubscriptionGroupAlert(mockAlert1)).toEqual(
-            mockSubscriptionGroupAlert1
+    test("getUiSubscriptionGroupAlert should return appropriate UI subscription group alert for alert", () => {
+        expect(getUiSubscriptionGroupAlert(mockAlert1)).toEqual(
+            mockUiSubscriptionGroupAlert1
         );
     });
 
-    test("getSubscriptionGroupAlerts should return empty array for invalid alerts", () => {
+    test("getUiSubscriptionGroupAlerts should return empty array for invalid alerts", () => {
         expect(
-            getSubscriptionGroupAlerts((null as unknown) as Alert[])
+            getUiSubscriptionGroupAlerts((null as unknown) as Alert[])
         ).toEqual([]);
     });
 
-    test("getSubscriptionGroupAlerts should return empty array for empty alerts", () => {
-        expect(getSubscriptionGroupAlerts([])).toEqual([]);
+    test("getUiSubscriptionGroupAlerts should return empty array for empty alerts", () => {
+        expect(getUiSubscriptionGroupAlerts([])).toEqual([]);
     });
 
-    test("getSubscriptionGroupAlerts should return appropriate subscription group alert array for alerts", () => {
-        expect(getSubscriptionGroupAlerts(mockAlerts)).toEqual(
-            mockSubscriptionGroupAlerts
+    test("getUiSubscriptionGroupAlerts should return appropriate UI subscription group alerts for alerts", () => {
+        expect(getUiSubscriptionGroupAlerts(mockAlerts)).toEqual(
+            mockUiSubscriptionGroupAlerts
         );
     });
 
-    test("getSubscriptionGroupAlertId should return -1 for invalid subscription group alert", () => {
+    test("getUiSubscriptionGroupAlertId should return -1 for invalid UI subscription group alert", () => {
         expect(
-            getSubscriptionGroupAlertId(
-                (null as unknown) as SubscriptionGroupAlert
+            getUiSubscriptionGroupAlertId(
+                (null as unknown) as UiSubscriptionGroupAlert
             )
         ).toEqual(-1);
     });
 
-    test("getSubscriptionGroupAlertId should return approopriate id for subscription group alert", () => {
+    test("getUiSubscriptionGroupAlertId should return approopriate id for UI subscription group alert", () => {
         expect(
-            getSubscriptionGroupAlertId(mockSubscriptionGroupAlert1)
+            getUiSubscriptionGroupAlertId(mockUiSubscriptionGroupAlert1)
         ).toEqual(2);
     });
 
-    test("getSubscriptionGroupAlertName should return empty string for invalid subscription group alert", () => {
+    test("getUiSubscriptionGroupAlertName should return empty string for invalid UI subscription group alert", () => {
         expect(
-            getSubscriptionGroupAlertName(
-                (null as unknown) as SubscriptionGroupAlert
+            getUiSubscriptionGroupAlertName(
+                (null as unknown) as UiSubscriptionGroupAlert
             )
         ).toEqual("");
     });
 
-    test("getSubscriptionGroupAlertName should return approopriate name for subscription group alert", () => {
+    test("getUiSubscriptionGroupAlertName should return approopriate name for UI subscription group alert", () => {
         expect(
-            getSubscriptionGroupAlertName(mockSubscriptionGroupAlert1)
+            getUiSubscriptionGroupAlertName(mockUiSubscriptionGroupAlert1)
         ).toEqual("testNameAlert2");
     });
 
-    test("filterSubscriptionGroups should return empty array for invalid subscription group card data array", () => {
+    test("filterSubscriptionGroups should return empty array for invalid UI subscription groups", () => {
         expect(
             filterSubscriptionGroups(
-                (null as unknown) as SubscriptionGroupCardData[],
+                (null as unknown) as UiSubscriptionGroup[],
                 mockSearchWords
             )
         ).toEqual([]);
     });
 
-    test("filterSubscriptionGroups should return empty array for empty subscription group card data array", () => {
+    test("filterSubscriptionGroups should return empty array for empty UI subscription groups", () => {
         expect(filterSubscriptionGroups([], mockSearchWords)).toEqual([]);
     });
 
-    test("filterSubscriptionGroups should return appropriate subscription group card data array for subscription group card data array and invalid search words", () => {
+    test("filterSubscriptionGroups should return appropriate UI subscription groups for UI subscription groups and invalid search words", () => {
         expect(
             filterSubscriptionGroups(
-                mockSubscriptionGroupCardDatas,
+                mockUiSubscriptionGroups,
                 (null as unknown) as string[]
             )
-        ).toEqual(mockSubscriptionGroupCardDatas);
+        ).toEqual(mockUiSubscriptionGroups);
     });
 
-    test("filterSubscriptionGroups should return appropriate subscription group card data array for subscription group card data array and empty search words", () => {
-        expect(
-            filterSubscriptionGroups(mockSubscriptionGroupCardDatas, [])
-        ).toEqual(mockSubscriptionGroupCardDatas);
+    test("filterSubscriptionGroups should return appropriate UI subscription groups for UI subscription groups and empty search words", () => {
+        expect(filterSubscriptionGroups(mockUiSubscriptionGroups, [])).toEqual(
+            mockUiSubscriptionGroups
+        );
     });
 
-    test("filterSubscriptionGroups should return appropriate subscription group card data array for subscription group card data array and search words", () => {
+    test("filterSubscriptionGroups should return appropriate UI subscription groups for UI subscription groups and search words", () => {
         expect(
-            filterSubscriptionGroups(
-                mockSubscriptionGroupCardDatas,
-                mockSearchWords
-            )
-        ).toEqual([
-            mockSubscriptionGroupCardData1,
-            mockSubscriptionGroupCardData3,
-        ]);
+            filterSubscriptionGroups(mockUiSubscriptionGroups, mockSearchWords)
+        ).toEqual([mockUiSubscriptionGroup1, mockUiSubscriptionGroup3]);
     });
 });
 
@@ -256,7 +244,7 @@ const mockEmptySubscriptionGroup = {
     },
 };
 
-const mockEmptySubscriptionGroupCardData = {
+const mockEmptyUiSubscriptionGroup = {
     id: -1,
     name: "label.no-data-marker",
     alerts: [],
@@ -264,7 +252,7 @@ const mockEmptySubscriptionGroupCardData = {
     subscriptionGroup: null,
 };
 
-const mockEmptySubscriptionGroupAlert = {
+const mockEmptyUiSubscriptionGroupAlert = {
     id: -1,
     name: "label.no-data-marker",
 };
@@ -326,28 +314,28 @@ const mockAlert3 = {
 
 const mockAlerts = [mockAlert1, mockAlert2, mockAlert3];
 
-const mockSubscriptionGroupAlert1 = {
+const mockUiSubscriptionGroupAlert1 = {
     id: 2,
     name: "testNameAlert2",
 };
 
-const mockSubscriptionGroupAlert2 = {
+const mockUiSubscriptionGroupAlert2 = {
     id: 3,
     name: "label.no-data-marker",
 };
 
-const mockSubscriptionGroupAlert3 = {
+const mockUiSubscriptionGroupAlert3 = {
     id: 6,
     name: "testNameAlert6",
 };
 
-const mockSubscriptionGroupAlerts = [
-    mockSubscriptionGroupAlert1,
-    mockSubscriptionGroupAlert2,
-    mockSubscriptionGroupAlert3,
+const mockUiSubscriptionGroupAlerts = [
+    mockUiSubscriptionGroupAlert1,
+    mockUiSubscriptionGroupAlert2,
+    mockUiSubscriptionGroupAlert3,
 ];
 
-const mockSubscriptionGroupCardData1 = {
+const mockUiSubscriptionGroup1 = {
     id: 1,
     name: "testNameSubscriptionGroup1",
     alerts: [
@@ -364,7 +352,7 @@ const mockSubscriptionGroupCardData1 = {
     subscriptionGroup: mockSubscriptionGroup1,
 };
 
-const mockSubscriptionGroupCardData2 = {
+const mockUiSubscriptionGroup2 = {
     id: 5,
     name: "label.no-data-marker",
     alerts: [],
@@ -372,7 +360,7 @@ const mockSubscriptionGroupCardData2 = {
     subscriptionGroup: mockSubscriptionGroup2,
 };
 
-const mockSubscriptionGroupCardData3 = {
+const mockUiSubscriptionGroup3 = {
     id: 6,
     name: "testNameSubscriptionGroup6",
     alerts: [],
@@ -380,10 +368,10 @@ const mockSubscriptionGroupCardData3 = {
     subscriptionGroup: mockSubscriptionGroup3,
 };
 
-const mockSubscriptionGroupCardDatas = [
-    mockSubscriptionGroupCardData1,
-    mockSubscriptionGroupCardData2,
-    mockSubscriptionGroupCardData3,
+const mockUiSubscriptionGroups = [
+    mockUiSubscriptionGroup1,
+    mockUiSubscriptionGroup2,
+    mockUiSubscriptionGroup3,
 ];
 
 const mockSearchWords = ["testNameAlert2", "testNameSubscriptionGroup6"];

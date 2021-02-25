@@ -1,11 +1,11 @@
-import { MetricCardData } from "../../components/entity-cards/metric-card/metric-card.interfaces";
 import { Metric, MetricAggFunction } from "../../rest/dto/metric.interfaces";
+import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import {
-    createEmptyMetricCardData,
     createEmptyMetricLogicalView,
+    createEmptyUiMetric,
     filterMetrics,
-    getMetricCardData,
-    getMetricCardDatas,
+    getUiMetric,
+    getUiMetrics,
 } from "./metrics.util";
 
 jest.mock("i18next", () => ({
@@ -13,8 +13,8 @@ jest.mock("i18next", () => ({
 }));
 
 describe("Metrics Util", () => {
-    test("createEmptyMetricCardData should create appropriate metric card data", () => {
-        expect(createEmptyMetricCardData()).toEqual(mockEmptyMetricCardData);
+    test("createEmptyUiMetric should create appropriate UI metric", () => {
+        expect(createEmptyUiMetric()).toEqual(mockEmptyUiMetric);
     });
 
     test("createEmptyMetricLogicalView should create appropriate metric logical view", () => {
@@ -23,61 +23,56 @@ describe("Metrics Util", () => {
         );
     });
 
-    test("getMetricCardData should return empty metric card data for invalid metric", () => {
-        expect(getMetricCardData((null as unknown) as Metric)).toEqual(
-            mockEmptyMetricCardData
+    test("getUiMetric should return empty UI metric for invalid metric", () => {
+        expect(getUiMetric((null as unknown) as Metric)).toEqual(
+            mockEmptyUiMetric
         );
     });
 
-    test("getMetricCardData should return appropriate metric card data for metric", () => {
-        expect(getMetricCardData(mockMetric1)).toEqual(mockMetricCardData1);
+    test("getUiMetric should return appropriate UI metric for metric", () => {
+        expect(getUiMetric(mockMetric1)).toEqual(mockUiMetric1);
     });
 
-    test("getMetricCardDatas should return empty array for invalid metric", () => {
-        expect(getMetricCardDatas((null as unknown) as Metric[])).toEqual([]);
+    test("getUiMetrics should return empty array for invalid metric", () => {
+        expect(getUiMetrics((null as unknown) as Metric[])).toEqual([]);
     });
 
-    test("getMetricCardDatas should return empty array for empty metrics", () => {
-        expect(getMetricCardDatas([])).toEqual([]);
+    test("getUiMetrics should return empty array for empty metrics", () => {
+        expect(getUiMetrics([])).toEqual([]);
     });
 
-    test("getMetricCardDatas should return appropriate metric card data array for metrics", () => {
-        expect(getMetricCardDatas(mockMetrics)).toEqual(mockMetricCardDatas);
+    test("getUiMetrics should return appropriate UI metrics for metrics", () => {
+        expect(getUiMetrics(mockMetrics)).toEqual(mockUiMetrics);
     });
 
-    test("filterMetrics should return empty array for invalid metric card data array", () => {
+    test("filterMetrics should return empty array for invalid UI metrics", () => {
         expect(
-            filterMetrics(
-                (null as unknown) as MetricCardData[],
-                mockSearchWords
-            )
+            filterMetrics((null as unknown) as UiMetric[], mockSearchWords)
         ).toEqual([]);
     });
 
-    test("filterMetrics should return empty array for empty metric card data array", () => {
+    test("filterMetrics should return empty array for empty UI metrics", () => {
         expect(filterMetrics([], mockSearchWords)).toEqual([]);
     });
 
-    test("filterMetrics should return appropriate metric card data array for metric card data array and invalid search words", () => {
+    test("filterMetrics should return appropriate UI metrics for UI metrics and invalid search words", () => {
         expect(
-            filterMetrics(mockMetricCardDatas, (null as unknown) as string[])
-        ).toEqual(mockMetricCardDatas);
+            filterMetrics(mockUiMetrics, (null as unknown) as string[])
+        ).toEqual(mockUiMetrics);
     });
 
-    test("filterMetrics should return appropriate metric card data array for metric card data array and empty search words", () => {
-        expect(filterMetrics(mockMetricCardDatas, [])).toEqual(
-            mockMetricCardDatas
-        );
+    test("filterMetrics should return appropriate UI metrics for UI metrics and empty search words", () => {
+        expect(filterMetrics(mockUiMetrics, [])).toEqual(mockUiMetrics);
     });
 
-    test("filterMetrics should return appropriate metric card data array for metric card data array and search words", () => {
-        expect(filterMetrics(mockMetricCardDatas, mockSearchWords)).toEqual([
-            mockMetricCardData1,
+    test("filterMetrics should return appropriate UI metrics for UI metrics and search words", () => {
+        expect(filterMetrics(mockUiMetrics, mockSearchWords)).toEqual([
+            mockUiMetric1,
         ]);
     });
 });
 
-const mockEmptyMetricCardData = {
+const mockEmptyUiMetric = {
     id: -1,
     name: "label.no-data-marker",
     datasetId: -1,
@@ -132,7 +127,7 @@ const mockMetric3 = {
 
 const mockMetrics = [mockMetric1, mockMetric2, mockMetric3];
 
-const mockMetricCardData1 = {
+const mockUiMetric1 = {
     id: 1,
     name: "testNameMetric1",
     datasetId: 2,
@@ -154,7 +149,7 @@ const mockMetricCardData1 = {
     ],
 };
 
-const mockMetricCardData2 = {
+const mockUiMetric2 = {
     id: 3,
     name: "label.no-data-marker",
     datasetId: 4,
@@ -172,7 +167,7 @@ const mockMetricCardData2 = {
     ],
 };
 
-const mockMetricCardData3 = {
+const mockUiMetric3 = {
     id: 5,
     name: "label.no-data-marker",
     datasetId: -1,
@@ -185,10 +180,6 @@ const mockMetricCardData3 = {
     views: [],
 };
 
-const mockMetricCardDatas = [
-    mockMetricCardData1,
-    mockMetricCardData2,
-    mockMetricCardData3,
-];
+const mockUiMetrics = [mockUiMetric1, mockUiMetric2, mockUiMetric3];
 
 const mockSearchWords = [MetricAggFunction.AVG];

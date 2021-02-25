@@ -1,4 +1,4 @@
-import { Box, Grid, Typography, useTheme } from "@material-ui/core";
+import { Box, Typography, useTheme } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactComponent as EmptyGlassIcon } from "../../../assets/images/empty-glass.svg";
@@ -15,36 +15,33 @@ export const NoDataIndicator: FunctionComponent<NoDataIndicatorProps> = (
     const { t } = useTranslation();
 
     return (
-        <Grid
-            container
+        <Box
             alignItems="center"
-            className={noDataIndicatorClasses.noDataIndicator}
-            justify="center"
+            display="flex"
+            flex={1}
+            height="100%"
+            justifyContent="center"
+            width="100%"
         >
             {/* Icon */}
-            <Grid item>
-                <Box
-                    border={Dimension.WIDTH_BORDER_DEFAULT}
-                    borderBottom={0}
-                    borderColor={Palette.COLOR_BORDER_DEFAULT}
-                    borderLeft={0}
-                    borderTop={0}
-                    className={noDataIndicatorClasses.icon}
-                    paddingRight={2}
-                >
-                    <EmptyGlassIcon
-                        fill={theme.palette.primary.main}
-                        width={36}
-                    />
-                </Box>
-            </Grid>
+            <Box
+                border={Dimension.WIDTH_BORDER_DEFAULT}
+                borderBottom={0}
+                borderColor={Palette.COLOR_BORDER_DEFAULT}
+                borderLeft={0}
+                borderTop={0}
+                className={noDataIndicatorClasses.icon}
+                paddingRight={2}
+            >
+                <EmptyGlassIcon fill={theme.palette.primary.main} height={36} />
+            </Box>
 
             {/* No data available message */}
-            <Grid item>
+            <Box paddingLeft={2}>
                 <Typography variant="body2">
                     {props.text || t("message.no-data")}
                 </Typography>
-            </Grid>
-        </Grid>
+            </Box>
+        </Box>
     );
 };

@@ -9,7 +9,6 @@ export const useButtonTileStyles = makeStyles<Theme, ButtonTileProps>(
             display: "flex",
         },
         buttonBase: {
-            display: "flex",
             flex: 1,
             borderRadius: theme.shape.borderRadius,
         },

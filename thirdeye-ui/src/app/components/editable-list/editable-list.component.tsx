@@ -72,7 +72,6 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         setList(newList);
         reset();
 
-        // Notify
         props.onChange && props.onChange(newList);
     };
 
@@ -84,7 +83,6 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         // Clear input
         inputRef.current.value = "";
         setHelperText("");
-
         // Set focus
         inputRef.current.focus();
     };
@@ -94,7 +92,6 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         newList.splice(index, 1);
         setList(newList);
 
-        // Notify
         props.onChange && props.onChange(newList);
     };
 

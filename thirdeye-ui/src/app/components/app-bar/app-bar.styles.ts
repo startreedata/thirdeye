@@ -9,7 +9,7 @@ export const useAppBarStyles = makeStyles((theme) => ({
         display: "flex",
         alignSelf: "center",
         marginRight: theme.spacing(2),
-        [theme.breakpoints.down("sm")]: {
+        [theme.breakpoints.down("xs")]: {
             marginLeft: "auto", // Center the logo
         },
     },

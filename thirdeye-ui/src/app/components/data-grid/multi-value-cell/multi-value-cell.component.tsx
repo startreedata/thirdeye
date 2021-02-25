@@ -44,12 +44,7 @@ function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
 
     return (
         <Box width="100%">
-            <Grid
-                container
-                alignItems="center"
-                justify="space-between"
-                spacing={0}
-            >
+            <Grid container spacing={0}>
                 {/* Values */}
                 <Grid
                     item

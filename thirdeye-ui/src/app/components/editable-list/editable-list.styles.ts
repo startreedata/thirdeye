@@ -4,7 +4,6 @@ import { Dimension } from "../../utils/material-ui/dimension.util";
 export const useEditableListStyles = makeStyles({
     list: {
         height: 250,
-        overflowX: "hidden",
         overflowY: "auto",
         padding: 0,
     },

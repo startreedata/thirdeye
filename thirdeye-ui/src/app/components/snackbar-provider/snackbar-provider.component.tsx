@@ -8,6 +8,8 @@ import React, { FunctionComponent, useRef } from "react";
 import { SnackbarProviderProps } from "./snackbar-provider.interfaces";
 import { useSnackbarProviderStyles } from "./snackbar-provider.styles";
 
+const DURATION_SNACKBAR_AUTO_HIDE = 3500;
+
 export const SnackbarProvider: FunctionComponent<SnackbarProviderProps> = (
     props: SnackbarProviderProps
 ) => {
@@ -36,7 +38,7 @@ export const SnackbarProvider: FunctionComponent<SnackbarProviderProps> = (
                 horizontal: "right",
                 vertical: "top",
             }}
-            autoHideDuration={3500}
+            autoHideDuration={DURATION_SNACKBAR_AUTO_HIDE}
             className={snackbarProviderClasses.snackbarProvider}
             classes={{
                 variantSuccess: snackbarProviderClasses.success,

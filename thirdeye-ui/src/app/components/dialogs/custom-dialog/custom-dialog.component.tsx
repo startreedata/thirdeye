@@ -3,15 +3,14 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
 } from "@material-ui/core";
 import React, { FunctionComponent, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { DialogContext } from "../dialog-provider/dialog-provider.component";
-import { AlertDialogData } from "../dialog-provider/dialog-provider.interfaces";
+import { CustomDialogData } from "../dialog-provider/dialog-provider.interfaces";
 
-export const AlertDialog: FunctionComponent = () => {
+export const CustomDialog: FunctionComponent = () => {
     const { visible, hideDialog, dialogData } = useContext(DialogContext);
     const { t } = useTranslation();
 
@@ -42,9 +41,7 @@ export const AlertDialog: FunctionComponent = () => {
 
                     {/* Contents */}
                     <DialogContent>
-                        <DialogContentText>
-                            {(dialogData as AlertDialogData).text}
-                        </DialogContentText>
+                        {(dialogData as CustomDialogData).children}
                     </DialogContent>
 
                     {/* Controls */}

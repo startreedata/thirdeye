@@ -27,13 +27,11 @@ import {
     SubscriptionGroupCardData,
 } from "../entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { SearchBar } from "../search-bar/search-bar.component";
-import { SubscriptionGroupsListProps } from "./subscription-groups-list.interfaces";
-import { useSubscriptionGroupsListStyles } from "./subscription-groups-list.styles";
+import { SubscriptionGroupListProps } from "./subscription-group-list.interfaces";
 
-export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListProps> = (
-    props: SubscriptionGroupsListProps
+export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps> = (
+    props: SubscriptionGroupListProps
 ) => {
-    const subscriptionGroupsListClasses = useSubscriptionGroupsListStyles();
     const [
         filteredSubscriptionGroupCardDatas,
         setFilteredSubscriptionGroupCardDatas,
@@ -58,7 +56,7 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
     }, [props.subscriptionGroupCardDatas, searchWords]);
 
     useEffect(() => {
-        // Search changed, re-initialize row selection
+        // Search changed, reset data grid selection model
         setDataGridSelectionModel([...dataGridSelectionModel]);
     }, [searchWords]);
 
@@ -68,8 +66,8 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
             {
                 field: "name",
                 type: "string",
-                headerName: t("label.name"),
                 sortable: true,
+                headerName: t("label.name"),
                 width: 150,
                 renderCell: (params) =>
                     linkCellRenderer<string>(
@@ -81,8 +79,8 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
             // Alerts
             {
                 field: "alerts",
-                headerName: t("label.subscribed-alerts"),
                 sortable: false,
+                headerName: t("label.subscribed-alerts"),
                 flex: 1,
                 renderCell: (params) =>
                     multiValueCellRenderer<SubscriptionGroupAlert>(
@@ -90,15 +88,15 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
                         true,
                         searchWords,
                         handleSubscriptionGroupViewDetailsById,
-                        handleAlertViewDetails,
+                        handleAlertClick,
                         getSubscriptionGroupAlertName
                     ),
             },
             // Emails
             {
                 field: "emails",
-                headerName: t("label.subscribed-emails"),
                 sortable: false,
+                headerName: t("label.subscribed-emails"),
                 flex: 1,
                 renderCell: (params) =>
                     multiValueCellRenderer<string>(
@@ -111,10 +109,10 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
             // Actions
             {
                 field: "id",
-                headerName: t("label.actions"),
+                sortable: false,
                 align: "center",
                 headerAlign: "center",
-                sortable: false,
+                headerName: t("label.actions"),
                 width: 150,
                 renderCell: (params) =>
                     actionsCellRenderer(
@@ -135,7 +133,7 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
         _name: string,
         id: number
     ): void => {
-        history.push(getSubscriptionGroupsDetailPath(id));
+        handleSubscriptionGroupViewDetailsById(id);
     };
 
     const handleSubscriptionGroupViewDetailsById = (id: number): void => {
@@ -155,16 +153,6 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
         props.onDelete && props.onDelete(subscriptionGroupCardData);
     };
 
-    const handleAlertViewDetails = (
-        subscriptionGroupAlert: SubscriptionGroupAlert
-    ): void => {
-        if (!subscriptionGroupAlert) {
-            return;
-        }
-
-        history.push(getAlertsDetailPath(subscriptionGroupAlert.id));
-    };
-
     const getSubscriptionGroupCardData = (
         id: number
     ): SubscriptionGroupCardData | null => {
@@ -180,6 +168,16 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
         );
     };
 
+    const handleAlertClick = (
+        subscriptionGroupAlert: SubscriptionGroupAlert
+    ): void => {
+        if (!subscriptionGroupAlert) {
+            return;
+        }
+
+        history.push(getAlertsDetailPath(subscriptionGroupAlert.id));
+    };
+
     const handleDataGridSelectionModelChange = (
         params: SelectionModelChangeParams
     ): void => {
@@ -187,34 +185,33 @@ export const SubscriptionGroupsList: FunctionComponent<SubscriptionGroupsListPro
     };
 
     return (
-        <Grid
-            container
-            className={subscriptionGroupsListClasses.subscriptionGroupsList}
-            direction="column"
-        >
+        <Grid container>
             {/* Search */}
-            <Grid item>
-                <SearchBar
-                    autoFocus
-                    setSearchQueryString
-                    searchLabel={t("label.search-entity", {
-                        entity: t("label.subscription-groups"),
-                    })}
-                    searchStatusLabel={getSearchStatusLabel(
-                        filteredSubscriptionGroupCardDatas
-                            ? filteredSubscriptionGroupCardDatas.length
-                            : 0,
-                        props.subscriptionGroupCardDatas
-                            ? props.subscriptionGroupCardDatas.length
-                            : 0
-                    )}
-                    onChange={setSearchWords}
-                />
-            </Grid>
+            {!props.hideSearchBar && (
+                <Grid item xs={12}>
+                    <SearchBar
+                        autoFocus
+                        setSearchQueryString
+                        searchLabel={t("label.search-entity", {
+                            entity: t("label.subscription-groups"),
+                        })}
+                        searchStatusLabel={getSearchStatusLabel(
+                            filteredSubscriptionGroupCardDatas
+                                ? filteredSubscriptionGroupCardDatas.length
+                                : 0,
+                            props.subscriptionGroupCardDatas
+                                ? props.subscriptionGroupCardDatas.length
+                                : 0
+                        )}
+                        onChange={setSearchWords}
+                    />
+                </Grid>
+            )}
 
-            {/* Subscription groups list */}
-            <Grid item className={subscriptionGroupsListClasses.list}>
+            {/* Subscription group list */}
+            <Grid item xs={12}>
                 <DataGrid
+                    autoHeight
                     checkboxSelection
                     columns={dataGridColumns}
                     loading={!props.subscriptionGroupCardDatas}

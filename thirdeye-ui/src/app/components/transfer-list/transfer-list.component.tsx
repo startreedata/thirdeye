@@ -167,7 +167,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             })
         );
 
-        // Notify
         props.onChange && props.onChange([...newToListMap.values()]);
     };
 
@@ -189,7 +188,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
             })
         );
 
-        // Notify
         props.onChange && props.onChange([...newToListMap.values()]);
     };
 
@@ -360,6 +358,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                 {/* Link */}
                                                                 {props.link && (
                                                                     <Link
+                                                                        component="button"
                                                                         onClick={() =>
                                                                             props.onClick &&
                                                                             props.onClick(

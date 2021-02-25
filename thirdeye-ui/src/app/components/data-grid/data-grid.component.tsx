@@ -1,7 +1,6 @@
 import { Box, Typography } from "@material-ui/core";
 import {
     CellParams,
-    classnames,
     ColDef,
     DataGrid as MuiDataGrid,
     GridOverlay,
@@ -58,9 +57,9 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
             // For columns that don't already have a custom cell renderer, set cell renderer with
             // text highlighter
             const columnCopy = cloneDeep(column);
-            (columnCopy.renderCell =
-                columnCopy.renderCell || cellRendererWithTextHighlighter),
-                columns.push(columnCopy);
+            columnCopy.renderCell =
+                columnCopy.renderCell || cellRendererWithTextHighlighter;
+            columns.push(columnCopy);
         }
         setDataGridColumns(columns);
     };
@@ -71,8 +70,8 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
         return (
             // Retain content alignment based on column properties
             <Box
-                className={classnames(commonClasses.ellipsis)}
-                textAlign={params.colDef && params.colDef.align}
+                className={commonClasses.ellipsis}
+                textAlign={params && params.colDef && params.colDef.align}
                 width="100%"
             >
                 <TextHighlighter
@@ -80,6 +79,39 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
                     text={params.value as string}
                 />
             </Box>
+        );
+    };
+
+    const toolbarRenderer = (): ReactElement => {
+        return (
+            <>
+                {props.checkboxSelection && (
+                    <Box
+                        border={Dimension.WIDTH_BORDER_DEFAULT}
+                        borderColor={Palette.COLOR_BORDER_LIGHT}
+                        borderLeft={0}
+                        borderRight={0}
+                        borderTop={0}
+                        display="flex"
+                        padding={1}
+                    >
+                        {/* Row selection status */}
+                        <Typography
+                            className={dataGridClasses.rowSelectionStatus}
+                            color="textSecondary"
+                            variant="body2"
+                        >
+                            {t("label.selected-count", {
+                                count: formatNumber(
+                                    dataGridSelectionModel
+                                        ? dataGridSelectionModel.length
+                                        : 0
+                                ) as never,
+                            })}
+                        </Typography>
+                    </Box>
+                )}
+            </>
         );
     };
 
@@ -107,31 +139,6 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
         );
     };
 
-    const footerRenderer = (): ReactElement => {
-        return (
-            <Box
-                border={Dimension.WIDTH_BORDER_DEFAULT}
-                borderBottom={0}
-                borderColor={Palette.COLOR_BORDER_LIGHT}
-                borderLeft={0}
-                borderRight={0}
-            >
-                {/* Row selection status */}
-                <Typography
-                    className={dataGridClasses.rowSelectionStatus}
-                    color="textSecondary"
-                    variant="body2"
-                >
-                    {t("label.selected-count", {
-                        count: formatNumber(
-                            dataGridSelectionModel.length
-                        ) as never,
-                    })}
-                </Typography>
-            </Box>
-        );
-    };
-
     const handleDataGridSelectionModelChange = (
         params: SelectionModelChangeParams
     ): void => {
@@ -143,13 +150,14 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
         <MuiDataGrid
             {...props}
             disableColumnMenu
+            hideFooter
             className={dataGridClasses.dataGrid}
             columns={dataGridColumns}
             components={{
+                Toolbar: toolbarRenderer,
                 LoadingOverlay: loadingIndicatorRenderer,
                 NoRowsOverlay: noDataAvailableRenderer,
                 ErrorOverlay: errorIndicatorRenderer,
-                Footer: footerRenderer,
             }}
             selectionModel={dataGridSelectionModel}
             onSelectionModelChange={handleDataGridSelectionModelChange}

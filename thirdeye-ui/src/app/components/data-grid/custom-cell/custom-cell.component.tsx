@@ -1,10 +1,12 @@
 import { Box } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { CustomCellProps } from "./custom-cell.interfaces";
+import { useCustomCellStyles } from "./custom-cell.styles";
 
 export const CustomCell: FunctionComponent<CustomCellProps> = (
     props: CustomCellProps
 ) => {
+    const customCellClasses = useCustomCellStyles();
     const [align, setAlign] = useState("");
 
     useEffect(() => {
@@ -15,7 +17,9 @@ export const CustomCell: FunctionComponent<CustomCellProps> = (
 
     return (
         <Box textAlign={align} width="100%">
-            {props.children}
+            <div className={customCellClasses.cellContents}>
+                {props.children}
+            </div>
         </Box>
     );
 };

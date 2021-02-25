@@ -138,7 +138,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered hideTimeRange title={t("label.update")}>
+        <PageContents centered title={t("label.update")}>
             {subscriptionGroup && (
                 <SubscriptionGroupWizard
                     alerts={alerts}

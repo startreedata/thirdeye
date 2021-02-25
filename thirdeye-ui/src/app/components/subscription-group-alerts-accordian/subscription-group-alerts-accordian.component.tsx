@@ -7,6 +7,8 @@ import {
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import { getAlertsDetailPath } from "../../utils/routes/routes.util";
 import {
     getSubscriptionGroupAlertId,
     getSubscriptionGroupAlertName,
@@ -19,7 +21,18 @@ import { SubscriptionGroupAlertsAccordianProps } from "./subscription-group-aler
 export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGroupAlertsAccordianProps> = (
     props: SubscriptionGroupAlertsAccordianProps
 ) => {
+    const history = useHistory();
     const { t } = useTranslation();
+
+    const handleAlertClick = (
+        subscriptionGroupAlert: SubscriptionGroupAlert
+    ): void => {
+        if (!subscriptionGroupAlert) {
+            return;
+        }
+
+        history.push(getAlertsDetailPath(subscriptionGroupAlert.id));
+    };
 
     const handleSubscriptionGroupAlertsChange = (
         subscriptionGroupAlerts: SubscriptionGroupAlert[]
@@ -34,7 +47,7 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
                 <Typography variant="h6">{props.title}</Typography>
             </AccordionSummary>
 
-            {/* Subscription group alerts transfer list */}
+            {/* Transfer list */}
             <AccordionDetails>
                 <TransferList<SubscriptionGroupAlert>
                     link
@@ -49,9 +62,8 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
                         props.subscriptionGroupCardData &&
                         props.subscriptionGroupCardData.alerts
                     }
-                    // TODO handle link
                     onChange={handleSubscriptionGroupAlertsChange}
-                    onClick={() => console.log("Link clicked")}
+                    onClick={handleAlertClick}
                 />
             </AccordionDetails>
         </Accordion>

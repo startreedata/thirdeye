@@ -5,7 +5,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricCardData } from "../../components/entity-cards/metric-card/metric-card.interfaces";
-import { MetricsList } from "../../components/metrics-list/metrics-list.component";
+import { MetricList } from "../../components/metric-list/metric-list.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { Metric } from "../../rest/dto/metric.interfaces";
 import { deleteMetric, getAllMetrics } from "../../rest/metrics/metrics.rest";
@@ -116,7 +116,7 @@ export const MetricsAllPage: FunctionComponent = () => {
             maxRouterBreadcrumbs={1}
             title={t("label.metrics")}
         >
-            <MetricsList
+            <MetricList
                 metricCardDatas={metricCardDatas}
                 onDelete={onDeleteMetric}
             />

@@ -6,7 +6,7 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCardData } from "../../components/entity-cards/subscription-group-card/subscription-group-card.interfaces";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { SubscriptionGroupsList } from "../../components/subscription-groups-list/subscription-groups-list.component";
+import { SubscriptionGroupList } from "../../components/subscription-group-list/subscription-group-list.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -150,7 +150,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             maxRouterBreadcrumbs={1}
             title={t("label.subscription-groups")}
         >
-            <SubscriptionGroupsList
+            <SubscriptionGroupList
                 subscriptionGroupCardDatas={subscriptionGroupCardDatas}
                 onDelete={onDeleteSubscriptionGroup}
             />

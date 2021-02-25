@@ -10,7 +10,7 @@ export const TimeRangeSelectorControls: FunctionComponent<TimeRangeSelectorContr
     const { t } = useTranslation();
 
     return (
-        <Grid container>
+        <Grid container spacing={1}>
             {/* Cancel button */}
             <Grid item>
                 <Button

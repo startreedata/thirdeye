@@ -1,4 +1,5 @@
 import { Box, FormHelperText, useTheme } from "@material-ui/core";
+import { classnames } from "@material-ui/data-grid";
 import { Editor, EditorChange, EditorConfiguration } from "codemirror";
 import "codemirror/addon/edit/closebrackets.js";
 import "codemirror/addon/edit/matchbrackets.js";
@@ -95,7 +96,7 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
     };
 
     return (
-        <>
+        <Box height="100%" width="100%">
             <Box
                 border={Dimension.WIDTH_BORDER_DEFAULT}
                 borderColor={
@@ -106,6 +107,11 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
                         : Palette.COLOR_BORDER_DEFAULT
                 }
                 borderRadius={theme.shape.borderRadius}
+                className={
+                    props.error
+                        ? jsonEditorClasses.jsonEditorContainerWithError
+                        : jsonEditorClasses.jsonEditorContainer
+                }
                 onMouseEnter={handleEditorMouseEnter}
                 onMouseLeave={handleEditorMouseLeave}
             >
@@ -142,9 +148,12 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
             </Box>
 
             {/* Helper text */}
-            <FormHelperText error={props.error}>
+            <FormHelperText
+                className={classnames(props.error && jsonEditorClasses.error)}
+                error={props.error}
+            >
                 {props.helperText}
             </FormHelperText>
-        </>
+        </Box>
     );
 };

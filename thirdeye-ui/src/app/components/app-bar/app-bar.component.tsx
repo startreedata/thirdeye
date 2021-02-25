@@ -122,7 +122,7 @@ export const AppBar: FunctionComponent = () => {
     return (
         <MuiAppBar className={appBarClasses.appBar} elevation={6}>
             <Toolbar>
-                <Hidden mdUp>
+                <Hidden smUp>
                     {/* App bar drawer button */}
                     <IconButton edge="start" onClick={handleAppBarDrawerClick}>
                         <MenuIcon />
@@ -144,7 +144,7 @@ export const AppBar: FunctionComponent = () => {
                     <ThirdEyeIcon height={32} />
                 </Link>
 
-                <Hidden smDown>
+                <Hidden xsDown>
                     {/* Home */}
                     <Link
                         className={appBarClasses.link}

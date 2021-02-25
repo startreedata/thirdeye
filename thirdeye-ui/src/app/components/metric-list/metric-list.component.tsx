@@ -26,13 +26,11 @@ import { DataGrid } from "../data-grid/data-grid.component";
 import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
 import { MetricCardData } from "../entity-cards/metric-card/metric-card.interfaces";
 import { SearchBar } from "../search-bar/search-bar.component";
-import { MetricsListProps } from "./metrics-list.interfaces";
-import { useMetricsListStyles } from "./metrics-list.styles";
+import { MetricListProps } from "./metric-list.interfaces";
 
-export const MetricsList: FunctionComponent<MetricsListProps> = (
-    props: MetricsListProps
+export const MetricList: FunctionComponent<MetricListProps> = (
+    props: MetricListProps
 ) => {
-    const metricsListClasses = useMetricsListStyles();
     const [filteredMetricCardDatas, setFilteredMetricCardDatas] = useState<
         MetricCardData[]
     >([]);
@@ -57,7 +55,7 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
     }, [props.metricCardDatas, searchWords]);
 
     useEffect(() => {
-        // Search changed, re-initialize row selection
+        // Search changed, reset data grid selection model
         setDataGridSelectionModel([...dataGridSelectionModel]);
     }, [searchWords]);
 
@@ -67,8 +65,8 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
             {
                 field: "name",
                 type: "string",
-                headerName: t("label.name"),
                 sortable: true,
+                headerName: t("label.name"),
                 width: 150,
                 renderCell: (params) =>
                     linkCellRenderer<string>(
@@ -81,18 +79,18 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
             {
                 field: "datasetName",
                 type: "string",
-                headerName: t("label.dataset"),
                 sortable: true,
+                headerName: t("label.dataset"),
                 width: 150,
             },
             // Active/inactive
             {
                 field: "active",
                 type: "boolean",
-                headerName: t("label.active"),
+                sortable: true,
                 align: "center",
                 headerAlign: "center",
-                sortable: true,
+                headerName: t("label.active"),
                 width: 80,
                 renderCell: metricStatusRenderer,
                 sortComparator: metricStatusComparator,
@@ -101,35 +99,35 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
             {
                 field: "aggregationColumn",
                 type: "string",
-                headerName: t("label.aggregation-column"),
                 sortable: true,
+                headerName: t("label.aggregation-column"),
                 flex: 1,
             },
             // Aggregation function
             {
                 field: "aggregationFunction",
                 type: "string",
-                headerName: t("label.aggregation-function"),
                 sortable: true,
+                headerName: t("label.aggregation-function"),
                 flex: 1,
             },
             // View count
             {
                 field: "viewCount",
                 type: "number",
-                headerName: t("label.views"),
+                sortable: true,
                 align: "right",
                 headerAlign: "right",
-                sortable: true,
+                headerName: t("label.views"),
                 width: 80,
             },
             // Actions
             {
                 field: "id",
-                headerName: t("label.actions"),
+                sortable: false,
                 align: "center",
                 headerAlign: "center",
-                sortable: false,
+                headerName: t("label.actions"),
                 width: 150,
                 renderCell: (params) =>
                     actionsCellRenderer(
@@ -152,21 +150,18 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
                 {/* Active */}
                 {params && params.value && (
                     <CheckIcon
-                        className={metricsListClasses.activeInactiveIcon}
                         fontSize="small"
                         htmlColor={theme.palette.success.main}
                     />
                 )}
 
                 {/* Inactive */}
-                {!params ||
-                    (!params.value && (
-                        <CloseIcon
-                            className={metricsListClasses.activeInactiveIcon}
-                            fontSize="small"
-                            htmlColor={theme.palette.error.main}
-                        />
-                    ))}
+                {(!params || !params.value) && (
+                    <CloseIcon
+                        fontSize="small"
+                        htmlColor={theme.palette.error.main}
+                    />
+                )}
             </CustomCell>
         );
     };
@@ -182,7 +177,7 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
         _name: string,
         id: number
     ): void => {
-        history.push(getMetricsDetailPath(id));
+        handleMetricViewDetailsById(id);
     };
 
     const handleMetricViewDetailsById = (id: number): void => {
@@ -217,32 +212,33 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
     };
 
     return (
-        <Grid
-            container
-            className={metricsListClasses.metricsList}
-            direction="column"
-        >
+        <Grid container>
             {/* Search */}
-            <Grid item>
-                <SearchBar
-                    autoFocus
-                    setSearchQueryString
-                    searchLabel={t("label.search-entity", {
-                        entity: t("label.metrics"),
-                    })}
-                    searchStatusLabel={getSearchStatusLabel(
-                        filteredMetricCardDatas
-                            ? filteredMetricCardDatas.length
-                            : 0,
-                        props.metricCardDatas ? props.metricCardDatas.length : 0
-                    )}
-                    onChange={setSearchWords}
-                />
-            </Grid>
+            {!props.hideSearchBar && (
+                <Grid item xs={12}>
+                    <SearchBar
+                        autoFocus
+                        setSearchQueryString
+                        searchLabel={t("label.search-entity", {
+                            entity: t("label.metrics"),
+                        })}
+                        searchStatusLabel={getSearchStatusLabel(
+                            filteredMetricCardDatas
+                                ? filteredMetricCardDatas.length
+                                : 0,
+                            props.metricCardDatas
+                                ? props.metricCardDatas.length
+                                : 0
+                        )}
+                        onChange={setSearchWords}
+                    />
+                </Grid>
+            )}
 
-            {/* Metrics list */}
-            <Grid item className={metricsListClasses.list}>
+            {/* Metric list */}
+            <Grid item xs={12}>
                 <DataGrid
+                    autoHeight
                     checkboxSelection
                     columns={dataGridColumns}
                     loading={!props.metricCardDatas}

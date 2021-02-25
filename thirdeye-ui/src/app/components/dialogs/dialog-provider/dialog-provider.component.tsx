@@ -1,7 +1,10 @@
 import * as React from "react";
 import { createContext, FunctionComponent, useContext, useState } from "react";
 import { AlertDialog } from "../alert-dialog/alert-dialog.component";
+import { CustomDialog } from "../custom-dialog/custom-dialog.component";
 import {
+    AlertDialogData,
+    CustomDialogData,
     DialogContextProps,
     DialogData,
     DialogProviderProps,
@@ -29,7 +32,7 @@ export const DialogProvider: FunctionComponent<DialogProviderProps> = (
         visible: visible,
         showDialog: showDialog,
         hideDialog: hideDialog,
-        dialogData: dialogData as DialogData,
+        dialogData: dialogData as AlertDialogData | CustomDialogData,
     };
 
     return (
@@ -39,6 +42,11 @@ export const DialogProvider: FunctionComponent<DialogProviderProps> = (
             {/* Alert dialog */}
             {visible && dialogData && dialogData.type === DialogType.ALERT && (
                 <AlertDialog />
+            )}
+
+            {/* Custom dialog */}
+            {visible && dialogData && dialogData.type === DialogType.CUSTOM && (
+                <CustomDialog />
             )}
         </DialogContext.Provider>
     );

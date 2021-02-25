@@ -3,7 +3,10 @@ import { Dimension } from "../../utils/material-ui/dimension.util";
 
 export const useSnackbarProviderStyles = makeStyles((theme) => ({
     snackbarProvider: {
-        width: Dimension.WIDTH_SNACKBAR_DEFAULT,
+        // Default 100% width when screen width is xs
+        [theme.breakpoints.up("sm")]: {
+            width: Dimension.WIDTH_SNACKBAR_DEFAULT,
+        },
     },
     success: {
         ...theme.typography.body2,

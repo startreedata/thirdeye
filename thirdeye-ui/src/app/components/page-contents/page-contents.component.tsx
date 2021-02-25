@@ -1,6 +1,7 @@
 import {
     Box,
     Grid,
+    Hidden,
     Paper,
     Slide,
     Typography,
@@ -29,7 +30,7 @@ import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.styles";
 
-const THRESHOLD_PAGE_CONTENTS_SCROLL_TOP = 95;
+const THRESHOLD_SCROLL_TOP_PAGE_CONTENTS = 95;
 
 const PageContentsInternal: FunctionComponent<PageContentsProps> = (
     props: PageContentsProps
@@ -39,7 +40,7 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
     const [documentTitle, setDocumentTitle] = useState("");
     const [showHeader, setShowHeader] = useState(true);
     const [headerWidth, setHeaderWidth] = useState<number>(
-        Dimension.WIDTH_PAGE_CONTENTS_DEFAULT
+        Dimension.WIDTH_PAGE_CONTENTS_CENTERED
     );
     const [pageContentsScrollTop, setPageContentsScrollTop] = useState(0);
     const { routerBreadcrumbs, pageBreadcrumbs } = useAppBreadcrumbs();
@@ -76,6 +77,18 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
         window.removeEventListener("resize", setHeaderWidthDebounced);
     };
 
+    const setHeaderWidthDebounced = useCallback(
+        debounce((): void => {
+            if (!mainContentsRef || !mainContentsRef.current) {
+                return;
+            }
+
+            // Determine header width based on main contents
+            setHeaderWidth(mainContentsRef.current.offsetWidth);
+        }, 1),
+        [mainContentsRef]
+    );
+
     const generateDocumentTitle = (): string => {
         // Document title is composed of:
         // Last router breadcrumb (if available) +
@@ -95,18 +108,6 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
             firstPageBreadcrumbText
         );
     };
-
-    const setHeaderWidthDebounced = useCallback(
-        debounce((): void => {
-            if (!mainContentsRef || !mainContentsRef.current) {
-                return;
-            }
-
-            // Determine header width based on main contents
-            setHeaderWidth(mainContentsRef.current.offsetWidth);
-        }, 1),
-        [mainContentsRef]
-    );
 
     const handlePageContentsScroll = (event: UIEvent<HTMLDivElement>): void => {
         if (
@@ -128,7 +129,7 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
                 // Page contents being scrolled up, show header
                 setShowHeader(true);
             } else if (
-                newPageContentsScrollTop < THRESHOLD_PAGE_CONTENTS_SCROLL_TOP
+                newPageContentsScrollTop < THRESHOLD_SCROLL_TOP_PAGE_CONTENTS
             ) {
                 // Page content scrolled down within set threshold, show header
                 setShowHeader(true);
@@ -192,18 +193,31 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
                                             }
                                             justify="space-between"
                                         >
-                                            <Grid item>
-                                                {/* App breadcrumbs */}
-                                                {!props.hideAppBreadcrumbs && (
-                                                    <AppBreadcrumbs
-                                                        maxRouterBreadcrumbs={
-                                                            props.maxRouterBreadcrumbs
-                                                        }
-                                                    />
+                                            <Grid
+                                                item
+                                                className={classnames(
+                                                    pageContentsClasses.titleContainer,
+                                                    commonClasses.ellipsis
                                                 )}
+                                            >
+                                                {/* App breadcrumbs */}
+                                                <Hidden
+                                                    xsDown
+                                                    smDown={
+                                                        !props.hideTimeRange
+                                                    }
+                                                >
+                                                    {!props.hideAppBreadcrumbs && (
+                                                        <AppBreadcrumbs
+                                                            maxRouterBreadcrumbs={
+                                                                props.maxRouterBreadcrumbs
+                                                            }
+                                                        />
+                                                    )}
+                                                </Hidden>
 
                                                 {/* Title */}
-                                                <Typography variant="h5">
+                                                <Typography noWrap variant="h5">
                                                     {props.title}
                                                 </Typography>
                                             </Grid>

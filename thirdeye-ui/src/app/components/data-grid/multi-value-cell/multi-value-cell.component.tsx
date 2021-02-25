@@ -20,12 +20,11 @@ function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Input cell parameters changed
         setValues(props.params && ((props.params.value as unknown) as T[]));
         setRowId(
             toNumber(props.params && props.params.row && props.params.row.id)
         );
-    }, [props.params]);
+    }, []);
 
     const getValueText = (value: T): string => {
         if (props.valueTextFn) {
@@ -39,7 +38,7 @@ function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
         return "";
     };
 
-    const handleMore = (): void => {
+    const handleMoreClick = (): void => {
         props.onMore && props.onMore(rowId);
     };
 
@@ -55,7 +54,7 @@ function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                 <Grid
                     item
                     className={classnames(commonClasses.ellipsis, {
-                        [multiValueCellClasses.values]: props.link, // Ellipsis to have same color as link
+                        [multiValueCellClasses.linkValues]: props.link, // Ellipsis to have same color as link
                     })}
                     xs={11}
                 >
@@ -74,6 +73,8 @@ function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
 
                                     {/* Value as link */}
                                     {props.link && (
+                                        // Not to set component as button to enable keyboard focus,
+                                        // links may be hidden
                                         <Link
                                             onClick={() =>
                                                 props.onClick &&
@@ -106,7 +107,7 @@ function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                 {/* More button */}
                 {values && values.length > MAX_ITEMS_VALUES && (
                     <Grid item xs={1}>
-                        <IconButton size="small" onClick={handleMore}>
+                        <IconButton size="small" onClick={handleMoreClick}>
                             <MoreHorizIcon fontSize="small" />
                         </IconButton>
                     </Grid>

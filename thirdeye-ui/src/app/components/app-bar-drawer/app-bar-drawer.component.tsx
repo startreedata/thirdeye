@@ -15,12 +15,10 @@ import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
 import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
 import { ReactComponent as MetricIcon } from "../../../assets/images/metric.svg";
 import { ReactComponent as SubscriptionGroupIcon } from "../../../assets/images/subscription-group.svg";
-import { ReactComponent as ThirdEyeIcon } from "../../../assets/images/third-eye.svg";
 import {
     AppRoute,
     getAlertsPath,
     getAnomaliesAllPath,
-    getBasePath,
     getConfigurationPath,
     getHomePath,
     getMetricsPath,
@@ -33,15 +31,10 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
     props: AppBarDrawerProps
 ) => {
     const appBarDrawerClasses = useAppBarDrawerStyles();
+    const theme = useTheme();
     const history = useHistory();
     const location = useLocation();
-    const theme = useTheme();
     const { t } = useTranslation();
-
-    const handleThirdEyeClick = (): void => {
-        history.push(getBasePath());
-        props.onClose && props.onClose();
-    };
 
     const handleHomeClick = (): void => {
         history.push(getHomePath());
@@ -85,24 +78,10 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
             onClose={props.onClose}
         >
             <List>
-                {/* ThirdEye */}
-                <ListItem button divider onClick={handleThirdEyeClick}>
-                    <ListItemIcon>
-                        <ThirdEyeIcon width={24} />
-                    </ListItemIcon>
-
-                    <ListItemText
-                        primary={t("label.thirdeye")}
-                        primaryTypographyProps={{
-                            variant: "subtitle1",
-                        }}
-                    />
-                </ListItem>
-
                 {/* Home */}
                 <ListItem button onClick={handleHomeClick}>
                     <ListItemIcon>
-                        <HomeIcon color="action" />
+                        <HomeIcon />
                     </ListItemIcon>
 
                     <ListItemText
@@ -121,7 +100,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                     <ListItemIcon>
                         <AlertIcon
                             fill={theme.palette.action.active}
-                            width={24}
+                            height={24}
                         />
                     </ListItemIcon>
 
@@ -141,7 +120,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                     <ListItemIcon>
                         <AnomalyIcon
                             fill={theme.palette.action.active}
-                            width={24}
+                            height={24}
                         />
                     </ListItemIcon>
 
@@ -159,7 +138,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                 {/* Configuration */}
                 <ListItem button divider onClick={handleConfigurationClick}>
                     <ListItemIcon>
-                        <SettingsIcon color="action" />
+                        <SettingsIcon />
                     </ListItemIcon>
 
                     <ListItemText
@@ -182,7 +161,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                     <ListItemIcon>
                         <SubscriptionGroupIcon
                             fill={theme.palette.action.active}
-                            width={24}
+                            height={24}
                         />
                     </ListItemIcon>
 
@@ -206,7 +185,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                     <ListItemIcon>
                         <MetricIcon
                             fill={theme.palette.action.active}
-                            width={24}
+                            height={24}
                         />
                     </ListItemIcon>
 

@@ -4,14 +4,15 @@ import { toNumber } from "lodash";
 import React, { ReactElement, useEffect, useState } from "react";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { LinkCellProps } from "./link-cell.interfaces";
+import { useLinkCellStyles } from "./link-cell.styles";
 
 function LinkCell<T>(props: LinkCellProps<T>): ReactElement {
+    const linkCellClasses = useLinkCellStyles();
     const [value, setValue] = useState<T>();
     const [rowId, setRowId] = useState(-1);
     const [align, setAlign] = useState("");
 
     useEffect(() => {
-        // Input cell parameters changed
         setValue(props.params && ((props.params.value as unknown) as T));
         setRowId(
             toNumber(props.params && props.params.row && props.params.row.id)
@@ -19,7 +20,7 @@ function LinkCell<T>(props: LinkCellProps<T>): ReactElement {
         setAlign(
             props.params && props.params.colDef && props.params.colDef.align
         );
-    }, [props.params]);
+    }, []);
 
     const getValueText = (): string => {
         if (props.valueTextFn) {
@@ -33,13 +34,18 @@ function LinkCell<T>(props: LinkCellProps<T>): ReactElement {
         return "";
     };
 
-    const handleClick = (): void => {
+    const handleLinkClick = (): void => {
         props.onClick && props.onClick(value as T, rowId);
     };
 
     return (
         <Box textAlign={align} width="100%">
-            <Link noWrap display="block" onClick={handleClick}>
+            <Link
+                noWrap
+                className={linkCellClasses.link}
+                component="button"
+                onClick={handleLinkClick}
+            >
                 <TextHighlighter
                     searchWords={props.searchWords}
                     text={getValueText()}

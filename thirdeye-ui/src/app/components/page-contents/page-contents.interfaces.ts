@@ -6,7 +6,7 @@ export interface PageContentsProps extends WithWidth {
     hideHeader?: boolean;
     hideTimeRange?: boolean;
     hideAppBreadcrumbs?: boolean;
-    maxRouterBreadcrumbs?: number; // Maximum number of router breadcrumbs to render
+    maxRouterBreadcrumbs?: number; // Maximum number of router breadcrumbs to display
     centered?: boolean;
     children?: ReactNode;
 }

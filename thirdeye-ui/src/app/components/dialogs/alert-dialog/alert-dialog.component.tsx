@@ -14,12 +14,12 @@ export const AlertDialog: FunctionComponent = () => {
     const { visible, hideDialog, dialogData } = useContext(DialogContext);
     const { t } = useTranslation();
 
-    const handleClose = (): void => {
+    const handleDialogClose = (): void => {
         dialogData && dialogData.onCancel && dialogData.onCancel();
         hideDialog();
     };
 
-    const handleOk = (): void => {
+    const handleOkClick = (): void => {
         dialogData && dialogData.onOk && dialogData.onOk();
         hideDialog();
     };
@@ -32,7 +32,7 @@ export const AlertDialog: FunctionComponent = () => {
                     fullWidth
                     maxWidth="xs"
                     open={visible}
-                    onClose={handleClose}
+                    onClose={handleDialogClose}
                 >
                     {/* Header */}
                     {dialogData.title && (
@@ -50,7 +50,7 @@ export const AlertDialog: FunctionComponent = () => {
                         <Button
                             color="primary"
                             variant="outlined"
-                            onClick={handleClose}
+                            onClick={handleDialogClose}
                         >
                             {dialogData.cancelButtonLabel || t("label.cancel")}
                         </Button>
@@ -59,7 +59,7 @@ export const AlertDialog: FunctionComponent = () => {
                         <Button
                             color="primary"
                             variant="contained"
-                            onClick={handleOk}
+                            onClick={handleOkClick}
                         >
                             {dialogData.okButtonLabel || t("label.ok")}
                         </Button>

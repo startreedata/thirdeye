@@ -153,6 +153,7 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
                 {params && params.value && (
                     <CheckIcon
                         className={metricsListClasses.activeInactiveIcon}
+                        fontSize="small"
                         htmlColor={theme.palette.success.main}
                     />
                 )}
@@ -162,6 +163,7 @@ export const MetricsList: FunctionComponent<MetricsListProps> = (
                     (!params.value && (
                         <CloseIcon
                             className={metricsListClasses.activeInactiveIcon}
+                            fontSize="small"
                             htmlColor={theme.palette.error.main}
                         />
                     ))}

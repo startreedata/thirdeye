@@ -19,14 +19,13 @@ const ActionsCell: FunctionComponent<ActionsCellProps> = (
     const [align, setAlign] = useState("");
 
     useEffect(() => {
-        // Input cell parameters changed
         setRowId(
             toNumber(props.params && props.params.row && props.params.row.id)
         );
         setAlign(
             props.params && props.params.colDef && props.params.colDef.align
         );
-    }, [props.params]);
+    }, []);
 
     const handleViewDetails = (): void => {
         props.onViewDetails && props.onViewDetails(rowId);

@@ -8,11 +8,10 @@ export const CustomCell: FunctionComponent<CustomCellProps> = (
     const [align, setAlign] = useState("");
 
     useEffect(() => {
-        // Input cell parameters changed
         setAlign(
             props.params && props.params.colDef && props.params.colDef.align
         );
-    }, [props.params]);
+    }, []);
 
     return (
         <Box textAlign={align} width="100%">

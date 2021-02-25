@@ -1,6 +1,7 @@
 import { Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { SafariGridItem } from "../../../safari-grid-item/safari-grid-item.component";
 import { TimeRangeSelectorControlsProps } from "./time-range-selector-controls.interfaces";
 
 export const TimeRangeSelectorControls: FunctionComponent<TimeRangeSelectorControlsProps> = (
@@ -31,6 +32,8 @@ export const TimeRangeSelectorControls: FunctionComponent<TimeRangeSelectorContr
                     {t("label.apply")}
                 </Button>
             </Grid>
+
+            <SafariGridItem />
         </Grid>
     );
 };

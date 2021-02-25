@@ -1,7 +1,7 @@
 import { Breadcrumb } from "../breadcrumbs/breadcrumbs.interfaces";
 
 export interface AppBreadcrumbsProps {
-    maxRouterBreadcrumbs?: number; // Maximum number of router breadcrumbs to render
+    maxRouterBreadcrumbs?: number; // Maximum number of router breadcrumbs to display
 }
 
 export interface UseAppBreadcrumbsProps {

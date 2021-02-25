@@ -8,6 +8,7 @@ import {
     RowId,
     SelectionModelChangeParams,
 } from "@material-ui/data-grid";
+import { cloneDeep } from "lodash";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -54,12 +55,12 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
 
         const columns = [];
         for (const column of props.columns) {
-            columns.push({
-                ...column,
-                // For columns that don't already have a custom cell renderer
-                renderCell:
-                    column.renderCell || cellRendererWithTextHighlighter,
-            });
+            // For columns that don't already have a custom cell renderer, set cell renderer with
+            // text highlighter
+            const columnCopy = cloneDeep(column);
+            (columnCopy.renderCell =
+                columnCopy.renderCell || cellRendererWithTextHighlighter),
+                columns.push(columnCopy);
         }
         setDataGridColumns(columns);
     };
@@ -123,7 +124,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
                 >
                     {t("label.selected-count", {
                         count: formatNumber(
-                            dataGridSelectionModel.length || 0
+                            dataGridSelectionModel.length
                         ) as never,
                     })}
                 </Typography>

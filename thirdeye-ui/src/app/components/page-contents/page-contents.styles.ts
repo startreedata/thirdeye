@@ -3,41 +3,40 @@ import { Dimension } from "../../utils/material-ui/dimension.util";
 
 export const usePageContentsStyles = makeStyles((theme: Theme) => ({
     pageContents: {
-        // Container to occupy entire height and width so that contained components can be
-        // horizontally/vertically centered if required
-        height: "100%",
-        width: "100%",
         display: "flex",
-        overflow: "auto", // This container can scroll while everything outside is fixed
+        flex: 1, // Occupy available area
+        overflow: "auto", // Container can scroll while everything outside is fixed
     },
     main: {
         display: "flex",
         flexDirection: "column",
-        paddingLeft: 16,
-        paddingRight: 16,
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(2),
     },
     mainExpanded: {
-        flexGrow: 1, // Container to occupy available area
+        flex: 1, // Occupy available area
     },
     mainCenterAligned: {
-        width: Dimension.WIDTH_PAGE_CONTENTS_DEFAULT,
+        width: Dimension.WIDTH_PAGE_CONTENTS_CENTERED,
         marginLeft: "auto",
         marginRight: "auto",
     },
     headerContainer: {
         position: "fixed",
-        display: "flex",
-        background: `linear-gradient(${theme.palette.background.default}, transparent)`,
-        zIndex: theme.zIndex.drawer, // Header to be at the same level as drawer
+        background: `linear-gradient(${theme.palette.background.default}, ${theme.palette.background.default}00)`,
+        zIndex: theme.zIndex.drawer, // Header at the same level as drawer
     },
     header: {
+        minHeight: 78,
         display: "flex",
-        width: "100%",
-        padding: 16,
-        marginTop: 8,
+        padding: theme.spacing(2),
+        marginTop: theme.spacing(1),
     },
     headerContents: {
-        height: 64,
+        flex: 1,
+    },
+    titleContainer: {
+        flex: 1,
     },
     headerPlaceholder: {
         minHeight: 110,
@@ -45,7 +44,7 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
     mainContents: {
         display: "flex",
         flexDirection: "column",
-        flexGrow: 1, // Container to occupy available area
-        paddingBottom: 16,
+        flex: 1, // Occupy available area
+        paddingBottom: theme.spacing(2),
     },
 }));

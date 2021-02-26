@@ -43,3 +43,6 @@ src/test/unit/coverage/
 
 # macOS
 .DS_Store
+
+# webpack
+webpack/

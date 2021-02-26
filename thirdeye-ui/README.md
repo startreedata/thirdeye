@@ -23,6 +23,7 @@ This is the project for CortexData ThirdEye UI.
     -   [`eslint`](#eslint)
     -   [`stylelint`](#stylelint)
     -   [`pretty`](#pretty)
+-   [Supported Browsers](#supported-browsers)
 
 ## Getting Started
 
@@ -30,11 +31,11 @@ These instructions will help you get the project up and running on your local ma
 
 ### Prerequisites
 
-#### Node Version Manager (nvm)
+#### [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm)
 
-The project uses [nvm](https://github.com/nvm-sh/nvm) to maintain the Node version. Compatible Node version is listed in project root `.nvmrc`.
+The project uses nvm to maintain the [Node](https://nodejs.org) version. Compatible Node version is listed in project root [**.nvmrc**](.nvmrc).
 
-Once you install nvm, go to the project directory and switch to the compatible node version
+Once you install nvm, go to the project directory and switch to the compatible Node version
 
 ```
 $ nvm use
@@ -53,11 +54,11 @@ You need to run "nvm install 14.7.0" to install it before using it.
 
 Following the installation, the command above will let you switch to the required Node version.
 
-#### Configure Node Package Manager (npm) for use with GitHub Packages
+#### Configure [Node Package Manager (npm)](https://www.npmjs.com) for use with GitHub Packages
 
-The project may depend on some GitHub Packages and [npm](https://www.npmjs.com) needs to be configured to allow access to these packages using a GitHub account. The GitHub repository to install packages from is configured in project root `.npmrc`.
+The project may depend on some GitHub Packages and npm needs to be configured to allow access to these packages using a GitHub account. The GitHub repository to install packages from is configured in project root [**.npmrc**](.npmrc).
 
-Follow the official GitHub Docs [here](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-with-a-personal-access-token) to configure [npm](https://www.npmjs.com) with a GitHub personal access token using `~/.npmrc` file.
+Follow the official GitHub Docs [here](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-with-a-personal-access-token) to configure npm with a GitHub personal access token using **~/.npmrc**.
 
 ### Setup
 
@@ -77,13 +78,13 @@ Once set up, go to the project directory and run
 $ npm run start
 ```
 
-This will build and deploy the project using webpack-dev-server at http://localhost:7004.
+This will build and deploy the project using [webpack-dev-server](https://github.com/webpack/webpack-dev-server) at http://localhost:7004.
 
 ## Scripts
 
 ### `start`
 
-Build and deploy the project using webpack-dev-server at http://localhost:7004
+Build and deploy the project using [webpack-dev-server](https://github.com/webpack/webpack-dev-server) at http://localhost:7004
 
 ```
 $ npm run start
@@ -91,11 +92,13 @@ $ npm run start
 
 ### `build`
 
-Build the project and output the bundles in project root `dist`
+Build the project and output the bundles in project root **dist**
 
 ```
 $ npm run build
 ```
+
+This will also analyze the bundles using [Webpack Bundle Analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer) and generate bundle report in project root **webpack**.
 
 ### `test`
 
@@ -115,7 +118,7 @@ $ npm run test-watch
 
 ### `test-coverage`
 
-Run all tests and generate coverage report in project root `src/test/coverage`
+Run all tests and generate coverage report in project root **src/test/unit/coverage**
 
 ```
 $ npm run test-coverage
@@ -123,7 +126,7 @@ $ npm run test-coverage
 
 ### `eslint`
 
-Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root `.eslintignore`
+Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](.eslintignore)
 
 ```
 $ npm run eslint
@@ -131,7 +134,7 @@ $ npm run eslint
 
 ### `stylelint`
 
-Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root `.stylelintignore`
+Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root [**.stylelintignore**](.stylelintignore)
 
 ```
 $ npm run stylelint
@@ -139,8 +142,12 @@ $ npm run stylelint
 
 ### `pretty`
 
-Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root `.prettierignore`
+Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root [**.prettierignore**](.prettierignore)
 
 ```
 $ npm run pretty
 ```
+
+## Supported Browsers
+
+CortexData ThirdEye UI is tested on latest, stable release of [Chrome](https://www.google.com/chrome), [Firefox](https://www.mozilla.org/firefox), [Safari](https://www.apple.com/safari) and [Edge](https://www.microsoft.com/edge).

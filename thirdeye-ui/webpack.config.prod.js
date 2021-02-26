@@ -3,7 +3,8 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WebpackBar = require("webpackbar");
-const webpack = require("webpack");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+    .BundleAnalyzerPlugin;
 
 const outputPath = path.join(__dirname, "dist");
 
@@ -101,6 +102,15 @@ module.exports = {
         new WebpackBar({
             name: "@cortexdata/thirdeye-ui [prod]",
             color: "#6EC4D1",
+        }),
+        // Bundle analyzer
+        new BundleAnalyzerPlugin({
+            analyzerMode: "static",
+            reportFilename: path.join(
+                __dirname,
+                "webpack/bundle-analyzer-report.html"
+            ),
+            openAnalyzer: false,
         }),
     ],
 

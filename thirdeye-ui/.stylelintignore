@@ -16,3 +16,6 @@ tsbuildinfo/
 
 # Jest
 src/test/unit/coverage/
+
+# webpack
+webpack/

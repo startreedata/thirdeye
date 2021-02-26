@@ -107,12 +107,12 @@ export const getUiAnomalies = (anomalies: Anomaly[]): UiAnomaly[] => {
         return [];
     }
 
-    const uiAnomalys = [];
+    const uiAnomalies = [];
     for (const anomaly of anomalies) {
-        uiAnomalys.push(getUiAnomaly(anomaly));
+        uiAnomalies.push(getUiAnomaly(anomaly));
     }
 
-    return uiAnomalys;
+    return uiAnomalies;
 };
 
 export const filterAnomalies = (

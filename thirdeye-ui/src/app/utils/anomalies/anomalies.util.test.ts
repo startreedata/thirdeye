@@ -82,7 +82,7 @@ describe("Anomalies Util", () => {
     });
 
     test("getUiAnomalies should return appropriate UI anomalies for anomalies", () => {
-        expect(getUiAnomalies(mockAnomalies)).toEqual(mockUiAnomalys);
+        expect(getUiAnomalies(mockAnomalies)).toEqual(mockUiAnomalies);
     });
 
     test("filterAnomalies should return empty array for invalid UI anomalies", () => {
@@ -97,16 +97,16 @@ describe("Anomalies Util", () => {
 
     test("filterAnomalies should return appropriate UI anomalies for UI anomalies and invalid search words", () => {
         expect(
-            filterAnomalies(mockUiAnomalys, (null as unknown) as string[])
-        ).toEqual(mockUiAnomalys);
+            filterAnomalies(mockUiAnomalies, (null as unknown) as string[])
+        ).toEqual(mockUiAnomalies);
     });
 
     test("filterAnomalies should return appropriate UI anomalies for UI anomalies and empty search words", () => {
-        expect(filterAnomalies(mockUiAnomalys, [])).toEqual(mockUiAnomalys);
+        expect(filterAnomalies(mockUiAnomalies, [])).toEqual(mockUiAnomalies);
     });
 
     test("filterAnomalies should return appropriate UI anomalies for UI anomalies and search words", () => {
-        expect(filterAnomalies(mockUiAnomalys, mockSearchWords)).toEqual([
+        expect(filterAnomalies(mockUiAnomalies, mockSearchWords)).toEqual([
             mockUiAnomaly1,
             mockUiAnomaly2,
         ]);
@@ -307,7 +307,7 @@ const mockUiAnomaly4 = {
     endTime: "label.no-data-marker",
 };
 
-const mockUiAnomalys = [
+const mockUiAnomalies = [
     mockUiAnomaly1,
     mockUiAnomaly2,
     mockUiAnomaly3,

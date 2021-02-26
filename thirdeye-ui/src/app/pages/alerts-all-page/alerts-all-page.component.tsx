@@ -1,16 +1,12 @@
-import { Grid } from "@material-ui/core";
-import { isEmpty } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AlertList } from "../../components/alert-list/alert-list.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { SearchBar } from "../../components/search-bar/search-bar.component";
 import {
     deleteAlert,
     getAllAlerts,
@@ -20,12 +16,7 @@ import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
-import {
-    filterAlerts,
-    getUiAlert,
-    getUiAlerts,
-} from "../../utils/alerts/alerts.util";
-import { getSearchStatusLabel } from "../../utils/search/search.util";
+import { getUiAlert, getUiAlerts } from "../../utils/alerts/alerts.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -34,11 +25,9 @@ import {
 export const AlertsAllPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [uiAlerts, setUiAlerts] = useState<UiAlert[]>([]);
-    const [filteredUiAlerts, setFilteredUiAlerts] = useState<UiAlert[]>([]);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
-    const [searchWords, setSearchWords] = useState<string[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
@@ -48,11 +37,6 @@ export const AlertsAllPage: FunctionComponent = () => {
         setPageBreadcrumbs([]);
         fetchAllAlerts();
     }, []);
-
-    useEffect(() => {
-        // Fetched alerts or search changed, reset
-        setFilteredUiAlerts(filterAlerts(uiAlerts, searchWords));
-    }, [uiAlerts, searchWords]);
 
     const onAlertChange = (uiAlert: UiAlert): void => {
         if (!uiAlert || !uiAlert.alert) {
@@ -189,45 +173,11 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     return (
         <PageContents centered hideAppBreadcrumbs title={t("label.alerts")}>
-            <Grid container>
-                {/* Search */}
-                <Grid item sm={12}>
-                    <SearchBar
-                        autoFocus
-                        setSearchQueryString
-                        searchLabel={t("label.search-alerts")}
-                        searchStatusLabel={getSearchStatusLabel(
-                            filteredUiAlerts ? filteredUiAlerts.length : 0,
-                            uiAlerts ? uiAlerts.length : 0
-                        )}
-                        onChange={setSearchWords}
-                    />
-                </Grid>
-
-                {/* Alerts */}
-                {filteredUiAlerts &&
-                    filteredUiAlerts.map((filteredUiAlert, index) => (
-                        <Grid item key={index} sm={12}>
-                            <AlertCard
-                                showViewDetails
-                                searchWords={searchWords}
-                                uiAlert={filteredUiAlert}
-                                onChange={onAlertChange}
-                                onDelete={onDeleteAlert}
-                            />
-                        </Grid>
-                    ))}
-            </Grid>
-
-            {/* No data available message */}
-            {isEmpty(filteredUiAlerts) && isEmpty(searchWords) && (
-                <NoDataIndicator />
-            )}
-
-            {/* No search results available message */}
-            {isEmpty(filteredUiAlerts) && !isEmpty(searchWords) && (
-                <NoDataIndicator text={t("message.no-search-results")} />
-            )}
+            <AlertList
+                uiAlerts={uiAlerts}
+                onChange={onAlertChange}
+                onDelete={onDeleteAlert}
+            />
         </PageContents>
     );
 };

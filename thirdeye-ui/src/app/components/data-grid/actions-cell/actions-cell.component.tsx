@@ -1,5 +1,5 @@
 import { Box, IconButton } from "@material-ui/core";
-import { CellParams } from "@material-ui/data-grid";
+import { CellParams, RowParams } from "@material-ui/data-grid";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import VisibilityIcon from "@material-ui/icons/Visibility";
@@ -16,6 +16,7 @@ const ActionsCell: FunctionComponent<ActionsCellProps> = (
     props: ActionsCellProps
 ) => {
     const [rowId, setRowId] = useState(-1);
+    const [hoveredRowId, setHoveredRowId] = useState(-1);
     const [align, setAlign] = useState("");
 
     useEffect(() => {
@@ -25,7 +26,15 @@ const ActionsCell: FunctionComponent<ActionsCellProps> = (
         setAlign(
             props.params && props.params.colDef && props.params.colDef.align
         );
+
+        props.params &&
+            props.params.api &&
+            props.params.api.subscribeEvent("rowHover", handleRowHover);
     }, []);
+
+    const handleRowHover = (params: RowParams): void => {
+        setHoveredRowId(toNumber(params.row && params.row.id));
+    };
 
     const handleViewDetails = (): void => {
         props.onViewDetails && props.onViewDetails(rowId);
@@ -44,21 +53,30 @@ const ActionsCell: FunctionComponent<ActionsCellProps> = (
             {/* View details button */}
             {props.viewDetails && (
                 <IconButton size="small" onClick={handleViewDetails}>
-                    <VisibilityIcon fontSize="small" />
+                    <VisibilityIcon
+                        color={rowId === hoveredRowId ? "action" : "disabled"}
+                        fontSize="small"
+                    />
                 </IconButton>
             )}
 
             {/* Edit button */}
             {props.edit && (
-                <IconButton size="small" onClick={handleEdit}>
-                    <EditIcon fontSize="small" />
+                <IconButton color="secondary" size="small" onClick={handleEdit}>
+                    <EditIcon
+                        color={rowId === hoveredRowId ? "action" : "disabled"}
+                        fontSize="small"
+                    />
                 </IconButton>
             )}
 
             {/* Delete button */}
             {props.delete && (
                 <IconButton size="small" onClick={handleDelete}>
-                    <DeleteIcon fontSize="small" />
+                    <DeleteIcon
+                        color={rowId === hoveredRowId ? "action" : "disabled"}
+                        fontSize="small"
+                    />
                 </IconButton>
             )}
         </Box>

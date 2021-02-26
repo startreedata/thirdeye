@@ -56,7 +56,7 @@ describe("App Breadcrumbs Store", () => {
         expect(result.current.pageBreadcrumbs).toEqual([]);
     });
 
-    test("setRouterBreadcrumbs should update store appropriately", () => {
+    test("setRouterBreadcrumbs should update store appropriately for breadcrumbs", () => {
         const { result } = renderHook(() => useAppBreadcrumbsStore());
         act(() => {
             result.current.setRouterBreadcrumbs([
@@ -73,7 +73,7 @@ describe("App Breadcrumbs Store", () => {
         expect(result.current.pageBreadcrumbs).toEqual([]);
     });
 
-    test("setPageBreadcrumbs should update store appropriately", () => {
+    test("setPageBreadcrumbs should update store appropriately for braedcrumbs", () => {
         const { result } = renderHook(() => useAppBreadcrumbsStore());
         act(() => {
             result.current.setRouterBreadcrumbs([]);
@@ -91,7 +91,7 @@ describe("App Breadcrumbs Store", () => {
     });
 });
 
-test("pushPageBreadcrumb should update store appropriately", () => {
+test("pushPageBreadcrumb should update store appropriately for breadcrumb", () => {
     const { result } = renderHook(() => useAppBreadcrumbsStore());
     act(() => {
         result.current.setRouterBreadcrumbs([]);

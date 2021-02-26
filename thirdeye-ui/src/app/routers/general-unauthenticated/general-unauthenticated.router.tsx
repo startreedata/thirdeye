@@ -23,8 +23,8 @@ const SignInPage = lazy(() =>
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
     const [redirectURL, setRedirectURL] = useState(getBasePath());
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
     const location = useLocation();
 
     useEffect(() => {

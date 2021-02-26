@@ -49,12 +49,7 @@ export const HomePage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents
-            centered
-            hideAppBreadcrumbs
-            hideTimeRange
-            title={t("label.configuration")}
-        >
+        <PageContents centered hideAppBreadcrumbs title={t("label.home")}>
             <Box
                 alignItems="center"
                 display="flex"

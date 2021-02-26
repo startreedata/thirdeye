@@ -379,20 +379,6 @@ describe("App Router", () => {
             screen.findByText("testGeneralUnauthenticatedRouter")
         ).resolves.toBeInTheDocument();
     });
-
-    test("should direct any path to general unauthenticated router when auth enabled and not authenticated", async () => {
-        mockAuthDisabled = false;
-        mockAuthenticated = false;
-        render(
-            <MemoryRouter initialEntries={["/testPath"]}>
-                <AppRouter />
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testGeneralUnauthenticatedRouter")
-        ).resolves.toBeInTheDocument();
-    });
 });
 
 let mockAuthDisabled = false;

@@ -2,6 +2,6 @@ import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interf
 
 export interface SubscriptionGroupListProps {
     hideSearchBar?: boolean;
-    uiSubscriptionGroups: UiSubscriptionGroup[] | null;
+    subscriptionGroups: UiSubscriptionGroup[] | null;
     onDelete?: (uiSubscriptionGroup: UiSubscriptionGroup) => void;
 }

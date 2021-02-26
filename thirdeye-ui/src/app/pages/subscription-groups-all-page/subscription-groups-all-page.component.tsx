@@ -146,7 +146,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         >
             {/* Subscription group list */}
             <SubscriptionGroupList
-                uiSubscriptionGroups={uiSubscriptionGroups}
+                subscriptionGroups={uiSubscriptionGroups}
                 onDelete={handleSubscriptionGroupDelete}
             />
         </PageContents>

@@ -6,6 +6,7 @@ import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { filterAnomalies } from "../../utils/anomalies/anomalies.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
 import { AnomalyCard } from "../entity-cards/anomaly-card/anomaly-card.component";
+import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { AnomalyListProps } from "./anomaly-list.interfaces";
@@ -22,62 +23,62 @@ export const AnomalyList: FunctionComponent<AnomalyListProps> = (
     useEffect(() => {
         // Input anomalies or search changed, reset
         setFilteredUiAnomalies(
-            filterAnomalies(props.uiAnomalies as UiAnomaly[], searchWords)
+            filterAnomalies(props.anomalies || [], searchWords)
         );
-    }, [props.uiAnomalies, searchWords]);
-
-    const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
-        if (!uiAnomaly) {
-            return;
-        }
-
-        props.onDelete && props.onDelete(uiAnomaly);
-    };
+    }, [props.anomalies, searchWords]);
 
     return (
-        <Grid container>
-            {/* Search */}
-            {!props.hideSearchBar && (
-                <Grid item xs={12}>
-                    <SearchBar
-                        autoFocus
-                        setSearchQueryString
-                        searchLabel={t("label.search-entity", {
-                            entity: t("label.anomalies"),
-                        })}
-                        searchStatusLabel={getSearchStatusLabel(
-                            filteredUiAnomalies
-                                ? filteredUiAnomalies.length
-                                : 0,
-                            props.uiAnomalies ? props.uiAnomalies.length : 0
-                        )}
-                        onChange={setSearchWords}
-                    />
-                </Grid>
-            )}
-
-            {/* Anomalies */}
-            {filteredUiAnomalies &&
-                filteredUiAnomalies.map((filteredUiAnomaly, index) => (
-                    <Grid item key={index} sm={12}>
-                        <AnomalyCard
-                            showViewDetails
-                            searchWords={searchWords}
-                            uiAnomaly={filteredUiAnomaly}
-                            onDelete={handleAnomalyDelete}
+        <>
+            <Grid container>
+                {/* Search */}
+                {!props.hideSearchBar && (
+                    <Grid item xs={12}>
+                        <SearchBar
+                            autoFocus
+                            setSearchQueryString
+                            searchLabel={t("label.search-entity", {
+                                entity: t("label.anomalies"),
+                            })}
+                            searchStatusLabel={getSearchStatusLabel(
+                                filteredUiAnomalies
+                                    ? filteredUiAnomalies.length
+                                    : 0,
+                                props.anomalies ? props.anomalies.length : 0
+                            )}
+                            onChange={setSearchWords}
                         />
                     </Grid>
-                ))}
+                )}
+
+                {/* Anomalies */}
+                {props.anomalies &&
+                    filteredUiAnomalies &&
+                    filteredUiAnomalies.map((filteredUiAnomaly, index) => (
+                        <Grid item key={index} sm={12}>
+                            <AnomalyCard
+                                showViewDetails
+                                searchWords={searchWords}
+                                uiAnomaly={filteredUiAnomaly}
+                                onDelete={props.onDelete}
+                            />
+                        </Grid>
+                    ))}
+            </Grid>
+
+            {/* Loading indicator */}
+            {!props.anomalies && <LoadingIndicator />}
 
             {/* No data available message */}
-            {isEmpty(filteredUiAnomalies) && isEmpty(searchWords) && (
-                <NoDataIndicator />
-            )}
+            {props.anomalies &&
+                isEmpty(filteredUiAnomalies) &&
+                isEmpty(searchWords) && <NoDataIndicator />}
 
             {/* No search results available message */}
-            {isEmpty(filteredUiAnomalies) && !isEmpty(searchWords) && (
-                <NoDataIndicator text={t("message.no-search-results")} />
-            )}
-        </Grid>
+            {props.anomalies &&
+                isEmpty(filteredUiAnomalies) &&
+                !isEmpty(searchWords) && (
+                    <NoDataIndicator text={t("message.no-search-results")} />
+                )}
+        </>
     );
 };

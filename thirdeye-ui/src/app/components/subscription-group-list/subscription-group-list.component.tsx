@@ -28,10 +28,12 @@ import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
 import { multiValueCellRenderer } from "../data-grid/multi-value-cell/multi-value-cell.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { SubscriptionGroupListProps } from "./subscription-group-list.interfaces";
+import { useSubscriptionGroupListStyles } from "./subscription-group-list.styles";
 
 export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps> = (
     props: SubscriptionGroupListProps
 ) => {
+    const subscriptionGroupListClasses = useSubscriptionGroupListStyles();
     const [
         filteredUiSubscriptionGroups,
         setFilteredUiSubscriptionGroups,
@@ -46,14 +48,14 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
 
     useEffect(() => {
         // Input subscription groups or search changed, reset
-        initDataGridColumns();
         setFilteredUiSubscriptionGroups(
             filterSubscriptionGroups(
-                props.uiSubscriptionGroups as UiSubscriptionGroup[],
+                props.subscriptionGroups || [],
                 searchWords
             )
         );
-    }, [props.uiSubscriptionGroups, searchWords]);
+        initDataGridColumns();
+    }, [props.subscriptionGroups, searchWords]);
 
     useEffect(() => {
         // Search changed, reset data grid selection model
@@ -154,14 +156,12 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     };
 
     const getUiSubscriptionGroup = (id: number): UiSubscriptionGroup | null => {
-        if (!props.uiSubscriptionGroups) {
-            return null;
-        }
-
         return (
-            props.uiSubscriptionGroups.find(
-                (uiSubscriptionGroup) => uiSubscriptionGroup.id === id
-            ) || null
+            (props.subscriptionGroups &&
+                props.subscriptionGroups.find(
+                    (subscriptionGroup) => subscriptionGroup.id === id
+                )) ||
+            null
         );
     };
 
@@ -182,10 +182,14 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     };
 
     return (
-        <Grid container>
+        <Grid
+            container
+            className={subscriptionGroupListClasses.subscriptionGroupList}
+            direction="column"
+        >
             {/* Search */}
             {!props.hideSearchBar && (
-                <Grid item xs={12}>
+                <Grid item>
                     <SearchBar
                         autoFocus
                         setSearchQueryString
@@ -196,8 +200,8 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
                             filteredUiSubscriptionGroups
                                 ? filteredUiSubscriptionGroups.length
                                 : 0,
-                            props.uiSubscriptionGroups
-                                ? props.uiSubscriptionGroups.length
+                            props.subscriptionGroups
+                                ? props.subscriptionGroups.length
                                 : 0
                         )}
                         onChange={setSearchWords}
@@ -206,12 +210,17 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
             )}
 
             {/* Subscription group list */}
-            <Grid item xs={12}>
+            <Grid
+                item
+                className={
+                    subscriptionGroupListClasses.subscriptionGroupListDataGrid
+                }
+            >
                 <DataGrid
                     autoHeight
                     checkboxSelection
                     columns={dataGridColumns}
-                    loading={!props.uiSubscriptionGroups}
+                    loading={!props.subscriptionGroups}
                     noDataAvailableMessage={
                         isEmpty(filteredUiSubscriptionGroups) &&
                         !isEmpty(searchWords)

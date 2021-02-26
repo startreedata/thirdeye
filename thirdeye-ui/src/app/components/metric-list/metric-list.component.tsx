@@ -27,10 +27,12 @@ import { DataGrid } from "../data-grid/data-grid.component";
 import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { MetricListProps } from "./metric-list.interfaces";
+import { useMetricListStyles } from "./metric-list.styles";
 
 export const MetricList: FunctionComponent<MetricListProps> = (
     props: MetricListProps
 ) => {
+    const metricListClasses = useMetricListStyles();
     const [filteredUiMetrics, setFilteredUiMetrics] = useState<UiMetric[]>([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
     const [dataGridColumns, setDataGridColumns] = useState<ColDef[]>([]);
@@ -43,10 +45,8 @@ export const MetricList: FunctionComponent<MetricListProps> = (
 
     useEffect(() => {
         // Input metrics or search changed, reset
+        setFilteredUiMetrics(filterMetrics(props.metrics || [], searchWords));
         initDataGridColumns();
-        setFilteredUiMetrics(
-            filterMetrics(props.metrics as UiMetric[], searchWords)
-        );
     }, [props.metrics, searchWords]);
 
     useEffect(() => {
@@ -143,7 +143,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
         return (
             <CustomCell params={params}>
                 {/* Active */}
-                {params && params.value && (
+                {params.value && (
                     <CheckIcon
                         fontSize="small"
                         htmlColor={theme.palette.success.main}
@@ -151,7 +151,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                 )}
 
                 {/* Inactive */}
-                {(!params || !params.value) && (
+                {!params.value && (
                     <CloseIcon
                         fontSize="small"
                         htmlColor={theme.palette.error.main}
@@ -162,10 +162,10 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     };
 
     const metricStatusComparator = (
-        cellValue1: CellValue,
-        cellValue2: CellValue
+        value1: CellValue,
+        value2: CellValue
     ): number => {
-        return toNumber(cellValue1) - toNumber(cellValue2);
+        return toNumber(value1) - toNumber(value2);
     };
 
     const handleMetricViewDetailsByNameAndId = (
@@ -189,11 +189,11 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     };
 
     const getUiMetric = (id: number): UiMetric | null => {
-        if (!props.metrics) {
-            return null;
-        }
-
-        return props.metrics.find((uiMetric) => uiMetric.id === id) || null;
+        return (
+            (props.metrics &&
+                props.metrics.find((metric) => metric.id === id)) ||
+            null
+        );
     };
 
     const handleDataGridSelectionModelChange = (
@@ -203,10 +203,14 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     };
 
     return (
-        <Grid container>
+        <Grid
+            container
+            className={metricListClasses.metricList}
+            direction="column"
+        >
             {/* Search */}
             {!props.hideSearchBar && (
-                <Grid item xs={12}>
+                <Grid item>
                     <SearchBar
                         autoFocus
                         setSearchQueryString
@@ -223,7 +227,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
             )}
 
             {/* Metric list */}
-            <Grid item xs={12}>
+            <Grid item className={metricListClasses.metricListDataGrid}>
                 <DataGrid
                     autoHeight
                     checkboxSelection

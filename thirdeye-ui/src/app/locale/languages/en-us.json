@@ -125,12 +125,7 @@
         "reset-configuration": "Reset Configuration",
         "aggregation-column": "Aggregation Column",
         "aggregation-function": "Aggregation Function",
-        "views": "Views",
-
-        "id": "Id",
-        "function": "Function",
-        "threshold": "Threshold",
-        "selected": "Selected"
+        "views": "Views"
     },
     "message": {
         "error": "Error",

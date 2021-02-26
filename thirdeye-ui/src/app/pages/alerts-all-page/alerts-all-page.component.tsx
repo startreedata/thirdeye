@@ -172,7 +172,7 @@ export const AlertsAllPage: FunctionComponent = () => {
         <PageContents centered hideAppBreadcrumbs title={t("label.alerts")}>
             {/* Alert list */}
             <AlertList
-                uiAlerts={uiAlerts}
+                alerts={uiAlerts}
                 onChange={handleAlertChange}
                 onDelete={handleAlertDelete}
             />

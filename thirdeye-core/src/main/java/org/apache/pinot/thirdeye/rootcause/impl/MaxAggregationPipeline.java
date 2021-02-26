@@ -20,12 +20,12 @@
 package org.apache.pinot.thirdeye.rootcause.impl;
 
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.slf4j.Logger;
@@ -43,30 +43,12 @@ public class MaxAggregationPipeline extends Pipeline {
   private final static String PROP_K = "k";
   private final static int PROP_K_DEFAULT = -1;
 
-  private final int k;
+  private int k;
 
-  /**
-   * Constructor for dependency injection
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param k top k truncation before aggregation ({@code -1} for unbounded)
-   */
-  public MaxAggregationPipeline(String outputName, Set<String> inputNames, int k) {
-    super();
-    this.k = k;
-  }
-
-  /**
-   * Alternate constructor for use by RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_K})
-   */
-  public MaxAggregationPipeline(String outputName, Set<String> inputNames,
-      Map<String, Object> properties) {
-    super();
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
     this.k = MapUtils.getIntValue(properties, PROP_K, PROP_K_DEFAULT);
   }
 

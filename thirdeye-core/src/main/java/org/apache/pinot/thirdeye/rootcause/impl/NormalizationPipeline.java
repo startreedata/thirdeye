@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import java.util.Map;
-import java.util.Set;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
@@ -32,28 +30,6 @@ import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
  * minimum and maximum scores.
  */
 public class NormalizationPipeline extends Pipeline {
-
-  /**
-   * Constructor for dependency injection
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   */
-  public NormalizationPipeline(String outputName, Set<String> inputNames) {
-    super();
-  }
-
-  /**
-   * Alternate constructor for RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param ignore configuration properties (none)
-   */
-  public NormalizationPipeline(String outputName, Set<String> inputNames,
-      Map<String, Object> ignore) {
-    super();
-  }
 
   @Override
   public PipelineResult run(PipelineContext context) {

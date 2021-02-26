@@ -22,7 +22,9 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
@@ -30,6 +32,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,30 +61,20 @@ public class MetricDatasetPipeline extends Pipeline {
 
   public static final String META_METRIC_COUNT = "__COUNT";
 
-  private final MetricConfigManager metricDAO;
-  private final DatasetConfigManager datasetDAO;
+  private MetricConfigManager metricDAO;
+  private DatasetConfigManager datasetDAO;
+  private double coefficient;
+  private MappingDirection direction;
 
-  private final double coefficient;
-  private final MappingDirection direction;
-
-  /**
-   * Constructor for dependency injection
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param coefficient coefficient for scoring dataset metrics
-   * @param direction mapping direction
-   * @param metricDAO metric config DAO
-   * @param datasetDAO dataset config DAO
-   */
-  public MetricDatasetPipeline(String outputName, Set<String> inputNames, double coefficient,
-      MappingDirection direction, MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO) {
-    super();
-    this.metricDAO = metricDAO;
-    this.datasetDAO = datasetDAO;
-    this.coefficient = coefficient;
-    this.direction = direction;
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
+    this.metricDAO = context.getMetricConfigManager();
+    this.datasetDAO = context.getDatasetConfigManager();
+    this.coefficient = MapUtils
+        .getDoubleValue(properties, PROP_COEFFICIENT, PROP_COEFFICIENT_DEFAULT);
+    this.direction = MappingDirection.valueOf(MapUtils.getString(properties, PROP_DIRECTION, PROP_DIRECTION_DEFAULT));
   }
 
   @Override

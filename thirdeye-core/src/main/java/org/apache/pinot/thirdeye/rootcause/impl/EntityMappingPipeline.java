@@ -20,18 +20,22 @@
 package org.apache.pinot.thirdeye.rootcause.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.slf4j.Logger;
@@ -68,17 +72,20 @@ public class EntityMappingPipeline extends Pipeline {
   public static final String PROP_DIRECTION_DEFAULT = PROP_DIRECTION_REGULAR;
   public static final int PROP_ITERATIONS_DEFAULT = 1;
 
-  private final EntityToEntityMappingManager entityDAO;
-  private final Set<String> inputFilters;
-  private final Set<String> outputFilters;
-  private final boolean isRewriter;
-  private final boolean matchPrefix;
-  private final boolean isCollector;
-  private final String direction;
-  private final int iterations;
+  private EntityToEntityMappingManager entityDAO;
+  private Set<String> inputFilters;
+  private Set<String> outputFilters;
+  private boolean isRewriter;
+  private boolean matchPrefix;
+  private boolean isCollector;
+  private String direction;
+  private int iterations;
+
+  @SuppressWarnings("unused")
+  public EntityMappingPipeline() {}
 
   /**
-   * Constructor for dependency injection
+   * Constructor for tests
    *
    * @param outputName pipeline output name
    * @param inputNames input pipeline names
@@ -105,6 +112,35 @@ public class EntityMappingPipeline extends Pipeline {
     this.direction = direction;
     this.iterations = iterations;
   }
+
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
+    entityDAO = context.getEntityToEntityMappingManager();
+    this.isRewriter = MapUtils.getBoolean(properties, PROP_IS_REWRITER, PROP_IS_REWRITER_DEFAULT);
+    this.matchPrefix = MapUtils.getBoolean(properties, PROP_MATCH_PREFIX, PROP_MATCH_PREFIX_DEFAULT);
+    this.isCollector = MapUtils.getBoolean(properties, PROP_IS_COLLECTOR, PROP_IS_COLLECTOR_DEFAULT);
+    this.direction = MapUtils.getString(properties, PROP_DIRECTION, PROP_DIRECTION_DEFAULT);
+    this.iterations = MapUtils.getInteger(properties, PROP_ITERATIONS, PROP_ITERATIONS_DEFAULT);
+
+    if (!Arrays.asList(PROP_DIRECTION_REGULAR, PROP_DIRECTION_REVERSE, PROP_DIRECTION_BOTH).contains(this.direction)) {
+      throw new IllegalArgumentException(String.format("Unknown direction '%s'", this.direction));
+    }
+
+    if (properties.containsKey(PROP_INPUT_FILTERS)) {
+      this.inputFilters = new HashSet<>((Collection<String>) properties.get(PROP_INPUT_FILTERS));
+    } else {
+      this.inputFilters = new HashSet<>();
+    }
+
+    if (properties.containsKey(PROP_OUTPUT_FILTERS)) {
+      this.outputFilters = new HashSet<>((Collection<String>) properties.get(PROP_OUTPUT_FILTERS));
+    } else {
+      this.outputFilters = new HashSet<>();
+    }
+  }
+
 
   @Override
   public PipelineResult run(PipelineContext context) {

@@ -32,8 +32,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.StringSeries;
@@ -50,6 +52,7 @@ import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.slf4j.Logger;
@@ -83,39 +86,24 @@ public class DimensionAnalysisPipeline extends Pipeline {
 
   public static final long TIMEOUT = 120000;
 
-  private final DataSourceCache cache;
-  private final MetricConfigManager metricDAO;
-  private final DatasetConfigManager datasetDAO;
-  private final ExecutorService executor;
-  private final int k;
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private DataSourceCache cache;
+  private MetricConfigManager metricDAO;
+  private DatasetConfigManager datasetDAO;
+  private ExecutorService executor;
+  private int k;
+  private ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
-  /**
-   * Constructor for dependency injection
-   *
-   * @param thirdEyeCacheRegistry
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param metricDAO metric config DAO
-   * @param datasetDAO dataset config DAO
-   * @param cache query cache for running contribution analysis
-   * @param executor executor service for parallel task execution
-   */
-  public DimensionAnalysisPipeline(String outputName,
-      Set<String> inputNames,
-      MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO,
-      DataSourceCache cache,
-      ExecutorService executor,
-      int k,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super();
-    this.metricDAO = metricDAO;
-    this.datasetDAO = datasetDAO;
-    this.cache = cache;
-    this.executor = executor;
-    this.k = k;
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
+    this.metricDAO = context.getMetricConfigManager();
+    this.datasetDAO = context.getDatasetConfigManager();
+    this.cache = context.getThirdEyeCacheRegistry().getDataSourceCache();
+    this.thirdEyeCacheRegistry = context.getThirdEyeCacheRegistry();
+    this.executor = Executors.newFixedThreadPool(
+        MapUtils.getInteger(properties, PROP_PARALLELISM, PROP_PARALLELISM_DEFAULT));
+    this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
   }
 
   @Override

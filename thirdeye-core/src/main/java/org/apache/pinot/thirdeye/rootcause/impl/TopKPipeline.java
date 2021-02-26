@@ -20,10 +20,10 @@
 package org.apache.pinot.thirdeye.rootcause.impl;
 
 import java.util.Map;
-import java.util.Set;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 
@@ -41,35 +41,13 @@ public class TopKPipeline extends Pipeline {
 
   public static final String PROP_CLASS_DEFAULT = Entity.class.getName();
 
-  private final int k;
-  private final Class<? extends Entity> clazz;
+  private int k;
+  private Class<? extends Entity> clazz;
 
-  /**
-   * Constructor for dependency injection
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param clazz (super) class to filter by
-   * @param k maximum number of result elements
-   */
-  public TopKPipeline(String outputName, Set<String> inputNames, Class<? extends Entity> clazz,
-      int k) {
-    super();
-    this.k = k;
-    this.clazz = clazz;
-  }
-
-  /**
-   * Alternate constructor for RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param properties configuration properties ({@code PROP_K}, {@code PROP_CLASS})
-   */
-  @SuppressWarnings("unchecked")
-  public TopKPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties)
-      throws Exception {
-    super();
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
 
     if (!properties.containsKey(PROP_K)) {
       throw new IllegalArgumentException(
@@ -81,7 +59,11 @@ public class TopKPipeline extends Pipeline {
     if (properties.containsKey(PROP_CLASS)) {
       classProp = properties.get(PROP_CLASS).toString();
     }
-    this.clazz = (Class<? extends Entity>) Class.forName(classProp);
+    try {
+      this.clazz = (Class<? extends Entity>) Class.forName(classProp);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

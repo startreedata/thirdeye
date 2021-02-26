@@ -109,7 +109,7 @@ public class DimensionAnalysisPipeline extends Pipeline {
       ExecutorService executor,
       int k,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super(outputName, inputNames);
+    super();
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.cache = cache;

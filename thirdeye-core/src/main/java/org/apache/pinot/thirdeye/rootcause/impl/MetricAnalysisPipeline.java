@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
@@ -47,6 +48,7 @@ import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,40 +83,32 @@ public class MetricAnalysisPipeline extends Pipeline {
   private static final String COL_CURRENT = "current";
   private static final String COL_BASELINE = "baseline";
 
-  private final DataSourceCache cache;
-  private final MetricConfigManager metricDAO;
-  private final DatasetConfigManager datasetDAO;
-  private final ScoringStrategyFactory strategyFactory;
-  private final TimeGranularity granularity;
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private DataSourceCache cache;
+  private MetricConfigManager metricDAO;
+  private DatasetConfigManager datasetDAO;
+  private ScoringStrategyFactory strategyFactory;
+  private TimeGranularity granularity;
+  private ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
-  /**
-   * Constructor for dependency injection
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param strategyFactory scoring strategy for differences
-   * @param granularity time series target granularity
-   * @param cache query cache
-   * @param metricDAO metric config DAO
-   * @param datasetDAO datset config DAO
-   * @param thirdEyeCacheRegistry
-   */
-  public MetricAnalysisPipeline(String outputName,
-      Set<String> inputNames,
-      ScoringStrategyFactory strategyFactory,
-      TimeGranularity granularity,
-      DataSourceCache cache,
-      MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super(outputName, inputNames);
-    this.cache = cache;
-    this.metricDAO = metricDAO;
-    this.datasetDAO = datasetDAO;
-    this.strategyFactory = strategyFactory;
-    this.granularity = granularity;
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
+    this.metricDAO = context.getMetricConfigManager();
+    this.datasetDAO = context.getDatasetConfigManager();
+    this.thirdEyeCacheRegistry = context.getThirdEyeCacheRegistry();
+    this.cache = thirdEyeCacheRegistry.getDataSourceCache();
+    this.strategyFactory = parseStrategyFactory(
+        MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
+    this.granularity = TimeGranularity.fromString(MapUtils.getString(properties, PROP_GRANULARITY, PROP_GRANULARITY_DEFAULT));
+  }
+
+  private static ScoringStrategyFactory parseStrategyFactory(String strategy) {
+    switch(strategy) {
+      case STRATEGY_THRESHOLD:
+        return new ThresholdStrategyFactory(0.90, 0.95, 0.975, 0.99, 1.00);
+      default:
+        throw new IllegalArgumentException(String.format("Unknown strategy '%s'", strategy));
+    }
   }
 
   @Override

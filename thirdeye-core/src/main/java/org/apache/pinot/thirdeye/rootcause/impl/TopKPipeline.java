@@ -54,7 +54,7 @@ public class TopKPipeline extends Pipeline {
    */
   public TopKPipeline(String outputName, Set<String> inputNames, Class<? extends Entity> clazz,
       int k) {
-    super(outputName, inputNames);
+    super();
     this.k = k;
     this.clazz = clazz;
   }
@@ -69,7 +69,7 @@ public class TopKPipeline extends Pipeline {
   @SuppressWarnings("unchecked")
   public TopKPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties)
       throws Exception {
-    super(outputName, inputNames);
+    super();
 
     if (!properties.containsKey(PROP_K)) {
       throw new IllegalArgumentException(

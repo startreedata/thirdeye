@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
@@ -32,6 +33,7 @@ import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.rootcause.util.ScoreUtils;
@@ -69,29 +71,22 @@ public class ThirdEyeEventsPipeline extends Pipeline {
 
   private static final long OVERFETCH = TimeUnit.DAYS.toMillis(2);
 
-  private final StrategyType strategy;
-  private final EventManager eventDAO;
-  private final int k;
-  private final String eventType;
+  private StrategyType strategy;
+  private EventManager eventDAO;
+  private int k;
+  private String eventType;
 
-  /**
-   * Constructor for dependency injection
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param eventDAO event DAO
-   * @param strategy scoring strategy
-   * @param k the k
-   * @param eventType the event type
-   */
-  public ThirdEyeEventsPipeline(String outputName, Set<String> inputNames, EventManager eventDAO,
-      StrategyType strategy, int k, String eventType) {
-    super(outputName, inputNames);
-    this.eventDAO = eventDAO;
-    this.strategy = strategy;
-    this.k = k;
-    this.eventType = eventType;
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
+    this.eventDAO = context.getEventManager();
+    this.strategy = StrategyType.valueOf(
+        MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
+    this.eventType = MapUtils.getString(properties, PROP_EVENT_TYPE, "holiday");
+    this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
   }
+
 
   @Override
   public PipelineResult run(PipelineContext context) {

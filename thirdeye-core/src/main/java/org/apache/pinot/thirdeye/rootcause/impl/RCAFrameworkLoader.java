@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -31,7 +33,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * It further augments certain properties with additional information, e.g. the {@code PROP_PATH}
  * property with absolute path information.
  */
+@Singleton
 public class RCAFrameworkLoader {
 
   public static final String PROP_PATH = "path";
@@ -51,7 +61,30 @@ public class RCAFrameworkLoader {
   private static final Logger LOG = LoggerFactory.getLogger(RCAFrameworkLoader.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  public static Map<String, RCAFramework> getFrameworksFromConfig(File rcaFile,
+  private final MetricConfigManager metricConfigManager;
+  private final DatasetConfigManager datasetConfigManager;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private final EntityToEntityMappingManager entityToEntityMappingManager;
+  private final EventManager eventManager;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+
+  @Inject
+  public RCAFrameworkLoader(
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final EntityToEntityMappingManager entityToEntityMappingManager,
+      final EventManager eventManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    this.metricConfigManager = metricConfigManager;
+    this.datasetConfigManager = datasetConfigManager;
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+    this.entityToEntityMappingManager = entityToEntityMappingManager;
+    this.eventManager = eventManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+  }
+
+  public Map<String, RCAFramework> getFrameworksFromConfig(File rcaFile,
       ExecutorService executor) throws Exception {
     Map<String, RCAFramework> frameworks = new HashMap<>();
 
@@ -66,7 +99,7 @@ public class RCAFrameworkLoader {
     return frameworks;
   }
 
-  public static List<Pipeline> getPipelinesFromConfig(File rcaFile, String frameworkName)
+  List<Pipeline> getPipelinesFromConfig(File rcaFile, String frameworkName)
       throws Exception {
     LOG.info("Loading framework '{}' from '{}'", frameworkName, rcaFile);
     RCAConfiguration rcaConfiguration = OBJECT_MAPPER.readValue(rcaFile, RCAConfiguration.class);
@@ -74,7 +107,7 @@ public class RCAFrameworkLoader {
     return getPipelines(rcaConfiguration, rcaFile, frameworkName);
   }
 
-  static List<Pipeline> getPipelines(RCAConfiguration config, File configPath, String frameworkName)
+  private List<Pipeline> getPipelines(RCAConfiguration config, File configPath, String frameworkName)
       throws Exception {
     List<Pipeline> pipelines = new ArrayList<>();
     Map<String, List<PipelineConfiguration>> rcaPipelinesConfiguration = config.getFrameworks();
@@ -96,9 +129,22 @@ public class RCAFrameworkLoader {
         properties = augmentPathProperty(properties, configPath);
 
         LOG.info("Creating pipeline '{}' [{}] with inputs '{}'", outputName, className, inputNames);
-        Constructor<?> constructor = Class.forName(className)
-            .getConstructor(String.class, Set.class, Map.class);
-        Pipeline pipeline = (Pipeline) constructor.newInstance(outputName, inputNames, properties);
+        final PipelineInitContext initContext = new PipelineInitContext()
+            .setInputNames(inputNames)
+            .setOutputName(outputName)
+            .setProperties(properties)
+            .setDatasetConfigManager(datasetConfigManager)
+            .setMetricConfigManager(metricConfigManager)
+            .setThirdEyeCacheRegistry(thirdEyeCacheRegistry)
+            .setEntityToEntityMappingManager(entityToEntityMappingManager)
+            .setEventManager(eventManager)
+            .setMergedAnomalyResultManager(mergedAnomalyResultManager);
+            ;
+
+        final Constructor<?> constructor = Class.forName(className)
+            .getConstructor();
+        final Pipeline pipeline = (Pipeline) constructor.newInstance();
+        pipeline.init(initContext);
 
         pipelines.add(pipeline);
       }

@@ -31,12 +31,12 @@ import java.util.Set;
  */
 public abstract class Pipeline {
 
-  private final String outputName;
-  private final Set<String> inputNames;
+  private String outputName;
+  private Set<String> inputNames;
 
-  public Pipeline(String outputName, Set<String> inputNames) {
-    this.outputName = outputName;
-    this.inputNames = inputNames;
+  public void init(PipelineInitContext context) {
+    outputName = context.getOutputName();
+    inputNames = context.getInputNames();
   }
 
   public final String getOutputName() {

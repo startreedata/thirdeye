@@ -40,7 +40,7 @@ public class NormalizationPipeline extends Pipeline {
    * @param inputNames input pipeline names
    */
   public NormalizationPipeline(String outputName, Set<String> inputNames) {
-    super(outputName, inputNames);
+    super();
   }
 
   /**
@@ -52,7 +52,7 @@ public class NormalizationPipeline extends Pipeline {
    */
   public NormalizationPipeline(String outputName, Set<String> inputNames,
       Map<String, Object> ignore) {
-    super(outputName, inputNames);
+    super();
   }
 
   @Override

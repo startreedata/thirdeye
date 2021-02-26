@@ -27,11 +27,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.rootcause.util.ScoreUtils;
@@ -63,24 +65,18 @@ public class AnomalyEventsPipeline extends Pipeline {
   private static final String PROP_STRATEGY = "strategy";
   private static final String PROP_STRATEGY_DEFAULT = StrategyType.COMPOUND.toString();
 
-  private final StrategyType strategy;
-  private final MergedAnomalyResultManager anomalyDAO;
-  private final int k;
+  private StrategyType strategy;
+  private MergedAnomalyResultManager anomalyDAO;
+  private int k;
 
-  /**
-   * Constructor for dependency injection
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param anomalyDAO anomaly config DAO
-   * @param strategy scoring strategy
-   */
-  public AnomalyEventsPipeline(String outputName, Set<String> inputNames,
-      MergedAnomalyResultManager anomalyDAO, StrategyType strategy, int k) {
-    super(outputName, inputNames);
-    this.anomalyDAO = anomalyDAO;
-    this.strategy = strategy;
-    this.k = k;
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
+    this.anomalyDAO = context.getMergedAnomalyResultManager();
+    this.strategy = StrategyType.valueOf(
+        MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
+    this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
   }
 
   @Override

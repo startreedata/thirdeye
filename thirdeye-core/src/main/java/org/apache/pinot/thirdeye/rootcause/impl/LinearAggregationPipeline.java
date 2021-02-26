@@ -61,7 +61,7 @@ public class LinearAggregationPipeline extends Pipeline {
    * @param k top k truncation before aggregation ({@code -1} for unbounded)
    */
   public LinearAggregationPipeline(String outputName, Set<String> inputNames, int k) {
-    super(outputName, inputNames);
+    super();
 
     this.k = k;
   }
@@ -75,7 +75,7 @@ public class LinearAggregationPipeline extends Pipeline {
    */
   public LinearAggregationPipeline(String outputName, Set<String> inputNames,
       Map<String, Object> properties) {
-    super(outputName, inputNames);
+    super();
 
     String kProp = PROP_K_DEFAULT;
     if (properties.containsKey(PROP_K)) {

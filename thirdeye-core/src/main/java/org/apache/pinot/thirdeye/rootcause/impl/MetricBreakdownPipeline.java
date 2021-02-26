@@ -24,11 +24,15 @@ import com.google.common.collect.TreeMultimap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.StringSeries;
@@ -45,6 +49,7 @@ import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.slf4j.Logger;
@@ -86,48 +91,46 @@ public class MetricBreakdownPipeline extends Pipeline {
 
   public static final long TIMEOUT = 120000;
 
-  private final DataSourceCache cache;
-  private final MetricConfigManager metricDAO;
-  private final DatasetConfigManager datasetDAO;
-  private final ExecutorService executor;
-  private final Set<String> includeDimensions;
-  private final Set<String> excludeDimensions;
-  private final int k;
-  private final boolean ignoreScore;
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private DataSourceCache cache;
+  private MetricConfigManager metricDAO;
+  private DatasetConfigManager datasetDAO;
+  private ExecutorService executor;
+  private Set<String> includeDimensions;
+  private Set<String> excludeDimensions;
+  private int k;
+  private boolean ignoreScore;
+  private ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
-  /**
-   * Constructor for dependency injection
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param metricDAO metric config DAO
-   * @param datasetDAO dataset config DAO
-   * @param cache query cache for running contribution analysis
-   * @param executor executor service for parallel task execution
-   * @param includeDimensions dimensions to break down on (all if empty)
-   * @param excludeDimensions dimensions not to break down on
-   * @param k number of top-ranking elements to emit
-   * @param ignoreScore flag to include all breakdowns, even if score is zero (only set if
-   *     ignoring wanted)
-   * @param thirdEyeCacheRegistry
-   */
-  public MetricBreakdownPipeline(String outputName, Set<String> inputNames,
-      MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO, DataSourceCache cache, ExecutorService executor,
-      Set<String> includeDimensions,
-      Set<String> excludeDimensions, int k, boolean ignoreScore,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super(outputName, inputNames);
-    this.metricDAO = metricDAO;
-    this.datasetDAO = datasetDAO;
-    this.cache = cache;
-    this.executor = executor;
-    this.includeDimensions = includeDimensions;
-    this.excludeDimensions = excludeDimensions;
-    this.k = k;
-    this.ignoreScore = ignoreScore;
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
+    this.metricDAO = context.getMetricConfigManager();
+    this.datasetDAO = context.getDatasetConfigManager();
+    this.cache = context.getThirdEyeCacheRegistry().getDataSourceCache();
+    this.thirdEyeCacheRegistry = context.getThirdEyeCacheRegistry();
+
+    this.executor = Executors.newFixedThreadPool(
+        MapUtils.getInteger(properties, PROP_PARALLELISM, PROP_PARALLELISM_DEFAULT));
+    this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
+
+    if (properties.containsKey(PROP_INCLUDE_DIMENSIONS)) {
+      this.includeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_INCLUDE_DIMENSIONS));
+    } else {
+      this.includeDimensions = new HashSet<>();
+    }
+
+    if (properties.containsKey(PROP_EXCLUDE_DIMENSIONS)) {
+      this.excludeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
+    } else {
+      this.excludeDimensions = new HashSet<>();
+    }
+
+    if (properties.containsKey(PROP_IGNORE_SCORE)) {
+      this.ignoreScore = PROP_IGNORE_SCORE_TRUE;
+    } else {
+      this.ignoreScore = PROP_IGNORE_SCORE_FALSE;
+    }
   }
 
   @Override

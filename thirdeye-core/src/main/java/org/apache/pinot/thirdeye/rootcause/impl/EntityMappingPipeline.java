@@ -95,7 +95,7 @@ public class EntityMappingPipeline extends Pipeline {
       EntityToEntityMappingManager entityDAO, Set<String> inputFilters, Set<String> outputFilters,
       boolean isRewriter, boolean matchPrefix, boolean isCollector, String direction,
       int iterations) {
-    super(outputName, inputNames);
+    super();
     this.entityDAO = entityDAO;
     this.inputFilters = inputFilters;
     this.outputFilters = outputFilters;

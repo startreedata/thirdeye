@@ -32,6 +32,9 @@ public class RootCauseResourceProvider implements Provider<RootCauseResource> {
   @Inject
   private DataCubeSummaryCalculator dataCubeSummaryCalculator;
 
+  @Inject
+  private RCAFrameworkLoader rcaFrameworkLoader;
+
   public RootCauseResourceProvider(
       final ThirdEyeCoordinatorConfiguration config) {
     this.config = config;
@@ -45,10 +48,10 @@ public class RootCauseResourceProvider implements Provider<RootCauseResource> {
     return rcaConfigFile;
   }
 
-  private static Map<String, RCAFramework> makeRootCauseFrameworks(RCAConfiguration config,
+  private Map<String, RCAFramework> makeRootCauseFrameworks(RCAConfiguration config,
       File definitionsFile) throws Exception {
     ExecutorService executor = Executors.newFixedThreadPool(config.getParallelism());
-    return RCAFrameworkLoader.getFrameworksFromConfig(definitionsFile, executor);
+    return rcaFrameworkLoader.getFrameworksFromConfig(definitionsFile, executor);
   }
 
   private static List<RootCauseEntityFormatter> makeRootCauseFormatters(

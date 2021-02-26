@@ -44,7 +44,7 @@ public class StaticPipeline extends Pipeline {
    * @param entities entities to emit as result
    */
   public StaticPipeline(String outputName, Set<String> inputNames, Set<Entity> entities) {
-    super(outputName, inputNames);
+    super();
     this.entities = entities;
   }
 
@@ -57,7 +57,7 @@ public class StaticPipeline extends Pipeline {
    */
   @SuppressWarnings("unchecked")
   public StaticPipeline(String outputName, Set<String> inputNames, Map<String, Object> properties) {
-    super(outputName, inputNames);
+    super();
 
     if (!properties.containsKey(PROP_ENTITIES)) {
       throw new IllegalArgumentException(

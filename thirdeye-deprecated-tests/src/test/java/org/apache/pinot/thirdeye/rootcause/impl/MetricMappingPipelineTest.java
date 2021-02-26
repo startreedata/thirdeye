@@ -85,8 +85,8 @@ public class MetricMappingPipelineTest {
 
   @Test
   public void testExploreMetrics() {
-    MetricMappingPipeline pipeline = new MetricMappingPipeline("OUTPUT",
-        Collections.singleton("INPUT"), false, Collections.emptySet(),
+    MetricMappingPipeline pipeline = new MetricMappingPipeline(
+        false, Collections.emptySet(),
         new MockMetricConfigManager(metrics), new MockDatasetConfigManager(datasets),
         new MockEntityToEntityMappingManager(mappings));
 
@@ -107,8 +107,8 @@ public class MetricMappingPipelineTest {
 
   @Test
   public void testExploreMetricsWithFilters() {
-    MetricMappingPipeline pipeline = new MetricMappingPipeline("OUTPUT",
-        Collections.singleton("INPUT"), true, Collections.emptySet(),
+    MetricMappingPipeline pipeline = new MetricMappingPipeline(
+        true, Collections.emptySet(),
         new MockMetricConfigManager(metrics), new MockDatasetConfigManager(datasets),
         new MockEntityToEntityMappingManager(mappings));
 

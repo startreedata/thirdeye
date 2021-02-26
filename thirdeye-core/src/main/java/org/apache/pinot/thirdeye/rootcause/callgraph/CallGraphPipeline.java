@@ -124,7 +124,7 @@ public class CallGraphPipeline extends Pipeline {
       int k,
       double cutoffFraction,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super(outputName, inputNames);
+    super();
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.cache = cache;

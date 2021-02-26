@@ -38,16 +38,13 @@ public class RCAFrameworkTest {
   private static final String INPUT = RCAFramework.INPUT;
   private static final String OUTPUT = RCAFramework.OUTPUT;
 
-  static class DummyPipeline extends Pipeline {
-
-    public DummyPipeline(String name, Set<String> inputs) {
-      super(name, inputs);
-    }
-
-    @Override
-    public PipelineResult run(PipelineContext context) {
-      return new PipelineResult(context, Collections.emptySet());
-    }
+  static DummyPipeline makePipeline(String name, String... inputs) {
+    final DummyPipeline dummyPipeline = new DummyPipeline();
+    dummyPipeline.init(new PipelineInitContext()
+        .setOutputName(name)
+        .setInputNames(new HashSet<>(Arrays.asList(inputs)))
+    );
+    return dummyPipeline;
   }
 
   @Test
@@ -141,7 +138,11 @@ public class RCAFrameworkTest {
     new RCAFramework(pipelines, Executors.newSingleThreadExecutor());
   }
 
-  static DummyPipeline makePipeline(String name, String... inputs) {
-    return new DummyPipeline(name, new HashSet<>(Arrays.asList(inputs)));
+  static class DummyPipeline extends Pipeline {
+
+    @Override
+    public PipelineResult run(PipelineContext context) {
+      return new PipelineResult(context, Collections.emptySet());
+    }
   }
 }

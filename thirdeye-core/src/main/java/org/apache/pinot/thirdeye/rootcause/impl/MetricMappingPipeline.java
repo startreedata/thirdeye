@@ -24,11 +24,13 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
@@ -38,6 +40,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,25 +64,49 @@ public class MetricMappingPipeline extends Pipeline {
   private static final String PROP_EXCLUDE_METRICS = "excludeMetrics";
   private static final Set<String> PROP_EXCLUDE_METRICS_DEFAULT = Collections.singleton("__COUNT");
 
-  private final MetricConfigManager metricDAO;
-  private final DatasetConfigManager datasetDAO;
-  private final EntityToEntityMappingManager mappingDAO;
+  private MetricConfigManager metricDAO;
+  private DatasetConfigManager datasetDAO;
+  private EntityToEntityMappingManager mappingDAO;
+  private boolean includeFilters;
+  private Set<String> excludeMetrics;
 
-  private final boolean includeFilters;
-  private final Set<String> excludeMetrics;
+  /**
+   * Used by {@link RCAFrameworkLoader}
+   */
+  @SuppressWarnings("unused")
+  public MetricMappingPipeline() {}
 
   /**
    * Constructor for dependency injection
    */
-  public MetricMappingPipeline(String outputName, Set<String> inputNames, boolean includeFilters,
-      Set<String> excludeMetrics, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
+  public MetricMappingPipeline(boolean includeFilters,
+      Set<String> excludeMetrics,
+      MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO,
       EntityToEntityMappingManager mappingDAO) {
-    super(outputName, inputNames);
+    super();
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.mappingDAO = mappingDAO;
     this.includeFilters = includeFilters;
     this.excludeMetrics = excludeMetrics;
+  }
+
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
+    Map<String, Object> properties = context.getProperties();
+    this.metricDAO = context.getMetricConfigManager();
+    this.datasetDAO = context.getDatasetConfigManager();
+    this.mappingDAO = context.getEntityToEntityMappingManager();
+    this.includeFilters = MapUtils
+        .getBooleanValue(properties, PROP_INCLUDE_FILTERS, PROP_INCLUDE_FILTERS_DEFAULT);
+
+    if (properties.containsKey(PROP_EXCLUDE_METRICS)) {
+      this.excludeMetrics = new HashSet<>((Collection<String>) properties.get(PROP_EXCLUDE_METRICS));
+    } else {
+      this.excludeMetrics = PROP_EXCLUDE_METRICS_DEFAULT;
+    }
   }
 
   @Override

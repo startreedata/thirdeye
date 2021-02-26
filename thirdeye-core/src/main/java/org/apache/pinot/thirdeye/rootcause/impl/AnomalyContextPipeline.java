@@ -70,7 +70,7 @@ public class AnomalyContextPipeline extends Pipeline {
   public AnomalyContextPipeline(String outputName, Set<String> inputNames,
       MergedAnomalyResultManager anomalyDAO, MetricConfigManager metricDAO, long baselineOffset,
       long analysisWindow) {
-    super(outputName, inputNames);
+    super();
     this.anomalyDAO = anomalyDAO;
     this.metricDAO = metricDAO;
     this.baselineOffset = baselineOffset;

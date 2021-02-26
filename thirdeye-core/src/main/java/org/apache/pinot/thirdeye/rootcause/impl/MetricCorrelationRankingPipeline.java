@@ -112,7 +112,7 @@ public class MetricCorrelationRankingPipeline extends Pipeline {
       MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super(outputName, inputNames);
+    super();
     this.targetInput = targetInput;
     this.cache = cache;
     this.metricDAO = metricDAO;

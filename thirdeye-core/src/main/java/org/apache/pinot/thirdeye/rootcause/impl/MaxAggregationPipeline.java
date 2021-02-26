@@ -53,7 +53,7 @@ public class MaxAggregationPipeline extends Pipeline {
    * @param k top k truncation before aggregation ({@code -1} for unbounded)
    */
   public MaxAggregationPipeline(String outputName, Set<String> inputNames, int k) {
-    super(outputName, inputNames);
+    super();
     this.k = k;
   }
 
@@ -66,7 +66,7 @@ public class MaxAggregationPipeline extends Pipeline {
    */
   public MaxAggregationPipeline(String outputName, Set<String> inputNames,
       Map<String, Object> properties) {
-    super(outputName, inputNames);
+    super();
     this.k = MapUtils.getIntValue(properties, PROP_K, PROP_K_DEFAULT);
   }
 

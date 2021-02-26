@@ -39,7 +39,7 @@ public class MetricDimensionPipeline extends Pipeline {
    * @param inputNames input pipeline names
    */
   public MetricDimensionPipeline(String outputName, Set<String> inputNames) {
-    super(outputName, inputNames);
+    super();
   }
 
   /**
@@ -51,7 +51,7 @@ public class MetricDimensionPipeline extends Pipeline {
    */
   public MetricDimensionPipeline(String outputName, Set<String> inputNames,
       Map<String, Object> ignore) {
-    super(outputName, inputNames);
+    super();
   }
 
   @Override

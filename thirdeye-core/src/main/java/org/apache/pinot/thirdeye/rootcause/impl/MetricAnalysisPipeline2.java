@@ -116,7 +116,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
       MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super(outputName, inputNames);
+    super();
     this.cache = cache;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;

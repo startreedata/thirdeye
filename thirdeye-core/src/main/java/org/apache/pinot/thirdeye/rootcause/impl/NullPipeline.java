@@ -19,11 +19,10 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import java.util.Map;
-import java.util.Set;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
 
 /**
@@ -32,25 +31,9 @@ import org.apache.pinot.thirdeye.rootcause.PipelineResult;
  */
 public class NullPipeline extends Pipeline {
 
-  /**
-   * Constructor for dependency injection
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   */
-  public NullPipeline(String outputName, Set<String> inputNames) {
-    super(outputName, inputNames);
-  }
-
-  /**
-   * Alternate constructor for RCAFrameworkLoader
-   *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
-   * @param ignore configuration properties (none)
-   */
-  public NullPipeline(String outputName, Set<String> inputNames, Map<String, Object> ignore) {
-    super(outputName, inputNames);
+  @Override
+  public void init(final PipelineInitContext context) {
+    super.init(context);
   }
 
   @Override

@@ -77,7 +77,7 @@ public class MetricDatasetPipeline extends Pipeline {
   public MetricDatasetPipeline(String outputName, Set<String> inputNames, double coefficient,
       MappingDirection direction, MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO) {
-    super(outputName, inputNames);
+    super();
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.coefficient = coefficient;

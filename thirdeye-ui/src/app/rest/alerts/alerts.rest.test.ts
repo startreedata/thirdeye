@@ -34,7 +34,7 @@ describe("Alerts REST", () => {
         await expect(getAlert(1)).rejects.toThrow("testError");
     });
 
-    test("getAllAlerts should invoke axios.get with appropriate input and return appropriate alert array", async () => {
+    test("getAllAlerts should invoke axios.get with appropriate input and return appropriate alerts", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockAlertResponse],
         });
@@ -72,7 +72,7 @@ describe("Alerts REST", () => {
         );
     });
 
-    test("createAlerts should invoke axios.post with appropriate input and return appropriate alert array", async () => {
+    test("createAlerts should invoke axios.post with appropriate input and return appropriate alerts", async () => {
         jest.spyOn(axios, "post").mockResolvedValue({
             data: [mockAlertResponse],
         });
@@ -116,7 +116,7 @@ describe("Alerts REST", () => {
         );
     });
 
-    test("updateAlerts should invoke axios.put with appropriate input and return appropriate alert array", async () => {
+    test("updateAlerts should invoke axios.put with appropriate input and return appropriate alerts", async () => {
         jest.spyOn(axios, "put").mockResolvedValue({
             data: [mockAlertResponse],
         });

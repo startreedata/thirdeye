@@ -31,7 +31,7 @@ describe("Anomalies REST", () => {
         await expect(getAnomaly(1)).rejects.toThrow("testError");
     });
 
-    test("getAllAnomalies should invoke axios.get with appropriate input and return appropriate anomaly array", async () => {
+    test("getAllAnomalies should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockAnomalyResponse],
         });
@@ -47,7 +47,25 @@ describe("Anomalies REST", () => {
         await expect(getAllAnomalies()).rejects.toThrow("testError");
     });
 
-    test("getAnomaliesByTime should invoke axios.get with appropriate input and return appropriate anomaly array", async () => {
+    test("getAnomaliesByAlertId should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: [mockAnomalyResponse],
+        });
+
+        await expect(getAnomaliesByAlertId(1)).resolves.toEqual([
+            mockAnomalyResponse,
+        ]);
+
+        expect(axios.get).toHaveBeenCalledWith("/api/anomalies?alert.id=1");
+    });
+
+    test("getAnomaliesByAlertId should throw encountered error", async () => {
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
+
+        await expect(getAnomaliesByAlertId(1)).rejects.toThrow("testError");
+    });
+
+    test("getAnomaliesByTime should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockAnomalyResponse],
         });
@@ -67,25 +85,7 @@ describe("Anomalies REST", () => {
         await expect(getAnomaliesByTime(1, 2)).rejects.toThrow("testError");
     });
 
-    test("getAnomaliesByAlertId should invoke axios.get with appropriate input and return appropriate anomaly array", async () => {
-        jest.spyOn(axios, "get").mockResolvedValue({
-            data: [mockAnomalyResponse],
-        });
-
-        await expect(getAnomaliesByAlertId(1)).resolves.toEqual([
-            mockAnomalyResponse,
-        ]);
-
-        expect(axios.get).toHaveBeenCalledWith("/api/anomalies?alert.id=1");
-    });
-
-    test("getAnomaliesByAlertId should throw encountered error", async () => {
-        jest.spyOn(axios, "get").mockRejectedValue(mockError);
-
-        await expect(getAnomaliesByAlertId(1)).rejects.toThrow("testError");
-    });
-
-    test("getAnomaliesByAlertIdAndTime should invoke axios.get with appropriate input and return appropriate anomaly array", async () => {
+    test("getAnomaliesByAlertIdAndTime should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockAnomalyResponse],
         });

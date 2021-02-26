@@ -15,22 +15,22 @@ export const getAllAnomalies = async (): Promise<Anomaly[]> => {
     return response.data;
 };
 
+export const getAnomaliesByAlertId = async (
+    alertId: number
+): Promise<Anomaly[]> => {
+    const response = await axios.get(
+        `${BASE_URL_ANOMALIES}?alert.id=${alertId}`
+    );
+
+    return response.data;
+};
+
 export const getAnomaliesByTime = async (
     startTime: number,
     endTime: number
 ): Promise<Anomaly[]> => {
     const response = await axios.get(
         `${BASE_URL_ANOMALIES}?startTime=[gte]${startTime}&endTime=[lte]${endTime}`
-    );
-
-    return response.data;
-};
-
-export const getAnomaliesByAlertId = async (
-    alertId: number
-): Promise<Anomaly[]> => {
-    const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?alert.id=${alertId}`
     );
 
     return response.data;

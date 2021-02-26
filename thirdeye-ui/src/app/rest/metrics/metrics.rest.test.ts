@@ -24,7 +24,7 @@ describe("Metrics REST", () => {
         await expect(getMetric(1)).rejects.toThrow("testError");
     });
 
-    test("getAllMetrics should invoke axios.get with appropriate input and return appropriate metric array", async () => {
+    test("getAllMetrics should invoke axios.get with appropriate input and return appropriate metrics", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockMetricResponse],
         });

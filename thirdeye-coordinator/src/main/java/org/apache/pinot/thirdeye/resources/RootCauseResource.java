@@ -7,6 +7,7 @@ import static org.apache.pinot.thirdeye.resources.ResourceUtils.parseListParams;
 
 import com.google.common.base.Preconditions;
 import io.dropwizard.auth.Auth;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Api(tags = "Root Cause Analysis")
 @Produces(MediaType.APPLICATION_JSON)
 public class RootCauseResource {
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseResource.class);
@@ -108,13 +110,13 @@ public class RootCauseResource {
       @QueryParam("analysisStart") Long analysisStart,
       @ApiParam(value = "end of overall time window to consider for events")
       @QueryParam("analysisEnd") Long analysisEnd,
-      @ApiParam(value = "start time of the anomalous time period for the metric under analysis", defaultValue = "analysisStart")
+      @ApiParam(value = "start time of the anomalous time period for the metric under analysis")
       @QueryParam("anomalyStart") Long anomalyStart,
-      @ApiParam(value = "end time of the anomalous time period for the metric under analysis", defaultValue = "analysisEnd")
+      @ApiParam(value = "end time of the anomalous time period for the metric under analysis")
       @QueryParam("anomalyEnd") Long anomalyEnd,
-      @ApiParam(value = "baseline start time, e.g. anomaly start time offset by 1 week", defaultValue = "anomalyStart - 7 days")
+      @ApiParam(value = "baseline start time, e.g. anomaly start time offset by 1 week")
       @QueryParam("baselineStart") Long baselineStart,
-      @ApiParam(value = "baseline end time, e.g. typically anomaly start time offset by 1 week", defaultValue = "anomalyEnd - 7 days")
+      @ApiParam(value = "baseline end time, e.g. typically anomaly start time offset by 1 week")
       @QueryParam("baselineEnd") Long baselineEnd,
       @QueryParam("formatterDepth") Integer formatterDepth,
       @ApiParam(value = "URNs of metrics to analyze")

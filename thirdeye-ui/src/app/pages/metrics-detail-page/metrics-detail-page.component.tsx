@@ -11,10 +11,7 @@ import { PageContents } from "../../components/page-contents/page-contents.compo
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getMetric } from "../../rest/metrics/metrics.rest";
-import {
-    createEmptyUiMetric,
-    getUiMetric,
-} from "../../utils/metrics/metrics.util";
+import { getUiMetric } from "../../utils/metrics/metrics.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getMetricsAllPath } from "../../utils/routes/routes.util";
 import {
@@ -35,7 +32,6 @@ export const MetricsDetailPage: FunctionComponent = () => {
 
     useEffect(() => {
         setPageBreadcrumbs([]);
-        fetchMetric();
     }, []);
 
     useEffect(() => {
@@ -45,7 +41,7 @@ export const MetricsDetailPage: FunctionComponent = () => {
 
     const fetchMetric = (): void => {
         setUiMetric(null);
-        let fetchedUiMetric = createEmptyUiMetric();
+        let fetchedUiMetric = {} as UiMetric;
 
         if (!isValidNumberId(params.id)) {
             // Invalid id
@@ -117,6 +113,7 @@ export const MetricsDetailPage: FunctionComponent = () => {
             hideTimeRange
             title={uiMetric ? uiMetric.name : ""}
         >
+            {/* Metric */}
             <MetricCard metric={uiMetric} onDelete={handleMetricDelete} />
         </PageContents>
     );

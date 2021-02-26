@@ -144,6 +144,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             maxRouterBreadcrumbs={1}
             title={t("label.subscription-groups")}
         >
+            {/* Subscription group list */}
             <SubscriptionGroupList
                 uiSubscriptionGroups={uiSubscriptionGroups}
                 onDelete={handleSubscriptionGroupDelete}

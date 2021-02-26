@@ -31,6 +31,8 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
         login()
             .then((auth) => {
                 signIn(auth.accessToken);
+
+                // Redirect
                 history.push(props.redirectURL);
             })
             .catch(() => {
@@ -57,6 +59,7 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
                 justifyContent="center"
                 width="100%"
             >
+                {/* Sign in */}
                 <Button
                     color="primary"
                     variant="contained"

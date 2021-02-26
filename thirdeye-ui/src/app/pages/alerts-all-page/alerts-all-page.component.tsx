@@ -170,6 +170,7 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     return (
         <PageContents centered hideAppBreadcrumbs title={t("label.alerts")}>
+            {/* Alert list */}
             <AlertList
                 uiAlerts={uiAlerts}
                 onChange={handleAlertChange}

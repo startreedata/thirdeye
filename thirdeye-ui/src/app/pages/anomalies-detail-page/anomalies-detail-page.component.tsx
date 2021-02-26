@@ -17,7 +17,6 @@ import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     createAlertEvaluation,
-    createEmptyUiAnomaly,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
@@ -58,7 +57,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
 
     const fetchAnomaly = (): void => {
         setUiAnomaly(null);
-        let fetchedUiAnomaly = createEmptyUiAnomaly();
+        let fetchedUiAnomaly = {} as UiAnomaly;
 
         if (!isValidNumberId(params.id)) {
             // Invalid id

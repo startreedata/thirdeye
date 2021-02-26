@@ -33,10 +33,7 @@ import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
-import {
-    createEmptyUiSubscriptionGroup,
-    getUiSubscriptionGroup,
-} from "../../utils/subscription-groups/subscription-groups.util";
+import { getUiSubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { SubscriptionGroupsDetailPageParams } from "./subscription-groups-detail-page.interfaces";
 
 export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
@@ -64,7 +61,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
 
     const fetchSubscriptionGroup = (): void => {
         setUiSubscriptionGroup(null);
-        let fetchedUiSubscriptionGroup = createEmptyUiSubscriptionGroup();
+        let fetchedUiSubscriptionGroup = {} as UiSubscriptionGroup;
         let fetchedAlerts: Alert[] = [];
 
         if (!isValidNumberId(params.id)) {
@@ -190,8 +187,13 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
             subscriptionGroupCopy.notificationSchemes &&
             subscriptionGroupCopy.notificationSchemes.email
         ) {
-            // Add to existing notification scheme
+            // Add to existing notification email scheme
             subscriptionGroupCopy.notificationSchemes.email.to = emails;
+        } else if (subscriptionGroupCopy.notificationSchemes) {
+            // Add to existing notification scheme
+            subscriptionGroupCopy.notificationSchemes.email = {
+                to: emails,
+            } as EmailScheme;
         } else {
             // Create and add to notification scheme
             subscriptionGroupCopy.notificationSchemes = {

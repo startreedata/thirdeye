@@ -105,6 +105,7 @@ export const MetricsAllPage: FunctionComponent = () => {
             maxRouterBreadcrumbs={1}
             title={t("label.metrics")}
         >
+            {/* Metric list */}
             <MetricList metrics={uiMetrics} onDelete={handleMetricDelete} />
         </PageContents>
     );

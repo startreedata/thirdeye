@@ -23,7 +23,6 @@ import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     createAlertEvaluation,
-    createEmptyUiAlert,
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
@@ -67,7 +66,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
 
     const fetchAlert = (): void => {
         setUiAlert(null);
-        let fetchedUiAlert = createEmptyUiAlert();
+        let fetchedUiAlert = {} as UiAlert;
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
 
         if (!isValidNumberId(params.id)) {

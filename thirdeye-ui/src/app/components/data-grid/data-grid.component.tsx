@@ -99,7 +99,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
                         <Typography
                             className={dataGridClasses.rowSelectionStatus}
                             color="textSecondary"
-                            variant="body2"
+                            variant="body1"
                         >
                             {t("label.selected-count", {
                                 count: formatNumber(

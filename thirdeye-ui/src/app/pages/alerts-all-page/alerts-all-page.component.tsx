@@ -5,8 +5,8 @@ import { AlertList } from "../../components/alert-list/alert-list.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     deleteAlert,
     getAllAlerts,
@@ -23,87 +23,32 @@ import {
 } from "../../utils/snackbar/snackbar.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const [uiAlerts, setUiAlerts] = useState<UiAlert[]>([]);
+    const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>([]);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
-        fetchAllAlerts();
     }, []);
 
-    const onAlertChange = (uiAlert: UiAlert): void => {
-        if (!uiAlert || !uiAlert.alert) {
-            return;
-        }
-
-        updateAlert(uiAlert.alert)
-            .then((alert: Alert): void => {
-                enqueueSnackbar(
-                    t("message.update-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Replace updated alert in fetched alerts
-                replaceUiAlert(alert);
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.update-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
-                );
-            });
-    };
-
-    const onDeleteAlert = (uiAlert: UiAlert): void => {
-        if (!uiAlert) {
-            return;
-        }
-
-        showDialog({
-            type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
-                name: uiAlert.name,
-            }),
-            okButtonLabel: t("label.delete"),
-            onOk: (): void => {
-                onDeleteAlertConfirmation(uiAlert);
-            },
-        });
-    };
-
-    const onDeleteAlertConfirmation = (uiAlert: UiAlert): void => {
-        if (!uiAlert) {
-            return;
-        }
-
-        deleteAlert(uiAlert.id)
-            .then((alert: Alert): void => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Remove deleted alert from fetched alerts
-                removeUiAlert(alert);
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
-                );
-            });
-    };
+    useEffect(() => {
+        // Time range refreshed, fetch alerts
+        fetchAllAlerts();
+    }, [timeRangeDuration]);
 
     const fetchAllAlerts = (): void => {
+        setUiAlerts(null);
+
+        let fetchedUiAlerts: UiAlert[] = [];
+        let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
         Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
-            .then(([alertsResponse, subscriptionGroupsResponse]): void => {
+            .then(([alertsResponse, subscriptionGroupsResponse]) => {
                 // Determine if any of the calls failed
                 if (
                     alertsResponse.status === "rejected" ||
@@ -116,24 +61,80 @@ export const AlertsAllPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
-                let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
                 if (subscriptionGroupsResponse.status === "fulfilled") {
                     fetchedSubscriptionGroups =
                         subscriptionGroupsResponse.value;
-                    setSubscriptionGroups(fetchedSubscriptionGroups);
                 }
                 if (alertsResponse.status === "fulfilled") {
-                    setUiAlerts(
-                        getUiAlerts(
-                            alertsResponse.value,
-                            fetchedSubscriptionGroups
-                        )
+                    fetchedUiAlerts = getUiAlerts(
+                        alertsResponse.value,
+                        fetchedSubscriptionGroups
                     );
                 }
             })
-            .finally((): void => {
-                setLoading(false);
+            .finally(() => {
+                setUiAlerts(fetchedUiAlerts);
+                setSubscriptionGroups(fetchedSubscriptionGroups);
             });
+    };
+
+    const handleAlertChange = (uiAlert: UiAlert): void => {
+        if (!uiAlert || !uiAlert.alert) {
+            return;
+        }
+
+        updateAlert(uiAlert.alert)
+            .then((alert) => {
+                enqueueSnackbar(
+                    t("message.update-success", { entity: t("label.alert") }),
+                    getSuccessSnackbarOption()
+                );
+
+                // Replace updated alert in fetched alerts
+                replaceUiAlert(alert);
+            })
+            .catch(() =>
+                enqueueSnackbar(
+                    t("message.update-error", { entity: t("label.alert") }),
+                    getErrorSnackbarOption()
+                )
+            );
+    };
+
+    const handleAlertDelete = (uiAlert: UiAlert): void => {
+        if (!uiAlert) {
+            return;
+        }
+
+        showDialog({
+            type: DialogType.ALERT,
+            text: t("message.delete-confirmation", { name: uiAlert.name }),
+            okButtonLabel: t("label.delete"),
+            onOk: () => handleAlertDeleteOk(uiAlert),
+        });
+    };
+
+    const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
+        if (!uiAlert) {
+            return;
+        }
+
+        deleteAlert(uiAlert.id)
+            .then((alert) => {
+                enqueueSnackbar(
+                    t("message.delete-success", { entity: t("label.alert") }),
+                    getSuccessSnackbarOption()
+                );
+
+                // Remove deleted alert from fetched alerts
+                removeUiAlert(alert);
+            })
+            .catch(() =>
+                enqueueSnackbar(
+                    t("message.delete-error", { entity: t("label.alert") }),
+                    getErrorSnackbarOption()
+                )
+            );
     };
 
     const replaceUiAlert = (alert: Alert): void => {
@@ -141,17 +142,17 @@ export const AlertsAllPage: FunctionComponent = () => {
             return;
         }
 
-        setUiAlerts((uiAlerts) =>
-            uiAlerts.map(
-                (uiAlert: UiAlert): UiAlert => {
+        setUiAlerts(
+            (uiAlerts) =>
+                uiAlerts &&
+                uiAlerts.map((uiAlert) => {
                     if (uiAlert.id === alert.id) {
                         // Replace
                         return getUiAlert(alert, subscriptionGroups);
                     }
 
                     return uiAlert;
-                }
-            )
+                })
         );
     };
 
@@ -160,23 +161,19 @@ export const AlertsAllPage: FunctionComponent = () => {
             return;
         }
 
-        setUiAlerts((uiAlerts) =>
-            uiAlerts.filter((uiAlert: UiAlert): boolean => {
-                return uiAlert.id !== alert.id;
-            })
+        setUiAlerts(
+            (uiAlerts) =>
+                uiAlerts &&
+                uiAlerts.filter((uiAlert) => uiAlert.id !== alert.id)
         );
     };
-
-    if (loading) {
-        return <LoadingIndicator />;
-    }
 
     return (
         <PageContents centered hideAppBreadcrumbs title={t("label.alerts")}>
             <AlertList
                 uiAlerts={uiAlerts}
-                onChange={onAlertChange}
-                onDelete={onDeleteAlert}
+                onChange={handleAlertChange}
+                onDelete={handleAlertDelete}
             />
         </PageContents>
     );

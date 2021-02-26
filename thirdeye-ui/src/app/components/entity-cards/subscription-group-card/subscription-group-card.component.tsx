@@ -67,6 +67,10 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
     };
 
     const handleSubscriptionGroupDelete = (): void => {
+        if (!props.uiSubscriptionGroup) {
+            return;
+        }
+
         props.onDelete && props.onDelete(props.uiSubscriptionGroup);
         handleSubscriptionGroupOptionsClose();
     };

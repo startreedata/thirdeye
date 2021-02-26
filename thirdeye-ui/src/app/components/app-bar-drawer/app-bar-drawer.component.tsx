@@ -7,12 +7,12 @@ import {
     useTheme,
 } from "@material-ui/core";
 import HomeIcon from "@material-ui/icons/Home";
-import SettingsIcon from "@material-ui/icons/Settings";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
 import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
+import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
 import { ReactComponent as MetricIcon } from "../../../assets/images/metric.svg";
 import { ReactComponent as SubscriptionGroupIcon } from "../../../assets/images/subscription-group.svg";
 import {
@@ -138,7 +138,10 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                 {/* Configuration */}
                 <ListItem button divider onClick={handleConfigurationClick}>
                     <ListItemIcon>
-                        <SettingsIcon />
+                        <ConfigurationIcon
+                            fill={theme.palette.action.active}
+                            height={24}
+                        />
                     </ListItemIcon>
 
                     <ListItemText

@@ -1,7 +1,7 @@
 import { UiMetric } from "../../../rest/dto/ui-metric.interfaces";
 
 export interface MetricCardProps {
-    uiMetric: UiMetric;
+    metric: UiMetric | null;
     searchWords?: string[];
     showViewDetails?: boolean;
     onDelete?: (uiMetric: UiMetric) => void;

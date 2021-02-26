@@ -5,7 +5,6 @@ import { AnomalyList } from "../../components/anomaly-list/anomaly-list.componen
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
@@ -21,8 +20,7 @@ import {
 } from "../../utils/snackbar/snackbar.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[]>([]);
+    const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
@@ -34,34 +32,50 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        // Time range changed, fetch anomalies
+        // Time range refreshed, fetch anomalies
         fetchAnomaliesByTime();
     }, [timeRangeDuration]);
 
-    const onDeleteAnomaly = (uiAnomaly: UiAnomaly): void => {
+    const fetchAnomaliesByTime = (): void => {
+        setUiAnomalies(null);
+
+        let fetchedUiAnomalies: UiAnomaly[] = [];
+        getAnomaliesByTime(
+            timeRangeDuration.startTime,
+            timeRangeDuration.endTime
+        )
+            .then((anomalies) => {
+                fetchedUiAnomalies = getUiAnomalies(anomalies);
+            })
+            .catch(() =>
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                )
+            )
+            .finally(() => setUiAnomalies(fetchedUiAnomalies));
+    };
+
+    const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
         if (!uiAnomaly) {
             return;
         }
 
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
-                name: uiAnomaly.name,
-            }),
+            text: t("message.delete-confirmation", { name: uiAnomaly.name }),
             okButtonLabel: t("label.delete"),
-            onOk: (): void => {
-                onDeleteAnomalyConfirmation(uiAnomaly);
-            },
+            onOk: () => handleAnomalyDeleteOk(uiAnomaly),
         });
     };
 
-    const onDeleteAnomalyConfirmation = (uiAnomaly: UiAnomaly): void => {
+    const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
         if (!uiAnomaly) {
             return;
         }
 
         deleteAnomaly(uiAnomaly.id)
-            .then((anomaly: Anomaly): void => {
+            .then((anomaly): void => {
                 enqueueSnackbar(
                     t("message.delete-success", { entity: t("label.anomaly") }),
                     getSuccessSnackbarOption()
@@ -70,31 +84,12 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 // Remove deleted anomaly from fetched anomalies
                 removeUiAnomaly(anomaly);
             })
-            .catch((): void => {
+            .catch(() =>
                 enqueueSnackbar(
                     t("message.delete-error", { entity: t("label.anomaly") }),
                     getErrorSnackbarOption()
-                );
-            });
-    };
-
-    const fetchAnomaliesByTime = (): void => {
-        getAnomaliesByTime(
-            timeRangeDuration.startTime,
-            timeRangeDuration.endTime
-        )
-            .then((anomalies: Anomaly[]): void => {
-                setUiAnomalies(getUiAnomalies(anomalies));
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
+                )
+            );
     };
 
     const removeUiAnomaly = (anomaly: Anomaly): void => {
@@ -102,20 +97,19 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             return;
         }
 
-        setUiAnomalies((uiAnomalies) =>
-            uiAnomalies.filter((uiAnomaly: UiAnomaly): boolean => {
-                return uiAnomaly.id !== anomaly.id;
-            })
+        setUiAnomalies(
+            (uiAnomalies) =>
+                uiAnomalies &&
+                uiAnomalies.filter((uiAnomaly) => uiAnomaly.id !== anomaly.id)
         );
     };
 
-    if (loading) {
-        return <LoadingIndicator />;
-    }
-
     return (
         <PageContents centered hideAppBreadcrumbs title={t("label.anomalies")}>
-            <AnomalyList uiAnomalies={uiAnomalies} onDelete={onDeleteAnomaly} />
+            <AnomalyList
+                uiAnomalies={uiAnomalies}
+                onDelete={handleAnomalyDelete}
+            />
         </PageContents>
     );
 };

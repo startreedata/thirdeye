@@ -45,9 +45,9 @@ export const MetricList: FunctionComponent<MetricListProps> = (
         // Input metrics or search changed, reset
         initDataGridColumns();
         setFilteredUiMetrics(
-            filterMetrics(props.uiMetrics as UiMetric[], searchWords)
+            filterMetrics(props.metrics as UiMetric[], searchWords)
         );
-    }, [props.uiMetrics, searchWords]);
+    }, [props.metrics, searchWords]);
 
     useEffect(() => {
         // Search changed, reset data grid selection model
@@ -189,11 +189,11 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     };
 
     const getUiMetric = (id: number): UiMetric | null => {
-        if (!props.uiMetrics) {
+        if (!props.metrics) {
             return null;
         }
 
-        return props.uiMetrics.find((uiMetric) => uiMetric.id === id) || null;
+        return props.metrics.find((uiMetric) => uiMetric.id === id) || null;
     };
 
     const handleDataGridSelectionModelChange = (
@@ -215,7 +215,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                         })}
                         searchStatusLabel={getSearchStatusLabel(
                             filteredUiMetrics ? filteredUiMetrics.length : 0,
-                            props.uiMetrics ? props.uiMetrics.length : 0
+                            props.metrics ? props.metrics.length : 0
                         )}
                         onChange={setSearchWords}
                     />
@@ -228,7 +228,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                     autoHeight
                     checkboxSelection
                     columns={dataGridColumns}
-                    loading={!props.uiMetrics}
+                    loading={!props.metrics}
                     noDataAvailableMessage={
                         isEmpty(filteredUiMetrics) && !isEmpty(searchWords)
                             ? t("message.no-search-results")

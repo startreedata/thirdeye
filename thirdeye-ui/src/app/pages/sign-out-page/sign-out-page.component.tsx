@@ -17,10 +17,8 @@ export const SignOutPage: FunctionComponent = () => {
     }, []);
 
     const performSignOut = (): void => {
-        logout().finally((): void => {
-            // Sign out and let authentication state force reload
-            signOut();
-        });
+        // Sign out and let authentication state force reload
+        logout().finally(() => signOut());
     };
 
     return (

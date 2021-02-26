@@ -8,18 +8,16 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { getAlertEvaluation } from "../../rest/alerts/alerts.rest";
 import { deleteAnomaly, getAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     createAlertEvaluation,
+    createEmptyUiAnomaly,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
@@ -31,8 +29,7 @@ import {
 import { AnomaliesDetailPageParams } from "./anomalies-detail-page.interfaces";
 
 export const AnomaliesDetailPage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly>();
+    const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [
         alertEvaluation,
         setAlertEvaluation,
@@ -47,57 +44,24 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
 
     useEffect(() => {
         setPageBreadcrumbs([]);
-        fetchAnomaly();
     }, []);
 
     useEffect(() => {
-        // Fetched anomaly or time range changed, fetch alert evaluation
+        // Time range refreshed, fetch anomaly
+        fetchAnomaly();
+    }, [timeRangeDuration]);
+
+    useEffect(() => {
+        // Fetched anomaly changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [uiAnomaly, timeRangeDuration]);
-
-    const onDeleteAnomaly = (uiAnomaly: UiAnomaly): void => {
-        if (!uiAnomaly) {
-            return;
-        }
-
-        showDialog({
-            type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
-                name: uiAnomaly.name,
-            }),
-            okButtonLabel: t("label.delete"),
-            onOk: (): void => {
-                onDeleteAnomalyConfirmation(uiAnomaly);
-            },
-        });
-    };
-
-    const onDeleteAnomalyConfirmation = (uiAnomaly: UiAnomaly): void => {
-        if (!uiAnomaly) {
-            return;
-        }
-
-        deleteAnomaly(uiAnomaly.id)
-            .then((): void => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.anomaly") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Redirect to anomalies all path
-                history.push(getAnomaliesAllPath());
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.anomaly") }),
-                    getErrorSnackbarOption()
-                );
-            });
-    };
+    }, [uiAnomaly]);
 
     const fetchAnomaly = (): void => {
-        // Validate id from URL
+        setUiAnomaly(null);
+        let fetchedUiAnomaly = createEmptyUiAnomaly();
+
         if (!isValidNumberId(params.id)) {
+            // Invalid id
             enqueueSnackbar(
                 t("message.invalid-id", {
                     entity: t("label.anomaly"),
@@ -105,24 +69,23 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                 }),
                 getErrorSnackbarOption()
             );
-            setLoading(false);
+
+            setUiAnomaly(fetchedUiAnomaly);
 
             return;
         }
 
         getAnomaly(toNumber(params.id))
-            .then((anomaly: Anomaly): void => {
-                setUiAnomaly(getUiAnomaly(anomaly));
+            .then((anomaly) => {
+                fetchedUiAnomaly = getUiAnomaly(anomaly);
             })
-            .catch((): void => {
+            .catch(() =>
                 enqueueSnackbar(
                     t("message.fetch-error"),
                     getErrorSnackbarOption()
-                );
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
+                )
+            )
+            .finally(() => setUiAnomaly(fetchedUiAnomaly));
     };
 
     const fetchAlertEvaluation = (): void => {
@@ -142,50 +105,75 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                 timeRangeDuration.endTime
             )
         )
-            .then((alertEvaluation: AlertEvaluation): void => {
+            .then((alertEvaluation) => {
                 fetchedAlertEvaluation = alertEvaluation;
             })
-            .catch((): void => {
+            .catch(() =>
                 enqueueSnackbar(
                     t("message.fetch-error"),
                     getErrorSnackbarOption()
-                );
-            })
-            .finally((): void => {
-                setAlertEvaluation(fetchedAlertEvaluation);
-            });
+                )
+            )
+            .finally(() => setAlertEvaluation(fetchedAlertEvaluation));
     };
 
-    if (loading) {
-        return <LoadingIndicator />;
-    }
+    const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
+        if (!uiAnomaly) {
+            return;
+        }
+
+        showDialog({
+            type: DialogType.ALERT,
+            text: t("message.delete-confirmation", { name: uiAnomaly.name }),
+            okButtonLabel: t("label.delete"),
+            onOk: () => handleAnomalyDeleteOk(uiAnomaly),
+        });
+    };
+
+    const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
+        if (!uiAnomaly) {
+            return;
+        }
+
+        deleteAnomaly(uiAnomaly.id)
+            .then(() => {
+                enqueueSnackbar(
+                    t("message.delete-success", { entity: t("label.anomaly") }),
+                    getSuccessSnackbarOption()
+                );
+
+                // Redirect to anomalies all path
+                history.push(getAnomaliesAllPath());
+            })
+            .catch(() =>
+                enqueueSnackbar(
+                    t("message.delete-error", { entity: t("label.anomaly") }),
+                    getErrorSnackbarOption()
+                )
+            );
+    };
 
     return (
         <PageContents centered title={uiAnomaly ? uiAnomaly.name : ""}>
-            {uiAnomaly && (
-                <Grid container>
-                    {/* Anomaly */}
-                    <Grid item sm={12}>
-                        <AnomalyCard
-                            uiAnomaly={uiAnomaly}
-                            onDelete={onDeleteAnomaly}
-                        />
-                    </Grid>
-
-                    {/* Alert evaluation time series */}
-                    <Grid item sm={12}>
-                        <AlertEvaluationTimeSeriesCard
-                            showMaximizeButton
-                            alertEvaluation={alertEvaluation}
-                            maximizedTitle={uiAnomaly.name}
-                            visualizationHeight={500}
-                        />
-                    </Grid>
+            <Grid container>
+                {/* Anomaly */}
+                <Grid item sm={12}>
+                    <AnomalyCard
+                        uiAnomaly={uiAnomaly}
+                        onDelete={handleAnomalyDelete}
+                    />
                 </Grid>
-            )}
 
-            {/* No data available message */}
-            {!uiAnomaly && <NoDataIndicator />}
+                {/* Alert evaluation time series */}
+                <Grid item sm={12}>
+                    <AlertEvaluationTimeSeriesCard
+                        showMaximizeButton
+                        alertEvaluation={alertEvaluation}
+                        maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
+                        visualizationHeight={500}
+                    />
+                </Grid>
+            </Grid>
         </PageContents>
     );
 };

@@ -59,6 +59,10 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
     };
 
     const handleAnomalyDelete = (): void => {
+        if (!props.uiAnomaly) {
+            return;
+        }
+
         props.onDelete && props.onDelete(props.uiAnomaly);
         handleAnomalyOptionsClose();
     };

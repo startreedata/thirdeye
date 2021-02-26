@@ -77,6 +77,10 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
     };
 
     const handleAlertDelete = (): void => {
+        if (!props.uiAlert) {
+            return;
+        }
+
         props.onDelete && props.onDelete(props.uiAlert);
         handleAlertOptionsClose();
     };

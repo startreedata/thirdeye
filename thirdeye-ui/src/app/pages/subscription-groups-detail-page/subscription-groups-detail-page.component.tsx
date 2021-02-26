@@ -8,11 +8,10 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { UiSubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
 import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
@@ -34,17 +33,20 @@ import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
-import { getUiSubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
+import {
+    createEmptyUiSubscriptionGroup,
+    getUiSubscriptionGroup,
+} from "../../utils/subscription-groups/subscription-groups.util";
 import { SubscriptionGroupsDetailPageParams } from "./subscription-groups-detail-page.interfaces";
 
 export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
     const [
         uiSubscriptionGroup,
         setUiSubscriptionGroup,
-    ] = useState<UiSubscriptionGroup>();
+    ] = useState<UiSubscriptionGroup | null>(null);
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const params = useParams<SubscriptionGroupsDetailPageParams>();
@@ -53,99 +55,20 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
 
     useEffect(() => {
         setPageBreadcrumbs([]);
-        fetchSubscriptionGroup();
     }, []);
 
-    const onDeleteSubscriptionGroup = (
-        uiSubscriptionGroup: UiSubscriptionGroup
-    ): void => {
-        if (!uiSubscriptionGroup) {
-            return;
-        }
-
-        showDialog({
-            type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
-                name: uiSubscriptionGroup.name,
-            }),
-            okButtonLabel: t("label.delete"),
-            onOk: (): void => {
-                onDeleteSubscriptionGroupConfirmation(uiSubscriptionGroup);
-            },
-        });
-    };
-
-    const onDeleteSubscriptionGroupConfirmation = (
-        uiSubscriptionGroup: UiSubscriptionGroup
-    ): void => {
-        if (!uiSubscriptionGroup) {
-            return;
-        }
-
-        deleteSubscriptionGroup(uiSubscriptionGroup.id)
-            .then((): void => {
-                enqueueSnackbar(
-                    t("message.delete-success", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Redirect to subscription groups all path
-                history.push(getSubscriptionGroupsAllPath());
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                );
-            });
-    };
-
-    const onUiSubscriptionGroupAlertsChange = (
-        uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]
-    ): void => {
-        if (!uiSubscriptionGroup || !uiSubscriptionGroup.subscriptionGroup) {
-            return;
-        }
-
-        // Create a copy of subscription group and update alerts
-        const subscriptionGroupCopy = cloneDeep(
-            uiSubscriptionGroup.subscriptionGroup
-        );
-        subscriptionGroupCopy.alerts = uiSubscriptionGroupAlerts as Alert[];
-        saveUpdatedSubscriptionGroup(subscriptionGroupCopy);
-    };
-
-    const onSubscriptionGroupEmailsChange = (emails: string[]): void => {
-        if (!uiSubscriptionGroup || !uiSubscriptionGroup.subscriptionGroup) {
-            return;
-        }
-
-        // Create a copy of subscription group and update emails
-        const subscriptionGroupCopy = cloneDeep(
-            uiSubscriptionGroup.subscriptionGroup
-        );
-        if (
-            subscriptionGroupCopy.notificationSchemes &&
-            subscriptionGroupCopy.notificationSchemes.email
-        ) {
-            subscriptionGroupCopy.notificationSchemes.email.to = emails;
-        } else {
-            subscriptionGroupCopy.notificationSchemes = {
-                email: {
-                    to: emails,
-                } as EmailScheme,
-            };
-        }
-        saveUpdatedSubscriptionGroup(subscriptionGroupCopy);
-    };
+    useEffect(() => {
+        // Time range refreshed, fetch subscription group
+        fetchSubscriptionGroup();
+    }, [timeRangeDuration]);
 
     const fetchSubscriptionGroup = (): void => {
-        // Validate id from URL
+        setUiSubscriptionGroup(null);
+        let fetchedUiSubscriptionGroup = createEmptyUiSubscriptionGroup();
+        let fetchedAlerts: Alert[] = [];
+
         if (!isValidNumberId(params.id)) {
+            // Invalid id
             enqueueSnackbar(
                 t("message.invalid-id", {
                     entity: t("label.subscription-group"),
@@ -153,7 +76,9 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 }),
                 getErrorSnackbarOption()
             );
-            setLoading(false);
+
+            setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
+            setAlerts(fetchedAlerts);
 
             return;
         }
@@ -162,7 +87,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
             getSubscriptionGroup(toNumber(params.id)),
             getAllAlerts(),
         ])
-            .then(([subscriptionGroupResponse, alertsResponse]): void => {
+            .then(([subscriptionGroupResponse, alertsResponse]) => {
                 // Determine if any of the calls failed
                 if (
                     subscriptionGroupResponse.status === "rejected" ||
@@ -175,26 +100,110 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
-                let fetchedAlerts: Alert[] = [];
                 if (alertsResponse.status === "fulfilled") {
                     fetchedAlerts = alertsResponse.value;
-                    setAlerts(fetchedAlerts);
                 }
                 if (subscriptionGroupResponse.status === "fulfilled") {
-                    setUiSubscriptionGroup(
-                        getUiSubscriptionGroup(
-                            subscriptionGroupResponse.value,
-                            fetchedAlerts
-                        )
+                    fetchedUiSubscriptionGroup = getUiSubscriptionGroup(
+                        subscriptionGroupResponse.value,
+                        fetchedAlerts
                     );
                 }
             })
-            .finally((): void => {
-                setLoading(false);
+            .finally(() => {
+                setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
+                setAlerts(fetchedAlerts);
             });
     };
 
-    const saveUpdatedSubscriptionGroup = (
+    const handleSubscriptionGroupDelete = (
+        uiSubscriptionGroup: UiSubscriptionGroup
+    ): void => {
+        if (!uiSubscriptionGroup) {
+            return;
+        }
+
+        showDialog({
+            type: DialogType.ALERT,
+            text: t("message.delete-confirmation", {
+                name: uiSubscriptionGroup.name,
+            }),
+            okButtonLabel: t("label.delete"),
+            onOk: () => handleSubscriptionGroupDeleteOk(uiSubscriptionGroup),
+        });
+    };
+
+    const handleSubscriptionGroupDeleteOk = (
+        uiSubscriptionGroup: UiSubscriptionGroup
+    ): void => {
+        if (!uiSubscriptionGroup) {
+            return;
+        }
+
+        deleteSubscriptionGroup(uiSubscriptionGroup.id)
+            .then(() => {
+                enqueueSnackbar(
+                    t("message.delete-success", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getSuccessSnackbarOption()
+                );
+
+                // Redirect to subscription groups all path
+                history.push(getSubscriptionGroupsAllPath());
+            })
+            .catch(() =>
+                enqueueSnackbar(
+                    t("message.delete-error", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getErrorSnackbarOption()
+                )
+            );
+    };
+
+    const handleSubscriptionGroupAlertsChange = (
+        uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]
+    ): void => {
+        if (!uiSubscriptionGroup || !uiSubscriptionGroup.subscriptionGroup) {
+            return;
+        }
+
+        // Create a copy of subscription group and update alerts
+        const subscriptionGroupCopy = cloneDeep(
+            uiSubscriptionGroup.subscriptionGroup
+        );
+        subscriptionGroupCopy.alerts = uiSubscriptionGroupAlerts as Alert[];
+        saveSubscriptionGroup(subscriptionGroupCopy);
+    };
+
+    const handleSubscriptionGroupEmailsChange = (emails: string[]): void => {
+        if (!uiSubscriptionGroup || !uiSubscriptionGroup.subscriptionGroup) {
+            return;
+        }
+
+        // Create a copy of subscription group and update emails
+        const subscriptionGroupCopy = cloneDeep(
+            uiSubscriptionGroup.subscriptionGroup
+        );
+        if (
+            subscriptionGroupCopy.notificationSchemes &&
+            subscriptionGroupCopy.notificationSchemes.email
+        ) {
+            // Add to existing notification scheme
+            subscriptionGroupCopy.notificationSchemes.email.to = emails;
+        } else {
+            // Create and add to notification scheme
+            subscriptionGroupCopy.notificationSchemes = {
+                email: {
+                    to: emails,
+                } as EmailScheme,
+            };
+        }
+        saveSubscriptionGroup(subscriptionGroupCopy);
+    };
+
+    const saveSubscriptionGroup = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
         if (!subscriptionGroup) {
@@ -202,7 +211,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
         }
 
         updateSubscriptionGroup(subscriptionGroup)
-            .then((subscriptionGroup: SubscriptionGroup): void => {
+            .then((subscriptionGroup) => {
                 enqueueSnackbar(
                     t("message.update-success", {
                         entity: t("label.subscription-group"),
@@ -215,19 +224,15 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                     getUiSubscriptionGroup(subscriptionGroup, alerts)
                 );
             })
-            .catch((): void => {
+            .catch(() =>
                 enqueueSnackbar(
                     t("message.update-error", {
                         entity: t("label.subscription-group"),
                     }),
                     getErrorSnackbarOption()
-                );
-            });
+                )
+            );
     };
-
-    if (loading) {
-        return <LoadingIndicator />;
-    }
 
     return (
         <PageContents
@@ -235,39 +240,34 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
             hideTimeRange
             title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
         >
-            {uiSubscriptionGroup && (
-                <Grid container>
-                    {/* Subscription Group */}
-                    <Grid item sm={12}>
-                        <SubscriptionGroupCard
-                            uiSubscriptionGroup={uiSubscriptionGroup}
-                            onDelete={onDeleteSubscriptionGroup}
-                        />
-                    </Grid>
-
-                    {/* Subscribed alerts */}
-                    <Grid item sm={12}>
-                        <UiSubscriptionGroupAlertsAccordian
-                            alerts={alerts}
-                            title={t("label.subscribe-alerts")}
-                            uiSubscriptionGroup={uiSubscriptionGroup}
-                            onChange={onUiSubscriptionGroupAlertsChange}
-                        />
-                    </Grid>
-
-                    {/* Subscribed emails */}
-                    <Grid item sm={12}>
-                        <SubscriptionGroupEmailsAccordian
-                            title={t("label.subscribe-emails")}
-                            uiSubscriptionGroup={uiSubscriptionGroup}
-                            onChange={onSubscriptionGroupEmailsChange}
-                        />
-                    </Grid>
+            <Grid container>
+                {/* Subscription Group */}
+                <Grid item sm={12}>
+                    <SubscriptionGroupCard
+                        uiSubscriptionGroup={uiSubscriptionGroup}
+                        onDelete={handleSubscriptionGroupDelete}
+                    />
                 </Grid>
-            )}
 
-            {/* No data available message */}
-            {!uiSubscriptionGroup && <NoDataIndicator />}
+                {/* Subscribed alerts */}
+                <Grid item sm={12}>
+                    <UiSubscriptionGroupAlertsAccordian
+                        alerts={alerts}
+                        title={t("label.subscribe-alerts")}
+                        uiSubscriptionGroup={uiSubscriptionGroup}
+                        onChange={handleSubscriptionGroupAlertsChange}
+                    />
+                </Grid>
+
+                {/* Subscribed emails */}
+                <Grid item sm={12}>
+                    <SubscriptionGroupEmailsAccordian
+                        title={t("label.subscribe-emails")}
+                        uiSubscriptionGroup={uiSubscriptionGroup}
+                        onChange={handleSubscriptionGroupEmailsChange}
+                    />
+                </Grid>
+            </Grid>
         </PageContents>
     );
 };

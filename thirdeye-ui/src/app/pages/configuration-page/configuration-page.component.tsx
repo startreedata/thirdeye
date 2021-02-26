@@ -1,4 +1,4 @@
-import { Grid, useTheme } from "@material-ui/core";
+import { Box, Grid, useTheme } from "@material-ui/core";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -11,10 +11,8 @@ import {
     getMetricsPath,
     getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
-import { useConfigurationPageStyles } from "./configuration-page.styles";
 
 export const ConfigurationPage: FunctionComponent = () => {
-    const configurationPageClasses = useConfigurationPageStyles();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const theme = useTheme();
     const history = useHistory();
@@ -24,11 +22,11 @@ export const ConfigurationPage: FunctionComponent = () => {
         setPageBreadcrumbs([]);
     }, []);
 
-    const onSubscriptionGroupsClick = (): void => {
+    const handleSubscriptionGroupsClick = (): void => {
         history.push(getSubscriptionGroupsPath());
     };
 
-    const onMetricsClick = (): void => {
+    const handleMetricsClick = (): void => {
         history.push(getMetricsPath());
     };
 
@@ -39,32 +37,36 @@ export const ConfigurationPage: FunctionComponent = () => {
             hideTimeRange
             title={t("label.configuration")}
         >
-            <Grid
-                container
+            <Box
                 alignItems="center"
-                className={configurationPageClasses.container}
-                justify="center"
+                display="flex"
+                flex={1}
+                height="100%"
+                justifyContent="center"
+                width="100%"
             >
-                {/* Subscription groups */}
-                <Grid item>
-                    <ButtonTile
-                        icon={SubscriptionGroups}
-                        iconColor={theme.palette.primary.main}
-                        text={t("label.subscription-groups")}
-                        onClick={onSubscriptionGroupsClick}
-                    />
-                </Grid>
+                <Grid container justify="center" spacing={4}>
+                    {/* Subscription groups */}
+                    <Grid item>
+                        <ButtonTile
+                            icon={SubscriptionGroups}
+                            iconColor={theme.palette.primary.main}
+                            text={t("label.subscription-groups")}
+                            onClick={handleSubscriptionGroupsClick}
+                        />
+                    </Grid>
 
-                {/* Metrics */}
-                <Grid item>
-                    <ButtonTile
-                        icon={Metrics}
-                        iconColor={theme.palette.primary.main}
-                        text={t("label.metrics")}
-                        onClick={onMetricsClick}
-                    />
+                    {/* Metrics */}
+                    <Grid item>
+                        <ButtonTile
+                            icon={Metrics}
+                            iconColor={theme.palette.primary.main}
+                            text={t("label.metrics")}
+                            onClick={handleMetricsClick}
+                        />
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Box>
         </PageContents>
     );
 };

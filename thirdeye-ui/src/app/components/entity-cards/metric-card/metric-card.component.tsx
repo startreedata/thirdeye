@@ -42,22 +42,26 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
     };
 
     const handleMetricViewDetails = (): void => {
-        if (!props.uiMetric) {
+        if (!props.metric) {
             return;
         }
 
-        history.push(getMetricsDetailPath(props.uiMetric.id));
+        history.push(getMetricsDetailPath(props.metric.id));
         handleMetricOptionsClose();
     };
 
     const handleMetricDelete = (): void => {
-        props.onDelete && props.onDelete(props.uiMetric);
+        if (!props.metric) {
+            return;
+        }
+
+        props.onDelete && props.onDelete(props.metric);
         handleMetricOptionsClose();
     };
 
     return (
         <Card variant="outlined">
-            {props.uiMetric && (
+            {props.metric && (
                 <CardHeader
                     action={
                         <Grid container alignItems="center" spacing={0}>
@@ -65,7 +69,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                             <Grid item>
                                 <Typography
                                     className={
-                                        props.uiMetric.active
+                                        props.metric.active
                                             ? metricCardClasses.active
                                             : metricCardClasses.inactive
                                     }
@@ -73,7 +77,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                                 >
                                     <TextHighlighter
                                         searchWords={props.searchWords}
-                                        text={props.uiMetric.activeText}
+                                        text={props.metric.activeText}
                                     />
                                 </Typography>
                             </Grid>
@@ -116,7 +120,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                                 <Link onClick={handleMetricViewDetails}>
                                     <TextHighlighter
                                         searchWords={props.searchWords}
-                                        text={props.uiMetric.name}
+                                        text={props.metric.name}
                                     />
                                 </Link>
                             )}
@@ -130,14 +134,14 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
             )}
 
             <CardContent>
-                {props.uiMetric && (
+                {props.metric && (
                     <Grid container>
                         {/* Dataset */}
                         <Grid item md={4} xs={12}>
                             <NameValueDisplayCard<string>
                                 name={t("label.dataset")}
                                 searchWords={props.searchWords}
-                                values={[props.uiMetric.datasetName]}
+                                values={[props.metric.datasetName]}
                             />
                         </Grid>
 
@@ -146,7 +150,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                             <NameValueDisplayCard<string>
                                 name={t("label.aggregation-column")}
                                 searchWords={props.searchWords}
-                                values={[props.uiMetric.aggregationColumn]}
+                                values={[props.metric.aggregationColumn]}
                             />
                         </Grid>
 
@@ -155,11 +159,11 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                             <NameValueDisplayCard<string>
                                 name={t("label.aggregation-function")}
                                 searchWords={props.searchWords}
-                                values={[props.uiMetric.aggregationFunction]}
+                                values={[props.metric.aggregationFunction]}
                             />
                         </Grid>
 
-                        {!isEmpty(props.uiMetric.views) && (
+                        {!isEmpty(props.metric.views) && (
                             <>
                                 <Grid item xs={12}>
                                     <Grid container alignItems="center">
@@ -178,7 +182,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                                 </Grid>
 
                                 {/* views */}
-                                {props.uiMetric.views.map((view, index) => (
+                                {props.metric.views.map((view, index) => (
                                     <Grid item key={index} xs={12}>
                                         <NameValueDisplayCard<string>
                                             wrap
@@ -197,7 +201,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                 )}
 
                 {/* No data available */}
-                {!props.uiMetric && <NoDataIndicator />}
+                {!props.metric && <NoDataIndicator />}
             </CardContent>
         </Card>
     );

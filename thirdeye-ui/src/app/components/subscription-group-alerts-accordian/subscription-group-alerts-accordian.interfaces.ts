@@ -5,7 +5,7 @@ import {
 } from "../../rest/dto/ui-subscription-group.interfaces";
 
 export interface UiSubscriptionGroupAlertsAccordianProps {
-    uiSubscriptionGroup: UiSubscriptionGroup;
+    uiSubscriptionGroup: UiSubscriptionGroup | null;
     alerts: Alert[];
     title: string;
     defaultExpanded?: boolean;

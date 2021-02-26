@@ -1,4 +1,4 @@
-import { Button, Grid } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,15 +8,12 @@ import { useAuth } from "../../components/auth-provider/auth-provider.component"
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { login } from "../../rest/auth/auth.rest";
-import { Auth } from "../../rest/dto/auth.interfaces";
 import { getErrorSnackbarOption } from "../../utils/snackbar/snackbar.util";
 import { SignInPageProps } from "./sign-in-page.interfaces";
-import { useSignInPageStyles } from "./sign-in-page.styles";
 
 export const SignInPage: FunctionComponent<SignInPageProps> = (
     props: SignInPageProps
 ) => {
-    const signInPageClasses = useSignInPageStyles();
     const [loading, setLoading] = useState(false);
     const { signIn } = useAuth();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
@@ -28,20 +25,20 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
         setPageBreadcrumbs([]);
     }, []);
 
-    const performSignIn = (): void => {
+    const handleSignInClick = (): void => {
         setLoading(true);
-        login()
-            .then((auth: Auth): void => {
-                signIn(auth.accessToken);
 
-                // Redirect
+        login()
+            .then((auth) => {
+                signIn(auth.accessToken);
                 history.push(props.redirectURL);
             })
-            .catch((): void => {
+            .catch(() => {
                 enqueueSnackbar(
                     t("message.sign-in-error"),
                     getErrorSnackbarOption()
                 );
+
                 setLoading(false);
             });
     };
@@ -52,22 +49,22 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
 
     return (
         <PageContents hideHeader title={t("label.sign-in")}>
-            <Grid
-                container
+            <Box
                 alignItems="center"
-                className={signInPageClasses.container}
-                justify="center"
+                display="flex"
+                flex={1}
+                height="100%"
+                justifyContent="center"
+                width="100%"
             >
-                <Grid item>
-                    <Button
-                        color="primary"
-                        variant="contained"
-                        onClick={performSignIn}
-                    >
-                        {t("label.sign-in")}
-                    </Button>
-                </Grid>
-            </Grid>
+                <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={handleSignInClick}
+                >
+                    {t("label.sign-in")}
+                </Button>
+            </Box>
         </PageContents>
     );
 };

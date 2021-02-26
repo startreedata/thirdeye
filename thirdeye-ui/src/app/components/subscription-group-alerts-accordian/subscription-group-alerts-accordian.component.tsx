@@ -59,8 +59,9 @@ export const UiSubscriptionGroupAlertsAccordian: FunctionComponent<UiSubscriptio
                     listItemTextFn={getUiSubscriptionGroupAlertName}
                     toLabel={t("label.subscribed-alerts")}
                     toList={
-                        props.uiSubscriptionGroup &&
-                        props.uiSubscriptionGroup.alerts
+                        (props.uiSubscriptionGroup &&
+                            props.uiSubscriptionGroup.alerts) ||
+                        []
                     }
                     onChange={handleUiSubscriptionGroupAlertsChange}
                     onClick={handleAlertClick}

@@ -6,6 +6,7 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupList } from "../../components/subscription-group-list/subscription-group-list.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -25,68 +26,27 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         UiSubscriptionGroup[] | null
     >(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
-        fetchAllSubscriptionGroups();
     }, []);
 
-    const onDeleteSubscriptionGroup = (
-        uiSubscriptionGroup: UiSubscriptionGroup
-    ): void => {
-        if (!uiSubscriptionGroup) {
-            return;
-        }
-
-        showDialog({
-            type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
-                name: uiSubscriptionGroup.name,
-            }),
-            okButtonLabel: t("label.delete"),
-            onOk: (): void => {
-                onDeleteSubscriptionGroupConfirmation(uiSubscriptionGroup);
-            },
-        });
-    };
-
-    const onDeleteSubscriptionGroupConfirmation = (
-        uiSubscriptionGroup: UiSubscriptionGroup
-    ): void => {
-        if (!uiSubscriptionGroup) {
-            return;
-        }
-
-        deleteSubscriptionGroup(uiSubscriptionGroup.id)
-            .then((subscriptionGroup: SubscriptionGroup): void => {
-                enqueueSnackbar(
-                    t("message.delete-success", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Remove deleted subscription group from fetched subscription groups
-                removeUiSubscriptionGroup(subscriptionGroup);
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                );
-            });
-    };
+    useEffect(() => {
+        // Time range refreshed, fetch subscription groups
+        fetchAllSubscriptionGroups();
+    }, [timeRangeDuration]);
 
     const fetchAllSubscriptionGroups = (): void => {
         setUiSubscriptionGroups(null);
+
         let fetchedUiSubscriptionGroups: UiSubscriptionGroup[] = [];
+        let fetchedAlerts: Alert[] = [];
         Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
-            .then(([subscriptionGroupsResponse, alertsResponse]): void => {
+            .then(([subscriptionGroupsResponse, alertsResponse]) => {
                 // Determine if any of the calls failed
                 if (
                     subscriptionGroupsResponse.status === "rejected" ||
@@ -99,7 +59,6 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
-                let fetchedAlerts: Alert[] = [];
                 if (alertsResponse.status === "fulfilled") {
                     fetchedAlerts = alertsResponse.value;
                 }
@@ -110,9 +69,55 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                     );
                 }
             })
-            .finally((): void => {
+            .finally(() => {
                 setUiSubscriptionGroups(fetchedUiSubscriptionGroups);
             });
+    };
+
+    const handleSubscriptionGroupDelete = (
+        uiSubscriptionGroup: UiSubscriptionGroup
+    ): void => {
+        if (!uiSubscriptionGroup) {
+            return;
+        }
+
+        showDialog({
+            type: DialogType.ALERT,
+            text: t("message.delete-confirmation", {
+                name: uiSubscriptionGroup.name,
+            }),
+            okButtonLabel: t("label.delete"),
+            onOk: () => handleSubscriptionGroupDeleteOk(uiSubscriptionGroup),
+        });
+    };
+
+    const handleSubscriptionGroupDeleteOk = (
+        uiSubscriptionGroup: UiSubscriptionGroup
+    ): void => {
+        if (!uiSubscriptionGroup) {
+            return;
+        }
+
+        deleteSubscriptionGroup(uiSubscriptionGroup.id)
+            .then((subscriptionGroup) => {
+                enqueueSnackbar(
+                    t("message.delete-success", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getSuccessSnackbarOption()
+                );
+
+                // Remove deleted subscription group from fetched subscription groups
+                removeUiSubscriptionGroup(subscriptionGroup);
+            })
+            .catch(() =>
+                enqueueSnackbar(
+                    t("message.delete-error", {
+                        entity: t("label.subscription-group"),
+                    }),
+                    getErrorSnackbarOption()
+                )
+            );
     };
 
     const removeUiSubscriptionGroup = (
@@ -126,9 +131,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             (uiSubscriptionGroups) =>
                 uiSubscriptionGroups &&
                 uiSubscriptionGroups.filter(
-                    (uiSubscriptionGroup: UiSubscriptionGroup): boolean => {
-                        return uiSubscriptionGroup.id !== subscriptionGroup.id;
-                    }
+                    (uiSubscriptionGroup) =>
+                        uiSubscriptionGroup.id !== subscriptionGroup.id
                 )
         );
     };
@@ -142,7 +146,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         >
             <SubscriptionGroupList
                 uiSubscriptionGroups={uiSubscriptionGroups}
-                onDelete={onDeleteSubscriptionGroup}
+                onDelete={handleSubscriptionGroupDelete}
             />
         </PageContents>
     );

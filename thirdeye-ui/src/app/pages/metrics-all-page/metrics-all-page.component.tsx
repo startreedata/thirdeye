@@ -6,6 +6,7 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricList } from "../../components/metric-list/metric-list.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getAllMetrics } from "../../rest/metrics/metrics.rest";
@@ -18,75 +19,71 @@ import {
 export const MetricsAllPage: FunctionComponent = () => {
     const [uiMetrics, setUiMetrics] = useState<UiMetric[] | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
-        fetchAllMetrics();
     }, []);
 
-    const onDeleteMetric = (uiMetric: UiMetric): void => {
+    useEffect(() => {
+        // Time range refreshed, fetch metrics
+        fetchAllMetrics();
+    }, [timeRangeDuration]);
+
+    const fetchAllMetrics = (): void => {
+        setUiMetrics(null);
+
+        let fetchedUiMetrics: UiMetric[] = [];
+        getAllMetrics()
+            .then((metrics) => {
+                fetchedUiMetrics = getUiMetrics(metrics);
+            })
+            .catch(() =>
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                )
+            )
+            .finally(() => setUiMetrics(fetchedUiMetrics));
+    };
+
+    const handleMetricDelete = (uiMetric: UiMetric): void => {
         if (!uiMetric) {
             return;
         }
 
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
-                name: uiMetric.name,
-            }),
+            text: t("message.delete-confirmation", { name: uiMetric.name }),
             okButtonLabel: t("label.delete"),
-            onOk: (): void => {
-                onDeleteMetricConfirmation(uiMetric);
-            },
+            onOk: () => handleMetricDeleteOk(uiMetric),
         });
     };
 
-    const onDeleteMetricConfirmation = (uiMetric: UiMetric): void => {
+    const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
         if (!uiMetric) {
             return;
         }
 
         deleteMetric(uiMetric.id)
-            .then((metric: Metric): void => {
+            .then((metric) => {
                 enqueueSnackbar(
-                    t("message.delete-success", {
-                        entity: t("label.metric"),
-                    }),
+                    t("message.delete-success", { entity: t("label.metric") }),
                     getSuccessSnackbarOption()
                 );
 
                 // Remove deleted metric from fetched metrics
                 removeUiMetric(metric);
             })
-            .catch((): void => {
+            .catch(() =>
                 enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.metric"),
-                    }),
+                    t("message.delete-error", { entity: t("label.metric") }),
                     getErrorSnackbarOption()
-                );
-            });
-    };
-
-    const fetchAllMetrics = (): void => {
-        setUiMetrics(null);
-        let fetchedUiMetrics: UiMetric[] = [];
-        getAllMetrics()
-            .then((metrics: Metric[]): void => {
-                fetchedUiMetrics = getUiMetrics(metrics);
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
-            })
-            .finally((): void => {
-                setUiMetrics(fetchedUiMetrics);
-            });
+                )
+            );
     };
 
     const removeUiMetric = (metric: Metric): void => {
@@ -97,9 +94,7 @@ export const MetricsAllPage: FunctionComponent = () => {
         setUiMetrics(
             (uiMetrics) =>
                 uiMetrics &&
-                uiMetrics.filter((uiMetric: UiMetric): boolean => {
-                    return uiMetric.id !== metric.id;
-                })
+                uiMetrics.filter((uiMetric) => uiMetric.id !== metric.id)
         );
     };
 
@@ -110,7 +105,7 @@ export const MetricsAllPage: FunctionComponent = () => {
             maxRouterBreadcrumbs={1}
             title={t("label.metrics")}
         >
-            <MetricList uiMetrics={uiMetrics} onDelete={onDeleteMetric} />
+            <MetricList metrics={uiMetrics} onDelete={handleMetricDelete} />
         </PageContents>
     );
 };

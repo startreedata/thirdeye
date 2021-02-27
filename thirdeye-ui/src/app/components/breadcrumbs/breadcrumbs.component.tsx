@@ -1,4 +1,5 @@
 import { Breadcrumbs as MuiBreadcrumbs, Link } from "@material-ui/core";
+import { classnames } from "@material-ui/data-grid";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import React, { FunctionComponent } from "react";
 import { BreadcrumbsProps } from "./breadcrumbs.interfaces";
@@ -9,7 +10,7 @@ const MAX_ITEMS_BREADCRUMBS = 5;
 export const Breadcrumbs: FunctionComponent<BreadcrumbsProps> = (
     props: BreadcrumbsProps
 ) => {
-    const breadcrumbsClasses = useBreadcrumbsStyles();
+    const breadcrumbsClasses = useBreadcrumbsStyles(props);
 
     return (
         <MuiBreadcrumbs
@@ -28,7 +29,10 @@ export const Breadcrumbs: FunctionComponent<BreadcrumbsProps> = (
                 props.breadcrumbs.map((breadcrumb, index) => (
                     <Link
                         noWrap
-                        className={breadcrumbsClasses.breadcrumb}
+                        className={classnames({
+                            [breadcrumbsClasses.maxWidthBreadcrumb]:
+                                props.breadcrumbMaxWidth,
+                        })}
                         color={breadcrumb.onClick ? "primary" : "textSecondary"}
                         component="button"
                         disabled={!breadcrumb.onClick}

@@ -1,7 +1,8 @@
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, Theme } from "@material-ui/core";
+import { BreadcrumbsProps } from "./breadcrumbs.interfaces";
 
-export const useBreadcrumbsStyles = makeStyles({
-    breadcrumb: {
-        maxWidth: 120,
+export const useBreadcrumbsStyles = makeStyles<Theme, BreadcrumbsProps>({
+    maxWidthBreadcrumb: {
+        maxWidth: (props) => props.breadcrumbMaxWidth,
     },
 });

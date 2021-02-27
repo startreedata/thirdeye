@@ -6,6 +6,7 @@ import {
     UseAppBreadcrumbsProps,
 } from "./app-breadcrumbs.interfaces";
 
+const MAX_WIDTH_APP_BREADCRUMB = 120;
 const MAX_ITEMS_APP_BREADCRUMBS = 4;
 
 export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
@@ -22,17 +23,13 @@ export const AppBreadcrumbs: FunctionComponent<AppBreadcrumbsProps> = (
     return (
         <Breadcrumbs
             trailingSeparator
-            breadcrumbs={
-                props.maxRouterBreadcrumbs
-                    ? [
-                          ...routerBreadcrumbs.slice(
-                              0,
-                              props.maxRouterBreadcrumbs
-                          ),
-                          ...pageBreadcrumbs,
-                      ]
-                    : [...routerBreadcrumbs, ...pageBreadcrumbs]
-            }
+            breadcrumbMaxWidth={MAX_WIDTH_APP_BREADCRUMB}
+            breadcrumbs={[
+                ...(props.maxRouterBreadcrumbs
+                    ? routerBreadcrumbs.slice(0, props.maxRouterBreadcrumbs)
+                    : routerBreadcrumbs),
+                ...pageBreadcrumbs,
+            ]}
             maxItems={MAX_ITEMS_APP_BREADCRUMBS}
             variant="body2"
         />

@@ -1,10 +1,9 @@
 import { SvgIconComponent } from "@material-ui/icons";
 
 export interface ButtonTileProps {
-    icon?: SvgIconComponent | SvgComponent;
+    icon?: SvgIconComponent | SvgComponent; // Material-UI or custom SVG
     iconColor?: string;
     text?: string;
-    textColor?: string;
     disabled?: boolean;
     onClick?: () => void;
 }

@@ -1,12 +1,12 @@
-import { Box, Grid, useTheme } from "@material-ui/core";
+import { Grid, useTheme } from "@material-ui/core";
 import { default as React, FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
 import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
 import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
-import { ReactComponent as Metrics } from "../../../assets/images/metric.svg";
-import { ReactComponent as SubscriptionGroups } from "../../../assets/images/subscription-group.svg";
+import { ReactComponent as MetricIcon } from "../../../assets/images/metric.svg";
+import { ReactComponent as SubscriptionGroupIcon } from "../../../assets/images/subscription-group.svg";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
 import { ButtonTile } from "../../components/button-tile/button-tile.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
@@ -17,8 +17,10 @@ import {
     getMetricsPath,
     getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
+import { useHomePageStyles } from "./home-page.styles";
 
 export const HomePage: FunctionComponent = () => {
+    const homePageClasses = useHomePageStyles();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const theme = useTheme();
     const history = useHistory();
@@ -50,13 +52,11 @@ export const HomePage: FunctionComponent = () => {
 
     return (
         <PageContents centered hideAppBreadcrumbs title={t("label.home")}>
-            <Box
+            <Grid
+                container
                 alignItems="center"
-                display="flex"
-                flex={1}
-                height="100%"
-                justifyContent="center"
-                width="100%"
+                className={homePageClasses.homePage}
+                justify="center"
             >
                 <Grid container justify="center" spacing={4}>
                     {/* Alerts */}
@@ -92,7 +92,7 @@ export const HomePage: FunctionComponent = () => {
                     {/* Subscription groups */}
                     <Grid item>
                         <ButtonTile
-                            icon={SubscriptionGroups}
+                            icon={SubscriptionGroupIcon}
                             iconColor={theme.palette.primary.main}
                             text={t("label.subscription-groups")}
                             onClick={handleSubscriptionGroupsClick}
@@ -102,14 +102,14 @@ export const HomePage: FunctionComponent = () => {
                     {/* Metrics */}
                     <Grid item>
                         <ButtonTile
-                            icon={Metrics}
+                            icon={MetricIcon}
                             iconColor={theme.palette.primary.main}
                             text={t("label.metrics")}
                             onClick={handleMetricsClick}
                         />
                     </Grid>
                 </Grid>
-            </Box>
+            </Grid>
         </PageContents>
     );
 };

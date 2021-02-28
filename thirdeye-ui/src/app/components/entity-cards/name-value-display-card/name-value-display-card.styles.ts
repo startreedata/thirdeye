@@ -4,7 +4,7 @@ import { Palette } from "../../../utils/material-ui/palette.util";
 export const useNameValueDisplayCardStyles = makeStyles((theme) => ({
     nameValueDisplayCard: {
         height: "100%",
-        borderColor: Palette.COLOR_BORDER_LIGHT,
+        borderColor: Palette.COLOR_BORDER_DEFAULT,
     },
     nameValueDisplayCardContent: {
         "&:last-child": {

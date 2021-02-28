@@ -1,18 +1,32 @@
 import { makeStyles } from "@material-ui/core";
+import { Border } from "../../utils/material-ui/border.util";
 import { codeTypographyOptions } from "../../utils/material-ui/typography.util";
 
-const HEIGHT_JSON_EDITOR_ERROR = 20;
+const HEIGHT_HELPER_TEXT = 20;
 
 export const useJSONEditorStyles = makeStyles((theme) => ({
     jsonEditorContainer: {
         height: "100%",
         width: "100%",
-    },
-    jsonEditorContainerWithError: {
-        height: `calc(100% - ${HEIGHT_JSON_EDITOR_ERROR}px)`,
-        width: "100%",
+        flex: 1,
     },
     jsonEditor: {
+        width: "100%",
+        borderRadius: theme.shape.borderRadius,
+    },
+    jsonEditorWithoutHelperText: {
+        height: "100%",
+    },
+    jsonEditorWithHelperText: {
+        height: `calc(100% - ${HEIGHT_HELPER_TEXT}px)`,
+    },
+    jsonEditorDefaultBorder: {
+        border: Border.BORDER_INPUT_DEFAULT,
+    },
+    jsonEditorErrorBorder: {
+        border: Border.BORDER_INPUT_ERROR,
+    },
+    codeMirror: {
         height: "100%",
         width: "100%",
         // Override CodeMirror styles to better align with Material-UI theme
@@ -30,7 +44,7 @@ export const useJSONEditorStyles = makeStyles((theme) => ({
             textShadow: "none",
         },
     },
-    error: {
-        height: HEIGHT_JSON_EDITOR_ERROR,
+    helperText: {
+        height: HEIGHT_HELPER_TEXT,
     },
 }));

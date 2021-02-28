@@ -1,11 +1,11 @@
-import { Box, FormHelperText, useTheme } from "@material-ui/core";
+import { FormHelperText } from "@material-ui/core";
 import { classnames } from "@material-ui/data-grid";
-import { Editor, EditorChange, EditorConfiguration } from "codemirror";
+import { Editor, EditorChange } from "codemirror";
 import "codemirror/addon/edit/closebrackets.js";
 import "codemirror/addon/edit/matchbrackets.js";
 import "codemirror/addon/fold/brace-fold";
-import "codemirror/addon/fold/foldgutter";
 import "codemirror/addon/fold/foldgutter.css";
+import "codemirror/addon/fold/foldgutter.js";
 import "codemirror/addon/selection/active-line";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/javascript/javascript";
@@ -16,8 +16,6 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { Dimension } from "../../utils/material-ui/dimension.util";
-import { Palette } from "../../utils/material-ui/palette.util";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { JSONEditorProps } from "./json-editor.interfaces";
 import { useJSONEditorStyles } from "./json-editor.styles";
@@ -35,15 +33,13 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
 ) => {
     const jsonEditorClasses = useJSONEditorStyles();
     const [value, setValue] = useState("");
-    const [mouseHover, setMouseHover] = useState(false);
-    const theme = useTheme();
 
     useEffect(() => {
-        // Input changed, reset
-        initJSONInput();
+        // Input value changed, initialize JSON value
+        initJSONValue();
     }, [props.value]);
 
-    const initJSONInput = (): void => {
+    const initJSONValue = (): void => {
         if (typeof props.value === "string") {
             // Format string if possible
             let jsonObject;
@@ -71,14 +67,6 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
         setValue("");
     };
 
-    const handleEditorMouseEnter = (): void => {
-        setMouseHover(true);
-    };
-
-    const handleEditorMouseLeave = (): void => {
-        setMouseHover(false);
-    };
-
     const handleEditorInputBeforeChange = (
         _editor: Editor,
         _data: EditorChange,
@@ -96,64 +84,57 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
     };
 
     return (
-        <Box height="100%" width="100%">
-            <Box
-                border={Dimension.WIDTH_BORDER_DEFAULT}
-                borderColor={
-                    props.error
-                        ? theme.palette.error.main
-                        : mouseHover
-                        ? Palette.COLOR_BORDER_DARK
-                        : Palette.COLOR_BORDER_DEFAULT
-                }
-                borderRadius={theme.shape.borderRadius}
-                className={
-                    props.error
-                        ? jsonEditorClasses.jsonEditorContainerWithError
-                        : jsonEditorClasses.jsonEditorContainer
-                }
-                onMouseEnter={handleEditorMouseEnter}
-                onMouseLeave={handleEditorMouseLeave}
+        <div className={jsonEditorClasses.jsonEditorContainer}>
+            {/* JSON Editor */}
+            <div
+                className={classnames(jsonEditorClasses.jsonEditor, {
+                    [jsonEditorClasses.jsonEditorWithHelperText]:
+                        props.helperText,
+                    [jsonEditorClasses.jsonEditorWithoutHelperText]: !props.helperText,
+                    [jsonEditorClasses.jsonEditorDefaultBorder]: !props.error,
+                    [jsonEditorClasses.jsonEditorErrorBorder]: props.error,
+                })}
             >
+                {/* CodeMirror */}
                 <Suspense fallback={<LoadingIndicator />}>
                     <CodeMirror
-                        className={jsonEditorClasses.jsonEditor}
-                        options={
-                            {
-                                tabSize: TAB_SIZE_JSON_EDITOR,
-                                indentUnit: TAB_SIZE_JSON_EDITOR,
-                                indentWithTabs: false,
-                                lineNumbers: true,
-                                lineWrapping: true,
-                                styleActiveLine: true,
-                                matchBrackets: true,
-                                autoCloseBrackets: true,
-                                foldGutter: true,
-                                gutters: [
-                                    "CodeMirror-linenumbers",
-                                    "CodeMirror-foldgutter",
-                                ],
-                                mode: {
-                                    name: "javascript",
-                                    json: true,
-                                },
-                                readOnly: props.readOnly,
-                            } as EditorConfiguration
-                        }
+                        className={jsonEditorClasses.codeMirror}
+                        options={{
+                            tabSize: TAB_SIZE_JSON_EDITOR,
+                            indentUnit: TAB_SIZE_JSON_EDITOR,
+                            indentWithTabs: false,
+                            lineNumbers: true,
+                            lineWrapping: true,
+                            styleActiveLine: true,
+                            matchBrackets: true,
+                            autoCloseBrackets: true,
+                            foldGutter: true,
+                            gutters: [
+                                "CodeMirror-linenumbers",
+                                "CodeMirror-foldgutter",
+                            ],
+                            mode: {
+                                name: "javascript",
+                                json: true,
+                            },
+                            readOnly: props.readOnly,
+                        }}
                         value={value}
                         onBeforeChange={handleEditorInputBeforeChange}
                         onChange={handleEditorInputChange}
                     />
                 </Suspense>
-            </Box>
+            </div>
 
             {/* Helper text */}
-            <FormHelperText
-                className={classnames(props.error && jsonEditorClasses.error)}
-                error={props.error}
-            >
-                {props.helperText}
-            </FormHelperText>
-        </Box>
+            {props.helperText && (
+                <FormHelperText
+                    className={jsonEditorClasses.helperText}
+                    error={props.error}
+                >
+                    {props.helperText}
+                </FormHelperText>
+            )}
+        </div>
     );
 };

@@ -30,7 +30,7 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Access token changed, reset axios
+        // Access token changed, initialize axios
         setLoading(true);
         initAxios();
         setLoading(false);

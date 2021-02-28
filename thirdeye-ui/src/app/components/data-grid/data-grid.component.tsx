@@ -88,7 +88,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
                 {props.checkboxSelection && (
                     <Box
                         border={Dimension.WIDTH_BORDER_DEFAULT}
-                        borderColor={Palette.COLOR_BORDER_LIGHT}
+                        borderColor={Palette.COLOR_BORDER_DEFAULT}
                         borderLeft={0}
                         borderRight={0}
                         borderTop={0}

@@ -5,7 +5,6 @@ import { gridProps } from "./grid.util";
 import { linkClasses, linkProps } from "./link.util";
 import { listItemTextClasses } from "./list.util";
 import { paletteOptions } from "./palette.util";
-import { paperClasses } from "./paper.util";
 import { shapeOptions } from "./shape.util";
 import { tooltipClasses } from "./tooltip.util";
 import { typographyOptions } from "./typography.util";
@@ -19,7 +18,6 @@ export const theme: Theme = createMuiTheme({
     },
     overrides: {
         MuiCssBaseline: cssBaselineClasses,
-        MuiPaper: paperClasses,
         MuiListItemText: listItemTextClasses,
         MuiLink: linkClasses,
         MuiButton: buttonClasses,

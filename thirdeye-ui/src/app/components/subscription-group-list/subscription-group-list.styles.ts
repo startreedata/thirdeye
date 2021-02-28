@@ -5,7 +5,7 @@ export const useSubscriptionGroupListStyles = makeStyles({
         flex: 1,
         flexWrap: "nowrap", // Fixes layout in Safari
     },
-    subscriptionGroupListDataGrid: {
+    dataGrid: {
         flex: 1,
         "& .MuiDataGrid-root": {
             minHeight: "100%",

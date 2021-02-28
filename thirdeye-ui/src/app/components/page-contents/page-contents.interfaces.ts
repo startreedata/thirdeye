@@ -1,7 +1,6 @@
-import { WithWidth } from "@material-ui/core";
 import { ReactNode } from "react";
 
-export interface PageContentsProps extends WithWidth {
+export interface PageContentsProps {
     title: string;
     hideHeader?: boolean;
     hideTimeRange?: boolean;

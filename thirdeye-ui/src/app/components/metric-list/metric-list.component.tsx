@@ -227,7 +227,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
             )}
 
             {/* Metric list */}
-            <Grid item className={metricListClasses.metricListDataGrid}>
+            <Grid item className={metricListClasses.dataGrid}>
                 <DataGrid
                     autoHeight
                     checkboxSelection

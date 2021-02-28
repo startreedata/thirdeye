@@ -186,7 +186,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             />
                         </Grid>
 
-                        {/* Current / Predicted */}
+                        {/* Current/Predicted */}
                         <Grid item md={3} xs={6}>
                             <NameValueDisplayCard<string>
                                 name={`${t("label.current")}${t(

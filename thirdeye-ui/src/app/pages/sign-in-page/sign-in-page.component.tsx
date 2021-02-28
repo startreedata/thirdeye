@@ -25,7 +25,7 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
         setPageBreadcrumbs([]);
     }, []);
 
-    const handleSignInClick = (): void => {
+    const handleSignIn = (): void => {
         setLoading(true);
 
         login()
@@ -63,7 +63,7 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
                 <Button
                     color="primary"
                     variant="contained"
-                    onClick={handleSignInClick}
+                    onClick={handleSignIn}
                 >
                     {t("label.sign-in")}
                 </Button>

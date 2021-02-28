@@ -135,11 +135,4 @@ module.exports = {
 
     // Source map
     devtool: "eval-cheap-source-map",
-
-    // Development mode optimizations
-    optimization: {
-        runtimeChunk: true,
-        splitChunks: false,
-        removeEmptyChunks: false,
-    },
 };

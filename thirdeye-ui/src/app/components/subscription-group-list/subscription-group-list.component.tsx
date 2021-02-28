@@ -210,12 +210,7 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
             )}
 
             {/* Subscription group list */}
-            <Grid
-                item
-                className={
-                    subscriptionGroupListClasses.subscriptionGroupListDataGrid
-                }
-            >
+            <Grid item className={subscriptionGroupListClasses.dataGrid}>
                 <DataGrid
                     autoHeight
                     checkboxSelection

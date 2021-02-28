@@ -37,7 +37,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Input changed, populate list
+        // Input list changed, populate list
         setList(props.list || []);
     }, [props.list]);
 
@@ -55,11 +55,8 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         }
 
         const input = inputRef.current.value;
-        let validationResult;
-        if (
-            (validationResult = props.validateFn && props.validateFn(input)) &&
-            !validationResult.valid
-        ) {
+        const validationResult = props.validateFn && props.validateFn(input);
+        if (validationResult && !validationResult.valid) {
             // Validation failed
             setHelperText(
                 validationResult.message || t("message.validation-failed")

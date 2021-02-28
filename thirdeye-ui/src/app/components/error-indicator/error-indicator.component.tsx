@@ -1,9 +1,7 @@
-import { Box, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import ErrorOutlineIcon from "@material-ui/icons/ErrorOutline";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimension } from "../../utils/material-ui/dimension.util";
-import { Palette } from "../../utils/material-ui/palette.util";
 import { ErrorIndicatorProps } from "./error-indicator.interfaces";
 import { useErrorIndicatorStyles } from "./error-indicator.styles";
 
@@ -14,33 +12,18 @@ export const ErrorIndicator: FunctionComponent<ErrorIndicatorProps> = (
     const { t } = useTranslation();
 
     return (
-        <Box
-            alignItems="center"
-            display="flex"
-            flex={1}
-            height="100%"
-            justifyContent="center"
-            width="100%"
-        >
+        <div className={errorIndicatorClasses.errorIndicator}>
             {/* Icon */}
-            <Box
-                border={Dimension.WIDTH_BORDER_DEFAULT}
-                borderBottom={0}
-                borderColor={Palette.COLOR_BORDER_DEFAULT}
-                borderLeft={0}
-                borderTop={0}
-                className={errorIndicatorClasses.icon}
-                paddingRight={2}
-            >
+            <div className={errorIndicatorClasses.icon}>
                 <ErrorOutlineIcon color="error" fontSize="large" />
-            </Box>
+            </div>
 
-            {/* Error message */}
-            <Box paddingLeft={2}>
+            {/* Text */}
+            <div className={errorIndicatorClasses.text}>
                 <Typography variant="body2">
                     {props.text || t("message.error")}
                 </Typography>
-            </Box>
-        </Box>
+            </div>
+        </div>
     );
 };

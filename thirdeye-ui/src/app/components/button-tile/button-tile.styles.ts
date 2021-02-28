@@ -1,25 +1,13 @@
-import { makeStyles, Theme } from "@material-ui/core";
-import { ButtonTileProps } from "./button-tile.interfaces";
+import { makeStyles } from "@material-ui/core";
 
-export const useButtonTileStyles = makeStyles<Theme, ButtonTileProps>(
-    (theme) => ({
-        buttonTile: {
-            height: 130,
-            width: 220,
-            display: "flex",
-        },
-        buttonBase: {
-            flex: 1,
-            borderRadius: theme.shape.borderRadius,
-        },
-        icon: {
-            height: 80,
-        },
-        text: {
-            color: (props) =>
-                (props.disabled && theme.palette.text.disabled) ||
-                props.textColor ||
-                theme.palette.text.primary,
-        },
-    })
-);
+export const useButtonTileStyles = makeStyles((theme) => ({
+    buttonRoot: {
+        height: 130,
+        width: 220,
+        textTransform: "none",
+        backgroundColor: theme.palette.background.paper,
+    },
+    icon: {
+        height: 80,
+    },
+}));

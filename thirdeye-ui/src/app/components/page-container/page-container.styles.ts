@@ -11,7 +11,7 @@ export const usePageContainerStyles = makeStyles({
     },
     contents: {
         display: "flex",
-        flex: 1, // Occupy available area
+        flex: 1,
         overflow: "hidden", // Contents can scroll while everything outside is fixed
     },
 });

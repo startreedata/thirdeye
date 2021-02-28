@@ -1,18 +1,14 @@
-import { Box, CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { useLoadingIndicatorStyles } from "./loading-indicator.styles";
 
 export const LoadingIndicator: FunctionComponent = () => {
+    const loadingIndicatorClasses = useLoadingIndicatorStyles();
+
     return (
-        <Box
-            alignItems="center"
-            display="flex"
-            flex={1}
-            height="100%"
-            justifyContent="center"
-            width="100%"
-        >
+        <div className={loadingIndicatorClasses.loadigIndicator}>
             {/* Loading indicator */}
             <CircularProgress color="primary" />
-        </Box>
+        </div>
     );
 };

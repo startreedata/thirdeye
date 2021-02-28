@@ -3,12 +3,12 @@ import { makeStyles } from "@material-ui/core";
 export const useCommonStyles = makeStyles((theme) => ({
     gridLimitation: {
         // Padding to avoid the effect of Material-UI Grid negative margins
-        // (https://material-ui.com/components/grid/#limitations)
+        // https://material-ui.com/components/grid/#limitations
         padding: theme.spacing(1),
     },
     cardContentBottomPaddingRemoved: {
         "&:last-child": {
-            paddingBottom: 0,
+            paddingBottom: "0px !important",
         },
     },
     ellipsis: {

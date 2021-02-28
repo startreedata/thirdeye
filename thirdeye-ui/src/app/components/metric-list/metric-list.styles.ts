@@ -5,7 +5,7 @@ export const useMetricListStyles = makeStyles({
         flex: 1,
         flexWrap: "nowrap", // Fixes layout in Safari
     },
-    metricListDataGrid: {
+    dataGrid: {
         flex: 1,
         "& .MuiDataGrid-root": {
             minHeight: "100%",

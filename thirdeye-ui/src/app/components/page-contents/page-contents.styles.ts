@@ -4,8 +4,16 @@ import { Dimension } from "../../utils/material-ui/dimension.util";
 export const usePageContentsStyles = makeStyles((theme: Theme) => ({
     pageContents: {
         display: "flex",
-        flex: 1, // Occupy available area
+        flex: 1,
         overflow: "auto", // Container can scroll while everything outside is fixed
+    },
+    pageContentsWithAppDrawer: {
+        [theme.breakpoints.down("sm")]: {
+            marginLeft: Dimension.WIDTH_DRAWER_MINIMIZED,
+        },
+        [theme.breakpoints.up("md")]: {
+            marginLeft: Dimension.WIDTH_DRAWER_DEFAULT,
+        },
     },
     main: {
         display: "flex",
@@ -14,7 +22,7 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
         paddingRight: theme.spacing(2),
     },
     mainExpanded: {
-        flex: 1, // Occupy available area
+        flex: 1,
     },
     mainCenterAligned: {
         width: Dimension.WIDTH_PAGE_CONTENTS_CENTERED,
@@ -43,8 +51,8 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
     },
     mainContents: {
         display: "flex",
+        flex: 1,
         flexDirection: "column",
-        flex: 1, // Occupy available area
         paddingBottom: theme.spacing(2),
     },
 }));

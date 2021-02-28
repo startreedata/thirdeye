@@ -236,7 +236,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                             />
                         </Grid>
 
-                        {/* Dataset / Metric */}
+                        {/* Dataset/Metric */}
                         <Grid item md={3} sm={6} xs={12}>
                             <NameValueDisplayCard<UiAlertDatasetAndMetric>
                                 showCount

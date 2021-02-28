@@ -26,7 +26,7 @@ import {
     getDefaultTimeRangeDuration,
     getTimeRangeDuration,
 } from "../../../utils/time-range/time-range.util";
-import { SafariGridItem } from "../../safari-grid-item/safari-grid-item.component";
+import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { TimeRangeList } from "../time-range-list/time-range-list.component";
 import {
     TimeRange,
@@ -426,7 +426,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                 </Button>
             </Grid>
 
-            <SafariGridItem />
+            <SafariMuiGridFix />
         </Grid>
     );
 };

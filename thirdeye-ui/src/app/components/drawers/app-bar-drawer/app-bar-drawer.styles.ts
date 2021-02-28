@@ -1,8 +1,8 @@
 import { makeStyles } from "@material-ui/core";
-import { Dimension } from "../../utils/material-ui/dimension.util";
+import { Dimension } from "../../../utils/material-ui/dimension.util";
 
 export const useAppBarDrawerStyles = makeStyles((theme) => ({
-    appBarDrawerPaper: {
+    drawerPaper: {
         width: Dimension.WIDTH_DRAWER_DEFAULT,
     },
     listItemNested: {

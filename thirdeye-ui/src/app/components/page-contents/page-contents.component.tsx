@@ -5,10 +5,11 @@ import {
     Paper,
     Slide,
     Typography,
-    withWidth,
+    useMediaQuery,
+    useTheme,
 } from "@material-ui/core";
 import classnames from "classnames";
-import { debounce, isEmpty } from "lodash";
+import { debounce, isEmpty, toArray } from "lodash";
 import React, {
     FunctionComponent,
     UIEvent,
@@ -25,6 +26,7 @@ import {
     AppBreadcrumbs,
     useAppBreadcrumbs,
 } from "../app-breadcrumbs/app-breadcrumbs.component";
+import { ID_APP_DRAWER } from "../drawers/app-drawer/app-drawer.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
@@ -32,12 +34,13 @@ import { usePageContentsStyles } from "./page-contents.styles";
 
 const THRESHOLD_SCROLL_TOP_PAGE_CONTENTS = 95;
 
-const PageContentsInternal: FunctionComponent<PageContentsProps> = (
+export const PageContents: FunctionComponent<PageContentsProps> = (
     props: PageContentsProps
 ) => {
     const pageContentsClasses = usePageContentsStyles();
     const commonClasses = useCommonStyles();
     const [documentTitle, setDocumentTitle] = useState("");
+    const [appDrawer, setAppDrawer] = useState(false);
     const [showHeader, setShowHeader] = useState(true);
     const [headerWidth, setHeaderWidth] = useState<number>(
         Dimension.WIDTH_PAGE_CONTENTS_CENTERED
@@ -52,6 +55,8 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
     } = useTimeRange();
     const pageContentsRef = useRef<HTMLDivElement>(null);
     const mainContentsRef = useRef<HTMLDivElement>(null);
+    const theme = useTheme();
+    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
 
     useEffect(() => {
         addWindowResizeListener();
@@ -60,7 +65,8 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
     }, []);
 
     useEffect(() => {
-        // Main contents rendered, determine header width
+        // Main contents rendered, detect app drawer and determine header width
+        detectAppDrawer();
         setHeaderWidthDebounced();
     }, [mainContentsRef]);
 
@@ -88,6 +94,21 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
         }, 1),
         [mainContentsRef]
     );
+
+    const detectAppDrawer = (): void => {
+        // Detect app drawer among top level children of main contents
+        if (!mainContentsRef || !mainContentsRef.current) {
+            setAppDrawer(false);
+
+            return;
+        }
+
+        for (const child of toArray(mainContentsRef.current.children)) {
+            if (child && child.id === ID_APP_DRAWER) {
+                setAppDrawer(true);
+            }
+        }
+    };
 
     const generateDocumentTitle = (): string => {
         // Document title is composed of:
@@ -151,7 +172,9 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
             </Helmet>
 
             <div
-                className={pageContentsClasses.pageContents}
+                className={classnames(pageContentsClasses.pageContents, {
+                    [pageContentsClasses.pageContentsWithAppDrawer]: appDrawer,
+                })}
                 ref={pageContentsRef}
                 onScroll={handlePageContentsScroll}
             >
@@ -230,7 +253,7 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
                                                             recentCustomTimeRangeDurations
                                                         }
                                                         showTimeRange={
-                                                            props.width !== "xs"
+                                                            screenWidthSmUp
                                                         }
                                                         timeRangeDuration={
                                                             timeRangeDuration
@@ -273,5 +296,3 @@ const PageContentsInternal: FunctionComponent<PageContentsProps> = (
         </>
     );
 };
-
-export const PageContents = withWidth()(PageContentsInternal);

@@ -35,6 +35,10 @@ function LinkCell<T>(props: LinkCellProps<T>): ReactElement {
     };
 
     const handleLinkClick = (): void => {
+        if (!value || rowId < 0) {
+            return;
+        }
+
         props.onClick && props.onClick(value as T, rowId);
     };
 

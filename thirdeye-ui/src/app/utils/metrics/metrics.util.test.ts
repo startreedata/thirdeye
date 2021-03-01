@@ -12,6 +12,10 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
+jest.mock("../number/number.util", () => ({
+    formatNumber: jest.fn().mockImplementation((num) => num.toString()),
+}));
+
 describe("Metrics Util", () => {
     test("createEmptyUiMetric should create appropriate UI metric", () => {
         expect(createEmptyUiMetric()).toEqual(mockEmptyUiMetric);
@@ -81,8 +85,8 @@ const mockEmptyUiMetric = {
     activeText: "label.no-data-marker",
     aggregationColumn: "label.no-data-marker",
     aggregationFunction: "label.no-data-marker",
-    viewCount: "0",
     views: [],
+    viewCount: "0",
 };
 
 const mockEmptyMetricLogicalView = {
@@ -136,7 +140,6 @@ const mockUiMetric1 = {
     activeText: "label.active",
     aggregationColumn: "testAggregationColumnMetric1",
     aggregationFunction: MetricAggFunction.AVG,
-    viewCount: "2",
     views: [
         {
             name: "testNameViews1Metric1",
@@ -147,6 +150,7 @@ const mockUiMetric1 = {
             query: "testQueryViews2Metric1",
         },
     ],
+    viewCount: "2",
 };
 
 const mockUiMetric2 = {
@@ -158,13 +162,13 @@ const mockUiMetric2 = {
     activeText: "label.inactive",
     aggregationColumn: "label.no-data-marker",
     aggregationFunction: "label.no-data-marker" as MetricAggFunction,
-    viewCount: "1",
     views: [
         {
             name: "label.no-data-marker",
             query: "label.no-data-marker",
         },
     ],
+    viewCount: "1",
 };
 
 const mockUiMetric3 = {
@@ -176,8 +180,8 @@ const mockUiMetric3 = {
     activeText: "label.inactive",
     aggregationColumn: "label.no-data-marker",
     aggregationFunction: "label.no-data-marker" as MetricAggFunction,
-    viewCount: "0",
     views: [],
+    viewCount: "0",
 };
 
 const mockUiMetrics = [mockUiMetric1, mockUiMetric2, mockUiMetric3];

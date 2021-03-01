@@ -1,13 +1,10 @@
 import { Alert } from "../../rest/dto/alert.interfaces";
-import {
-    UiSubscriptionGroup,
-    UiSubscriptionGroupAlert,
-} from "../../rest/dto/ui-subscription-group.interfaces";
+import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 
-export interface UiSubscriptionGroupAlertsAccordianProps {
-    uiSubscriptionGroup: UiSubscriptionGroup | null;
+export interface SubscriptionGroupAlertsAccordianProps {
+    subscriptionGroup: UiSubscriptionGroup | null;
     alerts: Alert[];
     title: string;
     defaultExpanded?: boolean;
-    onChange?: (uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]) => void;
+    onChange?: (alerts: Alert[]) => void;
 }

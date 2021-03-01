@@ -31,3 +31,9 @@ export const getSearchStatusLabel = (count: number, total: number): string => {
         total: formatNumber(total) as never,
     });
 };
+
+export const getSelectedStatusLabel = (count: number): string => {
+    return i18n.t("label.selected-count", {
+        count: formatNumber(count) as never,
+    });
+};

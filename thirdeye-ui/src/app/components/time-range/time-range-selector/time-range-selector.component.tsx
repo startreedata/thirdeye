@@ -1,6 +1,5 @@
 import LuxonUtils from "@date-io/luxon";
 import {
-    Box,
     Button,
     Card,
     CardActions,
@@ -15,11 +14,11 @@ import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import classnames from "classnames";
 import { cloneDeep } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimension } from "../../../utils/material-ui/dimension.util";
-import { Palette } from "../../../utils/material-ui/palette.util";
+import { useCommonStyles } from "../../../utils/material-ui/common.styles";
 import {
     formatTimeRange,
     formatTimeRangeDuration,
@@ -42,6 +41,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     props: TimeRangeSelectorProps
 ) => {
     const timeRangeSelectorClasses = useTimeRangeSelectorStyles();
+    const commonClasses = useCommonStyles();
     const [
         componentTimeRangeDuration,
         setComponentTimeRangeDuration,
@@ -80,7 +80,8 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
             return;
         }
 
-        setCustomTimeRangeDuration(eventObject);
+        // Update component time range duration
+        setComponentTimeRangeDuration(eventObject);
     };
 
     const setTimeRange = (timeRange: TimeRange): void => {
@@ -103,17 +104,6 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         // Start with setting default time range as custom time range duration
         const customTimeRangeDuration = getDefaultTimeRangeDuration();
         customTimeRangeDuration.timeRange = TimeRange.CUSTOM;
-
-        // Update component time range duration
-        setComponentTimeRangeDuration(customTimeRangeDuration);
-    };
-
-    const setCustomTimeRangeDuration = (
-        customTimeRangeDuration: TimeRangeDuration
-    ): void => {
-        if (!customTimeRangeDuration) {
-            return;
-        }
 
         // Update component time range duration
         setComponentTimeRangeDuration(customTimeRangeDuration);
@@ -156,7 +146,13 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
         setComponentTimeRangeDuration(customTimeRangeDuration);
     };
 
-    const handleApply = (): void => {
+    const handleApplyClick = (): void => {
+        if (!componentTimeRangeDuration) {
+            handleTimeRangeSelectorClose();
+
+            return;
+        }
+
         // Notify that component time range duration has changed
         props.onChange && props.onChange(componentTimeRangeDuration);
         handleTimeRangeSelectorClose();
@@ -165,7 +161,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     return (
         <Grid container alignItems="center">
             {/* Time range */}
-            {props.showTimeRange && props.timeRangeDuration && (
+            {!props.hideTimeRange && props.timeRangeDuration && (
                 <Grid item>
                     {/* Time range label*/}
                     <Typography variant="overline">
@@ -179,253 +175,251 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                 </Grid>
             )}
 
-            <Grid item>
-                {/* Time range selector button */}
-                <Button
-                    className={timeRangeSelectorClasses.timeRangeSelectorButton}
-                    color="primary"
-                    variant="outlined"
-                    onClick={handleTimeRangeSelectorClick}
-                >
-                    <CalendarTodayIcon />
-                </Button>
+            {!props.hideTimeRangeSelectorButton && (
+                <Grid item>
+                    {/* Time range selector button */}
+                    <Button
+                        className={
+                            timeRangeSelectorClasses.timeRangeSelectorButton
+                        }
+                        color="primary"
+                        variant="outlined"
+                        onClick={handleTimeRangeSelectorClick}
+                    >
+                        <CalendarTodayIcon />
+                    </Button>
 
-                {/* Time range selector */}
-                <Popover
-                    anchorEl={timeRangeSelectorAnchorElement}
-                    open={Boolean(timeRangeSelectorAnchorElement)}
-                    onClose={handleTimeRangeSelectorClose}
-                    onEnter={handleTimeRangeSelectorOpen}
-                >
-                    <Card elevation={0}>
-                        {/* Header */}
-                        <Box
-                            border={Dimension.WIDTH_BORDER_DEFAULT}
-                            borderColor={Palette.COLOR_BORDER_DEFAULT}
-                            borderLeft={0}
-                            borderRight={0}
-                            borderTop={0}
-                        >
+                    {/* Time range selector */}
+                    <Popover
+                        anchorEl={timeRangeSelectorAnchorElement}
+                        open={Boolean(timeRangeSelectorAnchorElement)}
+                        onClose={handleTimeRangeSelectorClose}
+                        onEnter={handleTimeRangeSelectorOpen}
+                    >
+                        <Card elevation={0}>
+                            {/* Header */}
                             <CardHeader
+                                className={
+                                    timeRangeSelectorClasses.timeRangeSelectorHeader
+                                }
                                 title={t("label.customize-time-range")}
                                 titleTypographyProps={{ variant: "h6" }}
                             />
-                        </Box>
 
-                        <CardContent
-                            className={
-                                timeRangeSelectorClasses.timeRangeSelectorContents
-                            }
-                        >
-                            <Grid container spacing={0}>
-                                {/* Time range list */}
-                                <Hidden xsDown>
-                                    <Grid item md={3} sm={4}>
-                                        <Box
-                                            border={
-                                                Dimension.WIDTH_BORDER_DEFAULT
-                                            }
-                                            borderBottom={0}
-                                            borderColor={
-                                                Palette.COLOR_BORDER_DEFAULT
-                                            }
-                                            borderLeft={0}
-                                            borderTop={0}
-                                            className={
-                                                timeRangeSelectorClasses.timeRangeList
-                                            }
-                                        >
-                                            <TimeRangeList
-                                                recentCustomTimeRangeDurations={
-                                                    props.recentCustomTimeRangeDurations
+                            <CardContent
+                                className={classnames(
+                                    timeRangeSelectorClasses.timeRangeSelectorContents,
+                                    commonClasses.cardContentBottomPaddingRemoved
+                                )}
+                            >
+                                <Grid container spacing={0}>
+                                    {/* Time range list */}
+                                    <Hidden xsDown>
+                                        <Grid item md={3} sm={4}>
+                                            <div
+                                                className={
+                                                    timeRangeSelectorClasses.timeRangeList
                                                 }
-                                                selectedTimeRange={
-                                                    componentTimeRangeDuration.timeRange
-                                                }
-                                                onClick={handleTimeRangeChange}
-                                            />
-                                        </Box>
-                                    </Grid>
-                                </Hidden>
-
-                                <Grid item md={9} sm={8} xs={12}>
-                                    <Grid container>
-                                        {/* Time range select */}
-                                        <Hidden smUp>
-                                            <Grid item xs={12}>
-                                                <TimeRangeSelect
+                                            >
+                                                <TimeRangeList
                                                     recentCustomTimeRangeDurations={
                                                         props.recentCustomTimeRangeDurations
                                                     }
                                                     selectedTimeRange={
                                                         componentTimeRangeDuration.timeRange
                                                     }
-                                                    onChange={
+                                                    onClick={
                                                         handleTimeRangeChange
                                                     }
                                                 />
-                                            </Grid>
-                                        </Hidden>
+                                            </div>
+                                        </Grid>
+                                    </Hidden>
 
-                                        <MuiPickersUtilsProvider
-                                            utils={LuxonUtils}
-                                        >
-                                            {/* Start time calendar */}
-                                            <Grid
-                                                item
-                                                className={
-                                                    timeRangeSelectorClasses.startTimeCalendarContainer
-                                                }
-                                                md={6}
-                                                xs={12}
-                                            >
-                                                <Box
-                                                    className={
-                                                        timeRangeSelectorClasses.calendar
-                                                    }
-                                                >
-                                                    {/* Start time label */}
-                                                    <Typography
-                                                        className={
-                                                            timeRangeSelectorClasses.startTimeCalendarLabel
+                                    <Grid item md={9} sm={8} xs={12}>
+                                        <Grid container>
+                                            {/* Time range select */}
+                                            <Hidden smUp>
+                                                <Grid item xs={12}>
+                                                    <TimeRangeSelect
+                                                        recentCustomTimeRangeDurations={
+                                                            props.recentCustomTimeRangeDurations
                                                         }
-                                                        color="textSecondary"
-                                                        display="block"
-                                                        variant="overline"
-                                                    >
-                                                        {t("label.from")}
-                                                    </Typography>
-
-                                                    {/* Calendar */}
-                                                    <DateTimePicker
-                                                        disableFuture
-                                                        hideTabs
-                                                        ToolbarComponent={
-                                                            DateTimePickerToolbar
+                                                        selectedTimeRange={
+                                                            componentTimeRangeDuration.timeRange
                                                         }
-                                                        value={
-                                                            new Date(
-                                                                componentTimeRangeDuration.startTime
-                                                            )
-                                                        }
-                                                        variant="static"
                                                         onChange={
-                                                            handleStartTimeChange
+                                                            handleTimeRangeChange
                                                         }
                                                     />
-                                                </Box>
-                                            </Grid>
+                                                </Grid>
+                                            </Hidden>
 
-                                            {/* End time calendar */}
-                                            <Grid
-                                                item
-                                                className={
-                                                    timeRangeSelectorClasses.endTimeCalendarContainer
-                                                }
-                                                md={6}
-                                                xs={12}
+                                            <MuiPickersUtilsProvider
+                                                utils={LuxonUtils}
                                             >
-                                                <Box
+                                                {/* Start time calendar */}
+                                                <Grid
+                                                    item
                                                     className={
-                                                        timeRangeSelectorClasses.calendar
+                                                        timeRangeSelectorClasses.startTimeCalendarContainer
                                                     }
+                                                    md={6}
+                                                    xs={12}
                                                 >
-                                                    {/* End time label */}
-                                                    <Typography
+                                                    <div
                                                         className={
-                                                            timeRangeSelectorClasses.endTimeCalendarLabel
+                                                            timeRangeSelectorClasses.calendar
                                                         }
-                                                        color="textSecondary"
-                                                        display="block"
-                                                        variant="overline"
                                                     >
-                                                        {t("label.to")}
-                                                    </Typography>
+                                                        {/* Start time label */}
+                                                        <Typography
+                                                            className={
+                                                                timeRangeSelectorClasses.startTimeCalendarLabel
+                                                            }
+                                                            color="textSecondary"
+                                                            display="block"
+                                                            variant="overline"
+                                                        >
+                                                            {t("label.from")}
+                                                        </Typography>
 
-                                                    {/* Calendar */}
-                                                    <DateTimePicker
-                                                        disableFuture
-                                                        hideTabs
-                                                        ToolbarComponent={
-                                                            DateTimePickerToolbar
-                                                        }
-                                                        minDate={
-                                                            new Date(
-                                                                componentTimeRangeDuration.startTime
-                                                            )
-                                                        }
-                                                        value={
-                                                            new Date(
-                                                                componentTimeRangeDuration.endTime
-                                                            )
-                                                        }
-                                                        variant="static"
-                                                        onChange={
-                                                            handleEndTimeChange
-                                                        }
-                                                    />
-                                                </Box>
-                                            </Grid>
-                                        </MuiPickersUtilsProvider>
+                                                        {/* Calendar */}
+                                                        <DateTimePicker
+                                                            disableFuture
+                                                            hideTabs
+                                                            ToolbarComponent={
+                                                                DateTimePickerToolbar
+                                                            }
+                                                            value={
+                                                                new Date(
+                                                                    componentTimeRangeDuration.startTime
+                                                                )
+                                                            }
+                                                            variant="static"
+                                                            onChange={
+                                                                handleStartTimeChange
+                                                            }
+                                                        />
+                                                    </div>
+                                                </Grid>
 
-                                        {/* Controls when screen width is sm and up */}
-                                        <Hidden xsDown>
-                                            <Grid item xs={12}>
-                                                <CardActions>
-                                                    <Grid
-                                                        container
-                                                        justify="flex-end"
+                                                {/* End time calendar */}
+                                                <Grid
+                                                    item
+                                                    className={
+                                                        timeRangeSelectorClasses.endTimeCalendarContainer
+                                                    }
+                                                    md={6}
+                                                    xs={12}
+                                                >
+                                                    <div
+                                                        className={
+                                                            timeRangeSelectorClasses.calendar
+                                                        }
                                                     >
-                                                        <Grid item>
-                                                            <TimeRangeSelectorControls
-                                                                onApply={
-                                                                    handleApply
-                                                                }
-                                                                onCancel={
-                                                                    handleTimeRangeSelectorClose
-                                                                }
-                                                            />
+                                                        {/* End time label */}
+                                                        <Typography
+                                                            className={
+                                                                timeRangeSelectorClasses.endTimeCalendarLabel
+                                                            }
+                                                            color="textSecondary"
+                                                            display="block"
+                                                            variant="overline"
+                                                        >
+                                                            {t("label.to")}
+                                                        </Typography>
+
+                                                        {/* Calendar */}
+                                                        <DateTimePicker
+                                                            disableFuture
+                                                            hideTabs
+                                                            ToolbarComponent={
+                                                                DateTimePickerToolbar
+                                                            }
+                                                            minDate={
+                                                                new Date(
+                                                                    componentTimeRangeDuration.startTime
+                                                                )
+                                                            }
+                                                            value={
+                                                                new Date(
+                                                                    componentTimeRangeDuration.endTime
+                                                                )
+                                                            }
+                                                            variant="static"
+                                                            onChange={
+                                                                handleEndTimeChange
+                                                            }
+                                                        />
+                                                    </div>
+                                                </Grid>
+                                            </MuiPickersUtilsProvider>
+
+                                            {/* Controls when screen width is sm and up */}
+                                            <Hidden xsDown>
+                                                <Grid item xs={12}>
+                                                    <CardActions>
+                                                        <Grid
+                                                            container
+                                                            justify="flex-end"
+                                                        >
+                                                            <Grid item>
+                                                                <TimeRangeSelectorControls
+                                                                    onApply={
+                                                                        handleApplyClick
+                                                                    }
+                                                                    onCancel={
+                                                                        handleTimeRangeSelectorClose
+                                                                    }
+                                                                />
+                                                            </Grid>
                                                         </Grid>
-                                                    </Grid>
-                                                </CardActions>
-                                            </Grid>
-                                        </Hidden>
+                                                    </CardActions>
+                                                </Grid>
+                                            </Hidden>
+                                        </Grid>
                                     </Grid>
                                 </Grid>
-                            </Grid>
-                        </CardContent>
+                            </CardContent>
 
-                        {/* Controls when screen width is xs */}
-                        <Hidden smUp>
-                            <CardActions>
-                                <Grid container justify="flex-end">
-                                    <Grid item>
-                                        <TimeRangeSelectorControls
-                                            onApply={handleApply}
-                                            onCancel={
-                                                handleTimeRangeSelectorClose
-                                            }
-                                        />
+                            {/* Controls when screen width is xs */}
+                            <Hidden smUp>
+                                <CardActions>
+                                    <Grid container justify="flex-end">
+                                        <Grid item>
+                                            <TimeRangeSelectorControls
+                                                onApply={handleApplyClick}
+                                                onCancel={
+                                                    handleTimeRangeSelectorClose
+                                                }
+                                            />
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </CardActions>
-                        </Hidden>
-                    </Card>
-                </Popover>
-            </Grid>
+                                </CardActions>
+                            </Hidden>
+                        </Card>
+                    </Popover>
+                </Grid>
+            )}
 
             {/* Refresh button */}
-            <Grid item>
-                <Button
-                    className={timeRangeSelectorClasses.timeRangeSelectorButton}
-                    color="primary"
-                    variant="outlined"
-                    onClick={props.onRefresh}
-                >
-                    <RefreshIcon />
-                </Button>
-            </Grid>
+            {!props.hideRefreshButton && (
+                <Grid item>
+                    <Button
+                        className={
+                            timeRangeSelectorClasses.timeRangeSelectorButton
+                        }
+                        color="primary"
+                        variant="outlined"
+                        onClick={props.onRefresh}
+                    >
+                        <RefreshIcon />
+                    </Button>
+                </Grid>
+            )}
 
+            {/* Fixes layout in Safari */}
             <SafariMuiGridFix />
         </Grid>
     );

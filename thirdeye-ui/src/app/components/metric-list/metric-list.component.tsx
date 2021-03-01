@@ -22,7 +22,7 @@ import { filterMetrics } from "../../utils/metrics/metrics.util";
 import { getMetricsDetailPath } from "../../utils/routes/routes.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
 import { actionsCellRenderer } from "../data-grid/actions-cell/actions-cell.component";
-import { CustomCell } from "../data-grid/custom-cell/custom-cell.component";
+import { customCellRenderer } from "../data-grid/custom-cell/custom-cell.component";
 import { DataGrid } from "../data-grid/data-grid.component";
 import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
 import { SearchBar } from "../search-bar/search-bar.component";
@@ -64,7 +64,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                 headerName: t("label.name"),
                 width: 150,
                 renderCell: (params) =>
-                    linkCellRenderer<string>(
+                    linkCellRenderer(
                         params,
                         searchWords,
                         handleMetricViewDetailsByNameAndId
@@ -83,11 +83,12 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                 field: "active",
                 type: "boolean",
                 sortable: true,
+                headerName: t("label.active"),
                 align: "center",
                 headerAlign: "center",
-                headerName: t("label.active"),
                 width: 80,
-                renderCell: metricStatusRenderer,
+                renderCell: (params) =>
+                    customCellRenderer(params, metricStatusRenderer),
                 sortComparator: metricStatusComparator,
             },
             // Aggregation column
@@ -109,20 +110,21 @@ export const MetricList: FunctionComponent<MetricListProps> = (
             // View count
             {
                 field: "viewCount",
-                type: "number",
+                type: "string",
                 sortable: true,
+                headerName: t("label.views"),
                 align: "right",
                 headerAlign: "right",
-                headerName: t("label.views"),
                 width: 80,
+                sortComparator: metricViewCountComparator,
             },
             // Actions
             {
                 field: "id",
                 sortable: false,
+                headerName: t("label.actions"),
                 align: "center",
                 headerAlign: "center",
-                headerName: t("label.actions"),
                 width: 150,
                 renderCell: (params) =>
                     actionsCellRenderer(
@@ -141,7 +143,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
 
     const metricStatusRenderer = (params: CellParams): ReactElement => {
         return (
-            <CustomCell params={params}>
+            <>
                 {/* Active */}
                 {params.value && (
                     <CheckIcon
@@ -157,7 +159,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                         htmlColor={theme.palette.error.main}
                     />
                 )}
-            </CustomCell>
+            </>
         );
     };
 
@@ -166,6 +168,26 @@ export const MetricList: FunctionComponent<MetricListProps> = (
         value2: CellValue
     ): number => {
         return toNumber(value1) - toNumber(value2);
+    };
+
+    const metricViewCountComparator = (
+        _value1: CellValue,
+        _value2: CellValue,
+        params1: CellParams,
+        params2: CellParams
+    ): number => {
+        const uiMetric1 = getUiMetric(params1.row && params1.row.rowId);
+        const uiMetric2 = getUiMetric(params2.row && params2.row.rowId);
+
+        if (!uiMetric1 || !uiMetric1.views) {
+            return -1;
+        }
+
+        if (!uiMetric2 || !uiMetric2.views) {
+            return 1;
+        }
+
+        return uiMetric1.views.length - uiMetric2.views.length;
     };
 
     const handleMetricViewDetailsByNameAndId = (
@@ -189,11 +211,11 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     };
 
     const getUiMetric = (id: number): UiMetric | null => {
-        return (
-            (props.metrics &&
-                props.metrics.find((metric) => metric.id === id)) ||
-            null
-        );
+        if (!props.metrics) {
+            return null;
+        }
+
+        return props.metrics.find((metric) => metric.id === id) || null;
     };
 
     const handleDataGridSelectionModelChange = (

@@ -40,8 +40,11 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
     };
 
     const handleMeridiemClick = (): void => {
-        props.date &&
-            props.onChange &&
+        if (!props.date) {
+            return;
+        }
+
+        props.onChange &&
             props.onChange(
                 DateTime.fromMillis(switchMeridiem(props.date.toMillis()))
             );
@@ -51,7 +54,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
         <Toolbar
             className={dateTimePickerToolbarClasses.dateTimePickerToolbar}
             classes={{
-                dense: dateTimePickerToolbarClasses.dateTimePickerToolbarDense,
+                dense: dateTimePickerToolbarClasses.toolbarDense,
             }}
             variant="dense"
         >

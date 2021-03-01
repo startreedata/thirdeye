@@ -7,7 +7,6 @@ export const LoadingIndicator: FunctionComponent = () => {
 
     return (
         <div className={loadingIndicatorClasses.loadigIndicator}>
-            {/* Loading indicator */}
             <CircularProgress color="primary" />
         </div>
     );

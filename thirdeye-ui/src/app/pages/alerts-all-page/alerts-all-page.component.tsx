@@ -79,7 +79,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     };
 
     const handleAlertChange = (uiAlert: UiAlert): void => {
-        if (!uiAlert || !uiAlert.alert) {
+        if (!uiAlert.alert) {
             return;
         }
 
@@ -102,10 +102,6 @@ export const AlertsAllPage: FunctionComponent = () => {
     };
 
     const handleAlertDelete = (uiAlert: UiAlert): void => {
-        if (!uiAlert) {
-            return;
-        }
-
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", { name: uiAlert.name }),
@@ -115,10 +111,6 @@ export const AlertsAllPage: FunctionComponent = () => {
     };
 
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
-        if (!uiAlert) {
-            return;
-        }
-
         deleteAlert(uiAlert.id)
             .then((alert) => {
                 enqueueSnackbar(

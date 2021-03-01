@@ -33,6 +33,7 @@ export const TimeRangeSelectorControls: FunctionComponent<TimeRangeSelectorContr
                 </Button>
             </Grid>
 
+            {/* Fixes layout in Safari */}
             <SafariMuiGridFix />
         </Grid>
     );

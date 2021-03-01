@@ -49,7 +49,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         updateSearchText(event.currentTarget.value, true);
     };
 
-    const handleClear = (): void => {
+    const handleInputClear = (): void => {
         // Update search text and arrange to send event immediately
         updateSearchText("", false);
         // Set focus
@@ -110,7 +110,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 
                         {/* Clear button */}
                         <InputAdornment position="end">
-                            <IconButton onClick={handleClear}>
+                            <IconButton onClick={handleInputClear}>
                                 <CloseIcon />
                             </IconButton>
                         </InputAdornment>

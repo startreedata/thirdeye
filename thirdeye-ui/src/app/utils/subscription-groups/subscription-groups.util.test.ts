@@ -22,6 +22,10 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
+jest.mock("../number/number.util", () => ({
+    formatNumber: jest.fn().mockImplementation((num) => num.toString()),
+}));
+
 describe("Subscription Groups Util", () => {
     test("createEmptySubscriptionGroup should create appropriate subscription group", () => {
         expect(createEmptySubscriptionGroup()).toEqual(
@@ -53,6 +57,7 @@ describe("Subscription Groups Util", () => {
     test("getUiSubscriptionGroup should return appropriate UI subscription group for subscription group and invalid alerts", () => {
         const expectedUiSubscriptionGroup = cloneDeep(mockUiSubscriptionGroup1);
         expectedUiSubscriptionGroup.alerts = [];
+        expectedUiSubscriptionGroup.alertCount = "0";
 
         expect(
             getUiSubscriptionGroup(
@@ -65,6 +70,7 @@ describe("Subscription Groups Util", () => {
     test("getUiSubscriptionGroup should return appropriate UI subscription group for subscription group and empty alerts", () => {
         const expectedUiSubscriptionGroup = cloneDeep(mockUiSubscriptionGroup1);
         expectedUiSubscriptionGroup.alerts = [];
+        expectedUiSubscriptionGroup.alertCount = "0";
 
         expect(getUiSubscriptionGroup(mockSubscriptionGroup1, [])).toEqual(
             expectedUiSubscriptionGroup
@@ -95,14 +101,17 @@ describe("Subscription Groups Util", () => {
             mockUiSubscriptionGroup1
         );
         expectedUiSubscriptionGroup1.alerts = [];
+        expectedUiSubscriptionGroup1.alertCount = "0";
         const expectedUiSubscriptionGroup2 = cloneDeep(
             mockUiSubscriptionGroup2
         );
         expectedUiSubscriptionGroup2.alerts = [];
+        expectedUiSubscriptionGroup2.alertCount = "0";
         const expectedUiSubscriptionGroup3 = cloneDeep(
             mockUiSubscriptionGroup3
         );
         expectedUiSubscriptionGroup3.alerts = [];
+        expectedUiSubscriptionGroup3.alertCount = "0";
 
         expect(
             getUiSubscriptionGroups(
@@ -121,14 +130,17 @@ describe("Subscription Groups Util", () => {
             mockUiSubscriptionGroup1
         );
         expectedUiSubscriptionGroup1.alerts = [];
+        expectedUiSubscriptionGroup1.alertCount = "0";
         const expectedUiSubscriptionGroup2 = cloneDeep(
             mockUiSubscriptionGroup2
         );
         expectedUiSubscriptionGroup2.alerts = [];
+        expectedUiSubscriptionGroup2.alertCount = "0";
         const expectedUiSubscriptionGroup3 = cloneDeep(
             mockUiSubscriptionGroup3
         );
         expectedUiSubscriptionGroup3.alerts = [];
+        expectedUiSubscriptionGroup3.alertCount = "0";
 
         expect(getUiSubscriptionGroups(mockSubscriptionGroups, [])).toEqual([
             expectedUiSubscriptionGroup1,
@@ -248,7 +260,9 @@ const mockEmptyUiSubscriptionGroup = {
     id: -1,
     name: "label.no-data-marker",
     alerts: [],
+    alertCount: "0",
     emails: [],
+    emailCount: "0",
     subscriptionGroup: null,
 };
 
@@ -348,7 +362,9 @@ const mockUiSubscriptionGroup1 = {
             name: "label.no-data-marker",
         },
     ],
+    alertCount: "2",
     emails: ["testEmail1SubscriptionGroup1", "testEmail2SubscriptionGroup1"],
+    emailCount: "2",
     subscriptionGroup: mockSubscriptionGroup1,
 };
 
@@ -356,7 +372,9 @@ const mockUiSubscriptionGroup2 = {
     id: 5,
     name: "label.no-data-marker",
     alerts: [],
+    alertCount: "0",
     emails: [],
+    emailCount: "0",
     subscriptionGroup: mockSubscriptionGroup2,
 };
 
@@ -364,7 +382,9 @@ const mockUiSubscriptionGroup3 = {
     id: 6,
     name: "testNameSubscriptionGroup6",
     alerts: [],
+    alertCount: "0",
     emails: [],
+    emailCount: "0",
     subscriptionGroup: mockSubscriptionGroup3,
 };
 

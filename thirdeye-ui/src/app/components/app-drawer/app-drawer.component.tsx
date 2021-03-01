@@ -24,30 +24,16 @@ export const AppDrawer: FunctionComponent<AppDrawerProps> = (
     const screenWidthSmDown = useMediaQuery(theme.breakpoints.down("sm"));
 
     useEffect(() => {
-        // SCreen width changed, open/close app drawer
-        updateApDrawerStatus();
+        // Screen width changed, minimize/restore app drawer
+        setAppDrawerOpen(!screenWidthSmDown);
     }, [screenWidthSmDown]);
 
-    const updateApDrawerStatus = (): void => {
-        if (screenWidthSmDown) {
-            setAppDrawerOpen(false);
-
-            return;
-        }
-
-        setAppDrawerOpen(true);
-    };
-
-    const handleExpand = (): void => {
+    const handleAppDrawerExpand = (): void => {
         setAppDrawerOpen(true);
     };
 
     const handleClickAway = (): void => {
-        if (!screenWidthSmDown) {
-            return;
-        }
-
-        setAppDrawerOpen(false);
+        setAppDrawerOpen(!screenWidthSmDown);
     };
 
     return (
@@ -67,7 +53,7 @@ export const AppDrawer: FunctionComponent<AppDrawerProps> = (
 
                     {/* Expand button */}
                     {!appDrawerOpen && (
-                        <IconButton onClick={handleExpand}>
+                        <IconButton onClick={handleAppDrawerExpand}>
                             <ChevronRightIcon />
                         </IconButton>
                     )}

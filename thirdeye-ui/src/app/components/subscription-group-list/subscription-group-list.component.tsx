@@ -1,5 +1,7 @@
 import { Grid } from "@material-ui/core";
 import {
+    CellParams,
+    CellValue,
     ColDef,
     RowId,
     SelectionModelChangeParams,
@@ -8,24 +10,16 @@ import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import {
-    UiSubscriptionGroup,
-    UiSubscriptionGroupAlert,
-} from "../../rest/dto/ui-subscription-group.interfaces";
-import {
-    getAlertsDetailPath,
     getSubscriptionGroupsDetailPath,
     getSubscriptionGroupsUpdatePath,
 } from "../../utils/routes/routes.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
-import {
-    filterSubscriptionGroups,
-    getUiSubscriptionGroupAlertName,
-} from "../../utils/subscription-groups/subscription-groups.util";
+import { filterSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 import { actionsCellRenderer } from "../data-grid/actions-cell/actions-cell.component";
 import { DataGrid } from "../data-grid/data-grid.component";
 import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
-import { multiValueCellRenderer } from "../data-grid/multi-value-cell/multi-value-cell.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { SubscriptionGroupListProps } from "./subscription-group-list.interfaces";
 import { useSubscriptionGroupListStyles } from "./subscription-group-list.styles";
@@ -70,51 +64,43 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
                 type: "string",
                 sortable: true,
                 headerName: t("label.name"),
-                width: 150,
+                flex: 1.5,
                 renderCell: (params) =>
-                    linkCellRenderer<string>(
+                    linkCellRenderer(
                         params,
                         searchWords,
                         handleSubscriptionGroupViewDetailsByNameAndId
                     ),
             },
-            // Alerts
+            // Alert count
             {
-                field: "alerts",
-                sortable: false,
+                field: "alertCount",
+                type: "string",
+                sortable: true,
                 headerName: t("label.subscribed-alerts"),
+                align: "right",
+                headerAlign: "right",
                 flex: 1,
-                renderCell: (params) =>
-                    multiValueCellRenderer<UiSubscriptionGroupAlert>(
-                        params,
-                        true,
-                        searchWords,
-                        handleSubscriptionGroupViewDetailsById,
-                        handleAlertClick,
-                        getUiSubscriptionGroupAlertName
-                    ),
+                sortComparator: subscriptionGroupAlertCountComparator,
             },
-            // Emails
+            // Email count
             {
-                field: "emails",
-                sortable: false,
+                field: "emailCount",
+                type: "string",
+                sortable: true,
                 headerName: t("label.subscribed-emails"),
+                align: "right",
+                headerAlign: "right",
                 flex: 1,
-                renderCell: (params) =>
-                    multiValueCellRenderer<string>(
-                        params,
-                        false,
-                        searchWords,
-                        handleSubscriptionGroupViewDetailsById
-                    ),
+                sortComparator: subscriptionGroupEmailCountComparator,
             },
             // Actions
             {
                 field: "id",
                 sortable: false,
+                headerName: t("label.actions"),
                 align: "center",
                 headerAlign: "center",
-                headerName: t("label.actions"),
                 width: 150,
                 renderCell: (params) =>
                     actionsCellRenderer(
@@ -129,6 +115,60 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
             },
         ];
         setDataGridColumns(columns);
+    };
+
+    const subscriptionGroupAlertCountComparator = (
+        _value1: CellValue,
+        _value2: CellValue,
+        params1: CellParams,
+        params2: CellParams
+    ): number => {
+        const uiSubscriptionGroup1 = getUiSubscriptionGroup(
+            params1.row && params1.row.rowId
+        );
+        const uiSubscriptionGroup2 = getUiSubscriptionGroup(
+            params2.row && params2.row.rowId
+        );
+
+        if (!uiSubscriptionGroup1 || !uiSubscriptionGroup1.alerts) {
+            return -1;
+        }
+
+        if (!uiSubscriptionGroup2 || !uiSubscriptionGroup2.alerts) {
+            return 1;
+        }
+
+        return (
+            uiSubscriptionGroup1.alerts.length -
+            uiSubscriptionGroup2.alerts.length
+        );
+    };
+
+    const subscriptionGroupEmailCountComparator = (
+        _value1: CellValue,
+        _value2: CellValue,
+        params1: CellParams,
+        params2: CellParams
+    ): number => {
+        const uiSubscriptionGroup1 = getUiSubscriptionGroup(
+            params1.row && params1.row.rowId
+        );
+        const uiSubscriptionGroup2 = getUiSubscriptionGroup(
+            params2.row && params2.row.rowId
+        );
+
+        if (!uiSubscriptionGroup1 || !uiSubscriptionGroup1.emails) {
+            return -1;
+        }
+
+        if (!uiSubscriptionGroup2 || !uiSubscriptionGroup2.emails) {
+            return 1;
+        }
+
+        return (
+            uiSubscriptionGroup1.emails.length -
+            uiSubscriptionGroup2.emails.length
+        );
     };
 
     const handleSubscriptionGroupViewDetailsByNameAndId = (
@@ -156,23 +196,15 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     };
 
     const getUiSubscriptionGroup = (id: number): UiSubscriptionGroup | null => {
-        return (
-            (props.subscriptionGroups &&
-                props.subscriptionGroups.find(
-                    (subscriptionGroup) => subscriptionGroup.id === id
-                )) ||
-            null
-        );
-    };
-
-    const handleAlertClick = (
-        uiSubscriptionGroupAlert: UiSubscriptionGroupAlert
-    ): void => {
-        if (!uiSubscriptionGroupAlert) {
-            return;
+        if (!props.subscriptionGroups) {
+            return null;
         }
 
-        history.push(getAlertsDetailPath(uiSubscriptionGroupAlert.id));
+        return (
+            props.subscriptionGroups.find(
+                (subscriptionGroup) => subscriptionGroup.id === id
+            ) || null
+        );
     };
 
     const handleDataGridSelectionModelChange = (

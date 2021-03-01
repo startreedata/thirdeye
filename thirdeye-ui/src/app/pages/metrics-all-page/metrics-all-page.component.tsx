@@ -51,10 +51,6 @@ export const MetricsAllPage: FunctionComponent = () => {
     };
 
     const handleMetricDelete = (uiMetric: UiMetric): void => {
-        if (!uiMetric) {
-            return;
-        }
-
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", { name: uiMetric.name }),
@@ -64,10 +60,6 @@ export const MetricsAllPage: FunctionComponent = () => {
     };
 
     const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
-        if (!uiMetric) {
-            return;
-        }
-
         deleteMetric(uiMetric.id)
             .then((metric) => {
                 enqueueSnackbar(

@@ -1,4 +1,4 @@
-import { Box, Typography } from "@material-ui/core";
+import { Box, Toolbar, Typography } from "@material-ui/core";
 import {
     CellParams,
     ColDef,
@@ -14,11 +14,8 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { useTranslation } from "react-i18next";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
-import { Dimension } from "../../utils/material-ui/dimension.util";
-import { Palette } from "../../utils/material-ui/palette.util";
-import { formatNumber } from "../../utils/number/number.util";
+import { getSelectedStatusLabel } from "../../utils/search/search.util";
 import { ErrorIndicator } from "../error-indicator/error-indicator.component";
 import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
@@ -35,10 +32,9 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
     const [dataGridSelectionModel, setDatagridSelectionModel] = useState<
         RowId[]
     >([]);
-    const { t } = useTranslation();
 
     useEffect(() => {
-        // Input columns changed, initialize data grid columns with text highlighter
+        // Input columns changed, initialize data grid columns
         initDataGridColumns();
     }, [props.columns]);
 
@@ -48,11 +44,14 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
     }, [props.rows, props.selectionModel]);
 
     const initDataGridColumns = (): void => {
+        const columns: ColDef[] = [];
+
         if (!props.columns) {
+            setDataGridColumns(columns);
+
             return;
         }
 
-        const columns = [];
         for (const column of props.columns) {
             // For columns that don't already have a custom cell renderer, set cell renderer with
             // text highlighter
@@ -68,10 +67,9 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
         params: CellParams
     ): ReactElement => {
         return (
-            // Retain content alignment based on column properties
             <Box
                 className={commonClasses.ellipsis}
-                textAlign={params && params.colDef && params.colDef.align}
+                textAlign={params.colDef && params.colDef.align}
                 width="100%"
             >
                 <TextHighlighter
@@ -85,31 +83,26 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
     const toolbarRenderer = (): ReactElement => {
         return (
             <>
-                {props.checkboxSelection && (
-                    <Box
-                        border={Dimension.WIDTH_BORDER_DEFAULT}
-                        borderColor={Palette.COLOR_BORDER_DEFAULT}
-                        borderLeft={0}
-                        borderRight={0}
-                        borderTop={0}
-                        display="flex"
-                        padding={1}
+                {(props.showToolbar || props.checkboxSelection) && (
+                    <Toolbar
+                        className={dataGridClasses.toolbar}
+                        variant="dense"
                     >
                         {/* Row selection status */}
-                        <Typography
-                            className={dataGridClasses.rowSelectionStatus}
-                            color="textSecondary"
-                            variant="body1"
-                        >
-                            {t("label.selected-count", {
-                                count: formatNumber(
+                        {props.checkboxSelection && (
+                            <Typography
+                                className={dataGridClasses.rowSelectionStatus}
+                                color="textSecondary"
+                                variant="body1"
+                            >
+                                {getSelectedStatusLabel(
                                     dataGridSelectionModel
                                         ? dataGridSelectionModel.length
                                         : 0
-                                ) as never,
-                            })}
-                        </Typography>
-                    </Box>
+                                )}
+                            </Typography>
+                        )}
+                    </Toolbar>
                 )}
             </>
         );

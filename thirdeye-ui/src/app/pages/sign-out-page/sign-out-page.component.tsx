@@ -23,7 +23,6 @@ export const SignOutPage: FunctionComponent = () => {
 
     return (
         <PageContents hideHeader title={t("label.sign-out")}>
-            {/* Loading indicator */}
             <LoadingIndicator />
         </PageContents>
     );

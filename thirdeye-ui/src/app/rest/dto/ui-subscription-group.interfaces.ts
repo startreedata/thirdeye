@@ -4,7 +4,9 @@ export interface UiSubscriptionGroup {
     id: number;
     name: string;
     alerts: UiSubscriptionGroupAlert[];
+    alertCount: string;
     emails: string[];
+    emailCount: string;
     subscriptionGroup: SubscriptionGroup | null;
 }
 

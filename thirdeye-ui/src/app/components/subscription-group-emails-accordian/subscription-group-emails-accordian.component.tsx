@@ -16,10 +16,6 @@ export const SubscriptionGroupEmailsAccordian: FunctionComponent<SubscriptionGro
 ) => {
     const { t } = useTranslation();
 
-    const handleSubscriptionGroupEmailsChange = (emails: string[]): void => {
-        props.onChange && props.onChange(emails);
-    };
-
     return (
         <Accordion defaultExpanded={props.defaultExpanded} variant="outlined">
             {/* Header */}
@@ -35,12 +31,13 @@ export const SubscriptionGroupEmailsAccordian: FunctionComponent<SubscriptionGro
                         entity: t("label.email"),
                     })}
                     list={
-                        (props.uiSubscriptionGroup &&
-                            props.uiSubscriptionGroup.emails) ||
+                        (props.subscriptionGroup &&
+                            props.subscriptionGroup.emails) ||
                         []
                     }
+                    loading={!props.subscriptionGroup}
                     validateFn={validateEmail}
-                    onChange={handleSubscriptionGroupEmailsChange}
+                    onChange={props.onChange}
                 />
             </AccordionDetails>
         </Accordion>

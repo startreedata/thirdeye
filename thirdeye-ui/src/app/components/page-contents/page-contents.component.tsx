@@ -26,7 +26,7 @@ import {
     AppBreadcrumbs,
     useAppBreadcrumbs,
 } from "../app-breadcrumbs/app-breadcrumbs.component";
-import { ID_APP_DRAWER } from "../drawers/app-drawer/app-drawer.component";
+import { ID_APP_DRAWER } from "../app-drawer/app-drawer.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
@@ -41,11 +41,13 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     const commonClasses = useCommonStyles();
     const [documentTitle, setDocumentTitle] = useState("");
     const [appDrawer, setAppDrawer] = useState(false);
-    const [showHeader, setShowHeader] = useState(true);
+    const [showHeader, setShowHeader] = useState(!props.hideHeader);
     const [headerWidth, setHeaderWidth] = useState<number>(
         Dimension.WIDTH_PAGE_CONTENTS_CENTERED
     );
     const [pageContentsScrollTop, setPageContentsScrollTop] = useState(0);
+    const pageContentsRef = useRef<HTMLDivElement>(null);
+    const mainContentsRef = useRef<HTMLDivElement>(null);
     const { routerBreadcrumbs, pageBreadcrumbs } = useAppBreadcrumbs();
     const {
         timeRangeDuration,
@@ -53,8 +55,6 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
         setTimeRangeDuration,
         refreshTimeRange,
     } = useTimeRange();
-    const pageContentsRef = useRef<HTMLDivElement>(null);
-    const mainContentsRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
     const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
 
@@ -83,18 +83,6 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
         window.removeEventListener("resize", setHeaderWidthDebounced);
     };
 
-    const setHeaderWidthDebounced = useCallback(
-        debounce((): void => {
-            if (!mainContentsRef || !mainContentsRef.current) {
-                return;
-            }
-
-            // Determine header width based on main contents
-            setHeaderWidth(mainContentsRef.current.offsetWidth);
-        }, 1),
-        [mainContentsRef]
-    );
-
     const detectAppDrawer = (): void => {
         // Detect app drawer among top level children of main contents
         if (!mainContentsRef || !mainContentsRef.current) {
@@ -106,9 +94,27 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
         for (const child of toArray(mainContentsRef.current.children)) {
             if (child && child.id === ID_APP_DRAWER) {
                 setAppDrawer(true);
+
+                break;
             }
         }
     };
+
+    const setHeaderWidthDebounced = useCallback(
+        debounce((): void => {
+            if (
+                !mainContentsRef ||
+                !mainContentsRef.current ||
+                props.hideHeader
+            ) {
+                return;
+            }
+
+            // Determine header width based on main contents
+            setHeaderWidth(mainContentsRef.current.offsetWidth);
+        }, 1),
+        [mainContentsRef]
+    );
 
     const generateDocumentTitle = (): string => {
         // Document title is composed of:
@@ -246,27 +252,27 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                                             </Grid>
 
                                             {/* Time range selector */}
-                                            {!props.hideTimeRange && (
-                                                <Grid item>
-                                                    <TimeRangeSelector
-                                                        recentCustomTimeRangeDurations={
-                                                            recentCustomTimeRangeDurations
-                                                        }
-                                                        showTimeRange={
-                                                            screenWidthSmUp
-                                                        }
-                                                        timeRangeDuration={
-                                                            timeRangeDuration
-                                                        }
-                                                        onChange={
-                                                            setTimeRangeDuration
-                                                        }
-                                                        onRefresh={
-                                                            refreshTimeRange
-                                                        }
-                                                    />
-                                                </Grid>
-                                            )}
+                                            <Grid item>
+                                                <TimeRangeSelector
+                                                    hideTimeRange={
+                                                        props.hideTimeRange ||
+                                                        !screenWidthSmUp
+                                                    }
+                                                    hideTimeRangeSelectorButton={
+                                                        props.hideTimeRange
+                                                    }
+                                                    recentCustomTimeRangeDurations={
+                                                        recentCustomTimeRangeDurations
+                                                    }
+                                                    timeRangeDuration={
+                                                        timeRangeDuration
+                                                    }
+                                                    onChange={
+                                                        setTimeRangeDuration
+                                                    }
+                                                    onRefresh={refreshTimeRange}
+                                                />
+                                            </Grid>
                                         </Grid>
                                     </Paper>
                                 </Box>

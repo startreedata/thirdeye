@@ -9,6 +9,6 @@ export interface UiMetric {
     activeText: string;
     aggregationColumn: string;
     aggregationFunction: MetricAggFunction;
-    viewCount: string;
     views: LogicalView[];
+    viewCount: string;
 }

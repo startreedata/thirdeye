@@ -10,11 +10,11 @@ import HomeIcon from "@material-ui/icons/Home";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
-import { ReactComponent as AlertIcon } from "../../../../assets/images/alert.svg";
-import { ReactComponent as AnomalyIcon } from "../../../../assets/images/anomaly.svg";
-import { ReactComponent as ConfigurationIcon } from "../../../../assets/images/configuration.svg";
-import { ReactComponent as MetricIcon } from "../../../../assets/images/metric.svg";
-import { ReactComponent as SubscriptionGroupIcon } from "../../../../assets/images/subscription-group.svg";
+import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
+import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
+import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
+import { ReactComponent as MetricIcon } from "../../../assets/images/metric.svg";
+import { ReactComponent as SubscriptionGroupIcon } from "../../../assets/images/subscription-group.svg";
 import {
     AppRoute,
     getAlertsPath,
@@ -23,7 +23,7 @@ import {
     getHomePath,
     getMetricsPath,
     getSubscriptionGroupsPath,
-} from "../../../utils/routes/routes.util";
+} from "../../utils/routes/routes.util";
 import { AppBarDrawerProps } from "./app-bar-drawer.interfaces";
 import { useAppBarDrawerStyles } from "./app-bar-drawer.styles";
 

@@ -28,8 +28,8 @@ import {
     getSignOutPath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
+import { AppBarDrawer } from "../app-bar-drawer/app-bar-drawer.component";
 import { useAuth } from "../auth-provider/auth-provider.component";
-import { AppBarDrawer } from "../drawers/app-bar-drawer/app-bar-drawer.component";
 import { useAppBarStyles } from "./app-bar.styles";
 
 export const AppBar: FunctionComponent = () => {

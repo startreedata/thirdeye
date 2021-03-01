@@ -37,14 +37,26 @@ const ActionsCell: FunctionComponent<ActionsCellProps> = (
     };
 
     const handleViewDetails = (): void => {
+        if (rowId < 0) {
+            return;
+        }
+
         props.onViewDetails && props.onViewDetails(rowId);
     };
 
     const handleEdit = (): void => {
+        if (rowId < 0) {
+            return;
+        }
+
         props.onEdit && props.onEdit(rowId);
     };
 
     const handleDelete = (): void => {
+        if (rowId < 0) {
+            return;
+        }
+
         props.onDelete && props.onDelete(rowId);
     };
 

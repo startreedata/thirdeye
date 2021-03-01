@@ -23,6 +23,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
+import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";
 
@@ -45,11 +46,11 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         event: KeyboardEvent<HTMLInputElement>
     ): void => {
         if (event.key === "Enter") {
-            handleAdd();
+            handleListItemAdd();
         }
     };
 
-    const handleAdd = (): void => {
+    const handleListItemAdd = (): void => {
         if (!inputRef || !inputRef.current || !inputRef.current.value) {
             return;
         }
@@ -67,12 +68,12 @@ export const EditableList: FunctionComponent<EditableListProps> = (
 
         const newList = [input, ...list];
         setList(newList);
-        reset();
+        resetInput();
 
         props.onChange && props.onChange(newList);
     };
 
-    const reset = (): void => {
+    const resetInput = (): void => {
         if (!inputRef || !inputRef.current || !inputRef.current.value) {
             return;
         }
@@ -84,7 +85,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
         inputRef.current.focus();
     };
 
-    const handleRemove = (index: number) => (): void => {
+    const handleListItemRemove = (index: number) => (): void => {
         const newList = [...list];
         newList.splice(index, 1);
         setList(newList);
@@ -102,12 +103,13 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                         endAdornment: (
                             // Add button
                             <InputAdornment position="end">
-                                <IconButton onClick={handleAdd}>
+                                <IconButton onClick={handleListItemAdd}>
                                     <SubdirectoryArrowLeftIcon />
                                 </IconButton>
                             </InputAdornment>
                         ),
                     }}
+                    disabled={props.loading}
                     error={Boolean(helperText)}
                     helperText={helperText}
                     inputRef={inputRef}
@@ -123,14 +125,14 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                     fullWidth
                     className={editableListClasses.addButton}
                     color="primary"
+                    disabled={props.loading}
                     variant="outlined"
-                    onClick={handleAdd}
+                    onClick={handleListItemAdd}
                 >
                     {props.addButtonLabel || t("label.add")}
                 </Button>
             </Grid>
 
-            {/* List */}
             <Grid item xs={12}>
                 <Card variant="outlined">
                     <CardContent
@@ -139,28 +141,36 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                             commonClasses.cardContentBottomPaddingRemoved
                         )}
                     >
-                        <List disablePadding>
-                            {list &&
-                                list.map((listItem, index) => (
-                                    <ListItem divider key={index}>
-                                        <ListItemText
-                                            primary={listItem}
-                                            primaryTypographyProps={{
-                                                variant: "body1",
-                                            }}
-                                        />
+                        {/* List */}
+                        {!props.loading && (
+                            <List disablePadding>
+                                {list &&
+                                    list.map((listItem, index) => (
+                                        <ListItem divider key={index}>
+                                            <ListItemText
+                                                primary={listItem}
+                                                primaryTypographyProps={{
+                                                    variant: "body1",
+                                                }}
+                                            />
 
-                                        {/* Remove button */}
-                                        <ListItemSecondaryAction>
-                                            <IconButton
-                                                onClick={handleRemove(index)}
-                                            >
-                                                <CloseIcon />
-                                            </IconButton>
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                ))}
-                        </List>
+                                            {/* Remove button */}
+                                            <ListItemSecondaryAction>
+                                                <IconButton
+                                                    onClick={handleListItemRemove(
+                                                        index
+                                                    )}
+                                                >
+                                                    <CloseIcon />
+                                                </IconButton>
+                                            </ListItemSecondaryAction>
+                                        </ListItem>
+                                    ))}
+                            </List>
+                        )}
+
+                        {/* Loading indicator */}
+                        {props.loading && <LoadingIndicator />}
                     </CardContent>
                 </Card>
             </Grid>

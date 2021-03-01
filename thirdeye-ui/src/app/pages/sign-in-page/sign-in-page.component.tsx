@@ -1,4 +1,4 @@
-import { Box, Button } from "@material-ui/core";
+import { Button, Grid } from "@material-ui/core";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,10 +10,12 @@ import { PageContents } from "../../components/page-contents/page-contents.compo
 import { login } from "../../rest/auth/auth.rest";
 import { getErrorSnackbarOption } from "../../utils/snackbar/snackbar.util";
 import { SignInPageProps } from "./sign-in-page.interfaces";
+import { useSignInPageStyles } from "./sign-in-page.styles";
 
 export const SignInPage: FunctionComponent<SignInPageProps> = (
     props: SignInPageProps
 ) => {
+    const signInPageClasses = useSignInPageStyles();
     const [loading, setLoading] = useState(false);
     const { signIn } = useAuth();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
@@ -51,23 +53,23 @@ export const SignInPage: FunctionComponent<SignInPageProps> = (
 
     return (
         <PageContents hideHeader title={t("label.sign-in")}>
-            <Box
+            <Grid
+                container
                 alignItems="center"
-                display="flex"
-                flex={1}
-                height="100%"
-                justifyContent="center"
-                width="100%"
+                className={signInPageClasses.signInPage}
+                justify="center"
             >
-                {/* Sign in */}
-                <Button
-                    color="primary"
-                    variant="contained"
-                    onClick={handleSignIn}
-                >
-                    {t("label.sign-in")}
-                </Button>
-            </Box>
+                <Grid item>
+                    {/* Sign in button */}
+                    <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={handleSignIn}
+                    >
+                        {t("label.sign-in")}
+                    </Button>
+                </Grid>
+            </Grid>
         </PageContents>
     );
 };

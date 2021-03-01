@@ -8,36 +8,23 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import { UiSubscriptionGroupAlert } from "../../rest/dto/ui-subscription-group.interfaces";
+import { Alert } from "../../rest/dto/alert.interfaces";
 import { getAlertsDetailPath } from "../../utils/routes/routes.util";
 import {
     getUiSubscriptionGroupAlertId,
     getUiSubscriptionGroupAlertName,
-    getUiSubscriptionGroupAlerts,
 } from "../../utils/subscription-groups/subscription-groups.util";
 import { TransferList } from "../transfer-list/transfer-list.component";
-import { UiSubscriptionGroupAlertsAccordianProps } from "./subscription-group-alerts-accordian.interfaces";
+import { SubscriptionGroupAlertsAccordianProps } from "./subscription-group-alerts-accordian.interfaces";
 
-export const UiSubscriptionGroupAlertsAccordian: FunctionComponent<UiSubscriptionGroupAlertsAccordianProps> = (
-    props: UiSubscriptionGroupAlertsAccordianProps
+export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGroupAlertsAccordianProps> = (
+    props: SubscriptionGroupAlertsAccordianProps
 ) => {
     const history = useHistory();
     const { t } = useTranslation();
 
-    const handleAlertClick = (
-        uiSubscriptionGroupAlert: UiSubscriptionGroupAlert
-    ): void => {
-        if (!uiSubscriptionGroupAlert) {
-            return;
-        }
-
-        history.push(getAlertsDetailPath(uiSubscriptionGroupAlert.id));
-    };
-
-    const handleUiSubscriptionGroupAlertsChange = (
-        uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]
-    ): void => {
-        props.onChange && props.onChange(uiSubscriptionGroupAlerts);
+    const handleAlertClick = (alert: Alert): void => {
+        history.push(getAlertsDetailPath(alert.id));
     };
 
     return (
@@ -47,23 +34,24 @@ export const UiSubscriptionGroupAlertsAccordian: FunctionComponent<UiSubscriptio
                 <Typography variant="h6">{props.title}</Typography>
             </AccordionSummary>
 
-            {/* Transfer list */}
+            {/* Subscription group alerts transfer list */}
             <AccordionDetails>
-                <TransferList<UiSubscriptionGroupAlert>
+                <TransferList
                     link
                     fromLabel={t("label.all-entity", {
                         entity: t("label.alerts"),
                     })}
-                    fromList={getUiSubscriptionGroupAlerts(props.alerts)}
+                    fromList={props.alerts}
                     listItemKeyFn={getUiSubscriptionGroupAlertId}
                     listItemTextFn={getUiSubscriptionGroupAlertName}
+                    loading={!props.subscriptionGroup}
                     toLabel={t("label.subscribed-alerts")}
                     toList={
-                        (props.uiSubscriptionGroup &&
-                            props.uiSubscriptionGroup.alerts) ||
+                        (props.subscriptionGroup &&
+                            (props.subscriptionGroup.alerts as Alert[])) ||
                         []
                     }
-                    onChange={handleUiSubscriptionGroupAlertsChange}
+                    onChange={props.onChange}
                     onClick={handleAlertClick}
                 />
             </AccordionDetails>

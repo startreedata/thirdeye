@@ -9,7 +9,7 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { UiSubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
+import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
 import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
@@ -18,10 +18,7 @@ import {
     EmailScheme,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
-import {
-    UiSubscriptionGroup,
-    UiSubscriptionGroupAlert,
-} from "../../rest/dto/ui-subscription-group.interfaces";
+import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import {
     deleteSubscriptionGroup,
     getSubscriptionGroup,
@@ -116,10 +113,6 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     const handleSubscriptionGroupDelete = (
         uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
-        if (!uiSubscriptionGroup) {
-            return;
-        }
-
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", {
@@ -133,10 +126,6 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     const handleSubscriptionGroupDeleteOk = (
         uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
-        if (!uiSubscriptionGroup) {
-            return;
-        }
-
         deleteSubscriptionGroup(uiSubscriptionGroup.id)
             .then(() => {
                 enqueueSnackbar(
@@ -159,9 +148,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
             );
     };
 
-    const handleSubscriptionGroupAlertsChange = (
-        uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]
-    ): void => {
+    const handleSubscriptionGroupAlertsChange = (alerts: Alert[]): void => {
         if (!uiSubscriptionGroup || !uiSubscriptionGroup.subscriptionGroup) {
             return;
         }
@@ -170,7 +157,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
         const subscriptionGroupCopy = cloneDeep(
             uiSubscriptionGroup.subscriptionGroup
         );
-        subscriptionGroupCopy.alerts = uiSubscriptionGroupAlerts as Alert[];
+        subscriptionGroupCopy.alerts = alerts;
         saveSubscriptionGroup(subscriptionGroupCopy);
     };
 
@@ -208,10 +195,6 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     const saveSubscriptionGroup = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
-        if (!subscriptionGroup) {
-            return;
-        }
-
         updateSubscriptionGroup(subscriptionGroup)
             .then((subscriptionGroup) => {
                 enqueueSnackbar(
@@ -253,10 +236,10 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
 
                 {/* Subscribed alerts */}
                 <Grid item sm={12}>
-                    <UiSubscriptionGroupAlertsAccordian
+                    <SubscriptionGroupAlertsAccordian
                         alerts={alerts}
+                        subscriptionGroup={uiSubscriptionGroup}
                         title={t("label.subscribe-alerts")}
-                        uiSubscriptionGroup={uiSubscriptionGroup}
                         onChange={handleSubscriptionGroupAlertsChange}
                     />
                 </Grid>
@@ -264,8 +247,8 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 {/* Subscribed emails */}
                 <Grid item sm={12}>
                     <SubscriptionGroupEmailsAccordian
+                        subscriptionGroup={uiSubscriptionGroup}
                         title={t("label.subscribe-emails")}
-                        uiSubscriptionGroup={uiSubscriptionGroup}
                         onChange={handleSubscriptionGroupEmailsChange}
                     />
                 </Grid>

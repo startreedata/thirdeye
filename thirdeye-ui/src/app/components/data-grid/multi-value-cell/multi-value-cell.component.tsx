@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Link, Typography } from "@material-ui/core";
+import { Grid, IconButton, Link, Typography } from "@material-ui/core";
 import { CellParams } from "@material-ui/data-grid";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import classnames from "classnames";
@@ -38,18 +38,22 @@ function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
         return "";
     };
 
-    const handleMoreClick = (): void => {
+    const handleMore = (): void => {
+        if (rowId < 0) {
+            return;
+        }
+
         props.onMore && props.onMore(rowId);
     };
 
     return (
-        <Box width="100%">
+        <div className={multiValueCellClasses.multiValueCell}>
             <Grid container spacing={0}>
                 {/* Values */}
                 <Grid
                     item
                     className={classnames(commonClasses.ellipsis, {
-                        [multiValueCellClasses.linkValues]: props.link, // Ellipsis to have same color as link
+                        [multiValueCellClasses.linkValues]: props.link, // Ellipsis to have the same color as link
                     })}
                     xs={11}
                 >
@@ -102,13 +106,13 @@ function MultiValueCell<T>(props: MultiValueCellProps<T>): ReactElement {
                 {/* More button */}
                 {values && values.length > MAX_ITEMS_VALUES && (
                     <Grid item xs={1}>
-                        <IconButton size="small" onClick={handleMoreClick}>
+                        <IconButton size="small" onClick={handleMore}>
                             <MoreHorizIcon fontSize="small" />
                         </IconButton>
                     </Grid>
                 )}
             </Grid>
-        </Box>
+        </div>
     );
 }
 

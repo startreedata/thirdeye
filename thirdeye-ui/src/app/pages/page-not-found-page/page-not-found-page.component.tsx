@@ -14,7 +14,6 @@ export const PageNotFoundPage: FunctionComponent = () => {
 
     return (
         <PageContents hideHeader title={t("label.page-not-found")}>
-            {/* Page not found indicator */}
             <PageNotFoundIndicator />
         </PageContents>
     );

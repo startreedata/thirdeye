@@ -1,5 +1,9 @@
 import i18n from "i18next";
-import { deepSearchStringProperty, getSearchStatusLabel } from "./search.util";
+import {
+    deepSearchStringProperty,
+    getSearchStatusLabel,
+    getSelectedStatusLabel,
+} from "./search.util";
 
 jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
@@ -95,6 +99,13 @@ describe("Search Util", () => {
         expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
             count: "1",
             total: "2",
+        });
+    });
+
+    test("getSelectedStatusLabel should return appropriate selected status label for count", () => {
+        expect(getSelectedStatusLabel(1)).toEqual("label.selected-count");
+        expect(i18n.t).toHaveBeenCalledWith("label.selected-count", {
+            count: "1",
         });
     });
 });

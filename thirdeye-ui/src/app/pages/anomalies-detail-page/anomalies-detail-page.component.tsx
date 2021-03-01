@@ -117,10 +117,6 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     };
 
     const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
-        if (!uiAnomaly) {
-            return;
-        }
-
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", { name: uiAnomaly.name }),
@@ -130,10 +126,6 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
     };
 
     const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
-        if (!uiAnomaly) {
-            return;
-        }
-
         deleteAnomaly(uiAnomaly.id)
             .then(() => {
                 enqueueSnackbar(

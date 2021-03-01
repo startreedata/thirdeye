@@ -21,8 +21,8 @@ export const createEmptyUiMetric = (): UiMetric => {
         activeText: noDataMarker,
         aggregationColumn: noDataMarker,
         aggregationFunction: noDataMarker as MetricAggFunction,
-        viewCount: formatNumber(0),
         views: [],
+        viewCount: formatNumber(0),
     };
 };
 
@@ -65,7 +65,6 @@ export const getUiMetric = (metric: Metric): UiMetric => {
         return uiMetric;
     }
 
-    uiMetric.viewCount = formatNumber(metric.views.length);
     for (const view of metric.views) {
         const metricLocicalView = createEmptyMetricLogicalView();
         metricLocicalView.name = view.name || noDataMarker;
@@ -73,6 +72,7 @@ export const getUiMetric = (metric: Metric): UiMetric => {
 
         uiMetric.views.push(metricLocicalView);
     }
+    uiMetric.viewCount = formatNumber(uiMetric.views.length);
 
     return uiMetric;
 };

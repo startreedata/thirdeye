@@ -77,10 +77,6 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const handleSubscriptionGroupDelete = (
         uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
-        if (!uiSubscriptionGroup) {
-            return;
-        }
-
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", {
@@ -94,10 +90,6 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const handleSubscriptionGroupDeleteOk = (
         uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
-        if (!uiSubscriptionGroup) {
-            return;
-        }
-
         deleteSubscriptionGroup(uiSubscriptionGroup.id)
             .then((subscriptionGroup) => {
                 enqueueSnackbar(

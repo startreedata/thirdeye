@@ -2,6 +2,9 @@ import { makeStyles } from "@material-ui/core";
 import { Border } from "../../utils/material-ui/border.util";
 
 export const useDataGridStyles = makeStyles({
+    toolbar: {
+        borderBottom: Border.BORDER_DEFAULT,
+    },
     rowSelectionStatus: {
         marginLeft: "auto",
     },

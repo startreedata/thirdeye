@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core";
+import { Border } from "../../../utils/material-ui/border.util";
 
 const HEIGHT_TIME_RANGE_SELECTOR_MD_UP = 427;
 
@@ -7,9 +8,13 @@ export const useTimeRangeSelectorStyles = makeStyles((theme) => ({
         minWidth: 0,
         padding: theme.spacing(1),
     },
+    timeRangeSelectorHeader: {
+        borderBottom: Border.BORDER_DEFAULT,
+    },
     timeRangeSelectorContents: {
         [theme.breakpoints.only("xs")]: {
             width: 342,
+            paddingBottom: theme.spacing(1),
         },
         [theme.breakpoints.only("sm")]: {
             width: 465,
@@ -21,19 +26,15 @@ export const useTimeRangeSelectorStyles = makeStyles((theme) => ({
             height: HEIGHT_TIME_RANGE_SELECTOR_MD_UP,
             width: 828,
         },
-        "&:last-child": {
-            [theme.breakpoints.up("sm")]: {
-                paddingBottom: 0,
-            },
-        },
     },
     timeRangeList: {
+        borderRight: Border.BORDER_DEFAULT,
         [theme.breakpoints.only("sm")]: {
             height: "100%",
         },
         [theme.breakpoints.up("md")]: {
             height: HEIGHT_TIME_RANGE_SELECTOR_MD_UP,
-            overflow: "auto",
+            overflowY: "auto",
         },
     },
     startTimeCalendarContainer: {

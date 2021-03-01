@@ -3,6 +3,8 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_EXCLUDED_DIMENSIONS;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_TIMEZONE_ID;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.parseListParams;
 
 import com.google.common.base.Preconditions;
@@ -43,6 +45,7 @@ import org.slf4j.LoggerFactory;
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RootCauseResource {
+
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseResource.class);
 
   private static final int DEFAULT_FORMATTER_DEPTH = 1;
@@ -125,54 +128,64 @@ public class RootCauseResource {
       @QueryParam("urns") List<String> urns) throws Exception {
 
     // configuration validation
-    if(!this.frameworks.containsKey(framework))
-      throw new IllegalArgumentException(String.format("Could not resolve framework '%s'", framework));
+    ensure(frameworks.containsKey(framework),
+        String.format("Could not resolve framework '%s'. Allowed values: %s",
+            framework,
+            frameworks.keySet()));
 
     // input validation
-    if(analysisStart == null)
-      throw new IllegalArgumentException("Must provide analysis start timestamp (in milliseconds)");
+    ensureExists(analysisStart,
+        "Must provide analysis start timestamp (in milliseconds)");
 
-    if(analysisEnd == null)
-      throw new IllegalArgumentException("Must provide analysis end timestamp (in milliseconds)");
+    ensureExists(analysisEnd,
+        "Must provide analysis end timestamp (in milliseconds)");
 
-    if(anomalyStart == null)
+    if (anomalyStart == null) {
       anomalyStart = analysisStart;
+    }
 
-    if(anomalyEnd == null)
+    if (anomalyEnd == null) {
       anomalyEnd = analysisEnd;
+    }
 
-    if(baselineStart == null)
+    if (baselineStart == null) {
       baselineStart = anomalyStart - TimeUnit.DAYS.toMillis(7);
+    }
 
-    if(baselineEnd == null)
+    if (baselineEnd == null) {
       baselineEnd = anomalyEnd - TimeUnit.DAYS.toMillis(7);
+    }
 
-    if(formatterDepth == null)
+    if (formatterDepth == null) {
       formatterDepth = DEFAULT_FORMATTER_DEPTH;
+    }
 
-    if(analysisEnd - analysisStart > ANALYSIS_RANGE_MAX)
-      throw new IllegalArgumentException(String.format("Analysis range cannot be longer than %d", ANALYSIS_RANGE_MAX));
+    ensure(analysisEnd - analysisStart <= ANALYSIS_RANGE_MAX,
+        String.format("Analysis range cannot be longer than %d", ANALYSIS_RANGE_MAX));
 
-    if(anomalyEnd - anomalyStart > ANOMALY_RANGE_MAX)
-      throw new IllegalArgumentException(String.format("Anomaly range cannot be longer than %d", ANOMALY_RANGE_MAX));
+    ensure(anomalyEnd - anomalyStart <= ANOMALY_RANGE_MAX,
+        String.format("Anomaly range cannot be longer than %d", ANOMALY_RANGE_MAX));
 
-    if(baselineEnd - baselineStart > BASELINE_RANGE_MAX)
-      throw new IllegalArgumentException(String.format("Baseline range cannot be longer than %d", BASELINE_RANGE_MAX));
+    ensure(baselineEnd - baselineStart <= BASELINE_RANGE_MAX,
+        String.format("Baseline range cannot be longer than %d", BASELINE_RANGE_MAX));
 
     urns = parseListParams(urns);
 
     // validate window size
     long anomalyWindow = anomalyEnd - anomalyStart;
     long baselineWindow = baselineEnd - baselineStart;
-    if(anomalyWindow != baselineWindow)
-      throw new IllegalArgumentException("Must provide equal-sized anomaly and baseline periods");
+    ensure(anomalyWindow == baselineWindow,
+        "Must provide equal-sized anomaly and baseline periods");
 
     // format input
     Set<Entity> input = new HashSet<>();
-    input.add(TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANOMALY, anomalyStart, anomalyEnd));
-    input.add(TimeRangeEntity.fromRange(0.8, TimeRangeEntity.TYPE_BASELINE, baselineStart, baselineEnd));
-    input.add(TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANALYSIS, analysisStart, analysisEnd));
-    for(String urn : urns) {
+    input.add(
+        TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANOMALY, anomalyStart, anomalyEnd));
+    input.add(
+        TimeRangeEntity.fromRange(0.8, TimeRangeEntity.TYPE_BASELINE, baselineStart, baselineEnd));
+    input.add(
+        TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANALYSIS, analysisStart, analysisEnd));
+    for (String urn : urns) {
       input.add(EntityUtils.parseURN(urn, 1.0));
     }
 
@@ -192,18 +205,21 @@ public class RootCauseResource {
       @QueryParam("urns") List<String> urns) throws Exception {
 
     // configuration validation
-    if(!this.frameworks.containsKey(framework))
-      throw new IllegalArgumentException(String.format("Could not resolve framework '%s'", framework));
+    ensure(frameworks.containsKey(framework),
+        String.format("Could not resolve framework '%s'. Allowed values: %s",
+            framework,
+            frameworks.keySet()));
 
-    if(formatterDepth == null)
+    if (formatterDepth == null) {
       formatterDepth = DEFAULT_FORMATTER_DEPTH;
+    }
 
     // parse urns arg
     urns = parseListParams(urns);
 
     // format input
     Set<Entity> input = new HashSet<>();
-    for(String urn : urns) {
+    for (String urn : urns) {
       input.add(EntityUtils.parseURNRaw(urn, 1.0));
     }
 
@@ -216,19 +232,19 @@ public class RootCauseResource {
 
   private List<RootCauseEntity> applyFormatters(Iterable<Entity> entities, int maxDepth) {
     List<RootCauseEntity> output = new ArrayList<>();
-    for(Entity e : entities) {
+    for (Entity e : entities) {
       output.add(this.applyFormatters(e, maxDepth));
     }
     return output;
   }
 
   private RootCauseEntity applyFormatters(Entity e, int remainingDepth) {
-    for(RootCauseEntityFormatter formatter : this.formatters) {
-      if(formatter.applies(e)) {
+    for (RootCauseEntityFormatter formatter : this.formatters) {
+      if (formatter.applies(e)) {
         try {
           RootCauseEntity rce = formatter.format(e);
 
-          if(remainingDepth > 1) {
+          if (remainingDepth > 1) {
             for (Entity re : e.getRelated()) {
               rce.addRelatedEntity(this.applyFormatters(re, remainingDepth - 1));
             }
@@ -245,5 +261,4 @@ public class RootCauseResource {
     }
     throw new IllegalArgumentException(String.format("No formatter for Entity '%s'", e.getUrn()));
   }
-
 }

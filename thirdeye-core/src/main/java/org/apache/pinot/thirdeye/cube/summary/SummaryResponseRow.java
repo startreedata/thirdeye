@@ -36,11 +36,11 @@ public class SummaryResponseRow extends BaseResponseRow {
   public static SummaryResponseRow buildNotAvailableRow() {
     SummaryResponseRow row = new SummaryResponseRow();
     row.names = new ArrayList<>();
-    row.names.add(SummaryResponse.NOT_AVAILABLE);
-    row.percentageChange = SummaryResponse.NOT_AVAILABLE;
-    row.contributionChange = SummaryResponse.NOT_AVAILABLE;
-    row.contributionToOverallChange = SummaryResponse.NOT_AVAILABLE;
-    row.otherDimensionValues = SummaryResponse.NOT_AVAILABLE;
+    row.names.add(DataCubeSummaryApi.NOT_AVAILABLE);
+    row.percentageChange = DataCubeSummaryApi.NOT_AVAILABLE;
+    row.contributionChange = DataCubeSummaryApi.NOT_AVAILABLE;
+    row.contributionToOverallChange = DataCubeSummaryApi.NOT_AVAILABLE;
+    row.otherDimensionValues = DataCubeSummaryApi.NOT_AVAILABLE;
     return row;
   }
 

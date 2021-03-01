@@ -27,8 +27,8 @@ import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import org.apache.pinot.thirdeye.cube.data.cube.Cube;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
+import org.apache.pinot.thirdeye.cube.summary.DataCubeSummaryApi;
 import org.apache.pinot.thirdeye.cube.summary.Summary;
-import org.apache.pinot.thirdeye.cube.summary.SummaryResponse;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -78,7 +78,7 @@ public class MultiDimensionalSummary {
    * @param doOneSideError if the summary should only consider one side error.
    * @return the multi-dimensional summary of an additive metric.
    */
-  public SummaryResponse buildSummary(String dataset, String metric, long currentStartInclusive,
+  public DataCubeSummaryApi buildSummary(String dataset, String metric, long currentStartInclusive,
       long currentEndExclusive, long baselineStartInclusive, long baselineEndExclusive,
       Dimensions dimensions,
       Multimap<String, String> dataFilters, int summarySize, int depth,
@@ -99,7 +99,7 @@ public class MultiDimensionalSummary {
     dbClient.setBaselineEndExclusive(new DateTime(baselineEndExclusive, dateTimeZone));
 
     Cube cube = new Cube(costFunction);
-    SummaryResponse response;
+    DataCubeSummaryApi response;
     if (depth > 0) { // depth != 0 means manual dimension order
       cube.buildWithAutoDimensionOrder(dbClient, dimensions, dataFilters, depth, hierarchies);
       Summary summary = new Summary(cube, costFunction);

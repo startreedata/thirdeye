@@ -1,21 +1,15 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_EXCLUDED_DIMENSIONS;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_TIMEZONE_ID;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.parseListParams;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Singleton;
-import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +20,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import joptsimple.internal.Strings;
+import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.RootCauseEntity;
-import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
@@ -53,8 +46,6 @@ public class RootCauseResource {
   private static final long ANALYSIS_RANGE_MAX = TimeUnit.DAYS.toMillis(32);
   private static final long ANOMALY_RANGE_MAX = TimeUnit.DAYS.toMillis(32);
   private static final long BASELINE_RANGE_MAX = ANOMALY_RANGE_MAX;
-  private static final int DEFAULT_HIGHLIGHT_CUBE_SUMMARY_SIZE = 4;
-  private static final int DEFAULT_HIGHLIGHT_CUBE_DEPTH = 3;
 
   private final List<RootCauseEntityFormatter> formatters;
   private final Map<String, RCAFramework> frameworks;
@@ -72,37 +63,17 @@ public class RootCauseResource {
   }
 
   @GET
-  @Path("/highlights")
+  @Path("/data-cube-summary")
   @ApiOperation("Retrieve the likely root causes behind an anomaly")
-  public Map<String, Object> highlights(
+  public Response dataCubeSummary(
       @ApiParam(value = "internal id of the anomaly")
-      @QueryParam("anomalyId") long anomalyId,
-      @Auth ThirdEyePrincipal principal) throws Exception {
-    Map<String, Object> responseMessage = new HashMap<>();
-    MergedAnomalyResultDTO anomalyDTO = mergedAnomalyResultManager.findById(anomalyId);
-    Preconditions.checkNotNull(anomalyDTO, "Anomaly doesn't exist in ThirdEye's repository");
+      @QueryParam("anomalyId") long anomalyId) {
+    final MergedAnomalyResultDTO anomalyDTO = ensureExists(
+        mergedAnomalyResultManager.findById(anomalyId), String.format("Anomaly ID: %d", anomalyId));
 
     // In the highlights api we retrieve only the top 3 results across 3 dimensions.
     // TODO: polish the results to make it more meaningful
-    Map<String, Object> cubeHighlights = dataCubeSummaryCalculator.getDataCubeSummary(
-        anomalyDTO.getMetricUrn(),
-        anomalyDTO.getCollection(),
-        anomalyDTO.getMetric(),
-        anomalyDTO.getStartTime(),
-        anomalyDTO.getEndTime(),
-        anomalyDTO.getStartTime() - TimeUnit.DAYS.toMillis(7),
-        anomalyDTO.getEndTime() - TimeUnit.DAYS.toMillis(7),
-        Strings.EMPTY,
-        Strings.EMPTY,
-        DEFAULT_HIGHLIGHT_CUBE_SUMMARY_SIZE,
-        DEFAULT_HIGHLIGHT_CUBE_DEPTH,
-        DEFAULT_HIERARCHIES,
-        false,
-        DEFAULT_EXCLUDED_DIMENSIONS,
-        DEFAULT_TIMEZONE_ID);
-    responseMessage.put("cubeResults", cubeHighlights);
-
-    return responseMessage;
+    return Response.ok(dataCubeSummaryCalculator.compute(anomalyDTO)).build();
   }
 
   @GET
@@ -250,7 +221,7 @@ public class RootCauseResource {
             }
           } else {
             // clear out any related entities added by the formatter by default
-            rce.setRelatedEntities(Collections.<RootCauseEntity>emptyList());
+            rce.setRelatedEntities(Collections.emptyList());
           }
 
           return rce;

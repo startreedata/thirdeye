@@ -12,7 +12,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -25,10 +25,11 @@ import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalRatioSummary;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummary;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummaryCLITool;
 import org.apache.pinot.thirdeye.cube.ratio.RatioDBClient;
-import org.apache.pinot.thirdeye.cube.summary.SummaryResponse;
+import org.apache.pinot.thirdeye.cube.summary.DataCubeSummaryApi;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
@@ -45,6 +46,8 @@ public class DataCubeSummaryCalculator {
   public static final String DEFAULT_HIERARCHIES = "[]";
   public static final String DEFAULT_ONE_SIDE_ERROR = "false";
   public static final String DEFAULT_EXCLUDED_DIMENSIONS = "";
+  private static final int DEFAULT_HIGHLIGHT_CUBE_SUMMARY_SIZE = 4;
+  private static final int DEFAULT_HIGHLIGHT_CUBE_DEPTH = 3;
 
   private static final Logger LOG = LoggerFactory.getLogger(DataCubeSummaryCalculator.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -58,21 +61,80 @@ public class DataCubeSummaryCalculator {
   private static final String SIMPLE_RATIO_METRIC_EXPRESSION_ID_PARSER =
       "^id(?<" + NUMERATOR_GROUP_NAME + ">\\d*)\\/id(?<" + DENOMINATOR_GROUP_NAME + ">\\d*)$";
 
-  private final ThirdEyeCacheRegistry CACHE_REGISTRY_INSTANCE;
-  private final MetricConfigManager metricConfigDAO;
-  private final DatasetConfigManager datasetConfigDAO;
+  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private final MetricConfigManager metricConfigManager;
+  private final DatasetConfigManager datasetConfigManager;
 
   @Inject
   public DataCubeSummaryCalculator(
-      final ThirdEyeCacheRegistry cache_registry_instance,
-      final MetricConfigManager metricConfigDAO,
-      final DatasetConfigManager datasetConfigDAO) {
-    CACHE_REGISTRY_INSTANCE = cache_registry_instance;
-    this.metricConfigDAO = metricConfigDAO;
-    this.datasetConfigDAO = datasetConfigDAO;
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager) {
+    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+    this.metricConfigManager = metricConfigManager;
+    this.datasetConfigManager = datasetConfigManager;
   }
 
-  public Map<String, Object> getDataCubeSummary(
+  /**
+   * Returns if the given metric is a simple ratio metric such as "A/B" where A and B is a metric.
+   *
+   * @param metricConfigDTO the config of a metric.
+   * @return true if the given metric is a simple ratio metric.
+   */
+  static boolean isSimpleRatioMetric(MetricConfigDTO metricConfigDTO) {
+    if (metricConfigDTO != null) {
+      String metricExpression = metricConfigDTO.getDerivedMetricExpression();
+      if (!Strings.isNullOrEmpty(metricExpression)) {
+        Pattern pattern = Pattern.compile(SIMPLE_RATIO_METRIC_EXPRESSION_ID_PARSER);
+        Matcher matcher = pattern.matcher(metricExpression);
+        return matcher.matches();
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Parse numerator and denominator id from a given metric expression string.
+   *
+   * @param derivedMetricExpression the given metric expression.
+   * @return the parsed result, which is stored in MatchedRatioMetricsResult.
+   */
+  static MatchedRatioMetricsResult parseNumeratorDenominatorId(String derivedMetricExpression) {
+    if (Strings.isNullOrEmpty(derivedMetricExpression)) {
+      return new MatchedRatioMetricsResult(false, -1, -1);
+    }
+
+    Pattern pattern = Pattern.compile(SIMPLE_RATIO_METRIC_EXPRESSION_ID_PARSER);
+    Matcher matcher = pattern.matcher(derivedMetricExpression);
+    if (matcher.find()) {
+      // Extract numerator and denominator id
+      long numeratorId = Long.parseLong(matcher.group(NUMERATOR_GROUP_NAME));
+      long denominatorId = Long.parseLong(matcher.group(DENOMINATOR_GROUP_NAME));
+      return new MatchedRatioMetricsResult(true, numeratorId, denominatorId);
+    } else {
+      return new MatchedRatioMetricsResult(false, -1, -1);
+    }
+  }
+  public DataCubeSummaryApi compute(final MergedAnomalyResultDTO anomalyDTO) {
+    return compute(
+        anomalyDTO.getMetricUrn(),
+        anomalyDTO.getCollection(),
+        anomalyDTO.getMetric(),
+        anomalyDTO.getStartTime(),
+        anomalyDTO.getEndTime(),
+        anomalyDTO.getStartTime() - TimeUnit.DAYS.toMillis(7),
+        anomalyDTO.getEndTime() - TimeUnit.DAYS.toMillis(7),
+        joptsimple.internal.Strings.EMPTY,
+        joptsimple.internal.Strings.EMPTY,
+        DEFAULT_HIGHLIGHT_CUBE_SUMMARY_SIZE,
+        DEFAULT_HIGHLIGHT_CUBE_DEPTH,
+        DEFAULT_HIERARCHIES,
+        false,
+        DEFAULT_EXCLUDED_DIMENSIONS,
+        DEFAULT_TIMEZONE_ID);
+  }
+
+  public DataCubeSummaryApi compute(
       String metricUrn,
       String dataset,
       String metric,
@@ -88,29 +150,36 @@ public class DataCubeSummaryCalculator {
       boolean doOneSideError,
       String excludedDimensions,
       String timeZone
-  ) throws Exception {
-    SummaryResponse response = buildDataCubeSummary(metricUrn, metric, dataset,
+  ) {
+    return buildDataCubeSummary(metricUrn, metric, dataset,
         currentStartInclusive, currentEndExclusive, baselineStartInclusive,
         baselineEndExclusive, groupByDimensions, filterJsonPayload, summarySize, depth,
         hierarchiesPayload,
         doOneSideError, excludedDimensions, timeZone);
-    return OBJECT_MAPPER.convertValue(response, Map.class);
   }
 
-  private SummaryResponse buildDataCubeSummary(String metricUrn, String dataset, String metric,
+  private DataCubeSummaryApi buildDataCubeSummary(String metricUrn,
+      String dataset,
+      String metric,
       long currentStartInclusive,
-      long currentEndExclusive, long baselineStartInclusive, long baselineEndExclusive,
+      long currentEndExclusive,
+      long baselineStartInclusive,
+      long baselineEndExclusive,
       String groupByDimensions,
-      String filterJsonPayload, int summarySize, int depth, String hierarchiesPayload,
+      String filterJsonPayload,
+      int summarySize,
+      int depth,
+      String hierarchiesPayload,
       boolean doOneSideError,
-      String excludedDimensions, String timeZone) throws Exception {
+      String excludedDimensions,
+      String timeZone) {
     if (summarySize < 1) {
       summarySize = 1;
     }
 
     String metricName = metric;
     String datasetName = dataset;
-    SummaryResponse response = null;
+    DataCubeSummaryApi response = null;
     try {
       MetricConfigDTO metricConfigDTO = fetchMetricConfig(metricUrn, metric, dataset);
       if (metricConfigDTO != null) {
@@ -121,7 +190,7 @@ public class DataCubeSummaryCalculator {
       Dimensions dimensions;
       if (StringUtils.isBlank(groupByDimensions) || JAVASCRIPT_NULL_STRING
           .equals(groupByDimensions)) {
-        DatasetConfigDTO datasetConfigDTO = datasetConfigDAO.findByDataset(datasetName);
+        DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDataset(datasetName);
         List<String> dimensionNames = new ArrayList<>();
         if (datasetConfigDTO != null) {
           dimensionNames = datasetConfigDTO.getDimensions();
@@ -170,40 +239,21 @@ public class DataCubeSummaryCalculator {
     } catch (Exception e) {
       LOG.error("Exception while generating difference summary", e);
       if (metricUrn != null) {
-        response = SummaryResponse.buildNotAvailableResponse(metricUrn);
+        response = DataCubeSummaryApi.buildNotAvailableResponse(metricUrn);
       } else {
-        response = SummaryResponse.buildNotAvailableResponse(datasetName, metricName);
+        response = DataCubeSummaryApi.buildNotAvailableResponse(datasetName, metricName);
       }
     }
 
     return response;
   }
 
-  /**
-   * Returns if the given metric is a simple ratio metric such as "A/B" where A and B is a metric.
-   *
-   * @param metricConfigDTO the config of a metric.
-   *
-   * @return true if the given metric is a simple ratio metric.
-   */
-  static boolean isSimpleRatioMetric(MetricConfigDTO metricConfigDTO) {
-    if (metricConfigDTO != null) {
-      String metricExpression = metricConfigDTO.getDerivedMetricExpression();
-      if (!Strings.isNullOrEmpty(metricExpression)) {
-        Pattern pattern = Pattern.compile(SIMPLE_RATIO_METRIC_EXPRESSION_ID_PARSER);
-        Matcher matcher = pattern.matcher(metricExpression);
-        return matcher.matches();
-      }
-    }
-    return false;
-  }
-
   private MetricConfigDTO fetchMetricConfig(String metricUrn, String metric, String dataset) {
     MetricConfigDTO metricConfigDTO;
     if (StringUtils.isNotBlank(metricUrn)) {
-      metricConfigDTO = metricConfigDAO.findById(MetricEntity.fromURN(metricUrn).getId());
+      metricConfigDTO = metricConfigManager.findById(MetricEntity.fromURN(metricUrn).getId());
     } else {
-      metricConfigDTO = metricConfigDAO.findByMetricAndDataset(metric, dataset);
+      metricConfigDTO = metricConfigManager.findByMetricAndDataset(metric, dataset);
     }
     return metricConfigDTO;
   }
@@ -227,7 +277,7 @@ public class DataCubeSummaryCalculator {
    * @param doOneSideError flag to toggle if we only want one side results.
    * @return the summary result of cube algorithm.
    */
-  private SummaryResponse runAdditiveCubeAlgorithm(DateTimeZone dateTimeZone, String dataset,
+  private DataCubeSummaryApi runAdditiveCubeAlgorithm(DateTimeZone dateTimeZone, String dataset,
       String metric,
       long currentStartInclusive, long currentEndExclusive, long baselineStartInclusive,
       long baselineEndExclusive,
@@ -236,7 +286,7 @@ public class DataCubeSummaryCalculator {
 
     CostFunction costFunction = new BalancedCostFunction();
     AdditiveDBClient cubeDbClient = new AdditiveDBClient(
-        CACHE_REGISTRY_INSTANCE.getDataSourceCache(), CACHE_REGISTRY_INSTANCE);
+        thirdEyeCacheRegistry.getDataSourceCache(), thirdEyeCacheRegistry);
     MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(cubeDbClient, costFunction,
         dateTimeZone);
 
@@ -257,88 +307,50 @@ public class DataCubeSummaryCalculator {
    * @param baselineStartInclusive timestamp of baseline start.
    * @param baselineEndExclusive timestamp of baseline end.
    * @param dimensions ordered dimensions to be drilled down by the algorithm.
-   * @param dataFilters the filter to be applied on the data. Thus, the algorithm will only analyze a subset of data.
+   * @param dataFilters the filter to be applied on the data. Thus, the algorithm will only
+   *     analyze a subset of data.
    * @param summarySize the size of the summary result.
    * @param depth the depth of the dimensions to be analyzed.
    * @param hierarchies the hierarchy among the dimensions.
    * @param doOneSideError flag to toggle if we only want one side results.
-   *
    * @return the summary result of cube algorithm.
    */
-  private SummaryResponse runRatioCubeAlgorithm(DateTimeZone dateTimeZone, String dataset,
+  private DataCubeSummaryApi runRatioCubeAlgorithm(DateTimeZone dateTimeZone, String dataset,
       MetricConfigDTO metricConfigDTO, long currentStartInclusive, long currentEndExclusive,
       long baselineStartInclusive, long baselineEndExclusive, Dimensions dimensions,
-      Multimap<String, String> dataFilters, int summarySize, int depth, List<List<String>> hierarchies,
+      Multimap<String, String> dataFilters, int summarySize, int depth,
+      List<List<String>> hierarchies,
       boolean doOneSideError) throws Exception {
     Preconditions.checkNotNull(metricConfigDTO);
 
     // Construct regular expression parser
     String derivedMetricExpression = metricConfigDTO.getDerivedMetricExpression();
-    MatchedRatioMetricsResult matchedRatioMetricsResult = parseNumeratorDenominatorId(derivedMetricExpression);
+    MatchedRatioMetricsResult matchedRatioMetricsResult = parseNumeratorDenominatorId(
+        derivedMetricExpression);
 
     if (matchedRatioMetricsResult.hasFound) {
       // Extract numerator and denominator id
       long numeratorId = matchedRatioMetricsResult.numeratorId;
       long denominatorId = matchedRatioMetricsResult.denominatorId;
       // Get numerator and denominator's metric name
-      String numeratorMetric = metricConfigDAO.findById(numeratorId).getName();
-      String denominatorMetric = metricConfigDAO.findById(denominatorId).getName();
+      String numeratorMetric = metricConfigManager.findById(numeratorId).getName();
+      String denominatorMetric = metricConfigManager.findById(denominatorId).getName();
       // Generate cube result
       CostFunction costFunction = new RatioCostFunction();
-      RatioDBClient dbClient = new RatioDBClient(CACHE_REGISTRY_INSTANCE.getDataSourceCache(), CACHE_REGISTRY_INSTANCE);
-      MultiDimensionalRatioSummary mdSummary = new MultiDimensionalRatioSummary(dbClient, costFunction, dateTimeZone);
+      RatioDBClient dbClient = new RatioDBClient(thirdEyeCacheRegistry.getDataSourceCache(),
+          thirdEyeCacheRegistry);
+      MultiDimensionalRatioSummary mdSummary = new MultiDimensionalRatioSummary(dbClient,
+          costFunction, dateTimeZone);
 
-      return mdSummary.buildRatioSummary(dataset, numeratorMetric, denominatorMetric, currentStartInclusive,
-          currentEndExclusive, baselineStartInclusive, baselineEndExclusive, dimensions, dataFilters, summarySize,
-          depth, hierarchies, doOneSideError);
+      return mdSummary
+          .buildRatioSummary(dataset, numeratorMetric, denominatorMetric, currentStartInclusive,
+              currentEndExclusive, baselineStartInclusive, baselineEndExclusive, dimensions,
+              dataFilters, summarySize,
+              depth, hierarchies, doOneSideError);
     } else { // parser should find ids because of the guard of the if-condition.
-      LOG.error("Unable to parser numerator and denominator metric for metric" + metricConfigDTO.getName());
-      return SummaryResponse.buildNotAvailableResponse(dataset, metricConfigDTO.getName());
+      LOG.error("Unable to parser numerator and denominator metric for metric" + metricConfigDTO
+          .getName());
+      return DataCubeSummaryApi.buildNotAvailableResponse(dataset, metricConfigDTO.getName());
     }
   }
-
-  /**
-   * Parse numerator and denominator id from a given metric expression string.
-   *
-   * @param derivedMetricExpression the given metric expression.
-   *
-   * @return the parsed result, which is stored in MatchedRatioMetricsResult.
-   */
-  static MatchedRatioMetricsResult parseNumeratorDenominatorId(String derivedMetricExpression) {
-    if (Strings.isNullOrEmpty(derivedMetricExpression)) {
-      return new MatchedRatioMetricsResult(false, -1, -1);
-    }
-
-    Pattern pattern = Pattern.compile(SIMPLE_RATIO_METRIC_EXPRESSION_ID_PARSER);
-    Matcher matcher = pattern.matcher(derivedMetricExpression);
-    if (matcher.find()) {
-      // Extract numerator and denominator id
-      long numeratorId = Long.valueOf(matcher.group(NUMERATOR_GROUP_NAME));
-      long denominatorId = Long.valueOf(matcher.group(DENOMINATOR_GROUP_NAME));
-      return new MatchedRatioMetricsResult(true, numeratorId, denominatorId);
-    } else {
-      return new MatchedRatioMetricsResult(false, -1, -1);
-    }
-  }
-  /**
-   * The class to store the parsed numerator and denominator id.
-   */
-  static class MatchedRatioMetricsResult {
-    boolean hasFound; // false is parsing is failed.
-    long numeratorId; // numerator id if parsing is succeeded.
-    long denominatorId; // denominator id if parsing is succeeded.
-
-    /**
-     * Construct the object that stores the parsed numerator and denominator id.
-     * @param hasFound false is parsing is failed.
-     * @param numeratorId numerator id if parsing is succeeded.
-     * @param denominatorId denominator id if parsing is succeeded.
-     */
-    MatchedRatioMetricsResult(boolean hasFound, long numeratorId, long denominatorId) {
-      this.hasFound = hasFound;
-      this.numeratorId = numeratorId;
-      this.denominatorId = denominatorId;
-    }
-  }
-
 }

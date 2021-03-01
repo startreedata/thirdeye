@@ -27,12 +27,12 @@ public class SummaryGainerLoserResponseRow extends BaseResponseRow {
 
   public static SummaryGainerLoserResponseRow buildNotAvailableRow() {
     SummaryGainerLoserResponseRow row = new SummaryGainerLoserResponseRow();
-    row.dimensionName = SummaryResponse.NOT_AVAILABLE;
-    row.dimensionValue = SummaryResponse.NOT_AVAILABLE;
-    row.cost = SummaryResponse.NOT_AVAILABLE;
-    row.percentageChange = SummaryResponse.NOT_AVAILABLE;
-    row.contributionChange = SummaryResponse.NOT_AVAILABLE;
-    row.contributionToOverallChange = SummaryResponse.NOT_AVAILABLE;
+    row.dimensionName = DataCubeSummaryApi.NOT_AVAILABLE;
+    row.dimensionValue = DataCubeSummaryApi.NOT_AVAILABLE;
+    row.cost = DataCubeSummaryApi.NOT_AVAILABLE;
+    row.percentageChange = DataCubeSummaryApi.NOT_AVAILABLE;
+    row.contributionChange = DataCubeSummaryApi.NOT_AVAILABLE;
+    row.contributionToOverallChange = DataCubeSummaryApi.NOT_AVAILABLE;
     return row;
   }
 }

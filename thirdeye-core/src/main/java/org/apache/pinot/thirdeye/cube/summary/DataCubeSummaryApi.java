@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 
-public class SummaryResponse {
+public class DataCubeSummaryApi {
 
   private final static int MAX_GAINER_LOSER_COUNT = 5;
   private final static NumberFormat DOUBLE_FORMATTER = new DecimalFormat("#0.0000");
@@ -85,7 +85,7 @@ public class SummaryResponse {
   @JsonProperty("dimensionCosts")
   private List<Cube.DimensionCost> dimensionCosts = new ArrayList<>();
 
-  public SummaryResponse(double baselineTotal, double currentTotal, double baselineTotalSize,
+  public DataCubeSummaryApi(double baselineTotal, double currentTotal, double baselineTotalSize,
       double currentTotalSize) {
     this.baselineTotal = baselineTotal;
     this.currentTotal = currentTotal;
@@ -138,15 +138,15 @@ public class SummaryResponse {
     this.dimensionCosts = dimensionCosts;
   }
 
-  public static SummaryResponse buildNotAvailableResponse(String metricUrn) {
-    SummaryResponse response = new SummaryResponse(0d, 0d, 0d, 0d);
+  public static DataCubeSummaryApi buildNotAvailableResponse(String metricUrn) {
+    DataCubeSummaryApi response = new DataCubeSummaryApi(0d, 0d, 0d, 0d);
     response.setMetricUrn(metricUrn);
     response.dimensions.add(NOT_AVAILABLE);
     return response;
   }
 
-  public static SummaryResponse buildNotAvailableResponse(String dataset, String metricName) {
-    SummaryResponse response = new SummaryResponse(0d, 0d, 0d, 0d);
+  public static DataCubeSummaryApi buildNotAvailableResponse(String dataset, String metricName) {
+    DataCubeSummaryApi response = new DataCubeSummaryApi(0d, 0d, 0d, 0d);
     response.setDataset(dataset);
     response.setMetricName(metricName);
     response.dimensions.add(NOT_AVAILABLE);
@@ -319,7 +319,7 @@ public class SummaryResponse {
   }
 
   public String toString() {
-    StringBuilder sb = new StringBuilder(SummaryResponse.class.getSimpleName());
+    StringBuilder sb = new StringBuilder(DataCubeSummaryApi.class.getSimpleName());
     sb.append("\n\t").append(this.dimensions);
     for (SummaryResponseRow row : getResponseRows()) {
       sb.append("\n\t").append(row);

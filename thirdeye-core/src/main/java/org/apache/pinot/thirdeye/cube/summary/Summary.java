@@ -75,19 +75,19 @@ public class Summary {
     this.leafRowInserter = basicRowInserter;
   }
 
-  public SummaryResponse computeSummary(int answerSize) {
+  public DataCubeSummaryApi computeSummary(int answerSize) {
     return computeSummary(answerSize, false, this.maxLevelCount);
   }
 
-  public SummaryResponse computeSummary(int answerSize, boolean doOneSideError) {
+  public DataCubeSummaryApi computeSummary(int answerSize, boolean doOneSideError) {
     return computeSummary(answerSize, doOneSideError, this.maxLevelCount);
   }
 
-  public SummaryResponse computeSummary(int answerSize, int levelCount) {
+  public DataCubeSummaryApi computeSummary(int answerSize, int levelCount) {
     return computeSummary(answerSize, false, levelCount);
   }
 
-  public SummaryResponse computeSummary(int answerSize, boolean doOneSideError,
+  public DataCubeSummaryApi computeSummary(int answerSize, boolean doOneSideError,
       int userLevelCount) {
     if (answerSize <= 0) {
       answerSize = 1;
@@ -114,8 +114,8 @@ public class Summary {
     }
     computeChildDPArray(root);
     List<CubeNode> answer = new ArrayList<>(dpArrays.get(0).getAnswer());
-    SummaryResponse response =
-        new SummaryResponse(cube.getBaselineTotal(), cube.getCurrentTotal(),
+    DataCubeSummaryApi response =
+        new DataCubeSummaryApi(cube.getBaselineTotal(), cube.getCurrentTotal(),
             cube.getBaselineTotalSize(),
             cube.getCurrentTotalSize());
     response.buildDiffSummary(answer, this.levelCount, costFunction);
@@ -473,7 +473,7 @@ public class Summary {
     }
     Summary summary = new Summary(cube, new BalancedCostFunction());
     try {
-      SummaryResponse response = summary
+      DataCubeSummaryApi response = summary
           .computeSummary(answerSize, doOneSideError, maxDimensionSize);
       System.out.print("JSon String: ");
       System.out.println(new ObjectMapper().writeValueAsString(response));

@@ -2,7 +2,6 @@ package org.apache.pinot.thirdeye;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
@@ -25,8 +24,7 @@ public class ThirdEyeCoordinatorModule extends AbstractModule {
     install(new ThirdEyeCoreModule(dataSource));
 
     bind(RootCauseResource.class)
-        .toProvider(new RootCauseResourceProvider(configuration))
-        .in(Scopes.SINGLETON);
+        .toProvider(new RootCauseResourceProvider(configuration));
   }
 
   @Singleton

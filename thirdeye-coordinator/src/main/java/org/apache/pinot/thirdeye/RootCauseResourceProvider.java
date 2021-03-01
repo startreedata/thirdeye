@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,13 +49,13 @@ public class RootCauseResourceProvider implements Provider<RootCauseResource> {
     return rcaConfigFile;
   }
 
-  private Map<String, RCAFramework> makeRootCauseFrameworks(RCAConfiguration config,
+  private Map<String, RCAFramework> createRcaFrameworkMap(RCAConfiguration config,
       File definitionsFile) throws Exception {
     ExecutorService executor = Executors.newFixedThreadPool(config.getParallelism());
     return rcaFrameworkLoader.getFrameworksFromConfig(definitionsFile, executor);
   }
 
-  private static List<RootCauseEntityFormatter> makeRootCauseFormatters(
+  private static List<RootCauseEntityFormatter> createFormatters(
       RCAConfiguration config) throws Exception {
     List<RootCauseEntityFormatter> formatters = new ArrayList<>();
     if (config.getFormatters() != null) {
@@ -79,13 +80,14 @@ public class RootCauseResourceProvider implements Provider<RootCauseResource> {
 
     RCAConfiguration rcConfig = new RCAConfiguration();
     return new RootCauseResource(
-        makeRootCauseFrameworks(rcConfig, definitionsFile),
-        makeRootCauseFormatters(rcConfig),
+        createRcaFrameworkMap(rcConfig, definitionsFile),
+        createFormatters(rcConfig),
         mergedAnomalyResultManager,
         dataCubeSummaryCalculator);
   }
 
   @Override
+  @Singleton
   public RootCauseResource get() {
     try {
       return makeRootCauseResource();

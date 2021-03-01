@@ -6,6 +6,7 @@ import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_TI
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.parseListParams;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 @Api(tags = "Root Cause Analysis")
 @Produces(MediaType.APPLICATION_JSON)
+@Singleton
 public class RootCauseResource {
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseResource.class);
 

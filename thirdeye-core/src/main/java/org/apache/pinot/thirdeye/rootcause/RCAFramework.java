@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.rootcause;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -103,7 +102,14 @@ public class RCAFramework {
     long tStart = System.nanoTime();
     try {
       Map<String, Pipeline> pipelines = new HashMap<>(this.pipelines);
-      pipelines.put(INPUT, new StaticPipeline(INPUT, Collections.emptySet(), input));
+
+      final StaticPipeline staticPipeline = new StaticPipeline(input);
+      staticPipeline.init(new PipelineInitContext()
+          .setInputNames(Collections.emptySet())
+          .setOutputName(INPUT)
+      );
+
+      pipelines.put(INPUT, staticPipeline);
 
       LOG.info("Constructing flow for input '{}'", input);
       Map<String, Future<PipelineResult>> flow = constructDAG(pipelines);
@@ -130,12 +136,7 @@ public class RCAFramework {
 
   static void logResultDetails(PipelineResult result) {
     List<Entity> entities = new ArrayList<>(result.getEntities());
-    Collections.sort(entities, new Comparator<Entity>() {
-      @Override
-      public int compare(Entity o1, Entity o2) {
-        return -Double.compare(o1.getScore(), o2.getScore());
-      }
-    });
+    entities.sort((o1, o2) -> -Double.compare(o1.getScore(), o2.getScore()));
 
     for (Entity e : entities) {
       LOG.debug("{} [{}] {}", Math.round(e.getScore() * 1000) / 1000.0,

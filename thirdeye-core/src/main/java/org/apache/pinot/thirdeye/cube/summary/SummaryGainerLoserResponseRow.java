@@ -24,15 +24,4 @@ public class SummaryGainerLoserResponseRow extends BaseResponseRow {
   public String dimensionName;
   public String dimensionValue;
   public String cost;
-
-  public static SummaryGainerLoserResponseRow buildNotAvailableRow() {
-    SummaryGainerLoserResponseRow row = new SummaryGainerLoserResponseRow();
-    row.dimensionName = Summary.NOT_AVAILABLE;
-    row.dimensionValue = Summary.NOT_AVAILABLE;
-    row.cost = Summary.NOT_AVAILABLE;
-    row.percentageChange = Summary.NOT_AVAILABLE;
-    row.contributionChange = Summary.NOT_AVAILABLE;
-    row.contributionToOverallChange = Summary.NOT_AVAILABLE;
-    return row;
-  }
 }

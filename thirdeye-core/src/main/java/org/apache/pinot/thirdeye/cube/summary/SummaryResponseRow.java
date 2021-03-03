@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -32,17 +31,6 @@ public class SummaryResponseRow extends BaseResponseRow {
   public List<String> names;
   public String otherDimensionValues;
   public double cost;
-
-  public static SummaryResponseRow buildNotAvailableRow() {
-    SummaryResponseRow row = new SummaryResponseRow();
-    row.names = new ArrayList<>();
-    row.names.add(Summary.NOT_AVAILABLE);
-    row.percentageChange = Summary.NOT_AVAILABLE;
-    row.contributionChange = Summary.NOT_AVAILABLE;
-    row.contributionToOverallChange = Summary.NOT_AVAILABLE;
-    row.otherDimensionValues = Summary.NOT_AVAILABLE;
-    return row;
-  }
 
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);

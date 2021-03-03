@@ -16,7 +16,8 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
-import static org.apache.pinot.thirdeye.cube.summary.DataCubeSummaryApi.NOT_ALL;
+import static org.apache.pinot.thirdeye.cube.summary.Summary.NOT_ALL;
+import static org.apache.pinot.thirdeye.cube.summary.Summary.roundUp;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,9 +46,13 @@ public class DataCubeSummaryApiTest {
     double baselineSize = cubeNodes.get(rootIdx).getOriginalBaselineSize();
     double currentSize = cubeNodes.get(rootIdx).getOriginalCurrentSize();
     // Build the response
-    DataCubeSummaryApi response = new DataCubeSummaryApi(baselineTotal, currentTotal, baselineSize,
-        currentSize);
-    response.buildDiffSummary(cubeNodes, 2, new BalancedCostFunction());
+    DataCubeSummaryApi response = new DataCubeSummaryApi()
+        .setBaselineTotal(baselineTotal)
+        .setCurrentTotal(currentTotal)
+        .setBaselineTotalSize(baselineSize)
+        .setCurrentTotalSize(currentSize)
+        .setGlobalRatio(roundUp(currentTotal / baselineTotal));
+    Summary.buildDiffSummary(response, cubeNodes, 2, new BalancedCostFunction());
     response.setMetricUrn("testMetricUrn");
 
     // Validation

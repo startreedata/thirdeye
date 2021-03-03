@@ -321,15 +321,25 @@ public class DataCubeSummaryCalculator {
       Dimensions dimensions, Multimap<String, String> dataFilters, int summarySize, int depth,
       List<List<String>> hierarchies, boolean doOneSideError) throws Exception {
 
-    CostFunction costFunction = new BalancedCostFunction();
-    AdditiveDBClient cubeDbClient = new AdditiveDBClient(
-        thirdEyeCacheRegistry.getDataSourceCache(), thirdEyeCacheRegistry);
-    MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(cubeDbClient, costFunction,
+    final CostFunction costFunction = new BalancedCostFunction();
+    final AdditiveDBClient cubeDbClient = new AdditiveDBClient(
+        thirdEyeCacheRegistry.getDataSourceCache(),
+        thirdEyeCacheRegistry);
+    final MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(cubeDbClient,
+        costFunction,
         dateTimeZone);
 
-    return mdSummary.buildSummary(dataset, metric, currentStartInclusive, currentEndExclusive,
+    return mdSummary.buildSummary(dataset,
+        metric,
+        currentStartInclusive,
+        currentEndExclusive,
         baselineStartInclusive,
-        baselineEndExclusive, dimensions, dataFilters, summarySize, depth, hierarchies,
+        baselineEndExclusive,
+        dimensions,
+        dataFilters,
+        summarySize,
+        depth,
+        hierarchies,
         doOneSideError);
   }
 

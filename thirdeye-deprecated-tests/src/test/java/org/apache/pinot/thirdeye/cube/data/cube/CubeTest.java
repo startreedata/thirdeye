@@ -34,7 +34,7 @@ public class CubeTest {
 
   @Test
   public void testSortDimensionNoHierarchy() throws Exception {
-    List<Cube.DimensionCost> dimensionCosts = getBasicDimensionCosts();
+    List<DimensionCost> dimensionCosts = getBasicDimensionCosts();
     Dimensions expectedSortedDimensions1 = new Dimensions(
         Arrays.asList("country", "page", "continent"));
 
@@ -50,7 +50,7 @@ public class CubeTest {
 
   @Test
   public void testSortDimensionWithHierarchy() throws Exception {
-    List<Cube.DimensionCost> dimensionCosts = getBasicDimensionCosts();
+    List<DimensionCost> dimensionCosts = getBasicDimensionCosts();
 
     // Hierarchy with depth = 1
     Dimensions sortedDimensionsDepth1 =
@@ -77,19 +77,19 @@ public class CubeTest {
     Assert.assertEquals(dimensionCosts, getBasicDimensionCosts());
   }
 
-  private List<Cube.DimensionCost> getBasicDimensionCosts() {
-    List<Cube.DimensionCost> dimensionCosts = new ArrayList<>();
-    dimensionCosts.add(new Cube.DimensionCost("country", 10d));
-    dimensionCosts.add(new Cube.DimensionCost("page", 8d));
-    dimensionCosts.add(new Cube.DimensionCost("continent", 5d));
+  private List<DimensionCost> getBasicDimensionCosts() {
+    List<DimensionCost> dimensionCosts = new ArrayList<>();
+    dimensionCosts.add(new DimensionCost("country", 10d));
+    dimensionCosts.add(new DimensionCost("page", 8d));
+    dimensionCosts.add(new DimensionCost("continent", 5d));
     return dimensionCosts;
   }
 
   @Test
   public void testCalculateSortedDimensionCost() {
     List<DimNameValueCostEntry> costSet = getBasicCostSet();
-    List<Cube.DimensionCost> actualDimensionCosts = Cube.calculateSortedDimensionCost(costSet);
-    List<Cube.DimensionCost> expectedDimensionCosts = getBasicDimensionCosts();
+    List<DimensionCost> actualDimensionCosts = Cube.calculateSortedDimensionCost(costSet);
+    List<DimensionCost> expectedDimensionCosts = getBasicDimensionCosts();
 
     Assert.assertEquals(actualDimensionCosts, expectedDimensionCosts);
   }

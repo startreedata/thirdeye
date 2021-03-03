@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.cube.entry;
 
+import static org.apache.pinot.thirdeye.cube.entry.SummaryUtils.checkArguments;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -78,18 +80,32 @@ public class MultiDimensionalSummary {
    * @param doOneSideError if the summary should only consider one side error.
    * @return the multi-dimensional summary of an additive metric.
    */
-  public DataCubeSummaryApi buildSummary(String dataset, String metric, long currentStartInclusive,
-      long currentEndExclusive, long baselineStartInclusive, long baselineEndExclusive,
+  public DataCubeSummaryApi buildSummary(String dataset,
+      String metric,
+      long currentStartInclusive,
+      long currentEndExclusive,
+      long baselineStartInclusive,
+      long baselineEndExclusive,
       Dimensions dimensions,
-      Multimap<String, String> dataFilters, int summarySize, int depth,
+      Multimap<String, String> dataFilters,
+      int summarySize,
+      int depth,
       List<List<String>> hierarchies,
       boolean doOneSideError) throws Exception {
     // Check arguments
     List<String> metrics = new ArrayList<>();
     metrics.add(metric);
-    SummaryUtils.checkArguments(dataset, metrics, currentStartInclusive, currentEndExclusive,
+    checkArguments(dataset,
+        metrics,
+        currentStartInclusive,
+        currentEndExclusive,
         baselineStartInclusive,
-        baselineEndExclusive, dimensions, dataFilters, summarySize, depth, hierarchies);
+        baselineEndExclusive,
+        dimensions,
+        dataFilters,
+        summarySize,
+        depth,
+        hierarchies);
 
     dbClient.setDataset(dataset);
     dbClient.setMetric(metric);

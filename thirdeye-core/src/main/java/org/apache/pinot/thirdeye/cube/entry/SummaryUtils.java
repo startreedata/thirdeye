@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.cube.entry;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
@@ -27,24 +29,29 @@ public class SummaryUtils {
    * @param depth the max depth of dimensions to be drilled down; needs to be >= 0.
    * @param hierarchies the hierarchy among dimensions; cannot be null.
    */
-  public static void checkArguments(String dataset, List<String> metrics,
+  public static void checkArguments(String dataset,
+      List<String> metrics,
       long currentStartInclusive,
-      long currentEndExclusive, long baselineStartInclusive, long baselineEndExclusive,
+      long currentEndExclusive,
+      long baselineStartInclusive,
+      long baselineEndExclusive,
       Dimensions dimensions,
-      Multimap<String, String> dataFilters, int summarySize, int depth,
+      Multimap<String, String> dataFilters,
+      int summarySize,
+      int depth,
       List<List<String>> hierarchies) {
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(dataset));
-    Preconditions.checkArgument(!metrics.isEmpty());
+    checkArgument(!Strings.isNullOrEmpty(dataset));
+    checkArgument(!metrics.isEmpty());
     for (String metric : metrics) {
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(metric));
+      checkArgument(!Strings.isNullOrEmpty(metric));
     }
-    Preconditions.checkArgument(currentStartInclusive < currentEndExclusive);
-    Preconditions.checkArgument(baselineStartInclusive < baselineEndExclusive);
+    checkArgument(currentStartInclusive < currentEndExclusive);
+    checkArgument(baselineStartInclusive < baselineEndExclusive);
     Preconditions.checkNotNull(dimensions);
-    Preconditions.checkArgument(dimensions.size() > 0);
+    checkArgument(dimensions.size() > 0);
     Preconditions.checkNotNull(dataFilters);
-    Preconditions.checkArgument(summarySize > 1);
+    checkArgument(summarySize > 1);
     Preconditions.checkNotNull(hierarchies);
-    Preconditions.checkArgument(depth >= 0);
+    checkArgument(depth >= 0);
   }
 }

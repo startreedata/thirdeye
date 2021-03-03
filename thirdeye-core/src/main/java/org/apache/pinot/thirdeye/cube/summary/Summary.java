@@ -38,6 +38,7 @@ import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import org.apache.pinot.thirdeye.cube.data.cube.Cube;
 import org.apache.pinot.thirdeye.cube.data.cube.DimNameValueCostEntry;
+import org.apache.pinot.thirdeye.cube.data.cube.DimensionCost;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.slf4j.Logger;
@@ -63,7 +64,7 @@ public class Summary {
   private final CostFunction costFunction;
   private final RowInserter basicRowInserter;
   private final List<DimNameValueCostEntry> costSet;
-  private final List<Cube.DimensionCost> sortedDimensionCosts;
+  private final List<DimensionCost> sortedDimensionCosts;
   private int levelCount;
   private List<DPArray> dpArrays;
   private RowInserter oneSideErrorRowInserter;

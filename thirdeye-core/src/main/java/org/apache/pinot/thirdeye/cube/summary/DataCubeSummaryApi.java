@@ -21,8 +21,7 @@ package org.apache.pinot.thirdeye.cube.summary;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.cube.data.cube.Cube;
-import org.apache.pinot.thirdeye.cube.data.cube.Cube.DimensionCost;
+import org.apache.pinot.thirdeye.cube.data.cube.DimensionCost;
 
 public class DataCubeSummaryApi {
 
@@ -38,7 +37,7 @@ public class DataCubeSummaryApi {
   private List<SummaryResponseRow> responseRows = new ArrayList<>();
   private List<SummaryGainerLoserResponseRow> gainer = new ArrayList<>();
   private List<SummaryGainerLoserResponseRow> loser = new ArrayList<>();
-  private List<Cube.DimensionCost> dimensionCosts = new ArrayList<>();
+  private List<DimensionCost> dimensionCosts = new ArrayList<>();
 
   public String getMetricUrn() {
     return metricUrn;

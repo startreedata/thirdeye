@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -353,43 +352,6 @@ public class Cube { // the cube (Ca|Cb)
     return costSet;
   }
 
-  public static class DimensionCost {
-
-    private final String dimensinoName;
-    private final double cost;
-
-    public DimensionCost(String dimensinoName, double cost) {
-      this.dimensinoName = Preconditions.checkNotNull(dimensinoName);
-      this.cost = cost;
-    }
-
-    public String getDimensinoName() {
-      return dimensinoName;
-    }
-
-    public double getCost() {
-      return cost;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      DimensionCost that = (DimensionCost) o;
-      return Double.compare(that.cost, cost) == 0 && Objects
-          .equals(dimensinoName, that.dimensinoName);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(dimensinoName, cost);
-    }
-  }
-
   private static class HierarchicalDimensionCost {
 
     List<String> dimensionNames;
@@ -426,7 +388,7 @@ public class Cube { // the cube (Ca|Cb)
     dimensionCosts.sort(new Comparator<DimensionCost>() {
       @Override
       public int compare(DimensionCost d1, DimensionCost d2) {
-        return Double.compare(d2.cost, d1.cost);
+        return Double.compare(d2.getCost(), d1.getCost());
       }
     });
 
@@ -452,7 +414,7 @@ public class Cube { // the cube (Ca|Cb)
     // Reorder the dimensions based on the given hierarchy
     List<String> dimensionsToBeOrdered = new ArrayList<>(trimmedSortedDimensionCosts.size());
     for (DimensionCost dimensionCost : trimmedSortedDimensionCosts) {
-      dimensionsToBeOrdered.add(dimensionCost.dimensinoName);
+      dimensionsToBeOrdered.add(dimensionCost.getName());
     }
     List<HierarchicalDimensionCost> hierarchicalDimensionCosts =
         getInitialHierarchicalDimensionList(dimensionsToBeOrdered, suggestedHierarchies);
@@ -534,8 +496,8 @@ public class Cube { // the cube (Ca|Cb)
     // Average the cost of each group of hierarchical dimensions
     for (DimensionCost dimensionCost : sortedDimensionCosts) {
       HierarchicalDimensionCost hierarchicalDimensionCost =
-          hierarchicalDimensionCostTable.get(dimensionCost.dimensinoName);
-      hierarchicalDimensionCost.cost += dimensionCost.cost;
+          hierarchicalDimensionCostTable.get(dimensionCost.getName());
+      hierarchicalDimensionCost.cost += dimensionCost.getCost();
     }
     for (HierarchicalDimensionCost hierarchicalDimensionCost : hierarchicalDimensionCosts) {
       hierarchicalDimensionCost.cost /= hierarchicalDimensionCost.dimensionNames.size();

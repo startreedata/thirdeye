@@ -190,8 +190,6 @@ public class DataProviderTest {
     // aggregation loader
     final AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO,
         datasetDAO,
-        dataSourceCache,
-        mockDatasetMaxDataTimeCache,
         cacheRegistry);
 
     // time series loader

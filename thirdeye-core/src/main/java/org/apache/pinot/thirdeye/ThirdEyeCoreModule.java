@@ -10,8 +10,6 @@ import org.apache.pinot.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import org.apache.pinot.thirdeye.auth.ThirdEyeCredentials;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
@@ -34,40 +32,18 @@ public class ThirdEyeCoreModule extends AbstractModule {
   protected void configure() {
     install(new ThirdEyePersistenceModule(dataSource));
 
-    bind(new TypeLiteral<Authenticator<ThirdEyeCredentials, ThirdEyePrincipal>>() {
-    })
+    bind(new TypeLiteral<Authenticator<ThirdEyeCredentials, ThirdEyePrincipal>>() {})
         .to(ThirdEyeAuthenticatorDisabled.class)
         .in(Scopes.SINGLETON);
+
     bind(DataProvider.class).to(DefaultDataProvider.class).in(Scopes.SINGLETON);
     bind(TimeSeriesLoader.class).to(DefaultTimeSeriesLoader.class).in(Scopes.SINGLETON);
-  }
-
-  @Singleton
-  @Provides
-  public DefaultTimeSeriesLoader getTimeSeriesLoader(
-      final DatasetConfigManager datasetConfigManager,
-      final MetricConfigManager metricConfigManager,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    return new DefaultTimeSeriesLoader(metricConfigManager, datasetConfigManager,
-        thirdEyeCacheRegistry);
+    bind(AggregationLoader.class).to(DefaultAggregationLoader.class).in(Scopes.SINGLETON);
   }
 
   @Singleton
   @Provides
   public TimeSeriesCache getTimeSeriesCache(final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     return thirdEyeCacheRegistry.buildTimeSeriesCache(null, 10);
-  }
-
-  @Singleton
-  @Provides
-  public AggregationLoader getAggregationLoader(
-      final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    return new DefaultAggregationLoader(metricConfigManager,
-        datasetConfigManager,
-        thirdEyeCacheRegistry.getDataSourceCache(),
-        thirdEyeCacheRegistry.getDatasetMaxDataTimeCache(),
-        thirdEyeCacheRegistry);
   }
 }

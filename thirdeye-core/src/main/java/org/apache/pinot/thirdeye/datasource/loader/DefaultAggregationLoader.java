@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.datasource.loader;
 
-import com.google.common.cache.LoadingCache;
+import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,7 +38,6 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,20 +49,19 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
-  private final DataSourceCache cache;
-  private final LoadingCache<String, Long> maxTimeCache;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
+  @Inject
   public DefaultAggregationLoader(MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO,
-      DataSourceCache cache,
-      LoadingCache<String, Long> maxTimeCache,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
-    this.cache = cache;
-    this.maxTimeCache = maxTimeCache;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+  }
+
+  private static long makeTimeout(long deadline) {
+    return Math.max(deadline - System.currentTimeMillis(), 0);
   }
 
   @Override
@@ -102,7 +100,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
           .makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref",
               this.metricDAO, this.datasetDAO,
               thirdEyeCacheRegistry);
-      Future<ThirdEyeResponse> res = this.cache.getQueryResultAsync(rc.getRequest());
+      Future<ThirdEyeResponse> res = thirdEyeCacheRegistry.getDataSourceCache()
+          .getQueryResultAsync(rc.getRequest());
 
       requests.put(dimension, rc);
       responses.put(dimension, res);
@@ -154,7 +153,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     DataFrame dfEmpty = DataFrame.builder(cols).build().setIndex(dimensions);
 
-    final long maxTime = this.maxTimeCache.get(dataset.getDataset());
+    final long maxTime = thirdEyeCacheRegistry.getDatasetMaxDataTimeCache()
+        .get(dataset.getDataset());
     if (slice.getStart() > maxTime) {
       return dfEmpty;
     }
@@ -162,11 +162,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
     RequestContainer rc = DataFrameUtils
         .makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref", this.metricDAO,
             this.datasetDAO, thirdEyeCacheRegistry);
-    ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
+    ThirdEyeResponse res = thirdEyeCacheRegistry.getDataSourceCache()
+        .getQueryResult(rc.getRequest());
     return DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
-  }
-
-  private static long makeTimeout(long deadline) {
-    return Math.max(deadline - System.currentTimeMillis(), 0);
   }
 }

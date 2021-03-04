@@ -23,7 +23,6 @@ import java.time.Duration;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.testng.annotations.Test;
 
 public class AutoOnboardServiceTest {
@@ -39,7 +38,7 @@ public class AutoOnboardServiceTest {
     URL url = AutoOnboardServiceTest.class.getResource("/data-sources/data-sources-config-1.yml");
     thirdEyeWorkerConfiguration.setDataSources(url.getPath());
 
-    AutoOnboardService autoOnboardService = new AutoOnboardService(mock(DataSourcesLoader.class),
+    AutoOnboardService autoOnboardService = new AutoOnboardService(
         thirdEyeWorkerConfiguration,
         mock(MetricConfigManager.class),
         mock(DatasetConfigManager.class));

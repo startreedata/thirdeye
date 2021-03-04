@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datasource;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -104,9 +105,8 @@ public class ThirdEyeCacheRegistry {
   }
 
   public DataSourceCache buildQueryCache(final URL dataSourcesUrl) {
-    final DataSourcesConfiguration dataSourcesConfiguration = requireNonNull(
-        dataSourcesLoader.fromDataSourcesUrl(dataSourcesUrl),
-        "Could not create data sources from path " + dataSourcesUrl);
+    final DataSourcesConfiguration dataSourcesConfiguration =
+        readConfig(dataSourcesUrl, DataSourcesConfiguration.class);
 
     // Query Cache
     final Map<String, ThirdEyeDataSource> thirdEyeDataSourcesMap = dataSourcesLoader

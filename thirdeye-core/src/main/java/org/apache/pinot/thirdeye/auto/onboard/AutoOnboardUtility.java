@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
+
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
@@ -30,7 +32,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.DataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
-import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
 import org.slf4j.Logger;
@@ -41,17 +42,12 @@ public class AutoOnboardUtility {
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardUtility.class);
 
   public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(URL dataSourcesUrl,
-      final DataSourcesLoader dataSourcesLoader,
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager) {
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = new HashMap<>();
 
-    DataSourcesConfiguration dataSourcesConfiguration = dataSourcesLoader
-        .fromDataSourcesUrl(dataSourcesUrl);
-    if (dataSourcesConfiguration == null) {
-      throw new IllegalStateException(
-          "Could not create data sources config from path " + dataSourcesUrl);
-    }
+    DataSourcesConfiguration dataSourcesConfiguration = readConfig(dataSourcesUrl,
+        DataSourcesConfiguration.class);
     for (DataSourceConfig dataSourceConfig : dataSourcesConfiguration.getDataSourceConfigs()) {
       processDataSourceConfig(dataSourceToOnboardMap,
           dataSourceConfig,

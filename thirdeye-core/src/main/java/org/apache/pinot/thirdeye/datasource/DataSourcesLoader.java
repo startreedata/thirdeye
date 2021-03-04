@@ -19,16 +19,11 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
-import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
@@ -43,7 +38,6 @@ import org.slf4j.LoggerFactory;
 public class DataSourcesLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataSourcesLoader.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
@@ -54,23 +48,6 @@ public class DataSourcesLoader {
       final DatasetConfigManager datasetConfigManager) {
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
-  }
-
-  /**
-   * Returns datasources config from yml file
-   *
-   * @param dataSourcesUrl URL to data sources config
-   * @return DataSources
-   */
-  public DataSourcesConfiguration fromDataSourcesUrl(URL dataSourcesUrl) {
-    requireNonNull(dataSourcesUrl, "dataSourcesUrl is null!");
-    try {
-      return requireNonNull(OBJECT_MAPPER.readValue(dataSourcesUrl, DataSourcesConfiguration.class),
-          "dataSources is null");
-    } catch (IOException e) {
-      LOG.error("Exception in reading data sources file {}", dataSourcesUrl, e);
-      throw new RuntimeException(e);
-    }
   }
 
   /**

@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,6 @@ public class AutoOnboardService implements Runnable {
   private final ScheduledExecutorService scheduledExecutorService;
 
   private final List<AutoOnboard> autoOnboardServices = new ArrayList<>();
-  private final DataSourcesLoader dataSourcesLoader;
   private final ThirdEyeWorkerConfiguration config;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
@@ -59,11 +57,9 @@ public class AutoOnboardService implements Runnable {
    */
   @Inject
   public AutoOnboardService(
-      final DataSourcesLoader dataSourcesLoader,
       ThirdEyeWorkerConfiguration config,
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager) {
-    this.dataSourcesLoader = dataSourcesLoader;
     this.config = config;
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
@@ -86,7 +82,7 @@ public class AutoOnboardService implements Runnable {
   public void run() {
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
         .getDataSourceToAutoOnboardMap(
-            requireNonNull(config.getDataSourcesAsUrl()), dataSourcesLoader, metricConfigManager,
+            requireNonNull(config.getDataSourcesAsUrl()), metricConfigManager,
             datasetConfigManager);
 
     for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {

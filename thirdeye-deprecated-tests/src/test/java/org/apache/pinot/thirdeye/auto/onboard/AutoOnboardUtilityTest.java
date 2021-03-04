@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -35,9 +34,7 @@ public class AutoOnboardUtilityTest {
     URL url = AutoOnboardUtilityTest.class.getResource("/data-sources/data-sources-config-1.yml");
 
     Map<String, List<AutoOnboard>> dsToOnboardsMap = AutoOnboardUtility
-        .getDataSourceToAutoOnboardMap(url, new DataSourcesLoader(
-            mock(MetricConfigManager.class),
-            mock(DatasetConfigManager.class)),
+        .getDataSourceToAutoOnboardMap(url,
             mock(MetricConfigManager.class),
             mock(DatasetConfigManager.class));
 
@@ -81,9 +78,7 @@ public class AutoOnboardUtilityTest {
     URL url = AutoOnboardUtilityTest.class.getResource("/data-sources/data-sources-config-2.yml");
 
     Map<String, List<AutoOnboard>> dsToOnboardsMap = AutoOnboardUtility
-        .getDataSourceToAutoOnboardMap(url, new DataSourcesLoader(
-            mock(MetricConfigManager.class),
-            mock(DatasetConfigManager.class)),
+        .getDataSourceToAutoOnboardMap(url,
             mock(MetricConfigManager.class),
             mock(DatasetConfigManager.class));
 

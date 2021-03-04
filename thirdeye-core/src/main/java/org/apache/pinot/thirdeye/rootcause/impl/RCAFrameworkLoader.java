@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.File;
@@ -59,7 +59,6 @@ public class RCAFrameworkLoader {
   public static final String PROP_PATH_POSTFIX = "Path";
 
   private static final Logger LOG = LoggerFactory.getLogger(RCAFrameworkLoader.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
@@ -84,12 +83,26 @@ public class RCAFrameworkLoader {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
+  static Map<String, Object> augmentPathProperty(Map<String, Object> properties, File rcaConfig) {
+    for (Map.Entry<String, Object> entry : properties.entrySet()) {
+      if ((entry.getKey().equals(PROP_PATH) ||
+          entry.getKey().endsWith(PROP_PATH_POSTFIX)) &&
+          entry.getValue() instanceof String) {
+        File path = new File(entry.getValue().toString());
+        if (!path.isAbsolute()) {
+          properties.put(entry.getKey(), rcaConfig.getParent() + File.separator + path);
+        }
+      }
+    }
+    return properties;
+  }
+
   public Map<String, RCAFramework> getFrameworksFromConfig(File rcaFile,
       ExecutorService executor) throws Exception {
     Map<String, RCAFramework> frameworks = new HashMap<>();
 
     LOG.info("Loading all frameworks from '{}'", rcaFile);
-    RCAConfiguration rcaConfiguration = OBJECT_MAPPER.readValue(rcaFile, RCAConfiguration.class);
+    final RCAConfiguration rcaConfiguration = readConfig(rcaFile, RCAConfiguration.class);
 
     for (String frameworkName : rcaConfiguration.getFrameworks().keySet()) {
       List<Pipeline> pipelines = getPipelinesFromConfig(rcaFile, frameworkName);
@@ -102,12 +115,13 @@ public class RCAFrameworkLoader {
   List<Pipeline> getPipelinesFromConfig(File rcaFile, String frameworkName)
       throws Exception {
     LOG.info("Loading framework '{}' from '{}'", frameworkName, rcaFile);
-    RCAConfiguration rcaConfiguration = OBJECT_MAPPER.readValue(rcaFile, RCAConfiguration.class);
+    final RCAConfiguration rcaConfiguration = readConfig(rcaFile, RCAConfiguration.class);
 
     return getPipelines(rcaConfiguration, rcaFile, frameworkName);
   }
 
-  private List<Pipeline> getPipelines(RCAConfiguration config, File configPath, String frameworkName)
+  private List<Pipeline> getPipelines(RCAConfiguration config, File configPath,
+      String frameworkName)
       throws Exception {
     List<Pipeline> pipelines = new ArrayList<>();
     Map<String, List<PipelineConfiguration>> rcaPipelinesConfiguration = config.getFrameworks();
@@ -139,7 +153,7 @@ public class RCAFrameworkLoader {
             .setEntityToEntityMappingManager(entityToEntityMappingManager)
             .setEventManager(eventManager)
             .setMergedAnomalyResultManager(mergedAnomalyResultManager);
-            ;
+        ;
 
         final Constructor<?> constructor = Class.forName(className)
             .getConstructor();
@@ -151,19 +165,5 @@ public class RCAFrameworkLoader {
     }
 
     return pipelines;
-  }
-
-  static Map<String, Object> augmentPathProperty(Map<String, Object> properties, File rcaConfig) {
-    for (Map.Entry<String, Object> entry : properties.entrySet()) {
-      if ((entry.getKey().equals(PROP_PATH) ||
-          entry.getKey().endsWith(PROP_PATH_POSTFIX)) &&
-          entry.getValue() instanceof String) {
-        File path = new File(entry.getValue().toString());
-        if (!path.isAbsolute()) {
-          properties.put(entry.getKey(), rcaConfig.getParent() + File.separator + path);
-        }
-      }
-    }
-    return properties;
   }
 }

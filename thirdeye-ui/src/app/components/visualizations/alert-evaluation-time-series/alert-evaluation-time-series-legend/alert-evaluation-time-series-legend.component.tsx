@@ -1,13 +1,8 @@
-import { Typography } from "@material-ui/core";
-import {
-    Legend as VisxLegend,
-    LegendItem,
-    LegendLabel,
-    scaleOrdinal,
-} from "@visx/visx";
+import { Grid, Typography, useTheme } from "@material-ui/core";
+import { Legend, LegendItem, LegendLabel, scaleOrdinal } from "@visx/visx";
 import classnames from "classnames";
 import { kebabCase } from "lodash";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimension } from "../../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../../utils/material-ui/palette.util";
@@ -19,22 +14,25 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationT
     props: AlertEvaluationTimeSeriesLegendProps
 ) => {
     const alertEvaluationTimeSeriesLegendClasses = useAlertEvaluationTimeSeriesLegendStyles();
+    const theme = useTheme();
     const { t } = useTranslation();
 
-    const legendScale = scaleOrdinal({
-        domain: [
-            AlertEvaluationTimeSeriesPlotLine.CURRENT,
-            AlertEvaluationTimeSeriesPlotLine.BASELINE,
-            AlertEvaluationTimeSeriesPlotLine.UPPER_AND_LOWER_BOUND,
-            AlertEvaluationTimeSeriesPlotLine.ANOMALIES,
-        ],
-        range: [
-            Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
-            Palette.COLOR_VISUALIZATION_STROKE_BASELINE,
-            Palette.COLOR_VISUALIZATION_FILL_UPPER_AND_LOWER_BOUND,
-            Palette.COLOR_VISUALIZATION_FILL_ANOMALY,
-        ],
-    });
+    const legendScale = useMemo(() => {
+        return scaleOrdinal({
+            domain: [
+                AlertEvaluationTimeSeriesPlotLine.CURRENT,
+                AlertEvaluationTimeSeriesPlotLine.BASELINE,
+                AlertEvaluationTimeSeriesPlotLine.UPPER_AND_LOWER_BOUND,
+                AlertEvaluationTimeSeriesPlotLine.ANOMALIES,
+            ],
+            range: [
+                Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
+                Palette.COLOR_VISUALIZATION_STROKE_BASELINE,
+                Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
+                Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
+            ],
+        });
+    }, []);
 
     const getLegendItemState = (
         alertEvaluationTimeSeriesPlotLine: AlertEvaluationTimeSeriesPlotLine
@@ -59,69 +57,85 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationT
     };
 
     return (
-        <VisxLegend direction="row" scale={legendScale}>
+        <Legend scale={legendScale}>
             {(labels) => (
-                <div className={alertEvaluationTimeSeriesLegendClasses.legend}>
+                <Grid container justify="space-between" spacing={0}>
                     {labels &&
                         labels.map((label, index) => (
-                            <LegendItem
-                                className={
-                                    alertEvaluationTimeSeriesLegendClasses.legendItem
-                                }
-                                key={index}
-                                onClick={() =>
-                                    props.onChange &&
-                                    props.onChange(
-                                        label.text as AlertEvaluationTimeSeriesPlotLine
-                                    )
-                                }
-                            >
-                                {/* Glyph */}
-                                <svg
-                                    height={
-                                        Dimension.HEIGHT_VISUALIZATION_LEGEND_GLYPH
-                                    }
-                                    opacity={
-                                        getLegendItemState(
+                            <Grid item key={index}>
+                                <LegendItem
+                                    className={classnames(
+                                        alertEvaluationTimeSeriesLegendClasses.legendItem,
+                                        {
+                                            // When parent container width is roughly equal to
+                                            // screen width xs, apply sufficient right margin to
+                                            // the last legend item so that it wraps to new line
+                                            [alertEvaluationTimeSeriesLegendClasses.legendItemWrapped]:
+                                                label.text ===
+                                                    AlertEvaluationTimeSeriesPlotLine.ANOMALIES &&
+                                                props.parentWidth &&
+                                                props.parentWidth <
+                                                    theme.breakpoints.width(
+                                                        "sm"
+                                                    ),
+                                        }
+                                    )}
+                                    onClick={() =>
+                                        props.onChange &&
+                                        props.onChange(
                                             label.text as AlertEvaluationTimeSeriesPlotLine
                                         )
-                                            ? 1
-                                            : 0.5
-                                    }
-                                    width={
-                                        Dimension.WIDTH_VISUALIZATION_LEGEND_GLYPH
                                     }
                                 >
-                                    <rect
-                                        fill={label.value}
+                                    {/* Glyph */}
+                                    <svg
                                         height={
                                             Dimension.HEIGHT_VISUALIZATION_LEGEND_GLYPH
+                                        }
+                                        opacity={
+                                            getLegendItemState(
+                                                label.text as AlertEvaluationTimeSeriesPlotLine
+                                            )
+                                                ? 1
+                                                : 0.5
                                         }
                                         width={
                                             Dimension.WIDTH_VISUALIZATION_LEGEND_GLYPH
                                         }
-                                    />
-                                </svg>
+                                    >
+                                        <rect
+                                            fill={label.value}
+                                            height={
+                                                Dimension.HEIGHT_VISUALIZATION_LEGEND_GLYPH
+                                            }
+                                            width={
+                                                Dimension.WIDTH_VISUALIZATION_LEGEND_GLYPH
+                                            }
+                                        />
+                                    </svg>
 
-                                {/* Label */}
-                                <LegendLabel
-                                    className={classnames(
-                                        alertEvaluationTimeSeriesLegendClasses.legendItemLabel,
-                                        {
-                                            [alertEvaluationTimeSeriesLegendClasses.legendItemLabelDisabled]: !getLegendItemState(
-                                                label.text as AlertEvaluationTimeSeriesPlotLine
-                                            ),
-                                        }
-                                    )}
-                                >
-                                    <Typography variant="subtitle2">
-                                        {t(`label.${kebabCase(label.text)}`)}
-                                    </Typography>
-                                </LegendLabel>
-                            </LegendItem>
+                                    {/* Label */}
+                                    <LegendLabel
+                                        className={classnames(
+                                            alertEvaluationTimeSeriesLegendClasses.legendLabel,
+                                            {
+                                                [alertEvaluationTimeSeriesLegendClasses.legendLabelDisabled]: !getLegendItemState(
+                                                    label.text as AlertEvaluationTimeSeriesPlotLine
+                                                ),
+                                            }
+                                        )}
+                                    >
+                                        <Typography variant="subtitle2">
+                                            {t(
+                                                `label.${kebabCase(label.text)}`
+                                            )}
+                                        </Typography>
+                                    </LegendLabel>
+                                </LegendItem>
+                            </Grid>
                         ))}
-                </div>
+                </Grid>
             )}
-        </VisxLegend>
+        </Legend>
     );
 };

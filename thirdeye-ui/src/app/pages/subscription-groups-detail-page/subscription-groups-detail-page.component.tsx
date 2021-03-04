@@ -227,7 +227,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
         >
             <Grid container>
                 {/* Subscription Group */}
-                <Grid item sm={12}>
+                <Grid item xs={12}>
                     <SubscriptionGroupCard
                         uiSubscriptionGroup={uiSubscriptionGroup}
                         onDelete={handleSubscriptionGroupDelete}
@@ -235,7 +235,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 </Grid>
 
                 {/* Subscribed alerts */}
-                <Grid item sm={12}>
+                <Grid item xs={12}>
                     <SubscriptionGroupAlertsAccordian
                         alerts={alerts}
                         subscriptionGroup={uiSubscriptionGroup}
@@ -245,7 +245,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
                 </Grid>
 
                 {/* Subscribed emails */}
-                <Grid item sm={12}>
+                <Grid item xs={12}>
                     <SubscriptionGroupEmailsAccordian
                         subscriptionGroup={uiSubscriptionGroup}
                         title={t("label.subscribe-emails")}

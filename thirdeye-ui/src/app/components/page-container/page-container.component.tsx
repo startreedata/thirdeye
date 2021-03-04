@@ -14,7 +14,7 @@ export const PageContainer: FunctionComponent<PageContainerProps> = (
             <Toolbar />
 
             {/* Contents */}
-            <div className={pageContainerClasses.contents}>
+            <div className={pageContainerClasses.pageContainerContents}>
                 {props.children}
             </div>
         </div>

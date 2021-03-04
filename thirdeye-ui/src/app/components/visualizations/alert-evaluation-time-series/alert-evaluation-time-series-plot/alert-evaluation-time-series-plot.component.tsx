@@ -23,34 +23,53 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<AlertEvaluationTim
             {props.upperAndLowerBound && (
                 <AreaClosed
                     data={props.alertEvaluationTimeSeriesPoints}
-                    defined={(alertEvaluationTimeSeriesPoint) =>
+                    defined={(alertEvaluationTimeSeriesPoint) => {
                         // Area to be plot between upper and lower bound whenever both available or
                         // between current and upper/lower bound (whichever available)
-                        (isFinite(alertEvaluationTimeSeriesPoint.upperBound) &&
-                            isFinite(
-                                alertEvaluationTimeSeriesPoint.lowerBound
-                            )) ||
-                        (isFinite(alertEvaluationTimeSeriesPoint.current) &&
+                        if (
                             isFinite(
                                 alertEvaluationTimeSeriesPoint.upperBound
-                            )) ||
-                        (isFinite(alertEvaluationTimeSeriesPoint.current) &&
-                            isFinite(alertEvaluationTimeSeriesPoint.lowerBound))
-                    }
+                            ) &&
+                            isFinite(alertEvaluationTimeSeriesPoint.lowerBound)
+                        ) {
+                            // Upper and lower bound both available
+                            return true;
+                        }
+
+                        if (
+                            isFinite(alertEvaluationTimeSeriesPoint.current) &&
+                            isFinite(alertEvaluationTimeSeriesPoint.upperBound)
+                        ) {
+                            // Current and upper bound available
+                            return true;
+                        }
+
+                        if (
+                            isFinite(alertEvaluationTimeSeriesPoint.current) &&
+                            isFinite(alertEvaluationTimeSeriesPoint.lowerBound)
+                        ) {
+                            // Current and lower bound available
+                            return true;
+                        }
+
+                        return false;
+                    }}
                     fill={
-                        Palette.COLOR_VISUALIZATION_FILL_UPPER_AND_LOWER_BOUND
+                        Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND
                     }
-                    fillOpacity={0.4}
+                    fillOpacity={0.6}
                     stroke={
-                        Palette.COLOR_VISUALIZATION_FILL_UPPER_AND_LOWER_BOUND
+                        Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND
                     }
-                    strokeOpacity={0.4}
+                    strokeOpacity={0.6}
                     strokeWidth={Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT}
                     x={(alertEvaluationTimeSeriesPoint) =>
+                        props.xScale &&
                         props.xScale(alertEvaluationTimeSeriesPoint.timestamp)
                     }
                     y0={(alertEvaluationTimeSeriesPoint) =>
                         // Lower bound or current
+                        props.yScale &&
                         props.yScale(
                             isFinite(alertEvaluationTimeSeriesPoint.lowerBound)
                                 ? alertEvaluationTimeSeriesPoint.lowerBound
@@ -59,6 +78,7 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<AlertEvaluationTim
                     }
                     y1={(alertEvaluationTimeSeriesPoint) =>
                         // Upper bound or current
+                        props.yScale &&
                         props.yScale(
                             isFinite(alertEvaluationTimeSeriesPoint.upperBound)
                                 ? alertEvaluationTimeSeriesPoint.upperBound
@@ -80,9 +100,11 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<AlertEvaluationTim
                     strokeDasharray={Dimension.DASHARRAY_VISUALIZATION_BASELINE}
                     strokeWidth={Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE}
                     x={(alertEvaluationTimeSeriesPoint) =>
+                        props.xScale &&
                         props.xScale(alertEvaluationTimeSeriesPoint.timestamp)
                     }
                     y={(alertEvaluationTimeSeriesPoint) =>
+                        props.yScale &&
                         props.yScale(alertEvaluationTimeSeriesPoint.expected)
                     }
                 />
@@ -98,9 +120,11 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<AlertEvaluationTim
                     stroke={Palette.COLOR_VISUALIZATION_STROKE_CURRENT}
                     strokeWidth={Dimension.WIDTH_VISUALIZATION_STROKE_CURRENT}
                     x={(alertEvaluationTimeSeriesPoint) =>
+                        props.xScale &&
                         props.xScale(alertEvaluationTimeSeriesPoint.timestamp)
                     }
                     y={(alertEvaluationTimeSeriesPoint) =>
+                        props.yScale &&
                         props.yScale(alertEvaluationTimeSeriesPoint.current)
                     }
                 />

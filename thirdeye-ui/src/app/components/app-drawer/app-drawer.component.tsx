@@ -60,7 +60,7 @@ export const AppDrawer: FunctionComponent<AppDrawerProps> = (
 
                     {/* Contents */}
                     {appDrawerOpen && (
-                        <div className={appDrawerClasses.contents}>
+                        <div className={appDrawerClasses.appDrawerContents}>
                             {props.children}
                         </div>
                     )}

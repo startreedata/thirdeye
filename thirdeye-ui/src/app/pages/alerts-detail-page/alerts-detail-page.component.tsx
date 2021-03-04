@@ -203,7 +203,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
         <PageContents centered title={uiAlert ? uiAlert.name : ""}>
             <Grid container>
                 {/* Alert */}
-                <Grid item sm={12}>
+                <Grid item xs={12}>
                     <AlertCard
                         uiAlert={uiAlert}
                         onChange={handleAlertChange}
@@ -212,12 +212,12 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 </Grid>
 
                 {/* Alert evaluation time series */}
-                <Grid item sm={12}>
+                <Grid item xs={12}>
                     <AlertEvaluationTimeSeriesCard
-                        showMaximizeButton
                         alertEvaluation={alertEvaluation}
+                        alertEvaluationTimeSeriesHeight={500}
                         maximizedTitle={uiAlert ? uiAlert.name : ""}
-                        visualizationHeight={500}
+                        onRefresh={fetchAlertEvaluation}
                     />
                 </Grid>
             </Grid>

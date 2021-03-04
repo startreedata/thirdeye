@@ -24,14 +24,14 @@ export const TimeRangeSelect: FunctionComponent<TimeRangeSelectProps> = (
     return (
         <FormControl fullWidth variant="outlined">
             {/* Label */}
-            <InputLabel id="timeRangeSelectLabel">
+            <InputLabel id="time-range-select-label">
                 {t("label.time-range")}
             </InputLabel>
 
             {/* Select */}
             <Select
                 label={t("label.time-range")}
-                labelId="timeRangeSelectLabel"
+                labelId="time-range-select-label"
                 value={props.selectedTimeRange}
             >
                 {/* Recent custom time range durations label */}

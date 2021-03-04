@@ -1,4 +1,4 @@
-import { Box } from "@material-ui/core";
+import { Box, useTheme } from "@material-ui/core";
 import BaseBrush, { BaseBrushState } from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import {
@@ -60,8 +60,9 @@ const PADDING_BOTTOM_SVG = 30;
 const PADDING_LEFT_SVG = 50;
 const PADDING_RIGHT_SVG = 50;
 const HEIGHT_SEPARATOR_TIME_SERIES_BRUSH = 60;
-const HEIGHT_BRUSH = 100;
-const HEIGHT_LEGEND = 35;
+const HEIGHT_BRUSH = 90;
+const HEIGHT_LEGEND_XS = 55;
+const HEIGHT_LEGEND_SM_UP = 25;
 
 // Simple wrapper to capture parent container dimensions
 export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSeriesProps> = (
@@ -72,6 +73,7 @@ export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSer
             {(parent) => (
                 <AlertEvaluationTimeSeriesInternal
                     alertEvaluation={props.alertEvaluation}
+                    hideBrush={props.hideBrush}
                     parentHeight={parent.height}
                     parentWidth={parent.width}
                 />
@@ -90,8 +92,8 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             noData,
             alertEvaluationTimeSeriesPoints,
             filteredAlertEvaluationTimeSeriesPoints,
-            alertEvaluationAnomalies: alertEvaluationAnomalies,
-            filteredAlertEvaluationAnomalies: filteredAlertEvaluationAnomalies,
+            alertEvaluationAnomalies,
+            filteredAlertEvaluationAnomalies,
             currentPlotVisible,
             baselinePlotVisible,
             upperAndLowerBoundPlotVisible,
@@ -118,9 +120,17 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         hideTooltip,
     } = useTooltip<AlertEvaluationTimeSeriesTooltipPoint>();
     const brushRef = useRef<BaseBrush>(null);
+    const theme = useTheme();
+
+    // Legend height
+    // Legend items wrap to new line when parent container width is roughly equal to screen width xs
+    const legendHeight =
+        props.parentWidth < theme.breakpoints.width("sm")
+            ? HEIGHT_LEGEND_XS
+            : HEIGHT_LEGEND_SM_UP;
 
     // SVG bounds
-    const svgHeight = props.parentHeight - HEIGHT_LEGEND; // Container height - space for legend
+    const svgHeight = props.parentHeight - legendHeight; // Container height - space for legend
     const svgWidth = props.parentWidth; // Container width
 
     // Time series bounds
@@ -480,6 +490,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
 
                         {/* X axis */}
                         <TimeAxisBottom
+                            parentWidth={props.parentWidth}
                             scale={timeSeriesXScale}
                             top={timeSeriesYMax}
                         />
@@ -506,7 +517,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                             HEIGHT_SEPARATOR_TIME_SERIES_BRUSH
                         }
                     >
-                        <Group opacity={0.6}>
+                        <Group opacity={0.5}>
                             {/* Time series plot */}
                             <AlertEvaluationTimeSeriesPlot
                                 anomalies
@@ -552,7 +563,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                         />
 
                         {/* X axis */}
-                        <TimeAxisBottom scale={brushXScale} top={brushYMax} />
+                        <TimeAxisBottom
+                            parentWidth={props.parentWidth}
+                            scale={brushXScale}
+                            top={brushYMax}
+                        />
                     </Group>
                 </svg>
             </Box>
@@ -562,6 +577,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 anomalies={anomaliesPlotVisible}
                 baseline={baselinePlotVisible}
                 current={currentPlotVisible}
+                parentWidth={props.parentWidth}
                 upperAndLowerBound={upperAndLowerBoundPlotVisible}
                 onChange={handleLegendChange}
             />

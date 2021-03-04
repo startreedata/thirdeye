@@ -1,44 +1,47 @@
 import { makeStyles, Theme } from "@material-ui/core";
 import { VisualizationCardProps } from "./visualization-card.interfaces";
 
-const PADDING_TOP_CARD_MAXIMIZED = 100;
-const PADDING_CARD_MAXIMIZED = 32;
-const HEIGHT_HEADER = 72;
+const MARGIN_TOP_VISUALIZATION_CARD_MAXIMIZED = 100;
+const MARGIN_VISUALIZATION_CARD_MAXIMIZED = 32;
+const HEIGHT_VISUALIZATION_CARD_HEADER = 72;
 
 export const useVisualizationCardStyles = makeStyles<
     Theme,
     VisualizationCardProps
 >((theme) => ({
-    card: (props) => ({
-        height: HEIGHT_HEADER + props.visualizationHeight,
-        willChange: "position, top, left, width, height, transform",
-    }),
-    cardMaximized: (props) => ({
+    visualizationCard: {
+        height: (props) => props.visualizationHeight,
+        willChange: "position, top, left, height, width, transform",
+    },
+    visualizationCardMaximized: {
         position: "fixed",
         top: "50%",
         left: "50%",
-        height: HEIGHT_HEADER + props.visualizationHeight, // Required height
+        height: (props) =>
+            HEIGHT_VISUALIZATION_CARD_HEADER +
+            (props.visualizationMaximizedHeight || props.visualizationHeight), // Required height
         maxHeight: `calc(100% - ${
-            PADDING_TOP_CARD_MAXIMIZED + PADDING_CARD_MAXIMIZED
-        }px)`, // Available maxmized height, available height - top and bottom padding
-        width: `calc(100% - ${PADDING_CARD_MAXIMIZED * 2}px)`, // Available width - left and right padding
-        overflowY: "auto", // Allow vertical scroll in case maximized height is not sufficient
-        zIndex: theme.zIndex.drawer + 3, // Maximized container to be always above backdrop
-        WebkitTransform: "translate(-50%, -50%)", // Center the container
-        willChange: "position, top, left, width, height, transform",
-    }),
-    header: {
-        height: HEIGHT_HEADER,
+            MARGIN_TOP_VISUALIZATION_CARD_MAXIMIZED +
+            MARGIN_VISUALIZATION_CARD_MAXIMIZED
+        }px)`, // Available maxmized height, available height - top and bottom margins
+        width: `calc(100% - ${MARGIN_VISUALIZATION_CARD_MAXIMIZED * 2}px)`, // Available width - left and right margins
+        overflowY: "auto",
+        zIndex: theme.zIndex.drawer + 3, // Maximized visualization card above backdrop
+        WebkitTransform: "translate(-50%, -50%)", // Center the maximized visualization card
+        willChange: "position, top, left, height, width, transform",
     },
-    contents: (props) => ({
-        height: props.visualizationHeight,
-    }),
-    backdrop: {
-        position: "fixed",
-        top: 0,
-        left: 0,
-        height: "100%",
-        width: "100%",
-        zIndex: theme.zIndex.drawer + 2, // Backdrop to be always above app bar
+    visualizationCardHeader: {
+        height: HEIGHT_VISUALIZATION_CARD_HEADER,
+    },
+    helperText: {
+        paddingRight: theme.spacing(1),
+    },
+    visualizationCardContents: {
+        height: (props) => props.visualizationHeight,
+        padding: 0,
+    },
+    visualizationCardContentsMaximized: {
+        height: (props) =>
+            props.visualizationMaximizedHeight || props.visualizationHeight,
     },
 }));

@@ -101,7 +101,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                                     </MenuItem>
                                 )}
 
-                                {/* Investigate anomaly*/}
+                                {/* Investigate anomaly */}
                                 <MenuItem
                                     disabled
                                     onClick={handleAnomalyInvestigate}

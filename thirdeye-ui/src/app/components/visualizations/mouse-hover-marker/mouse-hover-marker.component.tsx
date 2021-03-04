@@ -11,11 +11,11 @@ export const MouseHoverMarker: FunctionComponent<MouseHoverMarkerProps> = (
         <>
             {/* Mouse hover region  */}
             <Bar
-                height={props.yScale.range()[0]}
+                height={props.yScale && props.yScale.range()[0]}
                 opacity={0}
-                width={props.xScale.range()[1]}
-                x={props.xScale.range()[0]}
-                y={props.yScale.range()[1]}
+                width={props.xScale && props.xScale.range()[1]}
+                x={props.xScale && props.xScale.range()[0]}
+                y={props.yScale && props.yScale.range()[1]}
                 onMouseLeave={props.onMouseLeave}
                 onMouseMove={props.onMouseMove}
             />
@@ -25,10 +25,10 @@ export const MouseHoverMarker: FunctionComponent<MouseHoverMarkerProps> = (
                 <>
                     <Line
                         from={{
-                            x: props.xScale.range()[0],
-                            y: props.yScale(props.y),
+                            x: props.xScale && props.xScale.range()[0],
+                            y: props.yScale && props.yScale(props.y),
                         }}
-                        opacity={0.6}
+                        opacity={0.5}
                         stroke={Palette.COLOR_VISUALIZATION_STROKE_HOVER_MARKER}
                         strokeDasharray={
                             Dimension.DASHARRAY_VISUALIZATION_HOVER_MARKER
@@ -37,17 +37,17 @@ export const MouseHoverMarker: FunctionComponent<MouseHoverMarkerProps> = (
                             Dimension.WIDTH_VISUALIZATION_STROKE_HOVER_MARKER
                         }
                         to={{
-                            x: props.xScale(props.x),
-                            y: props.yScale(props.y),
+                            x: props.xScale && props.xScale(props.x),
+                            y: props.yScale && props.yScale(props.y),
                         }}
                     />
 
                     <Line
                         from={{
-                            x: props.xScale(props.x),
-                            y: props.yScale.range()[0],
+                            x: props.xScale && props.xScale(props.x),
+                            y: props.yScale && props.yScale.range()[0],
                         }}
-                        opacity={0.6}
+                        opacity={0.5}
                         stroke={Palette.COLOR_VISUALIZATION_STROKE_HOVER_MARKER}
                         strokeDasharray={
                             Dimension.DASHARRAY_VISUALIZATION_HOVER_MARKER
@@ -56,18 +56,18 @@ export const MouseHoverMarker: FunctionComponent<MouseHoverMarkerProps> = (
                             Dimension.WIDTH_VISUALIZATION_STROKE_HOVER_MARKER
                         }
                         to={{
-                            x: props.xScale(props.x),
-                            y: props.yScale(props.y),
+                            x: props.xScale && props.xScale(props.x),
+                            y: props.yScale && props.yScale(props.y),
                         }}
                     />
 
                     <Circle
-                        cx={props.xScale(props.x)}
-                        cy={props.yScale(props.y)}
+                        cx={props.xScale && props.xScale(props.x)}
+                        cy={props.yScale && props.yScale(props.y)}
                         fill={Palette.COLOR_VISUALIZATION_FILL_HOVER_MARKER}
                         r={Dimension.RADIUS_VISUALIZATION_HOVER_MARKER}
                         stroke={Palette.COLOR_VISUALIZATION_STROKE_HOVER_MARKER}
-                        strokeOpacity={0.6}
+                        strokeOpacity={0.5}
                         strokeWidth={
                             Dimension.WIDTH_VISUALIZATION_STROKE_HOVER_MARKER
                         }

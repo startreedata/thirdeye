@@ -3,12 +3,14 @@ import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
 export interface AlertEvaluationTimeSeriesProps {
     alertEvaluation: AlertEvaluation | null;
+    hideBrush?: boolean;
 }
 
 export interface AlertEvaluationTimeSeriesInternalProps {
     parentHeight: number;
     parentWidth: number;
     alertEvaluation: AlertEvaluation | null;
+    hideBrush?: boolean;
 }
 
 export interface AlertEvaluationTimeSeriesState {

@@ -1,9 +1,9 @@
-import { WithWidth } from "@material-ui/core";
 import { ScaleTime } from "d3-scale";
 
-export interface TimeAxisBottomProps extends WithWidth {
+export interface TimeAxisBottomProps {
     top?: number;
     left?: number;
     numTicks?: number;
+    parentWidth?: number;
     scale: ScaleTime<number, number>;
 }

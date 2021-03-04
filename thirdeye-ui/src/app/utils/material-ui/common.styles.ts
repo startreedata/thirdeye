@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core";
+import { Palette } from "./palette.util";
 
 export const useCommonStyles = makeStyles((theme) => ({
     gridLimitation: {
@@ -17,6 +18,13 @@ export const useCommonStyles = makeStyles((theme) => ({
         textOverflow: "ellipsis",
     },
     backdrop: {
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        height: "100%",
+        width: "100%",
+        flex: 1,
+        backgroundColor: Palette.COLOR_BACKGROUND_BACKDROP,
+        zIndex: theme.zIndex.drawer + 2, // Backdrop above app bar
     },
 }));

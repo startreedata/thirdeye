@@ -1,32 +1,35 @@
 import { makeStyles } from "@material-ui/core";
 
-export const useButtonTileStyles = makeStyles((theme) => ({
-    buttonRoot: {
+export const useMetricTileStyles = makeStyles((theme) => ({
+    metricTile: {
         height: 130,
         width: 220,
-        textTransform: "none",
-        backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(1),
     },
-    buttonLabel: {
+    metricTileCompact: {
+        height: 90,
+        width: 140,
+    },
+    metricTileContents: {
         height: "100%",
         width: "100%",
         display: "flex",
         flexDirection: "column",
+        padding: theme.spacing(1),
     },
-    iconContainer: {
+    metricValueContainer: {
+        width: "100%",
         display: "flex",
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
     },
-    textContainer: {
+    metricNameContainer: {
         minHeight: 30,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
     },
-    text: {
+    metricName: {
         lineHeight: 1.2,
         wordBreak: "break-word",
     },

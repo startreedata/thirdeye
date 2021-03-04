@@ -8,6 +8,7 @@ import {
     formatLargeNumber,
     formatNumber,
 } from "../../../../utils/number/number.util";
+import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { AlertEvaluationTimeSeriesTooltipProps } from "./alert-evaluation-time-series-tooltip.interfaces";
 import { useAlertEvaluationTimeSeriesTooltipStyles } from "./alert-evaluation-time-series-tooltip.styles";
 
@@ -20,21 +21,31 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluation
     return (
         <>
             {props.alertEvaluationTimeSeriesTooltipPoint && (
-                <Grid container direction="column" spacing={0}>
+                <Grid
+                    container
+                    className={
+                        alertEvaluationTimeSeriesTooltipClasses.alertEvaluationTimeSeriesTooltip
+                    }
+                    direction="column"
+                    spacing={0}
+                >
                     {/* Time */}
                     <Grid
                         item
-                        className={
-                            alertEvaluationTimeSeriesTooltipClasses.header
-                        }
+                        className={alertEvaluationTimeSeriesTooltipClasses.time}
                     >
-                        <Grid container alignItems="center" justify="center">
+                        <Grid
+                            container
+                            alignItems="center"
+                            justify="center"
+                            spacing={0}
+                        >
                             <Grid item>
                                 <Typography variant="overline">
                                     {formatDateAndTime(
                                         props
                                             .alertEvaluationTimeSeriesTooltipPoint
-                                            .current
+                                            .timestamp
                                     )}
                                 </Typography>
                             </Grid>
@@ -45,28 +56,34 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluation
                     {isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.current
                     ) && (
-                        <Grid item>
-                            <Grid
-                                container
-                                alignItems="center"
-                                justify="space-between"
+                        <Grid
+                            item
+                            className={
+                                alertEvaluationTimeSeriesTooltipClasses.nameValueContents
+                            }
+                        >
+                            {/* Name */}
+                            <Typography
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.name
+                                }
+                                variant="subtitle2"
                             >
-                                <Grid item>
-                                    <Typography variant="subtitle2">
-                                        {t("label.current")}
-                                    </Typography>
-                                </Grid>
+                                {t("label.current")}
+                            </Typography>
 
-                                <Grid item>
-                                    <Typography variant="overline">
-                                        {formatLargeNumber(
-                                            props
-                                                .alertEvaluationTimeSeriesTooltipPoint
-                                                .current
-                                        )}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
+                            {/* Value */}
+                            <Typography
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.value
+                                }
+                                variant="overline"
+                            >
+                                {formatLargeNumber(
+                                    props.alertEvaluationTimeSeriesTooltipPoint
+                                        .current
+                                )}
+                            </Typography>
                         </Grid>
                     )}
 
@@ -74,28 +91,34 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluation
                     {isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.expected
                     ) && (
-                        <Grid item>
-                            <Grid
-                                container
-                                alignItems="center"
-                                justify="space-between"
+                        <Grid
+                            item
+                            className={
+                                alertEvaluationTimeSeriesTooltipClasses.nameValueContents
+                            }
+                        >
+                            {/* Name */}
+                            <Typography
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.name
+                                }
+                                variant="subtitle2"
                             >
-                                <Grid item>
-                                    <Typography variant="subtitle2">
-                                        {t("label.baseline")}
-                                    </Typography>
-                                </Grid>
+                                {t("label.baseline")}
+                            </Typography>
 
-                                <Grid item>
-                                    <Typography variant="overline">
-                                        {formatLargeNumber(
-                                            props
-                                                .alertEvaluationTimeSeriesTooltipPoint
-                                                .expected
-                                        )}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
+                            {/* Value */}
+                            <Typography
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.value
+                                }
+                                variant="overline"
+                            >
+                                {formatLargeNumber(
+                                    props.alertEvaluationTimeSeriesTooltipPoint
+                                        .expected
+                                )}
+                            </Typography>
                         </Grid>
                     )}
 
@@ -103,28 +126,34 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluation
                     {isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.upperBound
                     ) && (
-                        <Grid item>
-                            <Grid
-                                container
-                                alignItems="center"
-                                justify="space-between"
+                        <Grid
+                            item
+                            className={
+                                alertEvaluationTimeSeriesTooltipClasses.nameValueContents
+                            }
+                        >
+                            {/* Name */}
+                            <Typography
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.name
+                                }
+                                variant="subtitle2"
                             >
-                                <Grid item>
-                                    <Typography variant="subtitle2">
-                                        {t("label.upper-bound")}
-                                    </Typography>
-                                </Grid>
+                                {t("label.upper-bound")}
+                            </Typography>
 
-                                <Grid item>
-                                    <Typography variant="overline">
-                                        {formatLargeNumber(
-                                            props
-                                                .alertEvaluationTimeSeriesTooltipPoint
-                                                .upperBound
-                                        )}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
+                            {/* Value */}
+                            <Typography
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.value
+                                }
+                                variant="overline"
+                            >
+                                {formatLargeNumber(
+                                    props.alertEvaluationTimeSeriesTooltipPoint
+                                        .upperBound
+                                )}
+                            </Typography>
                         </Grid>
                     )}
 
@@ -132,47 +161,54 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluation
                     {isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.lowerBound
                     ) && (
-                        <Grid item>
-                            <Grid
-                                container
-                                alignItems="center"
-                                justify="space-between"
+                        <Grid
+                            item
+                            className={
+                                alertEvaluationTimeSeriesTooltipClasses.nameValueContents
+                            }
+                        >
+                            {/* Name */}
+                            <Typography
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.name
+                                }
+                                variant="subtitle2"
                             >
-                                <Grid item>
-                                    <Typography variant="subtitle2">
-                                        {t("label.lower-bound")}
-                                    </Typography>
-                                </Grid>
+                                {t("label.lower-bound")}
+                            </Typography>
 
-                                <Grid item>
-                                    <Typography variant="overline">
-                                        {formatLargeNumber(
-                                            props
-                                                .alertEvaluationTimeSeriesTooltipPoint
-                                                .lowerBound
-                                        )}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
+                            {/* Value */}
+                            <Typography
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.value
+                                }
+                                variant="overline"
+                            >
+                                {formatLargeNumber(
+                                    props.alertEvaluationTimeSeriesTooltipPoint
+                                        .lowerBound
+                                )}
+                            </Typography>
                         </Grid>
                     )}
 
-                    {/* Anomalies */}
+                    {/* Anomaly */}
                     {!isEmpty(
                         props.alertEvaluationTimeSeriesTooltipPoint.anomalies
                     ) && (
                         <>
-                            {/* Anomaly */}
+                            {/* Anomaly name */}
                             <Grid
                                 item
                                 className={
-                                    alertEvaluationTimeSeriesTooltipClasses.header
+                                    alertEvaluationTimeSeriesTooltipClasses.anomaly
                                 }
                             >
                                 <Grid
                                     container
                                     alignItems="center"
                                     justify="center"
+                                    spacing={0}
                                 >
                                     <Grid item>
                                         <Typography variant="overline">
@@ -186,54 +222,68 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluation
                                 </Grid>
                             </Grid>
 
-                            {/* Anomaly start time */}
-                            <Grid item>
-                                <Grid
-                                    container
-                                    alignItems="center"
-                                    justify="space-between"
+                            {/* Start time */}
+                            <Grid
+                                item
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.nameValueContents
+                                }
+                            >
+                                {/* Name */}
+                                <Typography
+                                    className={
+                                        alertEvaluationTimeSeriesTooltipClasses.name
+                                    }
+                                    variant="subtitle2"
                                 >
-                                    <Grid item>
-                                        <Typography variant="subtitle2">
-                                            {t("label.start")}
-                                        </Typography>
-                                    </Grid>
+                                    {t("label.start")}
+                                </Typography>
 
-                                    <Grid item>
-                                        <Typography variant="overline">
-                                            {formatDateAndTime(
-                                                props
-                                                    .alertEvaluationTimeSeriesTooltipPoint
-                                                    .anomalies[0].startTime
-                                            )}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
+                                {/* Value */}
+                                <Typography
+                                    className={
+                                        alertEvaluationTimeSeriesTooltipClasses.value
+                                    }
+                                    variant="overline"
+                                >
+                                    {formatDateAndTime(
+                                        props
+                                            .alertEvaluationTimeSeriesTooltipPoint
+                                            .anomalies[0].startTime
+                                    )}
+                                </Typography>
                             </Grid>
 
-                            {/* Anomaly end time */}
-                            <Grid item>
-                                <Grid
-                                    container
-                                    alignItems="center"
-                                    justify="space-between"
+                            {/* End time */}
+                            <Grid
+                                item
+                                className={
+                                    alertEvaluationTimeSeriesTooltipClasses.nameValueContents
+                                }
+                            >
+                                {/* Name */}
+                                <Typography
+                                    className={
+                                        alertEvaluationTimeSeriesTooltipClasses.name
+                                    }
+                                    variant="subtitle2"
                                 >
-                                    <Grid item>
-                                        <Typography variant="subtitle2">
-                                            {t("label.end")}
-                                        </Typography>
-                                    </Grid>
+                                    {t("label.end")}
+                                </Typography>
 
-                                    <Grid item>
-                                        <Typography variant="overline">
-                                            {formatDateAndTime(
-                                                props
-                                                    .alertEvaluationTimeSeriesTooltipPoint
-                                                    .anomalies[0].endTime
-                                            )}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
+                                {/* Value */}
+                                <Typography
+                                    className={
+                                        alertEvaluationTimeSeriesTooltipClasses.value
+                                    }
+                                    variant="overline"
+                                >
+                                    {formatDateAndTime(
+                                        props
+                                            .alertEvaluationTimeSeriesTooltipPoint
+                                            .anomalies[0].endTime
+                                    )}
+                                </Typography>
                             </Grid>
 
                             {/* More */}
@@ -242,13 +292,14 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluation
                                 <Grid
                                     item
                                     className={
-                                        alertEvaluationTimeSeriesTooltipClasses.header
+                                        alertEvaluationTimeSeriesTooltipClasses.more
                                     }
                                 >
                                     <Grid
                                         container
                                         alignItems="center"
                                         justify="flex-end"
+                                        spacing={0}
                                     >
                                         <Grid item>
                                             <Typography variant="subtitle2">
@@ -267,6 +318,8 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluation
                             )}
                         </>
                     )}
+
+                    <SafariMuiGridFix />
                 </Grid>
             )}
         </>

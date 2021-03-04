@@ -3,7 +3,6 @@ import { TimeRangeDuration } from "../time-range-provider/time-range-provider.in
 export interface TimeRangeSelectorProps {
     hideTimeRange?: boolean;
     hideTimeRangeSelectorButton?: boolean;
-    hideRefreshButton?: boolean;
     timeRangeDuration?: TimeRangeDuration;
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
     onChange?: (timeRangeDuration: TimeRangeDuration) => void;

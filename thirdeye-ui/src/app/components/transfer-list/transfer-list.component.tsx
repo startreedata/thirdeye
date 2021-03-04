@@ -194,7 +194,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
 
     return (
         <Grid container>
-            {/* From-list*/}
+            {/* From-list */}
             <Grid item sm={6} xs={12}>
                 <Grid container>
                     {/* Label */}

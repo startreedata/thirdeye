@@ -163,7 +163,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
             {/* Time range */}
             {!props.hideTimeRange && props.timeRangeDuration && (
                 <Grid item>
-                    {/* Time range label*/}
+                    {/* Time range label */}
                     <Typography variant="overline">
                         {formatTimeRange(props.timeRangeDuration.timeRange)}
                     </Typography>
@@ -404,20 +404,16 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
             )}
 
             {/* Refresh button */}
-            {!props.hideRefreshButton && (
-                <Grid item>
-                    <Button
-                        className={
-                            timeRangeSelectorClasses.timeRangeSelectorButton
-                        }
-                        color="primary"
-                        variant="outlined"
-                        onClick={props.onRefresh}
-                    >
-                        <RefreshIcon />
-                    </Button>
-                </Grid>
-            )}
+            <Grid item>
+                <Button
+                    className={timeRangeSelectorClasses.timeRangeSelectorButton}
+                    color="primary"
+                    variant="outlined"
+                    onClick={props.onRefresh}
+                >
+                    <RefreshIcon />
+                </Button>
+            </Grid>
 
             {/* Fixes layout in Safari */}
             <SafariMuiGridFix />

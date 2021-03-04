@@ -1,7 +1,14 @@
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
-import { VisualizationCardCommonProps } from "../visualization-card/visualization-card.interfaces";
 
-export interface AlertEvaluationTimeSeriesCardProps
-    extends VisualizationCardCommonProps {
+export interface AlertEvaluationTimeSeriesCardProps {
+    maximized?: boolean;
+    alertEvaluationTimeSeriesHeight: number;
+    alertEvaluationTimeSeriesMaximizedHeight?: number;
+    title?: string;
+    maximizedTitle?: string;
     alertEvaluation: AlertEvaluation | null;
+    error?: boolean;
+    helperText?: string;
+    hideRefreshButton?: boolean;
+    onRefresh?: () => void;
 }

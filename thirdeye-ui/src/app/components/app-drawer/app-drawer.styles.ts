@@ -16,7 +16,7 @@ export const useAppDrawerStyles = makeStyles((theme) => ({
             easing: theme.transitions.easing.sharp,
         }),
     },
-    contents: {
+    appDrawerContents: {
         overflowY: "auto",
     },
 }));

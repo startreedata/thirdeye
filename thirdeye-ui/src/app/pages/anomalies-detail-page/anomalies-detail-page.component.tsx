@@ -148,7 +148,7 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
         <PageContents centered title={uiAnomaly ? uiAnomaly.name : ""}>
             <Grid container>
                 {/* Anomaly */}
-                <Grid item sm={12}>
+                <Grid item xs={12}>
                     <AnomalyCard
                         uiAnomaly={uiAnomaly}
                         onDelete={handleAnomalyDelete}
@@ -156,12 +156,12 @@ export const AnomaliesDetailPage: FunctionComponent = () => {
                 </Grid>
 
                 {/* Alert evaluation time series */}
-                <Grid item sm={12}>
+                <Grid item xs={12}>
                     <AlertEvaluationTimeSeriesCard
-                        showMaximizeButton
                         alertEvaluation={alertEvaluation}
+                        alertEvaluationTimeSeriesHeight={500}
                         maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
-                        visualizationHeight={500}
+                        onRefresh={fetchAlertEvaluation}
                     />
                 </Grid>
             </Grid>

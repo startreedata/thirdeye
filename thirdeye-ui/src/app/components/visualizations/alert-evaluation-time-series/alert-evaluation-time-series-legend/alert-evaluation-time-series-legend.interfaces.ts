@@ -5,6 +5,7 @@ export interface AlertEvaluationTimeSeriesLegendProps {
     baseline: boolean;
     upperAndLowerBound: boolean;
     anomalies: boolean;
+    parentWidth?: number;
     onChange: (
         alertEvaluationTimeSeriesPlotLine: AlertEvaluationTimeSeriesPlotLine
     ) => void;

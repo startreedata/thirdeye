@@ -7,7 +7,6 @@ import {
     Grid,
     IconButton,
 } from "@material-ui/core";
-import FullscreenIcon from "@material-ui/icons/Fullscreen";
 import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import classnames from "classnames";
@@ -22,8 +21,24 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
 ) => {
     const visualizationCardClasses = useVisualizationCardStyles(props);
     const commonClasses = useCommonStyles();
-    const [maximized, setMaximized] = useState(props.startMaximized);
-    const [backdrop, setBackdrop] = useState(props.startMaximized);
+    const [maximized, setMaximized] = useState(props.maximized);
+    const [backdrop, setBackdrop] = useState(props.maximized);
+
+    useEffect(() => {
+        // Maximize/restore input changed, update
+        setMaximized(props.maximized);
+    }, [props.maximized]);
+
+    useEffect(() => {
+        // Maximize/restore state changed, notify
+        if (maximized) {
+            props.onMaximize && props.onMaximize();
+        }
+
+        if (!maximized) {
+            props.onRestore && props.onRestore();
+        }
+    }, [maximized]);
 
     useEffect(() => {
         addDocumentKeyDownListener();
@@ -32,15 +47,21 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
     }, []);
 
     const addDocumentKeyDownListener = (): void => {
-        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("keydown", handleDocumentKeyDown);
     };
 
     const removeDocumentKeyDownListener = (): void => {
-        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keydown", handleDocumentKeyDown);
     };
 
-    const handleMaximizeToggle = (): void => {
-        setMaximized((maximized) => !maximized);
+    const handleDocumentKeyDown = (event: KeyboardEvent): void => {
+        if (event.key === "Escape") {
+            setMaximized(false);
+        }
+    };
+
+    const handleVisualizationCardRestore = (): void => {
+        setMaximized(false);
     };
 
     const handleMaximizeToggleStart = (): void => {
@@ -59,10 +80,8 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
         }
     };
 
-    const handleKeyDown = (event: KeyboardEvent): void => {
-        if (event.key === "Escape") {
-            setMaximized(false);
-        }
+    const handleBackdropClick = (): void => {
+        setMaximized(false);
     };
 
     return (
@@ -73,70 +92,75 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                 onComplete={handleMaximizeToggleComplete}
                 onStart={handleMaximizeToggleStart}
             >
-                <Flipped flipId="visualizationCard">
+                <Flipped flipId="visualization-card">
                     <Card
                         className={
                             maximized
-                                ? visualizationCardClasses.cardMaximized
-                                : visualizationCardClasses.card
+                                ? visualizationCardClasses.visualizationCardMaximized
+                                : visualizationCardClasses.visualizationCard
                         }
-                        elevation={24} // Same as Material-UI dialog
-                        variant={maximized ? "elevation" : "outlined"}
+                        elevation={maximized ? 24 : 0} // Same as Material-UI dialog when maximized
+                        variant="elevation"
                     >
-                        <CardHeader
-                            action={
-                                <Grid container alignItems="center" spacing={0}>
-                                    {/* Stale label */}
-                                    {props.stale && (
-                                        <Grid item>
-                                            <FormHelperText error>
-                                                {props.staleLabel}
-                                            </FormHelperText>
-                                        </Grid>
-                                    )}
+                        {maximized && (
+                            <CardHeader
+                                action={
+                                    <Grid
+                                        container
+                                        alignItems="center"
+                                        spacing={0}
+                                    >
+                                        {/* Helper text */}
+                                        {props.helperText && (
+                                            <Grid item>
+                                                <FormHelperText
+                                                    className={
+                                                        visualizationCardClasses.helperText
+                                                    }
+                                                    error={props.error}
+                                                >
+                                                    {props.helperText}
+                                                </FormHelperText>
+                                            </Grid>
+                                        )}
 
-                                    {/* Refresh button */}
-                                    {props.showRefreshButton && (
+                                        {/* Refresh button */}
+                                        {!props.hideRefreshButton && (
+                                            <Grid item>
+                                                <IconButton
+                                                    onClick={props.onRefresh}
+                                                >
+                                                    <RefreshIcon />
+                                                </IconButton>
+                                            </Grid>
+                                        )}
+
+                                        {/* Restore button */}
                                         <Grid item>
                                             <IconButton
-                                                onClick={props.onRefresh}
+                                                onClick={
+                                                    handleVisualizationCardRestore
+                                                }
                                             >
-                                                <RefreshIcon />
+                                                <FullscreenExitIcon />
                                             </IconButton>
                                         </Grid>
-                                    )}
-
-                                    {/* Maximize/restore button */}
-                                    {props.showMaximizeButton && (
-                                        <Grid item>
-                                            <IconButton
-                                                onClick={handleMaximizeToggle}
-                                            >
-                                                {/* Maximize button */}
-                                                {!maximized && (
-                                                    <FullscreenIcon />
-                                                )}
-
-                                                {/* Restore button */}
-                                                {maximized && (
-                                                    <FullscreenExitIcon />
-                                                )}
-                                            </IconButton>
-                                        </Grid>
-                                    )}
-                                </Grid>
-                            }
-                            className={visualizationCardClasses.header}
-                            title={
-                                maximized
-                                    ? props.maximizedTitle || props.title
-                                    : props.title
-                            }
-                            titleTypographyProps={{ variant: "h6" }}
-                        />
+                                    </Grid>
+                                }
+                                className={
+                                    visualizationCardClasses.visualizationCardHeader
+                                }
+                                title={props.title}
+                                titleTypographyProps={{ variant: "h6" }}
+                            />
+                        )}
 
                         <CardContent
-                            className={visualizationCardClasses.contents}
+                            className={classnames({
+                                [visualizationCardClasses.visualizationCardContentsMaximized]: maximized,
+                                [visualizationCardClasses.visualizationCardContents]: !maximized,
+                                [commonClasses.cardContentBottomPaddingRemoved]: !maximized,
+                            })}
                         >
                             {props.children}
                         </CardContent>
@@ -145,15 +169,15 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
             </Flipper>
 
             {/* Placeholder while the visualization card is maximized */}
-            {maximized && <div className={visualizationCardClasses.card} />}
+            {maximized && (
+                <div className={visualizationCardClasses.visualizationCard} />
+            )}
 
             {/* Backdrop */}
             <Fade in={backdrop}>
                 <div
-                    className={classnames(
-                        visualizationCardClasses.backdrop,
-                        commonClasses.backdrop
-                    )}
+                    className={commonClasses.backdrop}
+                    onClick={handleBackdropClick}
                 />
             </Fade>
         </>

@@ -9,7 +9,7 @@ export const usePageContainerStyles = makeStyles({
         display: "flex",
         flexDirection: "column",
     },
-    contents: {
+    pageContainerContents: {
         display: "flex",
         flex: 1,
         overflow: "hidden", // Contents can scroll while everything outside is fixed

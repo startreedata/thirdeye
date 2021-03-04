@@ -60,17 +60,15 @@ public class ThirdEyeCacheRegistry {
   // DAO to ThirdEye's data and meta-data storage.
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
-
+  private final DataSourcesLoader dataSourcesLoader;
   private DataSourceCache dataSourceCache;
   private TimeSeriesCache timeSeriesCache = null;
-
   // Meta-data caches
   private LoadingCache<String, DatasetConfigDTO> datasetConfigCache;
   private LoadingCache<MetricDataset, MetricConfigDTO> metricConfigCache;
   private LoadingCache<String, Long> datasetMaxDataTimeCache;
   private LoadingCache<String, String> dimensionFiltersCache;
   private DatasetListCache datasetsCache;
-  private final DataSourcesLoader dataSourcesLoader;
 
   @Inject
   public ThirdEyeCacheRegistry(
@@ -138,12 +136,7 @@ public class ThirdEyeCacheRegistry {
 
   private void initCentralizedCache(final URL cacheConfigUrl) {
     try {
-      CacheConfig cacheConfig = CacheConfigLoader.fromCacheConfigUrl(cacheConfigUrl);
-      if (cacheConfig == null) {
-        LOG.error("Could not get cache config from path {} - reverting to default settings",
-            cacheConfigUrl);
-        setupDefaultTimeSeriesCacheSettings();
-      }
+      CacheConfig cacheConfig = readConfig(cacheConfigUrl, CacheConfig.class);
 
       CacheDAO cacheDAO = null;
       if (cacheConfig.useCentralizedCache()) {

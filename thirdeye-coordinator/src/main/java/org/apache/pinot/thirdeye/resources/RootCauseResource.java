@@ -9,6 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -51,15 +52,39 @@ public class RootCauseResource {
   private final Map<String, RCAFramework> frameworks;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final DataCubeSummaryCalculator dataCubeSummaryCalculator;
+  private final RootCauseTemplateResource rootCauseTemplateResource;
+  private final RootCauseSessionResource rootCauseSessionResource;
+  private final RootCauseMetricResource rootCauseMetricResource;
 
   public RootCauseResource(Map<String, RCAFramework> frameworks,
       List<RootCauseEntityFormatter> formatters,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final DataCubeSummaryCalculator dataCubeSummaryCalculator) {
+      final DataCubeSummaryCalculator dataCubeSummaryCalculator,
+      final RootCauseTemplateResource rootCauseTemplateResource,
+      final RootCauseSessionResource rootCauseSessionResource,
+      final RootCauseMetricResource rootCauseMetricResource) {
     this.frameworks = frameworks;
     this.formatters = formatters;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
+    this.rootCauseTemplateResource = rootCauseTemplateResource;
+    this.rootCauseSessionResource = rootCauseSessionResource;
+    this.rootCauseMetricResource = rootCauseMetricResource;
+  }
+
+  @Path(value = "/template")
+  public RootCauseTemplateResource getRootCauseTemplateResource() {
+    return rootCauseTemplateResource;
+  }
+
+  @Path(value = "/sessions")
+  public RootCauseSessionResource getRootCauseSessionResource() {
+    return rootCauseSessionResource;
+  }
+
+  @Path(value = "/metrics")
+  public RootCauseMetricResource getRootCauseMetricResource() {
+    return rootCauseMetricResource;
   }
 
   @GET
@@ -148,20 +173,19 @@ public class RootCauseResource {
     ensure(anomalyWindow == baselineWindow,
         "Must provide equal-sized anomaly and baseline periods");
 
-    // format input
-    Set<Entity> input = new HashSet<>();
-    input.add(
-        TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANOMALY, anomalyStart, anomalyEnd));
-    input.add(
-        TimeRangeEntity.fromRange(0.8, TimeRangeEntity.TYPE_BASELINE, baselineStart, baselineEnd));
-    input.add(
-        TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANALYSIS, analysisStart, analysisEnd));
+    // format inputs
+    Set<Entity> inputs = new HashSet<>(Arrays.asList(
+        TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANOMALY, anomalyStart, anomalyEnd),
+        TimeRangeEntity.fromRange(0.8, TimeRangeEntity.TYPE_BASELINE, baselineStart, baselineEnd),
+        TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANALYSIS, analysisStart, analysisEnd)
+    ));
+
     for (String urn : urns) {
-      input.add(EntityUtils.parseURN(urn, 1.0));
+      inputs.add(EntityUtils.parseURN(urn, 1.0));
     }
 
     // run root-cause analysis
-    RCAFrameworkExecutionResult result = this.frameworks.get(framework).run(input);
+    RCAFrameworkExecutionResult result = frameworks.get(framework).run(inputs);
 
     // apply formatters
     return applyFormatters(result.getResultsSorted(), formatterDepth);

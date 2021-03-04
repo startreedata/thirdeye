@@ -49,8 +49,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
       final MetricConfigManager metricConfigManager,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     return new DefaultTimeSeriesLoader(metricConfigManager, datasetConfigManager,
-        thirdEyeCacheRegistry.getDataSourceCache(),
-        thirdEyeCacheRegistry.getTimeSeriesCache(),
         thirdEyeCacheRegistry);
   }
 

@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.datasource.cache;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.inject.Singleton;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 
+@Singleton
 public class DataSourceCache {
 
   private final ExecutorService executorService;

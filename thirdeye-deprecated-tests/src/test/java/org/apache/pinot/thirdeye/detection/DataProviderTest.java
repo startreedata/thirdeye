@@ -198,8 +198,6 @@ public class DataProviderTest {
     DefaultTimeSeriesLoader timeSeriesLoader = new DefaultTimeSeriesLoader(
         TestDbEnv.getInstance().getMetricConfigDAO(),
         TestDbEnv.getInstance().getDatasetConfigDAO(),
-        cacheRegistry.getDataSourceCache(),
-        cacheRegistry.getTimeSeriesCache(),
         cacheRegistry);
 
     // provider

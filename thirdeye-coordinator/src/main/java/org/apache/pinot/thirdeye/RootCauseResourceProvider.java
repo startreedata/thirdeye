@@ -15,7 +15,10 @@ import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
 import org.apache.pinot.thirdeye.rca.DefaultEntityFormatter;
 import org.apache.pinot.thirdeye.rca.FormatterLoader;
 import org.apache.pinot.thirdeye.rca.RootCauseEntityFormatter;
+import org.apache.pinot.thirdeye.resources.RootCauseMetricResource;
 import org.apache.pinot.thirdeye.resources.RootCauseResource;
+import org.apache.pinot.thirdeye.resources.RootCauseSessionResource;
+import org.apache.pinot.thirdeye.resources.RootCauseTemplateResource;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAFrameworkLoader;
@@ -35,6 +38,15 @@ public class RootCauseResourceProvider implements Provider<RootCauseResource> {
 
   @Inject
   private RCAFrameworkLoader rcaFrameworkLoader;
+
+  @Inject
+  private RootCauseTemplateResource rootCauseTemplateResource;
+
+  @Inject
+  private RootCauseSessionResource rootCauseSessionResource;
+
+  @Inject
+  private RootCauseMetricResource rootCauseMetricResource;
 
   public RootCauseResourceProvider(
       final ThirdEyeCoordinatorConfiguration config) {
@@ -83,7 +95,10 @@ public class RootCauseResourceProvider implements Provider<RootCauseResource> {
         createRcaFrameworkMap(rcConfig, definitionsFile),
         createFormatters(rcConfig),
         mergedAnomalyResultManager,
-        dataCubeSummaryCalculator);
+        dataCubeSummaryCalculator,
+        rootCauseTemplateResource,
+        rootCauseSessionResource,
+        rootCauseMetricResource);
   }
 
   @Override

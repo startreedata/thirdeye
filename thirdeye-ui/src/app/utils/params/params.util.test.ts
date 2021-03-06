@@ -96,25 +96,25 @@ describe("Params Util", () => {
         );
     });
 
-    test("getTimeRangeDurationFromQueryString should return null when time range is not found in query string", () => {
+    test("getTimeRangeDurationFromQueryString should return null when time range duration is not found in query string", () => {
         location.search = "";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return null when time range key is not found in query string", () => {
+    test("getTimeRangeDurationFromQueryString should return null when time range is not found in query string", () => {
         location.search = "start_time=1&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return null when start time key is not found in query string", () => {
+    test("getTimeRangeDurationFromQueryString should return null when start time is not found in query string", () => {
         location.search = "time_range=CUSTOM&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return null when end time key is not found in query string", () => {
+    test("getTimeRangeDurationFromQueryString should return null when end time is not found in query string", () => {
         location.search = "time_range=CUSTOM&start_time=1";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
@@ -138,7 +138,7 @@ describe("Params Util", () => {
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return appropriate time range from query string", () => {
+    test("getTimeRangeDurationFromQueryString should return appropriate time range duration from query string", () => {
         location.search = "time_range=CUSTOM&start_time=1&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toEqual(
@@ -176,13 +176,13 @@ describe("Params Util", () => {
         );
     });
 
-    test("getQueryString should return empty string for key not found in query string", () => {
+    test("getQueryString should return empty string when key is not found in query string", () => {
         location.search = "";
 
         expect(getQueryString("testKey")).toEqual("");
     });
 
-    test("getQueryString should return appropriate string for key", () => {
+    test("getQueryString should return appropriate value from query string for key", () => {
         location.search = "testKey=testValue";
 
         expect(getQueryString("testKey")).toEqual("testValue");

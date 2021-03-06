@@ -1,6 +1,5 @@
 server {
     listen  ${NGINX_PORT};
-
     location ~/api(.*)$ {
         proxy_pass ${THIRDEYE_API_BASE_URL}/api$1;
         resolver kube-dns.kube-system.svc.cluster.local valid=30s;

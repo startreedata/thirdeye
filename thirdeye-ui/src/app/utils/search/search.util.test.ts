@@ -94,11 +94,47 @@ describe("Search Util", () => {
         );
     });
 
-    test("getSearchStatusLabel should return appropriate search status label for count and total", () => {
-        expect(getSearchStatusLabel(1, 2)).toEqual("label.search-count");
+    test("getSearchStatusLabel should return appropriate search status label for invalid count and total", () => {
+        expect(getSearchStatusLabel((null as unknown) as number, 1)).toEqual(
+            "label.search-count"
+        );
+        expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
+            count: "0",
+            total: "1",
+        });
+        expect(getSearchStatusLabel(1, (null as unknown) as number)).toEqual(
+            "label.search-count"
+        );
         expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
             count: "1",
-            total: "2",
+            total: "0",
+        });
+        expect(
+            getSearchStatusLabel(
+                (null as unknown) as number,
+                (null as unknown) as number
+            )
+        ).toEqual("label.search-count");
+        expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
+            count: "0",
+            total: "0",
+        });
+    });
+
+    test("getSearchStatusLabel should return appropriate search status label for count and total", () => {
+        expect(getSearchStatusLabel(0, 1)).toEqual("label.search-count");
+        expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
+            count: "0",
+            total: "1",
+        });
+    });
+
+    test("getSelectedStatusLabel should return appropriate selected status label for invalid count", () => {
+        expect(getSelectedStatusLabel((null as unknown) as number)).toEqual(
+            "label.selected-count"
+        );
+        expect(i18n.t).toHaveBeenCalledWith("label.selected-count", {
+            count: "0",
         });
     });
 
@@ -133,10 +169,10 @@ const mockObject = {
     },
     nestedObjectProperty: {
         objectProperty: {
-            numberProperty: 5,
+            numberProperty: 7,
             stringProperty: "testStringProperty3",
             booleanProperty: true,
-            numberArrayProperty: [6, 7],
+            numberArrayProperty: [8, 9],
             stringArrayProperty: [
                 "testStringArrayProperty5",
                 "testStringArrayProperty6",

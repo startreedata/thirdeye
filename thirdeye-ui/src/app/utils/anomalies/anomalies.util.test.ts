@@ -146,9 +146,9 @@ describe("Anomalies Util", () => {
             mockAnomaly1,
             mockAnomaly3,
         ]);
-        expect(filterAnomaliesByTime(mockAnomalies, 3, 3)).toEqual([
-            mockAnomaly1,
+        expect(filterAnomaliesByTime(mockAnomalies, 8, 9)).toEqual([
             mockAnomaly3,
+            mockAnomaly2,
         ]);
         expect(filterAnomaliesByTime(mockAnomalies, 2, 9)).toEqual([
             mockAnomaly1,
@@ -166,8 +166,8 @@ describe("Anomalies Util", () => {
         expect(filterAnomaliesByTime(mockAnomalies, 9, 10)).toEqual([
             mockAnomaly2,
         ]);
-        expect(filterAnomaliesByTime(mockAnomalies, 1, 1)).toEqual([]);
-        expect(filterAnomaliesByTime(mockAnomalies, 10, 10)).toEqual([]);
+        expect(filterAnomaliesByTime(mockAnomalies, 0, 1)).toEqual([]);
+        expect(filterAnomaliesByTime(mockAnomalies, 10, 11)).toEqual([]);
     });
 
     test("getAnomaliesAtTime should return empty array for invalid anomalies", () => {

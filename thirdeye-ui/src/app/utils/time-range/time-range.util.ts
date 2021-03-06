@@ -174,6 +174,7 @@ export const getTimeRangeDuration = (
     }
 };
 
+// Returns formatted string representation of time range
 export const formatTimeRange = (timeRange: TimeRange): string => {
     if (!timeRange) {
         return "";
@@ -182,6 +183,7 @@ export const formatTimeRange = (timeRange: TimeRange): string => {
     return i18n.t(`label.${kebabCase(timeRange)}`);
 };
 
+// Returns formatted string representation of time range duration
 export const formatTimeRangeDuration = (
     timeRangeDuration: TimeRangeDuration
 ): string => {

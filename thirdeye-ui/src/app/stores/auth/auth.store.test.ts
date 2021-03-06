@@ -30,7 +30,10 @@ describe("Auth Store", () => {
         expect(result.current.authDisabled).toBeFalsy();
         expect(result.current.authenticated).toBeFalsy();
         expect(result.current.accessToken).toEqual("");
+    });
 
+    test("setAccessToken should update store appropriately for empty token", () => {
+        const { result } = renderHook(() => useAuthStore());
         act(() => {
             result.current.setAccessToken("");
         });

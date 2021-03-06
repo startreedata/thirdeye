@@ -1,4 +1,8 @@
+import { isNil } from "lodash";
 import numbro from "numbro";
+
+const MANTISSA_DEFAULT = 2;
+const OPTIONAL_MANTISSA_DEFAULT = true;
 
 // Returns formatted string representation of number
 // For example:
@@ -10,13 +14,19 @@ import numbro from "numbro";
 // 10.127 -> 10.13
 export const formatNumber = (
     num: number,
-    mantissa = 2,
-    optionalMantissa = true
+    mantissa?: number,
+    optionalMantissa?: boolean
 ): string => {
+    if (isNil(num)) {
+        return "";
+    }
+
     return numbro(num).format({
         thousandSeparated: true,
-        mantissa: mantissa,
-        optionalMantissa: optionalMantissa,
+        mantissa: !isNil(mantissa) ? mantissa : MANTISSA_DEFAULT,
+        optionalMantissa: !isNil(optionalMantissa)
+            ? optionalMantissa
+            : OPTIONAL_MANTISSA_DEFAULT,
     });
 };
 
@@ -39,14 +49,20 @@ export const formatNumber = (
 // 100000000000000 -> 100t
 export const formatLargeNumber = (
     num: number,
-    mantissa = 2,
-    optionalMantissa = true
+    mantissa?: number,
+    optionalMantissa?: boolean
 ): string => {
+    if (isNil(num)) {
+        return "";
+    }
+
     return numbro(num).format({
         average: true,
         lowPrecision: false,
-        mantissa: mantissa,
-        optionalMantissa: optionalMantissa,
+        mantissa: !isNil(mantissa) ? mantissa : MANTISSA_DEFAULT,
+        optionalMantissa: !isNil(optionalMantissa)
+            ? optionalMantissa
+            : OPTIONAL_MANTISSA_DEFAULT,
     } as numbro.Format);
 };
 
@@ -59,13 +75,19 @@ export const formatLargeNumber = (
 // 0.01237 -> 1.24%
 export const formatPercentage = (
     num: number,
-    mantissa = 2,
-    optionalMantissa = true
+    mantissa?: number,
+    optionalMantissa?: boolean
 ): string => {
+    if (isNil(num)) {
+        return "";
+    }
+
     return numbro(num).format({
         output: "percent",
         thousandSeparated: true,
-        mantissa: mantissa,
-        optionalMantissa: optionalMantissa,
+        mantissa: !isNil(mantissa) ? mantissa : MANTISSA_DEFAULT,
+        optionalMantissa: !isNil(optionalMantissa)
+            ? optionalMantissa
+            : OPTIONAL_MANTISSA_DEFAULT,
     });
 };

@@ -1,20 +1,19 @@
 import { InitOptions } from "i18next";
-import en from "../../locale/languages/en-us.json";
+import enUS from "../../locale/languages/en-us.json";
 
 // Returns i18next options
 export const getInitOptions = (): InitOptions => {
     return {
+        supportedLngs: ["en-US"],
+        resources: {
+            "en-US": { translation: enUS },
+        },
+        fallbackLng: ["en-US"],
         interpolation: {
             escapeValue: false, // XSS safety provided by React
         },
-        lng: "en",
-        missingKeyHandler: (_lng, _ns, key) =>
+        missingKeyHandler: (_lngs, _ns, key) =>
             console.error(`i18next: key not found "${key}"`),
-        resources: {
-            en: {
-                translation: en,
-            },
-        },
         saveMissing: true, // Required for missing key handler
     };
 };

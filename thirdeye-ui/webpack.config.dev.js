@@ -110,7 +110,7 @@ module.exports = {
         // Build progress bar
         new WebpackBar({
             name: "@cortexdata/thirdeye-ui [dev]",
-            color: "#6EC4D1",
+            color: "#54BAC9",
         }),
     ],
 

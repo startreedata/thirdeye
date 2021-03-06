@@ -1,6 +1,6 @@
 import bounds from "binary-search-bounds";
 import { ScaleTime } from "d3-scale";
-import { isEmpty } from "lodash";
+import { isEmpty, isNil } from "lodash";
 import { Interval } from "luxon";
 import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
@@ -21,36 +21,47 @@ export const NUM_TICKS_DEFAULT = 8;
 export const formatLargeNumberForVisualization = (
     num: number | { valueOf(): number }
 ): string => {
-    if (!num) {
+    if (isNil(num)) {
         return "";
     }
 
+    let targetNum;
     if (typeof num === "number") {
-        return formatLargeNumber(num);
+        targetNum = num;
+    } else if (num.valueOf && typeof num.valueOf() === "number") {
+        targetNum = num.valueOf();
     }
 
-    return formatLargeNumber(num.valueOf());
+    if (isNil(targetNum)) {
+        return "";
+    }
+
+    return formatLargeNumber(targetNum);
 };
 
 // Returns formatted string representation of date based on scale domain interval
 // For example:
-// Interval > 2 years - YYYY
-// 2 years >= interval > 2 months - MMM YYYY
-// 2 months >= interval > 2 days - MMM DD, YYYY
-// 2 days >= interval - MMM DD, YY SEPARATOR_DATE_TIME HH:MM AM/PM
-export const formatDateTimeForAxis = (
+// Interval > 2 years -> YYYY
+// 2 years >= interval > 2 months -> MMM YYYY
+// 2 months >= interval > 2 days -> MMM DD, YYYY
+// 2 days >= interval -> MMM DD, YY SEPARATOR_DATE_TIME HH:MM AM/PM
+export const formatDateTimeForTimeAxis = (
     date: number | { valueOf(): number },
     scale: ScaleTime<number, number>
 ): string => {
-    if (!date || !scale) {
+    if (isNil(date) || !scale) {
         return "";
     }
 
     let targetDate;
     if (typeof date === "number") {
         targetDate = date;
-    } else {
+    } else if (date.valueOf && typeof date.valueOf() === "number") {
         targetDate = date.valueOf();
+    }
+
+    if (isNil(targetDate)) {
+        return "";
     }
 
     // Determine scale domain interval duration
@@ -80,16 +91,19 @@ export const formatDateTimeForAxis = (
     );
 };
 
-// Returns equally spaced time tick values for scale domain interval
-export const getTimeTickValuesForAxis = (
-    numTicks: number,
-    scale: ScaleTime<number, number>
+// Returns equally spaced tick values for scale domain interval
+export const getTickValuesForTimeAxis = (
+    scale: ScaleTime<number, number>,
+    numTicks?: number
 ): number[] => {
     if (!scale) {
         return [];
     }
 
-    numTicks = numTicks || NUM_TICKS_DEFAULT;
+    if (isNil(numTicks)) {
+        numTicks = NUM_TICKS_DEFAULT;
+    }
+
     if (numTicks < 3) {
         // Just the scale domain start and end time
         return [scale.domain()[0].getTime(), scale.domain()[1].getTime()];
@@ -100,7 +114,7 @@ export const getTimeTickValuesForAxis = (
         scale.domain()[0],
         scale.domain()[1]
     );
-    const splitIntervals = interval.divideEqually(numTicks - 1); // Account for scale domain start and end time as two time tick values
+    const splitIntervals = interval.divideEqually(numTicks - 1); // Account for scale domain start and end time as two tick values
     if (isEmpty(splitIntervals)) {
         // Just the scale domain start and end time
         return [scale.domain()[0].getTime(), scale.domain()[1].getTime()];
@@ -126,7 +140,7 @@ export const getAlertEvaluationTimeSeriesPoints = (
         return [];
     }
 
-    // Gather only first detection evaluation
+    // Gather only the first detection evaluation
     const detectionEvaluation = Object.values(
         alertEvaluation.detectionEvaluations
     )[0];
@@ -162,7 +176,7 @@ export const getAlertEvaluationAnomalies = (
         return [];
     }
 
-    // Gather only first detection evaluation
+    // Gather only the first detection evaluation
     const detectionEvaluation = Object.values(
         alertEvaluation.detectionEvaluations
     )[0];
@@ -173,29 +187,25 @@ export const getAlertEvaluationAnomalies = (
 export const getAlertEvaluationTimeSeriesPointsMinTimestamp = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {
+    if (isEmpty(alertEvaluationTimeSeriesPoints)) {
+        return 0;
+    }
+
     // Alert evaluation time series points assumed to be sorted by timestamp
-    return (
-        (alertEvaluationTimeSeriesPoints &&
-            alertEvaluationTimeSeriesPoints[0] &&
-            alertEvaluationTimeSeriesPoints[0].timestamp) ||
-        0
-    );
+    return alertEvaluationTimeSeriesPoints[0].timestamp;
 };
 
 export const getAlertEvaluationTimeSeriesPointsMaxTimestamp = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
 ): number => {
+    if (isEmpty(alertEvaluationTimeSeriesPoints)) {
+        return 0;
+    }
+
     // Alert evaluation time series points assumed to be sorted by timestamp
-    return (
-        (alertEvaluationTimeSeriesPoints &&
-            alertEvaluationTimeSeriesPoints[
-                alertEvaluationTimeSeriesPoints.length - 1
-            ] &&
-            alertEvaluationTimeSeriesPoints[
-                alertEvaluationTimeSeriesPoints.length - 1
-            ].timestamp) ||
-        0
-    );
+    return alertEvaluationTimeSeriesPoints[
+        alertEvaluationTimeSeriesPoints.length - 1
+    ].timestamp;
 };
 
 export const getAlertEvaluationTimeSeriesPointsMaxValue = (
@@ -207,22 +217,6 @@ export const getAlertEvaluationTimeSeriesPointsMaxValue = (
 
     let maxValue = Number.MIN_VALUE;
     for (const alertEvaluationTimeSeriesPoint of alertEvaluationTimeSeriesPoints) {
-        // Upper bound
-        if (
-            isFinite(alertEvaluationTimeSeriesPoint.upperBound) &&
-            maxValue < alertEvaluationTimeSeriesPoint.upperBound
-        ) {
-            maxValue = alertEvaluationTimeSeriesPoint.upperBound;
-        }
-
-        // Lower bound
-        if (
-            isFinite(alertEvaluationTimeSeriesPoint.lowerBound) &&
-            maxValue < alertEvaluationTimeSeriesPoint.lowerBound
-        ) {
-            maxValue = alertEvaluationTimeSeriesPoint.lowerBound;
-        }
-
         // Current
         if (
             isFinite(alertEvaluationTimeSeriesPoint.current) &&
@@ -238,6 +232,22 @@ export const getAlertEvaluationTimeSeriesPointsMaxValue = (
         ) {
             maxValue = alertEvaluationTimeSeriesPoint.expected;
         }
+
+        // Upper bound
+        if (
+            isFinite(alertEvaluationTimeSeriesPoint.upperBound) &&
+            maxValue < alertEvaluationTimeSeriesPoint.upperBound
+        ) {
+            maxValue = alertEvaluationTimeSeriesPoint.upperBound;
+        }
+
+        // Lower bound
+        if (
+            isFinite(alertEvaluationTimeSeriesPoint.lowerBound) &&
+            maxValue < alertEvaluationTimeSeriesPoint.lowerBound
+        ) {
+            maxValue = alertEvaluationTimeSeriesPoint.lowerBound;
+        }
     }
 
     return maxValue;
@@ -248,11 +258,11 @@ export const filterAlertEvaluationTimeSeriesPointsByTime = (
     startTime: number,
     endTime: number
 ): AlertEvaluationTimeSeriesPoint[] => {
-    if (!alertEvaluationTimeSeriesPoints) {
+    if (isEmpty(alertEvaluationTimeSeriesPoints)) {
         return [];
     }
 
-    if (!startTime || !endTime) {
+    if (isNil(startTime) || isNil(endTime)) {
         return alertEvaluationTimeSeriesPoints;
     }
 
@@ -283,16 +293,14 @@ export const getAlertEvaluationTimeSeriesPointAtTime = (
     alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[],
     time: number
 ): AlertEvaluationTimeSeriesPoint | null => {
-    if (isEmpty(alertEvaluationTimeSeriesPoints) || !time) {
+    if (isEmpty(alertEvaluationTimeSeriesPoints) || isNil(time)) {
         return null;
     }
 
     // Search first alert evaluation time series point with timestamp closest or equal to time
     const index = bounds.le(
         alertEvaluationTimeSeriesPoints,
-        {
-            timestamp: time,
-        } as AlertEvaluationTimeSeriesPoint,
+        { timestamp: time } as AlertEvaluationTimeSeriesPoint,
         alertEvaluationTimeSeriesPointsComparator
     );
     if (index === -1) {

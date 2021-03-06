@@ -27,13 +27,13 @@ export const deepSearchStringProperty = <T>(
 
 export const getSearchStatusLabel = (count: number, total: number): string => {
     return i18n.t("label.search-count", {
-        count: formatNumber(count) as never,
-        total: formatNumber(total) as never,
+        count: formatNumber(count || 0) as never,
+        total: formatNumber(total || 0) as never,
     });
 };
 
 export const getSelectedStatusLabel = (count: number): string => {
     return i18n.t("label.selected-count", {
-        count: formatNumber(count) as never,
+        count: formatNumber(count || 0) as never,
     });
 };

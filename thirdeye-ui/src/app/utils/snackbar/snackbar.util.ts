@@ -1,15 +1,15 @@
 import { OptionsObject, VariantType } from "notistack";
 
-export const getInfoSnackbarOption = (
-    preventDuplicate?: boolean
-): OptionsObject => {
-    return getSnackbarOption("info", preventDuplicate);
-};
-
 export const getSuccessSnackbarOption = (
     preventDuplicate?: boolean
 ): OptionsObject => {
     return getSnackbarOption("success", preventDuplicate);
+};
+
+export const getErrorSnackbarOption = (
+    preventDuplicate?: boolean
+): OptionsObject => {
+    return getSnackbarOption("error", preventDuplicate);
 };
 
 export const getWarningSnackbarOption = (
@@ -18,10 +18,10 @@ export const getWarningSnackbarOption = (
     return getSnackbarOption("warning", preventDuplicate);
 };
 
-export const getErrorSnackbarOption = (
+export const getInfoSnackbarOption = (
     preventDuplicate?: boolean
 ): OptionsObject => {
-    return getSnackbarOption("error", preventDuplicate);
+    return getSnackbarOption("info", preventDuplicate);
 };
 
 const getSnackbarOption = (

@@ -31,7 +31,7 @@ describe("Time Range Util", () => {
         Settings.defaultZoneName = "America/Los_Angeles";
 
         jest.spyOn(DateTime, "local").mockReturnValue(
-            DateTime.fromMillis(1606852800000) // December 1, 2020, 12:00:00 PM
+            DateTime.fromMillis(1577865600000) // January 1, 2020, 12:00:00 AM
         );
     });
 
@@ -49,115 +49,115 @@ describe("Time Range Util", () => {
         });
     });
 
-    test("getDefaultTimeRangeDuration should return TimeRange.TODAY time range duration", () => {
+    test("getDefaultTimeRangeDuration should return appropriate TimeRange.TODAY time range duration", () => {
         expect(getDefaultTimeRangeDuration()).toEqual({
             timeRange: TimeRange.TODAY,
-            startTime: 1606809600000,
-            endTime: 1606852800000,
+            startTime: 1577865600000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return default TimeRange.TODAY time range duration for invalid time range", () => {
         expect(getTimeRangeDuration((null as unknown) as TimeRange)).toEqual({
             timeRange: TimeRange.TODAY,
-            startTime: 1606809600000,
-            endTime: 1606852800000,
+            startTime: 1577865600000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.LAST_15_MINUTES time range", () => {
         expect(getTimeRangeDuration(TimeRange.LAST_15_MINUTES)).toEqual({
             timeRange: TimeRange.LAST_15_MINUTES,
-            startTime: 1606851900000,
-            endTime: 1606852800000,
+            startTime: 1577864700000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.LAST_1_HOUR time range", () => {
         expect(getTimeRangeDuration(TimeRange.LAST_1_HOUR)).toEqual({
             timeRange: TimeRange.LAST_1_HOUR,
-            startTime: 1606849200000,
-            endTime: 1606852800000,
+            startTime: 1577862000000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.LAST_12_HOURS time range", () => {
         expect(getTimeRangeDuration(TimeRange.LAST_12_HOURS)).toEqual({
             timeRange: TimeRange.LAST_12_HOURS,
-            startTime: 1606809600000,
-            endTime: 1606852800000,
+            startTime: 1577822400000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.LAST_24_HOURS time range", () => {
         expect(getTimeRangeDuration(TimeRange.LAST_24_HOURS)).toEqual({
             timeRange: TimeRange.LAST_24_HOURS,
-            startTime: 1606766400000,
-            endTime: 1606852800000,
+            startTime: 1577779200000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.LAST_7_DAYS time range", () => {
         expect(getTimeRangeDuration(TimeRange.LAST_7_DAYS)).toEqual({
             timeRange: TimeRange.LAST_7_DAYS,
-            startTime: 1606248000000,
-            endTime: 1606852800000,
+            startTime: 1577260800000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.LAST_30_DAYS time range", () => {
         expect(getTimeRangeDuration(TimeRange.LAST_30_DAYS)).toEqual({
             timeRange: TimeRange.LAST_30_DAYS,
-            startTime: 1604260800000,
-            endTime: 1606852800000,
+            startTime: 1575273600000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.TODAY time range", () => {
         expect(getTimeRangeDuration(TimeRange.TODAY)).toEqual({
             timeRange: TimeRange.TODAY,
-            startTime: 1606809600000,
-            endTime: 1606852800000,
+            startTime: 1577865600000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.YESTERDAY time range", () => {
         expect(getTimeRangeDuration(TimeRange.YESTERDAY)).toEqual({
             timeRange: TimeRange.YESTERDAY,
-            startTime: 1606723200000,
-            endTime: 1606809599999,
+            startTime: 1577779200000,
+            endTime: 1577865599999,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.THIS_WEEK time range", () => {
         expect(getTimeRangeDuration(TimeRange.THIS_WEEK)).toEqual({
             timeRange: TimeRange.THIS_WEEK,
-            startTime: 1606723200000,
-            endTime: 1606852800000,
+            startTime: 1577692800000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.LAST_WEEK time range", () => {
         expect(getTimeRangeDuration(TimeRange.LAST_WEEK)).toEqual({
             timeRange: TimeRange.LAST_WEEK,
-            startTime: 1606118400000,
-            endTime: 1606723199999,
+            startTime: 1577088000000,
+            endTime: 1577692799999,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.THIS_MONTH time range", () => {
         expect(getTimeRangeDuration(TimeRange.THIS_MONTH)).toEqual({
             timeRange: TimeRange.THIS_MONTH,
-            startTime: 1606809600000,
-            endTime: 1606852800000,
+            startTime: 1577865600000,
+            endTime: 1577865600000,
         });
     });
 
     test("getTimeRangeDuration should return appropriate time range duration for TimeRange.LAST_MONTH time range", () => {
         expect(getTimeRangeDuration(TimeRange.LAST_MONTH)).toEqual({
             timeRange: TimeRange.LAST_MONTH,
-            startTime: 1604214000000,
-            endTime: 1606809599999,
+            startTime: 1575187200000,
+            endTime: 1577865599999,
         });
     });
 
@@ -165,7 +165,7 @@ describe("Time Range Util", () => {
         expect(getTimeRangeDuration(TimeRange.THIS_YEAR)).toEqual({
             timeRange: TimeRange.THIS_YEAR,
             startTime: 1577865600000,
-            endTime: 1606852800000,
+            endTime: 1577865600000,
         });
     });
 
@@ -180,8 +180,8 @@ describe("Time Range Util", () => {
     test("getTimeRangeDuration should return default TimeRange.TODAY time range duration for custom time range", () => {
         expect(getTimeRangeDuration(TimeRange.CUSTOM)).toEqual({
             timeRange: TimeRange.TODAY,
-            startTime: 1606809600000,
-            endTime: 1606852800000,
+            startTime: 1577865600000,
+            endTime: 1577865600000,
         });
     });
 
@@ -202,12 +202,6 @@ describe("Time Range Util", () => {
     });
 
     test("formatTimeRangeDuration should return appropriate string for time range duration", () => {
-        const mockCustomTimeRangeDuration = {
-            timeRange: TimeRange.CUSTOM,
-            startTime: 1,
-            endTime: 2,
-        };
-
         expect(formatTimeRangeDuration(mockCustomTimeRangeDuration)).toEqual(
             "label.start-time-end-time"
         );
@@ -217,3 +211,9 @@ describe("Time Range Util", () => {
         });
     });
 });
+
+const mockCustomTimeRangeDuration = {
+    timeRange: TimeRange.CUSTOM,
+    startTime: 1,
+    endTime: 2,
+};

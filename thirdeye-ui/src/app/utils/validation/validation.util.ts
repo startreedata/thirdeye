@@ -14,6 +14,7 @@ export const validateEmail = (email: string): ValidationResult => {
     const emailSchema = yup.object().shape({
         email: yup
             .string()
+            .ensure()
             .trim()
             .required(i18n.t("message.email-required"))
             .email(i18n.t("message.invalid-email")),

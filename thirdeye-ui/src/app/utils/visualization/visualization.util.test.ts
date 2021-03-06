@@ -10,7 +10,7 @@ import {
 } from "../../rest/dto/detection.interfaces";
 import {
     filterAlertEvaluationTimeSeriesPointsByTime,
-    formatDateTimeForAxis,
+    formatDateTimeForTimeAxis,
     formatLargeNumberForVisualization,
     getAlertEvaluationAnomalies,
     getAlertEvaluationTimeSeriesPointAtTime,
@@ -18,7 +18,7 @@ import {
     getAlertEvaluationTimeSeriesPointsMaxTimestamp,
     getAlertEvaluationTimeSeriesPointsMaxValue,
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
-    getTimeTickValuesForAxis,
+    getTickValuesForTimeAxis,
 } from "./visualization.util";
 
 const systemLocale = Settings.defaultLocale;
@@ -26,6 +26,21 @@ const systemZoneName = Settings.defaultZoneName;
 
 jest.mock("../number/number.util", () => ({
     formatLargeNumber: jest.fn().mockImplementation((num) => num.toString()),
+}));
+
+jest.mock("../date-time/date-time.util", () => ({
+    formatYear: jest
+        .fn()
+        .mockImplementation((date) => `${date.toString()}year`),
+    formatMonthOfYear: jest
+        .fn()
+        .mockImplementation((date) => `${date.toString()}monthOfYear`),
+    formatDate: jest
+        .fn()
+        .mockImplementation((date) => `${date.toString()}date`),
+    formatTime: jest
+        .fn()
+        .mockImplementation((date) => `${date.toString()}time`),
 }));
 
 describe("Visualization Util", () => {
@@ -48,151 +63,179 @@ describe("Visualization Util", () => {
         ).toEqual("");
     });
 
+    test("formatLargeNumberForVisualization should return empty string for invalid object", () => {
+        expect(
+            formatLargeNumberForVisualization({} as { valueOf(): number })
+        ).toEqual("");
+    });
+
     test("formatLargeNumberForVisualization should return appropriate string for number", () => {
         expect(formatLargeNumberForVisualization(1)).toEqual("1");
     });
 
     test("formatLargeNumberForVisualization should return appropriate string for object", () => {
-        expect(
-            formatLargeNumberForVisualization({
-                valueOf: () => 1,
-            })
-        ).toEqual("1");
+        expect(formatLargeNumberForVisualization({ valueOf: () => 1 })).toEqual(
+            "1"
+        );
     });
 
-    test("formatDateTimeForAxis should return empty string for invalid date", () => {
+    test("formatDateTimeForTimeAxis should return empty string for invalid date", () => {
         expect(
-            formatDateTimeForAxis((null as unknown) as number, mockScale)
+            formatDateTimeForTimeAxis((null as unknown) as number, mockScale)
         ).toEqual("");
     });
 
-    test("formatDateTimeForAxis should return empty string for invalid scale", () => {
+    test("formatDateTimeForTimeAxis should return empty string for invalid object", () => {
         expect(
-            formatDateTimeForAxis(
+            formatDateTimeForTimeAxis({} as { valueOf(): number }, mockScale)
+        ).toEqual("");
+    });
+
+    test("formatDateTimeForTimeAxis should return empty string for invalid scale", () => {
+        expect(
+            formatDateTimeForTimeAxis(
                 1,
                 (null as unknown) as ScaleTime<number, number>
             )
         ).toEqual("");
     });
 
-    test("formatDateTimeForAxis should return appropriate string for date and scale", () => {
-        mockScaleDomain = [new Date(1543651200000), new Date(1669881600000)];
+    test("formatDateTimeForTimeAxis should return appropriate string for date and scale", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1672560000000)];
 
-        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual("2020");
+        expect(formatDateTimeForTimeAxis(1577865600000, mockScale)).toEqual(
+            "1577865600000year"
+        );
     });
 
-    test("formatDateTimeForAxis should return appropriate string for object and scale", () => {
-        mockScaleDomain = [new Date(1543651200000), new Date(1669881600000)];
+    test("formatDateTimeForTimeAxis should return appropriate string for object and scale", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1672560000000)];
 
         expect(
-            formatDateTimeForAxis(
-                {
-                    valueOf: () => 1606852800000,
-                },
+            formatDateTimeForTimeAxis(
+                { valueOf: () => 1577865600000 },
                 mockScale
             )
-        ).toEqual("2020");
+        ).toEqual("1577865600000year");
     });
 
-    test("formatDateTimeForAxis should return appropriate string for date and scale domain interval of more than 2 years", () => {
-        mockScaleDomain = [new Date(1543651200000), new Date(1669881600000)];
+    test("formatDateTimeForTimeAxis should return appropriate string for date and scale domain interval of more than 2 years", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1672560000000)]; // Interval > 2 years
 
-        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual("2020");
-    });
-
-    test("formatDateTimeForAxis should return appropriate string for date and scale domain interval of less than or equal to 2 years and more than 2 months", () => {
-        mockScaleDomain = [new Date(1575273600000), new Date(1638345600000)]; // Interval = 2 years
-
-        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
-            "Dec 2020"
-        );
-
-        mockScaleDomain = [new Date(1577865600000), new Date(1638345600000)]; // Interval < 2 years
-
-        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
-            "Dec 2020"
+        expect(formatDateTimeForTimeAxis(1577865600000, mockScale)).toEqual(
+            "1577865600000year"
         );
     });
 
-    test("formatDateTimeForAxis should return appropriate string for date and scale domain interval of less than or equal to 2 months and more than 2 days", () => {
-        mockScaleDomain = [new Date(1604304000000), new Date(1609488000000)]; // Interval = 2 months
+    test("formatDateTimeForTimeAxis should return appropriate string for date and scale domain interval of less than or equal to 2 years and more than 2 months", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1640937600000)]; // Interval = 2 years
 
-        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
-            "Dec 01, 2020"
+        expect(formatDateTimeForTimeAxis(1577865600000, mockScale)).toEqual(
+            "1577865600000monthOfYear"
         );
 
-        mockScaleDomain = [new Date(1606723200000), new Date(1609488000000)]; // Interval < 2 months
+        mockScaleDomain = [new Date(1577865600000), new Date(1585724400000)]; // 2 years >= interval > 2 months
 
-        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
-            "Dec 01, 2020"
-        );
-    });
-
-    test("formatDateTimeForAxis should return appropriate string for date and scale domain interval of less than or equal to 2 days", () => {
-        mockScaleDomain = [new Date(1606723200000), new Date(1606896000000)]; // Interval = 2 days
-
-        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
-            "Dec 01, 2020@12:00 PM"
-        );
-
-        mockScaleDomain = [new Date(1606852800000), new Date(1606896000000)]; // Interval < 2 days
-
-        expect(formatDateTimeForAxis(1606852800000, mockScale)).toEqual(
-            "Dec 01, 2020@12:00 PM"
+        expect(formatDateTimeForTimeAxis(1577865600000, mockScale)).toEqual(
+            "1577865600000monthOfYear"
         );
     });
 
-    test("getTimeTickValuesForAxis should return empty array for number of ticks and invalid scale", () => {
+    test("formatDateTimeForTimeAxis should return appropriate string for date and scale domain interval of less than or equal to 2 months and more than 2 days", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1583049600000)]; // Interval = 2 months
+
+        expect(formatDateTimeForTimeAxis(1577865600000, mockScale)).toEqual(
+            "1577865600000date"
+        );
+
+        mockScaleDomain = [new Date(1577865600000), new Date(1578124800000)]; // 2 months >= interval > 2 days
+
+        expect(formatDateTimeForTimeAxis(1577865600000, mockScale)).toEqual(
+            "1577865600000date"
+        );
+    });
+
+    test("formatDateTimeForTimeAxis should return appropriate string for date and scale domain interval of less than or equal to 2 days", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1578038400000)]; // Interval = 2 days
+
+        expect(formatDateTimeForTimeAxis(1577865600000, mockScale)).toEqual(
+            "1577865600000date@1577865600000time"
+        );
+
+        mockScaleDomain = [new Date(1577865600000), new Date(1577952000000)]; // Interval < 2 days
+
+        expect(formatDateTimeForTimeAxis(1577865600000, mockScale)).toEqual(
+            "1577865600000date@1577865600000time"
+        );
+    });
+
+    test("getTickValuesForTimeAxis should return empty array for invalid scale", () => {
         expect(
-            getTimeTickValuesForAxis(
-                1,
+            getTickValuesForTimeAxis(
                 (null as unknown) as ScaleTime<number, number>
             )
         ).toEqual([]);
     });
 
-    test("getTimeTickValuesForAxis should return appropriate time tick value array for invalid number of ticks and scale", () => {
-        mockScaleDomain = [new Date(1575187200000), new Date(1606852800000)];
-        const timeTickValues = getTimeTickValuesForAxis(
-            (null as unknown) as number,
-            mockScale
+    test("getTickValuesForTimeAxis should return appropriate tick values for scale and default number of ticks", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1672560000000)];
+        const timeTickValues = getTickValuesForTimeAxis(mockScale);
+
+        expect(timeTickValues).toHaveLength(8);
+        expect(timeTickValues[0]).toEqual(1577865600000);
+        expect(timeTickValues[1]).toEqual(1591393371428.5715);
+        expect(timeTickValues[2]).toEqual(1604921142856.5715);
+        expect(timeTickValues[3]).toEqual(1618448914284.5715);
+        expect(timeTickValues[4]).toEqual(1631976685712.5715);
+        expect(timeTickValues[5]).toEqual(1645504457140.5715);
+        expect(timeTickValues[6]).toEqual(1659032228568.5715);
+        expect(timeTickValues[7]).toEqual(1672560000000);
+    });
+
+    test("getTickValuesForTimeAxis should return appropriate tick values for scale and invalid number of ticks", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1672560000000)];
+        const timeTickValues = getTickValuesForTimeAxis(
+            mockScale,
+            (null as unknown) as number
         );
 
         expect(timeTickValues).toHaveLength(8);
-        expect(timeTickValues[0]).toEqual(1575187200000);
-        expect(timeTickValues[1]).toEqual(1579710857142.8572);
-        expect(timeTickValues[2]).toEqual(1584234514284.8572);
-        expect(timeTickValues[3]).toEqual(1588758171426.8572);
-        expect(timeTickValues[4]).toEqual(1593281828568.8572);
-        expect(timeTickValues[5]).toEqual(1597805485710.8572);
-        expect(timeTickValues[6]).toEqual(1602329142852.8572);
-        expect(timeTickValues[7]).toEqual(1606852800000);
+        expect(timeTickValues[0]).toEqual(1577865600000);
+        expect(timeTickValues[1]).toEqual(1591393371428.5715);
+        expect(timeTickValues[2]).toEqual(1604921142856.5715);
+        expect(timeTickValues[3]).toEqual(1618448914284.5715);
+        expect(timeTickValues[4]).toEqual(1631976685712.5715);
+        expect(timeTickValues[5]).toEqual(1645504457140.5715);
+        expect(timeTickValues[6]).toEqual(1659032228568.5715);
+        expect(timeTickValues[7]).toEqual(1672560000000);
     });
 
-    test("getTimeTickValuesForAxis should return appropriate time tick value array for number of ticks less than 3 and scale", () => {
-        mockScaleDomain = [new Date(1575187200000), new Date(1606852800000)];
-        const timeTickValues = getTimeTickValuesForAxis(1, mockScale);
+    test("getTickValuesForTimeAxis should return appropriate tick values for scale and number of ticks less than 3", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1672560000000)];
+        const timeTickValues = getTickValuesForTimeAxis(mockScale, 1);
 
         expect(timeTickValues).toHaveLength(2);
-        expect(timeTickValues[0]).toEqual(1575187200000);
-        expect(timeTickValues[1]).toEqual(1606852800000);
+        expect(timeTickValues[0]).toEqual(1577865600000);
+        expect(timeTickValues[1]).toEqual(1672560000000);
     });
 
-    test("getTimeTickValuesForAxis should return appropriate time tick value array for number of ticks and scale", () => {
-        mockScaleDomain = [new Date(1575187200000), new Date(1606852800000)];
-        let timeTickValues = getTimeTickValuesForAxis(3, mockScale);
+    test("getTickValuesForTimeAxis should return appropriate tick values for scale and number of ticks", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1672560000000)];
+        const timeTickValues = getTickValuesForTimeAxis(mockScale, 3);
 
         expect(timeTickValues).toHaveLength(3);
-        expect(timeTickValues[0]).toEqual(1575187200000);
-        expect(timeTickValues[1]).toEqual(1591020000000);
-        expect(timeTickValues[2]).toEqual(1606852800000);
+        expect(timeTickValues[0]).toEqual(1577865600000);
+        expect(timeTickValues[1]).toEqual(1625212800000);
+        expect(timeTickValues[2]).toEqual(1672560000000);
+    });
 
-        mockScaleDomain = [new Date(1606852800000), new Date(1606852800000)];
-        timeTickValues = getTimeTickValuesForAxis(3, mockScale);
+    test("getTickValuesForTimeAxis should return appropriate tick values for scale with domain interval of 0", () => {
+        mockScaleDomain = [new Date(1577865600000), new Date(1577865600000)];
+        const timeTickValues = getTickValuesForTimeAxis(mockScale);
 
         expect(timeTickValues).toHaveLength(2);
-        expect(timeTickValues[0]).toEqual(1606852800000);
-        expect(timeTickValues[1]).toEqual(1606852800000);
+        expect(timeTickValues[0]).toEqual(1577865600000);
+        expect(timeTickValues[1]).toEqual(1577865600000);
     });
 
     test("getAlertEvaluationTimeSeriesPoints should return empty array for invalid alert evaluation", () => {
@@ -203,7 +246,7 @@ describe("Visualization Util", () => {
         ).toEqual([]);
     });
 
-    test("getAlertEvaluationTimeSeriesPoints should return empty array for invalid detection evaluation", () => {
+    test("getAlertEvaluationTimeSeriesPoints should return empty array for invalid detection evaluations", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations = (null as unknown) as {
             [index: string]: DetectionEvaluation;
@@ -214,7 +257,7 @@ describe("Visualization Util", () => {
         ).toEqual([]);
     });
 
-    test("getAlertEvaluationTimeSeriesPoints should return empty array for empty detection evaluation", () => {
+    test("getAlertEvaluationTimeSeriesPoints should return empty array for empty detection evaluations", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations = {};
 
@@ -283,7 +326,7 @@ describe("Visualization Util", () => {
         ).toEqual([]);
     });
 
-    test("getAlertEvaluationAnomalies should return empty array for invalid detection evaluation", () => {
+    test("getAlertEvaluationAnomalies should return empty array for invalid detection evaluations", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations = (null as unknown) as {
             [index: string]: DetectionEvaluation;
@@ -294,7 +337,7 @@ describe("Visualization Util", () => {
         );
     });
 
-    test("getAlertEvaluationAnomalies should return empty array for empty detection evaluation", () => {
+    test("getAlertEvaluationAnomalies should return empty array for empty detection evaluations", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations = {};
 
@@ -325,7 +368,7 @@ describe("Visualization Util", () => {
         );
     });
 
-    test("getAlertEvaluationAnomalies should return appropriate alert evaluation anomalies points for alert evaluation", () => {
+    test("getAlertEvaluationAnomalies should return appropriate alert evaluation anomalies for alert evaluation", () => {
         expect(getAlertEvaluationAnomalies(mockAlertEvaluation)).toEqual(
             mockAnomalies
         );
@@ -394,9 +437,9 @@ describe("Visualization Util", () => {
             mockAlertEvaluationTimeSeriesPoints
         );
         mockAlertEvaluationTimeSeriesPointsCopy[0].current = NaN;
+        mockAlertEvaluationTimeSeriesPointsCopy[0].expected = NaN;
         mockAlertEvaluationTimeSeriesPointsCopy[1].lowerBound = NaN;
         mockAlertEvaluationTimeSeriesPointsCopy[2].upperBound = NaN;
-        mockAlertEvaluationTimeSeriesPointsCopy[0].expected = NaN;
 
         expect(
             getAlertEvaluationTimeSeriesPointsMaxValue(
@@ -404,157 +447,159 @@ describe("Visualization Util", () => {
             )
         ).toEqual(15);
     });
-});
 
-test("filterAlertEvaluationTimeSeriesPointsByTime should return empty array for invalid alert evaluation time series points", () => {
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            (null as unknown) as AlertEvaluationTimeSeriesPoint[],
-            1,
-            2
-        )
-    ).toEqual([]);
-});
+    test("filterAlertEvaluationTimeSeriesPointsByTime should return empty array for invalid alert evaluation time series points", () => {
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                (null as unknown) as AlertEvaluationTimeSeriesPoint[],
+                1,
+                2
+            )
+        ).toEqual([]);
+    });
 
-test("filterAlertEvaluationTimeSeriesPointsByTime should return empty array for empty alert evaluation time series points", () => {
-    expect(filterAlertEvaluationTimeSeriesPointsByTime([], 1, 2)).toEqual([]);
-});
+    test("filterAlertEvaluationTimeSeriesPointsByTime should return empty array for empty alert evaluation time series points", () => {
+        expect(filterAlertEvaluationTimeSeriesPointsByTime([], 1, 2)).toEqual(
+            []
+        );
+    });
 
-test("filterAlertEvaluationTimeSeriesPointsByTime should return appropriate alert evaluation time series points for alert evaluation time series points and invalid start and end time", () => {
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            (null as unknown) as number,
-            1
-        )
-    ).toEqual(mockAlertEvaluationTimeSeriesPoints);
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            1,
-            (null as unknown) as number
-        )
-    ).toEqual(mockAlertEvaluationTimeSeriesPoints);
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            (null as unknown) as number,
-            (null as unknown) as number
-        )
-    ).toEqual(mockAlertEvaluationTimeSeriesPoints);
-});
+    test("filterAlertEvaluationTimeSeriesPointsByTime should return appropriate alert evaluation time series points for alert evaluation time series points and invalid start and end time", () => {
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                (null as unknown) as number,
+                1
+            )
+        ).toEqual(mockAlertEvaluationTimeSeriesPoints);
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                1,
+                (null as unknown) as number
+            )
+        ).toEqual(mockAlertEvaluationTimeSeriesPoints);
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                (null as unknown) as number,
+                (null as unknown) as number
+            )
+        ).toEqual(mockAlertEvaluationTimeSeriesPoints);
+    });
 
-test("filterAlertEvaluationTimeSeriesPointsByTime should return appropriate alert evaluation time series points for alert evaluation time series points and start and end time", () => {
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            2,
-            2
-        )
-    ).toEqual([mockAlertEvaluationTimeSeriesPoint2]);
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            1,
-            3
-        )
-    ).toEqual(mockAlertEvaluationTimeSeriesPoints);
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            -1,
-            4
-        )
-    ).toEqual(mockAlertEvaluationTimeSeriesPoints);
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            -1,
-            2
-        )
-    ).toEqual([
-        mockAlertEvaluationTimeSeriesPoint1,
-        mockAlertEvaluationTimeSeriesPoint2,
-    ]);
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            2,
-            4
-        )
-    ).toEqual([
-        mockAlertEvaluationTimeSeriesPoint2,
-        mockAlertEvaluationTimeSeriesPoint3,
-    ]);
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            -2,
-            -1
-        )
-    ).toEqual([]);
-    expect(
-        filterAlertEvaluationTimeSeriesPointsByTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            4,
-            5
-        )
-    ).toEqual([]);
-});
+    test("filterAlertEvaluationTimeSeriesPointsByTime should return appropriate alert evaluation time series points for alert evaluation time series points and start and end time", () => {
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                2,
+                2
+            )
+        ).toEqual([mockAlertEvaluationTimeSeriesPoint2]);
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                1,
+                3
+            )
+        ).toEqual(mockAlertEvaluationTimeSeriesPoints);
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                0,
+                4
+            )
+        ).toEqual(mockAlertEvaluationTimeSeriesPoints);
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                -1,
+                2
+            )
+        ).toEqual([
+            mockAlertEvaluationTimeSeriesPoint1,
+            mockAlertEvaluationTimeSeriesPoint2,
+        ]);
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                2,
+                5
+            )
+        ).toEqual([
+            mockAlertEvaluationTimeSeriesPoint2,
+            mockAlertEvaluationTimeSeriesPoint3,
+        ]);
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                -1,
+                0
+            )
+        ).toEqual([]);
+        expect(
+            filterAlertEvaluationTimeSeriesPointsByTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                4,
+                5
+            )
+        ).toEqual([]);
+    });
 
-test("getAlertEvaluationTimeSeriesPointAtTime should return null for invalid alert evaluation time series points", () => {
-    expect(
-        getAlertEvaluationTimeSeriesPointAtTime(
-            (null as unknown) as AlertEvaluationTimeSeriesPoint[],
-            1
-        )
-    ).toBeNull();
-});
+    test("getAlertEvaluationTimeSeriesPointAtTime should return null for invalid alert evaluation time series points", () => {
+        expect(
+            getAlertEvaluationTimeSeriesPointAtTime(
+                (null as unknown) as AlertEvaluationTimeSeriesPoint[],
+                1
+            )
+        ).toBeNull();
+    });
 
-test("getAlertEvaluationTimeSeriesPointAtTime should return null for empty alert evaluation time series points", () => {
-    expect(getAlertEvaluationTimeSeriesPointAtTime([], 1)).toBeNull();
-});
+    test("getAlertEvaluationTimeSeriesPointAtTime should return null for empty alert evaluation time series points", () => {
+        expect(getAlertEvaluationTimeSeriesPointAtTime([], 1)).toBeNull();
+    });
 
-test("getAlertEvaluationTimeSeriesPointAtTime should return null for alert evaluation time series points and invalid time", () => {
-    expect(
-        getAlertEvaluationTimeSeriesPointAtTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            (null as unknown) as number
-        )
-    ).toBeNull();
-});
+    test("getAlertEvaluationTimeSeriesPointAtTime should return null for alert evaluation time series points and invalid time", () => {
+        expect(
+            getAlertEvaluationTimeSeriesPointAtTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                (null as unknown) as number
+            )
+        ).toBeNull();
+    });
 
-test("getAlertEvaluationTimeSeriesPointAtTime should return appropriate alert evaluation time series point for alert evaluation time series points and time", () => {
-    expect(
-        getAlertEvaluationTimeSeriesPointAtTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            2
-        )
-    ).toEqual(mockAlertEvaluationTimeSeriesPoint2);
-    expect(
-        getAlertEvaluationTimeSeriesPointAtTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            1
-        )
-    ).toEqual(mockAlertEvaluationTimeSeriesPoint1);
-    expect(
-        getAlertEvaluationTimeSeriesPointAtTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            3
-        )
-    ).toEqual(mockAlertEvaluationTimeSeriesPoint3);
-    expect(
-        getAlertEvaluationTimeSeriesPointAtTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            -1
-        )
-    ).toBeNull();
-    expect(
-        getAlertEvaluationTimeSeriesPointAtTime(
-            mockAlertEvaluationTimeSeriesPoints,
-            4
-        )
-    ).toEqual(mockAlertEvaluationTimeSeriesPoint3);
+    test("getAlertEvaluationTimeSeriesPointAtTime should return appropriate alert evaluation time series point for alert evaluation time series points and time", () => {
+        expect(
+            getAlertEvaluationTimeSeriesPointAtTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                2
+            )
+        ).toEqual(mockAlertEvaluationTimeSeriesPoint2);
+        expect(
+            getAlertEvaluationTimeSeriesPointAtTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                1
+            )
+        ).toEqual(mockAlertEvaluationTimeSeriesPoint1);
+        expect(
+            getAlertEvaluationTimeSeriesPointAtTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                3
+            )
+        ).toEqual(mockAlertEvaluationTimeSeriesPoint3);
+        expect(
+            getAlertEvaluationTimeSeriesPointAtTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                0
+            )
+        ).toBeNull();
+        expect(
+            getAlertEvaluationTimeSeriesPointAtTime(
+                mockAlertEvaluationTimeSeriesPoints,
+                4
+            )
+        ).toEqual(mockAlertEvaluationTimeSeriesPoint3);
+    });
 });
 
 let mockScaleDomain: Date[] = [];
@@ -653,13 +698,13 @@ const mockAnomaly1 = {
     endTime: 17,
     avgCurrentVal: 18,
     avgBaselineVal: 19,
-} as Anomaly;
+};
 
 const mockAnomaly2 = {
     startTime: 20,
     endTime: 21,
     avgCurrentVal: 22,
     avgBaselineVal: 23,
-} as Anomaly;
+};
 
 const mockAnomalies = [mockAnomaly1, mockAnomaly2];

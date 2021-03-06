@@ -11,7 +11,12 @@ jest.mock("numbro", () =>
 );
 
 describe("Number Util", () => {
-    test("formatNumber should invoke numbro.format with default input and return appropriate string", () => {
+    test("formatNumber should return empty string for invald number", () => {
+        expect(formatNumber((null as unknown) as number)).toEqual("");
+        expect(mockFormat).not.toHaveBeenCalled();
+    });
+
+    test("formatNumber should invoke numbro.format with default input and return appropriate string for number", () => {
         expect(formatNumber(1)).toEqual("1");
         expect(mockFormat).toHaveBeenCalledWith({
             thousandSeparated: true,
@@ -20,16 +25,27 @@ describe("Number Util", () => {
         });
     });
 
-    test("formatNumber should invoke numbro.format with appropriate input and return appropriate string", () => {
-        expect(formatNumber(1, 1, false)).toEqual("1");
-        expect(mockFormat).toHaveBeenCalledWith({
+    test("formatNumber should invoke numbro.format with appropriate input and return appropriate string for number", () => {
+        expect(formatNumber(0, 1, true)).toEqual("0");
+        expect(mockFormat).toHaveBeenNthCalledWith(1, {
+            thousandSeparated: true,
+            mantissa: 1,
+            optionalMantissa: true,
+        });
+        expect(formatNumber(0, 1, false)).toEqual("0");
+        expect(mockFormat).toHaveBeenNthCalledWith(2, {
             thousandSeparated: true,
             mantissa: 1,
             optionalMantissa: false,
         });
     });
 
-    test("formatLargeNumber should invoke numbro.format with default input and return appropriate string", () => {
+    test("formatLargeNumber should return empty string for invald number", () => {
+        expect(formatLargeNumber((null as unknown) as number)).toEqual("");
+        expect(mockFormat).not.toHaveBeenCalled();
+    });
+
+    test("formatLargeNumber should invoke numbro.format with default input and return appropriate string for number", () => {
         expect(formatLargeNumber(1)).toEqual("1");
         expect(mockFormat).toHaveBeenCalledWith({
             average: true,
@@ -39,17 +55,29 @@ describe("Number Util", () => {
         });
     });
 
-    test("formatLargeNumber should invoke numbro.format with appropriate input and return appropriate string", () => {
-        expect(formatLargeNumber(1, 1, false)).toEqual("1");
+    test("formatLargeNumber should invoke numbro.format with appropriate input and return appropriate string for number", () => {
+        expect(formatLargeNumber(0, 1, false)).toEqual("0");
         expect(mockFormat).toHaveBeenCalledWith({
             average: true,
             lowPrecision: false,
             mantissa: 1,
             optionalMantissa: false,
         });
+        expect(formatLargeNumber(0, 1, true)).toEqual("0");
+        expect(mockFormat).toHaveBeenCalledWith({
+            average: true,
+            lowPrecision: false,
+            mantissa: 1,
+            optionalMantissa: true,
+        });
     });
 
-    test("formatPercentage should invoke numbro.format with default input and return appropriate string", () => {
+    test("formatPercentage should return empty string for invalid number", () => {
+        expect(formatPercentage((null as unknown) as number)).toEqual("");
+        expect(mockFormat).not.toHaveBeenCalled();
+    });
+
+    test("formatPercentage should invoke numbro.format with default input and return appropriate string for number", () => {
         expect(formatPercentage(1)).toEqual("1");
         expect(mockFormat).toHaveBeenCalledWith({
             output: "percent",
@@ -59,13 +87,20 @@ describe("Number Util", () => {
         });
     });
 
-    test("formatPercentage should invoke numbro.format with appropriate input and return appropriate string", () => {
-        expect(formatPercentage(1, 1, false)).toEqual("1");
+    test("formatPercentage should invoke numbro.format with appropriate input and return appropriate string for number", () => {
+        expect(formatPercentage(0, 1, false)).toEqual("0");
         expect(mockFormat).toHaveBeenCalledWith({
             output: "percent",
             thousandSeparated: true,
             mantissa: 1,
             optionalMantissa: false,
+        });
+        expect(formatPercentage(0, 1, true)).toEqual("0");
+        expect(mockFormat).toHaveBeenCalledWith({
+            output: "percent",
+            thousandSeparated: true,
+            mantissa: 1,
+            optionalMantissa: true,
         });
     });
 });

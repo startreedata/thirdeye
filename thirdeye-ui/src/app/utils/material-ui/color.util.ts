@@ -1,6 +1,7 @@
 // Material-UI theme colors
 export const Color = {
     BLACK_1: "#000000",
+    BLACK_2: "#00000080",
     WHITE_1: "#FFFFFF",
     GREY_1: "#000000DE",
     GREY_2: "#0000001F",

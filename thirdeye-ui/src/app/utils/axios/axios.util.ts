@@ -7,8 +7,8 @@ export const getRequestInterceptor = (
     const requestInterceptor = (
         requestConfig: AxiosRequestConfig
     ): AxiosRequestConfig => {
+        // If access token is available, attach it to the request
         if (accessToken) {
-            // If access token is available, attach it to the request
             requestConfig.headers = {
                 Authorization: `Bearer ${accessToken}`,
             };
@@ -34,12 +34,12 @@ export const getFulfilledResponseInterceptor = (): (<T>(
 
 // Returns axios rejected response interceptor
 export const getRejectedResponseInterceptor = (
-    onUnauthenticatedAccess: () => void
+    unauthenticatedAccessFn: () => void
 ): ((error: AxiosError) => void) => {
     const rejectedResponseInterceptor = (error: AxiosError): void => {
         if (error && error.response && error.response.status === 401) {
             // Unauthenticated access
-            onUnauthenticatedAccess && onUnauthenticatedAccess();
+            unauthenticatedAccessFn && unauthenticatedAccessFn();
         }
 
         throw error;

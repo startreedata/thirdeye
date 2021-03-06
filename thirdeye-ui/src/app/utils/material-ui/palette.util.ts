@@ -1,7 +1,7 @@
 import { PaletteOptions } from "@material-ui/core/styles/createPalette";
 import { Color } from "./color.util";
 
-// Constants for convenience, to be shared across Palette and PaletteOptions
+// Constants for convenience, to be shared across Palette and paletteOptions
 const COLOR_PRIMARY_LIGHT = Color.TEAL_1;
 const COLOR_PRIMARY_MAIN = Color.TEAL_2;
 const COLOR_PRIMARY_DARK = Color.TEAL_3;
@@ -27,7 +27,7 @@ export const Palette = {
     COLOR_BORDER_INPUT_DEFAULT: Color.GREY_3,
     COLOR_BORDER_INPUT_ERROR: COLOR_ERROR_MAIN,
     COLOR_BACKGROUND_TOOLTIP: Color.GREY_4,
-    COLOR_BACKGROUND_BACKDROP: `${Color.BLACK_1}80`,
+    COLOR_BACKGROUND_BACKDROP: Color.BLACK_2,
     // Visualizations
     COLOR_VISUALIZATION_STROKE_CURRENT: Color.GREY_4,
     COLOR_VISUALIZATION_STROKE_BASELINE: COLOR_PRIMARY_DARK,

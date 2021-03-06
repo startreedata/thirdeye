@@ -52,29 +52,35 @@ export const setTimeRangeDurationInQueryString = (
 };
 
 export const getTimeRangeDurationFromQueryString = (): TimeRangeDuration | null => {
-    const timeRange = getQueryString(
+    const timeRangeString = getQueryString(
         AppQueryStringKey.TIME_RANGE.toLowerCase()
     );
-    const startTime = parseInt(
-        getQueryString(AppQueryStringKey.START_TIME.toLowerCase())
+
+    const startTimeString = getQueryString(
+        AppQueryStringKey.START_TIME.toLowerCase()
     );
-    const endTime = parseInt(
-        getQueryString(AppQueryStringKey.END_TIME.toLowerCase())
+    const startTime = toNumber(startTimeString);
+
+    const endTimeString = getQueryString(
+        AppQueryStringKey.END_TIME.toLowerCase()
     );
+    const endTime = toNumber(endTimeString);
 
     // Validate time range duration
     if (
-        !TimeRange[timeRange as keyof typeof TimeRange] ||
-        !isFinite(startTime) ||
+        !TimeRange[timeRangeString as keyof typeof TimeRange] ||
+        !startTimeString ||
+        !isInteger(startTime) ||
         startTime < 0 ||
-        !isFinite(endTime) ||
+        !endTimeString ||
+        !isInteger(endTime) ||
         endTime < 0
     ) {
         return null;
     }
 
     return createTimeRangeDuration(
-        TimeRange[timeRange as keyof typeof TimeRange],
+        TimeRange[timeRangeString as keyof typeof TimeRange],
         startTime,
         endTime
     );

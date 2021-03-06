@@ -2,8 +2,8 @@ import { useTheme } from "@material-ui/core";
 import { AxisBottom, Text, TickRendererProps } from "@visx/visx";
 import React, { FunctionComponent, ReactNode } from "react";
 import {
-    formatDateTimeForAxis,
-    getTimeTickValuesForAxis,
+    formatDateTimeForTimeAxis,
+    getTickValuesForTimeAxis,
     SEPARATOR_DATE_TIME,
 } from "../../../utils/visualization/visualization.util";
 import { TimeAxisBottomProps } from "./time-axis-bottom.interfaces";
@@ -22,7 +22,7 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
     const theme = useTheme();
 
     const tickFormatter = (date: number | { valueOf(): number }): string => {
-        return formatDateTimeForAxis(date, props.scale);
+        return formatDateTimeForTimeAxis(date, props.scale);
     };
 
     const getTickValues = (): number[] => {
@@ -54,7 +54,7 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
             numTicks = NUM_TICKS_LG;
         }
 
-        return getTimeTickValuesForAxis(numTicks, props.scale);
+        return getTickValuesForTimeAxis(props.scale, numTicks);
     };
 
     // Renders formatted date from tick renderer props based on whether or not it contains

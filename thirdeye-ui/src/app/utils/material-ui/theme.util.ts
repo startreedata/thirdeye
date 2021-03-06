@@ -4,7 +4,9 @@ import { cssBaselineClasses } from "./css-baseline.util";
 import { gridProps } from "./grid.util";
 import { linkClasses, linkProps } from "./link.util";
 import { listItemTextClasses } from "./list.util";
+import { menuClasses, menuProps } from "./menu.util";
 import { paletteOptions } from "./palette.util";
+import { popoverProps } from "./popover.util";
 import { shapeOptions } from "./shape.util";
 import { tooltipClasses } from "./tooltip.util";
 import { typographyOptions } from "./typography.util";
@@ -14,12 +16,15 @@ export const theme: Theme = createMuiTheme({
     palette: paletteOptions,
     props: {
         MuiLink: linkProps,
+        MuiMenu: menuProps,
         MuiGrid: gridProps,
+        MuiPopover: popoverProps,
     },
     overrides: {
         MuiCssBaseline: cssBaselineClasses,
-        MuiListItemText: listItemTextClasses,
         MuiLink: linkClasses,
+        MuiMenu: menuClasses,
+        MuiListItemText: listItemTextClasses,
         MuiButton: buttonClasses,
         MuiTooltip: tooltipClasses,
     },

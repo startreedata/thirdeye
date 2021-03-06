@@ -1,6 +1,6 @@
 import numbro from "numbro";
 
-export const enUs = {
+export const enUS = {
     languageTag: "en-US",
     delimiters: {
         thousands: ",",

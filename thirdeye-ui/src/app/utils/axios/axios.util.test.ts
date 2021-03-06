@@ -50,33 +50,37 @@ describe("Axios Util", () => {
         ).toBeInstanceOf(Function);
     });
 
-    test("axios rejected response interceptor should throw 401 error and invoke unauthenticated access handler", () => {
-        const mockError = {
-            response: {
-                status: 401,
-            },
-        } as AxiosError;
+    test("axios rejected response interceptor should throw 401 error and invoke unauthenticated access function", () => {
         const responseInterceptor = getRejectedResponseInterceptor(
             mockHandleUnauthenticatedAccess
         );
 
-        expect(() => responseInterceptor(mockError)).toThrow();
+        expect(() =>
+            responseInterceptor(mockUnauthenticatedAccessError)
+        ).toThrow();
         expect(mockHandleUnauthenticatedAccess).toHaveBeenCalled();
     });
 
-    test("axios rejected response interceptor should throw any error other than 401 but not invoke unauthenticated access handler", () => {
-        const mockError = {
-            response: {
-                status: 500,
-            },
-        } as AxiosError;
+    test("axios rejected response interceptor should throw any error other than 401 and not invoke unauthenticated access function", () => {
         const responseInterceptor = getRejectedResponseInterceptor(
             mockHandleUnauthenticatedAccess
         );
 
-        expect(() => responseInterceptor(mockError)).toThrow();
+        expect(() => responseInterceptor(mockInternalServerError)).toThrow();
         expect(mockHandleUnauthenticatedAccess).not.toHaveBeenCalled();
     });
 });
 
 const mockHandleUnauthenticatedAccess = jest.fn();
+
+const mockUnauthenticatedAccessError = {
+    response: {
+        status: 401,
+    },
+} as AxiosError;
+
+const mockInternalServerError = {
+    response: {
+        status: 500,
+    },
+} as AxiosError;

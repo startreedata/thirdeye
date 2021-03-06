@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { round } from "lodash";
+import { isNil, round } from "lodash";
 import { DateTime, Interval } from "luxon";
 import { formatNumber } from "../number/number.util";
 
@@ -7,9 +7,9 @@ import { formatNumber } from "../number/number.util";
 // For example:
 // 1 second
 // 1 day
-// 1 month and so on
+// 1 month
 export const formatDuration = (startTime: number, endTime: number): string => {
-    if (!startTime || !endTime) {
+    if (isNil(startTime) || isNil(endTime)) {
         return "";
     }
 
@@ -96,7 +96,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
 // For example:
 // MMM DD, YYYY, HH:MM AM/PM
 export const formatDateAndTime = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
@@ -115,7 +115,7 @@ export const formatDateAndTime = (date: number): string => {
 // For example:
 // MMM DD, YYYY
 export const formatDate = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
@@ -132,7 +132,7 @@ export const formatDate = (date: number): string => {
 // For example:
 // HH:MM AM/PM
 export const formatTime = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
@@ -148,7 +148,7 @@ export const formatTime = (date: number): string => {
 // For example:
 // YYYY
 export const formatYear = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
@@ -159,7 +159,7 @@ export const formatYear = (date: number): string => {
 // For example:
 // MMM
 export const formatMonth = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
@@ -170,7 +170,7 @@ export const formatMonth = (date: number): string => {
 // For example:
 // MMM YYYY
 export const formatMonthOfYear = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
@@ -186,7 +186,7 @@ export const formatMonthOfYear = (date: number): string => {
 // For example:
 // DD
 export const formatDay = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
@@ -197,7 +197,7 @@ export const formatDay = (date: number): string => {
 // For example:
 // HH
 export const formatHour = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
@@ -208,18 +208,40 @@ export const formatHour = (date: number): string => {
 // For example:
 // MM
 export const formatMinute = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
     return DateTime.fromMillis(date).toFormat("mm");
 };
 
+// Returns formatted string representation of second in date
+// For example:
+// SS
+export const formatSecond = (date: number): string => {
+    if (isNil(date)) {
+        return "";
+    }
+
+    return DateTime.fromMillis(date).toFormat("ss");
+};
+
+// Returns formatted string representation of millisecond in date
+// For example:
+// SSS
+export const formatMillisecond = (date: number): string => {
+    if (isNil(date)) {
+        return "";
+    }
+
+    return DateTime.fromMillis(date).toFormat("SSS");
+};
+
 // Returns formatted string representation of meridiem in date
 // For example:
 // AM/PM
 export const formatMeridiem = (date: number): string => {
-    if (!date) {
+    if (isNil(date)) {
         return "";
     }
 
@@ -228,9 +250,9 @@ export const formatMeridiem = (date: number): string => {
 
 // Returns date with switched meridiem as compared to original date
 // For example:
-// Dec 01, 2020, 12:00 PM to Dec 01, 2020, 12:00 AM
+// Jan 01, 2020, 12:00 AM to Jan 01, 2020, 12:00 PM
 export const switchMeridiem = (date: number): number => {
-    if (!date) {
+    if (isNil(date)) {
         return -1;
     }
 

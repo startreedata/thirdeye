@@ -14,6 +14,7 @@ This is the project for CortexData ThirdEye UI.
         -   [Configure Node Package Manager (npm) for use with GitHub Packages](#configure-node-package-manager-npm-for-use-with-github-packages)
     -   [Setup](#setup)
     -   [Run](#run)
+-   [Supported Browsers](#supported-browsers)
 -   [Scripts](#scripts)
     -   [`start`](#start)
     -   [`build`](#build)
@@ -23,7 +24,6 @@ This is the project for CortexData ThirdEye UI.
     -   [`eslint`](#eslint)
     -   [`stylelint`](#stylelint)
     -   [`pretty`](#pretty)
--   [Supported Browsers](#supported-browsers)
 
 ## Getting Started
 
@@ -79,6 +79,10 @@ $ npm run start
 ```
 
 This will build and deploy the project using [webpack-dev-server](https://github.com/webpack/webpack-dev-server) at http://localhost:7004.
+
+## Supported Browsers
+
+CortexData ThirdEye UI is tested on latest, stable release of [Chrome](https://www.google.com/chrome), [Firefox](https://www.mozilla.org/firefox), [Safari](https://www.apple.com/safari) and [Edge](https://www.microsoft.com/edge).
 
 ## Scripts
 
@@ -147,7 +151,3 @@ Run [Prettier](https://prettier.io) across the project except for files and dire
 ```
 $ npm run pretty
 ```
-
-## Supported Browsers
-
-CortexData ThirdEye UI is tested on latest, stable release of [Chrome](https://www.google.com/chrome), [Firefox](https://www.mozilla.org/firefox), [Safari](https://www.apple.com/safari) and [Edge](https://www.microsoft.com/edge).

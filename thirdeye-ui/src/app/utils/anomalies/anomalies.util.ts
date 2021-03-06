@@ -1,6 +1,6 @@
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
-import { cloneDeep, isEmpty } from "lodash";
+import { cloneDeep, isEmpty, isNil } from "lodash";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
@@ -9,7 +9,7 @@ import { formatLargeNumber, formatPercentage } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const getAnomalyName = (anomaly: Anomaly): string => {
-    if (!anomaly || !anomaly.id) {
+    if (!anomaly || isNil(anomaly.id)) {
         return i18n.t("label.anomaly");
     }
 
@@ -159,7 +159,7 @@ export const filterAnomaliesByTime = (
         return [];
     }
 
-    if (!startTime || !endTime) {
+    if (isNil(startTime) || isNil(endTime)) {
         return anomalies;
     }
 
@@ -209,7 +209,7 @@ export const getAnomaliesAtTime = (
         return [];
     }
 
-    if (!time) {
+    if (isNil(time)) {
         return anomalies;
     }
 

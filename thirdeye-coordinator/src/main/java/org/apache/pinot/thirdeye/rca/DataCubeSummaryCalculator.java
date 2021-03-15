@@ -122,8 +122,7 @@ public class DataCubeSummaryCalculator {
         .setBaselineTotal(0d)
         .setCurrentTotal(0d)
         .setBaselineTotalSize(0d)
-        .setCurrentTotalSize(0d)
-        ;
+        .setCurrentTotalSize(0d);
     response.setMetricUrn(metricUrn);
     response.getDimensions().add(Summary.NOT_AVAILABLE);
     return response;
@@ -134,8 +133,7 @@ public class DataCubeSummaryCalculator {
         .setBaselineTotal(0d)
         .setCurrentTotal(0d)
         .setBaselineTotalSize(0d)
-        .setCurrentTotalSize(0d)
-        ;
+        .setCurrentTotalSize(0d);
     response.setDataset(dataset);
     response.setMetricName(metricName);
     response.getDimensions().add(Summary.NOT_AVAILABLE);
@@ -261,17 +259,33 @@ public class DataCubeSummaryCalculator {
 
       // Non simple ratio metrics
       if (!isSimpleRatioMetric(metricConfigDTO)) {
-        response =
-            runAdditiveCubeAlgorithm(dateTimeZone, datasetName, metricName, currentStartInclusive,
-                currentEndExclusive, baselineStartInclusive, baselineEndExclusive, dimensions,
-                filterSetMap,
-                summarySize, depth, hierarchies, doOneSideError);
+        response = runAdditiveCubeAlgorithm(dateTimeZone,
+            datasetName,
+            metricName,
+            currentStartInclusive,
+            currentEndExclusive,
+            baselineStartInclusive,
+            baselineEndExclusive,
+            dimensions,
+            filterSetMap,
+            summarySize,
+            depth,
+            hierarchies,
+            doOneSideError);
       } else {  // Simple ratio metric such as "A/B". On the contrary, "A*100/B" is not a simple ratio metric.
-        response =
-            runRatioCubeAlgorithm(dateTimeZone, datasetName, metricConfigDTO, currentStartInclusive,
-                currentEndExclusive, baselineStartInclusive, baselineEndExclusive, dimensions,
-                filterSetMap,
-                summarySize, depth, hierarchies, doOneSideError);
+        response = runRatioCubeAlgorithm(dateTimeZone,
+            datasetName,
+            metricConfigDTO,
+            currentStartInclusive,
+            currentEndExclusive,
+            baselineStartInclusive,
+            baselineEndExclusive,
+            dimensions,
+            filterSetMap,
+            summarySize,
+            depth,
+            hierarchies,
+            doOneSideError);
       }
     } catch (Exception e) {
       LOG.error("Exception while generating difference summary", e);
@@ -314,12 +328,19 @@ public class DataCubeSummaryCalculator {
    * @param doOneSideError flag to toggle if we only want one side results.
    * @return the summary result of cube algorithm.
    */
-  private DataCubeSummaryApi runAdditiveCubeAlgorithm(DateTimeZone dateTimeZone, String dataset,
+  private DataCubeSummaryApi runAdditiveCubeAlgorithm(DateTimeZone dateTimeZone,
+      String dataset,
       String metric,
-      long currentStartInclusive, long currentEndExclusive, long baselineStartInclusive,
+      long currentStartInclusive,
+      long currentEndExclusive,
+      long baselineStartInclusive,
       long baselineEndExclusive,
-      Dimensions dimensions, Multimap<String, String> dataFilters, int summarySize, int depth,
-      List<List<String>> hierarchies, boolean doOneSideError) throws Exception {
+      Dimensions dimensions,
+      Multimap<String, String> dataFilters,
+      int summarySize,
+      int depth,
+      List<List<String>> hierarchies,
+      boolean doOneSideError) throws Exception {
 
     final CostFunction costFunction = new BalancedCostFunction();
     final AdditiveDBClient cubeDbClient = new AdditiveDBClient(
@@ -362,10 +383,17 @@ public class DataCubeSummaryCalculator {
    * @param doOneSideError flag to toggle if we only want one side results.
    * @return the summary result of cube algorithm.
    */
-  private DataCubeSummaryApi runRatioCubeAlgorithm(DateTimeZone dateTimeZone, String dataset,
-      MetricConfigDTO metricConfigDTO, long currentStartInclusive, long currentEndExclusive,
-      long baselineStartInclusive, long baselineEndExclusive, Dimensions dimensions,
-      Multimap<String, String> dataFilters, int summarySize, int depth,
+  private DataCubeSummaryApi runRatioCubeAlgorithm(DateTimeZone dateTimeZone,
+      String dataset,
+      MetricConfigDTO metricConfigDTO,
+      long currentStartInclusive,
+      long currentEndExclusive,
+      long baselineStartInclusive,
+      long baselineEndExclusive,
+      Dimensions dimensions,
+      Multimap<String, String> dataFilters,
+      int summarySize,
+      int depth,
       List<List<String>> hierarchies,
       boolean doOneSideError) throws Exception {
     Preconditions.checkNotNull(metricConfigDTO);
@@ -389,11 +417,19 @@ public class DataCubeSummaryCalculator {
       MultiDimensionalRatioSummary mdSummary = new MultiDimensionalRatioSummary(dbClient,
           costFunction, dateTimeZone);
 
-      return mdSummary
-          .buildRatioSummary(dataset, numeratorMetric, denominatorMetric, currentStartInclusive,
-              currentEndExclusive, baselineStartInclusive, baselineEndExclusive, dimensions,
-              dataFilters, summarySize,
-              depth, hierarchies, doOneSideError);
+      return mdSummary.buildRatioSummary(dataset,
+          numeratorMetric,
+          denominatorMetric,
+          currentStartInclusive,
+          currentEndExclusive,
+          baselineStartInclusive,
+          baselineEndExclusive,
+          dimensions,
+          dataFilters,
+          summarySize,
+          depth,
+          hierarchies,
+          doOneSideError);
     } else { // parser should find ids because of the guard of the if-condition.
       LOG.error("Unable to parser numerator and denominator metric for metric" + metricConfigDTO
           .getName());

@@ -20,6 +20,7 @@ import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.parseListParams;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,6 +45,7 @@ import org.apache.pinot.thirdeye.cube.summary.DataCubeSummaryApi;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
+import org.apache.pinot.thirdeye.rca.RootCauseAnalysisService;
 import org.apache.pinot.thirdeye.rca.RootCauseEntityFormatter;
 import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
@@ -74,15 +76,16 @@ public class RootCauseResource {
   private final RootCauseSessionResource rootCauseSessionResource;
   private final RootCauseMetricResource rootCauseMetricResource;
 
-  public RootCauseResource(Map<String, RCAFramework> frameworks,
-      List<RootCauseEntityFormatter> formatters,
+  @Inject
+  public RootCauseResource(
+      final RootCauseAnalysisService rootCauseAnalysisService,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final DataCubeSummaryCalculator dataCubeSummaryCalculator,
       final RootCauseTemplateResource rootCauseTemplateResource,
       final RootCauseSessionResource rootCauseSessionResource,
       final RootCauseMetricResource rootCauseMetricResource) {
-    this.frameworks = frameworks;
-    this.formatters = formatters;
+    this.frameworks = rootCauseAnalysisService.getFrameworks();
+    this.formatters = rootCauseAnalysisService.getFormatters();
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
     this.rootCauseTemplateResource = rootCauseTemplateResource;

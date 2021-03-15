@@ -37,11 +37,11 @@ public class RCAFrameworkLoaderTest {
     prop.put("relativePath", "relative_path.txt");
     prop.put("path", "another_relative_path.txt");
 
-    Map<String, Object> aug = RCAFrameworkLoader.augmentPathProperty(prop, rcaConfig);
+    RCAFrameworkLoader.augmentPathProperty(prop, rcaConfig.getParent());
 
-    Assert.assertEquals(aug.get("key"), "value");
-    Assert.assertEquals(aug.get("absolutePath"), "/absolute/path.txt");
-    Assert.assertEquals(aug.get("relativePath"), "/my/path/relative_path.txt");
-    Assert.assertEquals(aug.get("path"), "/my/path/another_relative_path.txt");
+    Assert.assertEquals(prop.get("key"), "value");
+    Assert.assertEquals(prop.get("absolutePath"), "/absolute/path.txt");
+    Assert.assertEquals(prop.get("relativePath"), "/my/path/relative_path.txt");
+    Assert.assertEquals(prop.get("path"), "/my/path/another_relative_path.txt");
   }
 }

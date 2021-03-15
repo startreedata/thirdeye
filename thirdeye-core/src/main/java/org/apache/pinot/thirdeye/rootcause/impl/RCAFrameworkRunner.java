@@ -144,7 +144,7 @@ public class RCAFrameworkRunner {
     // ************************************************************************
     File rcaConfig = new File(cmd.getOptionValue(CLI_ROOTCAUSE_CONFIG));
     List<Pipeline> pipelines = injector.getInstance(RCAFrameworkLoader.class)
-        .getPipelinesFromConfig(rcaConfig, cmd.getOptionValue(CLI_FRAMEWORK));
+        .getPipelinesFromConfig(cmd.getOptionValue(CLI_FRAMEWORK));
 
     // Executor
     ExecutorService executor = Executors.newSingleThreadExecutor();

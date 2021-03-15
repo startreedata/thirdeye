@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.File;
@@ -32,7 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.config.ConfigurationHolder;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
@@ -60,6 +60,8 @@ public class RCAFrameworkLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(RCAFrameworkLoader.class);
 
+  private final RCAConfiguration configuration;
+  private final ConfigurationHolder configurationHolder;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
@@ -69,12 +71,16 @@ public class RCAFrameworkLoader {
 
   @Inject
   public RCAFrameworkLoader(
+      final RCAConfiguration configuration,
+      final ConfigurationHolder configurationHolder,
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final EntityToEntityMappingManager entityToEntityMappingManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    this.configuration = configuration;
+    this.configurationHolder = configurationHolder;
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
@@ -83,48 +89,41 @@ public class RCAFrameworkLoader {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
-  static Map<String, Object> augmentPathProperty(Map<String, Object> properties, File rcaConfig) {
+  static void augmentPathProperty(Map<String, Object> properties, final String configPath) {
     for (Map.Entry<String, Object> entry : properties.entrySet()) {
       if ((entry.getKey().equals(PROP_PATH) ||
           entry.getKey().endsWith(PROP_PATH_POSTFIX)) &&
           entry.getValue() instanceof String) {
         File path = new File(entry.getValue().toString());
         if (!path.isAbsolute()) {
-          properties.put(entry.getKey(), rcaConfig.getParent() + File.separator + path);
+          properties.put(entry.getKey(), configPath + File.separator + path);
         }
       }
     }
-    return properties;
   }
 
-  public Map<String, RCAFramework> getFrameworksFromConfig(File rcaFile,
-      ExecutorService executor) throws Exception {
-    Map<String, RCAFramework> frameworks = new HashMap<>();
+  public Map<String, RCAFramework> getFrameworksFromConfig() {
+    final ExecutorService executor = Executors.newFixedThreadPool(configuration.getParallelism());
 
-    LOG.info("Loading all frameworks from '{}'", rcaFile);
-    final RCAConfiguration rcaConfiguration = readConfig(rcaFile, RCAConfiguration.class);
-
-    for (String frameworkName : rcaConfiguration.getFrameworks().keySet()) {
-      List<Pipeline> pipelines = getPipelinesFromConfig(rcaFile, frameworkName);
+    final Map<String, RCAFramework> frameworks = new HashMap<>();
+    for (String frameworkName : configuration.getFrameworks().keySet()) {
+      List<Pipeline> pipelines = getPipelinesFromConfig(frameworkName);
       frameworks.put(frameworkName, new RCAFramework(pipelines, executor));
     }
 
     return frameworks;
   }
 
-  List<Pipeline> getPipelinesFromConfig(File rcaFile, String frameworkName)
-      throws Exception {
-    LOG.info("Loading framework '{}' from '{}'", frameworkName, rcaFile);
-    final RCAConfiguration rcaConfiguration = readConfig(rcaFile, RCAConfiguration.class);
-
-    return getPipelines(rcaConfiguration, rcaFile, frameworkName);
+  List<Pipeline> getPipelinesFromConfig(String frameworkName) {
+    return getPipelines(frameworkName, configurationHolder.getPath());
   }
 
-  private List<Pipeline> getPipelines(RCAConfiguration config, File configPath,
-      String frameworkName)
-      throws Exception {
+  private List<Pipeline> getPipelines(
+      String frameworkName, final String configPath) {
     List<Pipeline> pipelines = new ArrayList<>();
-    Map<String, List<PipelineConfiguration>> rcaPipelinesConfiguration = config.getFrameworks();
+    Map<String, List<PipelineConfiguration>> rcaPipelinesConfiguration =
+        configuration.getFrameworks();
+
     if (!MapUtils.isEmpty(rcaPipelinesConfiguration)) {
       if (!rcaPipelinesConfiguration.containsKey(frameworkName)) {
         throw new IllegalArgumentException(
@@ -140,7 +139,7 @@ public class RCAFrameworkLoader {
           properties = new HashMap<>();
         }
 
-        properties = augmentPathProperty(properties, configPath);
+        augmentPathProperty(properties, configPath);
 
         LOG.info("Creating pipeline '{}' [{}] with inputs '{}'", outputName, className, inputNames);
         final PipelineInitContext initContext = new PipelineInitContext()
@@ -155,12 +154,19 @@ public class RCAFrameworkLoader {
             .setMergedAnomalyResultManager(mergedAnomalyResultManager);
         ;
 
-        final Constructor<?> constructor = Class.forName(className)
-            .getConstructor();
-        final Pipeline pipeline = (Pipeline) constructor.newInstance();
-        pipeline.init(initContext);
-
-        pipelines.add(pipeline);
+        final Constructor<?> constructor;
+        try {
+          constructor = Class.forName(className).getConstructor();
+          final Pipeline pipeline = (Pipeline) constructor.newInstance();
+          pipeline.init(initContext);
+          pipelines.add(pipeline);
+        } catch (RuntimeException e) {
+          // Already a runtime exception. Just escalate.
+          throw e;
+        } catch (Exception e) {
+          // wrap in RuntimeException and escalate.
+          throw new RuntimeException("Failed to load: " + className, e);
+        }
       }
     }
 

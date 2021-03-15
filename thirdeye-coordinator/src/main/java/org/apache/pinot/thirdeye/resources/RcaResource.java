@@ -58,9 +58,9 @@ import org.slf4j.LoggerFactory;
 @Api(tags = "Root Cause Analysis")
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class RootCauseResource {
+public class RcaResource {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RootCauseResource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RcaResource.class);
 
   private static final int DEFAULT_FORMATTER_DEPTH = 1;
 
@@ -77,7 +77,7 @@ public class RootCauseResource {
   private final RootCauseMetricResource rootCauseMetricResource;
 
   @Inject
-  public RootCauseResource(
+  public RcaResource(
       final RootCauseAnalysisService rootCauseAnalysisService,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final DataCubeSummaryCalculator dataCubeSummaryCalculator,

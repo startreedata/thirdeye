@@ -13,7 +13,7 @@ public class ApiResource {
   private final SubscriptionGroupResource subscriptionGroupResource;
   private final AnomalyResource anomalyResource;
   private final EntityResource entityResource;
-  private final RootCauseResource rootCauseResource;
+  private final RcaResource rcaResource;
 
   @Inject
   public ApiResource(final AuthResource authResource,
@@ -24,7 +24,7 @@ public class ApiResource {
       final SubscriptionGroupResource subscriptionGroupResource,
       final AnomalyResource anomalyResource,
       final EntityResource entityResource,
-      final RootCauseResource rootCauseResource) {
+      final RcaResource rcaResource) {
     this.authResource = authResource;
     this.applicationResource = applicationResource;
     this.datasetResource = datasetResource;
@@ -33,7 +33,7 @@ public class ApiResource {
     this.subscriptionGroupResource = subscriptionGroupResource;
     this.anomalyResource = anomalyResource;
     this.entityResource = entityResource;
-    this.rootCauseResource = rootCauseResource;
+    this.rcaResource = rcaResource;
   }
 
   @Path("auth")
@@ -77,7 +77,7 @@ public class ApiResource {
   }
 
   @Path("rca")
-  public RootCauseResource getRootCauseResource() {
-    return rootCauseResource;
+  public RcaResource getRootCauseResource() {
+    return rcaResource;
   }
 }

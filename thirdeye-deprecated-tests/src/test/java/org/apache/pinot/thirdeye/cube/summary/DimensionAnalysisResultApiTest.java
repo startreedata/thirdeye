@@ -22,7 +22,8 @@ import static org.apache.pinot.thirdeye.cube.summary.Summary.roundUp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
+import org.apache.pinot.thirdeye.api.DimensionAnalysisResultApi;
+import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.api.cube.SummaryResponseRow;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveCubeNode;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveRow;
@@ -34,7 +35,7 @@ import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class DataCubeSummaryApiTest {
+public class DimensionAnalysisResultApiTest {
 
   private static final double EPSILON = 0.0001d;
 
@@ -48,14 +49,14 @@ public class DataCubeSummaryApiTest {
     double baselineSize = cubeNodes.get(rootIdx).getOriginalBaselineSize();
     double currentSize = cubeNodes.get(rootIdx).getOriginalCurrentSize();
     // Build the response
-    DataCubeSummaryApi response = new DataCubeSummaryApi()
+    DimensionAnalysisResultApi response = new DimensionAnalysisResultApi()
         .setBaselineTotal(baselineTotal)
         .setCurrentTotal(currentTotal)
         .setBaselineTotalSize(baselineSize)
         .setCurrentTotalSize(currentSize)
         .setGlobalRatio(roundUp(currentTotal / baselineTotal));
     Summary.buildDiffSummary(response, cubeNodes, 2, new BalancedCostFunction());
-    response.setMetricUrn("testMetricUrn");
+    response.setMetric(new MetricApi().setUrn("testMetricUrn"));
 
     // Validation
     List<SummaryResponseRow> responseRows = response.getResponseRows();

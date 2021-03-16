@@ -25,7 +25,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
+import org.apache.pinot.thirdeye.api.DatasetApi;
+import org.apache.pinot.thirdeye.api.DimensionAnalysisResultApi;
+import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import org.apache.pinot.thirdeye.cube.data.cube.Cube;
@@ -80,7 +82,7 @@ public class MultiDimensionalSummary {
    * @param doOneSideError if the summary should only consider one side error.
    * @return the multi-dimensional summary of an additive metric.
    */
-  public DataCubeSummaryApi buildSummary(String dataset,
+  public DimensionAnalysisResultApi buildSummary(String dataset,
       String metric,
       long currentStartInclusive,
       long currentEndExclusive,
@@ -115,7 +117,7 @@ public class MultiDimensionalSummary {
     dbClient.setBaselineEndExclusive(new DateTime(baselineEndExclusive, dateTimeZone));
 
     Cube cube = new Cube(costFunction);
-    DataCubeSummaryApi response;
+    DimensionAnalysisResultApi response;
     if (depth > 0) { // depth != 0 means manual dimension order
       cube.buildWithAutoDimensionOrder(dbClient, dimensions, dataFilters, depth, hierarchies);
       Summary summary = new Summary(cube, costFunction);
@@ -125,8 +127,10 @@ public class MultiDimensionalSummary {
       Summary summary = new Summary(cube, costFunction);
       response = summary.computeSummary(summarySize, doOneSideError);
     }
-    response.setDataset(dataset);
-    response.setMetricName(metric);
+    response.setMetric(new MetricApi()
+        .setName(metric)
+        .setDataset(new DatasetApi().setName(dataset))
+    );
 
     return response;
   }

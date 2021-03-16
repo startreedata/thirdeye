@@ -25,11 +25,9 @@ import org.apache.pinot.thirdeye.api.cube.DimensionCost;
 import org.apache.pinot.thirdeye.api.cube.SummaryGainerLoserResponseRow;
 import org.apache.pinot.thirdeye.api.cube.SummaryResponseRow;
 
-public class DataCubeSummaryApi {
+public class DimensionAnalysisResultApi {
 
-  private String metricUrn;
-  private String dataset;
-  private String metricName;
+  private MetricApi metric;
   private Double baselineTotal = 0d;
   private Double currentTotal = 0d;
   private Double baselineTotalSize = 0d;
@@ -41,30 +39,12 @@ public class DataCubeSummaryApi {
   private List<SummaryGainerLoserResponseRow> loser = new ArrayList<>();
   private List<DimensionCost> dimensionCosts = new ArrayList<>();
 
-  public String getMetricUrn() {
-    return metricUrn;
+  public MetricApi getMetric() {
+    return metric;
   }
 
-  public DataCubeSummaryApi setMetricUrn(final String metricUrn) {
-    this.metricUrn = metricUrn;
-    return this;
-  }
-
-  public String getDataset() {
-    return dataset;
-  }
-
-  public DataCubeSummaryApi setDataset(final String dataset) {
-    this.dataset = dataset;
-    return this;
-  }
-
-  public String getMetricName() {
-    return metricName;
-  }
-
-  public DataCubeSummaryApi setMetricName(final String metricName) {
-    this.metricName = metricName;
+  public DimensionAnalysisResultApi setMetric(final MetricApi metric) {
+    this.metric = metric;
     return this;
   }
 
@@ -72,7 +52,7 @@ public class DataCubeSummaryApi {
     return baselineTotal;
   }
 
-  public DataCubeSummaryApi setBaselineTotal(final Double baselineTotal) {
+  public DimensionAnalysisResultApi setBaselineTotal(final Double baselineTotal) {
     this.baselineTotal = baselineTotal;
     return this;
   }
@@ -81,7 +61,7 @@ public class DataCubeSummaryApi {
     return currentTotal;
   }
 
-  public DataCubeSummaryApi setCurrentTotal(final Double currentTotal) {
+  public DimensionAnalysisResultApi setCurrentTotal(final Double currentTotal) {
     this.currentTotal = currentTotal;
     return this;
   }
@@ -90,7 +70,7 @@ public class DataCubeSummaryApi {
     return baselineTotalSize;
   }
 
-  public DataCubeSummaryApi setBaselineTotalSize(final Double baselineTotalSize) {
+  public DimensionAnalysisResultApi setBaselineTotalSize(final Double baselineTotalSize) {
     this.baselineTotalSize = baselineTotalSize;
     return this;
   }
@@ -99,7 +79,7 @@ public class DataCubeSummaryApi {
     return currentTotalSize;
   }
 
-  public DataCubeSummaryApi setCurrentTotalSize(final Double currentTotalSize) {
+  public DimensionAnalysisResultApi setCurrentTotalSize(final Double currentTotalSize) {
     this.currentTotalSize = currentTotalSize;
     return this;
   }
@@ -108,7 +88,7 @@ public class DataCubeSummaryApi {
     return globalRatio;
   }
 
-  public DataCubeSummaryApi setGlobalRatio(final Double globalRatio) {
+  public DimensionAnalysisResultApi setGlobalRatio(final Double globalRatio) {
     this.globalRatio = globalRatio;
     return this;
   }
@@ -117,7 +97,7 @@ public class DataCubeSummaryApi {
     return dimensions;
   }
 
-  public DataCubeSummaryApi setDimensions(final List<String> dimensions) {
+  public DimensionAnalysisResultApi setDimensions(final List<String> dimensions) {
     this.dimensions = dimensions;
     return this;
   }
@@ -126,7 +106,7 @@ public class DataCubeSummaryApi {
     return responseRows;
   }
 
-  public DataCubeSummaryApi setResponseRows(
+  public DimensionAnalysisResultApi setResponseRows(
       final List<SummaryResponseRow> responseRows) {
     this.responseRows = responseRows;
     return this;
@@ -136,7 +116,7 @@ public class DataCubeSummaryApi {
     return gainer;
   }
 
-  public DataCubeSummaryApi setGainer(
+  public DimensionAnalysisResultApi setGainer(
       final List<SummaryGainerLoserResponseRow> gainer) {
     this.gainer = gainer;
     return this;
@@ -146,7 +126,7 @@ public class DataCubeSummaryApi {
     return loser;
   }
 
-  public DataCubeSummaryApi setLoser(
+  public DimensionAnalysisResultApi setLoser(
       final List<SummaryGainerLoserResponseRow> loser) {
     this.loser = loser;
     return this;
@@ -156,14 +136,14 @@ public class DataCubeSummaryApi {
     return dimensionCosts;
   }
 
-  public DataCubeSummaryApi setDimensionCosts(
+  public DimensionAnalysisResultApi setDimensionCosts(
       final List<DimensionCost> dimensionCosts) {
     this.dimensionCosts = dimensionCosts;
     return this;
   }
 
   public String toString() {
-    StringBuilder sb = new StringBuilder(DataCubeSummaryApi.class.getSimpleName());
+    StringBuilder sb = new StringBuilder(DimensionAnalysisResultApi.class.getSimpleName());
     sb.append("\n\t").append(this.getDimensions());
     for (SummaryResponseRow row : getResponseRows()) {
       sb.append("\n\t").append(row);

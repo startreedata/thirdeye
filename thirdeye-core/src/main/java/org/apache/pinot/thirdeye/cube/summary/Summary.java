@@ -34,7 +34,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
+import org.apache.pinot.thirdeye.api.DimensionAnalysisResultApi;
 import org.apache.pinot.thirdeye.api.cube.DimensionCost;
 import org.apache.pinot.thirdeye.api.cube.SummaryGainerLoserResponseRow;
 import org.apache.pinot.thirdeye.api.cube.SummaryResponseRow;
@@ -92,30 +92,30 @@ public class Summary {
     this.leafRowInserter = basicRowInserter;
   }
 
-  public static void buildGainerLoserGroup(final DataCubeSummaryApi dataCubeSummaryApi,
+  public static void buildGainerLoserGroup(final DimensionAnalysisResultApi dimensionAnalysisResultApi,
       List<DimNameValueCostEntry> costSet) {
     for (DimNameValueCostEntry dimNameValueCostEntry : costSet) {
       if (Double.compare(dimNameValueCostEntry.getCost(), 0d) <= 0) {
         continue;
       }
       if (dimNameValueCostEntry.getCurrentValue() >= dimNameValueCostEntry.getBaselineValue()
-          && dataCubeSummaryApi.getGainer().size() < MAX_GAINER_LOSER_COUNT) {
-        dataCubeSummaryApi.getGainer().add(
-            buildGainerLoserRow(dataCubeSummaryApi, dimNameValueCostEntry));
+          && dimensionAnalysisResultApi.getGainer().size() < MAX_GAINER_LOSER_COUNT) {
+        dimensionAnalysisResultApi.getGainer().add(
+            buildGainerLoserRow(dimensionAnalysisResultApi, dimNameValueCostEntry));
       } else if (dimNameValueCostEntry.getCurrentValue() < dimNameValueCostEntry.getBaselineValue()
-          && dataCubeSummaryApi.getLoser().size() < MAX_GAINER_LOSER_COUNT) {
-        dataCubeSummaryApi.getLoser().add(
-            buildGainerLoserRow(dataCubeSummaryApi, dimNameValueCostEntry));
+          && dimensionAnalysisResultApi.getLoser().size() < MAX_GAINER_LOSER_COUNT) {
+        dimensionAnalysisResultApi.getLoser().add(
+            buildGainerLoserRow(dimensionAnalysisResultApi, dimNameValueCostEntry));
       }
-      if (dataCubeSummaryApi.getGainer().size() >= MAX_GAINER_LOSER_COUNT
-          && dataCubeSummaryApi.getLoser().size() >= MAX_GAINER_LOSER_COUNT) {
+      if (dimensionAnalysisResultApi.getGainer().size() >= MAX_GAINER_LOSER_COUNT
+          && dimensionAnalysisResultApi.getLoser().size() >= MAX_GAINER_LOSER_COUNT) {
         break;
       }
     }
   }
 
   public static SummaryGainerLoserResponseRow buildGainerLoserRow(
-      final DataCubeSummaryApi dataCubeSummaryApi, DimNameValueCostEntry costEntry) {
+      final DimensionAnalysisResultApi dimensionAnalysisResultApi, DimNameValueCostEntry costEntry) {
     SummaryGainerLoserResponseRow row = new SummaryGainerLoserResponseRow();
     row.setBaselineValue(costEntry.getBaselineValue());
     row.setCurrentValue(costEntry.getCurrentValue());
@@ -125,17 +125,17 @@ public class Summary {
     row.setPercentageChange(computePercentageChange(row.getBaselineValue(), row.getCurrentValue()));
     row.setContributionChange(computeContributionChange(row.getBaselineValue(),
         row.getCurrentValue(),
-        dataCubeSummaryApi.getBaselineTotal(),
-        dataCubeSummaryApi.getCurrentTotal()));
+        dimensionAnalysisResultApi.getBaselineTotal(),
+        dimensionAnalysisResultApi.getCurrentTotal()));
     row.setContributionToOverallChange(computeContributionToOverallChange(row.getBaselineValue(),
         row.getCurrentValue(),
-        dataCubeSummaryApi.getBaselineTotal(),
-        dataCubeSummaryApi.getCurrentTotal()));
+        dimensionAnalysisResultApi.getBaselineTotal(),
+        dimensionAnalysisResultApi.getCurrentTotal()));
     row.setCost(DOUBLE_FORMATTER.format(roundUp(costEntry.getCost())));
     return row;
   }
 
-  public static void buildDiffSummary(final DataCubeSummaryApi dataCubeSummaryApi,
+  public static void buildDiffSummary(final DimensionAnalysisResultApi dimensionAnalysisResultApi,
       List<CubeNode> nodes,
       int targetLevelCount,
       CostFunction costFunction) {
@@ -150,7 +150,7 @@ public class Summary {
     // Build the header
     Dimensions dimensions = nodes.get(0).getDimensions();
     for (int i = 0; i < dimensions.size(); ++i) {
-      dataCubeSummaryApi.getDimensions().add(dimensions.get(i));
+      dimensionAnalysisResultApi.getDimensions().add(dimensions.get(i));
     }
 
     // Build the response
@@ -206,16 +206,16 @@ public class Summary {
       row.setPercentageChange(computePercentageChange(row.getBaselineValue(),
           row.getCurrentValue()));
       row.setSizeFactor((node.getBaselineSize() + node.getCurrentSize()) / (
-          dataCubeSummaryApi.getBaselineTotalSize()
-              + dataCubeSummaryApi.getCurrentTotalSize()));
+          dimensionAnalysisResultApi.getBaselineTotalSize()
+              + dimensionAnalysisResultApi.getCurrentTotalSize()));
       row.setContributionChange(computeContributionChange(row.getBaselineValue(),
           row.getCurrentValue(),
-          dataCubeSummaryApi.getBaselineTotal(),
-          dataCubeSummaryApi.getCurrentTotal()));
+          dimensionAnalysisResultApi.getBaselineTotal(),
+          dimensionAnalysisResultApi.getCurrentTotal()));
       row.setContributionToOverallChange(computeContributionToOverallChange(row.getBaselineValue(),
           row.getCurrentValue(),
-          dataCubeSummaryApi.getBaselineTotal(),
-          dataCubeSummaryApi.getCurrentTotal()));
+          dimensionAnalysisResultApi.getBaselineTotal(),
+          dimensionAnalysisResultApi.getCurrentTotal()));
       row.setCost(node.getCost());
       // Add other dimension values if this node is (ALL)-
       StringBuilder sb = new StringBuilder();
@@ -231,7 +231,7 @@ public class Summary {
         separator = ", ";
       }
       row.setOtherDimensionValues(sb.toString());
-      dataCubeSummaryApi.getResponseRows().add(row);
+      dimensionAnalysisResultApi.getResponseRows().add(row);
     }
   }
 
@@ -359,7 +359,7 @@ public class Summary {
     }
     Summary summary = new Summary(cube, new BalancedCostFunction());
     try {
-      DataCubeSummaryApi response = summary
+      DimensionAnalysisResultApi response = summary
           .computeSummary(answerSize, doOneSideError, maxDimensionSize);
       System.out.print("JSon String: ");
       System.out.println(new ObjectMapper().writeValueAsString(response));
@@ -372,19 +372,19 @@ public class Summary {
     summary.testCorrectnessOfWowValues();
   }
 
-  public DataCubeSummaryApi computeSummary(int answerSize) {
+  public DimensionAnalysisResultApi computeSummary(int answerSize) {
     return computeSummary(answerSize, false, this.maxLevelCount);
   }
 
-  public DataCubeSummaryApi computeSummary(int answerSize, boolean doOneSideError) {
+  public DimensionAnalysisResultApi computeSummary(int answerSize, boolean doOneSideError) {
     return computeSummary(answerSize, doOneSideError, this.maxLevelCount);
   }
 
-  public DataCubeSummaryApi computeSummary(int answerSize, int levelCount) {
+  public DimensionAnalysisResultApi computeSummary(int answerSize, int levelCount) {
     return computeSummary(answerSize, false, levelCount);
   }
 
-  public DataCubeSummaryApi computeSummary(int answerSize, boolean doOneSideError,
+  public DimensionAnalysisResultApi computeSummary(int answerSize, boolean doOneSideError,
       int userLevelCount) {
     if (answerSize <= 0) {
       answerSize = 1;
@@ -411,7 +411,7 @@ public class Summary {
     }
     computeChildDPArray(root);
     List<CubeNode> answer = new ArrayList<>(dpArrays.get(0).getAnswer());
-    DataCubeSummaryApi response = new DataCubeSummaryApi()
+    DimensionAnalysisResultApi response = new DimensionAnalysisResultApi()
         .setBaselineTotal(cube.getBaselineTotal())
         .setCurrentTotal(cube.getCurrentTotal())
         .setBaselineTotalSize(cube.getBaselineTotalSize())

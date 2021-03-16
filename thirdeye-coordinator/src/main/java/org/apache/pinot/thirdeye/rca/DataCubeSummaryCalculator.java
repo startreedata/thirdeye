@@ -18,7 +18,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
+import org.apache.pinot.thirdeye.api.DatasetApi;
+import org.apache.pinot.thirdeye.api.DimensionAnalysisResultApi;
+import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
 import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
@@ -119,8 +121,8 @@ public class DataCubeSummaryCalculator {
     }
   }
 
-  private static DataCubeSummaryApi notAvailable() {
-    return new DataCubeSummaryApi()
+  private static DimensionAnalysisResultApi notAvailable() {
+    return new DimensionAnalysisResultApi()
         .setBaselineTotal(0d)
         .setCurrentTotal(0d)
         .setBaselineTotalSize(0d)
@@ -128,7 +130,7 @@ public class DataCubeSummaryCalculator {
         .setDimensions(singletonList(Summary.NOT_AVAILABLE));
   }
 
-  public DataCubeSummaryApi compute(final MergedAnomalyResultDTO anomalyDTO) {
+  public DimensionAnalysisResultApi compute(final MergedAnomalyResultDTO anomalyDTO) {
     return compute(
         anomalyDTO.getMetricUrn(),
         anomalyDTO.getCollection(),
@@ -147,7 +149,7 @@ public class DataCubeSummaryCalculator {
         DEFAULT_TIMEZONE_ID);
   }
 
-  public DataCubeSummaryApi compute(
+  public DimensionAnalysisResultApi compute(
       String metricUrn,
       String dataset,
       String metric,
@@ -181,7 +183,7 @@ public class DataCubeSummaryCalculator {
         timeZone);
   }
 
-  private DataCubeSummaryApi buildDataCubeSummary(String metricUrn,
+  private DimensionAnalysisResultApi buildDataCubeSummary(String metricUrn,
       String dataset,
       String metric,
       long currentStartInclusive,
@@ -202,7 +204,7 @@ public class DataCubeSummaryCalculator {
 
     String metricName = metric;
     String datasetName = dataset;
-    DataCubeSummaryApi response = null;
+    DimensionAnalysisResultApi response = null;
     try {
       MetricConfigDTO metricConfigDTO = fetchMetricConfig(metricUrn, metric, dataset);
       if (metricConfigDTO != null) {
@@ -279,11 +281,14 @@ public class DataCubeSummaryCalculator {
       LOG.error("Exception while generating difference summary", e);
       if (metricUrn != null) {
         response = notAvailable()
-            .setMetricUrn(metricUrn);
+            .setMetric(new MetricApi().setUrn(metricUrn));
       } else {
         response = notAvailable()
-            .setDataset(datasetName)
-            .setMetricName(metricName);
+        .setMetric(new MetricApi()
+            .setName(metricName)
+            .setDataset(new DatasetApi().setName(datasetName))
+        );
+
       }
     }
 
@@ -319,7 +324,7 @@ public class DataCubeSummaryCalculator {
    * @param doOneSideError flag to toggle if we only want one side results.
    * @return the summary result of cube algorithm.
    */
-  private DataCubeSummaryApi runAdditiveCubeAlgorithm(DateTimeZone dateTimeZone,
+  private DimensionAnalysisResultApi runAdditiveCubeAlgorithm(DateTimeZone dateTimeZone,
       String dataset,
       String metric,
       long currentStartInclusive,
@@ -374,7 +379,7 @@ public class DataCubeSummaryCalculator {
    * @param doOneSideError flag to toggle if we only want one side results.
    * @return the summary result of cube algorithm.
    */
-  private DataCubeSummaryApi runRatioCubeAlgorithm(DateTimeZone dateTimeZone,
+  private DimensionAnalysisResultApi runRatioCubeAlgorithm(DateTimeZone dateTimeZone,
       String dataset,
       MetricConfigDTO metricConfigDTO,
       long currentStartInclusive,
@@ -425,8 +430,10 @@ public class DataCubeSummaryCalculator {
       LOG.error("Unable to parser numerator and denominator metric for metric" + metricConfigDTO
           .getName());
       return notAvailable()
-          .setDataset(dataset)
-          .setMetricName(metricConfigDTO.getName());
+      .setMetric(new MetricApi()
+          .setName(metricConfigDTO.getName())
+          .setDataset(new DatasetApi().setName(dataset))
+      );
     }
   }
 }

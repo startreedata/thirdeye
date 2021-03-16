@@ -4,7 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
+import org.apache.pinot.thirdeye.api.DatasetApi;
+import org.apache.pinot.thirdeye.api.DimensionAnalysisResultApi;
+import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import org.apache.pinot.thirdeye.cube.data.cube.Cube;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
@@ -61,7 +63,7 @@ public class MultiDimensionalRatioSummary {
    * @param doOneSideError if the summary should only consider one side error.
    * @return the multi-dimensional summary of a ratio metric.
    */
-  public DataCubeSummaryApi buildRatioSummary(String dataset,
+  public DimensionAnalysisResultApi buildRatioSummary(String dataset,
       String numeratorMetric,
       String denominatorMetric,
       long currentStartInclusive,
@@ -99,7 +101,7 @@ public class MultiDimensionalRatioSummary {
     dbClient.setBaselineEndExclusive(new DateTime(baselineEndExclusive, dateTimeZone));
 
     Cube cube = new Cube(costFunction);
-    DataCubeSummaryApi response;
+    DimensionAnalysisResultApi response;
     if (depth > 0) { // depth != 0 means manual dimension order
       cube.buildWithAutoDimensionOrder(dbClient, dimensions, dataFilters, depth, hierarchies);
       Summary summary = new Summary(cube, costFunction);
@@ -109,8 +111,10 @@ public class MultiDimensionalRatioSummary {
       Summary summary = new Summary(cube, costFunction);
       response = summary.computeSummary(summarySize, doOneSideError);
     }
-    response.setDataset(dataset);
-    response.setMetricName(numeratorMetric + "/" + denominatorMetric);
+    response.setMetric(new MetricApi()
+        .setName(numeratorMetric + "/" + denominatorMetric)
+        .setDataset(new DatasetApi().setName(dataset))
+    );
 
     return response;
   }

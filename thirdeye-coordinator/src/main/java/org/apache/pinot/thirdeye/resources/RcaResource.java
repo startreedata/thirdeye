@@ -1,21 +1,5 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_DEPTH;
-import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_DIM_HIERARCHIES;
-import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_EXCLUDED_DIMENSIONS;
-import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_ONE_SIDE_ERROR;
-import static org.apache.pinot.thirdeye.common.constants.rca.MultiDimensionalSummaryConstants.CUBE_SUMMARY_SIZE;
-import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.BASELINE_END;
-import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.BASELINE_START;
-import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.CURRENT_END;
-import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.CURRENT_START;
-import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.METRIC_URN;
-import static org.apache.pinot.thirdeye.common.constants.rca.RootCauseResourceConstants.TIME_ZONE;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_DEPTH;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_EXCLUDED_DIMENSIONS;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_ONE_SIDE_ERROR;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_TIMEZONE_ID;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.parseListParams;
@@ -33,17 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
 import org.apache.pinot.thirdeye.api.RootCauseEntity;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
 import org.apache.pinot.thirdeye.rca.RootCauseAnalysisService;
 import org.apache.pinot.thirdeye.rca.RootCauseEntityFormatter;
@@ -75,6 +55,7 @@ public class RcaResource {
   private final RootCauseTemplateResource rootCauseTemplateResource;
   private final RootCauseSessionResource rootCauseSessionResource;
   private final RootCauseMetricResource rootCauseMetricResource;
+  private final DimensionAnalysisResource dimensionAnalysisResource;
 
   @Inject
   public RcaResource(
@@ -83,7 +64,8 @@ public class RcaResource {
       final DataCubeSummaryCalculator dataCubeSummaryCalculator,
       final RootCauseTemplateResource rootCauseTemplateResource,
       final RootCauseSessionResource rootCauseSessionResource,
-      final RootCauseMetricResource rootCauseMetricResource) {
+      final RootCauseMetricResource rootCauseMetricResource,
+      final DimensionAnalysisResource dimensionAnalysisResource) {
     this.frameworks = rootCauseAnalysisService.getFrameworks();
     this.formatters = rootCauseAnalysisService.getFormatters();
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
@@ -91,6 +73,12 @@ public class RcaResource {
     this.rootCauseTemplateResource = rootCauseTemplateResource;
     this.rootCauseSessionResource = rootCauseSessionResource;
     this.rootCauseMetricResource = rootCauseMetricResource;
+    this.dimensionAnalysisResource = dimensionAnalysisResource;
+  }
+
+  @Path(value = "/dim-analysis")
+  public DimensionAnalysisResource getDimensionAnalysisResource() {
+    return dimensionAnalysisResource;
   }
 
   @Path(value = "/template")
@@ -106,57 +94,6 @@ public class RcaResource {
   @Path(value = "/metrics")
   public RootCauseMetricResource getRootCauseMetricResource() {
     return rootCauseMetricResource;
-  }
-
-  @GET
-  @Path("/cube/anomaly")
-  @ApiOperation("Retrieve the likely root causes behind an anomaly")
-  public Response dataCubeSummary(
-      @ApiParam(value = "internal id of the anomaly")
-      @QueryParam("anomalyId") long anomalyId) {
-    final MergedAnomalyResultDTO anomalyDTO = ensureExists(
-        mergedAnomalyResultManager.findById(anomalyId), String.format("Anomaly ID: %d", anomalyId));
-
-    // In the highlights api we retrieve only the top 3 results across 3 dimensions.
-    // TODO: polish the results to make it more meaningful
-    return Response.ok(dataCubeSummaryCalculator.compute(anomalyDTO)).build();
-  }
-
-  @GET
-  @Path("cube")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response buildSummary(
-      @QueryParam(METRIC_URN) String metricUrn,
-      @QueryParam("dataset") String dataset,
-      @QueryParam("metric") String metric,
-      @QueryParam(CURRENT_START) long currentStartInclusive,
-      @QueryParam(CURRENT_END) long currentEndExclusive,
-      @QueryParam(BASELINE_START) long baselineStartInclusive,
-      @QueryParam(BASELINE_END) long baselineEndExclusive,
-      @QueryParam("dimensions") String groupByDimensions,
-      @QueryParam("filters") String filterJsonPayload,
-      @QueryParam(CUBE_SUMMARY_SIZE) int summarySize,
-      @QueryParam(CUBE_DEPTH) @DefaultValue(DEFAULT_DEPTH) int depth,
-      @QueryParam(CUBE_DIM_HIERARCHIES) @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload,
-      @QueryParam(CUBE_ONE_SIDE_ERROR) @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
-      @QueryParam(CUBE_EXCLUDED_DIMENSIONS) @DefaultValue(DEFAULT_EXCLUDED_DIMENSIONS) String excludedDimensions,
-      @QueryParam(TIME_ZONE) @DefaultValue(DEFAULT_TIMEZONE_ID) String timeZone) throws Exception {
-    final DataCubeSummaryApi response = dataCubeSummaryCalculator.compute(metricUrn,
-        metric,
-        dataset,
-        currentStartInclusive,
-        currentEndExclusive,
-        baselineStartInclusive,
-        baselineEndExclusive,
-        groupByDimensions,
-        filterJsonPayload,
-        summarySize,
-        depth,
-        hierarchiesPayload,
-        doOneSideError,
-        excludedDimensions,
-        timeZone);
-    return Response.ok(response).build();
   }
 
   @GET

@@ -1,14 +1,11 @@
 package org.apache.pinot.thirdeye;
 
-import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import io.dropwizard.auth.Authenticator;
-import java.io.File;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import org.apache.pinot.thirdeye.auth.ThirdEyeCredentials;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
@@ -41,7 +38,8 @@ public class ThirdEyeCoreModule extends AbstractModule {
     install(new ThirdEyePersistenceModule(dataSource));
 
     bind(ConfigurationHolder.class).toInstance(configurationHolder);
-    bind(new TypeLiteral<Authenticator<ThirdEyeCredentials, ThirdEyePrincipal>>() {})
+    bind(new TypeLiteral<Authenticator<ThirdEyeCredentials, ThirdEyePrincipal>>() {
+    })
         .to(ThirdEyeAuthenticatorDisabled.class)
         .in(Scopes.SINGLETON);
 
@@ -53,10 +51,7 @@ public class ThirdEyeCoreModule extends AbstractModule {
   @Singleton
   @Provides
   public RCAConfiguration getRCAConfiguration() {
-    final File rcaConfigFile = new File(
-        String.format("%s%s%s", configurationHolder.getPath(), File.separator, "rca.yml"));
-
-    return readConfig(rcaConfigFile, RCAConfiguration.class);
+    return configurationHolder.createConfigurationInstance(RCAConfiguration.class);
   }
 
   @Singleton

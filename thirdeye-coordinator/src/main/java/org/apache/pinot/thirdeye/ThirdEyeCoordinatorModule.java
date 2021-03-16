@@ -18,7 +18,7 @@ public class ThirdEyeCoordinatorModule extends AbstractModule {
       final DataSource dataSource) {
     this.configuration = configuration;
     this.dataSource = dataSource;
-    configurationHolder = new ConfigurationHolder().setPath(configuration.getConfigPath());
+    configurationHolder = new ConfigurationHolder(configuration.getConfigPath());
   }
 
   @Override

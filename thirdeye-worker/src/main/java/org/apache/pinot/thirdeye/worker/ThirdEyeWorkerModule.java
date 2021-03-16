@@ -22,7 +22,7 @@ public class ThirdEyeWorkerModule extends AbstractModule {
       final ThirdEyeWorkerConfiguration configuration) {
     this.dataSource = dataSource;
     this.configuration = configuration;
-    configurationHolder = new ConfigurationHolder().setPath(configuration.getRootDir());
+    configurationHolder = new ConfigurationHolder(configuration.getRootDir());
   }
 
   @Override

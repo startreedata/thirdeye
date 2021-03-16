@@ -26,7 +26,34 @@ import java.util.List;
  */
 public class SummaryResponseRow extends BaseResponseRow {
 
-  public List<String> names;
-  public String otherDimensionValues;
-  public double cost;
+  private List<String> names;
+  private String otherDimensionValues;
+  private double cost;
+
+  public List<String> getNames() {
+    return names;
+  }
+
+  public SummaryResponseRow setNames(final List<String> names) {
+    this.names = names;
+    return this;
+  }
+
+  public String getOtherDimensionValues() {
+    return otherDimensionValues;
+  }
+
+  public SummaryResponseRow setOtherDimensionValues(final String otherDimensionValues) {
+    this.otherDimensionValues = otherDimensionValues;
+    return this;
+  }
+
+  public double getCost() {
+    return cost;
+  }
+
+  public SummaryResponseRow setCost(final double cost) {
+    this.cost = cost;
+    return this;
+  }
 }

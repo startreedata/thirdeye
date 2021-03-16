@@ -21,7 +21,34 @@ package org.apache.pinot.thirdeye.api.cube;
 
 public class SummaryGainerLoserResponseRow extends BaseResponseRow {
 
-  public String dimensionName;
-  public String dimensionValue;
-  public String cost;
+  private String dimensionName;
+  private String dimensionValue;
+  private String cost;
+
+  public String getDimensionName() {
+    return dimensionName;
+  }
+
+  public SummaryGainerLoserResponseRow setDimensionName(final String dimensionName) {
+    this.dimensionName = dimensionName;
+    return this;
+  }
+
+  public String getDimensionValue() {
+    return dimensionValue;
+  }
+
+  public SummaryGainerLoserResponseRow setDimensionValue(final String dimensionValue) {
+    this.dimensionValue = dimensionValue;
+    return this;
+  }
+
+  public String getCost() {
+    return cost;
+  }
+
+  public SummaryGainerLoserResponseRow setCost(final String cost) {
+    this.cost = cost;
+    return this;
+  }
 }

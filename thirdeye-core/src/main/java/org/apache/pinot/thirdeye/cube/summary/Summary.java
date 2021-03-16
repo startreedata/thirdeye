@@ -35,13 +35,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
+import org.apache.pinot.thirdeye.api.cube.DimensionCost;
 import org.apache.pinot.thirdeye.api.cube.SummaryGainerLoserResponseRow;
 import org.apache.pinot.thirdeye.api.cube.SummaryResponseRow;
 import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import org.apache.pinot.thirdeye.cube.data.cube.Cube;
 import org.apache.pinot.thirdeye.cube.data.cube.DimNameValueCostEntry;
-import org.apache.pinot.thirdeye.api.cube.DimensionCost;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.slf4j.Logger;
@@ -56,8 +56,10 @@ public class Summary {
   public static final String NOT_ALL = "(ALL)-";
   public static final String EMPTY = "";
   public static final String NOT_AVAILABLE = "-na-";
+
   static final NodeDimensionValuesComparator NODE_COMPARATOR = new NodeDimensionValuesComparator();
   private static final Logger LOG = LoggerFactory.getLogger(Summary.class);
+
   private final Cube cube;
   private final int maxLevelCount;
   private final double globalBaselineValue;
@@ -115,20 +117,21 @@ public class Summary {
   public static SummaryGainerLoserResponseRow buildGainerLoserRow(
       final DataCubeSummaryApi dataCubeSummaryApi, DimNameValueCostEntry costEntry) {
     SummaryGainerLoserResponseRow row = new SummaryGainerLoserResponseRow();
-    row.baselineValue = costEntry.getBaselineValue();
-    row.currentValue = costEntry.getCurrentValue();
-    row.sizeFactor = costEntry.getSizeFactor();
-    row.dimensionName = costEntry.getDimName();
-    row.dimensionValue = costEntry.getDimValue();
-    row.percentageChange = computePercentageChange(row.baselineValue, row.currentValue);
-    row.contributionChange =
-        computeContributionChange(row.baselineValue, row.currentValue,
-            dataCubeSummaryApi.getBaselineTotal(), dataCubeSummaryApi.getCurrentTotal());
-    row.contributionToOverallChange =
-        computeContributionToOverallChange(row.baselineValue, row.currentValue,
-            dataCubeSummaryApi.getBaselineTotal(),
-            dataCubeSummaryApi.getCurrentTotal());
-    row.cost = DOUBLE_FORMATTER.format(roundUp(costEntry.getCost()));
+    row.setBaselineValue(costEntry.getBaselineValue());
+    row.setCurrentValue(costEntry.getCurrentValue());
+    row.setSizeFactor(costEntry.getSizeFactor());
+    row.setDimensionName(costEntry.getDimName());
+    row.setDimensionValue(costEntry.getDimValue());
+    row.setPercentageChange(computePercentageChange(row.getBaselineValue(), row.getCurrentValue()));
+    row.setContributionChange(computeContributionChange(row.getBaselineValue(),
+        row.getCurrentValue(),
+        dataCubeSummaryApi.getBaselineTotal(),
+        dataCubeSummaryApi.getCurrentTotal()));
+    row.setContributionToOverallChange(computeContributionToOverallChange(row.getBaselineValue(),
+        row.getCurrentValue(),
+        dataCubeSummaryApi.getBaselineTotal(),
+        dataCubeSummaryApi.getCurrentTotal()));
+    row.setCost(DOUBLE_FORMATTER.format(roundUp(costEntry.getCost())));
     return row;
   }
 
@@ -197,23 +200,23 @@ public class Summary {
     //    Fill in the information of each response row
     for (CubeNode node : nodes) {
       SummaryResponseRow row = new SummaryResponseRow();
-      row.names = nameTags.get(node).getNames();
-      row.baselineValue = node.getBaselineValue();
-      row.currentValue = node.getCurrentValue();
-      row.percentageChange = computePercentageChange(row.baselineValue, row.currentValue);
-      row.sizeFactor =
-          (node.getBaselineSize() + node.getCurrentSize()) / (
-              dataCubeSummaryApi.getBaselineTotalSize()
-                  + dataCubeSummaryApi.getCurrentTotalSize());
-      row.contributionChange =
-          computeContributionChange(row.baselineValue, row.currentValue,
-              dataCubeSummaryApi.getBaselineTotal(),
-              dataCubeSummaryApi.getCurrentTotal());
-      row.contributionToOverallChange =
-          computeContributionToOverallChange(row.baselineValue, row.currentValue,
-              dataCubeSummaryApi.getBaselineTotal(),
-              dataCubeSummaryApi.getCurrentTotal());
-      row.cost = node.getCost();
+      row.setNames(nameTags.get(node).getNames());
+      row.setBaselineValue(node.getBaselineValue());
+      row.setCurrentValue(node.getCurrentValue());
+      row.setPercentageChange(computePercentageChange(row.getBaselineValue(),
+          row.getCurrentValue()));
+      row.setSizeFactor((node.getBaselineSize() + node.getCurrentSize()) / (
+          dataCubeSummaryApi.getBaselineTotalSize()
+              + dataCubeSummaryApi.getCurrentTotalSize()));
+      row.setContributionChange(computeContributionChange(row.getBaselineValue(),
+          row.getCurrentValue(),
+          dataCubeSummaryApi.getBaselineTotal(),
+          dataCubeSummaryApi.getCurrentTotal()));
+      row.setContributionToOverallChange(computeContributionToOverallChange(row.getBaselineValue(),
+          row.getCurrentValue(),
+          dataCubeSummaryApi.getBaselineTotal(),
+          dataCubeSummaryApi.getCurrentTotal()));
+      row.setCost(node.getCost());
       // Add other dimension values if this node is (ALL)-
       StringBuilder sb = new StringBuilder();
       String separator = "";
@@ -227,7 +230,7 @@ public class Summary {
         sb.append(separator).append(iterator.next());
         separator = ", ";
       }
-      row.otherDimensionValues = sb.toString();
+      row.setOtherDimensionValues(sb.toString());
       dataCubeSummaryApi.getResponseRows().add(row);
     }
   }
@@ -663,9 +666,15 @@ public class Summary {
       double currentValue = node.getCurrentValue();
       double baselineSize = node.getBaselineSize();
       double currentSize = node.getCurrentSize();
-      double cost = costFunction
-          .computeCost(targetRatio, baselineValue, currentValue, baselineSize, currentSize,
-              globalBaselineValue, globalCurrentValue, globalBaselineSize, globalCurrentSize);
+      double cost = costFunction.computeCost(targetRatio,
+          baselineValue,
+          currentValue,
+          baselineSize,
+          currentSize,
+          globalBaselineValue,
+          globalCurrentValue,
+          globalBaselineSize,
+          globalCurrentSize);
 
       for (int n = dp.size() - 1; n > 0; --n) {
         double val1 = dp.slotAt(n - 1).cost;

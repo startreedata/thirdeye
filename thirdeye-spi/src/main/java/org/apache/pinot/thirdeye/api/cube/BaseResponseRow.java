@@ -24,10 +24,65 @@ package org.apache.pinot.thirdeye.api.cube;
  */
 public class BaseResponseRow {
 
-  public double baselineValue;
-  public double currentValue;
-  public double sizeFactor;
-  public String percentageChange;
-  public String contributionChange;
-  public String contributionToOverallChange;
+  private double baselineValue;
+  private double currentValue;
+  private double sizeFactor;
+  private String percentageChange;
+  private String contributionChange;
+  private String contributionToOverallChange;
+
+  public double getBaselineValue() {
+    return baselineValue;
+  }
+
+  public BaseResponseRow setBaselineValue(final double baselineValue) {
+    this.baselineValue = baselineValue;
+    return this;
+  }
+
+  public double getCurrentValue() {
+    return currentValue;
+  }
+
+  public BaseResponseRow setCurrentValue(final double currentValue) {
+    this.currentValue = currentValue;
+    return this;
+  }
+
+  public double getSizeFactor() {
+    return sizeFactor;
+  }
+
+  public BaseResponseRow setSizeFactor(final double sizeFactor) {
+    this.sizeFactor = sizeFactor;
+    return this;
+  }
+
+  public String getPercentageChange() {
+    return percentageChange;
+  }
+
+  public BaseResponseRow setPercentageChange(final String percentageChange) {
+    this.percentageChange = percentageChange;
+    return this;
+  }
+
+  public String getContributionChange() {
+    return contributionChange;
+  }
+
+  public BaseResponseRow setContributionChange(final String contributionChange) {
+    this.contributionChange = contributionChange;
+    return this;
+  }
+
+  public String getContributionToOverallChange() {
+    return contributionToOverallChange;
+  }
+
+  public BaseResponseRow setContributionToOverallChange(
+      final String contributionToOverallChange) {
+    this.contributionToOverallChange = contributionToOverallChange;
+    return this;
+  }
 }

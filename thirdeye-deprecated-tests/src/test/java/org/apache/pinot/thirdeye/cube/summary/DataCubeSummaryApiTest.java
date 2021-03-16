@@ -65,14 +65,15 @@ public class DataCubeSummaryApiTest {
     for (int i = 0; i < expectedResponseRows.size(); ++i) {
       SummaryResponseRow actualRow = responseRows.get(i);
       SummaryResponseRow expectedRow = expectedResponseRows.get(i);
-      Assert.assertEquals(actualRow.names, expectedRow.names);
-      Assert.assertEquals(actualRow.otherDimensionValues, expectedRow.otherDimensionValues);
-      Assert.assertEquals(actualRow.cost, expectedRow.cost, EPSILON);
-      Assert.assertEquals(actualRow.baselineValue, expectedRow.baselineValue);
-      Assert.assertEquals(actualRow.currentValue, expectedRow.currentValue);
-      Assert.assertEquals(Double.parseDouble(actualRow.percentageChange.split("%")[0]),
-          Double.parseDouble(expectedRow.percentageChange.split("%")[0]));
-      Assert.assertEquals(actualRow.sizeFactor, expectedRow.sizeFactor, EPSILON);
+      Assert.assertEquals(actualRow.getNames(), expectedRow.getNames());
+      Assert.assertEquals(actualRow.getOtherDimensionValues(),
+          expectedRow.getOtherDimensionValues());
+      Assert.assertEquals(actualRow.getCost(), expectedRow.getCost(), EPSILON);
+      Assert.assertEquals(actualRow.getBaselineValue(), expectedRow.getBaselineValue());
+      Assert.assertEquals(actualRow.getCurrentValue(), expectedRow.getCurrentValue());
+      Assert.assertEquals(Double.parseDouble(actualRow.getPercentageChange().split("%")[0]),
+          Double.parseDouble(expectedRow.getPercentageChange().split("%")[0]));
+      Assert.assertEquals(actualRow.getSizeFactor(), expectedRow.getSizeFactor(), EPSILON);
     }
   }
 
@@ -154,22 +155,22 @@ public class DataCubeSummaryApiTest {
    */
   private List<SummaryResponseRow> buildExpectedResponseRows() {
     SummaryResponseRow root = new SummaryResponseRow();
-    root.names = Collections.singletonList(NOT_ALL);
-    root.otherDimensionValues = "IN, FR";
-    root.cost = 0d; // root doesn't have cost
-    root.baselineValue = 25d;
-    root.currentValue = 28d;
-    root.sizeFactor = 0.5145d;
-    root.percentageChange = (28d - 25d) / 25d * 100 + "%";
+    root.setNames(Collections.singletonList(NOT_ALL));
+    root.setOtherDimensionValues("IN, FR");
+    root.setCost(0d); // root doesn't have cost
+    root.setBaselineValue(25d);
+    root.setCurrentValue(28d);
+    root.setSizeFactor(0.5145d);
+    root.setPercentageChange((28d - 25d) / 25d * 100 + "%");
 
     SummaryResponseRow US = new SummaryResponseRow();
-    US.names = Collections.singletonList("US");
-    US.otherDimensionValues = "";
-    US.cost = 1.1587d;
-    US.baselineValue = 20d;
-    US.currentValue = 30d;
-    US.sizeFactor = 0.4854d; // UPDATE THIS
-    US.percentageChange = (30d - 20d) / 20d * 100 + "%";
+    US.setNames(Collections.singletonList("US"));
+    US.setOtherDimensionValues("");
+    US.setCost(1.1587d);
+    US.setBaselineValue(20d);
+    US.setCurrentValue(30d);
+    US.setSizeFactor(0.4854d); // UPDATE THIS
+    US.setPercentageChange((30d - 20d) / 20d * 100 + "%");
 
     List<SummaryResponseRow> rows = new ArrayList<>();
     rows.add(root);

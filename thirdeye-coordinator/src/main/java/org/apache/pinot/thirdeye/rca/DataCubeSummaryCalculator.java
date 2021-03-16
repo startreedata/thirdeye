@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.rca;
 
+import static java.util.Collections.singletonList;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
@@ -16,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
 import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
@@ -25,7 +28,6 @@ import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalRatioSummary;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummary;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummaryCLITool;
 import org.apache.pinot.thirdeye.cube.ratio.RatioDBClient;
-import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
 import org.apache.pinot.thirdeye.cube.summary.Summary;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
@@ -117,27 +119,13 @@ public class DataCubeSummaryCalculator {
     }
   }
 
-  public static DataCubeSummaryApi buildNotAvailableResponse(String metricUrn) {
-    DataCubeSummaryApi response = new DataCubeSummaryApi()
+  private static DataCubeSummaryApi notAvailable() {
+    return new DataCubeSummaryApi()
         .setBaselineTotal(0d)
         .setCurrentTotal(0d)
         .setBaselineTotalSize(0d)
-        .setCurrentTotalSize(0d);
-    response.setMetricUrn(metricUrn);
-    response.getDimensions().add(Summary.NOT_AVAILABLE);
-    return response;
-  }
-
-  public static DataCubeSummaryApi buildNotAvailableResponse(String dataset, String metricName) {
-    DataCubeSummaryApi response = new DataCubeSummaryApi()
-        .setBaselineTotal(0d)
-        .setCurrentTotal(0d)
-        .setBaselineTotalSize(0d)
-        .setCurrentTotalSize(0d);
-    response.setDataset(dataset);
-    response.setMetricName(metricName);
-    response.getDimensions().add(Summary.NOT_AVAILABLE);
-    return response;
+        .setCurrentTotalSize(0d)
+        .setDimensions(singletonList(Summary.NOT_AVAILABLE));
   }
 
   public DataCubeSummaryApi compute(final MergedAnomalyResultDTO anomalyDTO) {
@@ -290,9 +278,12 @@ public class DataCubeSummaryCalculator {
     } catch (Exception e) {
       LOG.error("Exception while generating difference summary", e);
       if (metricUrn != null) {
-        response = buildNotAvailableResponse(metricUrn);
+        response = notAvailable()
+            .setMetricUrn(metricUrn);
       } else {
-        response = buildNotAvailableResponse(datasetName, metricName);
+        response = notAvailable()
+            .setDataset(datasetName)
+            .setMetricName(metricName);
       }
     }
 
@@ -433,7 +424,9 @@ public class DataCubeSummaryCalculator {
     } else { // parser should find ids because of the guard of the if-condition.
       LOG.error("Unable to parser numerator and denominator metric for metric" + metricConfigDTO
           .getName());
-      return buildNotAvailableResponse(dataset, metricConfigDTO.getName());
+      return notAvailable()
+          .setDataset(dataset)
+          .setMetricName(metricConfigDTO.getName());
     }
   }
 }

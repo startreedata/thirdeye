@@ -20,8 +20,6 @@
 package org.apache.pinot.thirdeye.cube.summary;
 
 import java.util.List;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * A POJO for front-end representation.
@@ -31,8 +29,4 @@ public class SummaryResponseRow extends BaseResponseRow {
   public List<String> names;
   public String otherDimensionValues;
   public double cost;
-
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
-  }
 }

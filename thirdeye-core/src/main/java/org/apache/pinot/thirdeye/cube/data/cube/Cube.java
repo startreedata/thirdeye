@@ -329,16 +329,27 @@ public class Cube { // the cube (Ca|Cb)
             (wowNode.getBaselineSize() + wowNode.getCurrentSize()) / (topBaselineSize
                 + topCurrentSize);
         double cost = costFunction
-            .computeCost(topRatio, wowNode.getBaselineValue(), wowNode.getCurrentValue(),
-                wowNode.getBaselineSize(), wowNode.getCurrentSize(), topBaselineValue,
-                topCurrentValue, topBaselineSize,
+            .computeCost(topRatio,
+                wowNode.getBaselineValue(),
+                wowNode.getCurrentValue(),
+                wowNode.getBaselineSize(),
+                wowNode.getCurrentSize(),
+                topBaselineValue,
+                topCurrentValue,
+                topBaselineSize,
                 topCurrentSize);
 
         costSet.add(
-            new DimNameValueCostEntry(dimensionName, dimensionValue, wowNode.getBaselineValue(),
-                wowNode.getCurrentValue(), wowNode.changeRatio(),
+            new DimNameValueCostEntry(dimensionName,
+                dimensionValue,
+                wowNode.getBaselineValue(),
+                wowNode.getCurrentValue(),
+                wowNode.changeRatio(),
                 wowNode.getCurrentValue() - wowNode.getBaselineValue(),
-                wowNode.getBaselineSize(), wowNode.getCurrentSize(), contributionFactor, cost));
+                wowNode.getBaselineSize(),
+                wowNode.getCurrentSize(),
+                contributionFactor,
+                cost));
       }
     }
 

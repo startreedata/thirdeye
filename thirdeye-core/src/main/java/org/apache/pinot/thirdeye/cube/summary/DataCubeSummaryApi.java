@@ -28,11 +28,11 @@ public class DataCubeSummaryApi {
   private String metricUrn;
   private String dataset;
   private String metricName;
-  private double baselineTotal = 0d;
-  private double currentTotal = 0d;
-  private double baselineTotalSize = 0d;
-  private double currentTotalSize = 0d;
-  private double globalRatio = 1d;
+  private Double baselineTotal = 0d;
+  private Double currentTotal = 0d;
+  private Double baselineTotalSize = 0d;
+  private Double currentTotalSize = 0d;
+  private Double globalRatio = 1d;
   private List<String> dimensions = new ArrayList<>();
   private List<SummaryResponseRow> responseRows = new ArrayList<>();
   private List<SummaryGainerLoserResponseRow> gainer = new ArrayList<>();
@@ -66,47 +66,47 @@ public class DataCubeSummaryApi {
     return this;
   }
 
-  public double getBaselineTotal() {
+  public Double getBaselineTotal() {
     return baselineTotal;
   }
 
-  public DataCubeSummaryApi setBaselineTotal(final double baselineTotal) {
+  public DataCubeSummaryApi setBaselineTotal(final Double baselineTotal) {
     this.baselineTotal = baselineTotal;
     return this;
   }
 
-  public double getCurrentTotal() {
+  public Double getCurrentTotal() {
     return currentTotal;
   }
 
-  public DataCubeSummaryApi setCurrentTotal(final double currentTotal) {
+  public DataCubeSummaryApi setCurrentTotal(final Double currentTotal) {
     this.currentTotal = currentTotal;
     return this;
   }
 
-  public double getBaselineTotalSize() {
+  public Double getBaselineTotalSize() {
     return baselineTotalSize;
   }
 
-  public DataCubeSummaryApi setBaselineTotalSize(final double baselineTotalSize) {
+  public DataCubeSummaryApi setBaselineTotalSize(final Double baselineTotalSize) {
     this.baselineTotalSize = baselineTotalSize;
     return this;
   }
 
-  public double getCurrentTotalSize() {
+  public Double getCurrentTotalSize() {
     return currentTotalSize;
   }
 
-  public DataCubeSummaryApi setCurrentTotalSize(final double currentTotalSize) {
+  public DataCubeSummaryApi setCurrentTotalSize(final Double currentTotalSize) {
     this.currentTotalSize = currentTotalSize;
     return this;
   }
 
-  public double getGlobalRatio() {
+  public Double getGlobalRatio() {
     return globalRatio;
   }
 
-  public DataCubeSummaryApi setGlobalRatio(final double globalRatio) {
+  public DataCubeSummaryApi setGlobalRatio(final Double globalRatio) {
     this.globalRatio = globalRatio;
     return this;
   }

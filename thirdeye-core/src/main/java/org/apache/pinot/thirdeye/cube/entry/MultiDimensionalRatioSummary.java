@@ -61,19 +61,34 @@ public class MultiDimensionalRatioSummary {
    * @param doOneSideError if the summary should only consider one side error.
    * @return the multi-dimensional summary of a ratio metric.
    */
-  public DataCubeSummaryApi buildRatioSummary(String dataset, String numeratorMetric,
+  public DataCubeSummaryApi buildRatioSummary(String dataset,
+      String numeratorMetric,
       String denominatorMetric,
-      long currentStartInclusive, long currentEndExclusive, long baselineStartInclusive,
+      long currentStartInclusive,
+      long currentEndExclusive,
+      long baselineStartInclusive,
       long baselineEndExclusive,
-      Dimensions dimensions, Multimap<String, String> dataFilters, int summarySize, int depth,
-      List<List<String>> hierarchies, boolean doOneSideError) throws Exception {
+      Dimensions dimensions,
+      Multimap<String, String> dataFilters,
+      int summarySize,
+      int depth,
+      List<List<String>> hierarchies,
+      boolean doOneSideError) throws Exception {
     // Check arguments
     List<String> metrics = new ArrayList<>();
     metrics.add(numeratorMetric);
     metrics.add(denominatorMetric);
-    SummaryUtils.checkArguments(dataset, metrics, currentStartInclusive, currentEndExclusive,
+    SummaryUtils.checkArguments(dataset,
+        metrics,
+        currentStartInclusive,
+        currentEndExclusive,
         baselineStartInclusive,
-        baselineEndExclusive, dimensions, dataFilters, summarySize, depth, hierarchies);
+        baselineEndExclusive,
+        dimensions,
+        dataFilters,
+        summarySize,
+        depth,
+        hierarchies);
 
     dbClient.setDataset(dataset);
     dbClient.setNumeratorMetric(numeratorMetric);

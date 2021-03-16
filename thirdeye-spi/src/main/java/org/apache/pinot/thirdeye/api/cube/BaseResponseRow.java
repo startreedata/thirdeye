@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.cube.summary;
+package org.apache.pinot.thirdeye.api.cube;
 
 /**
  * A POJO for front-end representation.

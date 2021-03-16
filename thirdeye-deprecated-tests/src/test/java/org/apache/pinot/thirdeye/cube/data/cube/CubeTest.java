@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.apache.pinot.thirdeye.api.cube.DimensionCost;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveCubeNode;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveRow;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;

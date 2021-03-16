@@ -17,11 +17,13 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.cube.summary;
+package org.apache.pinot.thirdeye.api;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.cube.data.cube.DimensionCost;
+import org.apache.pinot.thirdeye.api.cube.DimensionCost;
+import org.apache.pinot.thirdeye.api.cube.SummaryGainerLoserResponseRow;
+import org.apache.pinot.thirdeye.api.cube.SummaryResponseRow;
 
 public class DataCubeSummaryApi {
 

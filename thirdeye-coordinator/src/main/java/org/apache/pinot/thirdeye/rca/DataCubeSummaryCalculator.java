@@ -25,7 +25,7 @@ import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalRatioSummary;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummary;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummaryCLITool;
 import org.apache.pinot.thirdeye.cube.ratio.RatioDBClient;
-import org.apache.pinot.thirdeye.cube.summary.DataCubeSummaryApi;
+import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
 import org.apache.pinot.thirdeye.cube.summary.Summary;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;

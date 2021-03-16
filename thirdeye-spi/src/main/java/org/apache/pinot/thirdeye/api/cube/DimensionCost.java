@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.cube.data.cube;
+package org.apache.pinot.thirdeye.api.cube;
 
 import com.google.common.base.Preconditions;
 import java.util.Objects;

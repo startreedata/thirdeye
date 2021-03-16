@@ -29,7 +29,7 @@ import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import org.apache.pinot.thirdeye.cube.data.cube.Cube;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
-import org.apache.pinot.thirdeye.cube.summary.DataCubeSummaryApi;
+import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
 import org.apache.pinot.thirdeye.cube.summary.Summary;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;

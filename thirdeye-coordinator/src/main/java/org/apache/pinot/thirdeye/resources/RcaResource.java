@@ -41,7 +41,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.RootCauseEntity;
-import org.apache.pinot.thirdeye.cube.summary.DataCubeSummaryApi;
+import org.apache.pinot.thirdeye.api.DataCubeSummaryApi;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;

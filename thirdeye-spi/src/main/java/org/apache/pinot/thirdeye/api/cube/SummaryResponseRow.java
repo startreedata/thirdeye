@@ -17,11 +17,16 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.cube.summary;
+package org.apache.pinot.thirdeye.api.cube;
 
-public class SummaryGainerLoserResponseRow extends BaseResponseRow {
+import java.util.List;
 
-  public String dimensionName;
-  public String dimensionValue;
-  public String cost;
+/**
+ * A POJO for front-end representation.
+ */
+public class SummaryResponseRow extends BaseResponseRow {
+
+  public List<String> names;
+  public String otherDimensionValues;
+  public double cost;
 }

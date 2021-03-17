@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -488,7 +487,7 @@ public class RootCauseMetricResource {
 
       // cell
       if (!output.containsKey(dimName)) {
-        output.put(dimName, new HashMap<String, Double>());
+        output.put(dimName, new HashMap<>());
       }
       output.get(dimName).put(dimValue, value);
 
@@ -520,15 +519,12 @@ public class RootCauseMetricResource {
     Map<MetricSlice, Future<Double>> futures = new HashMap<>();
 
     for (final MetricSlice slice : slices) {
-      futures.put(slice, this.executor.submit(new Callable<Double>() {
-        @Override
-        public Double call() throws Exception {
-          DataFrame df = RootCauseMetricResource.this.aggregationLoader.loadAggregate(slice, Collections.<String>emptyList(), -1);
-          if (df.isEmpty()) {
-            return Double.NaN;
-          }
-          return df.getDouble(COL_VALUE, 0);
+      futures.put(slice, this.executor.submit(() -> {
+        DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
+        if (df.isEmpty()) {
+          return Double.NaN;
         }
+        return df.getDouble(COL_VALUE, 0);
       }));
     }
 
@@ -558,12 +554,7 @@ public class RootCauseMetricResource {
     Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
 
     for (final MetricSlice slice : slices) {
-      futures.put(slice, this.executor.submit(new Callable<DataFrame>() {
-        @Override
-        public DataFrame call() throws Exception {
-          return RootCauseMetricResource.this.aggregationLoader.loadBreakdown(slice, limit);
-        }
-      }));
+      futures.put(slice, this.executor.submit(() -> aggregationLoader.loadBreakdown(slice, limit)));
     }
 
     Map<MetricSlice, DataFrame> output = new HashMap<>();
@@ -591,12 +582,7 @@ public class RootCauseMetricResource {
     Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
 
     for (final MetricSlice slice : slices) {
-      futures.put(slice, this.executor.submit(new Callable<DataFrame>() {
-        @Override
-        public DataFrame call() throws Exception {
-          return RootCauseMetricResource.this.timeSeriesLoader.load(slice);
-        }
-      }));
+      futures.put(slice, this.executor.submit(() -> timeSeriesLoader.load(slice)));
     }
 
     Map<MetricSlice, DataFrame> output = new HashMap<>();

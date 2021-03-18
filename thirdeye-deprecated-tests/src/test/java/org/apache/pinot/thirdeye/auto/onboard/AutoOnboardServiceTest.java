@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
 
 import java.net.URL;
 import java.time.Duration;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.testng.annotations.Test;

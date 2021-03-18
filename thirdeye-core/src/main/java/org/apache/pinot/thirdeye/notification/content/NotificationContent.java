@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.notification.content;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 

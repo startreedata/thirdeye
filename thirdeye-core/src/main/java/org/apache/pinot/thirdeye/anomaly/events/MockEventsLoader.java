@@ -35,7 +35,7 @@ import org.apache.commons.math3.distribution.LogNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.apache.commons.math3.random.Well19937c;
-import org.apache.pinot.thirdeye.anomaly.MockEventsLoaderConfiguration;
+import org.apache.pinot.thirdeye.config.MockEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.slf4j.Logger;

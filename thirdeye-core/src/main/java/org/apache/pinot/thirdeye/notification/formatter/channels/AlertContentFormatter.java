@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.notification.formatter.channels;
 
 import java.util.Properties;
 import org.apache.pinot.thirdeye.Constants.SubjectType;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 

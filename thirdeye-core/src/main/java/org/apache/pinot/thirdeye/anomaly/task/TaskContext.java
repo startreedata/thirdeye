@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.anomaly.task;
 
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 
 public class TaskContext {
 

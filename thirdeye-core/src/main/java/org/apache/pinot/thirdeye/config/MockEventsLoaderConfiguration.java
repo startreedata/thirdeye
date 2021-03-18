@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.anomaly;
+package org.apache.pinot.thirdeye.config;
 
 import java.util.Collections;
 import java.util.List;

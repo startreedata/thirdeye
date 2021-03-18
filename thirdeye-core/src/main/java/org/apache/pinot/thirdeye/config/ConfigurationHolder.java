@@ -6,7 +6,6 @@ import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.util.Map;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 
 public class ConfigurationHolder {

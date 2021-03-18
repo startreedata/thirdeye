@@ -19,11 +19,12 @@
 
 package org.apache.pinot.thirdeye.anomaly.events;
 
+import static java.util.Collections.singleton;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -36,7 +37,6 @@ import com.ibm.icu.util.TimeZone;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +46,6 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.config.ConfigurationHolder;
 import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
@@ -61,14 +60,6 @@ import org.slf4j.LoggerFactory;
 public class HolidayEventsLoader implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(HolidayEventsLoader.class);
-  /**
-   * Global instance of the JSON factory.
-   */
-  private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  /**
-   * Global instance of the scopes.
-   */
-  private static final Set<String> SCOPES = Collections.singleton(CalendarScopes.CALENDAR_READONLY);
   private static final String NO_COUNTRY_CODE = "no country code";
   /**
    * Override the time zone code for a country
@@ -87,37 +78,22 @@ public class HolidayEventsLoader implements Runnable {
     }
   }
 
-  /**
-   * List of google holiday calendar ids
-   */
-  private final List<String> calendarList;
+  private final HolidayEventsLoaderConfiguration config;
   /**
    * Calendar Api private key path
    */
   private final String keyPath;
   private final ScheduledExecutorService scheduledExecutorService;
-  private final TimeGranularity runFrequency;
-  /**
-   * Time range to calculate the upper bound for an holiday's start time. In milliseconds
-   */
-  private final long holidayLoadRange;
   private final EventManager eventManager;
 
-  /**
-   * Instantiates a new Holiday events loader.
-   *
-   * @param eventManager the event dao
-   */
   @Inject
   public HolidayEventsLoader(
       final ConfigurationHolder configurationHolder,
       final EventManager eventManager,
       final HolidayEventsLoaderConfiguration config) {
-    this.holidayLoadRange = config.getHolidayLoadRange();
-    this.calendarList = config.getCalendars();
+    this.config = config;
     this.keyPath = getCalendarApiKeyPath(configurationHolder, config);
     this.eventManager = eventManager;
-    this.runFrequency = new TimeGranularity(config.getRunFrequency(), TimeUnit.DAYS);
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
   }
 
@@ -126,17 +102,11 @@ public class HolidayEventsLoader implements Runnable {
     return configurationHolder.getPath() + File.separator + config.getGoogleJsonKey();
   }
 
-  /**
-   * Start.
-   */
   public void start() {
     scheduledExecutorService
-        .scheduleAtFixedRate(this, 0, runFrequency.getSize(), runFrequency.getUnit());
+        .scheduleAtFixedRate(this, 0, config.getRunFrequency(), TimeUnit.DAYS);
   }
 
-  /**
-   * Shutdown.
-   */
   public void shutdown() {
     scheduledExecutorService.shutdown();
   }
@@ -146,14 +116,14 @@ public class HolidayEventsLoader implements Runnable {
    */
   public void run() {
     long start = System.currentTimeMillis();
-    long end = start + holidayLoadRange;
+    long end = start + config.getHolidayLoadRange();
 
     loadHolidays(start, end);
   }
 
   public void loadHolidays(long start, long end) {
     LOG.info("Loading holidays between {} and {}", start, end);
-    List<Event> newHolidays = null;
+    List<Event> newHolidays;
     try {
       newHolidays = getAllHolidays(start, end);
     } catch (Exception e) {
@@ -187,7 +157,7 @@ public class HolidayEventsLoader implements Runnable {
               getUtcTimeStamp(holiday.getStart().getDate().getValue(), timeZone),
               getUtcTimeStamp(holiday.getEnd().getDate().getValue(), timeZone));
       if (!newHolidayEventToCountryCodes.containsKey(holidayEvent)) {
-        newHolidayEventToCountryCodes.put(holidayEvent, new HashSet<String>());
+        newHolidayEventToCountryCodes.put(holidayEvent, new HashSet<>());
       }
       if (!countryCode.equals(NO_COUNTRY_CODE)) {
         newHolidayEventToCountryCodes.get(holidayEvent).add(countryCode);
@@ -238,7 +208,7 @@ public class HolidayEventsLoader implements Runnable {
       eventDTO.setTargetDimensionMap(targetDimensionMap);
 
       if (!holidayNameToHolidayEvent.containsKey(holidayName)) {
-        holidayNameToHolidayEvent.put(holidayName, new ArrayList<EventDTO>());
+        holidayNameToHolidayEvent.put(holidayName, new ArrayList<>());
       }
       holidayNameToHolidayEvent.get(holidayName).add(eventDTO);
     }
@@ -297,7 +267,7 @@ public class HolidayEventsLoader implements Runnable {
    */
   private List<Event> getAllHolidays(long start, long end) throws Exception {
     List<Event> events = new ArrayList<>();
-    for (String calendar : calendarList) {
+    for (String calendar : config.getCalendars()) {
       try {
         events.addAll(this.getCalendarEvents(calendar, start, end));
       } catch (GoogleJsonResponseException e) {
@@ -310,10 +280,12 @@ public class HolidayEventsLoader implements Runnable {
   private List<Event> getCalendarEvents(String Calendar_id, long start, long end) throws Exception {
     final GoogleCredential credential = GoogleCredential
         .fromStream(new FileInputStream(keyPath))
-        .createScoped(SCOPES);
+        .createScoped(singleton(CalendarScopes.CALENDAR_READONLY));
 
-    final Calendar calendar = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-        .setApplicationName("thirdeye").build();
+    final Calendar calendar = new Calendar
+        .Builder(HTTP_TRANSPORT, JacksonFactory.getDefaultInstance(), credential)
+        .setApplicationName("thirdeye")
+        .build();
 
     return calendar.events()
         .list(Calendar_id)

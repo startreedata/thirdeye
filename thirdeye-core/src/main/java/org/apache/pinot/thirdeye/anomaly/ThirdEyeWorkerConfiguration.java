@@ -31,7 +31,6 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
 
   private boolean alert = false;
   private boolean autoload = false;
-  private boolean holidayEventsLoader = false;
   private boolean mockEventsLoader = false;
   private boolean monitor = false;
   private boolean pinotProxy = false;
@@ -67,15 +66,6 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
 
   public ThirdEyeWorkerConfiguration setAutoload(final boolean autoload) {
     this.autoload = autoload;
-    return this;
-  }
-
-  public boolean isHolidayEventsLoader() {
-    return holidayEventsLoader;
-  }
-
-  public ThirdEyeWorkerConfiguration setHolidayEventsLoader(final boolean holidayEventsLoader) {
-    this.holidayEventsLoader = holidayEventsLoader;
     return this;
   }
 

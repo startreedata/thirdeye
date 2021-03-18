@@ -14,6 +14,7 @@ public enum ThirdEyeStatus {
   ERR_OBJECT_UNEXPECTED("Object should be null/empty! %s"),
   ERR_OBJECT_DOES_NOT_EXIST("Object does not exist! %s"),
   ERR_OPERATION_UNSUPPORTED("Operation is not supported!"),
+  ERR_CONFIG("Configuration Error! %s"),
   ERR_TIMEOUT("Operation timed out!"),
   ERR_UNKNOWN("Untagged Error! %s");
 

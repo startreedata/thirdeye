@@ -22,7 +22,6 @@ autoload: true
 autoOnboardConfiguration:
   frequency: PT5m # 5 min
 
-holidayEventsLoader: false
 mockEventsLoader: true
 monitor: false
 pinotProxy: false

@@ -10,12 +10,14 @@ import org.apache.pinot.thirdeye.anomaly.events.HolidayEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorJobScheduler;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardService;
+import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.model.download.ModelDownloaderManager;
 
 @Singleton
 public class SchedulerService implements Managed {
 
   private final ThirdEyeWorkerConfiguration config;
+  private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
   private final MonitorJobScheduler monitorJobScheduler;
   private final AutoOnboardService autoOnboardService;
   private final HolidayEventsLoader holidayEventsLoader;
@@ -28,6 +30,7 @@ public class SchedulerService implements Managed {
 
   @Inject
   public SchedulerService(final ThirdEyeWorkerConfiguration config,
+      final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
       final MonitorJobScheduler monitorJobScheduler,
       final AutoOnboardService autoOnboardService,
       final HolidayEventsLoader holidayEventsLoader,
@@ -38,6 +41,7 @@ public class SchedulerService implements Managed {
       final SubscriptionCronScheduler subscriptionScheduler,
       final MockEventsLoader mockEventsLoader) {
     this.config = config;
+    this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.monitorJobScheduler = monitorJobScheduler;
     this.autoOnboardService = autoOnboardService;
     this.holidayEventsLoader = holidayEventsLoader;
@@ -59,7 +63,7 @@ public class SchedulerService implements Managed {
       autoOnboardService.start();
     }
 
-    if (config.isHolidayEventsLoader()) {
+    if (holidayEventsLoaderConfiguration.isEnabled()) {
       holidayEventsLoader.start();
     }
     if (config.isMockEventsLoader()) {
@@ -87,7 +91,7 @@ public class SchedulerService implements Managed {
     if (monitorJobScheduler != null) {
       monitorJobScheduler.shutdown();
     }
-    if (holidayEventsLoader != null) {
+    if (holidayEventsLoader != null && holidayEventsLoaderConfiguration.isEnabled()) {
       holidayEventsLoader.shutdown();
     }
     if (autoOnboardService != null) {

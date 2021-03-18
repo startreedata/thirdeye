@@ -13,6 +13,7 @@ public class ConfigurationHolder {
 
   private static final Map<Class, String> CONFIG_CLASS_MAP = ImmutableMap.<Class, String>builder()
       .put(ThirdEyeWorkerConfiguration.class, "detector.yml")
+      .put(ThirdEyeSchedulerConfiguration.class, "scheduler.yaml")
       .put(RCAConfiguration.class, "rca.yml")
       .build();
 

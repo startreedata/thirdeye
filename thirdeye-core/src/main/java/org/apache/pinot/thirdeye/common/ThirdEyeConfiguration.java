@@ -116,10 +116,6 @@ public class ThirdEyeConfiguration extends Configuration {
     return getRootDir() + "/detector-config/anomaly-functions/alertFilter.properties";
   }
 
-  public String getCalendarApiKeyPath() {
-    return getRootDir() + "/holiday-loader-key.json";
-  }
-
   public String getPhantomJsPath() {
     return phantomJsPath;
   }

@@ -10,6 +10,8 @@ import org.apache.pinot.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import org.apache.pinot.thirdeye.auth.ThirdEyeCredentials;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.config.ConfigurationHolder;
+import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeSchedulerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
@@ -50,8 +52,21 @@ public class ThirdEyeCoreModule extends AbstractModule {
 
   @Singleton
   @Provides
+  public HolidayEventsLoaderConfiguration getHolidayEventsLoaderConfiguration(
+      ThirdEyeSchedulerConfiguration configuration) {
+    return configuration.getHoliday();
+  }
+
+  @Singleton
+  @Provides
   public RCAConfiguration getRCAConfiguration() {
     return configurationHolder.createConfigurationInstance(RCAConfiguration.class);
+  }
+
+  @Singleton
+  @Provides
+  public ThirdEyeSchedulerConfiguration getThirdEyeSchedulerConfiguration() {
+    return configurationHolder.createConfigurationInstance(ThirdEyeSchedulerConfiguration.class);
   }
 
   @Singleton

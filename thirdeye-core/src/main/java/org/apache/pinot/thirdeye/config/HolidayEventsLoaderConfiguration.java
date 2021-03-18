@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.anomaly;
+package org.apache.pinot.thirdeye.config;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +26,9 @@ import java.util.List;
  * The type Holiday events loader configuration.
  */
 public class HolidayEventsLoaderConfiguration {
+
+  private boolean enabled = false;
+  private String googleJsonKey = "holiday-loader-key.json";
 
   /**
    * Specify the time range used to calculate the upper bound for an holiday's start time. In
@@ -43,57 +46,48 @@ public class HolidayEventsLoaderConfiguration {
    */
   private int runFrequency;
 
-  /**
-   * Gets run frequency.
-   *
-   * @return the run frequency
-   */
-  public int getRunFrequency() {
-    return runFrequency;
+  public boolean isEnabled() {
+    return enabled;
   }
 
-  /**
-   * Sets run frequency.
-   *
-   * @param runFrequency the run frequency
-   */
-  public void setRunFrequency(int runFrequency) {
-    this.runFrequency = runFrequency;
+  public HolidayEventsLoaderConfiguration setEnabled(final boolean enabled) {
+    this.enabled = enabled;
+    return this;
   }
 
-  /**
-   * Gets holiday load range.
-   *
-   * @return the holiday load range
-   */
+  public String getGoogleJsonKey() {
+    return googleJsonKey;
+  }
+
+  public HolidayEventsLoaderConfiguration setGoogleJsonKey(final String googleJsonKey) {
+    this.googleJsonKey = googleJsonKey;
+    return this;
+  }
+
   public long getHolidayLoadRange() {
     return holidayLoadRange;
   }
 
-  /**
-   * Sets holiday load range.
-   *
-   * @param holidayLoadRange the holiday load range
-   */
-  public void setHolidayLoadRange(long holidayLoadRange) {
+  public HolidayEventsLoaderConfiguration setHolidayLoadRange(final long holidayLoadRange) {
     this.holidayLoadRange = holidayLoadRange;
+    return this;
   }
 
-  /**
-   * Gets calendars.
-   *
-   * @return the calendars
-   */
   public List<String> getCalendars() {
     return calendars;
   }
 
-  /**
-   * Sets calendars.
-   *
-   * @param calendars the calendars
-   */
-  public void setCalendars(List<String> calendars) {
+  public HolidayEventsLoaderConfiguration setCalendars(final List<String> calendars) {
     this.calendars = calendars;
+    return this;
+  }
+
+  public int getRunFrequency() {
+    return runFrequency;
+  }
+
+  public HolidayEventsLoaderConfiguration setRunFrequency(final int runFrequency) {
+    this.runFrequency = runFrequency;
+    return this;
   }
 }

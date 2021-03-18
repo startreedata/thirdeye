@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.ibm.icu.util.TimeZone;
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,9 +46,9 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.anomaly.HolidayEventsLoaderConfiguration;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.config.ConfigurationHolder;
+import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.slf4j.Logger;
@@ -109,17 +110,20 @@ public class HolidayEventsLoader implements Runnable {
    */
   @Inject
   public HolidayEventsLoader(
-      final ThirdEyeWorkerConfiguration config,
-      final EventManager eventManager) {
-    final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration = config
-        .getHolidayEventsLoaderConfiguration();
-    this.holidayLoadRange = holidayEventsLoaderConfiguration.getHolidayLoadRange();
-    this.calendarList = holidayEventsLoaderConfiguration.getCalendars();
-    this.keyPath = config.getCalendarApiKeyPath();
+      final ConfigurationHolder configurationHolder,
+      final EventManager eventManager,
+      final HolidayEventsLoaderConfiguration config) {
+    this.holidayLoadRange = config.getHolidayLoadRange();
+    this.calendarList = config.getCalendars();
+    this.keyPath = getCalendarApiKeyPath(configurationHolder, config);
     this.eventManager = eventManager;
-    this.runFrequency = new TimeGranularity(holidayEventsLoaderConfiguration.getRunFrequency(),
-        TimeUnit.DAYS);
+    this.runFrequency = new TimeGranularity(config.getRunFrequency(), TimeUnit.DAYS);
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+  }
+
+  private static String getCalendarApiKeyPath(final ConfigurationHolder configurationHolder,
+      final HolidayEventsLoaderConfiguration config) {
+    return configurationHolder.getPath() + File.separator + config.getGoogleJsonKey();
   }
 
   /**
@@ -304,12 +308,14 @@ public class HolidayEventsLoader implements Runnable {
   }
 
   private List<Event> getCalendarEvents(String Calendar_id, long start, long end) throws Exception {
-    GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(keyPath))
+    final GoogleCredential credential = GoogleCredential
+        .fromStream(new FileInputStream(keyPath))
         .createScoped(SCOPES);
-    Calendar service =
-        new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-            .setApplicationName("thirdeye").build();
-    return service.events()
+
+    final Calendar calendar = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+        .setApplicationName("thirdeye").build();
+
+    return calendar.events()
         .list(Calendar_id)
         .setTimeMin(new DateTime(start))
         .setTimeMax(new DateTime(end))

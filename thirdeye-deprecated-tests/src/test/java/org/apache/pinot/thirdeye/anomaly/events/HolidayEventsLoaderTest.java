@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.anomaly.events;
 
+import static org.mockito.Mockito.mock;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,8 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.anomaly.HolidayEventsLoaderConfiguration;
-import org.apache.pinot.thirdeye.anomaly.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ConfigurationHolder;
+import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -60,9 +62,9 @@ public class HolidayEventsLoaderTest {
     anotherEventDTO.setId(1L);
     eventsDAO = new MockEventsManager(new HashSet<>(Arrays.asList(eventDTO, anotherEventDTO)),
         null);
-    ThirdEyeWorkerConfiguration config = new ThirdEyeWorkerConfiguration()
-        .setHolidayEventsLoaderConfiguration(holidayEventsLoaderConfiguration);
-    holidayEventsLoader = new HolidayEventsLoader(config, eventsDAO);
+    holidayEventsLoader = new HolidayEventsLoader(mock(ConfigurationHolder.class),
+        eventsDAO,
+        holidayEventsLoaderConfiguration);
   }
 
   /**
@@ -124,17 +126,15 @@ public class HolidayEventsLoaderTest {
 
     Assert.assertEquals(festivalEvents.size(), 2);
 
-    Collections.sort(festivalEvents, new Comparator<EventDTO>() {
-      @Override
-      public int compare(EventDTO o1, EventDTO o2) {
-        return o1.getTargetDimensionMap().get("countryCode").size() - o2.getTargetDimensionMap()
-            .get("countryCode").size();
-      }
-    });
+    festivalEvents.sort(Comparator.comparingInt(o -> o.getTargetDimensionMap()
+        .get("countryCode")
+        .size()));
 
-    Assert.assertTrue(festivalEvents.get(0).getTargetDimensionMap().get("countryCode")
-        .equals(Collections.singletonList("uk"))
-        && new HashSet<>(festivalEvents.get(1).getTargetDimensionMap().get("countryCode")).equals(
-        new HashSet<>(Arrays.asList("us", "cn"))));
+    Assert.assertTrue(festivalEvents.get(0)
+        .getTargetDimensionMap()
+        .get("countryCode")
+        .equals(Collections.singletonList("uk")) && new HashSet<>(festivalEvents.get(1)
+        .getTargetDimensionMap()
+        .get("countryCode")).equals(new HashSet<>(Arrays.asList("us", "cn"))));
   }
 }

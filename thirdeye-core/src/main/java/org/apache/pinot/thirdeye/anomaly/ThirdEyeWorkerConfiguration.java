@@ -43,7 +43,6 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
   private boolean dataAvailabilityTaskScheduler = false;
 
   private long id;
-  private HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration = new HolidayEventsLoaderConfiguration();
   private MockEventsLoaderConfiguration mockEventsLoaderConfiguration = new MockEventsLoaderConfiguration();
   private MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
   private AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
@@ -169,16 +168,6 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
 
   public ThirdEyeWorkerConfiguration setId(final long id) {
     this.id = id;
-    return this;
-  }
-
-  public HolidayEventsLoaderConfiguration getHolidayEventsLoaderConfiguration() {
-    return holidayEventsLoaderConfiguration;
-  }
-
-  public ThirdEyeWorkerConfiguration setHolidayEventsLoaderConfiguration(
-      final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration) {
-    this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     return this;
   }
 

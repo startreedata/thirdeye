@@ -17,6 +17,7 @@
 package org.apache.pinot.thirdeye.common;
 
 import java.net.URL;
+import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

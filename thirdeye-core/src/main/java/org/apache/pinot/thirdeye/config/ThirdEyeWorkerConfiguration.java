@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.config;
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
-import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 
 public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {

@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.common;
 
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
 
 public class ThirdEyeSwaggerBundle extends SwaggerBundle<ThirdEyeConfiguration> {
 

@@ -20,7 +20,7 @@ import com.google.inject.Injector;
 import java.net.URL;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;

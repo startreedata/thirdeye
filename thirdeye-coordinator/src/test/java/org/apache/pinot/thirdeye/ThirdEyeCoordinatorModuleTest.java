@@ -6,7 +6,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
-import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.resources.RootResource;

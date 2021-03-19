@@ -68,7 +68,7 @@ public class CouchbaseCacheDAO implements CacheDAO {
    * Initialize connection to Couchbase and open bucket where data is stored.
    */
   private void createDataStoreConnection() {
-    CacheDataSource dataSource = CacheConfig.getInstance().getCentralizedCacheSettings()
+    CacheDataSource dataSource = CacheConfig.getInstance().getCentralizedCacheConfig()
         .getDataSourceConfig();
     Map<String, Object> config = dataSource.getConfig();
     List<String> hosts = ConfigUtils.getList(config.get(HOSTS));
@@ -184,13 +184,13 @@ public class CouchbaseCacheDAO implements CacheDAO {
   public void insertTimeSeriesDataPoint(TimeSeriesDataPoint point) {
 
     JsonDocument doc = bucket.getAndTouch(point.getDocumentKey(),
-        CacheConfig.getInstance().getCentralizedCacheSettings().getTTL());
+        CacheConfig.getInstance().getCentralizedCacheConfig().getTTL());
     ThirdeyeMetricsUtil.couchbaseCallCounter.inc();
 
     if (doc == null) {
       JsonObject documentBody = CacheUtils.buildDocumentStructure(point);
       doc = JsonDocument.create(point.getDocumentKey(),
-          CacheConfig.getInstance().getCentralizedCacheSettings().getTTL(), documentBody);
+          CacheConfig.getInstance().getCentralizedCacheConfig().getTTL(), documentBody);
     } else {
       JsonObject dimensions = doc.content();
       if (dimensions.containsKey(point.getMetricUrnHash())) {

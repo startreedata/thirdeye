@@ -15,6 +15,7 @@ import javax.servlet.FilterRegistration;
 import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.resources.RootResource;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
@@ -52,6 +53,9 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,
         dataSource));
+
+    // TODO remove hack and CacheConfig singleton
+    CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));
 
     // Initialize ThirdEyeCacheRegistry
     injector

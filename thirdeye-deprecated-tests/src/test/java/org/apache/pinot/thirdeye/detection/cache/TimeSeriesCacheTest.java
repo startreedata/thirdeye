@@ -55,25 +55,11 @@ import org.testng.annotations.Test;
 
 public class TimeSeriesCacheTest {
 
-  private MetricConfigManager metricDAO;
-  private DatasetConfigManager datasetDAO;
-  private DataSourceCache dataSourceCache;
-  private CouchbaseCacheDAO cacheDAO;
-  private DefaultTimeSeriesCache cache;
-
-  private final boolean centralizedCacheToggle = CacheConfig.getInstance().useCentralizedCache();
-  private final CacheConfig config = new CacheConfig();
-
-  ExecutorService executor;
-
-  private final List<TimeSeriesDataPoint> pretendCacheStore = new ArrayList<>();
-
   private static final String COLLECTION = "collection";
   private static final MetricDataset METRIC = new MetricDataset("metric", COLLECTION);
   private static final MetricFunction
       metricFunction = new MetricFunction(MetricAggFunction.AVG, METRIC.getMetricName(), 1L,
       COLLECTION, null, null);
-
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
       .setMetricFunctions(Collections.singletonList(metricFunction))
       .setStartTimeInclusive(0)
@@ -81,13 +67,20 @@ public class TimeSeriesCacheTest {
       .setGroupByTimeGranularity(TimeGranularity.fromString("1_SECONDS"))
       .setLimit(12345)
       .build("ref");
-
   private static final TimeSpec
       timeSpec = new TimeSpec(METRIC.getMetricName(), TimeGranularity.fromString("1_SECONDS"),
       TimeSpec.SINCE_EPOCH_FORMAT);
-
   private static final String metricUrn = MetricEntity
       .fromMetric(request.getFilterSet().asMap(), metricFunction.getMetricId()).getUrn();
+
+  private final CacheConfig config = CacheConfig.getInstance();
+  private final List<TimeSeriesDataPoint> pretendCacheStore = new ArrayList<>();
+  private ExecutorService executor;
+  private MetricConfigManager metricDAO;
+  private DatasetConfigManager datasetDAO;
+  private DataSourceCache dataSourceCache;
+  private CouchbaseCacheDAO cacheDAO;
+  private DefaultTimeSeriesCache cache;
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
@@ -106,15 +99,22 @@ public class TimeSeriesCacheTest {
 
     this.executor = Executors.newSingleThreadExecutor();
 
-    this.cache = new DefaultTimeSeriesCache(metricDAO, datasetDAO, dataSourceCache, cacheDAO,
-        executor, TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
-    TestDbEnv.getInstance(ThirdEyeCacheRegistry.class)
-        .registerTimeSeriesCache(this.cache);
+    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = new TestDbEnv()
+        .getInjector()
+        .getInstance(ThirdEyeCacheRegistry.class);
+
+    this.cache = new DefaultTimeSeriesCache(metricDAO,
+        datasetDAO,
+        dataSourceCache,
+        cacheDAO,
+        executor,
+        thirdEyeCacheRegistry);
+    thirdEyeCacheRegistry.registerTimeSeriesCache(this.cache);
   }
 
   @AfterMethod
   public void afterMethod() {
-    config.setUseCentralizedCache(centralizedCacheToggle);
+    config.setUseCentralizedCache(config.useCentralizedCache());
     pretendCacheStore.clear();
     Mockito.reset(this.cacheDAO, this.datasetDAO, this.metricDAO);
   }

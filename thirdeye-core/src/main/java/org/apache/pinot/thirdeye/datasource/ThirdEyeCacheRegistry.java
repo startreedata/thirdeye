@@ -82,9 +82,9 @@ public class ThirdEyeCacheRegistry {
     final CentralizedCacheConfig cfg = new CentralizedCacheConfig();
     cfg.setMaxParallelInserts(1);
 
-    CacheConfig.getInstance().setUseCentralizedCache(false);
-    CacheConfig.getInstance().setUseInMemoryCache(false);
-    CacheConfig.getInstance().setCentralizedCacheSettings(cfg);
+    cacheConfig.setUseCentralizedCache(false);
+    cacheConfig.setUseInMemoryCache(false);
+    cacheConfig.setCentralizedCacheConfig(cfg);
   }
 
   /**
@@ -126,7 +126,7 @@ public class ThirdEyeCacheRegistry {
 
       if (getTimeSeriesCache() == null) {
         TimeSeriesCache timeSeriesCache = buildTimeSeriesCache(cacheDAO,
-            cacheConfig.getCentralizedCacheSettings().getMaxParallelInserts());
+            cacheConfig.getCentralizedCacheConfig().getMaxParallelInserts());
 
         registerTimeSeriesCache(timeSeriesCache);
       }

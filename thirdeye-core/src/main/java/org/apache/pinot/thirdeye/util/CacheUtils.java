@@ -47,7 +47,7 @@ public class CacheUtils {
   public static CRC32 hashGenerator = new CRC32();
 
   public static String getBucketName() {
-    Map<String, Object> config = CacheConfig.getInstance().getCentralizedCacheSettings()
+    Map<String, Object> config = CacheConfig.getInstance().getCentralizedCacheConfig()
         .getDataSourceConfig().getConfig();
     return MapUtils.getString(config, BUCKET_NAME);
   }

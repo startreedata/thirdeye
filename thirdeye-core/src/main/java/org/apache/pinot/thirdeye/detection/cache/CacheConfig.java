@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.cache;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Config file for cache-related stuff.
  * Mapped from cache-config.yml
@@ -27,23 +29,24 @@ public class CacheConfig {
 
   public static CacheConfig INSTANCE = new CacheConfig();
 
-  /**
-   * flags for which cache(s) to use
-   */
-  private static boolean useInMemoryCache;
-  private static boolean useCentralizedCache;
+  @JsonProperty("centralizedCacheSettings")
+  private CentralizedCacheConfig centralizedCacheConfig;
+
+  private boolean useInMemoryCache;
+  private boolean useCentralizedCache;
 
   /**
-   * settings for centralized cache.
+   * Deprecated in favor of using an injected instance. This will be removed.
+   *
+   * @return singleton instance of {@link CacheConfig}
    */
-  private static CentralizedCacheConfig centralizedCacheSettings;
-
-  // left blank
-  public CacheConfig() {
-  }
-
+  @Deprecated
   public static CacheConfig getInstance() {
     return INSTANCE;
+  }
+
+  public static void setINSTANCE(final CacheConfig INSTANCE) {
+    CacheConfig.INSTANCE = INSTANCE;
   }
 
   public boolean useCentralizedCache() {
@@ -54,19 +57,22 @@ public class CacheConfig {
     return useInMemoryCache;
   }
 
-  public CentralizedCacheConfig getCentralizedCacheSettings() {
-    return centralizedCacheSettings;
+  public CentralizedCacheConfig getCentralizedCacheConfig() {
+    return centralizedCacheConfig;
   }
 
-  public void setUseCentralizedCache(boolean toggle) {
-    useCentralizedCache = toggle;
+  public CacheConfig setCentralizedCacheConfig(CentralizedCacheConfig centralizedCacheConfig) {
+    this.centralizedCacheConfig = centralizedCacheConfig;
+    return this;
   }
 
-  public void setUseInMemoryCache(boolean toggle) {
-    useInMemoryCache = toggle;
+  public CacheConfig setUseCentralizedCache(boolean useCentralizedCache) {
+    this.useCentralizedCache = useCentralizedCache;
+    return this;
   }
 
-  public void setCentralizedCacheSettings(CentralizedCacheConfig centralizedCacheConfig) {
-    centralizedCacheSettings = centralizedCacheConfig;
+  public CacheConfig setUseInMemoryCache(boolean useInMemoryCache) {
+    this.useInMemoryCache = useInMemoryCache;
+    return this;
   }
 }

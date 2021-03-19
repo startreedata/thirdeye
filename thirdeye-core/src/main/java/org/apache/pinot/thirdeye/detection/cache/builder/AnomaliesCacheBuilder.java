@@ -62,11 +62,14 @@ public class AnomaliesCacheBuilder {
   private final LoadingCache<AnomalySlice, Collection<MergedAnomalyResultDTO>> cache;
   private final ExecutorService executor = Executors.newCachedThreadPool();
   private final MergedAnomalyResultManager anomalyDAO;
+  private final CacheConfig cacheConfig;
 
   @Inject
-  public AnomaliesCacheBuilder(final MergedAnomalyResultManager anomalyDAO) {
+  public AnomaliesCacheBuilder(final MergedAnomalyResultManager anomalyDAO,
+      final CacheConfig cacheConfig) {
     this.anomalyDAO = anomalyDAO;
     this.cache = initCache();
+    this.cacheConfig = cacheConfig;
   }
 
   private LoadingCache<AnomalySlice, Collection<MergedAnomalyResultDTO>> initCache() {
@@ -90,7 +93,7 @@ public class AnomaliesCacheBuilder {
 
   public Collection<MergedAnomalyResultDTO> fetchSlice(AnomalySlice slice)
       throws ExecutionException {
-    if (CacheConfig.getInstance().useInMemoryCache()) {
+    if (cacheConfig.useInMemoryCache()) {
       return this.cache.get(slice);
     } else {
       return loadAnomalies(Collections.singleton(slice)).get(slice);
@@ -104,7 +107,7 @@ public class AnomaliesCacheBuilder {
       long ts = System.currentTimeMillis();
 
       // if the anomalies are already in cache, return directly
-      if (CacheConfig.getInstance().useInMemoryCache()) {
+      if (cacheConfig.useInMemoryCache()) {
         for (AnomalySlice slice : slices) {
           for (Map.Entry<AnomalySlice, Collection<MergedAnomalyResultDTO>> entry : this.cache
               .asMap().entrySet()) {

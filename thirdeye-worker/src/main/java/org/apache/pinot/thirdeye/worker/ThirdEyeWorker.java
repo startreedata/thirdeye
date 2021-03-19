@@ -45,6 +45,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SchedulerService;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
@@ -96,6 +97,9 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
 
     injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource, config));
+
+    // TODO remove hack and CacheConfig singleton
+    CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));
 
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches();
     schedulerService = injector.getInstance(SchedulerService.class);

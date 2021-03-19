@@ -58,6 +58,7 @@ import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
+import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
@@ -206,7 +207,7 @@ public class DataProviderTest {
         evaluationDAO,
         aggregationLoader,
         timeSeriesCacheBuilder,
-        new AnomaliesCacheBuilder(anomalyDAO));
+        new AnomaliesCacheBuilder(anomalyDAO, CacheConfig.getInstance()));
   }
 
   @AfterClass(alwaysRun = true)

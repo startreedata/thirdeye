@@ -27,7 +27,7 @@ import java.lang.reflect.Constructor;
 public class CacheConfigLoader {
 
   public static CacheDAO loadCacheDAO(CacheConfig config) throws Exception {
-    String className = config.getCentralizedCacheSettings().getDataSourceConfig().getClassName();
+    String className = config.getCentralizedCacheConfig().getDataSourceConfig().getClassName();
     Constructor<?> constructor = Class.forName(className).getConstructor();
     return (CacheDAO) constructor.newInstance();
   }

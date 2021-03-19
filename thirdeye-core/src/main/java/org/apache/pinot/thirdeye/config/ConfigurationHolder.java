@@ -31,6 +31,14 @@ public class ConfigurationHolder {
     checkArgument(filename != null, String.format("Unknown config class: %s", clazz));
     final File file = new File(String.format("%s%s%s", getPath(), File.separator, filename));
 
-    return readConfig(file, clazz);
+    if (file.exists()) {
+      return readConfig(file, clazz);
+    } else {
+      try {
+        return clazz.newInstance();
+      } catch (InstantiationException | IllegalAccessException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }

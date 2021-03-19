@@ -2,8 +2,10 @@ package org.apache.pinot.thirdeye.util;
 
 import static java.util.Objects.requireNonNull;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -13,7 +15,9 @@ import org.slf4j.LoggerFactory;
 public class ConfigurationLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(ConfigurationLoader.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory())
+      .registerModule(new JavaTimeModule())
+      .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
   public static <T> T readConfig(URL url, Class<T> clazz) {
     return readConfig(url, clazz, () -> OBJECT_MAPPER.readValue(url, clazz));

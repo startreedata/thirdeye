@@ -47,6 +47,7 @@ public class AutoOnboardService implements Runnable {
   private final ScheduledExecutorService scheduledExecutorService;
 
   private final List<AutoOnboard> autoOnboardServices = new ArrayList<>();
+  private final AutoOnboardConfiguration autoOnboardConfiguration;
   private final ThirdEyeWorkerConfiguration config;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
@@ -57,9 +58,11 @@ public class AutoOnboardService implements Runnable {
    */
   @Inject
   public AutoOnboardService(
-      ThirdEyeWorkerConfiguration config,
+      final AutoOnboardConfiguration autoOnboardConfiguration,
+      final ThirdEyeWorkerConfiguration config,
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager) {
+    this.autoOnboardConfiguration = autoOnboardConfiguration;
     this.config = config;
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
@@ -69,7 +72,7 @@ public class AutoOnboardService implements Runnable {
   public void start() {
     scheduledExecutorService
         .scheduleAtFixedRate(this, 0,
-            config.getAutoOnboardConfiguration().getFrequency().getSeconds(),
+            autoOnboardConfiguration.getFrequency().getSeconds(),
             TimeUnit.SECONDS);
   }
 

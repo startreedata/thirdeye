@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardService;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeSchedulerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +52,8 @@ public class ModelDownloaderManager {
   private final ScheduledExecutorService scheduledExecutorService;
 
   @Inject
-  public ModelDownloaderManager(ThirdEyeWorkerConfiguration configuration) {
-    this.configs = configuration.getModelDownloaderConfig();
+  public ModelDownloaderManager(ThirdEyeSchedulerConfiguration configuration) {
+    this.configs = configuration.getModelDownloaderConfigs();
     this.modelDownloaders = new HashMap<>();
     this.scheduledExecutorService = Executors.newScheduledThreadPool(5);
   }

@@ -6,18 +6,19 @@ import io.dropwizard.lifecycle.Managed;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityEventListenerDriver;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.DataAvailabilityTaskScheduler;
 import org.apache.pinot.thirdeye.anomaly.events.HolidayEventsLoader;
-import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorJobScheduler;
+import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardConfiguration;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardService;
 import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeSchedulerConfiguration;
 import org.apache.pinot.thirdeye.model.download.ModelDownloaderManager;
 
 @Singleton
 public class SchedulerService implements Managed {
 
-  private final ThirdEyeWorkerConfiguration config;
+  private final ThirdEyeSchedulerConfiguration config;
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
+  private final AutoOnboardConfiguration autoOnboardConfiguration;
   private final MonitorJobScheduler monitorJobScheduler;
   private final AutoOnboardService autoOnboardService;
   private final HolidayEventsLoader holidayEventsLoader;
@@ -26,11 +27,11 @@ public class SchedulerService implements Managed {
   private final ModelDownloaderManager modelDownloaderManager;
   private final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler;
   private final SubscriptionCronScheduler subscriptionScheduler;
-  private final MockEventsLoader mockEventsLoader;
 
   @Inject
-  public SchedulerService(final ThirdEyeWorkerConfiguration config,
+  public SchedulerService(final ThirdEyeSchedulerConfiguration config,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
+      final AutoOnboardConfiguration autoOnboardConfiguration,
       final MonitorJobScheduler monitorJobScheduler,
       final AutoOnboardService autoOnboardService,
       final HolidayEventsLoader holidayEventsLoader,
@@ -38,10 +39,10 @@ public class SchedulerService implements Managed {
       final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver,
       final ModelDownloaderManager modelDownloaderManager,
       final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler,
-      final SubscriptionCronScheduler subscriptionScheduler,
-      final MockEventsLoader mockEventsLoader) {
+      final SubscriptionCronScheduler subscriptionScheduler) {
     this.config = config;
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
+    this.autoOnboardConfiguration = autoOnboardConfiguration;
     this.monitorJobScheduler = monitorJobScheduler;
     this.autoOnboardService = autoOnboardService;
     this.holidayEventsLoader = holidayEventsLoader;
@@ -50,7 +51,6 @@ public class SchedulerService implements Managed {
     this.modelDownloaderManager = modelDownloaderManager;
     this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
     this.subscriptionScheduler = subscriptionScheduler;
-    this.mockEventsLoader = mockEventsLoader;
   }
 
   @Override
@@ -59,15 +59,12 @@ public class SchedulerService implements Managed {
       monitorJobScheduler.start();
     }
 
-    if (config.isAutoload()) {
+    if (autoOnboardConfiguration.isEnabled()) {
       autoOnboardService.start();
     }
 
     if (holidayEventsLoaderConfiguration.isEnabled()) {
       holidayEventsLoader.start();
-    }
-    if (config.isMockEventsLoader()) {
-      mockEventsLoader.run();
     }
     if (config.isDetectionPipeline()) {
       detectionScheduler.start();
@@ -81,7 +78,7 @@ public class SchedulerService implements Managed {
     if (config.isDataAvailabilityTaskScheduler()) {
       dataAvailabilityTaskScheduler.start();
     }
-    if (config.getModelDownloaderConfig() != null) {
+    if (config.getModelDownloaderConfigs() != null) {
       modelDownloaderManager.start();
     }
   }
@@ -91,10 +88,10 @@ public class SchedulerService implements Managed {
     if (monitorJobScheduler != null) {
       monitorJobScheduler.shutdown();
     }
-    if (holidayEventsLoader != null && holidayEventsLoaderConfiguration.isEnabled()) {
+    if (holidayEventsLoaderConfiguration.isEnabled()) {
       holidayEventsLoader.shutdown();
     }
-    if (autoOnboardService != null) {
+    if (autoOnboardConfiguration.isEnabled()) {
       autoOnboardService.shutdown();
     }
     if (detectionScheduler != null) {

@@ -33,12 +33,12 @@ public class AutoOnboardServiceTest {
 
     AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
     autoOnboardConfiguration.setFrequency(Duration.ofSeconds(1));
-    thirdEyeWorkerConfiguration.setAutoOnboardConfiguration(autoOnboardConfiguration);
 
     URL url = AutoOnboardServiceTest.class.getResource("/data-sources/data-sources-config-1.yml");
     thirdEyeWorkerConfiguration.setDataSources(url.getPath());
 
     AutoOnboardService autoOnboardService = new AutoOnboardService(
+        autoOnboardConfiguration,
         thirdEyeWorkerConfiguration,
         mock(MetricConfigManager.class),
         mock(DatasetConfigManager.class));

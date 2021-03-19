@@ -80,7 +80,6 @@ public class TestHierarchicalAnomaliesContent {
     thirdeyeAnomalyConfig.setDashboardHost(dashboardHost);
     MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
     monitorConfiguration.setMonitorFrequency(new TimeGranularity(3, TimeUnit.SECONDS));
-    thirdeyeAnomalyConfig.setMonitorConfiguration(monitorConfiguration);
 
     final TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration()
         .setNoTaskDelay(Duration.ofMillis(1000))

@@ -28,7 +28,27 @@ import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
  *
  * @see MockEventsLoader
  */
-public class MockEventsLoaderConfiguration {
+public class MockEventsConfiguration {
+
+  private boolean enabled = false;
+  private List<EventGeneratorConfig> generators = Collections.emptyList();
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public MockEventsConfiguration setEnabled(final boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
+
+  public List<EventGeneratorConfig> getGenerators() {
+    return generators;
+  }
+
+  public void setGenerators(List<EventGeneratorConfig> generators) {
+    this.generators = generators;
+  }
 
   public static class EventGeneratorConfig {
 
@@ -135,15 +155,5 @@ public class MockEventsLoaderConfiguration {
     public void setNameSuffixes(List<String> nameSuffixes) {
       this.nameSuffixes = nameSuffixes;
     }
-  }
-
-  List<EventGeneratorConfig> generators = Collections.emptyList();
-
-  public List<EventGeneratorConfig> getGenerators() {
-    return generators;
-  }
-
-  public void setGenerators(List<EventGeneratorConfig> generators) {
-    this.generators = generators;
   }
 }

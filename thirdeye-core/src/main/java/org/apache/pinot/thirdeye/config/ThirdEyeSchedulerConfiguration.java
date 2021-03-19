@@ -1,16 +1,125 @@
 package org.apache.pinot.thirdeye.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
+import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardConfiguration;
+import org.apache.pinot.thirdeye.model.download.ModelDownloaderConfiguration;
+
 public class ThirdEyeSchedulerConfiguration {
 
-  private HolidayEventsLoaderConfiguration holiday = new HolidayEventsLoaderConfiguration();
+  private boolean monitor = false;
+  private boolean detectionPipeline = false;
+  private boolean detectionAlert = false;
+  private boolean dataAvailabilityEventListener = false;
+  private boolean dataAvailabilityTaskScheduler = false;
 
-  public HolidayEventsLoaderConfiguration getHoliday() {
-    return holiday;
+  @JsonProperty("holidayEvents")
+  private HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration = new HolidayEventsLoaderConfiguration();
+
+  @JsonProperty("mockEvents")
+  private MockEventsConfiguration mockEventsConfiguration = new MockEventsConfiguration();
+
+  @JsonProperty("autoOnboard")
+  private AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
+
+  private MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
+  private List<ModelDownloaderConfiguration> modelDownloaderConfigs;
+
+  public HolidayEventsLoaderConfiguration getHolidayEventsLoaderConfiguration() {
+    return holidayEventsLoaderConfiguration;
   }
 
-  public ThirdEyeSchedulerConfiguration setHoliday(
-      final HolidayEventsLoaderConfiguration holiday) {
-    this.holiday = holiday;
+  public ThirdEyeSchedulerConfiguration setHolidayEventsLoaderConfiguration(
+      final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration) {
+    this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
+    return this;
+  }
+
+  public boolean isMonitor() {
+    return monitor;
+  }
+
+  public ThirdEyeSchedulerConfiguration setMonitor(final boolean monitor) {
+    this.monitor = monitor;
+    return this;
+  }
+
+  public boolean isDetectionPipeline() {
+    return detectionPipeline;
+  }
+
+  public ThirdEyeSchedulerConfiguration setDetectionPipeline(final boolean detectionPipeline) {
+    this.detectionPipeline = detectionPipeline;
+    return this;
+  }
+
+  public boolean isDetectionAlert() {
+    return detectionAlert;
+  }
+
+  public ThirdEyeSchedulerConfiguration setDetectionAlert(final boolean detectionAlert) {
+    this.detectionAlert = detectionAlert;
+    return this;
+  }
+
+  public boolean isDataAvailabilityEventListener() {
+    return dataAvailabilityEventListener;
+  }
+
+  public ThirdEyeSchedulerConfiguration setDataAvailabilityEventListener(
+      final boolean dataAvailabilityEventListener) {
+    this.dataAvailabilityEventListener = dataAvailabilityEventListener;
+    return this;
+  }
+
+  public boolean isDataAvailabilityTaskScheduler() {
+    return dataAvailabilityTaskScheduler;
+  }
+
+  public ThirdEyeSchedulerConfiguration setDataAvailabilityTaskScheduler(
+      final boolean dataAvailabilityTaskScheduler) {
+    this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
+    return this;
+  }
+
+  public MockEventsConfiguration getMockEventsLoaderConfiguration() {
+    return mockEventsConfiguration;
+  }
+
+  public ThirdEyeSchedulerConfiguration setMockEventsLoaderConfiguration(
+      final MockEventsConfiguration mockEventsConfiguration) {
+    this.mockEventsConfiguration = mockEventsConfiguration;
+    return this;
+  }
+
+  public MonitorConfiguration getMonitorConfiguration() {
+    return monitorConfiguration;
+  }
+
+  public ThirdEyeSchedulerConfiguration setMonitorConfiguration(
+      final MonitorConfiguration monitorConfiguration) {
+    this.monitorConfiguration = monitorConfiguration;
+    return this;
+  }
+
+  public AutoOnboardConfiguration getAutoOnboardConfiguration() {
+    return autoOnboardConfiguration;
+  }
+
+  public ThirdEyeSchedulerConfiguration setAutoOnboardConfiguration(
+      final AutoOnboardConfiguration autoOnboardConfiguration) {
+    this.autoOnboardConfiguration = autoOnboardConfiguration;
+    return this;
+  }
+
+  public List<ModelDownloaderConfiguration> getModelDownloaderConfigs() {
+    return modelDownloaderConfigs;
+  }
+
+  public ThirdEyeSchedulerConfiguration setModelDownloaderConfigs(
+      final List<ModelDownloaderConfiguration> modelDownloaderConfigs) {
+    this.modelDownloaderConfigs = modelDownloaderConfigs;
     return this;
   }
 }

@@ -21,80 +21,21 @@ package org.apache.pinot.thirdeye.config;
 
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
-import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
-import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardConfiguration;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 
 public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
 
-  private boolean alert = false;
-  private boolean autoload = false;
-  private boolean mockEventsLoader = false;
-  private boolean monitor = false;
-  private boolean pinotProxy = false;
   private boolean scheduler = false;
   private boolean worker = false;
-  private boolean detectionPipeline = false;
-  private boolean detectionAlert = false;
-  private boolean dataAvailabilityEventListener = false;
-  private boolean dataAvailabilityTaskScheduler = false;
 
   private long id;
-  private MockEventsLoaderConfiguration mockEventsLoaderConfiguration = new MockEventsLoaderConfiguration();
-  private MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
-  private AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
   private TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration();
   private ThirdEyeRestClientConfiguration teRestConfig = new ThirdEyeRestClientConfiguration();
   private DataAvailabilitySchedulingConfiguration
       dataAvailabilitySchedulingConfiguration = new DataAvailabilitySchedulingConfiguration();
   private List<String> holidayCountriesWhitelist;
-
-  public boolean isAlert() {
-    return alert;
-  }
-
-  public ThirdEyeWorkerConfiguration setAlert(final boolean alert) {
-    this.alert = alert;
-    return this;
-  }
-
-  public boolean isAutoload() {
-    return autoload;
-  }
-
-  public ThirdEyeWorkerConfiguration setAutoload(final boolean autoload) {
-    this.autoload = autoload;
-    return this;
-  }
-
-  public boolean isMockEventsLoader() {
-    return mockEventsLoader;
-  }
-
-  public ThirdEyeWorkerConfiguration setMockEventsLoader(final boolean mockEventsLoader) {
-    this.mockEventsLoader = mockEventsLoader;
-    return this;
-  }
-
-  public boolean isMonitor() {
-    return monitor;
-  }
-
-  public ThirdEyeWorkerConfiguration setMonitor(final boolean monitor) {
-    this.monitor = monitor;
-    return this;
-  }
-
-  public boolean isPinotProxy() {
-    return pinotProxy;
-  }
-
-  public ThirdEyeWorkerConfiguration setPinotProxy(final boolean pinotProxy) {
-    this.pinotProxy = pinotProxy;
-    return this;
-  }
 
   public boolean isScheduler() {
     return scheduler;
@@ -114,80 +55,12 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
     return this;
   }
 
-  public boolean isDetectionPipeline() {
-    return detectionPipeline;
-  }
-
-  public ThirdEyeWorkerConfiguration setDetectionPipeline(final boolean detectionPipeline) {
-    this.detectionPipeline = detectionPipeline;
-    return this;
-  }
-
-  public boolean isDetectionAlert() {
-    return detectionAlert;
-  }
-
-  public ThirdEyeWorkerConfiguration setDetectionAlert(final boolean detectionAlert) {
-    this.detectionAlert = detectionAlert;
-    return this;
-  }
-
-  public boolean isDataAvailabilityEventListener() {
-    return dataAvailabilityEventListener;
-  }
-
-  public ThirdEyeWorkerConfiguration setDataAvailabilityEventListener(
-      final boolean dataAvailabilityEventListener) {
-    this.dataAvailabilityEventListener = dataAvailabilityEventListener;
-    return this;
-  }
-
-  public boolean isDataAvailabilityTaskScheduler() {
-    return dataAvailabilityTaskScheduler;
-  }
-
-  public ThirdEyeWorkerConfiguration setDataAvailabilityTaskScheduler(
-      final boolean dataAvailabilityTaskScheduler) {
-    this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
-    return this;
-  }
-
   public long getId() {
     return id;
   }
 
   public ThirdEyeWorkerConfiguration setId(final long id) {
     this.id = id;
-    return this;
-  }
-
-  public MockEventsLoaderConfiguration getMockEventsLoaderConfiguration() {
-    return mockEventsLoaderConfiguration;
-  }
-
-  public ThirdEyeWorkerConfiguration setMockEventsLoaderConfiguration(
-      final MockEventsLoaderConfiguration mockEventsLoaderConfiguration) {
-    this.mockEventsLoaderConfiguration = mockEventsLoaderConfiguration;
-    return this;
-  }
-
-  public MonitorConfiguration getMonitorConfiguration() {
-    return monitorConfiguration;
-  }
-
-  public ThirdEyeWorkerConfiguration setMonitorConfiguration(
-      final MonitorConfiguration monitorConfiguration) {
-    this.monitorConfiguration = monitorConfiguration;
-    return this;
-  }
-
-  public AutoOnboardConfiguration getAutoOnboardConfiguration() {
-    return autoOnboardConfiguration;
-  }
-
-  public ThirdEyeWorkerConfiguration setAutoOnboardConfiguration(
-      final AutoOnboardConfiguration autoOnboardConfiguration) {
-    this.autoOnboardConfiguration = autoOnboardConfiguration;
     return this;
   }
 

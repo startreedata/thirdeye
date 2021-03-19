@@ -10,8 +10,7 @@ import org.apache.pinot.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import org.apache.pinot.thirdeye.auth.ThirdEyeCredentials;
 import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.config.ConfigurationHolder;
-import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
-import org.apache.pinot.thirdeye.config.ThirdEyeSchedulerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeConfigurationModule;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
@@ -21,7 +20,6 @@ import org.apache.pinot.thirdeye.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
-import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeCoreModule extends AbstractModule {
@@ -38,35 +36,15 @@ public class ThirdEyeCoreModule extends AbstractModule {
   @Override
   protected void configure() {
     install(new ThirdEyePersistenceModule(dataSource));
+    install(new ThirdEyeConfigurationModule(configurationHolder));
 
-    bind(ConfigurationHolder.class).toInstance(configurationHolder);
-    bind(new TypeLiteral<Authenticator<ThirdEyeCredentials, ThirdEyePrincipal>>() {
-    })
+    bind(new TypeLiteral<Authenticator<ThirdEyeCredentials, ThirdEyePrincipal>>() {})
         .to(ThirdEyeAuthenticatorDisabled.class)
         .in(Scopes.SINGLETON);
 
     bind(DataProvider.class).to(DefaultDataProvider.class).in(Scopes.SINGLETON);
     bind(TimeSeriesLoader.class).to(DefaultTimeSeriesLoader.class).in(Scopes.SINGLETON);
     bind(AggregationLoader.class).to(DefaultAggregationLoader.class).in(Scopes.SINGLETON);
-  }
-
-  @Singleton
-  @Provides
-  public HolidayEventsLoaderConfiguration getHolidayEventsLoaderConfiguration(
-      ThirdEyeSchedulerConfiguration configuration) {
-    return configuration.getHoliday();
-  }
-
-  @Singleton
-  @Provides
-  public RCAConfiguration getRCAConfiguration() {
-    return configurationHolder.createConfigurationInstance(RCAConfiguration.class);
-  }
-
-  @Singleton
-  @Provides
-  public ThirdEyeSchedulerConfiguration getThirdEyeSchedulerConfiguration() {
-    return configurationHolder.createConfigurationInstance(ThirdEyeSchedulerConfiguration.class);
   }
 
   @Singleton

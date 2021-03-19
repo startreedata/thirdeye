@@ -35,7 +35,7 @@ import org.apache.commons.math3.distribution.LogNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.apache.commons.math3.random.Well19937c;
-import org.apache.pinot.thirdeye.config.MockEventsLoaderConfiguration;
+import org.apache.pinot.thirdeye.config.MockEventsConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.slf4j.Logger;
@@ -57,6 +57,11 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class MockEventsLoader implements Runnable {
 
+  public static final String DIST_TYPE_GAUSSIAN = "gaussian";
+  public static final String DIST_TYPE_EXPONENTIAL = "exponential";
+  public static final String DIST_TYPE_LOGNORMAL = "lognormal";
+  public static final String DIST_TYPE_FIXED = "fixed";
+
   private static final Logger LOG = LoggerFactory.getLogger(MockEventsLoader.class);
 
   private static final Comparator<EventDTO> MOCK_EVENT_COMPARATOR = Comparator
@@ -67,25 +72,28 @@ public class MockEventsLoader implements Runnable {
   private static final long START_TIMESTAMP = 1546300800000L; // January 1, 2019 12:00:00 AM GMT
   private static final long END_OFFSET = 31536000000L; // 365d in ms
 
-  public static final String DIST_TYPE_GAUSSIAN = "gaussian";
-  public static final String DIST_TYPE_EXPONENTIAL = "exponential";
-  public static final String DIST_TYPE_LOGNORMAL = "lognormal";
-  public static final String DIST_TYPE_FIXED = "fixed";
-
-  MockEventsLoaderConfiguration configuration;
-  EventManager eventDAO;
+  private final MockEventsConfiguration configuration;
+  private final EventManager eventDAO;
 
   @Inject
-  public MockEventsLoader(MockEventsLoaderConfiguration configuration, EventManager eventDAO) {
+  public MockEventsLoader(MockEventsConfiguration configuration, EventManager eventDAO) {
     this.configuration = configuration;
     this.eventDAO = eventDAO;
   }
 
   @Override
   public void run() {
+    if (configuration.isEnabled()) {
+      loadEvents();
+    } else {
+      LOG.info("MockEventsLoader disabled! Skipping Execution.");
+    }
+  }
+
+  private void loadEvents() {
     final long cutoff = System.currentTimeMillis() + END_OFFSET;
 
-    for (MockEventsLoaderConfiguration.EventGeneratorConfig conf : this.configuration
+    for (MockEventsConfiguration.EventGeneratorConfig conf : this.configuration
         .getGenerators()) {
       LOG.info("Generating '{}' events from {} to {}", conf.getType(), START_TIMESTAMP, cutoff);
 
@@ -108,7 +116,7 @@ public class MockEventsLoader implements Runnable {
    * @param cutoff cutoff timestamp
    * @return series of mock events
    */
-  List<EventDTO> generateEvents(MockEventsLoaderConfiguration.EventGeneratorConfig conf,
+  List<EventDTO> generateEvents(MockEventsConfiguration.EventGeneratorConfig conf,
       long cutoff) {
     List<EventDTO> generated = new ArrayList<>();
 
@@ -197,6 +205,13 @@ public class MockEventsLoader implements Runnable {
       this.nameSuffixes = nameSuffixes;
     }
 
+    static String makeString(Random rng, List<String> strings, String defaultString) {
+      if (strings.isEmpty()) {
+        return defaultString;
+      }
+      return strings.get(rng.nextInt(strings.size()));
+    }
+
     public EventDTO next() {
       long arrival = lastTimestamp + (long) this.arrivalDist.sample();
       long duration = (long) this.durationDist.sample();
@@ -215,13 +230,6 @@ public class MockEventsLoader implements Runnable {
       event.setTargetDimensionMap(Collections.emptyMap());
 
       return event;
-    }
-
-    static String makeString(Random rng, List<String> strings, String defaultString) {
-      if (strings.isEmpty()) {
-        return defaultString;
-      }
-      return strings.get(rng.nextInt(strings.size()));
     }
   }
 }

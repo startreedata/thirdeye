@@ -32,12 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
@@ -98,9 +95,6 @@ public class TestEntityGroupKeyContent {
     ThirdEyeWorkerConfiguration thirdeyeAnomalyConfig = new ThirdEyeWorkerConfiguration();
     thirdeyeAnomalyConfig.setId(id);
     thirdeyeAnomalyConfig.setDashboardHost(dashboardHost);
-    MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
-    monitorConfiguration.setMonitorFrequency(new TimeGranularity(3, TimeUnit.SECONDS));
-    thirdeyeAnomalyConfig.setMonitorConfiguration(monitorConfiguration);
 
     final TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration()
         .setNoTaskDelay(Duration.ofMillis(1000))
@@ -199,9 +193,6 @@ public class TestEntityGroupKeyContent {
     ThirdEyeWorkerConfiguration thirdeyeAnomalyConfig = new ThirdEyeWorkerConfiguration();
     thirdeyeAnomalyConfig.setId(id);
     thirdeyeAnomalyConfig.setDashboardHost(dashboardHost);
-    MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
-    monitorConfiguration.setMonitorFrequency(new TimeGranularity(3, TimeUnit.SECONDS));
-    thirdeyeAnomalyConfig.setMonitorConfiguration(monitorConfiguration);
 
     final TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration()
         .setNoTaskDelay(Duration.ofMillis(1000))

@@ -24,9 +24,7 @@ import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.model.download.ModelDownloaderConfiguration;
 
 public class ThirdEyeConfiguration extends Configuration {
 
@@ -48,7 +46,6 @@ public class ThirdEyeConfiguration extends Configuration {
   private String failureFromAddress;
   private String failureToAddress;
 
-  private List<ModelDownloaderConfiguration> modelDownloaderConfig;
 
   /**
    * Convert relative path to absolute URL
@@ -154,13 +151,5 @@ public class ThirdEyeConfiguration extends Configuration {
 
   public void setAlerterConfiguration(Map<String, Map<String, Object>> alerterConfigurations) {
     this.alerterConfigurations = alerterConfigurations;
-  }
-
-  public List<ModelDownloaderConfiguration> getModelDownloaderConfig() {
-    return modelDownloaderConfig;
-  }
-
-  public void setModelDownloaderConfig(List<ModelDownloaderConfiguration> modelDownloaderConfig) {
-    this.modelDownloaderConfig = modelDownloaderConfig;
   }
 }

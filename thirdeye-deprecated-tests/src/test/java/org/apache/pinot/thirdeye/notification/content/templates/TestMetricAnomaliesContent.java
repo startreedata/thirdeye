@@ -38,14 +38,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.AnomalyType;
-import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
@@ -127,9 +124,6 @@ public class TestMetricAnomaliesContent {
     ThirdEyeWorkerConfiguration thirdeyeAnomalyConfig = new ThirdEyeWorkerConfiguration();
     thirdeyeAnomalyConfig.setId(id);
     thirdeyeAnomalyConfig.setDashboardHost(dashboardHost);
-    MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
-    monitorConfiguration.setMonitorFrequency(new TimeGranularity(3, TimeUnit.SECONDS));
-    thirdeyeAnomalyConfig.setMonitorConfiguration(monitorConfiguration);
 
     final TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration()
         .setNoTaskDelay(Duration.ofMillis(1000))

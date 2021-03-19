@@ -6,9 +6,7 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.ThirdEyeCoreModule;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
-import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.config.ConfigurationHolder;
-import org.apache.pinot.thirdeye.config.MockEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
@@ -29,16 +27,8 @@ public class ThirdEyeWorkerModule extends AbstractModule {
   protected void configure() {
     install(new ThirdEyeCoreModule(dataSource, configurationHolder));
 
-    bind(MonitorConfiguration.class)
-        .toProvider(configuration::getMonitorConfiguration)
-        .in(Scopes.SINGLETON);
-
     bind(DataAvailabilitySchedulingConfiguration.class)
         .toProvider(configuration::getDataAvailabilitySchedulingConfiguration)
-        .in(Scopes.SINGLETON);
-
-    bind(MockEventsLoaderConfiguration.class)
-        .toProvider(configuration::getMockEventsLoaderConfiguration)
         .in(Scopes.SINGLETON);
   }
 

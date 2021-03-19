@@ -97,7 +97,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
 
     injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource, config));
 
-    injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches(config);
+    injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches();
     schedulerService = injector.getInstance(SchedulerService.class);
 
     injector.getInstance(DetectionCronScheduler.class)

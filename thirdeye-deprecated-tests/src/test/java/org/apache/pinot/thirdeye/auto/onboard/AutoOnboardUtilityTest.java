@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.util.ConfigurationLoader;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,9 +36,10 @@ public class AutoOnboardUtilityTest {
     URL url = AutoOnboardUtilityTest.class.getResource("/data-sources/data-sources-config-1.yml");
 
     Map<String, List<AutoOnboard>> dsToOnboardsMap = AutoOnboardUtility
-        .getDataSourceToAutoOnboardMap(url,
+        .getDataSourceToAutoOnboardMap(
             mock(MetricConfigManager.class),
-            mock(DatasetConfigManager.class));
+            mock(DatasetConfigManager.class), ConfigurationLoader.readConfig(url,
+                DataSourcesConfiguration.class));
 
     // Assert two data sources (PinotThirdEyeDataSource, CSVThirdEyeDataSource)
     Assert.assertEquals(dsToOnboardsMap.keySet().size(), 2);
@@ -78,9 +81,10 @@ public class AutoOnboardUtilityTest {
     URL url = AutoOnboardUtilityTest.class.getResource("/data-sources/data-sources-config-2.yml");
 
     Map<String, List<AutoOnboard>> dsToOnboardsMap = AutoOnboardUtility
-        .getDataSourceToAutoOnboardMap(url,
+        .getDataSourceToAutoOnboardMap(
             mock(MetricConfigManager.class),
-            mock(DatasetConfigManager.class));
+            mock(DatasetConfigManager.class), ConfigurationLoader.readConfig(url,
+                DataSourcesConfiguration.class));
 
     // Assert no metadata loaders
     Assert.assertEquals(dsToOnboardsMap.keySet().size(), 0);

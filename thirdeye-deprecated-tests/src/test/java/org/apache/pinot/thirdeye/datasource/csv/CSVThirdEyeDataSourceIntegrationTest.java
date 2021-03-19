@@ -16,22 +16,27 @@
 
 package org.apache.pinot.thirdeye.datasource.csv;
 
+import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
+
 import com.google.inject.Injector;
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.RequestContainer;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
+import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.datasource.mock.MockThirdEyeDataSourceIntegrationTest;
+import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -39,12 +44,14 @@ import org.testng.annotations.Test;
 
 public class CSVThirdEyeDataSourceIntegrationTest {
 
-  private DAORegistry daoRegistry;
+  private DatasetConfigManager datasetConfigDAO;
+  private MetricConfigManager metricConfigDAO;
 
   @BeforeMethod
   void beforeMethod() {
     final Injector injector = new TestDbEnv().getInjector();
-    daoRegistry = injector.getInstance(DAORegistry.class);
+    datasetConfigDAO = injector.getInstance(DatasetConfigManager.class);
+    metricConfigDAO = injector.getInstance(MetricConfigManager.class);
   }
 
   @AfterMethod(alwaysRun = true)
@@ -62,7 +69,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     datasetConfigDTO.setTimeDuration(1);
     datasetConfigDTO.setTimeUnit(TimeUnit.HOURS);
 
-    daoRegistry.getDatasetConfigDAO().save(datasetConfigDTO);
+    datasetConfigDAO.save(datasetConfigDTO);
     Assert.assertNotNull(datasetConfigDTO.getId());
 
     MetricConfigDTO configDTO = new MetricConfigDTO();
@@ -70,21 +77,25 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     configDTO.setDataset("business");
     configDTO.setAlias("business::views");
 
-    daoRegistry.getMetricConfigDAO().save(configDTO);
+    metricConfigDAO.save(configDTO);
     Assert.assertNotNull(configDTO.getId());
 
-    ThirdEyeConfiguration thirdEyeConfiguration = new ThirdEyeConfiguration();
-    thirdEyeConfiguration.setDataSources(dataSourcesConfig.toString());
+    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = new ThirdEyeCacheRegistry(
+        metricConfigDAO,
+        datasetConfigDAO,
+        new DataSourcesLoader(metricConfigDAO,
+            datasetConfigDAO,
+            readConfig(dataSourcesConfig, DataSourcesConfiguration.class)),
+        new CacheConfig());
 
-    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = TestDbEnv
-        .getInstance(ThirdEyeCacheRegistry.class);
-
-    thirdEyeCacheRegistry.initializeCaches(thirdEyeConfiguration);
+    thirdEyeCacheRegistry.initializeCaches();
 
     MetricSlice slice = MetricSlice.from(configDTO.getId(), 0, 7200000);
-    RequestContainer requestContainer = MockThirdEyeDataSourceIntegrationTest
-        .makeAggregateRequest(slice, Collections.emptyList(), -1, "ref",
-            thirdEyeCacheRegistry);
+    RequestContainer requestContainer = makeAggregateRequest(slice,
+        Collections.emptyList(),
+        -1,
+        "ref",
+        thirdEyeCacheRegistry);
     ThirdEyeResponse response = thirdEyeCacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
@@ -92,5 +103,13 @@ public class CSVThirdEyeDataSourceIntegrationTest {
 
     Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
         Collections.singletonList(1503d));
+  }
+
+  private RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
+      int limit, String reference, final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
+      throws Exception {
+    return DataFrameUtils
+        .makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO, datasetConfigDAO,
+            thirdEyeCacheRegistry);
   }
 }

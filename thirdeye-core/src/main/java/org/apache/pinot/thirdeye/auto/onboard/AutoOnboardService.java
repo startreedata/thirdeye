@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -32,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +50,7 @@ public class AutoOnboardService implements Runnable {
   private final ThirdEyeWorkerConfiguration config;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
+  private final DataSourcesConfiguration dataSourcesConfiguration;
 
   /**
    * Reads data sources configs and instantiates the constructors for auto load of all data sources,
@@ -61,19 +61,21 @@ public class AutoOnboardService implements Runnable {
       final AutoOnboardConfiguration autoOnboardConfiguration,
       final ThirdEyeWorkerConfiguration config,
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final DataSourcesConfiguration dataSourcesConfiguration) {
     this.autoOnboardConfiguration = autoOnboardConfiguration;
     this.config = config;
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
+    this.dataSourcesConfiguration = dataSourcesConfiguration;
+
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
   }
 
   public void start() {
-    scheduledExecutorService
-        .scheduleAtFixedRate(this, 0,
-            autoOnboardConfiguration.getFrequency().getSeconds(),
-            TimeUnit.SECONDS);
+    scheduledExecutorService.scheduleAtFixedRate(this, 0,
+        autoOnboardConfiguration.getFrequency().getSeconds(),
+        TimeUnit.SECONDS);
   }
 
   public void shutdown() {
@@ -85,8 +87,9 @@ public class AutoOnboardService implements Runnable {
   public void run() {
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
         .getDataSourceToAutoOnboardMap(
-            requireNonNull(config.getDataSourcesAsUrl()), metricConfigManager,
-            datasetConfigManager);
+            metricConfigManager,
+            datasetConfigManager,
+            dataSourcesConfiguration);
 
     for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {
       autoOnboardServices.addAll(autoOnboards);

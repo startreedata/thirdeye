@@ -5,17 +5,26 @@ import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
+import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 
 public class ConfigurationHolder {
 
-  private static final Map<Class, String> CONFIG_CLASS_MAP = ImmutableMap.<Class, String>builder()
-      .put(ThirdEyeWorkerConfiguration.class, "detector.yml")
+  /**
+   * The files: coordinator.yaml and detector.yaml files are directly read by the dropwizard
+   * framework itself and therefore skipped in this map.
+   */
+  private Map<Class, String> configClassMap = new HashMap<>(ImmutableMap.<Class, String>builder()
       .put(ThirdEyeSchedulerConfiguration.class, "scheduler.yaml")
+      .put(DataSourcesConfiguration.class, "data-sources/data-sources-config.yml")
+      .put(CacheConfig.class, "data-sources/cache-config.yml")
       .put(RCAConfiguration.class, "rca.yml")
-      .build();
+      .build());
 
+  // root configuration path
   private final String path;
 
   public ConfigurationHolder(final String path) {
@@ -27,7 +36,7 @@ public class ConfigurationHolder {
   }
 
   public <T> T createConfigurationInstance(Class<T> clazz) {
-    final String filename = CONFIG_CLASS_MAP.get(clazz);
+    final String filename = configClassMap.get(clazz);
     checkArgument(filename != null, String.format("Unknown config class: %s", clazz));
     final File file = new File(String.format("%s%s%s", getPath(), File.separator, filename));
 
@@ -40,5 +49,15 @@ public class ConfigurationHolder {
         throw new RuntimeException(e);
       }
     }
+  }
+
+  public Map<Class, String> getConfigClassMap() {
+    return configClassMap;
+  }
+
+  public ConfigurationHolder setConfigClassMap(
+      final Map<Class, String> configClassMap) {
+    this.configClassMap = configClassMap;
+    return this;
   }
 }

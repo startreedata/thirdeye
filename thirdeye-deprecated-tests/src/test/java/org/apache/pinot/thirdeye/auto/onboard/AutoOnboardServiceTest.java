@@ -16,6 +16,7 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
 import static org.mockito.Mockito.mock;
 
 import java.net.URL;
@@ -23,31 +24,26 @@ import java.time.Duration;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.testng.annotations.Test;
 
 public class AutoOnboardServiceTest {
 
   @Test
   public void testAutoOnboardService() throws Exception {
-    ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration = new ThirdEyeWorkerConfiguration();
+    final URL url = AutoOnboardServiceTest.class.getResource(
+        "/data-sources/data-sources-config-1.yml");
 
-    AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
-    autoOnboardConfiguration.setFrequency(Duration.ofSeconds(1));
-
-    URL url = AutoOnboardServiceTest.class.getResource("/data-sources/data-sources-config-1.yml");
-    thirdEyeWorkerConfiguration.setDataSources(url.getPath());
-
-    AutoOnboardService autoOnboardService = new AutoOnboardService(
-        autoOnboardConfiguration,
-        thirdEyeWorkerConfiguration,
+    final AutoOnboardService autoOnboardService = new AutoOnboardService(
+        new AutoOnboardConfiguration()
+            .setFrequency(Duration.ofSeconds(1)),
+        new ThirdEyeWorkerConfiguration(),
         mock(MetricConfigManager.class),
-        mock(DatasetConfigManager.class));
+        mock(DatasetConfigManager.class),
+        readConfig(url, DataSourcesConfiguration.class));
+
     autoOnboardService.start();
-
     Thread.sleep(2000);
-
-    // Execute without exceptions
-
     autoOnboardService.shutdown();
   }
 }

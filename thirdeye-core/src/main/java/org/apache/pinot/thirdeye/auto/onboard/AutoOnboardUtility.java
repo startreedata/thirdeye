@@ -19,10 +19,7 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
-import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
-
 import java.lang.reflect.Constructor;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,13 +38,12 @@ public class AutoOnboardUtility {
 
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardUtility.class);
 
-  public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(URL dataSourcesUrl,
+  public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final DataSourcesConfiguration dataSourcesConfiguration) {
     Map<String, List<AutoOnboard>> dataSourceToOnboardMap = new HashMap<>();
 
-    DataSourcesConfiguration dataSourcesConfiguration = readConfig(dataSourcesUrl,
-        DataSourcesConfiguration.class);
     for (DataSourceConfig dataSourceConfig : dataSourcesConfiguration.getDataSourceConfigs()) {
       processDataSourceConfig(dataSourceToOnboardMap,
           dataSourceConfig,

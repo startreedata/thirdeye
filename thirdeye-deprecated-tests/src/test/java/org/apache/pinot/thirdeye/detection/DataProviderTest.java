@@ -183,7 +183,7 @@ public class DataProviderTest {
         .getInstance(ThirdEyeCacheRegistry.class);
     cacheRegistry.registerMetricConfigCache(mockMetricConfigCache);
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);
-    cacheRegistry.registerQueryCache(dataSourceCache);
+    cacheRegistry.setDataSourceCache(dataSourceCache);
     cacheRegistry.registerDatasetMaxDataTimeCache(mockDatasetMaxDataTimeCache);
 
 

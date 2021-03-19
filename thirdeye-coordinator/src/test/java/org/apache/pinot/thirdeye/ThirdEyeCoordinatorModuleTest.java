@@ -6,7 +6,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
-import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.resources.RootResource;
@@ -35,7 +34,7 @@ public class ThirdEyeCoordinatorModuleTest {
 
     injector
         .getInstance(ThirdEyeCacheRegistry.class)
-        .initializeCaches(new ThirdEyeConfiguration().setRootDir(configuration.getConfigPath()));
+        .initializeCaches();
 
     assertThat(injector.getInstance(RootResource.class)).isNotNull();
   }

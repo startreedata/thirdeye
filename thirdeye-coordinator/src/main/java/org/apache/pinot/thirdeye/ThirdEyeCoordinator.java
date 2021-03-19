@@ -13,7 +13,6 @@ import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
-import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.resources.RootResource;
@@ -57,7 +56,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     // Initialize ThirdEyeCacheRegistry
     injector
         .getInstance(ThirdEyeCacheRegistry.class)
-        .initializeCaches(new ThirdEyeConfiguration().setRootDir(configuration.getConfigPath()));
+        .initializeCaches();
 
     env.jersey().register(injector.getInstance(RootResource.class));
 

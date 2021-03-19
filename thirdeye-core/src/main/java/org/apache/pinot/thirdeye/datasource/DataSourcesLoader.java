@@ -41,20 +41,22 @@ public class DataSourcesLoader {
 
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
+  private final DataSourcesConfiguration dataSourcesConfiguration;
 
   @Inject
   public DataSourcesLoader(
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final DataSourcesConfiguration dataSourcesConfiguration) {
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
+    this.dataSourcesConfiguration = dataSourcesConfiguration;
   }
 
   /**
    * Returns datasource name to datasource map
    */
-  public Map<String, ThirdEyeDataSource> getDataSourceMap(
-      DataSourcesConfiguration dataSourcesConfiguration) {
+  public Map<String, ThirdEyeDataSource> getDataSourceMap() {
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
     if (!optional(dataSourcesConfiguration.getDataSourceConfigs()).filter(l -> l.size() > 0)
         .isPresent()) {

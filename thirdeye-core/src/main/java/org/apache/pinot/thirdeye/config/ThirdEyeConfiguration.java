@@ -22,8 +22,6 @@ package org.apache.pinot.thirdeye.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 
 public class ThirdEyeConfiguration extends Configuration {
@@ -32,9 +30,6 @@ public class ThirdEyeConfiguration extends Configuration {
    * Root directory for all other configuration
    */
   private String rootDir = "";
-  private String dataSources = "data-sources/data-sources-config.yml";
-  private String cacheDataSource = "data-sources/cache-config.yml";
-
   private String dashboardHost;
 
   @JsonProperty("swagger")
@@ -46,55 +41,6 @@ public class ThirdEyeConfiguration extends Configuration {
   private String failureFromAddress;
   private String failureToAddress;
 
-
-  /**
-   * Convert relative path to absolute URL
-   *
-   * Supported cases:
-   * <pre>
-   *   file:/....myDir/data-sources-config.yml
-   *   myDir/data-sources-config.yml
-   * </pre>
-   *
-   * @return the url of the data source
-   */
-  public URL getDataSourcesAsUrl() {
-    return getSourceAsUrl(dataSources);
-  }
-
-  private URL getSourceAsUrl(String path) {
-    try {
-      return new URL(path);
-    } catch (MalformedURLException ignore) {
-      // ignore
-    }
-
-    try {
-      URL rootUrl = new URL(String.format("file:%s/", this.rootDir));
-      return new URL(rootUrl, path);
-    } catch (MalformedURLException e) {
-      throw new IllegalArgumentException(String
-          .format("Could not parse relative path for rootDir '%s' and dataSources/cacheConfig '%s'",
-              this.rootDir, path));
-    }
-  }
-
-  public String getDataSources() {
-    return dataSources;
-  }
-
-  public void setDataSources(String dataSources) {
-    this.dataSources = dataSources;
-  }
-
-  public URL getCacheConfigAsUrl() {
-    return getSourceAsUrl(this.cacheDataSource);
-  }
-
-  public void setCacheDataSource(String cacheDataSource) {
-    this.cacheDataSource = cacheDataSource;
-  }
-
   public String getRootDir() {
     return rootDir;
   }
@@ -102,15 +48,6 @@ public class ThirdEyeConfiguration extends Configuration {
   public ThirdEyeConfiguration setRootDir(final String rootDir) {
     this.rootDir = rootDir;
     return this;
-  }
-
-  public String getFunctionConfigPath() {
-    return getRootDir() + "/detector-config/anomaly-functions/functions.properties";
-  }
-
-  //alertFilter.properties format: {alert filter type} = {path to alert filter implementation}
-  public String getAlertFilterConfigPath() {
-    return getRootDir() + "/detector-config/anomaly-functions/alertFilter.properties";
   }
 
   public String getPhantomJsPath() {

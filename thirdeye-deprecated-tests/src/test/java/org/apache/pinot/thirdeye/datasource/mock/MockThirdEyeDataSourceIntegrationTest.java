@@ -16,15 +16,17 @@
 
 package org.apache.pinot.thirdeye.datasource.mock;
 
+import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import com.google.inject.Injector;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
@@ -35,9 +37,11 @@ import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
+import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -46,7 +50,6 @@ import org.testng.annotations.Test;
 public class MockThirdEyeDataSourceIntegrationTest {
 
   private TestDbEnv testDAOProvider;
-  private DAORegistry daoRegistry;
 
   private Long metricPurchasesId;
   private Long metricRevenueId;
@@ -55,6 +58,8 @@ public class MockThirdEyeDataSourceIntegrationTest {
   private ThirdEyeCacheRegistry cacheRegistry;
 
   private long timestamp;
+  private DatasetConfigManager datasetConfigDAO;
+  private MetricConfigManager metricConfigDAO;
 
   /**
    * Constructs and wraps a request for a metric with derived expressions. Resolves all
@@ -67,12 +72,13 @@ public class MockThirdEyeDataSourceIntegrationTest {
    * @see DataFrameUtils#makeTimeSeriesRequest(MetricSlice slice, String, MetricConfigManager,
    *     DatasetConfigManager)
    */
-  public static TimeSeriesRequestContainer makeTimeSeriesRequest(MetricSlice slice,
+  private TimeSeriesRequestContainer makeTimeSeriesRequest(MetricSlice slice,
       String reference) throws Exception {
-    MetricConfigManager metricDAO = TestDbEnv.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = TestDbEnv.getInstance().getDatasetConfigDAO();
-    return DataFrameUtils.makeTimeSeriesRequest(slice, reference, metricDAO, datasetDAO,
-        TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+    return DataFrameUtils.makeTimeSeriesRequest(slice,
+        reference,
+        metricConfigDAO,
+        datasetConfigDAO,
+        cacheRegistry);
   }
 
   /**
@@ -83,22 +89,27 @@ public class MockThirdEyeDataSourceIntegrationTest {
    * @param dimensions dimensions to group by
    * @param limit top k element limit ({@code -1} for default)
    * @param reference unique identifier for request
-   * @param thirdEyeCacheRegistry
    * @return RequestContainer
    */
-  public static RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
-      int limit, String reference, final ThirdEyeCacheRegistry thirdEyeCacheRegistry) throws Exception {
-    MetricConfigManager metricDAO = TestDbEnv.getInstance().getMetricConfigDAO();
-    DatasetConfigManager datasetDAO = TestDbEnv.getInstance().getDatasetConfigDAO();
+  private RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
+      int limit, String reference, final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
+      throws Exception {
     return DataFrameUtils
-        .makeAggregateRequest(slice, dimensions, limit, reference, metricDAO, datasetDAO,
-        thirdEyeCacheRegistry);
+        .makeAggregateRequest(slice,
+            dimensions,
+            limit,
+            reference,
+            metricConfigDAO,
+            datasetConfigDAO,
+            thirdEyeCacheRegistry);
   }
 
   @BeforeClass
   void beforeMethod() throws Exception {
     this.testDAOProvider = new TestDbEnv();
-    this.daoRegistry = TestDbEnv.getInstance();
+    final Injector injector = testDAOProvider.getInjector();
+    datasetConfigDAO = injector.getInstance(DatasetConfigManager.class);
+    metricConfigDAO = injector.getInstance(MetricConfigManager.class);
 
     URL dataSourcesConfig = this.getClass().getResource("data-sources-config.yml");
 
@@ -109,7 +120,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     metricPurchases.setName("purchases");
     metricPurchases.setDataset("business");
     metricPurchases.setAlias("business::purchases");
-    this.metricPurchasesId = this.daoRegistry.getMetricConfigDAO().save(metricPurchases);
+    this.metricPurchasesId = metricConfigDAO.save(metricPurchases);
     Assert.assertNotNull(this.metricPurchasesId);
 
     // metric business::revenue
@@ -117,7 +128,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     metricRevenue.setName("revenue");
     metricRevenue.setDataset("business");
     metricRevenue.setAlias("business::revenue");
-    this.metricRevenueId = this.daoRegistry.getMetricConfigDAO().save(metricRevenue);
+    this.metricRevenueId = metricConfigDAO.save(metricRevenue);
     Assert.assertNotNull(this.metricRevenueId);
 
     // metric tracking::adImpressions
@@ -125,7 +136,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     metricAdImpressions.setName("adImpressions");
     metricAdImpressions.setDataset("tracking");
     metricAdImpressions.setAlias("tracking::adImpressions");
-    this.metricAdImpressionsId = this.daoRegistry.getMetricConfigDAO().save(metricAdImpressions);
+    this.metricAdImpressionsId = metricConfigDAO.save(metricAdImpressions);
     Assert.assertNotNull(this.metricAdImpressionsId);
 
     // metric tracking::pageViews
@@ -133,7 +144,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     metricPageViews.setName("pageViews");
     metricPageViews.setDataset("tracking");
     metricPageViews.setAlias("tracking::pageViews");
-    this.metricPageViewsId = this.daoRegistry.getMetricConfigDAO().save(metricPageViews);
+    this.metricPageViewsId = metricConfigDAO.save(metricPageViews);
     Assert.assertNotNull(this.metricPageViewsId);
 
     // dataset business
@@ -144,7 +155,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     datasetBusiness.setTimeUnit(TimeUnit.DAYS);
     datasetBusiness.setTimezone("America/Los_Angeles");
     datasetBusiness.setDimensions(Arrays.asList("browser", "country"));
-    this.daoRegistry.getDatasetConfigDAO().save(datasetBusiness);
+    datasetConfigDAO.save(datasetBusiness);
     Assert.assertNotNull(datasetBusiness.getId());
 
     // dataset tracking
@@ -155,17 +166,19 @@ public class MockThirdEyeDataSourceIntegrationTest {
     datasetTracking.setTimeUnit(TimeUnit.HOURS);
     datasetTracking.setTimezone("America/Los_Angeles");
     datasetTracking.setDimensions(Arrays.asList("browser", "country", "platform"));
-    this.daoRegistry.getDatasetConfigDAO().save(datasetTracking);
+    datasetConfigDAO.save(datasetTracking);
     Assert.assertNotNull(datasetTracking.getId());
 
     // data sources and caches
     this.timestamp = System.currentTimeMillis();
-    ThirdEyeConfiguration thirdEyeConfiguration = new ThirdEyeConfiguration();
-    thirdEyeConfiguration.setDataSources(dataSourcesConfig.toString());
-
-    TestDbEnv.getInstance(ThirdEyeCacheRegistry.class)
-        .initializeCaches(thirdEyeConfiguration);
-    this.cacheRegistry = TestDbEnv.getInstance(ThirdEyeCacheRegistry.class);
+    cacheRegistry = new ThirdEyeCacheRegistry(
+        this.metricConfigDAO,
+        this.datasetConfigDAO,
+        new DataSourcesLoader(this.metricConfigDAO,
+            this.datasetConfigDAO,
+            readConfig(dataSourcesConfig, DataSourcesConfiguration.class)),
+        new CacheConfig());
+    cacheRegistry.initializeCaches();
   }
 
   @AfterClass(alwaysRun = true)
@@ -177,12 +190,15 @@ public class MockThirdEyeDataSourceIntegrationTest {
   public void testAggregation() throws Exception {
     MetricSlice slice = MetricSlice
         .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
-    RequestContainer requestContainer = makeAggregateRequest(slice, Collections.emptyList(), -1, "ref",
-            TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+    RequestContainer requestContainer = makeAggregateRequest(slice,
+        Collections.emptyList(),
+        -1,
+        "ref",
+        cacheRegistry);
     ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
-        TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+        cacheRegistry);
 
     Assert.assertTrue(df.getDouble(DataFrame.COL_VALUE, 0) > 0);
   }
@@ -192,12 +208,15 @@ public class MockThirdEyeDataSourceIntegrationTest {
     MetricSlice slice = MetricSlice
         .from(this.metricRevenueId, this.timestamp - TimeUnit.HOURS.toMillis(25),
             this.timestamp); // allow for DST
-    RequestContainer requestContainer = makeAggregateRequest(slice, Arrays.asList("country", "browser"), -1, "ref",
-            TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+    RequestContainer requestContainer = makeAggregateRequest(slice,
+        Arrays.asList("country", "browser"),
+        -1,
+        "ref",
+        cacheRegistry);
     ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
-        TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+        cacheRegistry);
 
     Assert.assertEquals(df.size(), 9);
     Assert.assertEquals(new HashSet<>(df.getStrings("country").toList()),
@@ -217,7 +236,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
-        TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+        cacheRegistry);
 
     Assert.assertEquals(df.size(), 2);
     Assert.assertTrue(df.getLong(DataFrame.COL_TIME, 0) > 0);
@@ -250,21 +269,27 @@ public class MockThirdEyeDataSourceIntegrationTest {
     ThirdEyeResponse resBasic = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(reqBasic.getRequest());
     DataFrame dfBasic = DataFrameUtils.evaluateResponse(resBasic, reqBasic,
-        TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+        cacheRegistry);
 
-    RequestContainer reqMobile = makeAggregateRequest(sliceMobile, Collections.emptyList(), -1, "ref",
+    RequestContainer reqMobile = makeAggregateRequest(sliceMobile,
+        Collections.emptyList(),
+        -1,
+        "ref",
         cacheRegistry);
     ThirdEyeResponse resMobile = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(reqMobile.getRequest());
     DataFrame dfMobile = DataFrameUtils.evaluateResponse(resMobile, reqMobile,
-        TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+        cacheRegistry);
 
-    RequestContainer reqDesktop = makeAggregateRequest(sliceDesktop, Collections.emptyList(), -1, "ref",
+    RequestContainer reqDesktop = makeAggregateRequest(sliceDesktop,
+        Collections.emptyList(),
+        -1,
+        "ref",
         cacheRegistry);
     ThirdEyeResponse resDesktop = this.cacheRegistry.getDataSourceCache()
         .getQueryResult(reqDesktop.getRequest());
     DataFrame dfDesktop = DataFrameUtils.evaluateResponse(resDesktop, reqDesktop,
-        TestDbEnv.getInstance(ThirdEyeCacheRegistry.class));
+        cacheRegistry);
 
     Assert.assertTrue(
         dfBasic.getDouble(DataFrame.COL_VALUE, 0) >= dfMobile.getDouble(DataFrame.COL_VALUE, 0));

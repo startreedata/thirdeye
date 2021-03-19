@@ -52,11 +52,4 @@ public class ThirdEyeConfigurationModule extends AbstractModule {
       ThirdEyeSchedulerConfiguration schedulerConfiguration) {
     return schedulerConfiguration.getMonitorConfiguration();
   }
-
-  @Singleton
-  @Provides
-  public MockEventsConfiguration getMockEventsLoaderConfiguration(
-      ThirdEyeSchedulerConfiguration schedulerConfiguration) {
-    return schedulerConfiguration.getMockEventsLoaderConfiguration();
-  }
 }

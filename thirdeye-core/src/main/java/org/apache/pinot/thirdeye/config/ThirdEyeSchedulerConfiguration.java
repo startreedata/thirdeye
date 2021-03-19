@@ -17,9 +17,6 @@ public class ThirdEyeSchedulerConfiguration {
   @JsonProperty("holidayEvents")
   private HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration = new HolidayEventsLoaderConfiguration();
 
-  @JsonProperty("mockEvents")
-  private MockEventsConfiguration mockEventsConfiguration = new MockEventsConfiguration();
-
   @JsonProperty("autoOnboard")
   private AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
 
@@ -80,16 +77,6 @@ public class ThirdEyeSchedulerConfiguration {
   public ThirdEyeSchedulerConfiguration setDataAvailabilityTaskScheduler(
       final boolean dataAvailabilityTaskScheduler) {
     this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
-    return this;
-  }
-
-  public MockEventsConfiguration getMockEventsLoaderConfiguration() {
-    return mockEventsConfiguration;
-  }
-
-  public ThirdEyeSchedulerConfiguration setMockEventsLoaderConfiguration(
-      final MockEventsConfiguration mockEventsConfiguration) {
-    this.mockEventsConfiguration = mockEventsConfiguration;
     return this;
   }
 

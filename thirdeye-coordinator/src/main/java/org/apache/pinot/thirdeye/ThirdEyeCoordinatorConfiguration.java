@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
+import org.apache.pinot.thirdeye.config.MockEventsConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 
 public class ThirdEyeCoordinatorConfiguration extends Configuration {
@@ -16,6 +17,9 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
 
   @JsonProperty("swagger")
   private SwaggerBundleConfiguration swaggerBundleConfiguration;
+
+  @JsonProperty("mockEvents")
+  private MockEventsConfiguration mockEventsConfiguration = new MockEventsConfiguration();
 
   private String configPath = "config";
 
@@ -54,6 +58,16 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
 
   public ThirdEyeCoordinatorConfiguration setConfigPath(final String configPath) {
     this.configPath = configPath;
+    return this;
+  }
+
+  public MockEventsConfiguration getMockEventsConfiguration() {
+    return mockEventsConfiguration;
+  }
+
+  public ThirdEyeCoordinatorConfiguration setMockEventsConfiguration(
+      final MockEventsConfiguration mockEventsConfiguration) {
+    this.mockEventsConfiguration = mockEventsConfiguration;
     return this;
   }
 }

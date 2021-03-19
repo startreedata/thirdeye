@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.common.ThirdEyeSwaggerBundle;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
@@ -106,8 +105,6 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
 
     injector.getInstance(SubscriptionCronScheduler.class)
         .addToContext(CTX_INJECTOR, injector);
-
-    injector.getInstance(MockEventsLoader.class).run();
 
     env.lifecycle().manage(lifecycleManager(config));
   }

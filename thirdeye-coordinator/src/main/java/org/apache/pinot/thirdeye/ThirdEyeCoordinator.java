@@ -12,6 +12,7 @@ import java.lang.management.RuntimeMXBean;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.common.ThirdEyeConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -62,6 +63,9 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
     // Enable CORS. Opens up the API server to respond to requests from all external domains.
     addCorsFilter(env);
+
+    // Load mock events if enabled.
+    injector.getInstance(MockEventsLoader.class).run();
   }
 
   void addCorsFilter(final Environment environment) {

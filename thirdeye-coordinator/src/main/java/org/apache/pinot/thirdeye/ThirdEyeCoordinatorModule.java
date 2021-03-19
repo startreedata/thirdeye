@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
 import org.apache.pinot.thirdeye.config.ConfigurationHolder;
+import org.apache.pinot.thirdeye.config.MockEventsConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeCoordinatorModule extends AbstractModule {
@@ -36,5 +37,11 @@ public class ThirdEyeCoordinatorModule extends AbstractModule {
   @Provides
   public JwtConfiguration getJwtConfiguration(AuthConfiguration authConfiguration) {
     return authConfiguration.getJwtConfiguration();
+  }
+
+  @Singleton
+  @Provides
+  public MockEventsConfiguration getMockEventsLoaderConfiguration() {
+    return configuration.getMockEventsConfiguration();
   }
 }

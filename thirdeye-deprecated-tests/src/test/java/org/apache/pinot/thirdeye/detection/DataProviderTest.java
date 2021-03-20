@@ -59,6 +59,7 @@ import org.apache.pinot.thirdeye.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
@@ -197,7 +198,8 @@ public class DataProviderTest {
     DefaultTimeSeriesLoader timeSeriesLoader = new DefaultTimeSeriesLoader(
         TestDbEnv.getInstance().getMetricConfigDAO(),
         TestDbEnv.getInstance().getDatasetConfigDAO(),
-        cacheRegistry);
+        cacheRegistry, CacheConfig.getInstance(),
+        mock(TimeSeriesCache.class));
 
     // provider
     final TimeSeriesCacheBuilder timeSeriesCacheBuilder = new TimeSeriesCacheBuilder(timeSeriesLoader);

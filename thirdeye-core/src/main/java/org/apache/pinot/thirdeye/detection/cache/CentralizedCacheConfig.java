@@ -35,7 +35,7 @@ public class CentralizedCacheConfig {
   /**
    * if inserting documents in parallel, the number of threads to spawn for inserting them
    */
-  private int maxParallelInserts;
+  private int maxParallelInserts = 10;
 
   /**
    * name of the single data store we are choosing to use from the data sources provided

@@ -30,10 +30,10 @@ public class CacheConfig {
   public static CacheConfig INSTANCE = new CacheConfig();
 
   @JsonProperty("centralizedCacheSettings")
-  private CentralizedCacheConfig centralizedCacheConfig;
+  private CentralizedCacheConfig centralizedCacheConfig = new CentralizedCacheConfig();
 
-  private boolean useInMemoryCache;
-  private boolean useCentralizedCache;
+  private boolean useInMemoryCache = false;
+  private boolean useCentralizedCache = false;
 
   /**
    * Deprecated in favor of using an injected instance. This will be removed.

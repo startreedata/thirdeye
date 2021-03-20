@@ -19,10 +19,14 @@
 
 package org.apache.pinot.thirdeye.detection.cache;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.annotation.Nullable;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
@@ -49,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * data from centralized cache as an alternative to directly fetching from the
  * data source each time.
  */
-
+@Singleton
 public class DefaultTimeSeriesCache implements TimeSeriesCache {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultTimeSeriesCache.class);
@@ -60,19 +64,23 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
   private final CacheDAO cacheDAO;
   private final ExecutorService executor;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private final CacheConfig cacheConfig;
 
+  @Inject
   public DefaultTimeSeriesCache(MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO,
-      DataSourceCache dataSourceCache,
-      CacheDAO cacheDAO,
-      ExecutorService executorService,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      final DatasetConfigManager datasetDAO,
+      @Nullable final CacheDAO cacheDAO,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final CacheConfig cacheConfig) {
+    this.cacheConfig = cacheConfig;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
-    this.dataSourceCache = dataSourceCache;
+    this.dataSourceCache = thirdEyeCacheRegistry.getDataSourceCache();
     this.cacheDAO = cacheDAO;
-    this.executor = executorService;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+
+    int maxParallelInserts = cacheConfig.getCentralizedCacheConfig().getMaxParallelInserts();
+    this.executor = Executors.newFixedThreadPool(maxParallelInserts);
   }
 
   /**
@@ -85,8 +93,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
    * @throws Exception if fetch from original data source was not successful.
    */
   public ThirdEyeResponse fetchTimeSeries(ThirdEyeRequest thirdEyeRequest) throws Exception {
-
-    if (!CacheConfig.getInstance().useCentralizedCache()) {
+    if (!cacheConfig.useCentralizedCache()) {
       return this.dataSourceCache.getQueryResult(thirdEyeRequest);
     }
 

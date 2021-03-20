@@ -198,14 +198,14 @@ public class DataProviderTest {
     // aggregation loader
     final AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO,
         datasetDAO,
-        cacheRegistry);
+        cacheRegistry, dataSourceCache);
 
     // time series loader
     DefaultTimeSeriesLoader timeSeriesLoader = new DefaultTimeSeriesLoader(
         TestDbEnv.getInstance().getMetricConfigDAO(),
         TestDbEnv.getInstance().getDatasetConfigDAO(),
         cacheRegistry, CacheConfig.getInstance(),
-        mock(TimeSeriesCache.class));
+        mock(TimeSeriesCache.class), dataSourceCache);
 
     // provider
     final TimeSeriesCacheBuilder timeSeriesCacheBuilder = new TimeSeriesCacheBuilder(timeSeriesLoader);

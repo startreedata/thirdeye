@@ -97,7 +97,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
         -1,
         "ref",
         thirdEyeCacheRegistry);
-    ThirdEyeResponse response = thirdEyeCacheRegistry.getDataSourceCache()
+    ThirdEyeResponse response = dataSourceCache
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
         thirdEyeCacheRegistry);

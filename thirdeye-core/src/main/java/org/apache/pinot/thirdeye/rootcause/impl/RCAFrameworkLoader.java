@@ -39,6 +39,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
@@ -64,6 +65,7 @@ public class RCAFrameworkLoader {
   private final ConfigurationHolder configurationHolder;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
+  private final DataSourceCache dataSourceCache;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final EntityToEntityMappingManager entityToEntityMappingManager;
   private final EventManager eventManager;
@@ -75,6 +77,7 @@ public class RCAFrameworkLoader {
       final ConfigurationHolder configurationHolder,
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager,
+      final DataSourceCache dataSourceCache,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final EntityToEntityMappingManager entityToEntityMappingManager,
       final EventManager eventManager,
@@ -83,6 +86,7 @@ public class RCAFrameworkLoader {
     this.configurationHolder = configurationHolder;
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
+    this.dataSourceCache = dataSourceCache;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
     this.entityToEntityMappingManager = entityToEntityMappingManager;
     this.eventManager = eventManager;
@@ -148,6 +152,7 @@ public class RCAFrameworkLoader {
             .setProperties(properties)
             .setDatasetConfigManager(datasetConfigManager)
             .setMetricConfigManager(metricConfigManager)
+            .setDataSourceCache(dataSourceCache)
             .setThirdEyeCacheRegistry(thirdEyeCacheRegistry)
             .setEntityToEntityMappingManager(entityToEntityMappingManager)
             .setEventManager(eventManager)

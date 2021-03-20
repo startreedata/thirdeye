@@ -120,7 +120,8 @@ public class TimeSeriesCacheTest {
         datasetDAO,
         cacheDAO,
         thirdEyeCacheRegistry,
-        config);
+        config,
+        dataSourceCache);
   }
 
   @AfterMethod
@@ -194,7 +195,8 @@ public class TimeSeriesCacheTest {
 
     // verify that the missing data points were inserted into the cache after miss.
     executor.shutdown();
-    executor.awaitTermination(10, TimeUnit.SECONDS);
+    final boolean result = executor.awaitTermination(15, TimeUnit.SECONDS);
+    assertThat(result).isTrue();
 
     verify(cacheDAO, times(10)).insertTimeSeriesDataPoint(any(TimeSeriesDataPoint.class));
     Assert.assertEquals(pretendCacheStore.size(), 10);

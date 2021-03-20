@@ -19,6 +19,7 @@ package org.apache.pinot.thirdeye.notification.content.templates;
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_HOST_KEY;
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_PORT_KEY;
 
+import com.google.inject.Injector;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.notification.ContentFormatterUtils;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
@@ -57,10 +59,12 @@ public class TestHierarchicalAnomaliesContent {
   private TestDbEnv testDAOProvider;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
   private AnomalyFunctionManager anomalyFunctionDAO;
+  private Injector injector;
 
   @BeforeClass
   public void beforeClass() {
     testDAOProvider = new TestDbEnv();
+    injector = testDAOProvider.getInjector();
     DAORegistry daoRegistry = TestDbEnv.getInstance();
     mergedAnomalyResultDAO = daoRegistry.getMergedAnomalyResultDAO();
     anomalyFunctionDAO = daoRegistry.getAnomalyFunctionDAO();
@@ -157,8 +161,10 @@ public class TestHierarchicalAnomaliesContent {
         .getInstance(ThirdEyeCacheRegistry.class);
     EmailContentFormatter
         contentFormatter = new EmailContentFormatter(new Properties(),
-        new HierarchicalAnomaliesContent(thirdEyeCacheRegistry.getDataSourceCache(),
-            thirdEyeCacheRegistry, TestDbEnv.getInstance().getMetricConfigDAO(),
+        new HierarchicalAnomaliesContent(
+            injector.getInstance(DataSourceCache.class),
+            thirdEyeCacheRegistry,
+            TestDbEnv.getInstance().getMetricConfigDAO(),
             TestDbEnv.getInstance().getDatasetConfigDAO(),
             TestDbEnv.getInstance().getEventDAO(),
             TestDbEnv.getInstance().getMergedAnomalyResultDAO()),

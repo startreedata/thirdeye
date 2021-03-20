@@ -37,6 +37,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTimeZone;
@@ -69,15 +70,18 @@ public class DataCubeSummaryCalculator {
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
+  private final DataSourceCache dataSourceCache;
 
   @Inject
   public DataCubeSummaryCalculator(
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final DataSourceCache dataSourceCache) {
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
+    this.dataSourceCache = dataSourceCache;
   }
 
   /**
@@ -340,7 +344,7 @@ public class DataCubeSummaryCalculator {
 
     final CostFunction costFunction = new BalancedCostFunction();
     final AdditiveDBClient cubeDbClient = new AdditiveDBClient(
-        thirdEyeCacheRegistry.getDataSourceCache(),
+        dataSourceCache,
         thirdEyeCacheRegistry);
     final MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(cubeDbClient,
         costFunction,
@@ -408,7 +412,7 @@ public class DataCubeSummaryCalculator {
       String denominatorMetric = metricConfigManager.findById(denominatorId).getName();
       // Generate cube result
       CostFunction costFunction = new RatioCostFunction();
-      RatioDBClient dbClient = new RatioDBClient(thirdEyeCacheRegistry.getDataSourceCache(),
+      RatioDBClient dbClient = new RatioDBClient(dataSourceCache,
           thirdEyeCacheRegistry);
       MultiDimensionalRatioSummary mdSummary = new MultiDimensionalRatioSummary(dbClient,
           costFunction, dateTimeZone);

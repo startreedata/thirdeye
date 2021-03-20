@@ -34,13 +34,9 @@ import org.apache.pinot.thirdeye.datasource.cache.DatasetConfigCacheLoader;
 import org.apache.pinot.thirdeye.datasource.cache.DatasetMaxDataTimeCacheLoader;
 import org.apache.pinot.thirdeye.datasource.cache.MetricConfigCacheLoader;
 import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class ThirdEyeCacheRegistry {
-
-  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeCacheRegistry.class);
 
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
@@ -73,7 +69,7 @@ public class ThirdEyeCacheRegistry {
    * Initialize the cache for meta data. This method has to be invoked after data sources are
    * connected.
    */
-  public void initMetaDataCaches() {
+  private void initMetaDataCaches() {
     Preconditions.checkNotNull(dataSourceCache,
         "Data sources are not initialized. Please invoke initDataSources() before this method.");
 
@@ -104,10 +100,6 @@ public class ThirdEyeCacheRegistry {
 
   public void registerDatasetMaxDataTimeCache(LoadingCache<String, Long> datasetMaxDataTimeCache) {
     this.datasetMaxDataTimeCache = datasetMaxDataTimeCache;
-  }
-
-  public DataSourceCache getDataSourceCache() {
-    return dataSourceCache;
   }
 
   public LoadingCache<String, DatasetConfigDTO> getDatasetConfigCache() {

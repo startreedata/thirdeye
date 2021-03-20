@@ -8,6 +8,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 
 public class PipelineInitContext {
 
@@ -16,6 +17,7 @@ public class PipelineInitContext {
   private Map<String, Object> properties;
   private MetricConfigManager metricConfigManager;
   private DatasetConfigManager datasetConfigManager;
+  private DataSourceCache dataSourceCache;
   private ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private EntityToEntityMappingManager entityToEntityMappingManager;
   private EventManager eventManager;
@@ -66,6 +68,16 @@ public class PipelineInitContext {
   public PipelineInitContext setDatasetConfigManager(
       final DatasetConfigManager datasetConfigManager) {
     this.datasetConfigManager = datasetConfigManager;
+    return this;
+  }
+
+  public DataSourceCache getDataSourceCache() {
+    return dataSourceCache;
+  }
+
+  public PipelineInitContext setDataSourceCache(
+      final DataSourceCache dataSourceCache) {
+    this.dataSourceCache = dataSourceCache;
     return this;
   }
 

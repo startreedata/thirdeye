@@ -107,7 +107,7 @@ public class MetricBreakdownPipeline extends Pipeline {
     Map<String, Object> properties = context.getProperties();
     this.metricDAO = context.getMetricConfigManager();
     this.datasetDAO = context.getDatasetConfigManager();
-    this.cache = context.getThirdEyeCacheRegistry().getDataSourceCache();
+    this.cache = context.getDataSourceCache();
     this.thirdEyeCacheRegistry = context.getThirdEyeCacheRegistry();
 
     this.executor = Executors.newFixedThreadPool(

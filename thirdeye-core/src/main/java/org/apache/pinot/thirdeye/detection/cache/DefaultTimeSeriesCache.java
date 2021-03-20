@@ -71,11 +71,12 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
       final DatasetConfigManager datasetDAO,
       @Nullable final CacheDAO cacheDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
-      final CacheConfig cacheConfig) {
+      final CacheConfig cacheConfig,
+      final DataSourceCache dataSourceCache) {
     this.cacheConfig = cacheConfig;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
-    this.dataSourceCache = thirdEyeCacheRegistry.getDataSourceCache();
+    this.dataSourceCache = dataSourceCache;
     this.cacheDAO = cacheDAO;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
 

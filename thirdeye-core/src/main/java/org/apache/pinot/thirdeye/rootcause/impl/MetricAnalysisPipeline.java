@@ -96,7 +96,7 @@ public class MetricAnalysisPipeline extends Pipeline {
     this.metricDAO = context.getMetricConfigManager();
     this.datasetDAO = context.getDatasetConfigManager();
     this.thirdEyeCacheRegistry = context.getThirdEyeCacheRegistry();
-    this.cache = thirdEyeCacheRegistry.getDataSourceCache();
+    this.cache = context.getDataSourceCache();
     this.strategyFactory = parseStrategyFactory(
         MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
     this.granularity = TimeGranularity.fromString(MapUtils.getString(properties, PROP_GRANULARITY, PROP_GRANULARITY_DEFAULT));

@@ -38,6 +38,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,14 +51,17 @@ public class DefaultAggregationLoader implements AggregationLoader {
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
+  private final DataSourceCache dataSourceCache;
 
   @Inject
   public DefaultAggregationLoader(MetricConfigManager metricDAO,
       DatasetConfigManager datasetDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final DataSourceCache dataSourceCache) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+    this.dataSourceCache = dataSourceCache;
   }
 
   private static long makeTimeout(long deadline) {
@@ -100,7 +104,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
           .makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref",
               this.metricDAO, this.datasetDAO,
               thirdEyeCacheRegistry);
-      Future<ThirdEyeResponse> res = thirdEyeCacheRegistry.getDataSourceCache()
+      Future<ThirdEyeResponse> res = dataSourceCache
           .getQueryResultAsync(rc.getRequest());
 
       requests.put(dimension, rc);
@@ -162,7 +166,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     RequestContainer rc = DataFrameUtils
         .makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref", this.metricDAO,
             this.datasetDAO, thirdEyeCacheRegistry);
-    ThirdEyeResponse res = thirdEyeCacheRegistry.getDataSourceCache()
+    ThirdEyeResponse res = dataSourceCache
         .getQueryResult(rc.getRequest());
     return DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
   }

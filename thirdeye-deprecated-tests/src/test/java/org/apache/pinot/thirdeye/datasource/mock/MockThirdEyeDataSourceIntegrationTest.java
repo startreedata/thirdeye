@@ -60,6 +60,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
   private long timestamp;
   private DatasetConfigManager datasetConfigDAO;
   private MetricConfigManager metricConfigDAO;
+  private DataSourceCache dataSourceCache;
 
   /**
    * Constructs and wraps a request for a metric with derived expressions. Resolves all
@@ -174,7 +175,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     final DataSourcesLoader dataSourcesLoader = new DataSourcesLoader(metricConfigDAO,
         datasetConfigDAO,
         readConfig(dataSourcesConfig, DataSourcesConfiguration.class));
-    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourcesLoader);
+    dataSourceCache = new DataSourceCache(dataSourcesLoader);
     cacheRegistry = new ThirdEyeCacheRegistry(
         metricConfigDAO,
         datasetConfigDAO,
@@ -197,7 +198,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
         -1,
         "ref",
         cacheRegistry);
-    ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
+    ThirdEyeResponse response = dataSourceCache
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
         cacheRegistry);
@@ -215,7 +216,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
         -1,
         "ref",
         cacheRegistry);
-    ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
+    ThirdEyeResponse response = dataSourceCache
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
         cacheRegistry);
@@ -235,8 +236,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     MetricSlice slice = MetricSlice
         .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
     TimeSeriesRequestContainer requestContainer = makeTimeSeriesRequest(slice, "ref");
-    ThirdEyeResponse response = this.cacheRegistry.getDataSourceCache()
-        .getQueryResult(requestContainer.getRequest());
+    ThirdEyeResponse response = dataSourceCache.getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
         cacheRegistry);
 
@@ -268,8 +268,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
 
     RequestContainer reqBasic = makeAggregateRequest(sliceBasic, Collections.emptyList(), -1, "ref",
         cacheRegistry);
-    ThirdEyeResponse resBasic = this.cacheRegistry.getDataSourceCache()
-        .getQueryResult(reqBasic.getRequest());
+    ThirdEyeResponse resBasic = dataSourceCache.getQueryResult(reqBasic.getRequest());
     DataFrame dfBasic = DataFrameUtils.evaluateResponse(resBasic, reqBasic,
         cacheRegistry);
 
@@ -278,8 +277,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
         -1,
         "ref",
         cacheRegistry);
-    ThirdEyeResponse resMobile = this.cacheRegistry.getDataSourceCache()
-        .getQueryResult(reqMobile.getRequest());
+    ThirdEyeResponse resMobile = dataSourceCache.getQueryResult(reqMobile.getRequest());
     DataFrame dfMobile = DataFrameUtils.evaluateResponse(resMobile, reqMobile,
         cacheRegistry);
 
@@ -288,8 +286,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
         -1,
         "ref",
         cacheRegistry);
-    ThirdEyeResponse resDesktop = this.cacheRegistry.getDataSourceCache()
-        .getQueryResult(reqDesktop.getRequest());
+    ThirdEyeResponse resDesktop = dataSourceCache.getQueryResult(reqDesktop.getRequest());
     DataFrame dfDesktop = DataFrameUtils.evaluateResponse(resDesktop, reqDesktop,
         cacheRegistry);
 

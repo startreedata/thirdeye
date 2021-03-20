@@ -34,7 +34,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotQuery;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
@@ -63,8 +62,8 @@ public class PinotDataSourceResource {
   private final DataSourceCache dataSourceCache;
 
   @Inject
-  public PinotDataSourceResource(ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    dataSourceCache = thirdEyeCacheRegistry.getDataSourceCache();
+  public PinotDataSourceResource(final DataSourceCache dataSourceCache) {
+    this.dataSourceCache = dataSourceCache;
   }
 
   /**

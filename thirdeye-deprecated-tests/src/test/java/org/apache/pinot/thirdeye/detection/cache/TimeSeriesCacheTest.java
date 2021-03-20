@@ -43,7 +43,6 @@ import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
@@ -112,11 +111,11 @@ public class TimeSeriesCacheTest {
 
     executor = Executors.newSingleThreadExecutor();
 
-    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = new TestDbEnv()
-        .getInjector()
-        .getInstance(ThirdEyeCacheRegistry.class);
+    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = new ThirdEyeCacheRegistry(
+        metricDAO,
+        datasetDAO,
+        dataSourceCache);
 
-    thirdEyeCacheRegistry.setDataSourceCache(dataSourceCache);
     cache = new DefaultTimeSeriesCache(metricDAO,
         datasetDAO,
         cacheDAO,

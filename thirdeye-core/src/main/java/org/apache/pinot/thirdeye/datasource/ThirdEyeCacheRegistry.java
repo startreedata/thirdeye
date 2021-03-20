@@ -44,9 +44,7 @@ public class ThirdEyeCacheRegistry {
 
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
-  private final DataSourcesLoader dataSourcesLoader;
-
-  private DataSourceCache dataSourceCache;
+  private final DataSourceCache dataSourceCache;
 
   // Meta-data caches
   private LoadingCache<String, DatasetConfigDTO> datasetConfigCache;
@@ -57,19 +55,10 @@ public class ThirdEyeCacheRegistry {
   public ThirdEyeCacheRegistry(
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager,
-      final DataSourcesLoader dataSourcesLoader) {
+      final DataSourceCache dataSourceCache) {
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
-    this.dataSourcesLoader = dataSourcesLoader;
-  }
-
-  /**
-   * Initializes the adaptor to data sources such as Pinot, MySQL, etc.
-   */
-  private void initDataSources() {
-    // Initialize adaptors to time series databases.
-    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourcesLoader.getDataSourceMap());
-    setDataSourceCache(dataSourceCache);
+    this.dataSourceCache = dataSourceCache;
   }
 
   /**
@@ -77,7 +66,6 @@ public class ThirdEyeCacheRegistry {
    *
    */
   public void initializeCaches() {
-    initDataSources();
     initMetaDataCaches();
   }
 
@@ -120,10 +108,6 @@ public class ThirdEyeCacheRegistry {
 
   public DataSourceCache getDataSourceCache() {
     return dataSourceCache;
-  }
-
-  public void setDataSourceCache(DataSourceCache dataSourceCache) {
-    this.dataSourceCache = dataSourceCache;
   }
 
   public LoadingCache<String, DatasetConfigDTO> getDatasetConfigCache() {

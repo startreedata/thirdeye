@@ -41,6 +41,7 @@ import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -170,13 +171,15 @@ public class MockThirdEyeDataSourceIntegrationTest {
 
     // data sources and caches
     this.timestamp = System.currentTimeMillis();
+    final DataSourcesLoader dataSourcesLoader = new DataSourcesLoader(metricConfigDAO,
+        datasetConfigDAO,
+        readConfig(dataSourcesConfig, DataSourcesConfiguration.class));
+    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourcesLoader);
     cacheRegistry = new ThirdEyeCacheRegistry(
-        this.metricConfigDAO,
-        this.datasetConfigDAO,
-        new DataSourcesLoader(this.metricConfigDAO,
-            this.datasetConfigDAO,
-            readConfig(dataSourcesConfig, DataSourcesConfiguration.class))
-    );
+        metricConfigDAO,
+        datasetConfigDAO,
+        dataSourceCache);
+
     cacheRegistry.initializeCaches();
   }
 

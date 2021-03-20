@@ -36,6 +36,7 @@ import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -79,13 +80,14 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     metricConfigDAO.save(configDTO);
     Assert.assertNotNull(configDTO.getId());
 
+    final DataSourcesLoader dataSourcesLoader = new DataSourcesLoader(metricConfigDAO,
+        datasetConfigDAO,
+        readConfig(dataSourcesConfig, DataSourcesConfiguration.class));
+    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourcesLoader);
     final ThirdEyeCacheRegistry thirdEyeCacheRegistry = new ThirdEyeCacheRegistry(
         metricConfigDAO,
         datasetConfigDAO,
-        new DataSourcesLoader(metricConfigDAO,
-            datasetConfigDAO,
-            readConfig(dataSourcesConfig, DataSourcesConfiguration.class))
-    );
+        dataSourceCache);
 
     thirdEyeCacheRegistry.initializeCaches();
 

@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.datasource.cache;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
+import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
@@ -39,9 +41,10 @@ public class DataSourceCache {
   private final ExecutorService executorService;
   private final Map<String, ThirdEyeDataSource> dataSourceMap;
 
-  public DataSourceCache(Map<String, ThirdEyeDataSource> dataSourceMap) {
+  @Inject
+  public DataSourceCache(final DataSourcesLoader dataSourcesLoader) {
     this.executorService = Executors.newCachedThreadPool();
-    this.dataSourceMap = dataSourceMap;
+    this.dataSourceMap = dataSourcesLoader.getDataSourceMap();
   }
 
   public ThirdEyeDataSource getDataSource(String dataSource) {

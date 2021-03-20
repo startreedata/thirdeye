@@ -50,6 +50,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
@@ -179,13 +180,18 @@ public class DataProviderTest {
     id2name.put(this.metricIds.get(1), "value");
     Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
-    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourceMap);
 
-    ThirdEyeCacheRegistry cacheRegistry = TestDbEnv
-        .getInstance(ThirdEyeCacheRegistry.class);
+    final DataSourcesLoader dataSourcesLoader = mock(DataSourcesLoader.class);
+    when(dataSourcesLoader.getDataSourceMap()).thenReturn(dataSourceMap);
+
+    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourcesLoader);
+    final ThirdEyeCacheRegistry cacheRegistry = new ThirdEyeCacheRegistry(
+        metricDAO,
+        datasetDAO,
+        dataSourceCache);
+
     cacheRegistry.registerMetricConfigCache(mockMetricConfigCache);
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);
-    cacheRegistry.setDataSourceCache(dataSourceCache);
     cacheRegistry.registerDatasetMaxDataTimeCache(mockDatasetMaxDataTimeCache);
 
 

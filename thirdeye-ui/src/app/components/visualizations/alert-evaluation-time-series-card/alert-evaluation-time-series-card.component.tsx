@@ -92,6 +92,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTim
                     onRestore={handleAlertEvaluationTimeSeriesCardRestore}
                 >
                     <AlertEvaluationTimeSeries
+                        hideBrush
                         alertEvaluation={props.alertEvaluation}
                     />
                 </VisualizationCard>

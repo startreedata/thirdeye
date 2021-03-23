@@ -1,5 +1,5 @@
 import { Bar, Circle, Line } from "@visx/visx";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, MouseEvent, TouchEvent } from "react";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
 import { MouseHoverMarkerProps } from "./mouse-hover-marker.interfaces";
@@ -7,6 +7,30 @@ import { MouseHoverMarkerProps } from "./mouse-hover-marker.interfaces";
 export const MouseHoverMarker: FunctionComponent<MouseHoverMarkerProps> = (
     props: MouseHoverMarkerProps
 ) => {
+    const handleMouseLeave = (event: MouseEvent<SVGRectElement>): void => {
+        if (props.zoom && props.zoom.isDragging) {
+            props.zoom.dragEnd();
+        } else {
+            props.onMouseLeave(event);
+        }
+    };
+
+    const handleMouseMove = (event: MouseEvent<SVGRectElement>): void => {
+        if (props.zoom && props.zoom.isDragging) {
+            props.zoom.dragMove(event);
+            props.onZoomChange && props.onZoomChange(props.zoom);
+        } else {
+            props.onMouseMove(event);
+        }
+    };
+
+    const handleTouchMove = (event: TouchEvent<SVGRectElement>): void => {
+        if (props.zoom) {
+            props.zoom.dragMove(event);
+            props.onZoomChange && props.onZoomChange(props.zoom);
+        }
+    };
+
     return (
         <>
             {/* Mouse hover region  */}
@@ -16,8 +40,13 @@ export const MouseHoverMarker: FunctionComponent<MouseHoverMarkerProps> = (
                 width={props.xScale && props.xScale.range()[1]}
                 x={props.xScale && props.xScale.range()[0]}
                 y={props.yScale && props.yScale.range()[1]}
-                onMouseLeave={props.onMouseLeave}
-                onMouseMove={props.onMouseMove}
+                onMouseDown={props.zoom && props.zoom.dragStart}
+                onMouseLeave={handleMouseLeave}
+                onMouseMove={handleMouseMove}
+                onMouseUp={props.zoom && props.zoom.dragEnd}
+                onTouchEnd={props.zoom && props.zoom.dragEnd}
+                onTouchMove={handleTouchMove}
+                onTouchStart={props.zoom && props.zoom.dragStart}
             />
 
             {/* Mouse hover marker */}

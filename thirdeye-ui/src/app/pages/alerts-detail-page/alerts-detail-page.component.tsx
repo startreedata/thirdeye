@@ -215,7 +215,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
                 <Grid item xs={12}>
                     <AlertEvaluationTimeSeriesCard
                         alertEvaluation={alertEvaluation}
-                        alertEvaluationTimeSeriesHeight={500}
+                        alertEvaluationTimeSeriesHeight={300}
                         maximizedTitle={uiAlert ? uiAlert.name : ""}
                         onRefresh={fetchAlertEvaluation}
                     />

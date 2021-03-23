@@ -42,6 +42,8 @@ import { LinearAxisLeft } from "../linear-axis-left/linear-axis-left.component";
 import { MouseHoverMarker } from "../mouse-hover-marker/mouse-hover-marker.component";
 import { TimeAxisBottom } from "../time-axis-bottom/time-axis-bottom.component";
 import { TooltipWithBounds } from "../tooltip-with-bounds/tooltip-with-bounds.component";
+import { Zoom } from "../zoom/zoom.component";
+import { VisxZoomProps } from "../zoom/zoom.interfaces";
 import { AlertEvaluationTimeSeriesLegend } from "./alert-evaluation-time-series-legend/alert-evaluation-time-series-legend.component";
 import { AlertEvaluationTimeSeriesPlot } from "./alert-evaluation-time-series-plot/alert-evaluation-time-series-plot.component";
 import { AlertEvaluationTimeSeriesTooltip } from "./alert-evaluation-time-series-tooltip/alert-evaluation-time-series-tooltip.component";
@@ -53,7 +55,6 @@ import {
     AlertEvaluationTimeSeriesStateAction,
 } from "./alert-evaluation-time-series.interfaces";
 import { alertEvaluationTimeSeriesReducer } from "./alert-evaluation-time-series.reducer";
-import { useAlertEvaluationTimeSeriesStyles } from "./alert-evaluation-time-series.styles";
 
 const PADDING_TOP_SVG = 10;
 const PADDING_BOTTOM_SVG = 30;
@@ -63,6 +64,15 @@ const HEIGHT_SEPARATOR_TIME_SERIES_BRUSH = 60;
 const HEIGHT_BRUSH = 90;
 const HEIGHT_LEGEND_XS = 55;
 const HEIGHT_LEGEND_SM_UP = 25;
+
+const initialTransform = {
+    scaleX: 1,
+    scaleY: 1,
+    translateX: 50,
+    translateY: 10,
+    skewX: 0,
+    skewY: 0,
+};
 
 // Simple wrapper to capture parent container dimensions
 export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSeriesProps> = (
@@ -85,7 +95,6 @@ export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSer
 const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSeriesInternalProps> = (
     props: AlertEvaluationTimeSeriesInternalProps
 ) => {
-    const alertEvaluationTimeSeriesClasses = useAlertEvaluationTimeSeriesStyles();
     const [
         {
             loading,
@@ -138,7 +147,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         svgHeight -
         PADDING_TOP_SVG -
         HEIGHT_SEPARATOR_TIME_SERIES_BRUSH -
-        HEIGHT_BRUSH; // Available SVG height - top SVG padding - separator height between time series and brush - space for brush
+        (props.hideBrush ? 0 : HEIGHT_BRUSH); // Available SVG height - top SVG padding - separator height between time series and brush - space for brush
     const timeSeriesXMax = svgWidth - PADDING_LEFT_SVG - PADDING_RIGHT_SVG; // Available SVG width - left and right SVG padding
     const timeSeriesYMax = timeSeriesHeight;
 
@@ -175,6 +184,21 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             clamp: true,
         });
     }, [props.parentHeight, filteredAlertEvaluationTimeSeriesPoints]);
+
+    const initialXScale = useMemo(() => {
+        return scaleTime<number>({
+            range: [0, timeSeriesXMax],
+            domain: [
+                getAlertEvaluationTimeSeriesPointsMinTimestamp(
+                    filteredAlertEvaluationTimeSeriesPoints
+                ),
+                getAlertEvaluationTimeSeriesPointsMaxTimestamp(
+                    filteredAlertEvaluationTimeSeriesPoints
+                ),
+            ],
+            clamp: true,
+        });
+    }, [props.parentWidth, alertEvaluationTimeSeriesPoints]);
 
     // Brush scales
     const brushXScale = useMemo(() => {
@@ -448,6 +472,47 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         }
     };
 
+    // handle zoom event here
+    const handleZoomChange = useCallback(
+        debounce((zoom: VisxZoomProps | undefined): void => {
+            if (!zoom) {
+                return;
+            }
+
+            // Apply zoom to initial scale only
+            const newDomain = initialXScale.range().map((r) => {
+                return initialXScale.invert(
+                    (r - zoom.transformMatrix.translateX) /
+                        zoom.transformMatrix.scaleX
+                );
+            });
+
+            // Filter time series based on brush selection
+            const newFilteredAlertEvaluationTimeSeriesPoints = filterAlertEvaluationTimeSeriesPointsByTime(
+                alertEvaluationTimeSeriesPoints,
+                newDomain[0].getTime(),
+                newDomain[newDomain.length - 1].getTime()
+            );
+
+            // Filter anomalies based on brush selection
+            const newFilteredAlertEvaluationAnomalies = filterAnomaliesByTime(
+                alertEvaluationAnomalies,
+                newDomain[0].getTime(),
+                newDomain[newDomain.length - 1].getTime()
+            );
+
+            dispatch({
+                type: AlertEvaluationTimeSeriesStateAction.UPDATE,
+                payload: {
+                    filteredAlertEvaluationTimeSeriesPoints: newFilteredAlertEvaluationTimeSeriesPoints,
+                    filteredAlertEvaluationAnomalies: newFilteredAlertEvaluationAnomalies,
+                },
+            });
+            hideTooltip();
+        }, 1),
+        [initialXScale]
+    );
+
     if (loading) {
         return <LoadingIndicator />;
     }
@@ -469,107 +534,132 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         >
             {/* SVG container with calculated SVG bounds */}
             <Box height={svgHeight} width="100%">
-                <svg className={alertEvaluationTimeSeriesClasses.svg}>
-                    {/* Time series */}
-                    <Group left={PADDING_LEFT_SVG} top={PADDING_TOP_SVG}>
-                        {/* Time series plot */}
-                        <AlertEvaluationTimeSeriesPlot
-                            alertEvaluationAnomalies={
-                                filteredAlertEvaluationAnomalies
-                            }
-                            alertEvaluationTimeSeriesPoints={
-                                filteredAlertEvaluationTimeSeriesPoints
-                            }
-                            anomalies={anomaliesPlotVisible}
-                            baseline={baselinePlotVisible}
-                            current={currentPlotVisible}
-                            upperAndLowerBound={upperAndLowerBoundPlotVisible}
-                            xScale={timeSeriesXScale}
-                            yScale={timeSeriesYScale}
-                        />
+                <Zoom
+                    xAxisOnly
+                    initialTransform={initialTransform}
+                    svgHeight={svgHeight}
+                    svgWidth={svgWidth}
+                    zoomHeight={timeSeriesHeight}
+                    zoomWidth={timeSeriesXMax}
+                    onChange={handleZoomChange}
+                >
+                    {(zoom): JSX.Element => (
+                        <>
+                            <Group
+                                left={PADDING_LEFT_SVG}
+                                top={PADDING_TOP_SVG}
+                            >
+                                <AlertEvaluationTimeSeriesPlot
+                                    alertEvaluationAnomalies={
+                                        filteredAlertEvaluationAnomalies
+                                    }
+                                    alertEvaluationTimeSeriesPoints={
+                                        filteredAlertEvaluationTimeSeriesPoints
+                                    }
+                                    anomalies={anomaliesPlotVisible}
+                                    baseline={baselinePlotVisible}
+                                    current={currentPlotVisible}
+                                    upperAndLowerBound={
+                                        upperAndLowerBoundPlotVisible
+                                    }
+                                    xScale={timeSeriesXScale}
+                                    yScale={timeSeriesYScale}
+                                />
+                            </Group>
 
-                        {/* X axis */}
-                        <TimeAxisBottom
-                            parentWidth={props.parentWidth}
-                            scale={timeSeriesXScale}
-                            top={timeSeriesYMax}
-                        />
+                            <Group
+                                left={PADDING_LEFT_SVG}
+                                top={PADDING_TOP_SVG}
+                            >
+                                {/* X axis */}
+                                <TimeAxisBottom
+                                    parentWidth={props.parentWidth}
+                                    scale={timeSeriesXScale}
+                                    top={timeSeriesYMax}
+                                />
 
-                        {/* Y axis */}
-                        <LinearAxisLeft scale={timeSeriesYScale} />
+                                {/* Y axis */}
+                                <LinearAxisLeft scale={timeSeriesYScale} />
 
-                        {/* Mouse hover marker  */}
-                        <MouseHoverMarker
-                            x={tooltipData && tooltipData.timestamp}
-                            xScale={timeSeriesXScale}
-                            y={tooltipData && tooltipData.current}
-                            yScale={timeSeriesYScale}
-                            onMouseLeave={handleTimeSeriesMouseLeave}
-                            onMouseMove={handleTimeSeriesMouseMove}
-                        />
-                    </Group>
+                                {/* Mouse hover marker  */}
+                                <MouseHoverMarker
+                                    x={tooltipData && tooltipData.timestamp}
+                                    xScale={timeSeriesXScale}
+                                    y={tooltipData && tooltipData.current}
+                                    yScale={timeSeriesYScale}
+                                    zoom={zoom}
+                                    onMouseLeave={handleTimeSeriesMouseLeave}
+                                    onMouseMove={handleTimeSeriesMouseMove}
+                                    onZoomChange={handleZoomChange}
+                                />
+                            </Group>
 
-                    {/* Brush */}
-                    <Group
-                        left={PADDING_LEFT_SVG}
-                        top={
-                            timeSeriesHeight +
-                            HEIGHT_SEPARATOR_TIME_SERIES_BRUSH
-                        }
-                    >
-                        <Group opacity={0.5}>
-                            {/* Time series plot */}
-                            <AlertEvaluationTimeSeriesPlot
-                                anomalies
-                                baseline
-                                current
-                                upperAndLowerBound
-                                alertEvaluationAnomalies={
-                                    alertEvaluationAnomalies
-                                }
-                                alertEvaluationTimeSeriesPoints={
-                                    alertEvaluationTimeSeriesPoints
-                                }
-                                xScale={brushXScale}
-                                yScale={brushYScale}
-                            />
-                        </Group>
+                            {/* Brush */}
+                            {!props.hideBrush && (
+                                <Group
+                                    left={PADDING_LEFT_SVG}
+                                    top={
+                                        timeSeriesHeight +
+                                        HEIGHT_SEPARATOR_TIME_SERIES_BRUSH
+                                    }
+                                >
+                                    <Group opacity={0.5}>
+                                        {/* Time series plot */}
+                                        <AlertEvaluationTimeSeriesPlot
+                                            anomalies
+                                            baseline
+                                            current
+                                            upperAndLowerBound
+                                            alertEvaluationAnomalies={
+                                                alertEvaluationAnomalies
+                                            }
+                                            alertEvaluationTimeSeriesPoints={
+                                                alertEvaluationTimeSeriesPoints
+                                            }
+                                            xScale={brushXScale}
+                                            yScale={brushYScale}
+                                        />
+                                    </Group>
 
-                        {/* Brush */}
-                        <Brush
-                            height={brushYMax}
-                            innerRef={brushRef}
-                            margin={{
-                                top:
-                                    timeSeriesHeight +
-                                    HEIGHT_SEPARATOR_TIME_SERIES_BRUSH,
-                                left: PADDING_LEFT_SVG,
-                                right: PADDING_RIGHT_SVG,
-                                bottom: 0,
-                            }}
-                            selectedBoxStyle={{
-                                fill: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
-                                fillOpacity: 0.4,
-                                strokeOpacity: 1,
-                                stroke:
-                                    Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
-                                strokeWidth:
-                                    Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
-                            }}
-                            width={brushXMax}
-                            xScale={brushXScale}
-                            yScale={brushYScale}
-                            onChange={handleBrushChangeDebounced}
-                        />
+                                    {/* Brush */}
+                                    <Brush
+                                        height={brushYMax}
+                                        innerRef={brushRef}
+                                        margin={{
+                                            top:
+                                                timeSeriesHeight +
+                                                HEIGHT_SEPARATOR_TIME_SERIES_BRUSH,
+                                            left: PADDING_LEFT_SVG,
+                                            right: PADDING_RIGHT_SVG,
+                                            bottom: 0,
+                                        }}
+                                        selectedBoxStyle={{
+                                            fill:
+                                                Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+                                            fillOpacity: 0.4,
+                                            strokeOpacity: 1,
+                                            stroke:
+                                                Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+                                            strokeWidth:
+                                                Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
+                                        }}
+                                        width={brushXMax}
+                                        xScale={brushXScale}
+                                        yScale={brushYScale}
+                                        onChange={handleBrushChangeDebounced}
+                                    />
 
-                        {/* X axis */}
-                        <TimeAxisBottom
-                            parentWidth={props.parentWidth}
-                            scale={brushXScale}
-                            top={brushYMax}
-                        />
-                    </Group>
-                </svg>
+                                    {/* X axis */}
+                                    <TimeAxisBottom
+                                        parentWidth={props.parentWidth}
+                                        scale={brushXScale}
+                                        top={brushYMax}
+                                    />
+                                </Group>
+                            )}
+                        </>
+                    )}
+                </Zoom>
             </Box>
 
             {/* Legend */}

@@ -5,6 +5,9 @@ node_modules/
 build/
 dist/
 
+# Maven
+target/
+
 # TypeScript
 tsbuildinfo/
 

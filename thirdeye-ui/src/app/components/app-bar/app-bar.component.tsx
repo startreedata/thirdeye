@@ -15,7 +15,7 @@ import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
-import { ReactComponent as ThirdEyeIcon } from "../../../assets/images/third-eye.svg";
+import { ReactComponent as ThirdEyeIcon } from "../../../assets/images/thirdeye.svg";
 import {
     AppRoute,
     getAlertsCreatePath,

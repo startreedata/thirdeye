@@ -1,4 +1,5 @@
 # Dependencies
+node
 node_modules/
 
 # Production

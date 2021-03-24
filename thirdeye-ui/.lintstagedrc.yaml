@@ -1,11 +1,11 @@
 ---
-# Run stylelint
-"*.{css,scss}": stylelint --fix
-
 # Organize imports and run ESLint
 "*.{ts,tsx,js}":
     - organize-imports-cli
     - eslint --fix
+
+# Run stylelint
+"*.{css,scss}": stylelint --fix
 
 # Run prettier
 "*": prettier --write

@@ -17,10 +17,10 @@ describe("Anomalies REST", () => {
 
     test("getAnomaly should invoke axios.get with appropriate input and return appropriate anomaly", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
-            data: mockAnomalyResponse,
+            data: mockAnomaly,
         });
 
-        await expect(getAnomaly(1)).resolves.toEqual(mockAnomalyResponse);
+        await expect(getAnomaly(1)).resolves.toEqual(mockAnomaly);
 
         expect(axios.get).toHaveBeenCalledWith("/api/anomalies/1");
     });
@@ -33,10 +33,10 @@ describe("Anomalies REST", () => {
 
     test("getAllAnomalies should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
-            data: [mockAnomalyResponse],
+            data: [mockAnomaly],
         });
 
-        await expect(getAllAnomalies()).resolves.toEqual([mockAnomalyResponse]);
+        await expect(getAllAnomalies()).resolves.toEqual([mockAnomaly]);
 
         expect(axios.get).toHaveBeenCalledWith("/api/anomalies");
     });
@@ -49,12 +49,10 @@ describe("Anomalies REST", () => {
 
     test("getAnomaliesByAlertId should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
-            data: [mockAnomalyResponse],
+            data: [mockAnomaly],
         });
 
-        await expect(getAnomaliesByAlertId(1)).resolves.toEqual([
-            mockAnomalyResponse,
-        ]);
+        await expect(getAnomaliesByAlertId(1)).resolves.toEqual([mockAnomaly]);
 
         expect(axios.get).toHaveBeenCalledWith("/api/anomalies?alert.id=1");
     });
@@ -67,12 +65,10 @@ describe("Anomalies REST", () => {
 
     test("getAnomaliesByTime should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
-            data: [mockAnomalyResponse],
+            data: [mockAnomaly],
         });
 
-        await expect(getAnomaliesByTime(1, 2)).resolves.toEqual([
-            mockAnomalyResponse,
-        ]);
+        await expect(getAnomaliesByTime(1, 2)).resolves.toEqual([mockAnomaly]);
 
         expect(axios.get).toHaveBeenCalledWith(
             "/api/anomalies?startTime=[gte]1&endTime=[lte]2"
@@ -87,11 +83,11 @@ describe("Anomalies REST", () => {
 
     test("getAnomaliesByAlertIdAndTime should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
-            data: [mockAnomalyResponse],
+            data: [mockAnomaly],
         });
 
         await expect(getAnomaliesByAlertIdAndTime(1, 2, 3)).resolves.toEqual([
-            mockAnomalyResponse,
+            mockAnomaly,
         ]);
 
         expect(axios.get).toHaveBeenCalledWith(
@@ -109,10 +105,10 @@ describe("Anomalies REST", () => {
 
     test("deleteAnomaly should invoke axios.delete with appropriate input and return appropriate anomaly", async () => {
         jest.spyOn(axios, "delete").mockResolvedValue({
-            data: mockAnomalyResponse,
+            data: mockAnomaly,
         });
 
-        await expect(deleteAnomaly(1)).resolves.toEqual(mockAnomalyResponse);
+        await expect(deleteAnomaly(1)).resolves.toEqual(mockAnomaly);
 
         expect(axios.delete).toHaveBeenCalledWith("/api/anomalies/1");
     });
@@ -124,7 +120,7 @@ describe("Anomalies REST", () => {
     });
 });
 
-const mockAnomalyResponse = {
+const mockAnomaly = {
     id: 1,
 };
 

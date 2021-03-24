@@ -4,7 +4,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
@@ -31,9 +31,9 @@ import {
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
 import { getUiSubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
-import { SubscriptionGroupsDetailPageParams } from "./subscription-groups-detail-page.interfaces";
+import { SubscriptionGroupsViewPageParams } from "./subscription-groups-view-page.interfaces";
 
-export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
+export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const [
         uiSubscriptionGroup,
         setUiSubscriptionGroup,
@@ -43,7 +43,7 @@ export const SubscriptionGroupsDetailPage: FunctionComponent = () => {
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
-    const params = useParams<SubscriptionGroupsDetailPageParams>();
+    const params = useParams<SubscriptionGroupsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
 

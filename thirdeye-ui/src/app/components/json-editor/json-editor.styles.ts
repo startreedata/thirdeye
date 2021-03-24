@@ -5,20 +5,15 @@ import { codeTypographyOptions } from "../../utils/material-ui/typography.util";
 const HEIGHT_HELPER_TEXT = 20;
 
 export const useJSONEditorStyles = makeStyles((theme) => ({
-    jsonEditorContainer: {
-        height: "100%",
-        width: "100%",
-        flex: 1,
-    },
     jsonEditor: {
         width: "100%",
         borderRadius: theme.shape.borderRadius,
     },
-    jsonEditorWithoutHelperText: {
-        height: "100%",
-    },
     jsonEditorWithHelperText: {
         height: `calc(100% - ${HEIGHT_HELPER_TEXT}px)`,
+    },
+    jsonEditorWithoutHelperText: {
+        height: "100%",
     },
     jsonEditorDefaultBorder: {
         border: Border.BORDER_INPUT_DEFAULT,

@@ -1,7 +1,7 @@
 import { ScaleTime } from "d3-scale";
 import { cloneDeep } from "lodash";
 import { Settings } from "luxon";
-import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
+import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
@@ -229,7 +229,7 @@ describe("Visualization Util", () => {
         expect(timeTickValues[2]).toEqual(1672560000000);
     });
 
-    test("getTickValuesForTimeAxis should return appropriate tick values for scale with domain interval of 0", () => {
+    test("getTickValuesForTimeAxis should return appropriate tick values for scale domain interval of 0", () => {
         mockScaleDomain = [new Date(1577865600000), new Date(1577865600000)];
         const timeTickValues = getTickValuesForTimeAxis(mockScale);
 

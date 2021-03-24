@@ -5,31 +5,34 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { AppRoute } from "../../utils/routes/routes.util";
 import { GeneralAuthenticatedRouter } from "./general-authenticated.router";
 
-jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
-    useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-        setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-    })),
-}));
+jest.mock(
+    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
+    () => ({
+        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
+            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
+        })),
+    })
+);
 
 jest.mock(
     "../../components/loading-indicator/loading-indicator.component",
     () => ({
-        LoadingIndicator: jest.fn().mockReturnValue(<>testLoadingIndicator</>),
+        LoadingIndicator: jest.fn().mockReturnValue("testLoadingIndicator"),
     })
 );
 
 jest.mock("../../pages/home-page/home-page.component", () => ({
-    HomePage: jest.fn().mockReturnValue(<>testHomePage</>),
+    HomePage: jest.fn().mockReturnValue("testHomePage"),
 }));
 
 jest.mock("../../pages/sign-out-page/sign-out-page.component", () => ({
-    SignOutPage: jest.fn().mockReturnValue(<>testSignOutPage</>),
+    SignOutPage: jest.fn().mockReturnValue("testSignOutPage"),
 }));
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue("testPageNotFoundPage"),
     })
 );
 

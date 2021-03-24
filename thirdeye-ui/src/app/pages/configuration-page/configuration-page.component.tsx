@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { ReactComponent as MetricIcon } from "../../../assets/images/metric.svg";
 import { ReactComponent as SubscriptionGroupIcon } from "../../../assets/images/subscription-group.svg";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { ButtonTile } from "../../components/button-tile/button-tile.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import {

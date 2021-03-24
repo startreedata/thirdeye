@@ -1,15 +1,9 @@
-# Node
-node/
-
 # Dependencies
 node_modules/
 
 # Production
 build/
 dist/
-
-# Maven
-target/
 
 # TypeScript
 tsbuildinfo/
@@ -20,6 +14,5 @@ src/test/unit/coverage/
 src/test/unit/mocks/
 
 # webpack (ESLint rules don't agree with how these configs are written)
-webpack.config.dev.js
-webpack.config.prod.js
+webpack.config.*.js
 webpack/

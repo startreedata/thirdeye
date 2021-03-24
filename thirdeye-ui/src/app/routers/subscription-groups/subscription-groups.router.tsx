@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import {
     AppRoute,
@@ -22,10 +22,10 @@ const SubscriptionGroupsAllPage = lazy(() =>
     ).then((module) => ({ default: module.SubscriptionGroupsAllPage }))
 );
 
-const SubscriptionGroupsDetailPage = lazy(() =>
+const SubscriptionGroupsViewPage = lazy(() =>
     import(
-        /* webpackChunkName: "subscription-groups-detail-page" */ "../../pages/subscription-groups-detail-page/subscription-groups-detail-page.component"
-    ).then((module) => ({ default: module.SubscriptionGroupsDetailPage }))
+        /* webpackChunkName: "subscription-groups-view-page" */ "../../pages/subscription-groups-view-page/subscription-groups-view-page.component"
+    ).then((module) => ({ default: module.SubscriptionGroupsViewPage }))
 );
 
 const SubscriptionGroupsCreatePage = lazy(() =>
@@ -86,11 +86,11 @@ export const SubscriptionGroupsRouter: FunctionComponent = () => {
                     path={AppRoute.SUBSCRIPTION_GROUPS_ALL}
                 />
 
-                {/* Subscription groups detail path */}
+                {/* Subscription groups view path */}
                 <Route
                     exact
-                    component={SubscriptionGroupsDetailPage}
-                    path={AppRoute.SUBSCRIPTION_GROUPS_DETAIL}
+                    component={SubscriptionGroupsViewPage}
+                    path={AppRoute.SUBSCRIPTION_GROUPS_VIEW}
                 />
 
                 {/* Subscription groups create path */}

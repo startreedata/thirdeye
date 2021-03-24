@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
@@ -18,15 +18,15 @@ import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
-import { MetricsDetailPageParams } from "./metrics-detail-page.interfaces";
+import { MetricsViewPageParams } from "./metrics-view-page.interfaces";
 
-export const MetricsDetailPage: FunctionComponent = () => {
+export const MetricsViewPage: FunctionComponent = () => {
     const [uiMetric, setUiMetric] = useState<UiMetric | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
-    const params = useParams<MetricsDetailPageParams>();
+    const params = useParams<MetricsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
 

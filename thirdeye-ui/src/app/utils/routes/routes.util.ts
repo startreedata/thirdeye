@@ -7,23 +7,23 @@ export const AppRoute = {
     HOME: "/home",
     ALERTS: "/alerts",
     ALERTS_ALL: "/alerts/all",
-    ALERTS_DETAIL: `/alerts/detail/id/${PLACEHOLDER_ROUTE_ID}`,
+    ALERTS_VIEW: `/alerts/view/id/${PLACEHOLDER_ROUTE_ID}`,
     ALERTS_CREATE: "/alerts/create",
     ALERTS_UPDATE: `/alerts/update/id/${PLACEHOLDER_ROUTE_ID}`,
     ANOMALIES: "/anomalies",
     ANOMALIES_ALL: "/anomalies/all",
-    ANOMALIES_DETAIL: `/anomalies/detail/id/${PLACEHOLDER_ROUTE_ID}`,
+    ANOMALIES_VIEW: `/anomalies/view/id/${PLACEHOLDER_ROUTE_ID}`,
     CONFIGURATION: "/configuration",
-    SUBSCRIPTION_GROUPS: "/configuration/subscriptionGroups",
-    SUBSCRIPTION_GROUPS_ALL: "/configuration/subscriptionGroups/all",
-    SUBSCRIPTION_GROUPS_DETAIL: `/configuration/subscriptionGroups/detail/id/${PLACEHOLDER_ROUTE_ID}`,
-    SUBSCRIPTION_GROUPS_CREATE: "/configuration/subscriptionGroups/create",
-    SUBSCRIPTION_GROUPS_UPDATE: `/configuration/subscriptionGroups/update/id/${PLACEHOLDER_ROUTE_ID}`,
+    SUBSCRIPTION_GROUPS: "/configuration/subscription-groups",
+    SUBSCRIPTION_GROUPS_ALL: "/configuration/subscription-groups/all",
+    SUBSCRIPTION_GROUPS_VIEW: `/configuration/subscription-groups/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    SUBSCRIPTION_GROUPS_CREATE: "/configuration/subscription-groups/create",
+    SUBSCRIPTION_GROUPS_UPDATE: `/configuration/subscription-groups/update/id/${PLACEHOLDER_ROUTE_ID}`,
     METRICS: "/configuration/metrics",
     METRICS_ALL: "/configuration/metrics/all",
-    METRICS_DETAIL: `/configuration/metrics/detail/id/${PLACEHOLDER_ROUTE_ID}`,
-    SIGN_IN: "/signIn",
-    SIGN_OUT: "/signOut",
+    METRICS_VIEW: `/configuration/metrics/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    SIGN_IN: "/sign-in",
+    SIGN_OUT: "/sign-out",
 } as const;
 
 export const getBasePath = (): string => {
@@ -42,8 +42,8 @@ export const getAlertsAllPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ALERTS_ALL);
 };
 
-export const getAlertsDetailPath = (id: number): string => {
-    let path: string = AppRoute.ALERTS_DETAIL;
+export const getAlertsViewPath = (id: number): string => {
+    let path: string = AppRoute.ALERTS_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);
@@ -68,8 +68,8 @@ export const getAnomaliesAllPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ANOMALIES_ALL);
 };
 
-export const getAnomaliesDetailPath = (id: number): string => {
-    let path: string = AppRoute.ANOMALIES_DETAIL;
+export const getAnomaliesViewPath = (id: number): string => {
+    let path: string = AppRoute.ANOMALIES_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);
@@ -89,8 +89,8 @@ export const getSubscriptionGroupsAllPath = (): string => {
     );
 };
 
-export const getSubscriptionGroupsDetailPath = (id: number): string => {
-    let path: string = AppRoute.SUBSCRIPTION_GROUPS_DETAIL;
+export const getSubscriptionGroupsViewPath = (id: number): string => {
+    let path: string = AppRoute.SUBSCRIPTION_GROUPS_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);
@@ -117,8 +117,8 @@ export const getMetricsAllPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.METRICS_ALL);
 };
 
-export const getMetricsDetailPath = (id: number): string => {
-    let path: string = AppRoute.METRICS_DETAIL;
+export const getMetricsViewPath = (id: number): string => {
+    let path: string = AppRoute.METRICS_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);

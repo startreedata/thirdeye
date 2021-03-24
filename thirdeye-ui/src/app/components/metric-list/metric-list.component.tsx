@@ -1,10 +1,10 @@
 import { Grid, useTheme } from "@material-ui/core";
 import {
-    CellParams,
-    CellValue,
-    ColDef,
-    RowId,
-    SelectionModelChangeParams,
+    GridCellParams,
+    GridCellValue,
+    GridColDef,
+    GridRowId,
+    GridSelectionModelChangeParams,
 } from "@material-ui/data-grid";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
@@ -19,11 +19,14 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { filterMetrics } from "../../utils/metrics/metrics.util";
-import { getMetricsDetailPath } from "../../utils/routes/routes.util";
-import { getSearchStatusLabel } from "../../utils/search/search.util";
+import { getMetricsViewPath } from "../../utils/routes/routes.util";
+import {
+    getSearchStatusLabel,
+    getSelectedStatusLabel,
+} from "../../utils/search/search.util";
 import { actionsCellRenderer } from "../data-grid/actions-cell/actions-cell.component";
 import { customCellRenderer } from "../data-grid/custom-cell/custom-cell.component";
-import { DataGrid } from "../data-grid/data-grid.component";
+import { DataGrid } from "../data-grid/data-grid/data-grid.component";
 import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { MetricListProps } from "./metric-list.interfaces";
@@ -35,9 +38,9 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     const metricListClasses = useMetricListStyles();
     const [filteredUiMetrics, setFilteredUiMetrics] = useState<UiMetric[]>([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
-    const [dataGridColumns, setDataGridColumns] = useState<ColDef[]>([]);
+    const [dataGridColumns, setDataGridColumns] = useState<GridColDef[]>([]);
     const [dataGridSelectionModel, setDataGridSelectionModel] = useState<
-        RowId[]
+        GridRowId[]
     >([]);
     const theme = useTheme();
     const history = useHistory();
@@ -55,7 +58,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     }, [searchWords]);
 
     const initDataGridColumns = (): void => {
-        const columns: ColDef[] = [
+        const columns: GridColDef[] = [
             // Name
             {
                 field: "name",
@@ -141,7 +144,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
         setDataGridColumns(columns);
     };
 
-    const metricStatusRenderer = (params: CellParams): ReactElement => {
+    const metricStatusRenderer = (params: GridCellParams): ReactElement => {
         return (
             <>
                 {/* Active */}
@@ -164,17 +167,17 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     };
 
     const metricStatusComparator = (
-        value1: CellValue,
-        value2: CellValue
+        value1: GridCellValue,
+        value2: GridCellValue
     ): number => {
         return toNumber(value1) - toNumber(value2);
     };
 
     const metricViewCountComparator = (
-        _value1: CellValue,
-        _value2: CellValue,
-        params1: CellParams,
-        params2: CellParams
+        _value1: GridCellValue,
+        _value2: GridCellValue,
+        params1: GridCellParams,
+        params2: GridCellParams
     ): number => {
         const uiMetric1 = getUiMetric(params1.row && params1.row.rowId);
         const uiMetric2 = getUiMetric(params2.row && params2.row.rowId);
@@ -198,7 +201,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     };
 
     const handleMetricViewDetailsById = (id: number): void => {
-        history.push(getMetricsDetailPath(id));
+        history.push(getMetricsViewPath(id));
     };
 
     const handleMetricDelete = (id: number): void => {
@@ -219,7 +222,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
     };
 
     const handleDataGridSelectionModelChange = (
-        params: SelectionModelChangeParams
+        params: GridSelectionModelChangeParams
     ): void => {
         setDataGridSelectionModel(params.selectionModel || []);
     };
@@ -262,6 +265,7 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                     }
                     rows={filteredUiMetrics}
                     searchWords={searchWords}
+                    selectedStatusLabelFn={getSelectedStatusLabel}
                     selectionModel={dataGridSelectionModel}
                     onSelectionModelChange={handleDataGridSelectionModelChange}
                 />

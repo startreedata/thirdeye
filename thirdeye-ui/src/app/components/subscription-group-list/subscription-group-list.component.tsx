@@ -1,10 +1,10 @@
 import { Grid } from "@material-ui/core";
 import {
-    CellParams,
-    CellValue,
-    ColDef,
-    RowId,
-    SelectionModelChangeParams,
+    GridCellParams,
+    GridCellValue,
+    GridColDef,
+    GridRowId,
+    GridSelectionModelChangeParams,
 } from "@material-ui/data-grid";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -12,13 +12,16 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import {
-    getSubscriptionGroupsDetailPath,
     getSubscriptionGroupsUpdatePath,
+    getSubscriptionGroupsViewPath,
 } from "../../utils/routes/routes.util";
-import { getSearchStatusLabel } from "../../utils/search/search.util";
+import {
+    getSearchStatusLabel,
+    getSelectedStatusLabel,
+} from "../../utils/search/search.util";
 import { filterSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 import { actionsCellRenderer } from "../data-grid/actions-cell/actions-cell.component";
-import { DataGrid } from "../data-grid/data-grid.component";
+import { DataGrid } from "../data-grid/data-grid/data-grid.component";
 import { linkCellRenderer } from "../data-grid/link-cell/link-cell.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { SubscriptionGroupListProps } from "./subscription-group-list.interfaces";
@@ -33,9 +36,9 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
         setFilteredUiSubscriptionGroups,
     ] = useState<UiSubscriptionGroup[]>([]);
     const [searchWords, setSearchWords] = useState<string[]>([]);
-    const [dataGridColumns, setDataGridColumns] = useState<ColDef[]>([]);
+    const [dataGridColumns, setDataGridColumns] = useState<GridColDef[]>([]);
     const [dataGridSelectionModel, setDataGridSelectionModel] = useState<
-        RowId[]
+        GridRowId[]
     >([]);
     const history = useHistory();
     const { t } = useTranslation();
@@ -57,7 +60,7 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     }, [searchWords]);
 
     const initDataGridColumns = (): void => {
-        const columns: ColDef[] = [
+        const columns: GridColDef[] = [
             // Name
             {
                 field: "name",
@@ -118,10 +121,10 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     };
 
     const subscriptionGroupAlertCountComparator = (
-        _value1: CellValue,
-        _value2: CellValue,
-        params1: CellParams,
-        params2: CellParams
+        _value1: GridCellValue,
+        _value2: GridCellValue,
+        params1: GridCellParams,
+        params2: GridCellParams
     ): number => {
         const uiSubscriptionGroup1 = getUiSubscriptionGroup(
             params1.row && params1.row.rowId
@@ -145,10 +148,10 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     };
 
     const subscriptionGroupEmailCountComparator = (
-        _value1: CellValue,
-        _value2: CellValue,
-        params1: CellParams,
-        params2: CellParams
+        _value1: GridCellValue,
+        _value2: GridCellValue,
+        params1: GridCellParams,
+        params2: GridCellParams
     ): number => {
         const uiSubscriptionGroup1 = getUiSubscriptionGroup(
             params1.row && params1.row.rowId
@@ -179,7 +182,7 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     };
 
     const handleSubscriptionGroupViewDetailsById = (id: number): void => {
-        history.push(getSubscriptionGroupsDetailPath(id));
+        history.push(getSubscriptionGroupsViewPath(id));
     };
 
     const handleSubscriptionGroupEdit = (id: number): void => {
@@ -208,7 +211,7 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
     };
 
     const handleDataGridSelectionModelChange = (
-        params: SelectionModelChangeParams
+        params: GridSelectionModelChangeParams
     ): void => {
         setDataGridSelectionModel(params.selectionModel || []);
     };
@@ -256,6 +259,7 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
                     }
                     rows={filteredUiSubscriptionGroups}
                     searchWords={searchWords}
+                    selectedStatusLabelFn={getSelectedStatusLabel}
                     selectionModel={dataGridSelectionModel}
                     onSelectionModelChange={handleDataGridSelectionModelChange}
                 />

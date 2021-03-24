@@ -6,7 +6,7 @@ import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimension } from "../../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../../utils/material-ui/palette.util";
-import { AlertEvaluationTimeSeriesPlotLine } from "../alert-evaluation-time-series.interfaces";
+import { AlertEvaluationTimeSeriesPlotLine } from "../alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import { AlertEvaluationTimeSeriesLegendProps } from "./alert-evaluation-time-series-legend.interfaces";
 import { useAlertEvaluationTimeSeriesLegendStyles } from "./alert-evaluation-time-series-legend.styles";
 

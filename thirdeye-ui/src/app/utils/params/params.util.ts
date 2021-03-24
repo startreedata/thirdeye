@@ -1,33 +1,39 @@
 import { isInteger, toNumber } from "lodash";
+import { SearchQueryStringKey } from "../../components/search-bar/search-bar.interfaces";
 import {
     TimeRange,
     TimeRangeDuration,
+    TimeRangeQueryStringKey,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { appHistory } from "../history/history.util";
 import { createTimeRangeDuration } from "../time-range/time-range.util";
 
-export enum AppQueryStringKey {
-    SEARCH = "SEARCH",
-    SEARCH_TEXT = "SEARCH_TEXT",
-    TIME_RANGE = "TIME_RANGE",
-    START_TIME = "START_TIME",
-    END_TIME = "END_TIME",
-}
+export const HASH_KEY_ACCESS_TOKEN = "access_token";
+
+export const getAccessTokenFromHashParams = (): string => {
+    let accessToken = "";
+    const urlSearchParams = new URLSearchParams(location.hash.substr(1));
+    if (urlSearchParams.has(HASH_KEY_ACCESS_TOKEN)) {
+        accessToken = urlSearchParams.get(HASH_KEY_ACCESS_TOKEN) as string;
+    }
+
+    return accessToken;
+};
 
 export const setSearchInQueryString = (search: string): void => {
-    setQueryString(AppQueryStringKey.SEARCH.toLowerCase(), search);
+    setQueryString(SearchQueryStringKey.SEARCH.toLowerCase(), search);
 };
 
 export const getSearchFromQueryString = (): string => {
-    return getQueryString(AppQueryStringKey.SEARCH.toLowerCase());
+    return getQueryString(SearchQueryStringKey.SEARCH.toLowerCase());
 };
 
 export const setSearchTextInQueryString = (searchText: string): void => {
-    setQueryString(AppQueryStringKey.SEARCH_TEXT.toLowerCase(), searchText);
+    setQueryString(SearchQueryStringKey.SEARCH_TEXT.toLowerCase(), searchText);
 };
 
 export const getSearchTextFromQueryString = (): string => {
-    return getQueryString(AppQueryStringKey.SEARCH_TEXT.toLowerCase());
+    return getQueryString(SearchQueryStringKey.SEARCH_TEXT.toLowerCase());
 };
 
 export const setTimeRangeDurationInQueryString = (
@@ -38,31 +44,31 @@ export const setTimeRangeDurationInQueryString = (
     }
 
     setQueryString(
-        AppQueryStringKey.TIME_RANGE.toLowerCase(),
+        TimeRangeQueryStringKey.TIME_RANGE.toLowerCase(),
         timeRangeDuration.timeRange
     );
     setQueryString(
-        AppQueryStringKey.START_TIME.toLowerCase(),
+        TimeRangeQueryStringKey.START_TIME.toLowerCase(),
         timeRangeDuration.startTime.toString()
     );
     setQueryString(
-        AppQueryStringKey.END_TIME.toLowerCase(),
+        TimeRangeQueryStringKey.END_TIME.toLowerCase(),
         timeRangeDuration.endTime.toString()
     );
 };
 
 export const getTimeRangeDurationFromQueryString = (): TimeRangeDuration | null => {
     const timeRangeString = getQueryString(
-        AppQueryStringKey.TIME_RANGE.toLowerCase()
+        TimeRangeQueryStringKey.TIME_RANGE.toLowerCase()
     );
 
     const startTimeString = getQueryString(
-        AppQueryStringKey.START_TIME.toLowerCase()
+        TimeRangeQueryStringKey.START_TIME.toLowerCase()
     );
     const startTime = toNumber(startTimeString);
 
     const endTimeString = getQueryString(
-        AppQueryStringKey.END_TIME.toLowerCase()
+        TimeRangeQueryStringKey.END_TIME.toLowerCase()
     );
     const endTime = toNumber(endTimeString);
 
@@ -144,7 +150,7 @@ export const isValidNumberId = (param: string): boolean => {
 
 // List of app query string keys that are allowed to be carried forward when navigating
 const allowedAppQueryStringKeys = [
-    AppQueryStringKey.TIME_RANGE,
-    AppQueryStringKey.START_TIME,
-    AppQueryStringKey.END_TIME,
+    TimeRangeQueryStringKey.TIME_RANGE,
+    TimeRangeQueryStringKey.START_TIME,
+    TimeRangeQueryStringKey.END_TIME,
 ];

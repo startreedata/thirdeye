@@ -19,9 +19,9 @@ import {
     UiAlertSubscriptionGroup,
 } from "../../../rest/dto/ui-alert.interfaces";
 import {
-    getAlertsDetailPath,
     getAlertsUpdatePath,
-    getSubscriptionGroupsDetailPath,
+    getAlertsViewPath,
+    getSubscriptionGroupsViewPath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -53,7 +53,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             return;
         }
 
-        history.push(getAlertsDetailPath(props.uiAlert.id));
+        history.push(getAlertsViewPath(props.uiAlert.id));
         handleAlertOptionsClose();
     };
 
@@ -92,7 +92,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             return;
         }
 
-        history.push(getSubscriptionGroupsDetailPath(subscriptionGroup.id));
+        history.push(getSubscriptionGroupsViewPath(subscriptionGroup.id));
     };
 
     const getAlertDataSetAndMetric = (

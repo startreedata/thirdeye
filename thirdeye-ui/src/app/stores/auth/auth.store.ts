@@ -11,6 +11,7 @@ export const useAuthStore = create<AuthStore>(
             authDisabled: false,
             authenticated: false,
             accessToken: "",
+            redirectPath: "",
 
             disableAuth: () => {
                 set({
@@ -33,6 +34,18 @@ export const useAuthStore = create<AuthStore>(
                     authDisabled: false,
                     authenticated: false,
                     accessToken: "",
+                });
+            },
+
+            setRedirectPath: (path: string) => {
+                set({
+                    redirectPath: path,
+                });
+            },
+
+            clearRedirectPath: () => {
+                set({
+                    redirectPath: "",
                 });
             },
         }),

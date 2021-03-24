@@ -1,4 +1,4 @@
-import { AlertEvaluationTimeSeriesPlotLine } from "../alert-evaluation-time-series.interfaces";
+import { AlertEvaluationTimeSeriesPlotLine } from "../alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 
 export interface AlertEvaluationTimeSeriesLegendProps {
     current: boolean;

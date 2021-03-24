@@ -1,7 +1,7 @@
 import { IconButton, InputAdornment, TextField } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import SearchIcon from "@material-ui/icons/Search";
-import { debounce } from "lodash";
+import { debounce, isNil } from "lodash";
 import React, {
     ChangeEvent,
     FunctionComponent,
@@ -10,7 +10,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { useTranslation } from "react-i18next";
 import {
     getSearchFromQueryString,
     getSearchTextFromQueryString,
@@ -25,13 +24,12 @@ const DELAY_HANDLE_ON_CHANGE = 400;
 export const SearchBar: FunctionComponent<SearchBarProps> = (
     props: SearchBarProps
 ) => {
-    const [searchText, setSearchText] = useState("");
+    const [searchText, setSearchText] = useState(props.searchText || "");
     const searchInputRef = useRef<HTMLInputElement>(null);
-    const { t } = useTranslation();
 
     useEffect(() => {
-        // Pick up search from query string
-        if (!props.setSearchQueryString) {
+        // Pick up search from query string if search text not provided
+        if (props.searchText || !props.setSearchQueryString) {
             return;
         }
 
@@ -43,13 +41,23 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
         }
     }, []);
 
+    useEffect(() => {
+        if (isNil(props.searchText)) {
+            return;
+        }
+
+        // Input changed, update search text and arrange to send event with a delay to allow the
+        // user to notice search
+        updateSearchText(props.searchText || "", true);
+    }, [props.searchText]);
+
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
         // Update search text and arrange to send event with a delay to account for a burst of
         // change events
         updateSearchText(event.currentTarget.value, true);
     };
 
-    const handleInputClear = (): void => {
+    const handleClearClick = (): void => {
         // Update search text and arrange to send event immediately
         updateSearchText("", false);
         // Set focus
@@ -77,9 +85,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 
         // Set search in query string
         if (props.setSearchQueryString) {
-            setSearchInQueryString(
-                props.searchLabel ? props.searchLabel : t("label.search")
-            );
+            setSearchInQueryString(props.searchLabel);
             setSearchTextInQueryString(
                 searchWords.join(DELIMITER_SEARCH_WORDS)
             );
@@ -110,7 +116,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 
                         {/* Clear button */}
                         <InputAdornment position="end">
-                            <IconButton onClick={handleInputClear}>
+                            <IconButton onClick={handleClearClick}>
                                 <CloseIcon />
                             </IconButton>
                         </InputAdornment>
@@ -119,7 +125,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
             }}
             autoFocus={props.autoFocus}
             inputRef={searchInputRef}
-            label={props.searchLabel || t("label.search")}
+            label={props.searchLabel}
             value={searchText}
             variant="outlined"
             onChange={handleInputChange}

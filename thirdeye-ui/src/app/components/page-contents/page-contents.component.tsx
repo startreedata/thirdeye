@@ -14,6 +14,7 @@ import React, {
     FunctionComponent,
     UIEvent,
     useCallback,
+    useContext,
     useEffect,
     useRef,
     useState,
@@ -22,13 +23,11 @@ import { Helmet } from "react-helmet";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { getDocumentTitle } from "../../utils/page/page.util";
-import {
-    AppBreadcrumbs,
-    useAppBreadcrumbs,
-} from "../app-breadcrumbs/app-breadcrumbs.component";
+import { AppBreadcrumbsContext } from "../app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { AppBreadcrumbs } from "../app-breadcrumbs/app-breadcrumbs/app-breadcrumbs.component";
 import { ID_APP_DRAWER } from "../app-drawer/app-drawer.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
-import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector.component";
+import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.styles";
 
@@ -48,7 +47,9 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
     const [pageContentsScrollTop, setPageContentsScrollTop] = useState(0);
     const pageContentsRef = useRef<HTMLDivElement>(null);
     const mainContentsRef = useRef<HTMLDivElement>(null);
-    const { routerBreadcrumbs, pageBreadcrumbs } = useAppBreadcrumbs();
+    const { routerBreadcrumbs, pageBreadcrumbs } = useContext(
+        AppBreadcrumbsContext
+    );
     const {
         timeRangeDuration,
         recentCustomTimeRangeDurations,
@@ -85,7 +86,11 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
 
     const detectAppDrawer = (): void => {
         // Detect app drawer among top level children of main contents
-        if (!mainContentsRef || !mainContentsRef.current) {
+        if (
+            !mainContentsRef ||
+            !mainContentsRef.current ||
+            isEmpty(mainContentsRef.current.children)
+        ) {
             setAppDrawer(false);
 
             return;
@@ -196,6 +201,7 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                     {!props.hideHeader && (
                         <>
                             <Slide
+                                appear={false}
                                 direction="down"
                                 in={showHeader}
                                 timeout={{
@@ -217,9 +223,6 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                                         <Grid
                                             container
                                             alignItems="center"
-                                            className={
-                                                pageContentsClasses.headerContents
-                                            }
                                             justify="space-between"
                                         >
                                             <Grid
@@ -230,20 +233,20 @@ export const PageContents: FunctionComponent<PageContentsProps> = (
                                                 )}
                                             >
                                                 {/* App breadcrumbs */}
-                                                <Hidden
-                                                    xsDown
-                                                    smDown={
-                                                        !props.hideTimeRange
-                                                    }
-                                                >
-                                                    {!props.hideAppBreadcrumbs && (
+                                                {!props.hideAppBreadcrumbs && (
+                                                    <Hidden
+                                                        xsDown
+                                                        smDown={
+                                                            !props.hideTimeRange
+                                                        }
+                                                    >
                                                         <AppBreadcrumbs
                                                             maxRouterBreadcrumbs={
                                                                 props.maxRouterBreadcrumbs
                                                             }
                                                         />
-                                                    )}
-                                                </Hidden>
+                                                    </Hidden>
+                                                )}
 
                                                 {/* Title */}
                                                 <Typography noWrap variant="h5">

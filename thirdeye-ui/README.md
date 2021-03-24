@@ -6,7 +6,7 @@
 
 <br/>
 
-This is the project for CortexData ThirdEye UI.
+This is the UI project for CortexData ThirdEye.
 
 -   [Getting Started](#getting-started)
     -   [Prerequisites](#prerequisites)
@@ -24,6 +24,7 @@ This is the project for CortexData ThirdEye UI.
     -   [`eslint`](#eslint)
     -   [`stylelint`](#stylelint)
     -   [`pretty`](#pretty)
+    -   [`lint`](#lint)
 
 ## Getting Started
 
@@ -33,7 +34,7 @@ These instructions will help you get the project up and running on your local ma
 
 #### [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm)
 
-The project uses nvm to maintain the [Node](https://nodejs.org) version. Compatible Node version is listed in project root [**.nvmrc**](.nvmrc).
+The project uses nvm to maintain the [Node](https://nodejs.org) version. Compatible Node version is listed in project root [**.nvmrc**](/.nvmrc).
 
 Once you install nvm, go to the project directory and switch to the compatible Node version
 
@@ -56,7 +57,7 @@ Following the installation, the command above will let you switch to the require
 
 #### Configure [Node Package Manager (npm)](https://www.npmjs.com) for use with GitHub Packages
 
-The project may depend on some GitHub Packages and npm needs to be configured to allow access to these packages using a GitHub account. The GitHub repository to install packages from is configured in project root [**.npmrc**](.npmrc).
+The project may depend on some GitHub Packages and npm needs to be configured to allow access to these packages using a GitHub account. The GitHub repository to install packages from is configured in project root [**.npmrc**](/.npmrc).
 
 Follow the official GitHub Docs [here](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-with-a-personal-access-token) to configure npm with a GitHub personal access token using **~/.npmrc**.
 
@@ -130,7 +131,7 @@ $ npm run test-coverage
 
 ### `eslint`
 
-Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](.eslintignore)
+Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](/.eslintignore)
 
 ```
 $ npm run eslint
@@ -138,7 +139,7 @@ $ npm run eslint
 
 ### `stylelint`
 
-Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root [**.stylelintignore**](.stylelintignore)
+Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root [**.stylelintignore**](/.stylelintignore)
 
 ```
 $ npm run stylelint
@@ -146,8 +147,16 @@ $ npm run stylelint
 
 ### `pretty`
 
-Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root [**.prettierignore**](.prettierignore)
+Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root [**.prettierignore**](/.prettierignore)
 
 ```
 $ npm run pretty
+```
+
+### `lint`
+
+Run [`eslint`](#eslint), [`stylelint`](#stylelint) and [`pretty`](#pretty) scripts
+
+```
+$ npm run lint
 ```

@@ -27,6 +27,8 @@ import {
 import { AppBarDrawerProps } from "./app-bar-drawer.interfaces";
 import { useAppBarDrawerStyles } from "./app-bar-drawer.styles";
 
+const HEIGHT_ICON = 24;
+
 export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
     props: AppBarDrawerProps
 ) => {
@@ -100,7 +102,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                     <ListItemIcon>
                         <AlertIcon
                             fill={theme.palette.action.active}
-                            height={24}
+                            height={HEIGHT_ICON}
                         />
                     </ListItemIcon>
 
@@ -120,7 +122,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                     <ListItemIcon>
                         <AnomalyIcon
                             fill={theme.palette.action.active}
-                            height={24}
+                            height={HEIGHT_ICON}
                         />
                     </ListItemIcon>
 
@@ -140,7 +142,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                     <ListItemIcon>
                         <ConfigurationIcon
                             fill={theme.palette.action.active}
-                            height={24}
+                            height={HEIGHT_ICON}
                         />
                     </ListItemIcon>
 
@@ -164,7 +166,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                     <ListItemIcon>
                         <SubscriptionGroupIcon
                             fill={theme.palette.action.active}
-                            height={24}
+                            height={HEIGHT_ICON}
                         />
                     </ListItemIcon>
 
@@ -188,7 +190,7 @@ export const AppBarDrawer: FunctionComponent<AppBarDrawerProps> = (
                     <ListItemIcon>
                         <MetricIcon
                             fill={theme.palette.action.active}
-                            height={24}
+                            height={HEIGHT_ICON}
                         />
                     </ListItemIcon>
 

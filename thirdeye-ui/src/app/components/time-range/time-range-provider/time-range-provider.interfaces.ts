@@ -34,3 +34,9 @@ export enum TimeRange {
     THIS_YEAR = "THIS_YEAR",
     LAST_YEAR = "LAST_YEAR",
 }
+
+export enum TimeRangeQueryStringKey {
+    TIME_RANGE = "TIME_RANGE",
+    START_TIME = "START_TIME",
+    END_TIME = "END_TIME",
+}

@@ -55,7 +55,7 @@ module.exports = {
                         loader: "file-loader",
                         options: {
                             name: "[name].[ext]",
-                            outputPath: "assets/fonts/",
+                            outputPath: "fonts/",
                         },
                     },
                 ],
@@ -77,11 +77,7 @@ module.exports = {
         }),
         // In development mode, fork TypeScript checking to run in another thread and not block main
         // transpilation
-        new ForkTsCheckerWebpackPlugin({
-            eslint: {
-                files: "**/*.{ts,tsx,js}",
-            },
-        }),
+        new ForkTsCheckerWebpackPlugin(),
         // Generate index.html from template
         new HtmlWebpackPlugin({
             template: path.join(__dirname, "src/public/index.html"),

@@ -1,15 +1,9 @@
-# Node
-node/
-
 # Dependencies
 node_modules/
 
 # Production
 build/
 dist/
-
-# Maven
-target/
 
 # TypeScript
 tsbuildinfo/

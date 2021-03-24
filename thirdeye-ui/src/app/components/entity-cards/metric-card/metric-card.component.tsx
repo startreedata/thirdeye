@@ -15,7 +15,7 @@ import { isEmpty } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import { getMetricsDetailPath } from "../../../utils/routes/routes.util";
+import { getMetricsViewPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
@@ -46,7 +46,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
             return;
         }
 
-        history.push(getMetricsDetailPath(props.metric.id));
+        history.push(getMetricsViewPath(props.metric.id));
         handleMetricOptionsClose();
     };
 

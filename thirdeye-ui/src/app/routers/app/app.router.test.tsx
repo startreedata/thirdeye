@@ -12,29 +12,27 @@ jest.mock("../../components/auth-provider/auth-provider.component", () => ({
 }));
 
 jest.mock("../alerts/alerts.router", () => ({
-    AlertsRouter: jest.fn().mockReturnValue(<>testAlertsRouter</>),
+    AlertsRouter: jest.fn().mockReturnValue("testAlertsRouter"),
 }));
 
 jest.mock("../anomalies/anomalies.router", () => ({
-    AnomaliesRouter: jest.fn().mockReturnValue(<>testAnomaliesRouter</>),
+    AnomaliesRouter: jest.fn().mockReturnValue("testAnomaliesRouter"),
 }));
 
 jest.mock("../configuration/configuration.router", () => ({
-    ConfigurationRouter: jest
-        .fn()
-        .mockReturnValue(<>testConfigurationRouter</>),
+    ConfigurationRouter: jest.fn().mockReturnValue("testConfigurationRouter"),
 }));
 
 jest.mock("../general-authenticated/general-authenticated.router", () => ({
     GeneralAuthenticatedRouter: jest
         .fn()
-        .mockReturnValue(<>testGeneralAuthenticatedRouter</>),
+        .mockReturnValue("testGeneralAuthenticatedRouter"),
 }));
 
 jest.mock("../general-unauthenticated/general-unauthenticated.router", () => ({
     GeneralUnauthenticatedRouter: jest
         .fn()
-        .mockReturnValue(<>testGeneralUnauthenticatedRouter</>),
+        .mockReturnValue("testGeneralUnauthenticatedRouter"),
 }));
 
 describe("App Router", () => {

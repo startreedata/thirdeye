@@ -40,9 +40,6 @@ export const usePageContentsStyles = makeStyles((theme: Theme) => ({
         padding: theme.spacing(2),
         marginTop: theme.spacing(1),
     },
-    headerContents: {
-        flex: 1,
-    },
     titleContainer: {
         flex: 1,
     },

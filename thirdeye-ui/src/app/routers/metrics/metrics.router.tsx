@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import {
     AppRoute,
@@ -22,10 +22,10 @@ const MetricsAllPage = lazy(() =>
     ).then((module) => ({ default: module.MetricsAllPage }))
 );
 
-const MetricsDetailPage = lazy(() =>
+const MetricsViewPage = lazy(() =>
     import(
-        /* webpackChunkName: "metrics-detail-page" */ "../../pages/metrics-detail-page/metrics-detail-page.component"
-    ).then((module) => ({ default: module.MetricsDetailPage }))
+        /* webpackChunkName: "metrics-view-page" */ "../../pages/metrics-view-page/metrics-view-page.component"
+    ).then((module) => ({ default: module.MetricsViewPage }))
 );
 
 const PageNotFoundPage = lazy(() =>
@@ -74,11 +74,11 @@ export const MetricsRouter: FunctionComponent = () => {
                     path={AppRoute.METRICS_ALL}
                 />
 
-                {/* Metrics detail path */}
+                {/* Metrics view path */}
                 <Route
                     exact
-                    component={MetricsDetailPage}
-                    path={AppRoute.METRICS_DETAIL}
+                    component={MetricsViewPage}
+                    path={AppRoute.METRICS_VIEW}
                 />
 
                 {/* No match found, render page not found */}

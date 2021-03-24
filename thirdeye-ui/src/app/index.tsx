@@ -3,12 +3,13 @@ import { enableAllPlugins } from "immer";
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom";
 import { Router } from "react-router-dom";
+import "../assets/styles/layout.scss";
 import { App } from "./app";
+import { AppBreadcrumbsProvider } from "./components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AuthProvider } from "./components/auth-provider/auth-provider.component";
 import { DialogProvider } from "./components/dialogs/dialog-provider/dialog-provider.component";
 import { SnackbarProvider } from "./components/snackbar-provider/snackbar-provider.component";
 import { TimeRangeProvider } from "./components/time-range/time-range-provider/time-range-provider.component";
-import "./index.scss";
 import { appHistory } from "./utils/history/history.util";
 import { initLocale } from "./utils/locale/locale.util";
 import { theme } from "./utils/material-ui/theme.util";
@@ -31,9 +32,11 @@ ReactDOM.render(
                 <SnackbarProvider>
                     <AuthProvider>
                         <TimeRangeProvider>
-                            <DialogProvider>
-                                <App />
-                            </DialogProvider>
+                            <AppBreadcrumbsProvider>
+                                <DialogProvider>
+                                    <App />
+                                </DialogProvider>
+                            </AppBreadcrumbsProvider>
                         </TimeRangeProvider>
                     </AuthProvider>
                 </SnackbarProvider>

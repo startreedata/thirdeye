@@ -18,22 +18,22 @@ import classnames from "classnames";
 import { cloneDeep } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useCommonStyles } from "../../../utils/material-ui/common.styles";
+import { useCommonStyles } from "../../../../utils/material-ui/common.styles";
 import {
     formatTimeRange,
     formatTimeRangeDuration,
     getDefaultTimeRangeDuration,
     getTimeRangeDuration,
-} from "../../../utils/time-range/time-range.util";
-import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";
-import { TimeRangeList } from "../time-range-list/time-range-list.component";
+} from "../../../../utils/time-range/time-range.util";
+import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
+import { TimeRangeList } from "../../time-range-list/time-range-list.component";
 import {
     TimeRange,
     TimeRangeDuration,
-} from "../time-range-provider/time-range-provider.interfaces";
-import { TimeRangeSelect } from "../time-range-select/time-range-select.component";
-import { DateTimePickerToolbar } from "./date-time-picker-toolbar/date-time-picker-toolbar.component";
-import { TimeRangeSelectorControls } from "./time-range-selector-controls/time-range-selector-controls.component";
+} from "../../time-range-provider/time-range-provider.interfaces";
+import { TimeRangeSelect } from "../../time-range-select/time-range-select.component";
+import { DateTimePickerToolbar } from "../date-time-picker-toolbar/date-time-picker-toolbar.component";
+import { TimeRangeSelectorControls } from "../time-range-selector-controls/time-range-selector-controls.component";
 import { TimeRangeSelectorProps } from "./time-range-selector.interfaces";
 import { useTimeRangeSelectorStyles } from "./time-range-selector.styles";
 

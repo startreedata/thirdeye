@@ -10,10 +10,10 @@ describe("Metrics REST", () => {
 
     test("getMetric should invoke axios.get with appropriate input and return appropriate metric", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
-            data: mockMetricResponse,
+            data: mockMetric,
         });
 
-        await expect(getMetric(1)).resolves.toEqual(mockMetricResponse);
+        await expect(getMetric(1)).resolves.toEqual(mockMetric);
 
         expect(axios.get).toHaveBeenCalledWith("/api/metrics/1");
     });
@@ -26,10 +26,10 @@ describe("Metrics REST", () => {
 
     test("getAllMetrics should invoke axios.get with appropriate input and return appropriate metrics", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
-            data: [mockMetricResponse],
+            data: [mockMetric],
         });
 
-        await expect(getAllMetrics()).resolves.toEqual([mockMetricResponse]);
+        await expect(getAllMetrics()).resolves.toEqual([mockMetric]);
 
         expect(axios.get).toHaveBeenCalledWith("/api/metrics");
     });
@@ -42,10 +42,10 @@ describe("Metrics REST", () => {
 
     test("deleteMetric should invoke axios.delete with appropriate input and return appropriate metric", async () => {
         jest.spyOn(axios, "delete").mockResolvedValue({
-            data: mockMetricResponse,
+            data: mockMetric,
         });
 
-        await expect(deleteMetric(1)).resolves.toEqual(mockMetricResponse);
+        await expect(deleteMetric(1)).resolves.toEqual(mockMetric);
 
         expect(axios.delete).toHaveBeenCalledWith("/api/metrics/1");
     });
@@ -57,7 +57,7 @@ describe("Metrics REST", () => {
     });
 });
 
-const mockMetricResponse = {
+const mockMetric = {
     name: "testNameMetricResponse",
 };
 

@@ -1,5 +1,5 @@
 import { Box } from "@material-ui/core";
-import { CellParams } from "@material-ui/data-grid";
+import { GridCellParams } from "@material-ui/data-grid";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -31,8 +31,12 @@ const CustomCell: FunctionComponent<CustomCellProps> = (
 };
 
 export function customCellRenderer(
-    params: CellParams,
-    componentRenderer: (params: CellParams) => ReactElement
+    params: GridCellParams,
+    componentRenderer: (params: GridCellParams) => ReactElement
 ): ReactElement {
-    return <CustomCell params={params}>{componentRenderer(params)}</CustomCell>;
+    return (
+        <CustomCell params={params}>
+            {componentRenderer && componentRenderer(params)}
+        </CustomCell>
+    );
 }

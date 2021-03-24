@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import {
     AppRoute,
@@ -21,10 +21,10 @@ const AnomaliesAllPage = lazy(() =>
     ).then((module) => ({ default: module.AnomaliesAllPage }))
 );
 
-const AnomaliesDetailPage = lazy(() =>
+const AnomaliesViewPage = lazy(() =>
     import(
-        /* webpackChunkName: "anomalies-detail-page" */ "../../pages/anomalies-detail-page/anomalies-detail-page.component"
-    ).then((module) => ({ default: module.AnomaliesDetailPage }))
+        /* webpackChunkName: "anomalies-view-page" */ "../../pages/anomalies-view-page/anomalies-view-page.component"
+    ).then((module) => ({ default: module.AnomaliesViewPage }))
 );
 
 const PageNotFoundPage = lazy(() =>
@@ -69,11 +69,11 @@ export const AnomaliesRouter: FunctionComponent = () => {
                     path={AppRoute.ANOMALIES_ALL}
                 />
 
-                {/* Anomalies detail path */}
+                {/* Anomalies view path */}
                 <Route
                     exact
-                    component={AnomaliesDetailPage}
-                    path={AppRoute.ANOMALIES_DETAIL}
+                    component={AnomaliesViewPage}
+                    path={AppRoute.ANOMALIES_VIEW}
                 />
 
                 {/* No match found, render page not found */}

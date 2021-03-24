@@ -4,7 +4,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
@@ -31,9 +31,9 @@ import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
-import { AlertsDetailPageParams } from "./alerts-detail-page.interfaces";
+import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
-export const AlertsDetailPage: FunctionComponent = () => {
+export const AlertsViewPage: FunctionComponent = () => {
     const [uiAlert, setUiAlert] = useState<UiAlert | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
@@ -46,7 +46,7 @@ export const AlertsDetailPage: FunctionComponent = () => {
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { enqueueSnackbar } = useSnackbar();
-    const params = useParams<AlertsDetailPageParams>();
+    const params = useParams<AlertsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
 

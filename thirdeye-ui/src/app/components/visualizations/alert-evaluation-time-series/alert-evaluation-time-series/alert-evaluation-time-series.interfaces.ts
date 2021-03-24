@@ -1,5 +1,5 @@
-import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { AlertEvaluation } from "../../../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
 
 export interface AlertEvaluationTimeSeriesProps {
     alertEvaluation: AlertEvaluation | null;

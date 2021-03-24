@@ -8,6 +8,7 @@ describe("Auth Store", () => {
         expect(result.current.authDisabled).toBeFalsy();
         expect(result.current.authenticated).toBeFalsy();
         expect(result.current.accessToken).toEqual("");
+        expect(result.current.redirectPath).toEqual("");
     });
 
     test("disableAuth should update store appropriately", () => {
@@ -19,6 +20,7 @@ describe("Auth Store", () => {
         expect(result.current.authDisabled).toBeTruthy();
         expect(result.current.authenticated).toBeFalsy();
         expect(result.current.accessToken).toEqual("");
+        expect(result.current.redirectPath).toEqual("");
     });
 
     test("setAccessToken should update store appropriately for invalid token", () => {
@@ -30,6 +32,7 @@ describe("Auth Store", () => {
         expect(result.current.authDisabled).toBeFalsy();
         expect(result.current.authenticated).toBeFalsy();
         expect(result.current.accessToken).toEqual("");
+        expect(result.current.redirectPath).toEqual("");
     });
 
     test("setAccessToken should update store appropriately for empty token", () => {
@@ -41,6 +44,7 @@ describe("Auth Store", () => {
         expect(result.current.authDisabled).toBeFalsy();
         expect(result.current.authenticated).toBeFalsy();
         expect(result.current.accessToken).toEqual("");
+        expect(result.current.redirectPath).toEqual("");
     });
 
     test("setAccessToken should update store appropriately for token", () => {
@@ -52,6 +56,7 @@ describe("Auth Store", () => {
         expect(result.current.authDisabled).toBeFalsy();
         expect(result.current.authenticated).toBeTruthy();
         expect(result.current.accessToken).toEqual("testToken");
+        expect(result.current.redirectPath).toEqual("");
     });
 
     test("clearAccessToken should update store appropriately", () => {
@@ -63,12 +68,38 @@ describe("Auth Store", () => {
         expect(result.current.authDisabled).toBeFalsy();
         expect(result.current.authenticated).toBeFalsy();
         expect(result.current.accessToken).toEqual("");
+        expect(result.current.redirectPath).toEqual("");
+    });
+
+    test("setRedirectPath should update store appropriately for path", () => {
+        const { result } = renderHook(() => useAuthStore());
+        act(() => {
+            result.current.setRedirectPath("testPath");
+        });
+
+        expect(result.current.authDisabled).toBeFalsy();
+        expect(result.current.authenticated).toBeFalsy();
+        expect(result.current.accessToken).toEqual("");
+        expect(result.current.redirectPath).toEqual("testPath");
+    });
+
+    test("clearRedirectPath should update store appropriately", () => {
+        const { result } = renderHook(() => useAuthStore());
+        act(() => {
+            result.current.clearRedirectPath();
+        });
+
+        expect(result.current.authDisabled).toBeFalsy();
+        expect(result.current.authenticated).toBeFalsy();
+        expect(result.current.accessToken).toEqual("");
+        expect(result.current.redirectPath).toEqual("");
     });
 
     test("should persist in browser local storage", async () => {
         const { result, waitFor } = renderHook(() => useAuthStore());
         act(() => {
             result.current.setAccessToken("testToken");
+            result.current.setRedirectPath("testPath");
         });
         await waitFor(() => Boolean(result.current.accessToken));
 
@@ -77,7 +108,8 @@ describe("Auth Store", () => {
                 `"state":{` +
                 `"authDisabled":false,` +
                 `"authenticated":true,` +
-                `"accessToken":"testToken"` +
+                `"accessToken":"testToken",` +
+                `"redirectPath":"testPath"` +
                 `},` +
                 `"version":0` +
                 `}`

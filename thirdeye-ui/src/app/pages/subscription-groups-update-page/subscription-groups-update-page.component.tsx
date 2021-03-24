@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
@@ -16,7 +16,7 @@ import {
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getSubscriptionGroupsDetailPath } from "../../utils/routes/routes.util";
+import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -44,9 +44,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 onClick: (): void => {
                     if (subscriptionGroup) {
                         history.push(
-                            getSubscriptionGroupsDetailPath(
-                                subscriptionGroup.id
-                            )
+                            getSubscriptionGroupsViewPath(subscriptionGroup.id)
                         );
                     }
                 },
@@ -76,7 +74,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
 
                 // Redirect to subscription groups detail path
                 history.push(
-                    getSubscriptionGroupsDetailPath(subscriptionGroup.id)
+                    getSubscriptionGroupsViewPath(subscriptionGroup.id)
                 );
             })
             .catch((): void => {

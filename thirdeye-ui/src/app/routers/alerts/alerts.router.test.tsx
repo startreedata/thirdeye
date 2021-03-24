@@ -5,11 +5,14 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { AppRoute } from "../../utils/routes/routes.util";
 import { AlertsRouter } from "./alerts.router";
 
-jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
-    useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-        setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-    })),
-}));
+jest.mock(
+    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
+    () => ({
+        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
+            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
+        })),
+    })
+);
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
@@ -35,39 +38,36 @@ jest.mock("../../utils/routes/routes.util", () => ({
 jest.mock(
     "../../components/loading-indicator/loading-indicator.component",
     () => ({
-        LoadingIndicator: jest.fn().mockReturnValue(<>testLoadingIndicator</>),
+        LoadingIndicator: jest.fn().mockReturnValue("testLoadingIndicator"),
     })
 );
 
 jest.mock("../../pages/alerts-all-page/alerts-all-page.component", () => ({
-    AlertsAllPage: jest.fn().mockReturnValue(<>testAlertsAllPage</>),
+    AlertsAllPage: jest.fn().mockReturnValue("testAlertsAllPage"),
 }));
 
-jest.mock(
-    "../../pages/alerts-detail-page/alerts-detail-page.component",
-    () => ({
-        AlertsDetailPage: jest.fn().mockReturnValue(<>testAlertsDetailPage</>),
-    })
-);
+jest.mock("../../pages/alerts-view-page/alerts-view-page.component", () => ({
+    AlertsViewPage: jest.fn().mockReturnValue("testAlertsViewPage"),
+}));
 
 jest.mock(
     "../../pages/alerts-create-page/alerts-create-page.component",
     () => ({
-        AlertsCreatePage: jest.fn().mockReturnValue(<>testAlertsCreatePage</>),
+        AlertsCreatePage: jest.fn().mockReturnValue("testAlertsCreatePage"),
     })
 );
 
 jest.mock(
     "../../pages/alerts-update-page/alerts-update-page.component",
     () => ({
-        AlertsUpdatePage: jest.fn().mockReturnValue(<>testAlertsUpdatePage</>),
+        AlertsUpdatePage: jest.fn().mockReturnValue("testAlertsUpdatePage"),
     })
 );
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue("testPageNotFoundPage"),
     })
 );
 
@@ -153,23 +153,21 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render alerts detail page at exact alerts detail path", async () => {
+    test("should render alerts view page at exact alerts view path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.ALERTS_DETAIL]}>
+            <MemoryRouter initialEntries={[AppRoute.ALERTS_VIEW]}>
                 <AlertsRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testAlertsDetailPage")
+            screen.findByText("testAlertsViewPage")
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts detail path", async () => {
+    test("should render page not found page at invalid alerts view path", async () => {
         render(
-            <MemoryRouter
-                initialEntries={[`${AppRoute.ALERTS_DETAIL}/testPath`]}
-            >
+            <MemoryRouter initialEntries={[`${AppRoute.ALERTS_VIEW}/testPath`]}>
                 <AlertsRouter />
             </MemoryRouter>
         );

@@ -53,8 +53,8 @@ import {
     AlertEvaluationTimeSeriesPlotLine,
     AlertEvaluationTimeSeriesProps,
     AlertEvaluationTimeSeriesStateAction,
-} from "./alert-evaluation-time-series.interfaces";
-import { alertEvaluationTimeSeriesReducer } from "./alert-evaluation-time-series.reducer";
+} from "./alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
+import { alertEvaluationTimeSeriesReducer } from "./alert-evaluation-time-series/alert-evaluation-time-series.reducer";
 
 const PADDING_TOP_SVG = 10;
 const PADDING_BOTTOM_SVG = 30;

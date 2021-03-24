@@ -5,11 +5,14 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { AppRoute } from "../../utils/routes/routes.util";
 import { SubscriptionGroupsRouter } from "./subscription-groups.router";
 
-jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
-    useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-        setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-    })),
-}));
+jest.mock(
+    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
+    () => ({
+        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
+            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
+        })),
+    })
+);
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
@@ -38,7 +41,7 @@ jest.mock("../../utils/routes/routes.util", () => ({
 jest.mock(
     "../../components/loading-indicator/loading-indicator.component",
     () => ({
-        LoadingIndicator: jest.fn().mockReturnValue(<>testLoadingIndicator</>),
+        LoadingIndicator: jest.fn().mockReturnValue("testLoadingIndicator"),
     })
 );
 
@@ -47,16 +50,16 @@ jest.mock(
     () => ({
         SubscriptionGroupsAllPage: jest
             .fn()
-            .mockReturnValue(<>testSubscriptionGroupsAllPage</>),
+            .mockReturnValue("testSubscriptionGroupsAllPage"),
     })
 );
 
 jest.mock(
-    "../../pages/subscription-groups-detail-page/subscription-groups-detail-page.component",
+    "../../pages/subscription-groups-view-page/subscription-groups-view-page.component",
     () => ({
-        SubscriptionGroupsDetailPage: jest
+        SubscriptionGroupsViewPage: jest
             .fn()
-            .mockReturnValue(<>testSubscriptionGroupsDetailPage</>),
+            .mockReturnValue("testSubscriptionGroupsViewPage"),
     })
 );
 
@@ -65,7 +68,7 @@ jest.mock(
     () => ({
         SubscriptionGroupsCreatePage: jest
             .fn()
-            .mockReturnValue(<>testSubscriptionGroupsCreatePage</>),
+            .mockReturnValue("testSubscriptionGroupsCreatePage"),
     })
 );
 
@@ -74,14 +77,14 @@ jest.mock(
     () => ({
         SubscriptionGroupsUpdatePage: jest
             .fn()
-            .mockReturnValue(<>testSubscriptionGroupsUpdatePage</>),
+            .mockReturnValue("testSubscriptionGroupsUpdatePage"),
     })
 );
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue("testPageNotFoundPage"),
     })
 );
 
@@ -183,25 +186,23 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render subscription groups detail page at exact subscription groups detail path", async () => {
+    test("should render subscription groups view page at exact subscription groups view path", async () => {
         render(
-            <MemoryRouter
-                initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_DETAIL]}
-            >
+            <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_VIEW]}>
                 <SubscriptionGroupsRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testSubscriptionGroupsDetailPage")
+            screen.findByText("testSubscriptionGroupsViewPage")
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups detail path", async () => {
+    test("should render page not found page at invalid subscription groups view path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
-                    `${AppRoute.SUBSCRIPTION_GROUPS_DETAIL}/testPath`,
+                    `${AppRoute.SUBSCRIPTION_GROUPS_VIEW}/testPath`,
                 ]}
             >
                 <SubscriptionGroupsRouter />

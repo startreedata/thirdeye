@@ -2,12 +2,13 @@ import {
     ClickAwayListener,
     Drawer,
     IconButton,
+    Slide,
     Toolbar,
     useMediaQuery,
     useTheme,
 } from "@material-ui/core";
-import { classnames } from "@material-ui/data-grid";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import classnames from "classnames";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { AppDrawerProps } from "./app-drawer.interfaces";
 import { useAppDrawerStyles } from "./app-drawer.styles";
@@ -24,11 +25,38 @@ export const AppDrawer: FunctionComponent<AppDrawerProps> = (
     const screenWidthSmDown = useMediaQuery(theme.breakpoints.down("sm"));
 
     useEffect(() => {
-        // Screen width changed, minimize/restore app drawer
+        // Input changed, minimize/restore app drawer
+        setAppDrawerOpen(!screenWidthSmDown || Boolean(props.open));
+    }, [props.open]);
+
+    useEffect(() => {
+        // Screen width changed, minimize/restore app drawer and update document listeners
         setAppDrawerOpen(!screenWidthSmDown);
+        addDocumentKeyDownListener();
+
+        return removeDocumentKeyDownListener;
     }, [screenWidthSmDown]);
 
-    const handleAppDrawerExpand = (): void => {
+    useEffect(() => {
+        // App drawer minimized/restored, notify
+        props.onChange && props.onChange(appDrawerOpen);
+    }, [appDrawerOpen]);
+
+    const addDocumentKeyDownListener = (): void => {
+        document.addEventListener("keydown", handleDocumentKeyDown);
+    };
+
+    const removeDocumentKeyDownListener = (): void => {
+        document.removeEventListener("keydown", handleDocumentKeyDown);
+    };
+
+    const handleDocumentKeyDown = (event: KeyboardEvent): void => {
+        if (event.key === "Escape") {
+            setAppDrawerOpen(!screenWidthSmDown);
+        }
+    };
+
+    const handleAppDrawerRestore = (): void => {
         setAppDrawerOpen(true);
     };
 
@@ -51,11 +79,22 @@ export const AppDrawer: FunctionComponent<AppDrawerProps> = (
                     {/* Required to clip the container under app bar */}
                     <Toolbar />
 
-                    {/* Expand button */}
+                    {/* Restore button */}
                     {!appDrawerOpen && (
-                        <IconButton onClick={handleAppDrawerExpand}>
-                            <ChevronRightIcon />
-                        </IconButton>
+                        <Slide
+                            direction="right"
+                            in={!appDrawerOpen}
+                            timeout={{
+                                enter:
+                                    theme.transitions.duration.enteringScreen *
+                                    2,
+                                exit: 0,
+                            }}
+                        >
+                            <IconButton onClick={handleAppDrawerRestore}>
+                                <ChevronRightIcon />
+                            </IconButton>
+                        </Slide>
                     )}
 
                     {/* Contents */}

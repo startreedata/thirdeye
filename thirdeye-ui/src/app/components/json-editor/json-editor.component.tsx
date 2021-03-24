@@ -1,5 +1,5 @@
 import { FormHelperText } from "@material-ui/core";
-import { classnames } from "@material-ui/data-grid";
+import classnames from "classnames";
 import { Editor, EditorChange } from "codemirror";
 import "codemirror/addon/edit/closebrackets.js";
 import "codemirror/addon/edit/matchbrackets.js";
@@ -84,7 +84,7 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
     };
 
     return (
-        <div className={jsonEditorClasses.jsonEditorContainer}>
+        <div className={props.className}>
             {/* JSON Editor */}
             <div
                 className={classnames(jsonEditorClasses.jsonEditor, {

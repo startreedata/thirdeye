@@ -2,7 +2,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertList } from "../../components/alert-list/alert-list.component";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { PageContents } from "../../components/page-contents/page-contents.component";
@@ -23,7 +23,7 @@ import {
 } from "../../utils/snackbar/snackbar.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
-    const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>([]);
+    const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);

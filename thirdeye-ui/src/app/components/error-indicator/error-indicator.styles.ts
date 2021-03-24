@@ -12,6 +12,9 @@ export const useErrorIndicatorStyles = makeStyles((theme) => ({
     },
     icon: {
         display: "flex",
+    },
+    iconWithText: {
+        display: "flex",
         borderRight: Border.BORDER_DEFAULT,
         paddingRight: theme.spacing(2),
     },

@@ -6,6 +6,7 @@ import {
     DialogContentText,
     DialogTitle,
 } from "@material-ui/core";
+import { isNil } from "lodash";
 import React, { FunctionComponent, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { DialogContext } from "../dialog-provider/dialog-provider.component";
@@ -29,8 +30,12 @@ export const AlertDialog: FunctionComponent = () => {
         <>
             {dialogData && (
                 <Dialog
-                    disableBackdropClick
                     fullWidth
+                    disableBackdropClick={
+                        !isNil(dialogData.disableBackdropClick)
+                            ? dialogData.disableBackdropClick
+                            : true
+                    }
                     maxWidth={dialogData.width || "xs"}
                     open={visible}
                     onClose={handleDialogClose}

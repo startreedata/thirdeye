@@ -2,7 +2,7 @@ import bounds from "binary-search-bounds";
 import { ScaleTime } from "d3-scale";
 import { isEmpty, isNil } from "lodash";
 import { Interval } from "luxon";
-import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
+import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
@@ -14,7 +14,7 @@ import {
 import { formatLargeNumber } from "../number/number.util";
 
 export const SEPARATOR_DATE_TIME = "@";
-export const NUM_TICKS_DEFAULT = 8;
+export const NUM_TICKS = 8;
 
 // Returns abbreviated string representation of number
 // Equivalent to Number Util formatLargeNumber, but as required by D3
@@ -101,7 +101,7 @@ export const getTickValuesForTimeAxis = (
     }
 
     if (isNil(numTicks)) {
-        numTicks = NUM_TICKS_DEFAULT;
+        numTicks = NUM_TICKS;
     }
 
     if (numTicks < 3) {

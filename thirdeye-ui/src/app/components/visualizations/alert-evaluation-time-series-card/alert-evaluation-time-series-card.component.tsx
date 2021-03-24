@@ -9,7 +9,7 @@ import {
 import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { AlertEvaluationTimeSeries } from "../alert-evaluation-time-series/alert-evaluation-time-series.component";
+import { AlertEvaluationTimeSeries } from "../alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.component";
 import { VisualizationCard } from "../visualization-card/visualization-card.component";
 import { AlertEvaluationTimeSeriesCardProps } from "./alert-evaluation-time-series-card.interfaces";
 import { useAlertEvaluationTimeSeriesCardStyles } from "./alert-evaluation-time-series-card.styles";

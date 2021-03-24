@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core";
-import { Border } from "../../../utils/material-ui/border.util";
+import { Border } from "../../../../utils/material-ui/border.util";
 
 const HEIGHT_TIME_RANGE_SELECTOR_MD_UP = 427;
 

@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import {
     AppRoute,
@@ -21,10 +21,10 @@ const AlertsAllPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsAllPage }))
 );
 
-const AlertsDetailPage = lazy(() =>
+const AlertsViewPage = lazy(() =>
     import(
-        /* webpackChunkName: "alerts-detail-page" */ "../../pages/alerts-detail-page/alerts-detail-page.component"
-    ).then((module) => ({ default: module.AlertsDetailPage }))
+        /* webpackChunkName: "alerts-view-page" */ "../../pages/alerts-view-page/alerts-view-page.component"
+    ).then((module) => ({ default: module.AlertsViewPage }))
 );
 
 const AlertsCreatePage = lazy(() =>
@@ -81,11 +81,11 @@ export const AlertsRouter: FunctionComponent = () => {
                     path={AppRoute.ALERTS_ALL}
                 />
 
-                {/* Alerts detail path */}
+                {/* Alerts view path */}
                 <Route
                     exact
-                    component={AlertsDetailPage}
-                    path={AppRoute.ALERTS_DETAIL}
+                    component={AlertsViewPage}
+                    path={AppRoute.ALERTS_VIEW}
                 />
 
                 {/* Alerts create path */}

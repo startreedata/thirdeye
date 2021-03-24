@@ -1,6 +1,3 @@
-# Node
-node/
-
 # Dependencies
 node_modules/
 
@@ -17,8 +14,8 @@ tsbuildinfo/
 # Jest
 src/test/unit/coverage/
 
-# macOS
-.DS_Store
-
 # webpack
 webpack/
+
+# macOS
+.DS_Store

@@ -3,6 +3,7 @@ import {
     TimeRangeDuration,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
+    getAccessTokenFromHashParams,
     getQueryString,
     getRecognizedQueryString,
     getSearchFromQueryString,
@@ -20,6 +21,7 @@ const systemLocation = location;
 jest.mock("../history/history.util", () => ({
     appHistory: {
         replace: jest.fn().mockImplementation((locationObject) => {
+            location.hash = locationObject.hash;
             location.search = locationObject.search;
         }),
     },
@@ -30,6 +32,7 @@ describe("Params Util", () => {
         // Manipulate global location object
         Object.defineProperty(window, "location", {
             value: {
+                hash: "",
                 search: "",
             },
         });
@@ -38,6 +41,18 @@ describe("Params Util", () => {
     afterAll(() => {
         // Restore global location object
         Object.defineProperty(window, "location", { value: systemLocation });
+    });
+
+    test("getAccessTokenFromHashParams should return empty string when access token is not found in hash params", () => {
+        location.hash = "";
+
+        expect(getAccessTokenFromHashParams()).toEqual("");
+    });
+
+    test("getAccessTokenFromHashParams should return appropriate access token from hash params", () => {
+        location.hash = "#access_token=testAccessToken";
+
+        expect(getAccessTokenFromHashParams()).toEqual("testAccessToken");
     });
 
     test("setSearchInQueryString should set appropriate search in query string", () => {

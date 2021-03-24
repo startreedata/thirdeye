@@ -1,15 +1,9 @@
-# Node
-node/
-
 # Dependencies
 node_modules/
 
 # Production
 build/
 dist/
-
-# Maven
-target/
 
 # Docker (Prettier has trouble parsing docker files)
 docker/
@@ -38,11 +32,11 @@ src/test/unit/coverage/
 .npmrc
 .nvmrc
 
+# webpack
+webpack/
+
 # XML (file type not supported)
 *.xml
 
 # macOS
 .DS_Store
-
-# webpack
-webpack/

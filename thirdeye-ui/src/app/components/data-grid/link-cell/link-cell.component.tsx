@@ -1,6 +1,6 @@
 import { Box, Link } from "@material-ui/core";
-import { CellParams } from "@material-ui/data-grid";
-import { toNumber } from "lodash";
+import { GridCellParams } from "@material-ui/data-grid";
+import { isNil, toNumber } from "lodash";
 import React, { ReactElement, useEffect, useState } from "react";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { LinkCellProps } from "./link-cell.interfaces";
@@ -35,7 +35,7 @@ function LinkCell<T>(props: LinkCellProps<T>): ReactElement {
     };
 
     const handleLinkClick = (): void => {
-        if (!value || rowId < 0) {
+        if (!value || isNil(rowId) || rowId < 0) {
             return;
         }
 
@@ -48,6 +48,7 @@ function LinkCell<T>(props: LinkCellProps<T>): ReactElement {
                 noWrap
                 className={linkCellClasses.link}
                 component="button"
+                variant="body1"
                 onClick={handleLinkClick}
             >
                 <TextHighlighter
@@ -60,7 +61,7 @@ function LinkCell<T>(props: LinkCellProps<T>): ReactElement {
 }
 
 export function linkCellRenderer<T>(
-    params: CellParams,
+    params: GridCellParams,
     searchWords?: string[],
     onClick?: (value: T, rowId: number) => void,
     valueTextFn?: (value: T) => string

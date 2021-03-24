@@ -1,8 +1,8 @@
 import { isNil } from "lodash";
 import numbro from "numbro";
 
-const MANTISSA_DEFAULT = 2;
-const OPTIONAL_MANTISSA_DEFAULT = true;
+const MANTISSA = 2;
+const OPTIONAL_MANTISSA = true;
 
 // Returns formatted string representation of number
 // For example:
@@ -23,10 +23,10 @@ export const formatNumber = (
 
     return numbro(num).format({
         thousandSeparated: true,
-        mantissa: !isNil(mantissa) ? mantissa : MANTISSA_DEFAULT,
+        mantissa: !isNil(mantissa) ? mantissa : MANTISSA,
         optionalMantissa: !isNil(optionalMantissa)
             ? optionalMantissa
-            : OPTIONAL_MANTISSA_DEFAULT,
+            : OPTIONAL_MANTISSA,
     });
 };
 
@@ -59,10 +59,10 @@ export const formatLargeNumber = (
     return numbro(num).format({
         average: true,
         lowPrecision: false,
-        mantissa: !isNil(mantissa) ? mantissa : MANTISSA_DEFAULT,
+        mantissa: !isNil(mantissa) ? mantissa : MANTISSA,
         optionalMantissa: !isNil(optionalMantissa)
             ? optionalMantissa
-            : OPTIONAL_MANTISSA_DEFAULT,
+            : OPTIONAL_MANTISSA,
     } as numbro.Format);
 };
 
@@ -85,9 +85,9 @@ export const formatPercentage = (
     return numbro(num).format({
         output: "percent",
         thousandSeparated: true,
-        mantissa: !isNil(mantissa) ? mantissa : MANTISSA_DEFAULT,
+        mantissa: !isNil(mantissa) ? mantissa : MANTISSA,
         optionalMantissa: !isNil(optionalMantissa)
             ? optionalMantissa
-            : OPTIONAL_MANTISSA_DEFAULT,
+            : OPTIONAL_MANTISSA,
     });
 };

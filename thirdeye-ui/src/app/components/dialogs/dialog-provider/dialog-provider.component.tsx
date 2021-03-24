@@ -28,7 +28,7 @@ export const DialogProvider: FunctionComponent<DialogProviderProps> = (
         setDialogData(null);
     };
 
-    const dialogContextProps: DialogContextProps = {
+    const dialogContext: DialogContextProps = {
         visible: visible,
         showDialog: showDialog,
         hideDialog: hideDialog,
@@ -36,7 +36,7 @@ export const DialogProvider: FunctionComponent<DialogProviderProps> = (
     };
 
     return (
-        <DialogContext.Provider value={dialogContextProps}>
+        <DialogContext.Provider value={dialogContext}>
             {props.children}
 
             {/* Alert dialog */}

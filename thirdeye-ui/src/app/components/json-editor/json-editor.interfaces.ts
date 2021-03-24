@@ -3,5 +3,6 @@ export interface JSONEditorProps {
     helperText?: string;
     error?: boolean;
     readOnly?: boolean;
+    className?: string;
     onChange?: (value: string) => void;
 }

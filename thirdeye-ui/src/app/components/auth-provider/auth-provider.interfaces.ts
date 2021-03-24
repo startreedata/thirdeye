@@ -4,11 +4,10 @@ export interface AuthProviderProps {
     children: ReactNode;
 }
 
-export interface UseAuthProps {
+export interface AuthContextProps {
     authDisabled: boolean;
     authenticated: boolean;
     accessToken: string;
-    disableAuth: () => void;
-    signIn: (accessToken: string) => void;
+    signIn: () => Promise<boolean>;
     signOut: () => void;
 }

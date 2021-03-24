@@ -1,4 +1,4 @@
-# Workflow to triage pull requests and build ThirdEye UI
+# Workflow to triage pull requests and build ThirdEye UI project
 name: ThirdEye UI Workflow
 
 on:

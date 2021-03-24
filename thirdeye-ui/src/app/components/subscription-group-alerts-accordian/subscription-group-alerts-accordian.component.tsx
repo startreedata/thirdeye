@@ -9,7 +9,7 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { getAlertsDetailPath } from "../../utils/routes/routes.util";
+import { getAlertsViewPath } from "../../utils/routes/routes.util";
 import {
     getUiSubscriptionGroupAlertId,
     getUiSubscriptionGroupAlertName,
@@ -24,7 +24,7 @@ export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGro
     const { t } = useTranslation();
 
     const handleAlertClick = (alert: Alert): void => {
-        history.push(getAlertsDetailPath(alert.id));
+        history.push(getAlertsViewPath(alert.id));
     };
 
     return (

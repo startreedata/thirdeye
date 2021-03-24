@@ -1,11 +1,11 @@
 import { Box, Toolbar, Typography } from "@material-ui/core";
 import {
-    CellParams,
-    ColDef,
     DataGrid as MuiDataGrid,
+    GridCellParams,
+    GridColDef,
     GridOverlay,
-    RowId,
-    SelectionModelChangeParams,
+    GridRowId,
+    GridSelectionModelChangeParams,
 } from "@material-ui/data-grid";
 import { cloneDeep } from "lodash";
 import React, {
@@ -14,12 +14,10 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { useCommonStyles } from "../../utils/material-ui/common.styles";
-import { getSelectedStatusLabel } from "../../utils/search/search.util";
-import { ErrorIndicator } from "../error-indicator/error-indicator.component";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
-import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
-import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
+import { ErrorIndicator } from "../../error-indicator/error-indicator.component";
+import { LoadingIndicator } from "../../loading-indicator/loading-indicator.component";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { DataGridProps } from "./data-grid.interfaces";
 import { useDataGridStyles } from "./data-grid.styles";
 
@@ -27,10 +25,9 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
     props: DataGridProps
 ) => {
     const dataGridClasses = useDataGridStyles();
-    const commonClasses = useCommonStyles();
-    const [dataGridColumns, setDataGridColumns] = useState<ColDef[]>([]);
+    const [dataGridColumns, setDataGridColumns] = useState<GridColDef[]>([]);
     const [dataGridSelectionModel, setDatagridSelectionModel] = useState<
-        RowId[]
+        GridRowId[]
     >([]);
 
     useEffect(() => {
@@ -44,7 +41,7 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
     }, [props.rows, props.selectionModel]);
 
     const initDataGridColumns = (): void => {
-        const columns: ColDef[] = [];
+        const columns: GridColDef[] = [];
 
         if (!props.columns) {
             setDataGridColumns(columns);
@@ -64,18 +61,16 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
     };
 
     const cellRendererWithTextHighlighter = (
-        params: CellParams
+        params: GridCellParams
     ): ReactElement => {
         return (
-            <Box
-                className={commonClasses.ellipsis}
-                textAlign={params.colDef && params.colDef.align}
-                width="100%"
-            >
-                <TextHighlighter
-                    searchWords={props.searchWords}
-                    text={params.value as string}
-                />
+            <Box textAlign={params.colDef && params.colDef.align} width="100%">
+                <Typography noWrap variant="body1">
+                    <TextHighlighter
+                        searchWords={props.searchWords}
+                        text={params.value as string}
+                    />
+                </Typography>
             </Box>
         );
     };
@@ -88,6 +83,9 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
                         className={dataGridClasses.toolbar}
                         variant="dense"
                     >
+                        {/* Toolbar items */}
+                        {props.toolbarItems}
+
                         {/* Row selection status */}
                         {props.checkboxSelection && (
                             <Typography
@@ -95,11 +93,12 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
                                 color="textSecondary"
                                 variant="body1"
                             >
-                                {getSelectedStatusLabel(
-                                    dataGridSelectionModel
-                                        ? dataGridSelectionModel.length
-                                        : 0
-                                )}
+                                {props.selectedStatusLabelFn &&
+                                    props.selectedStatusLabelFn(
+                                        dataGridSelectionModel
+                                            ? dataGridSelectionModel.length
+                                            : 0
+                                    )}
                             </Typography>
                         )}
                     </Toolbar>
@@ -127,13 +126,13 @@ export const DataGrid: FunctionComponent<DataGridProps> = (
     const errorIndicatorRenderer = (): ReactElement => {
         return (
             <GridOverlay>
-                <ErrorIndicator />
+                <ErrorIndicator text={props.errorMessage} />
             </GridOverlay>
         );
     };
 
     const handleDataGridSelectionModelChange = (
-        params: SelectionModelChangeParams
+        params: GridSelectionModelChangeParams
     ): void => {
         setDatagridSelectionModel(params.selectionModel || []);
         props.onSelectionModelChange && props.onSelectionModelChange(params);

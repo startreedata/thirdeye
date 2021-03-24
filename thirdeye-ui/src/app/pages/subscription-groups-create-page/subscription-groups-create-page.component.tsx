@@ -2,7 +2,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
@@ -10,7 +10,7 @@ import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
-import { getSubscriptionGroupsDetailPath } from "../../utils/routes/routes.util";
+import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -47,7 +47,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
 
                 // Redirect to subscription groups detail path
                 history.push(
-                    getSubscriptionGroupsDetailPath(subscriptionGroup.id)
+                    getSubscriptionGroupsViewPath(subscriptionGroup.id)
                 );
             })
             .catch((): void => {

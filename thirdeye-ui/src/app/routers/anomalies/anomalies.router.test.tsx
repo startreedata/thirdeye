@@ -5,11 +5,14 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { AppRoute } from "../../utils/routes/routes.util";
 import { AnomaliesRouter } from "./anomalies.router";
 
-jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
-    useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-        setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-    })),
-}));
+jest.mock(
+    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
+    () => ({
+        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
+            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
+        })),
+    })
+);
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
@@ -35,30 +38,28 @@ jest.mock("../../utils/routes/routes.util", () => ({
 jest.mock(
     "../../components/loading-indicator/loading-indicator.component",
     () => ({
-        LoadingIndicator: jest.fn().mockReturnValue(<>testLoadingIndicator</>),
+        LoadingIndicator: jest.fn().mockReturnValue("testLoadingIndicator"),
     })
 );
 
 jest.mock(
     "../../pages/anomalies-all-page/anomalies-all-page.component",
     () => ({
-        AnomaliesAllPage: jest.fn().mockReturnValue(<>testAnomaliesAllPage</>),
+        AnomaliesAllPage: jest.fn().mockReturnValue("testAnomaliesAllPage"),
     })
 );
 
 jest.mock(
-    "../../pages/anomalies-detail-page/anomalies-detail-page.component",
+    "../../pages/anomalies-view-page/anomalies-view-page.component",
     () => ({
-        AnomaliesDetailPage: jest
-            .fn()
-            .mockReturnValue(<>testAnomaliesDetailPage</>),
+        AnomaliesViewPage: jest.fn().mockReturnValue("testAnomaliesViewPage"),
     })
 );
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue("testPageNotFoundPage"),
     })
 );
 
@@ -146,22 +147,22 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render anomalies detail page at exact anomalies detail path", async () => {
+    test("should render anomalies view page at exact anomalies view path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.ANOMALIES_DETAIL]}>
+            <MemoryRouter initialEntries={[AppRoute.ANOMALIES_VIEW]}>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testAnomaliesDetailPage")
+            screen.findByText("testAnomaliesViewPage")
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies detail path", async () => {
+    test("should render page not found page at invalid anomalies view path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.ANOMALIES_DETAIL}/testPath`]}
+                initialEntries={[`${AppRoute.ANOMALIES_VIEW}/testPath`]}
             >
                 <AnomaliesRouter />
             </MemoryRouter>

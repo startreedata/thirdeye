@@ -32,6 +32,9 @@ import { AppBarDrawer } from "../app-bar-drawer/app-bar-drawer.component";
 import { useAuth } from "../auth-provider/auth-provider.component";
 import { useAppBarStyles } from "./app-bar.styles";
 
+const ELEVATION_APP_BAR = 6;
+const HEIGHT_LOGO = 32;
+
 export const AppBar: FunctionComponent = () => {
     const appBarClasses = useAppBarStyles();
     const [appBarDrawerOpen, setAppBarDrawerOpen] = useState(false);
@@ -120,7 +123,10 @@ export const AppBar: FunctionComponent = () => {
     };
 
     return (
-        <MuiAppBar className={appBarClasses.appBar} elevation={6}>
+        <MuiAppBar
+            className={appBarClasses.appBar}
+            elevation={ELEVATION_APP_BAR}
+        >
             <Toolbar>
                 <Hidden smUp>
                     {/* App bar drawer button */}
@@ -141,7 +147,7 @@ export const AppBar: FunctionComponent = () => {
                     component="button"
                     onClick={handleLogoClick}
                 >
-                    <ThirdEyeIcon height={32} />
+                    <ThirdEyeIcon height={HEIGHT_LOGO} />
                 </Link>
 
                 <Hidden xsDown>

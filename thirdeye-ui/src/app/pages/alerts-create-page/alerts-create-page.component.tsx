@@ -4,7 +4,7 @@ import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
@@ -20,7 +20,7 @@ import {
     updateSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
-import { getAlertsDetailPath } from "../../utils/routes/routes.util";
+import { getAlertsViewPath } from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -54,7 +54,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
 
                 if (isEmpty(subscriptionGroups)) {
                     // Redirect to alerts detail path
-                    history.push(getAlertsDetailPath(alert.id));
+                    history.push(getAlertsViewPath(alert.id));
 
                     return;
                 }
@@ -89,7 +89,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
                     })
                     .finally((): void => {
                         // Redirect to alerts detail path
-                        history.push(getAlertsDetailPath(alert.id));
+                        history.push(getAlertsViewPath(alert.id));
                     });
             })
             .catch((): void => {

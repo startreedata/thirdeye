@@ -5,11 +5,14 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { AppRoute } from "../../utils/routes/routes.util";
 import { MetricsRouter } from "./metrics.router";
 
-jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
-    useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-        setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-    })),
-}));
+jest.mock(
+    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
+    () => ({
+        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
+            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
+        })),
+    })
+);
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
@@ -36,27 +39,22 @@ jest.mock("../../utils/routes/routes.util", () => ({
 jest.mock(
     "../../components/loading-indicator/loading-indicator.component",
     () => ({
-        LoadingIndicator: jest.fn().mockReturnValue(<>testLoadingIndicator</>),
+        LoadingIndicator: jest.fn().mockReturnValue("testLoadingIndicator"),
     })
 );
 
 jest.mock("../../pages/metrics-all-page/metrics-all-page.component", () => ({
-    MetricsAllPage: jest.fn().mockReturnValue(<>testMetricsAllPage</>),
+    MetricsAllPage: jest.fn().mockReturnValue("testMetricsAllPage"),
 }));
 
-jest.mock(
-    "../../pages/metrics-detail-page/metrics-detail-page.component",
-    () => ({
-        MetricsDetailPage: jest
-            .fn()
-            .mockReturnValue(<>testMetricsDetailPage</>),
-    })
-);
+jest.mock("../../pages/metrics-view-page/metrics-view-page.component", () => ({
+    MetricsViewPage: jest.fn().mockReturnValue("testMetricsViewPage"),
+}));
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue("testPageNotFoundPage"),
     })
 );
 
@@ -149,22 +147,22 @@ describe("Metrics Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render metrics detail page at exact metrics detail path", async () => {
+    test("should render metrics view page at exact metrics view path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.METRICS_DETAIL]}>
+            <MemoryRouter initialEntries={[AppRoute.METRICS_VIEW]}>
                 <MetricsRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testMetricsDetailPage")
+            screen.findByText("testMetricsViewPage")
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid metrics detail path", async () => {
+    test("should render page not found page at invalid metrics view path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.METRICS_DETAIL}/testPath`]}
+                initialEntries={[`${AppRoute.METRICS_VIEW}/testPath`]}
             >
                 <MetricsRouter />
             </MemoryRouter>

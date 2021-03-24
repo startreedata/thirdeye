@@ -5,11 +5,14 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { AppRoute } from "../../utils/routes/routes.util";
 import { ConfigurationRouter } from "./configuration.router";
 
-jest.mock("../../components/app-breadcrumbs/app-breadcrumbs.component", () => ({
-    useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-        setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-    })),
-}));
+jest.mock(
+    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
+    () => ({
+        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
+            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
+        })),
+    })
+);
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
@@ -35,33 +38,31 @@ jest.mock("../../utils/routes/routes.util", () => ({
 jest.mock(
     "../../components/loading-indicator/loading-indicator.component",
     () => ({
-        LoadingIndicator: jest.fn().mockReturnValue(<>testLoadingIndicator</>),
+        LoadingIndicator: jest.fn().mockReturnValue("testLoadingIndicator"),
     })
 );
 
 jest.mock(
     "../../pages/configuration-page/configuration-page.component",
     () => ({
-        ConfigurationPage: jest
-            .fn()
-            .mockReturnValue(<>testConfigurationPage</>),
+        ConfigurationPage: jest.fn().mockReturnValue("testConfigurationPage"),
     })
 );
 
 jest.mock("../subscription-groups/subscription-groups.router", () => ({
     SubscriptionGroupsRouter: jest
         .fn()
-        .mockReturnValue(<>testSubscriptionGroupsRouter</>),
+        .mockReturnValue("testSubscriptionGroupsRouter"),
 }));
 
 jest.mock("../metrics/metrics.router", () => ({
-    MetricsRouter: jest.fn().mockReturnValue(<>testMetricsRouter</>),
+    MetricsRouter: jest.fn().mockReturnValue("testMetricsRouter"),
 }));
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",
     () => ({
-        PageNotFoundPage: jest.fn().mockReturnValue(<>testPageNotFoundPage</>),
+        PageNotFoundPage: jest.fn().mockReturnValue("testPageNotFoundPage"),
     })
 );
 

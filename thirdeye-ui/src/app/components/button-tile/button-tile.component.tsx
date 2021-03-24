@@ -1,5 +1,6 @@
 import { Button, Typography, useTheme } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
+import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
 import { ButtonTileProps } from "./button-tile.interfaces";
 import { useButtonTileStyles } from "./button-tile.styles";
 
@@ -58,7 +59,10 @@ export const ButtonTile: FunctionComponent<ButtonTileProps> = (
                         className={buttonTileClasses.text}
                         variant="subtitle1"
                     >
-                        {props.text}
+                        <TextHighlighter
+                            searchWords={props.searchWords}
+                            text={props.text}
+                        />
                     </Typography>
                 </div>
             )}

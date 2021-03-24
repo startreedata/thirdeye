@@ -14,9 +14,9 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { UiSubscriptionGroupAlert } from "../../../rest/dto/ui-subscription-group.interfaces";
 import {
-    getAlertsDetailPath,
-    getSubscriptionGroupsDetailPath,
+    getAlertsViewPath,
     getSubscriptionGroupsUpdatePath,
+    getSubscriptionGroupsViewPath,
 } from "../../../utils/routes/routes.util";
 import { getUiSubscriptionGroupAlertName } from "../../../utils/subscription-groups/subscription-groups.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
@@ -50,7 +50,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
         }
 
         history.push(
-            getSubscriptionGroupsDetailPath(props.uiSubscriptionGroup.id)
+            getSubscriptionGroupsViewPath(props.uiSubscriptionGroup.id)
         );
         handleSubscriptionGroupOptionsClose();
     };
@@ -82,7 +82,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
             return;
         }
 
-        history.push(getAlertsDetailPath(uiSubscriptionGroupAlert.id));
+        history.push(getAlertsViewPath(uiSubscriptionGroupAlert.id));
     };
 
     return (

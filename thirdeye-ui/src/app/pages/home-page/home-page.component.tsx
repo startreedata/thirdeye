@@ -7,7 +7,7 @@ import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.sv
 import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
 import { ReactComponent as MetricIcon } from "../../../assets/images/metric.svg";
 import { ReactComponent as SubscriptionGroupIcon } from "../../../assets/images/subscription-group.svg";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { ButtonTile } from "../../components/button-tile/button-tile.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import {

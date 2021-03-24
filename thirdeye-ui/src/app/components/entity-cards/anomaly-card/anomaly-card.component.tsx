@@ -9,14 +9,14 @@ import {
     Menu,
     MenuItem,
 } from "@material-ui/core";
-import { classnames } from "@material-ui/data-grid";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import {
-    getAlertsDetailPath,
-    getAnomaliesDetailPath,
+    getAlertsViewPath,
+    getAnomaliesViewPath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -50,7 +50,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             return;
         }
 
-        history.push(getAnomaliesDetailPath(props.uiAnomaly.id));
+        history.push(getAnomaliesViewPath(props.uiAnomaly.id));
         handleAnomalyOptionsClose();
     };
 
@@ -72,7 +72,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             return;
         }
 
-        history.push(getAlertsDetailPath(props.uiAnomaly.alertId));
+        history.push(getAlertsViewPath(props.uiAnomaly.alertId));
     };
 
     return (

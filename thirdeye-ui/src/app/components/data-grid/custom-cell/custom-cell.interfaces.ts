@@ -1,7 +1,7 @@
-import { CellParams } from "@material-ui/data-grid";
+import { GridCellParams } from "@material-ui/data-grid";
 import { ReactNode } from "react";
 
 export interface CustomCellProps {
-    params: CellParams;
+    params: GridCellParams;
     children?: ReactNode;
 }

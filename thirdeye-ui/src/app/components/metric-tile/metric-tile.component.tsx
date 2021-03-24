@@ -1,5 +1,5 @@
 import { ButtonBase, Paper, Typography } from "@material-ui/core";
-import { classnames } from "@material-ui/data-grid";
+import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { MetricTileProps } from "./metric-tile.interfaces";
@@ -29,7 +29,7 @@ export const MetricTile: FunctionComponent<MetricTileProps> = (
                     <Typography
                         noWrap
                         className={props.metricValueClassName}
-                        variant={props.compact ? "h6" : "h4"}
+                        variant={props.compact ? "h5" : "h3"}
                     >
                         {props.metricValue || t("label.no-data-marker")}
                     </Typography>

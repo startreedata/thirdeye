@@ -1,5 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SignOutPage } from "./sign-out-page.component";
 
 jest.mock("../../components/auth-provider/auth-provider.component", () => ({
@@ -24,12 +25,7 @@ jest.mock("react-i18next", () => ({
 }));
 
 jest.mock("../../components/page-contents/page-contents.component", () => ({
-    PageContents: jest.fn().mockImplementation((props) => (
-        <>
-            <div>title:{props.title}</div>
-            <div>{props.children}</div>
-        </>
-    )),
+    PageContents: jest.fn().mockImplementation((props) => props.children),
 }));
 
 jest.mock(
@@ -53,7 +49,14 @@ describe("Sign Out Page", () => {
             render(<SignOutPage />);
         });
 
-        expect(screen.getByText("title:label.sign-out")).toBeInTheDocument();
+        expect(PageContents).toHaveBeenCalledWith(
+            {
+                hideHeader: true,
+                title: "label.sign-out",
+                children: expect.any(Object),
+            },
+            {}
+        );
     });
 
     test("should sign out", async () => {

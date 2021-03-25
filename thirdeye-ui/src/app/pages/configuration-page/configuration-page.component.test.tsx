@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { ConfigurationPage } from "./configuration-page.component";
 
 jest.mock(
@@ -31,12 +32,7 @@ jest.mock("../../utils/routes/routes.util", () => ({
 }));
 
 jest.mock("../../components/page-contents/page-contents.component", () => ({
-    PageContents: jest.fn().mockImplementation((props) => (
-        <>
-            <div>title:{props.title}</div>
-            <div>{props.children}</div>
-        </>
-    )),
+    PageContents: jest.fn().mockImplementation((props) => props.children),
 }));
 
 describe("Configuration Page", () => {
@@ -53,9 +49,16 @@ describe("Configuration Page", () => {
             render(<ConfigurationPage />);
         });
 
-        expect(
-            screen.getByText("title:label.configuration")
-        ).toBeInTheDocument();
+        expect(PageContents).toHaveBeenCalledWith(
+            {
+                centered: true,
+                hideAppBreadcrumbs: true,
+                hideTimeRange: true,
+                title: "label.configuration",
+                children: expect.any(Object),
+            },
+            {}
+        );
     });
 
     test("should render all navigation buttons", async () => {

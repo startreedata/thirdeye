@@ -1,5 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { PageNotFoundPage } from "./page-not-found-page.component";
 
 jest.mock(
@@ -18,12 +19,7 @@ jest.mock("react-i18next", () => ({
 }));
 
 jest.mock("../../components/page-contents/page-contents.component", () => ({
-    PageContents: jest.fn().mockImplementation((props) => (
-        <>
-            <div>title:{props.title}</div>
-            <div>{props.children}</div>
-        </>
-    )),
+    PageContents: jest.fn().mockImplementation((props) => props.children),
 }));
 
 jest.mock(
@@ -49,9 +45,14 @@ describe("Page Not Found Page", () => {
             render(<PageNotFoundPage />);
         });
 
-        expect(
-            screen.getByText("title:label.page-not-found")
-        ).toBeInTheDocument();
+        expect(PageContents).toHaveBeenCalledWith(
+            {
+                hideHeader: true,
+                title: "label.page-not-found",
+                children: expect.any(Object),
+            },
+            {}
+        );
     });
 
     test("should render page not found indicator", async () => {

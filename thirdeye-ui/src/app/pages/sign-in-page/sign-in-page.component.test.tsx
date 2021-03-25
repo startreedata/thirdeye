@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SignInPage } from "./sign-in-page.component";
 
 jest.mock("../../components/auth-provider/auth-provider.component", () => ({
@@ -24,12 +25,7 @@ jest.mock("react-i18next", () => ({
 }));
 
 jest.mock("../../components/page-contents/page-contents.component", () => ({
-    PageContents: jest.fn().mockImplementation((props) => (
-        <>
-            <div>title:{props.title}</div>
-            <div>{props.children}</div>
-        </>
-    )),
+    PageContents: jest.fn().mockImplementation((props) => props.children),
 }));
 
 describe("Sign In Page", () => {
@@ -46,7 +42,14 @@ describe("Sign In Page", () => {
             render(<SignInPage />);
         });
 
-        expect(screen.getByText("title:label.sign-in")).toBeInTheDocument();
+        expect(PageContents).toHaveBeenCalledWith(
+            {
+                hideHeader: true,
+                title: "label.sign-in",
+                children: expect.any(Object),
+            },
+            {}
+        );
     });
 
     test("should render sign in button", async () => {

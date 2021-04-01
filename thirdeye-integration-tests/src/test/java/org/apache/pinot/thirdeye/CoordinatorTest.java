@@ -5,6 +5,7 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -17,16 +18,12 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
 import org.assertj.core.api.Assertions;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class CoordinatorTest {
 
-  public static final Logger log = LoggerFactory.getLogger(CoordinatorTest.class);
   public static final String THIRDEYE_CONFIG = "./src/test/resources/e2e/config";
 
   public static final DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT =

@@ -28,10 +28,15 @@
     <module>thirdeye-spi</module>
     <module>thirdeye-core</module>
     <module>thirdeye-coordinator</module>
-    <module>thirdeye-distribution</module>
-    <module>thirdeye-deprecated-tests</module>
-    <module>thirdeye-integration-tests</module>
     <module>thirdeye-worker</module>
+    <module>thirdeye-ui</module>
+
+    <!--    Build the distribution after everything -->
+    <module>thirdeye-distribution</module>
+
+    <!--    Run the test modules -->
+    <module>thirdeye-integration-tests</module>
+    <module>thirdeye-deprecated-tests</module>
   </modules>
 
   <properties>

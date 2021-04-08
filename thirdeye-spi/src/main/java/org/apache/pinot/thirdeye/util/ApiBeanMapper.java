@@ -42,7 +42,7 @@ import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
 public abstract class ApiBeanMapper {
 
   private static final String DEFAULT_ALERT_SUPPRESSOR = "org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor";
-  private static final String DEFAULT_ALERTER_PIPELINE_CLASS_NAME  = "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter";
+  private static final String DEFAULT_ALERTER_PIPELINE_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter";
   private static final String DEFAULT_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
   private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
   private static final String PROP_CLASS_NAME = "className";
@@ -175,7 +175,7 @@ public abstract class ApiBeanMapper {
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
       TimeGranularity timeGranularity = TimeGranularity.fromDuration(timeColumn.getInterval());
-      dto.setTimeDuration((int)timeGranularity.toDuration().getSeconds());
+      dto.setTimeDuration((int) timeGranularity.toDuration().getSeconds());
       dto.setTimeUnit(TimeUnit.SECONDS);
       optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
       optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
@@ -298,7 +298,7 @@ public abstract class ApiBeanMapper {
 
   private static Map<String, Object> buildProperties() {
     Map<String, Object> properties = new HashMap<>();
-    properties.put(PROP_CLASS_NAME,  DEFAULT_ALERTER_PIPELINE_CLASS_NAME);
+    properties.put(PROP_CLASS_NAME, DEFAULT_ALERTER_PIPELINE_CLASS_NAME);
     return properties;
   }
 
@@ -317,24 +317,26 @@ public abstract class ApiBeanMapper {
     Map<String, Object> alertSchemes = new HashMap<>();
     Map<String, Object> emailNotificationInfo = new HashMap<>();
     Map<String, Object> recipientsInfo = ImmutableMap.of(
-                "to", optional(email.getTo()).orElse(Collections.emptyList()),
-                "cc", optional(email.getCc()).orElse(Collections.emptyList()),
-                "bcc", optional(email.getBcc()).orElse(Collections.emptyList())
+        "to", optional(email.getTo()).orElse(Collections.emptyList()),
+        "cc", optional(email.getCc()).orElse(Collections.emptyList()),
+        "bcc", optional(email.getBcc()).orElse(Collections.emptyList())
     );
     emailNotificationInfo.put("recipients", recipientsInfo);
-    emailNotificationInfo.put(PROP_CLASS_NAME,  DEFAULT_ALERT_SCHEME_CLASS_NAME);
+    emailNotificationInfo.put(PROP_CLASS_NAME, DEFAULT_ALERT_SCHEME_CLASS_NAME);
     alertSchemes.put("emailScheme", emailNotificationInfo);
     return alertSchemes;
   }
 
-  public static Map<String, Object> toAlertSuppressors(final TimeWindowSuppressorApi timeWindowSuppressorApi) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    Map<String, Object> alertSuppressors = objectMapper.convertValue(timeWindowSuppressorApi, Map.class);
+  @SuppressWarnings("unchecked")
+  public static Map<String, Object> toAlertSuppressors(
+      final TimeWindowSuppressorApi timeWindowSuppressorApi) {
+    final Map<String, Object> alertSuppressors = optional(new ObjectMapper().convertValue(
+        timeWindowSuppressorApi,
+        Map.class))
+        .orElse(new HashMap());
     alertSuppressors.put(PROP_CLASS_NAME, DEFAULT_ALERT_SUPPRESSOR);
     return alertSuppressors;
   }
-
-
 
   public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
     return new AnomalyApi()

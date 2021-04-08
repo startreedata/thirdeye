@@ -62,6 +62,7 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
     optional(api.getActive()).ifPresent(dto::setActive);
     optional(api.getViews()).ifPresent(dto::setViews);
     optional(api.getWhere()).ifPresent(dto::setWhere);
+    optional(api.getAggregationFunction()).ifPresent(dto::setDefaultAggFunction);
     return dto;
   }
 

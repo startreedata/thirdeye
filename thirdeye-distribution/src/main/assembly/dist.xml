@@ -43,6 +43,10 @@
       <outputDirectory>config/</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>${thirdeye.root}/scripts</directory>
+      <outputDirectory>bin/</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>${thirdeye.root}/thirdeye-ui/dist</directory>
       <outputDirectory>ui/</outputDirectory>
     </fileSet>

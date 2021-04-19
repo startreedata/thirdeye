@@ -26,6 +26,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -85,6 +87,9 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
 
   @Override
   public void initialize(final Bootstrap<ThirdEyeWorkerConfiguration> bootstrap) {
+    bootstrap.setConfigurationSourceProvider(
+        new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
+            new EnvironmentVariableSubstitutor()));
     bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
     bootstrap.addBundle(new ThirdEyeSwaggerBundle());
   }

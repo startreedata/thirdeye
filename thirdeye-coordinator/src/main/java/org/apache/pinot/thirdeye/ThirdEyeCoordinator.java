@@ -3,6 +3,8 @@ package org.apache.pinot.thirdeye;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
@@ -35,6 +37,9 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
   @Override
   public void initialize(final Bootstrap<ThirdEyeCoordinatorConfiguration> bootstrap) {
+    bootstrap.setConfigurationSourceProvider(
+        new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
+            new EnvironmentVariableSubstitutor()));
     bootstrap.addBundle(new SwaggerBundle<ThirdEyeCoordinatorConfiguration>() {
       @Override
       protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(

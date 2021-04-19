@@ -150,13 +150,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     Set<String> datasets = new HashSet<>(allDatasets);
 
     Collection<DatasetConfigDTO> filtered = Collections2
-        .filter(allExistingDataset, new com.google.common.base.Predicate<DatasetConfigDTO>() {
-          @Override
-          public boolean apply(@Nullable DatasetConfigDTO datasetConfigDTO) {
-            return datasetConfigDTO.getDataSource()
-                .equals(AutoOnboardPinotMetadataSource.this.dataSourceName);
-          }
-        });
+        .filter(allExistingDataset, datasetConfigDTO -> datasetConfigDTO.getDataSource()
+            .equals(AutoOnboardPinotMetadataSource.this.dataSourceName));
 
     for (DatasetConfigDTO datasetConfigDTO : filtered) {
       if (shouldDeactivateDataset(datasetConfigDTO, datasets)) {

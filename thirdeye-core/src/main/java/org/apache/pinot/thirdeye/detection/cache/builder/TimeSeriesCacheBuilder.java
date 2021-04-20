@@ -54,12 +54,16 @@ public class TimeSeriesCacheBuilder {
 
   private static final long TIMEOUT = 60000;
 
+  private final CacheConfig cacheConfig;
   private final ExecutorService executor;
   private final LoadingCache<MetricSlice, DataFrame> cache;
   private final DefaultTimeSeriesLoader timeseriesLoader;
 
   @Inject
-  public TimeSeriesCacheBuilder(final DefaultTimeSeriesLoader timeseriesLoader) {
+  public TimeSeriesCacheBuilder(
+      final CacheConfig cacheConfig,
+      final DefaultTimeSeriesLoader timeseriesLoader) {
+    this.cacheConfig = cacheConfig;
     this.timeseriesLoader = timeseriesLoader;
     this.cache = initCache();
     executor = Executors.newCachedThreadPool();
@@ -94,7 +98,7 @@ public class TimeSeriesCacheBuilder {
 
   public Map<MetricSlice, DataFrame> fetchSlices(Collection<MetricSlice> slices)
       throws ExecutionException {
-    if (CacheConfig.getInstance().useInMemoryCache()) {
+    if (cacheConfig.useInMemoryCache()) {
       return this.cache.getAll(slices);
     } else {
       return loadTimeseries(slices);
@@ -113,7 +117,7 @@ public class TimeSeriesCacheBuilder {
       long ts = System.currentTimeMillis();
 
       // if the time series slice is already in cache, return directly
-      if (CacheConfig.getInstance().useInMemoryCache()) {
+      if (cacheConfig.useInMemoryCache()) {
         for (MetricSlice slice : slices) {
           for (Map.Entry<MetricSlice, DataFrame> entry : this.cache.asMap().entrySet()) {
             // current slice potentially contained in cache
@@ -136,8 +140,7 @@ public class TimeSeriesCacheBuilder {
       Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
       for (final MetricSlice slice : slices) {
         if (!output.containsKey(slice)) {
-          futures.put(slice,
-              this.executor.submit(() -> TimeSeriesCacheBuilder.this.timeseriesLoader.load(slice)));
+          futures.put(slice, this.executor.submit(() -> timeseriesLoader.load(slice)));
         }
       }
       //LOG.info("Fetching {} slices of timeseries, {} cache hit, {} cache miss", slices.size(), output.size(), futures.size());

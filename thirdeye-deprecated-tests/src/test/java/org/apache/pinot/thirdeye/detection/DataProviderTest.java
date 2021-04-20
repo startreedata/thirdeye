@@ -208,7 +208,9 @@ public class DataProviderTest {
         mock(TimeSeriesCache.class), dataSourceCache);
 
     // provider
-    final TimeSeriesCacheBuilder timeSeriesCacheBuilder = new TimeSeriesCacheBuilder(timeSeriesLoader);
+    final TimeSeriesCacheBuilder timeSeriesCacheBuilder = new TimeSeriesCacheBuilder(
+        CacheConfig.getInstance(),
+        timeSeriesLoader);
     this.provider = new DefaultDataProvider(metricDAO,
         datasetDAO,
         eventDAO,

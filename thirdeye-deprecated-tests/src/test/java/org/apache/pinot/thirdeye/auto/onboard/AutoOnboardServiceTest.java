@@ -37,7 +37,6 @@ public class AutoOnboardServiceTest {
     final AutoOnboardService autoOnboardService = new AutoOnboardService(
         new AutoOnboardConfiguration()
             .setFrequency(Duration.ofSeconds(1)),
-        new ThirdEyeWorkerConfiguration(),
         mock(MetricConfigManager.class),
         mock(DatasetConfigManager.class),
         readConfig(url, DataSourcesConfiguration.class));

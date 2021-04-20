@@ -47,7 +47,6 @@ public class AutoOnboardService implements Runnable {
 
   private final List<AutoOnboard> autoOnboardServices = new ArrayList<>();
   private final AutoOnboardConfiguration autoOnboardConfiguration;
-  private final ThirdEyeWorkerConfiguration config;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
   private final DataSourcesConfiguration dataSourcesConfiguration;
@@ -59,12 +58,10 @@ public class AutoOnboardService implements Runnable {
   @Inject
   public AutoOnboardService(
       final AutoOnboardConfiguration autoOnboardConfiguration,
-      final ThirdEyeWorkerConfiguration config,
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager,
       final DataSourcesConfiguration dataSourcesConfiguration) {
     this.autoOnboardConfiguration = autoOnboardConfiguration;
-    this.config = config;
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
     this.dataSourcesConfiguration = dataSourcesConfiguration;
@@ -95,7 +92,7 @@ public class AutoOnboardService implements Runnable {
       autoOnboardServices.addAll(autoOnboards);
     }
     for (AutoOnboard autoOnboard : autoOnboardServices) {
-      LOG.info("Running auto load for {}", autoOnboard.getClass().getSimpleName());
+      LOG.info("Running AutoOnboard for {}", autoOnboard.getClass().getSimpleName());
       try {
         autoOnboard.run();
       } catch (Throwable t) {

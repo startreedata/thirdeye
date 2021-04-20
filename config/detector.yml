@@ -21,8 +21,10 @@ dashboardHost: "http://localhost:1426"
 id: 0
 alerterConfiguration:
   smtpConfiguration:
-    smtpHost: "localhost"
-    smtpPort: 25
+    smtpHost: ${SMTP_HOST}
+    smtpPort: ${SMTP_PORT}
+    smtpUser: ${SMTP_USER}
+    smtpPassword: ${SMTP_PASSWORD}
 #  jiraConfiguration:
 #    jiraUser: <REPLACE_ME>
 #    jiraPassword: <REPLACE_ME>

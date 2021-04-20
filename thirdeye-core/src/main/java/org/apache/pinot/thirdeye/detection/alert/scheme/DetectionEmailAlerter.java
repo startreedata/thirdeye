@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_CONFIG_KEY;
+import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_USER_KEY;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -168,7 +169,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     if (Strings.isNullOrEmpty(this.subsConfig.getFrom())) {
       String fromAddress = MapUtils
           .getString(this.teConfig.getAlerterConfiguration().get(SMTP_CONFIG_KEY),
-              PROP_FROM_ADDRESS);
+              SMTP_USER_KEY);
       if (Strings.isNullOrEmpty(fromAddress)) {
         throw new IllegalArgumentException("Invalid sender's email");
       }

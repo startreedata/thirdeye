@@ -330,11 +330,11 @@ public abstract class ApiBeanMapper {
   @SuppressWarnings("unchecked")
   public static Map<String, Object> toAlertSuppressors(
       final TimeWindowSuppressorApi timeWindowSuppressorApi) {
-    final Map<String, Object> alertSuppressors = optional(new ObjectMapper().convertValue(
-        timeWindowSuppressorApi,
-        Map.class))
-        .orElse(new HashMap());
-    alertSuppressors.put(PROP_CLASS_NAME, DEFAULT_ALERT_SUPPRESSOR);
+    Map<String, Object> alertSuppressors = new HashMap<>();
+    if(timeWindowSuppressorApi != null) {
+      alertSuppressors = new ObjectMapper().convertValue(timeWindowSuppressorApi, Map.class);
+    }
+    //alertSuppressors.put(PROP_CLASS_NAME, DEFAULT_ALERT_SUPPRESSOR);
     return alertSuppressors;
   }
 

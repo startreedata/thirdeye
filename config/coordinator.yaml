@@ -34,7 +34,7 @@ auth:
 
 database:
   # Assuming a local MySQL server running on the default port 3306
-  url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true
+  url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true&useSSL=false
   user: uthirdeye
   password: pass
   driver: com.mysql.jdbc.Driver

@@ -48,6 +48,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
+import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -237,7 +238,8 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     // Display RCA highlights in email only if report contains anomalies belonging to a single metric.
     // Note: Once we have a sophisticated rca highlight support and users start seeing value, we'll
     // enable it for all the metrics.
-    if (this.rcaClient != null && metricAnomalyReports.keySet().size() == 1) {
+    //TODO: the API's for RCA had changed. Need to migrate
+/*    if (this.rcaClient != null && metricAnomalyReports.keySet().size() == 1) {
       String anomalyId = metricAnomalyReports.values().iterator().next().getAnomalyId();
       try {
         Map<String, Object> rcaHighlights = this.rcaClient
@@ -251,7 +253,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
         LOG.error("Skip Embedding RCA in email. Failed to retrieve the RCA Highlights for anomaly "
             + anomalyId, e);
       }
-    }
+    }*/
 
     return templateData;
   }

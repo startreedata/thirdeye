@@ -19,13 +19,13 @@
 
 package org.apache.pinot.thirdeye.dataframe.util;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.joda.time.DateTime;
 
 /**
  * Selector for time series and aggregate values of a specific metric, independent of
@@ -49,6 +49,21 @@ public final class MetricSlice {
     this.end = end;
     this.filters = filters;
     this.granularity = granularity;
+  }
+
+  public static MetricSlice from(long metricId, long start, long end) {
+    return new MetricSlice(metricId, start, end, ArrayListMultimap.create(),
+        NATIVE_GRANULARITY);
+  }
+
+  public static MetricSlice from(long metricId, long start, long end,
+      Multimap<String, String> filters) {
+    return new MetricSlice(metricId, start, end, filters, NATIVE_GRANULARITY);
+  }
+
+  public static MetricSlice from(long metricId, long start, long end,
+      Multimap<String, String> filters, TimeGranularity granularity) {
+    return new MetricSlice(metricId, start, end, filters, granularity);
   }
 
   public long getMetricId() {
@@ -87,21 +102,6 @@ public final class MetricSlice {
     return new MetricSlice(metricId, start, end, filters, granularity);
   }
 
-  public static MetricSlice from(long metricId, long start, long end) {
-    return new MetricSlice(metricId, start, end, ArrayListMultimap.create(),
-        NATIVE_GRANULARITY);
-  }
-
-  public static MetricSlice from(long metricId, long start, long end,
-      Multimap<String, String> filters) {
-    return new MetricSlice(metricId, start, end, filters, NATIVE_GRANULARITY);
-  }
-
-  public static MetricSlice from(long metricId, long start, long end,
-      Multimap<String, String> filters, TimeGranularity granularity) {
-    return new MetricSlice(metricId, start, end, filters, granularity);
-  }
-
   /**
    * check if current metric slice contains another metric slice
    */
@@ -132,6 +132,12 @@ public final class MetricSlice {
 
   @Override
   public String toString() {
-    return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    return MoreObjects.toStringHelper(this)
+        .add("metricId", metricId)
+        .add("start", new DateTime(start))
+        .add("end", new DateTime(end))
+        .add("filters", filters)
+        .add("granularity", granularity)
+        .toString();
   }
 }

@@ -86,7 +86,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
             let fetchedAlertEvaluation = {} as AlertEvaluation;
             props.getAlertEvaluation &&
                 props
-                    .getAlertEvaluation(newAlert)
+                    .getAlertEvaluation(JSON.parse(newAlertJSON))
                     .then((alertEvaluation: AlertEvaluation): void => {
                         fetchedAlertEvaluation = alertEvaluation;
                     })

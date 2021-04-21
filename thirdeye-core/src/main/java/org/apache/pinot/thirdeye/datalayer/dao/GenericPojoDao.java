@@ -524,7 +524,10 @@ public class GenericPojoDao {
         try (PreparedStatement selectStatement = sqlQueryBuilder.createFindByParamsStatement(
             connection,
             GenericJsonEntity.class,
-            ImmutableMap.of("id", id, "beanClass", pojoClass.getCanonicalName()))
+            Predicate.AND(
+                Predicate.EQ("id", id),
+                Predicate.EQ("beanClass", pojoClass.getCanonicalName()))
+            )
         ) {
           try (ResultSet resultSet = selectStatement.executeQuery()) {
             genericJsonEntity = genericResultSetMapper.mapSingle(resultSet,

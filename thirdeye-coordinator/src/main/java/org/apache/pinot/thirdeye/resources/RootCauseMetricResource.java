@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils.parseOffset;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -51,7 +52,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>RootCauseMetricResource is a central endpoint for querying different views on metrics as used by the
+ * <p>RootCauseMetricResource is a central endpoint for querying different views on metrics as used
+ * by the
  * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).
  * The endpoint parses metric urns and a unified set of "offsets", i.e. time-warped baseline of the
  * specified metric. It further aligns queried time stamps to sensibly match the raw dataset.</p>
@@ -61,6 +63,7 @@ import org.slf4j.LoggerFactory;
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RootCauseMetricResource {
+
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseMetricResource.class);
 
   private static final String COL_TIME = TimeSeriesLoader.COL_TIME;
@@ -97,24 +100,93 @@ public class RootCauseMetricResource {
   }
 
   /**
+   * Returns a map of time series (keyed by series name) derived from the timeseries results
+   * dataframe.
+   *
+   * @param data (transformed) query results
+   * @return map of lists of double or long (keyed by series name)
+   */
+  private static Map<String, List<? extends Number>> makeTimeSeriesMap(DataFrame data) {
+    Map<String, List<? extends Number>> output = new HashMap<>();
+    output.put(COL_TIME, data.getLongs(COL_TIME).toList());
+    output.put(COL_VALUE, data.getDoubles(COL_VALUE).toList());
+    return output;
+  }
+
+  /**
+   * Returns a map of maps (keyed by dimension name, keyed by dimension value) derived from the
+   * breakdown results dataframe.
+   *
+   * @param dataBreakdown (transformed) breakdown query results
+   * @param dataAggregate (transformed) aggregate query results
+   * @return map of maps of value (keyed by dimension name, keyed by dimension value)
+   */
+  private static Map<String, Map<String, Double>> makeBreakdownMap(DataFrame dataBreakdown,
+      DataFrame dataAggregate) {
+    Map<String, Map<String, Double>> output = new TreeMap<>();
+
+    dataBreakdown = dataBreakdown.dropNull();
+    dataAggregate = dataAggregate.dropNull();
+
+    Map<String, Double> dimensionTotals = new HashMap<>();
+
+    for (int i = 0; i < dataBreakdown.size(); i++) {
+      final String dimName = dataBreakdown.getString(COL_DIMENSION_NAME, i);
+      final String dimValue = dataBreakdown.getString(COL_DIMENSION_VALUE, i);
+      final double value = dataBreakdown.getDouble(COL_VALUE, i);
+
+      // cell
+      if (!output.containsKey(dimName)) {
+        output.put(dimName, new HashMap<>());
+      }
+      output.get(dimName).put(dimValue, value);
+
+      // total
+      dimensionTotals.put(dimName, MapUtils.getDoubleValue(dimensionTotals, dimName, 0) + value);
+    }
+
+    // add rollup column
+    if (!dataAggregate.isEmpty()) {
+      double total = dataAggregate.getDouble(COL_VALUE, 0);
+      for (Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
+        if (entry.getValue() < total) {
+          output.get(entry.getKey()).put(ROLLUP_NAME, total - entry.getValue());
+        }
+      }
+    }
+
+    return output;
+  }
+
+  private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
+    final DateTimeFormatter formatter = DateTimeFormat.forStyle("LL");
+    LOG.info("{} - {} (base)",
+        formatter.print(baseSlice.getStart()),
+        formatter.print(baseSlice.getEnd()));
+    for (MetricSlice slice : slices) {
+      LOG.info("{} - {}", formatter.print(slice.getStart()), formatter.print(slice.getEnd()));
+    }
+  }
+
+  /**
    * Returns an aggregate value for the specified metric and time range, and (optionally) offset.
-   * Aligns time stamps if necessary and returns NaN if no data is available for the given time range.
+   * Aligns time stamps if necessary and returns NaN if no data is available for the given time
+   * range.
    *
    * @param urn metric urn
    * @param start start time (in millis)
    * @param end end time (in millis)
    * @param offset offset identifier (e.g. "current", "wo2w")
    * @param timezone timezone identifier (e.g. "America/Los_Angeles")
-   *
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
-   *
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
+   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
    */
   @GET
   @Path("/aggregate")
   @ApiOperation(value = "Returns an aggregate value for the specified metric and time range, and (optionally) offset.")
-  public double getAggregate(@ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
+  public double getAggregate(
+      @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
       @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")") @QueryParam("offset") String offset,
@@ -145,19 +217,19 @@ public class RootCauseMetricResource {
   }
 
   /**
-   * Returns a list of aggregate value for the specified metric and time range, and a list of offset.
-   * Aligns time stamps if necessary and returns NaN if no data is available for the given time range.
+   * Returns a list of aggregate value for the specified metric and time range, and a list of
+   * offset.
+   * Aligns time stamps if necessary and returns NaN if no data is available for the given time
+   * range.
    *
    * @param urn metric urn
    * @param start start time (in millis)
    * @param end end time (in millis)
    * @param offsets A list of offset identifier (e.g. "current", "wo2w")
    * @param timezone timezone identifier (e.g. "America/Los_Angeles")
-   *
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
-   *
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
+   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
    */
   @GET
   @Path("/aggregate/batch")
@@ -209,19 +281,19 @@ public class RootCauseMetricResource {
   }
 
   /**
-   * Returns a map of lists of aggregate values for the specified metrics and time range, and a list of offsets.
-   * Aligns time stamps if necessary and returns NaN if no data is available for the given time range.
+   * Returns a map of lists of aggregate values for the specified metrics and time range, and a list
+   * of offsets.
+   * Aligns time stamps if necessary and returns NaN if no data is available for the given time
+   * range.
    *
    * @param urns metric urns
    * @param start start time (in millis)
    * @param end end time (in millis)
    * @param offsets A list of offset identifiers (e.g. "current", "wo2w")
    * @param timezone timezone identifier (e.g. "America/Los_Angeles")
-   *
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
-   *
    * @return map of lists (keyed by urn) of aggregate values, or NaN if data not available
    * @throws Exception on catch-all execution failure
+   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
    */
   @GET
   @Path("/aggregate/chunk")
@@ -282,7 +354,8 @@ public class RootCauseMetricResource {
   }
 
   /**
-   * Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally) offset.
+   * Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally)
+   * offset.
    * Aligns time stamps if necessary and omits null values.
    *
    * @param urn metric urn
@@ -291,16 +364,15 @@ public class RootCauseMetricResource {
    * @param offset offset identifier (e.g. "current", "wo2w")
    * @param timezone timezone identifier (e.g. "America/Los_Angeles")
    * @param limit limit results to the top k elements, plus a rollup element
-   *
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
-   *
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
+   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
    */
   @GET
   @Path("/breakdown")
-  @ApiOperation(value = "Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally) offset.\n"
-      + "Aligns time stamps if necessary and omits null values.")
+  @ApiOperation(value =
+      "Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally) offset.\n"
+          + "Aligns time stamps if necessary and omits null values.")
   public Map<String, Map<String, Double>> getBreakdown(
       @ApiParam(value = "metric urn", required = true)
       @QueryParam("urn") @NotNull String urn,
@@ -343,7 +415,8 @@ public class RootCauseMetricResource {
   }
 
   /**
-   * Returns a time series for the specified metric and time range, and (optionally) offset at an (optional)
+   * Returns a time series for the specified metric and time range, and (optionally) offset at an
+   * (optional)
    * time granularity. Aligns time stamps if necessary.
    *
    * @param urn metric urn
@@ -352,16 +425,15 @@ public class RootCauseMetricResource {
    * @param offset offset identifier (e.g. "current", "wo2w")
    * @param timezone timezone identifier (e.g. "America/Los_Angeles")
    * @param granularityString time granularity (e.g. "5_MINUTES", "1_HOURS")
-   *
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
-   *
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
+   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
    */
   @GET
   @Path("/timeseries")
-  @ApiOperation(value = "Returns a time series for the specified metric and time range, and (optionally) offset at an (optional)\n"
-      + "time granularity. Aligns time stamps if necessary.")
+  @ApiOperation(value =
+      "Returns a time series for the specified metric and time range, and (optionally) offset at an (optional)\n"
+          + "time granularity. Aligns time stamps if necessary.")
   public Map<String, List<? extends Number>> getTimeSeries(
       @ApiParam(value = "metric urn", required = true)
       @QueryParam("urn") @NotNull String urn,
@@ -416,16 +488,11 @@ public class RootCauseMetricResource {
     if (data.size() <= 1) {
       return data;
     }
+    final MetricConfigDTO metric = ensureExists(metricDAO.findById(slice.getMetricId()),
+        String.format("metric id: %d", slice.getMetricId()));
 
-    MetricConfigDTO metric = this.metricDAO.findById(slice.getMetricId());
-    if (metric == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id %d", slice.getMetricId()));
-    }
-
-    DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
-    if (dataset == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve dataset '%s' for metric id %d", metric.getDataset(), slice.getMetricId()));
-    }
+    final DatasetConfigDTO dataset = ensureExists(datasetDAO.findByDataset(metric.getDataset()),
+        String.format("dataset name: %s", metric.getDataset()));
 
     TimeGranularity granularity = dataset.bucketTimeGranularity();
     if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.getGranularity())
@@ -445,67 +512,11 @@ public class RootCauseMetricResource {
       current = current.plus(stepSize);
     }
 
-    LongSeries sExpected = LongSeries.buildFrom(ArrayUtils.toPrimitive(timestamps.toArray(new Long[timestamps.size()])));
+    LongSeries sExpected = LongSeries.buildFrom(ArrayUtils.toPrimitive(timestamps.toArray(new Long[timestamps
+        .size()])));
     DataFrame dfExpected = new DataFrame(COL_TIME, sExpected);
 
     return data.joinOuter(dfExpected).sortedBy(COL_TIME);
-  }
-
-  /**
-   * Returns a map of time series (keyed by series name) derived from the timeseries results dataframe.
-   *
-   * @param data (transformed) query results
-   * @return map of lists of double or long (keyed by series name)
-   */
-  private static Map<String, List<? extends Number>> makeTimeSeriesMap(DataFrame data) {
-    Map<String, List<? extends Number>> output = new HashMap<>();
-    output.put(COL_TIME, data.getLongs(COL_TIME).toList());
-    output.put(COL_VALUE, data.getDoubles(COL_VALUE).toList());
-    return output;
-  }
-
-  /**
-   * Returns a map of maps (keyed by dimension name, keyed by dimension value) derived from the
-   * breakdown results dataframe.
-   *
-   * @param dataBreakdown (transformed) breakdown query results
-   * @param dataAggregate (transformed) aggregate query results
-   * @return map of maps of value (keyed by dimension name, keyed by dimension value)
-   */
-  private static Map<String, Map<String, Double>> makeBreakdownMap(DataFrame dataBreakdown, DataFrame dataAggregate) {
-    Map<String, Map<String, Double>> output = new TreeMap<>();
-
-    dataBreakdown = dataBreakdown.dropNull();
-    dataAggregate = dataAggregate.dropNull();
-
-    Map<String, Double> dimensionTotals = new HashMap<>();
-
-    for (int i = 0; i < dataBreakdown.size(); i++) {
-      final String dimName = dataBreakdown.getString(COL_DIMENSION_NAME, i);
-      final String dimValue = dataBreakdown.getString(COL_DIMENSION_VALUE, i);
-      final double value = dataBreakdown.getDouble(COL_VALUE, i);
-
-      // cell
-      if (!output.containsKey(dimName)) {
-        output.put(dimName, new HashMap<>());
-      }
-      output.get(dimName).put(dimValue, value);
-
-      // total
-      dimensionTotals.put(dimName, MapUtils.getDoubleValue(dimensionTotals, dimName, 0) + value);
-    }
-
-    // add rollup column
-    if (!dataAggregate.isEmpty()) {
-      double total = dataAggregate.getDouble(COL_VALUE, 0);
-      for (Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
-        if (entry.getValue() < total) {
-          output.get(entry.getKey()).put(ROLLUP_NAME, total - entry.getValue());
-        }
-      }
-    }
-
-    return output;
   }
 
   /**
@@ -547,10 +558,11 @@ public class RootCauseMetricResource {
    * @param slices metric slices
    * @param limit top k elements limit
    * @return map of dataframes (keyed by metric slice,
-   *         columns: [COL_TIME(1), COL_DIMENSION_NAME, COL_DIMENSION_VALUE, COL_VALUE])
+   *     columns: [COL_TIME(1), COL_DIMENSION_NAME, COL_DIMENSION_VALUE, COL_VALUE])
    * @throws Exception on catch-all execution failure
    */
-  private Map<MetricSlice, DataFrame> fetchBreakdowns(List<MetricSlice> slices, final int limit) throws Exception {
+  private Map<MetricSlice, DataFrame> fetchBreakdowns(List<MetricSlice> slices, final int limit)
+      throws Exception {
     Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
 
     for (final MetricSlice slice : slices) {
@@ -601,15 +613,11 @@ public class RootCauseMetricResource {
    */
   // TODO refactor as util. similar to dataframe utils
   private MetricSlice alignSlice(MetricSlice slice, String timezone) {
-    MetricConfigDTO metric = this.metricDAO.findById(slice.getMetricId());
-    if (metric == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id %d", slice.getMetricId()));
-    }
+    final MetricConfigDTO metric = ensureExists(metricDAO.findById(slice.getMetricId()),
+        String.format("metric id: %d", slice.getMetricId()));
 
-    DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
-    if (dataset == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve dataset '%s' for metric id %d", metric.getDataset(), slice.getMetricId()));
-    }
+    final DatasetConfigDTO dataset = ensureExists(datasetDAO.findByDataset(metric.getDataset()),
+        String.format("dataset name: %s", metric.getDataset()));
 
     TimeGranularity granularity = dataset.bucketTimeGranularity();
     if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.getGranularity())) {
@@ -617,10 +625,12 @@ public class RootCauseMetricResource {
     }
 
     // align to time buckets and request time zone
-    long offset = DateTimeZone.forID(timezone).getOffset(slice.getStart());
-    long timeGranularity = granularity.toMillis();
-    long start = ((slice.getStart() + offset + timeGranularity - 1) / timeGranularity) * timeGranularity - offset; // round up the start time to time granularity boundary of the requested time zone
-    long end = start + (slice.getEnd() - slice.getStart());
+    final long offset = DateTimeZone.forID(timezone).getOffset(slice.getStart());
+    final long granularityMillis = granularity.toMillis();
+    final long start = ((slice.getStart() + offset + granularityMillis - 1) / granularityMillis)
+        * granularityMillis
+        - offset; // round up the start time to time granularity boundary of the requested time zone
+    final long end = start + (slice.getEnd() - slice.getStart());
 
     return slice.withStart(start).withEnd(end).withGranularity(granularity);
   }
@@ -632,13 +642,5 @@ public class RootCauseMetricResource {
   private MetricSlice makeSlice(String urn, long start, long end, TimeGranularity granularity) {
     MetricEntity metric = MetricEntity.fromURN(urn);
     return MetricSlice.from(metric.getId(), start, end, metric.getFilters(), granularity);
-  }
-
-  private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
-    final DateTimeFormatter formatter = DateTimeFormat.forStyle("LL");
-    LOG.info("{} - {} (base)", formatter.print(baseSlice.getStart()), formatter.print(baseSlice.getEnd()));
-    for (MetricSlice slice : slices) {
-      LOG.info("{} - {}", formatter.print(slice.getStart()), formatter.print(slice.getEnd()));
-    }
   }
 }

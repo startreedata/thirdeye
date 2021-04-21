@@ -107,9 +107,7 @@ public class GenericPojoDao {
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
   private static final int MAX_BATCH_SIZE = 1000;
 
-  static Map<Class<? extends AbstractBean>, PojoInfo> pojoInfoMap =
-      new HashMap<Class<? extends AbstractBean>, GenericPojoDao.PojoInfo>();
-
+  static Map<Class<? extends AbstractBean>, PojoInfo> pojoInfoMap = new HashMap<>();
   static String DEFAULT_BASE_TABLE_NAME = "GENERIC_JSON_ENTITY";
   static ModelMapper MODEL_MAPPER = new ModelMapper();
   static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -217,51 +215,47 @@ public class GenericPojoDao {
       //insert into its base table
       //get the generated id
       //update indexes
-      return runTask(new QueryTask<Long>() {
-        @Override
-        public Long handle(Connection connection)
-            throws Exception {
-          PojoInfo pojoInfo = pojoInfoMap.get(pojo.getClass());
-          AbstractJsonEntity genericJsonEntity = new GenericJsonEntity();
-          genericJsonEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-          genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-          genericJsonEntity.setVersion(1);
-          genericJsonEntity.setBeanClass(pojo.getClass().getName());
-          String jsonVal = OBJECT_MAPPER.writeValueAsString(pojo);
-          genericJsonEntity.setJsonVal(jsonVal);
-          ThirdeyeMetricsUtil.dbWriteByteCounter.inc(jsonVal.length());
+      return runTask(connection -> {
+        PojoInfo pojoInfo = pojoInfoMap.get(pojo.getClass());
+        AbstractJsonEntity genericJsonEntity = new GenericJsonEntity();
+        genericJsonEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+        genericJsonEntity.setVersion(1);
+        genericJsonEntity.setBeanClass(pojo.getClass().getName());
+        String jsonVal = OBJECT_MAPPER.writeValueAsString(pojo);
+        genericJsonEntity.setJsonVal(jsonVal);
+        ThirdeyeMetricsUtil.dbWriteByteCounter.inc(jsonVal.length());
 
-          try (PreparedStatement baseTableInsertStmt = sqlQueryBuilder
-              .createInsertStatement(connection, genericJsonEntity)) {
-            int affectedRows = baseTableInsertStmt.executeUpdate();
-            if (affectedRows == 1) {
-              try (ResultSet generatedKeys = baseTableInsertStmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                  pojo.setId(generatedKeys.getLong(1));
-                }
-              }
-              if (pojoInfo.indexEntityClass != null) {
-                AbstractIndexEntity abstractIndexEntity = pojoInfo.indexEntityClass.newInstance();
-                MODEL_MAPPER.map(pojo, abstractIndexEntity);
-                abstractIndexEntity.setBaseId(pojo.getId());
-                abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-                abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-                abstractIndexEntity.setVersion(1);
-                int numRowsCreated;
-                try (PreparedStatement indexTableInsertStatement = sqlQueryBuilder
-                    .createInsertStatement(connection, abstractIndexEntity)) {
-                  numRowsCreated = indexTableInsertStatement.executeUpdate();
-                }
-                if (numRowsCreated == 1) {
-                  return pojo.getId();
-                }
-              } else {
-                return pojo.getId();
+        try (PreparedStatement baseTableInsertStmt = sqlQueryBuilder
+            .createInsertStatement(connection, genericJsonEntity)) {
+          int affectedRows = baseTableInsertStmt.executeUpdate();
+          if (affectedRows == 1) {
+            try (ResultSet generatedKeys = baseTableInsertStmt.getGeneratedKeys()) {
+              if (generatedKeys.next()) {
+                pojo.setId(generatedKeys.getLong(1));
               }
             }
+            if (pojoInfo.indexEntityClass != null) {
+              AbstractIndexEntity abstractIndexEntity = pojoInfo.indexEntityClass.newInstance();
+              MODEL_MAPPER.map(pojo, abstractIndexEntity);
+              abstractIndexEntity.setBaseId(pojo.getId());
+              abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+              abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+              abstractIndexEntity.setVersion(1);
+              int numRowsCreated;
+              try (PreparedStatement indexTableInsertStatement = sqlQueryBuilder
+                  .createInsertStatement(connection, abstractIndexEntity)) {
+                numRowsCreated = indexTableInsertStatement.executeUpdate();
+              }
+              if (numRowsCreated == 1) {
+                return pojo.getId();
+              }
+            } else {
+              return pojo.getId();
+            }
           }
-          return null;
         }
+        return null;
       }, null);
     } finally {
       ThirdeyeMetricsUtil.dbWriteCallCounter.inc();
@@ -292,56 +286,52 @@ public class GenericPojoDao {
       pojo.setUpdatedBy(updateName);
     }
     try {
-      return runTask(new QueryTask<Integer>() {
-        @Override
-        public Integer handle(Connection connection)
-            throws Exception {
-          if (CollectionUtils.isEmpty(pojos)) {
-            return 0;
-          }
+      return runTask(connection -> {
+        if (CollectionUtils.isEmpty(pojos)) {
+          return 0;
+        }
 
-          int updateCounter = 0;
-          int minIdx = 0;
-          int maxIdx = MAX_BATCH_SIZE;
-          boolean isAutoCommit = connection.getAutoCommit();
-          // Ensure that transaction mode is enabled
-          connection.setAutoCommit(false);
-          while (minIdx < pojos.size()) {
-            List<E> subList = pojos.subList(minIdx, Math.min(maxIdx, pojos.size()));
-            try {
-              for (E pojo : subList) {
-                Preconditions.checkNotNull(pojo.getId());
-                addUpdateToConnection(pojo, Predicate.EQ("id", pojo.getId()), connection);
-              }
-              // Trigger commit() to ensure this batch of deletion is executed
-              connection.commit();
-              updateCounter += subList.size();
-            } catch (Exception e) {
-              // Error recovery: rollback previous changes.
-              connection.rollback();
-              // Unable to do batch because of exception; fall back to single row deletion mode.
-              for (final E pojo : subList) {
-                try {
-                  int updateRow = addUpdateToConnection(pojo,
-                      Predicate.EQ("id", pojo.getId()),
-                      connection);
-                  connection.commit();
-                  updateCounter += updateRow;
-                } catch (Exception e1) {
-                  connection.rollback();
-                  LOG.error("Exception while executing query task; skipping entity (id={})",
-                      pojo.getId(),
-                      e);
-                }
+        int updateCounter = 0;
+        int minIdx = 0;
+        int maxIdx = MAX_BATCH_SIZE;
+        boolean isAutoCommit = connection.getAutoCommit();
+        // Ensure that transaction mode is enabled
+        connection.setAutoCommit(false);
+        while (minIdx < pojos.size()) {
+          List<E> subList = pojos.subList(minIdx, Math.min(maxIdx, pojos.size()));
+          try {
+            for (E pojo : subList) {
+              Preconditions.checkNotNull(pojo.getId());
+              addUpdateToConnection(pojo, Predicate.EQ("id", pojo.getId()), connection);
+            }
+            // Trigger commit() to ensure this batch of deletion is executed
+            connection.commit();
+            updateCounter += subList.size();
+          } catch (Exception e) {
+            // Error recovery: rollback previous changes.
+            connection.rollback();
+            // Unable to do batch because of exception; fall back to single row deletion mode.
+            for (final E pojo : subList) {
+              try {
+                int updateRow = addUpdateToConnection(pojo,
+                    Predicate.EQ("id", pojo.getId()),
+                    connection);
+                connection.commit();
+                updateCounter += updateRow;
+              } catch (Exception e1) {
+                connection.rollback();
+                LOG.error("Exception while executing query task; skipping entity (id={})",
+                    pojo.getId(),
+                    e);
               }
             }
-            minIdx = maxIdx;
-            maxIdx = maxIdx + MAX_BATCH_SIZE;
           }
-          // Restore the original state of connection's auto commit
-          connection.setAutoCommit(isAutoCommit);
-          return updateCounter;
+          minIdx = maxIdx;
+          maxIdx = maxIdx + MAX_BATCH_SIZE;
         }
+        // Restore the original state of connection's auto commit
+        connection.setAutoCommit(isAutoCommit);
+        return updateCounter;
       }, 0);
     } finally {
       ThirdeyeMetricsUtil.dbWriteCallCounter.inc();
@@ -361,13 +351,7 @@ public class GenericPojoDao {
     long tStart = System.nanoTime();
     pojo.setUpdatedBy(getCurrentPrincipal());
     try {
-      return runTask(new QueryTask<Integer>() {
-        @Override
-        public Integer handle(Connection connection)
-            throws Exception {
-          return addUpdateToConnection(pojo, predicate, connection);
-        }
-      }, 0);
+      return runTask(connection -> addUpdateToConnection(pojo, predicate, connection), 0);
     } finally {
       ThirdeyeMetricsUtil.dbWriteCallCounter.inc();
       ThirdeyeMetricsUtil.dbWriteDurationCounter.inc(System.nanoTime() - tStart);
@@ -417,31 +401,27 @@ public class GenericPojoDao {
   public <E extends AbstractBean> List<E> getAll(final Class<E> beanClass) {
     long tStart = System.nanoTime();
     try {
-      return runTask(new QueryTask<List<E>>() {
-        @Override
-        public List<E> handle(Connection connection)
-            throws Exception {
-          Predicate predicate = Predicate.EQ("beanClass", beanClass.getName());
-          List<GenericJsonEntity> entities;
-          try (PreparedStatement selectStatement = sqlQueryBuilder
-              .createFindByParamsStatement(connection, GenericJsonEntity.class, predicate)) {
-            try (ResultSet resultSet = selectStatement.executeQuery()) {
-              entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
-            }
+      return runTask(connection -> {
+        Predicate predicate = Predicate.EQ("beanClass", beanClass.getName());
+        List<GenericJsonEntity> entities;
+        try (PreparedStatement selectStatement = sqlQueryBuilder
+            .createFindByParamsStatement(connection, GenericJsonEntity.class, predicate)) {
+          try (ResultSet resultSet = selectStatement.executeQuery()) {
+            entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
           }
-          List<E> ret = new ArrayList<>();
-          if (CollectionUtils.isNotEmpty(entities)) {
-            for (GenericJsonEntity entity : entities) {
-              ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
-
-              E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
-              e.setId(entity.getId());
-              e.setUpdateTime(entity.getUpdateTime());
-              ret.add(e);
-            }
-          }
-          return ret;
         }
+        List<E> ret = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(entities)) {
+          for (GenericJsonEntity entity : entities) {
+            ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
+
+            E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+            e.setId(entity.getId());
+            e.setUpdateTime(entity.getUpdateTime());
+            ret.add(e);
+          }
+        }
+        return ret;
       }, Collections.emptyList());
     } finally {
       ThirdeyeMetricsUtil.dbReadCallCounter.inc();
@@ -597,32 +577,28 @@ public class GenericPojoDao {
   public <E extends AbstractBean> List<E> get(final List<Long> idList, final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
-      return runTask(new QueryTask<List<E>>() {
-        @Override
-        public List<E> handle(Connection connection)
-            throws Exception {
-          List<GenericJsonEntity> genericJsonEntities;
-          try (PreparedStatement selectStatement = sqlQueryBuilder
-              .createFindByIdStatement(connection, GenericJsonEntity.class, idList)) {
-            try (ResultSet resultSet = selectStatement.executeQuery()) {
-              genericJsonEntities = genericResultSetMapper.mapAll(resultSet,
-                  GenericJsonEntity.class);
-            }
+      return runTask(connection -> {
+        List<GenericJsonEntity> genericJsonEntities;
+        try (PreparedStatement selectStatement = sqlQueryBuilder
+            .createFindByIdStatement(connection, GenericJsonEntity.class, idList)) {
+          try (ResultSet resultSet = selectStatement.executeQuery()) {
+            genericJsonEntities = genericResultSetMapper.mapAll(resultSet,
+                GenericJsonEntity.class);
           }
-          List<E> result = new ArrayList<>();
-          if (CollectionUtils.isNotEmpty(genericJsonEntities)) {
-            for (GenericJsonEntity genericJsonEntity : genericJsonEntities) {
-              ThirdeyeMetricsUtil.dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
-
-              E e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
-              e.setId(genericJsonEntity.getId());
-              e.setVersion(genericJsonEntity.getVersion());
-              e.setUpdateTime(genericJsonEntity.getUpdateTime());
-              result.add(e);
-            }
-          }
-          return result;
         }
+        List<E> result = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(genericJsonEntities)) {
+          for (GenericJsonEntity genericJsonEntity : genericJsonEntities) {
+            ThirdeyeMetricsUtil.dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
+
+            E e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
+            e.setId(genericJsonEntity.getId());
+            e.setVersion(genericJsonEntity.getVersion());
+            e.setUpdateTime(genericJsonEntity.getUpdateTime());
+            result.add(e);
+          }
+        }
+        return result;
       }, Collections.emptyList());
     } finally {
       ThirdeyeMetricsUtil.dbReadCallCounter.inc();
@@ -683,50 +659,46 @@ public class GenericPojoDao {
       final Map<String, Object> parameterMap, final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
-      return runTask(new QueryTask<List<E>>() {
-        @Override
-        public List<E> handle(Connection connection)
-            throws Exception {
-          PojoInfo pojoInfo = pojoInfoMap.get(pojoClass);
-          List<? extends AbstractIndexEntity> indexEntities;
-          try (PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
-              .createStatementFromSQL(connection,
-                  parameterizedSQL,
-                  parameterMap,
-                  pojoInfo.indexEntityClass)) {
-            try (ResultSet rs = findMatchingIdsStatement.executeQuery()) {
-              indexEntities = genericResultSetMapper.mapAll(rs, pojoInfo.indexEntityClass);
-            }
+      return runTask(connection -> {
+        PojoInfo pojoInfo = pojoInfoMap.get(pojoClass);
+        List<? extends AbstractIndexEntity> indexEntities;
+        try (PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
+            .createStatementFromSQL(connection,
+                parameterizedSQL,
+                parameterMap,
+                pojoInfo.indexEntityClass)) {
+          try (ResultSet rs = findMatchingIdsStatement.executeQuery()) {
+            indexEntities = genericResultSetMapper.mapAll(rs, pojoInfo.indexEntityClass);
           }
-          List<Long> idsToFind = new ArrayList<>();
-          if (CollectionUtils.isNotEmpty(indexEntities)) {
-            for (AbstractIndexEntity entity : indexEntities) {
-              idsToFind.add(entity.getBaseId());
-            }
-          }
-          List<E> ret = new ArrayList<>();
-          //fetch the entities
-          if (!idsToFind.isEmpty()) {
-            List<GenericJsonEntity> entities;
-            try (PreparedStatement selectStatement = sqlQueryBuilder
-                .createFindByIdStatement(connection, GenericJsonEntity.class, idsToFind)) {
-              try (ResultSet resultSet = selectStatement.executeQuery()) {
-                entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
-              }
-            }
-            if (CollectionUtils.isNotEmpty(entities)) {
-              for (GenericJsonEntity entity : entities) {
-                ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
-
-                E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
-                bean.setId(entity.getId());
-                bean.setVersion(entity.getVersion());
-                ret.add(bean);
-              }
-            }
-          }
-          return ret;
         }
+        List<Long> idsToFind = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(indexEntities)) {
+          for (AbstractIndexEntity entity : indexEntities) {
+            idsToFind.add(entity.getBaseId());
+          }
+        }
+        List<E> ret = new ArrayList<>();
+        //fetch the entities
+        if (!idsToFind.isEmpty()) {
+          List<GenericJsonEntity> entities;
+          try (PreparedStatement selectStatement = sqlQueryBuilder
+              .createFindByIdStatement(connection, GenericJsonEntity.class, idsToFind)) {
+            try (ResultSet resultSet = selectStatement.executeQuery()) {
+              entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
+            }
+          }
+          if (CollectionUtils.isNotEmpty(entities)) {
+            for (GenericJsonEntity entity : entities) {
+              ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
+
+              E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
+              bean.setId(entity.getId());
+              bean.setVersion(entity.getVersion());
+              ret.add(bean);
+            }
+          }
+        }
+        return ret;
       }, Collections.emptyList());
     } finally {
       ThirdeyeMetricsUtil.dbReadCallCounter.inc();
@@ -751,34 +723,30 @@ public class GenericPojoDao {
     try {
       //apply the predicates and fetch the primary key ids
       //look up the id and convert them to bean
-      return runTask(new QueryTask<List<E>>() {
-        @Override
-        public List<E> handle(Connection connection)
-            throws Exception {
-          //fetch the entities
-          List<E> ret = new ArrayList<>();
-          if (!idsToFind.isEmpty()) {
-            List<GenericJsonEntity> entities;
-            try (PreparedStatement selectStatement = sqlQueryBuilder
-                .createFindByIdStatement(connection, GenericJsonEntity.class, idsToFind)) {
-              try (ResultSet resultSet = selectStatement.executeQuery()) {
-                entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
-              }
-              if (CollectionUtils.isNotEmpty(entities)) {
-                for (GenericJsonEntity entity : entities) {
-                  ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
+      return runTask(connection -> {
+        //fetch the entities
+        List<E> ret = new ArrayList<>();
+        if (!idsToFind.isEmpty()) {
+          List<GenericJsonEntity> entities;
+          try (PreparedStatement selectStatement = sqlQueryBuilder
+              .createFindByIdStatement(connection, GenericJsonEntity.class, idsToFind)) {
+            try (ResultSet resultSet = selectStatement.executeQuery()) {
+              entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
+            }
+            if (CollectionUtils.isNotEmpty(entities)) {
+              for (GenericJsonEntity entity : entities) {
+                ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
 
-                  E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
-                  bean.setId(entity.getId());
-                  bean.setVersion(entity.getVersion());
-                  bean.setUpdateTime(entity.getUpdateTime());
-                  ret.add(bean);
-                }
+                E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
+                bean.setId(entity.getId());
+                bean.setVersion(entity.getVersion());
+                bean.setUpdateTime(entity.getUpdateTime());
+                ret.add(bean);
               }
             }
           }
-          return ret;
         }
+        return ret;
       }, Collections.emptyList());
     } finally {
       ThirdeyeMetricsUtil.dbReadCallCounter.inc();
@@ -791,7 +759,7 @@ public class GenericPojoDao {
     return filterIds(new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
   }
 
-  public <E extends AbstractBean> List<Long> filterIds(final DaoFilter daoFilter) {
+  public List<Long> filterIds(final DaoFilter daoFilter) {
     long tStart = System.nanoTime();
     try {
       //apply the predicates and fetch the primary key ids
@@ -854,24 +822,20 @@ public class GenericPojoDao {
   public <E extends AbstractBean> int delete(final Long id, final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
-      return runTask(new QueryTask<Integer>() {
-        @Override
-        public Integer handle(Connection connection)
-            throws Exception {
-          PojoInfo pojoInfo = pojoInfoMap.get(pojoClass);
-          Map<String, Object> filters = new HashMap<>();
-          filters.put("id", id);
-          try (PreparedStatement deleteStatement = sqlQueryBuilder
-              .createDeleteByIdStatement(connection, GenericJsonEntity.class, filters)) {
-            deleteStatement.executeUpdate();
-          }
-          filters.clear();
-          filters.put("baseId", id);
+      return runTask(connection -> {
+        PojoInfo pojoInfo = pojoInfoMap.get(pojoClass);
+        Map<String, Object> filters = new HashMap<>();
+        filters.put("id", id);
+        try (PreparedStatement deleteStatement = sqlQueryBuilder
+            .createDeleteByIdStatement(connection, GenericJsonEntity.class, filters)) {
+          deleteStatement.executeUpdate();
+        }
+        filters.clear();
+        filters.put("baseId", id);
 
-          try (PreparedStatement deleteIndexStatement = sqlQueryBuilder
-              .createDeleteByIdStatement(connection, pojoInfo.indexEntityClass, filters)) {
-            return deleteIndexStatement.executeUpdate();
-          }
+        try (PreparedStatement deleteIndexStatement = sqlQueryBuilder
+            .createDeleteByIdStatement(connection, pojoInfo.indexEntityClass, filters)) {
+          return deleteIndexStatement.executeUpdate();
         }
       }, 0);
     } finally {
@@ -884,57 +848,53 @@ public class GenericPojoDao {
       final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
-      return runTask(new QueryTask<Integer>() {
-        @Override
-        public Integer handle(Connection connection)
-            throws Exception {
-          if (CollectionUtils.isEmpty(idsToDelete)) {
-            return 0;
-          }
+      return runTask(connection -> {
+        if (CollectionUtils.isEmpty(idsToDelete)) {
+          return 0;
+        }
 
-          boolean isAutoCommit = connection.getAutoCommit();
-          // Ensure that transaction mode is enabled
-          connection.setAutoCommit(false);
-          Class<? extends AbstractIndexEntity> indexEntityClass = pojoInfoMap.get(pojoClass).indexEntityClass;
-          int updateCounter = 0;
-          int minIdx = 0;
-          int maxIdx = MAX_BATCH_SIZE;
-          while (minIdx < idsToDelete.size()) {
-            List<Long> subList = idsToDelete.subList(minIdx, Math.min(maxIdx, idsToDelete.size()));
-            try {
-              int updatedBaseRow = addBatchDeletionToConnection(subList,
-                  indexEntityClass,
-                  connection);
-              // Trigger commit() to ensure this batch of deletion is executed
-              connection.commit();
-              updateCounter += updatedBaseRow;
-            } catch (Exception e) {
-              // Error recovery: rollback previous changes.
-              connection.rollback();
-              // Unable to do batch because of exception; fall back to single row deletion mode.
-              for (final Long pojoId : subList) {
-                try {
-                  int updatedBaseRow =
-                      addBatchDeletionToConnection(Collections.singletonList(pojoId),
-                          indexEntityClass,
-                          connection);
-                  connection.commit();
-                  updateCounter += updatedBaseRow;
-                } catch (Exception e1) {
-                  connection.rollback();
-                  LOG.error("Exception while executing query task; skipping entity (id={})",
-                      pojoId,
-                      e);
-                }
+        boolean isAutoCommit = connection.getAutoCommit();
+        // Ensure that transaction mode is enabled
+        connection.setAutoCommit(false);
+        Class<? extends AbstractIndexEntity> indexEntityClass = pojoInfoMap.get(pojoClass).indexEntityClass;
+        int updateCounter = 0;
+        int minIdx = 0;
+        int maxIdx = MAX_BATCH_SIZE;
+        while (minIdx < idsToDelete.size()) {
+          List<Long> subList = idsToDelete.subList(minIdx, Math.min(maxIdx, idsToDelete.size()));
+          try {
+            int updatedBaseRow = addBatchDeletionToConnection(subList,
+                indexEntityClass,
+                connection);
+            // Trigger commit() to ensure this batch of deletion is executed
+            connection.commit();
+            updateCounter += updatedBaseRow;
+          } catch (Exception e) {
+            // Error recovery: rollback previous changes.
+            connection.rollback();
+            // Unable to do batch because of exception; fall back to single row deletion mode.
+            for (final Long pojoId : subList) {
+              try {
+                int updatedBaseRow =
+                    addBatchDeletionToConnection(Collections.singletonList(pojoId),
+                        indexEntityClass,
+                        connection);
+                connection.commit();
+                updateCounter += updatedBaseRow;
+              } catch (Exception e1) {
+                connection.rollback();
+                LOG.error("Exception while executing query task; skipping entity (id={})",
+                    pojoId,
+                    e);
               }
             }
-            minIdx = Math.min(maxIdx, idsToDelete.size());
-            maxIdx += MAX_BATCH_SIZE;
           }
-          // Restore the original state of connection's auto commit
-          connection.setAutoCommit(isAutoCommit);
-          return updateCounter;
+          minIdx = Math.min(maxIdx, idsToDelete.size());
+          maxIdx += MAX_BATCH_SIZE;
         }
+        // Restore the original state of connection's auto commit
+        connection.setAutoCommit(isAutoCommit);
+        return updateCounter;
       }, 0);
     } finally {
       ThirdeyeMetricsUtil.dbWriteCallCounter.inc();
@@ -953,7 +913,7 @@ public class GenericPojoDao {
    * @return the number of base rows that are deleted.
    * @throws Exception any exception from DB.
    */
-  private <E extends AbstractBean> int addBatchDeletionToConnection(List<Long> idsToDelete,
+  private int addBatchDeletionToConnection(List<Long> idsToDelete,
       Class<? extends AbstractIndexEntity> indexEntityClass, Connection connection)
       throws Exception {
     try (PreparedStatement statement = sqlQueryBuilder
@@ -1011,18 +971,12 @@ public class GenericPojoDao {
 
   private interface QueryTask<T> {
 
-    T handle(Connection connection)
-        throws Exception;
+    T handle(Connection connection) throws Exception;
   }
 
   static class PojoInfo {
 
-    Class<? extends AbstractBean> pojoClass;
-    String pojoName;
     String baseTableName;
-    Class<AbstractJsonEntity> baseEntityClass;
-    String indexTableName;
     Class<? extends AbstractIndexEntity> indexEntityClass;
-    List<String> indexTableColumns;
   }
 }

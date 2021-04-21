@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -99,7 +100,6 @@ import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 @Singleton
 public class GenericPojoDao {
 
@@ -115,30 +115,45 @@ public class GenericPojoDao {
   static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   static {
-    pojoInfoMap.put(AnomalyFeedbackBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, AnomalyFeedbackIndex.class));
+    pojoInfoMap.put(AnomalyFeedbackBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, AnomalyFeedbackIndex.class));
     pojoInfoMap.put(JobBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, JobIndex.class));
     pojoInfoMap.put(TaskBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, TaskIndex.class));
     pojoInfoMap
-        .put(MergedAnomalyResultBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, MergedAnomalyResultIndex.class));
-    pojoInfoMap.put(DatasetConfigBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, DatasetConfigIndex.class));
-    pojoInfoMap.put(MetricConfigBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, MetricConfigIndex.class));
-    pojoInfoMap.put(OverrideConfigBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, OverrideConfigIndex.class));
+        .put(MergedAnomalyResultBean.class,
+            newPojoInfo(DEFAULT_BASE_TABLE_NAME, MergedAnomalyResultIndex.class));
+    pojoInfoMap.put(DatasetConfigBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, DatasetConfigIndex.class));
+    pojoInfoMap.put(MetricConfigBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, MetricConfigIndex.class));
+    pojoInfoMap.put(OverrideConfigBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, OverrideConfigIndex.class));
     pojoInfoMap.put(EventBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, EventIndex.class));
-    pojoInfoMap.put(DetectionStatusBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionStatusIndex.class));
+    pojoInfoMap.put(DetectionStatusBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionStatusIndex.class));
     pojoInfoMap
-        .put(EntityToEntityMappingBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, EntityToEntityMappingIndex.class));
+        .put(EntityToEntityMappingBean.class,
+            newPojoInfo(DEFAULT_BASE_TABLE_NAME, EntityToEntityMappingIndex.class));
     pojoInfoMap
-        .put(OnboardDatasetMetricBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, OnboardDatasetMetricIndex.class));
-    pojoInfoMap.put(ApplicationBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, ApplicationIndex.class));
-    pojoInfoMap.put(RootcauseSessionBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, RootcauseSessionIndex.class));
+        .put(OnboardDatasetMetricBean.class,
+            newPojoInfo(DEFAULT_BASE_TABLE_NAME, OnboardDatasetMetricIndex.class));
+    pojoInfoMap.put(ApplicationBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, ApplicationIndex.class));
+    pojoInfoMap.put(RootcauseSessionBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, RootcauseSessionIndex.class));
     pojoInfoMap.put(SessionBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, SessionIndex.class));
-    pojoInfoMap.put(DetectionConfigBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionConfigIndex.class));
+    pojoInfoMap.put(DetectionConfigBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionConfigIndex.class));
     pojoInfoMap
-        .put(DetectionAlertConfigBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionAlertConfigIndex.class));
-    pojoInfoMap.put(EvaluationBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, EvaluationIndex.class));
-    pojoInfoMap.put(RootcauseTemplateBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, RootcauseTemplateIndex.class));
+        .put(DetectionAlertConfigBean.class,
+            newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionAlertConfigIndex.class));
+    pojoInfoMap.put(EvaluationBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, EvaluationIndex.class));
+    pojoInfoMap.put(RootcauseTemplateBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, RootcauseTemplateIndex.class));
     pojoInfoMap
-        .put(OnlineDetectionDataBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, OnlineDetectionDataIndex.class));
+        .put(OnlineDetectionDataBean.class,
+            newPojoInfo(DEFAULT_BASE_TABLE_NAME, OnlineDetectionDataIndex.class));
     pojoInfoMap.put(AnomalySubscriptionGroupNotificationBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, AnomalySubscriptionGroupNotificationIndex.class));
   }
@@ -153,7 +168,8 @@ public class GenericPojoDao {
   public GenericPojoDao() {
   }
 
-  private static PojoInfo newPojoInfo(String baseTableName, Class<? extends AbstractIndexEntity> indexEntityClass) {
+  private static PojoInfo newPojoInfo(String baseTableName,
+      Class<? extends AbstractIndexEntity> indexEntityClass) {
     PojoInfo pojoInfo = new PojoInfo();
     pojoInfo.baseTableName = baseTableName;
     pojoInfo.indexEntityClass = indexEntityClass;
@@ -306,12 +322,16 @@ public class GenericPojoDao {
               // Unable to do batch because of exception; fall back to single row deletion mode.
               for (final E pojo : subList) {
                 try {
-                  int updateRow = addUpdateToConnection(pojo, Predicate.EQ("id", pojo.getId()), connection);
+                  int updateRow = addUpdateToConnection(pojo,
+                      Predicate.EQ("id", pojo.getId()),
+                      connection);
                   connection.commit();
                   updateCounter += updateRow;
                 } catch (Exception e1) {
                   connection.rollback();
-                  LOG.error("Exception while executing query task; skipping entity (id={})", pojo.getId(), e);
+                  LOG.error("Exception while executing query task; skipping entity (id={})",
+                      pojo.getId(),
+                      e);
                 }
               }
             }
@@ -331,7 +351,8 @@ public class GenericPojoDao {
 
   public <E extends AbstractBean> int update(E pojo) {
     if (pojo.getId() == null) {
-      throw new IllegalArgumentException(String.format("Need an ID to update the DB entity: %s", pojo.toString()));
+      throw new IllegalArgumentException(String.format("Need an ID to update the DB entity: %s",
+          pojo.toString()));
     }
     return update(pojo, Predicate.EQ("id", pojo.getId()));
   }
@@ -353,7 +374,8 @@ public class GenericPojoDao {
     }
   }
 
-  private <E extends AbstractBean> int addUpdateToConnection(final E pojo, final Predicate predicate,
+  private <E extends AbstractBean> int addUpdateToConnection(final E pojo,
+      final Predicate predicate,
       Connection connection)
       throws Exception {
     //update base table
@@ -434,7 +456,11 @@ public class GenericPojoDao {
         List<GenericJsonEntity> entities;
         Predicate predicate = Predicate.EQ("beanClass", beanClass.getName());
         try (PreparedStatement selectStatement = sqlQueryBuilder
-            .createfindByParamsStatementWithLimit(connection, GenericJsonEntity.class, predicate, limit, offset)) {
+            .createfindByParamsStatementWithLimit(connection,
+                GenericJsonEntity.class,
+                predicate,
+                limit,
+                offset)) {
           try (ResultSet resultSet = selectStatement.executeQuery()) {
             entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
           }
@@ -457,7 +483,8 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> List<E> getByPredicateJsonVal(Predicate predicate, final Class<E> beanClass) {
+  public <E extends AbstractBean> List<E> getByPredicateJsonVal(Predicate predicate,
+      final Class<E> beanClass) {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -512,28 +539,28 @@ public class GenericPojoDao {
   public <E extends AbstractBean> E get(final Long id, final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
-      return runTask(new QueryTask<E>() {
-        @Override
-        public E handle(Connection connection)
-            throws Exception {
-          GenericJsonEntity genericJsonEntity;
-          try (PreparedStatement selectStatement = sqlQueryBuilder
-              .createFindByIdStatement(connection, GenericJsonEntity.class, id)) {
-            try (ResultSet resultSet = selectStatement.executeQuery()) {
-              genericJsonEntity = genericResultSetMapper.mapSingle(resultSet, GenericJsonEntity.class);
-            }
+      return runTask(connection -> {
+        GenericJsonEntity genericJsonEntity;
+        try (PreparedStatement selectStatement = sqlQueryBuilder.createFindByParamsStatement(
+            connection,
+            GenericJsonEntity.class,
+            ImmutableMap.of("id", id, "beanClass", pojoClass.getCanonicalName()))
+        ) {
+          try (ResultSet resultSet = selectStatement.executeQuery()) {
+            genericJsonEntity = genericResultSetMapper.mapSingle(resultSet,
+                GenericJsonEntity.class);
           }
-          E e = null;
-          if (genericJsonEntity != null) {
-            ThirdeyeMetricsUtil.dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
-
-            e = (E) OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
-            e.setId(genericJsonEntity.getId());
-            e.setVersion(genericJsonEntity.getVersion());
-            e.setUpdateTime(genericJsonEntity.getUpdateTime());
-          }
-          return e;
         }
+        if (genericJsonEntity == null) {
+          return null;
+        }
+        ThirdeyeMetricsUtil.dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
+
+        final E e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
+        e.setId(genericJsonEntity.getId());
+        e.setVersion(genericJsonEntity.getVersion());
+        e.setUpdateTime(genericJsonEntity.getUpdateTime());
+        return e;
       }, null);
     } finally {
       ThirdeyeMetricsUtil.dbReadCallCounter.inc();
@@ -550,7 +577,8 @@ public class GenericPojoDao {
         try (PreparedStatement selectStatement = sqlQueryBuilder
             .createFindByIdStatement(connection, GenericJsonEntity.class, id)) {
           try (ResultSet resultSet = selectStatement.executeQuery()) {
-            genericJsonEntity = genericResultSetMapper.mapSingle(resultSet, GenericJsonEntity.class);
+            genericJsonEntity = genericResultSetMapper.mapSingle(resultSet,
+                GenericJsonEntity.class);
           }
         }
         Object e = null;
@@ -577,7 +605,8 @@ public class GenericPojoDao {
           try (PreparedStatement selectStatement = sqlQueryBuilder
               .createFindByIdStatement(connection, GenericJsonEntity.class, idList)) {
             try (ResultSet resultSet = selectStatement.executeQuery()) {
-              genericJsonEntities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
+              genericJsonEntities = genericResultSetMapper.mapAll(resultSet,
+                  GenericJsonEntity.class);
             }
           }
           List<E> result = new ArrayList<>();
@@ -604,7 +633,8 @@ public class GenericPojoDao {
   @SuppressWarnings("unchecked")
   public <E extends AbstractBean> List<E> filter(final DaoFilter daoFilter) {
     requireNonNull(daoFilter.getPredicate(),
-        "If the predicate is null, you can just do " + "getAll() which doesn't need to fetch IDs first");
+        "If the predicate is null, you can just do "
+            + "getAll() which doesn't need to fetch IDs first");
 
     final Class<? extends AbstractBean> beanClass = daoFilter.getBeanClass();
     final List<Long> ids = filterIds(daoFilter);
@@ -631,7 +661,9 @@ public class GenericPojoDao {
               ThirdeyeMetricsUtil.dbReadByteCounter.inc(json.length());
 
               E bean = (E) OBJECT_MAPPER.readValue(json, beanClass);
-              bean.setId(entity.getId()).setVersion(entity.getVersion()).setUpdateTime(entity.getUpdateTime());
+              bean.setId(entity.getId())
+                  .setVersion(entity.getVersion())
+                  .setUpdateTime(entity.getUpdateTime());
               results.add(bean);
             }
           }
@@ -658,7 +690,10 @@ public class GenericPojoDao {
           PojoInfo pojoInfo = pojoInfoMap.get(pojoClass);
           List<? extends AbstractIndexEntity> indexEntities;
           try (PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
-              .createStatementFromSQL(connection, parameterizedSQL, parameterMap, pojoInfo.indexEntityClass)) {
+              .createStatementFromSQL(connection,
+                  parameterizedSQL,
+                  parameterMap,
+                  pojoInfo.indexEntityClass)) {
             try (ResultSet rs = findMatchingIdsStatement.executeQuery()) {
               indexEntities = genericResultSetMapper.mapAll(rs, pojoInfo.indexEntityClass);
             }
@@ -699,7 +734,8 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> List<E> get(Map<String, Object> filterParams, Class<E> pojoClass) {
+  public <E extends AbstractBean> List<E> get(Map<String, Object> filterParams,
+      Class<E> pojoClass) {
     Predicate[] childPredicates = new Predicate[filterParams.size()];
     int index = 0;
     for (Entry<String, Object> entry : filterParams.entrySet()) {
@@ -750,7 +786,8 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> List<Long> getIdsByPredicate(final Predicate predicate, final Class<E> pojoClass) {
+  public <E extends AbstractBean> List<Long> getIdsByPredicate(final Predicate predicate,
+      final Class<E> pojoClass) {
     return filterIds(new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
   }
 
@@ -797,9 +834,11 @@ public class GenericPojoDao {
     long tStart = System.nanoTime();
     try {
       if (IS_DEBUG) {
-        try (PreparedStatement findAllStatement = sqlQueryBuilder.createFindAllStatement(connection, entityClass)) {
+        try (PreparedStatement findAllStatement = sqlQueryBuilder.createFindAllStatement(connection,
+            entityClass)) {
           try (ResultSet resultSet = findAllStatement.executeQuery()) {
-            List<? extends AbstractEntity> entities = genericResultSetMapper.mapAll(resultSet, entityClass);
+            List<? extends AbstractEntity> entities = genericResultSetMapper.mapAll(resultSet,
+                entityClass);
             for (AbstractEntity entity : entities) {
               LOG.debug("{}", entity);
             }
@@ -841,7 +880,8 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> int delete(final List<Long> idsToDelete, final Class<E> pojoClass) {
+  public <E extends AbstractBean> int delete(final List<Long> idsToDelete,
+      final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
       return runTask(new QueryTask<Integer>() {
@@ -862,7 +902,9 @@ public class GenericPojoDao {
           while (minIdx < idsToDelete.size()) {
             List<Long> subList = idsToDelete.subList(minIdx, Math.min(maxIdx, idsToDelete.size()));
             try {
-              int updatedBaseRow = addBatchDeletionToConnection(subList, indexEntityClass, connection);
+              int updatedBaseRow = addBatchDeletionToConnection(subList,
+                  indexEntityClass,
+                  connection);
               // Trigger commit() to ensure this batch of deletion is executed
               connection.commit();
               updateCounter += updatedBaseRow;
@@ -873,12 +915,16 @@ public class GenericPojoDao {
               for (final Long pojoId : subList) {
                 try {
                   int updatedBaseRow =
-                      addBatchDeletionToConnection(Collections.singletonList(pojoId), indexEntityClass, connection);
+                      addBatchDeletionToConnection(Collections.singletonList(pojoId),
+                          indexEntityClass,
+                          connection);
                   connection.commit();
                   updateCounter += updatedBaseRow;
                 } catch (Exception e1) {
                   connection.rollback();
-                  LOG.error("Exception while executing query task; skipping entity (id={})", pojoId, e);
+                  LOG.error("Exception while executing query task; skipping entity (id={})",
+                      pojoId,
+                      e);
                 }
               }
             }
@@ -920,7 +966,8 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> int deleteByPredicate(final Predicate predicate, final Class<E> pojoClass) {
+  public <E extends AbstractBean> int deleteByPredicate(final Predicate predicate,
+      final Class<E> pojoClass) {
     List<Long> idsToDelete = getIdsByPredicate(predicate, pojoClass);
     return delete(idsToDelete, pojoClass);
   }

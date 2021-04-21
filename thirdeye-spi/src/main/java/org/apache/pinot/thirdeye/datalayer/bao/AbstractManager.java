@@ -57,30 +57,8 @@ public interface AbstractManager<E extends AbstractDTO> {
 
   List<E> filter(DaoFilter daoFilter);
 
-  List<Long> findIdsByPredicate(Predicate predicate);
 
   int update(E entity, Predicate predicate);
-
-  /**
-   * Find the entities based on the JSON value predicate
-   *
-   * @param predicate the predicate
-   * @return the list of entities that match with the predicate
-   */
-  default List<E> findByPredicateJsonVal(Predicate predicate) {
-    throw new NotImplementedException("Not Implemented");
-  }
-
-  /**
-   * List the entities with pagination
-   *
-   * @param limit the limit for the number of elements returned
-   * @param offset the offset position
-   * @return the list of entities ordered by id in descending order
-   */
-  default List<E> list(long limit, long offset) {
-    throw new NotImplementedException("Not Implemented");
-  }
 
   /**
    * Count how many entities are there in the table

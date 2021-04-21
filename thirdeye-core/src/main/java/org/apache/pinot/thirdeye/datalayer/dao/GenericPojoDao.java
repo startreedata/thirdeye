@@ -23,7 +23,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -463,37 +462,6 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> List<E> getByPredicateJsonVal(Predicate predicate,
-      final Class<E> beanClass) {
-    long tStart = System.nanoTime();
-    try {
-      return runTask(connection -> {
-        List<GenericJsonEntity> entities;
-        Predicate p = Predicate.AND(predicate, Predicate.EQ("beanClass", beanClass.getName()));
-        try (PreparedStatement selectStatement = sqlQueryBuilder
-            .createFindByParamsStatement(connection, GenericJsonEntity.class, p)) {
-          try (ResultSet resultSet = selectStatement.executeQuery()) {
-            entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
-          }
-        }
-        List<E> result = new ArrayList<>();
-        if (entities != null) {
-          for (GenericJsonEntity entity : entities) {
-            ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
-            E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
-            e.setId(entity.getId());
-            e.setUpdateTime(entity.getUpdateTime());
-            result.add(e);
-          }
-        }
-        return result;
-      }, Collections.emptyList());
-    } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
-    }
-  }
-
   public <E extends AbstractBean> long count(final Class<E> beanClass) {
     long tStart = System.nanoTime();
     try {
@@ -527,7 +495,7 @@ public class GenericPojoDao {
             Predicate.AND(
                 Predicate.EQ("id", id),
                 Predicate.EQ("beanClass", pojoClass.getCanonicalName()))
-            )
+        )
         ) {
           try (ResultSet resultSet = selectStatement.executeQuery()) {
             genericJsonEntity = genericResultSetMapper.mapSingle(resultSet,

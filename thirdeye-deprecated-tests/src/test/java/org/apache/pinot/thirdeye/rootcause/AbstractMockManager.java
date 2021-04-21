@@ -99,12 +99,6 @@ public abstract class AbstractMockManager<T extends AbstractDTO> implements Abst
   }
 
   @Override
-  public List<Long> findIdsByPredicate(
-      org.apache.pinot.thirdeye.datalayer.util.Predicate predicate) {
-    throw new AssertionError("not implemented");
-  }
-
-  @Override
   public int update(T entity, Predicate predicate) {
     throw new AssertionError("not implemented");
   }

@@ -261,27 +261,7 @@ public class SqlQueryBuilder {
 
   public PreparedStatement createFindByParamsStatement(Connection connection,
       Class<? extends AbstractEntity> entityClass, Predicate predicate) throws Exception {
-    String tableName =
-        entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
-    BiMap<String, String> entityNameToDBNameMapping =
-        entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
-    StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM " + tableName);
-    StringBuilder whereClause = new StringBuilder(" WHERE ");
-    List<Pair<String, Object>> parametersList = new ArrayList<>();
-    generateWhereClause(entityNameToDBNameMapping, predicate, parametersList, whereClause);
-    sqlBuilder.append(whereClause.toString());
-    PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
-    int parameterIndex = 1;
-    LinkedHashMap<String, ColumnInfo> columnInfoMap =
-        entityMappingHolder.columnInfoPerTable.get(tableName);
-    for (Pair<String, Object> pair : parametersList) {
-      String dbFieldName = pair.getKey();
-      ColumnInfo info = columnInfoMap.get(dbFieldName);
-      checkNotNull(info,
-          String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
-      prepareStatement.setObject(parameterIndex++, pair.getValue(), info.sqlType);
-    }
-    return prepareStatement;
+    return createfindByParamsStatementWithLimit(connection, entityClass, predicate, null, null);
   }
 
   public PreparedStatement createfindByParamsStatementWithLimit(Connection connection,
@@ -296,7 +276,6 @@ public class SqlQueryBuilder {
     List<Pair<String, Object>> parametersList = new ArrayList<>();
     generateWhereClause(entityNameToDBNameMapping, predicate, parametersList, whereClause);
     sqlBuilder.append(whereClause.toString());
-    sqlBuilder.append(" ORDER BY id DESC");
     if (limit != null) {
       sqlBuilder.append(" LIMIT ").append(limit);
     }

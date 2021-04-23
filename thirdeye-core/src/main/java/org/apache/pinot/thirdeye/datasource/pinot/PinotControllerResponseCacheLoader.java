@@ -36,6 +36,7 @@ import org.apache.helix.model.InstanceConfig;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.ConnectionFactory;
 import org.apache.pinot.client.PinotClientException;
+import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
@@ -123,7 +124,7 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
 
           long start = System.currentTimeMillis();
           ResultSetGroup resultSetGroup = connection
-              .execute(pinotQuery.getTableName(), pinotQuery.getQuery());
+              .execute(pinotQuery.getTableName(), new Request("pql", pinotQuery.getQuery()));
           if (LOG.isDebugEnabled()) {
             LOG.debug("Query:{}  response:{}", pinotQuery.getQuery(), format(resultSetGroup));
           }

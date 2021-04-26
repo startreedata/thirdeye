@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
@@ -24,6 +25,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.datalayer.util.Predicate;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
+import org.quartz.CronExpression;
 
 @Api(tags = "Subscription Group")
 @Singleton
@@ -45,7 +47,8 @@ public class SubscriptionGroupResource extends
   protected SubscriptionGroupDTO createDto(final ThirdEyePrincipal principal,
       final SubscriptionGroupApi api) {
     ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
-    ensureExists(api.getCron());
+    ensureExists(api.getCron(), "cron");
+    ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
     ensure(
         subscriptionGroupManager.findByPredicate(Predicate.EQ("name", api.getName())).size() == 0,
         ERR_DUPLICATE_NAME);
@@ -70,6 +73,11 @@ public class SubscriptionGroupResource extends
     optional(api.getNotificationSchemes())
         .ifPresent(notificationSchemes -> dto.setAlertSchemes(toAlertSchemes(notificationSchemes)));
 
+    optional(api.getCron())
+        .ifPresent(cron -> {
+          ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, cron);
+          dto.setCronExpression(cron);
+        });
     return dto;
   }
 

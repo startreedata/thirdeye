@@ -6,6 +6,7 @@ public enum ThirdEyeStatus {
   ERR_MULTIPLE_DATASETS_FOUND(
       "Multiple datasets found based on the dataset's display name %s, candidates: %s"),
   ERR_DATA_UNAVAILABLE("Data not available! %s"),
+  ERR_CRON_INVALID("Failed to parse cron expression: %s"),
   ERR_DUPLICATE_NAME("Name must be unique!"),
   ERR_MISSING_ID("ID is null!"),
   ERR_UNEXPECTED_QUERY_PARAM("Unexpected Query Param. Allowed values: %s"),

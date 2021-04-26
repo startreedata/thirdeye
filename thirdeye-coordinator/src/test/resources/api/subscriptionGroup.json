@@ -1,6 +1,7 @@
 [
   {
     "name": "sgn2",
+    "cron": "*/5 * * * * ?",
     "application": {
       "name": "myApp"
     },

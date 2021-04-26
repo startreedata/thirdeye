@@ -255,6 +255,7 @@ public abstract class ApiBeanMapper {
     return new SubscriptionGroupApi()
         .setId(dto.getId())
         .setName(dto.getName())
+        .setCron(dto.getCronExpression())
         .setApplication(new ApplicationApi()
             .setName(dto.getApplication()))
         .setAlerts(alertApis)

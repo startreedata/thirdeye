@@ -5,7 +5,6 @@ import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toAlertSchemes;
 import static org.apache.pinot.thirdeye.util.ApiBeanMapper.toSubscriptionGroupDTO;
@@ -33,6 +32,7 @@ import org.quartz.CronExpression;
 public class SubscriptionGroupResource extends
     CrudResource<SubscriptionGroupApi, SubscriptionGroupDTO> {
 
+  public static final String DEFAULT_CRON = "*/15 * * * * ?";
   private final SubscriptionGroupManager subscriptionGroupManager;
 
   @Inject
@@ -47,7 +47,9 @@ public class SubscriptionGroupResource extends
   protected SubscriptionGroupDTO createDto(final ThirdEyePrincipal principal,
       final SubscriptionGroupApi api) {
     ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
-    ensureExists(api.getCron(), "cron");
+    if (api.getCron() == null) {
+      api.setCron(DEFAULT_CRON);
+    }
     ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
     ensure(
         subscriptionGroupManager.findByPredicate(Predicate.EQ("name", api.getName())).size() == 0,

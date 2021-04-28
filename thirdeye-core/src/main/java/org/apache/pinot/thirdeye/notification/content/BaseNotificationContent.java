@@ -184,7 +184,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
    */
   protected static String getAnomalyURL(MergedAnomalyResultDTO anomalyResultDTO,
       String dashboardUrl) {
-    String urlPart = "/app/#/rootcause?anomalyId=";
+    String urlPart = "/anomalies/view/id/";
     return dashboardUrl + urlPart;
   }
 

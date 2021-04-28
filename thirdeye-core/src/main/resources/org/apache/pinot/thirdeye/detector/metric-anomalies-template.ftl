@@ -34,11 +34,11 @@
 
       <#if anomalyCount == 1>
         <p>
-          <a style="padding: 6px 12px; border-radius: 2px; border: 1px solid #FFF; font-size: 16px; font-weight: bold; color: white; text-decoration: none; line-height: 32px;" href="${dashboardHost}/app/#/anomalies?anomalyIds=${anomalyIds}">View anomaly on ThirdEye</a>
+          <a style="padding: 6px 12px; border-radius: 2px; border: 1px solid #FFF; font-size: 16px; font-weight: bold; color: white; text-decoration: none; line-height: 32px;" href="${dashboardHost}/anomalies/view/id/${anomalyIds}">View anomaly on ThirdEye</a>
         </p>
       <#else>
         <p>
-          <a style="padding: 6px 12px; border-radius: 2px; border: 1px solid #FFF; font-size: 16px; font-weight: bold; color: white; text-decoration: none; line-height: 32px;" href="${dashboardHost}/app/#/anomalies?anomalyIds=${anomalyIds}">View all anomalies on ThirdEye</a>
+          <a style="padding: 6px 12px; border-radius: 2px; border: 1px solid #FFF; font-size: 16px; font-weight: bold; color: white; text-decoration: none; line-height: 32px;" href="${dashboardHost}/anomalies/all">View all anomalies on ThirdEye</a>
         </p>
       </#if>
     </td>
@@ -80,7 +80,7 @@
                 <p>
                   <span style="color: #1D1D1D; font-size: 16px; font-weight: bold; display:inline-block; vertical-align: middle;">Alert:&nbsp;</span>
                   <span style="color: #606060; font-size: 16px; text-decoration: none; display:inline-block; vertical-align: middle; width: 77%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${detectionName}</span>
-                  <a href="${dashboardHost}/app/#/manage/explore/${functionToId[detectionName]?string.computer}" target="blank" style="text-decoration: none; color: #0B5EA1; display:inline-block; vertical-align: middle;">(Edit Settings)</a>
+<#--                  <a href="${dashboardHost}/app/#/manage/explore/${functionToId[detectionName]?string.computer}" target="blank" style="text-decoration: none; color: #0B5EA1; display:inline-block; vertical-align: middle;">(Edit Settings)</a>-->
                 </p>
                 <p>
                   <span style="color: #606060; font-size: 13px; text-decoration: none; display:inline-block; vertical-align: middle; width: 77%; white-space: wrap;">${description}</span>

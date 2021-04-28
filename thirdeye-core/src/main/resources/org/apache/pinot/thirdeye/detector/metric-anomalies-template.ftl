@@ -225,7 +225,7 @@
         <strong>${alertConfigName}</strong>.</p>
       <p>
         If you have any questions regarding this report, please email
-        <a style="color: #33aada;" href="mailto:ask_thirdeye@linkedin.com" target="_top">ask_thirdeye@linkedin.com</a>
+        <a style="color: #33aada;" href="mailto:thirdeye-support@startree.ai" target="_top">thirdeye-support@startree.ai</a>
       </p>
     </td>
   </tr>

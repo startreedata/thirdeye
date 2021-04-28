@@ -45,4 +45,4 @@
 
 =======================================================================================
 
-_You are receiving this alert because you have subscribed to ThirdEye Alert Service for *${alertConfigName}*. If you have any questions regarding this report, please email ask_thirdeye@linkedin.com_
+_You are receiving this alert because you have subscribed to ThirdEye Alert Service for *${alertConfigName}*. If you have any questions regarding this report, please email thirdeye-support@startree.ai_

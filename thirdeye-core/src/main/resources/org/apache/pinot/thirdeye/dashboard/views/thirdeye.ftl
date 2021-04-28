@@ -204,7 +204,7 @@
                     <span><i id="chevron-icon" class="te-icon glyphicon glyphicon-menu-down"></i> </span>
                   </a>
                   <div id="help-menu" class="te-nav__dropdown-wrapper hidden">
-                    <a class="te-nav__dropdown-item" href="mailto:ask_thirdeye@linkedin.com?Subject=TE-Feedback" target="_blank">Submit Feedback</a>
+                    <a class="te-nav__dropdown-item" href="mailto:thirdeye-support@startree.ai?Subject=TE-Feedback" target="_blank">Submit Feedback</a>
                     <a class="te-nav__dropdown-item" href="http://go/thirdeye-help" target="_blank">Help page</a>
                     <a class="te-nav__dropdown-item" href="app/#/logout">Logout</a>
                   </div>

@@ -58,10 +58,10 @@ public class DetectionAlertTaskFactory {
 
   @Inject
   public DetectionAlertTaskFactory(final DataProvider provider,
-                                   final MergedAnomalyResultManager mergedAnomalyResultManager,
-                                   final AlertManager alertManager,
-                                   final MetricConfigManager metricConfigManager,
-                                   final EventManager eventManager) {
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AlertManager alertManager,
+      final MetricConfigManager metricConfigManager,
+      final EventManager eventManager) {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
@@ -75,8 +75,16 @@ public class DetectionAlertTaskFactory {
     String className = alertConfig.getProperties().get(PROP_CLASS_NAME).toString();
     LOG.debug("Loading Alert Filter : {}", className);
     Constructor<?> constructor = Class.forName(className)
-        .getConstructor(DataProvider.class, SubscriptionGroupDTO.class, long.class, MergedAnomalyResultManager.class, AlertManager.class);
-    return (DetectionAlertFilter) constructor.newInstance(provider, alertConfig, endTime, this.mergedAnomalyResultManager, this.alertManager);
+        .getConstructor(DataProvider.class,
+            SubscriptionGroupDTO.class,
+            long.class,
+            MergedAnomalyResultManager.class,
+            AlertManager.class);
+    return (DetectionAlertFilter) constructor.newInstance(provider,
+        alertConfig,
+        endTime,
+        this.mergedAnomalyResultManager,
+        this.alertManager);
   }
 
   public Set<DetectionAlertScheme> loadAlertSchemes(SubscriptionGroupDTO alertConfig,
@@ -95,13 +103,24 @@ public class DetectionAlertTaskFactory {
       Preconditions.checkNotNull(alertSchemes.get(alertSchemeType));
       Preconditions
           .checkNotNull(ConfigUtils.getMap(alertSchemes.get(alertSchemeType)).get(PROP_CLASS_NAME));
-      Constructor<?> constructor = Class
-          .forName(ConfigUtils.getMap(alertSchemes.get(alertSchemeType))
-              .get(PROP_CLASS_NAME).toString().trim())
-          .getConstructor(SubscriptionGroupDTO.class, ThirdEyeWorkerConfiguration.class,
-              DetectionAlertFilterResult.class, MetricConfigManager.class, AlertManager.class, EventManager.class, MergedAnomalyResultManager.class);
+      Constructor<?> constructor = Class.forName(ConfigUtils.getMap(alertSchemes.get(alertSchemeType))
+          .get(PROP_CLASS_NAME).toString().trim())
+          .getConstructor(SubscriptionGroupDTO.class,
+              ThirdEyeWorkerConfiguration.class,
+              DetectionAlertFilterResult.class,
+              MetricConfigManager.class,
+              AlertManager.class,
+              EventManager.class,
+              MergedAnomalyResultManager.class);
+
       detectionAlertSchemeSet
-          .add((DetectionAlertScheme) constructor.newInstance(alertConfig, thirdeyeConfig, result, this.metricConfigManager, this.alertManager, this.eventManager, this.mergedAnomalyResultManager));
+          .add((DetectionAlertScheme) constructor.newInstance(alertConfig,
+              thirdeyeConfig,
+              result,
+              this.metricConfigManager,
+              this.alertManager,
+              this.eventManager,
+              this.mergedAnomalyResultManager));
     }
     return detectionAlertSchemeSet;
   }
@@ -125,7 +144,8 @@ public class DetectionAlertTaskFactory {
               .get(PROP_CLASS_NAME).toString().trim())
           .getConstructor(SubscriptionGroupDTO.class, MergedAnomalyResultManager.class);
       detectionAlertSuppressors
-          .add((DetectionAlertSuppressor) constructor.newInstance(alertConfig, this.mergedAnomalyResultManager));
+          .add((DetectionAlertSuppressor) constructor.newInstance(alertConfig,
+              this.mergedAnomalyResultManager));
     }
 
     return detectionAlertSuppressors;

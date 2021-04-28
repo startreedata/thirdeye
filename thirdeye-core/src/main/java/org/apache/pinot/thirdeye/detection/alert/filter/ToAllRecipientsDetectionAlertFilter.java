@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.detection.alert.filter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
@@ -50,16 +51,17 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
   final SetMultimap<String, String> recipients;
   List<Long> detectionConfigIds;
 
-  public ToAllRecipientsDetectionAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
-      long endTime, final MergedAnomalyResultManager mergedAnomalyResultManager,
+  public ToAllRecipientsDetectionAlertFilter(DataProvider provider,
+      SubscriptionGroupDTO config,
+      long endTime,
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager) {
     super(provider, config, endTime, mergedAnomalyResultManager,
         detectionConfigManager);
 
-    this.recipients = HashMultimap.create(
-        ConfigUtils.getMultimap(this.config.getProperties().get(PROP_RECIPIENTS)));
-    this.detectionConfigIds = ConfigUtils
-        .getLongs(this.config.getProperties().get(PROP_DETECTION_CONFIG_IDS));
+    final Map<String, Object> properties = this.config.getProperties();
+    this.recipients = HashMultimap.create(ConfigUtils.getMultimap(properties.get(PROP_RECIPIENTS)));
+    this.detectionConfigIds = ConfigUtils.getLongs(properties.get(PROP_DETECTION_CONFIG_IDS));
   }
 
   @Override
@@ -68,19 +70,19 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
 
     // Fetch all the anomalies to be notified to the recipients
     Set<MergedAnomalyResultDTO> anomalies = this
-        .filter(this.makeVectorClocks(this.detectionConfigIds));
+        .filter(makeVectorClocks(detectionConfigIds));
 
     // Handle legacy recipients yaml syntax
-    if (SubscriptionUtils.isEmptyEmailRecipients(this.config) && CollectionUtils
-        .isNotEmpty(this.recipients.get(PROP_TO))) {
+    if (SubscriptionUtils.isEmptyEmailRecipients(config) && CollectionUtils
+        .isNotEmpty(recipients.get(PROP_TO))) {
       // recipients are configured using the older syntax
-      this.config.setAlertSchemes(generateAlertSchemeProps(
-          this.config,
-          this.recipients.get(PROP_TO),
-          this.recipients.get(PROP_CC),
-          this.recipients.get(PROP_BCC)));
+      config.setAlertSchemes(generateAlertSchemeProps(
+          config,
+          recipients.get(PROP_TO),
+          recipients.get(PROP_CC),
+          recipients.get(PROP_BCC)));
     }
 
-    return result.addMapping(new DetectionAlertFilterNotification(this.config), anomalies);
+    return result.addMapping(new DetectionAlertFilterNotification(config), anomalies);
   }
 }

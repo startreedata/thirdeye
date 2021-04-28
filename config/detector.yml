@@ -17,7 +17,7 @@ server:
 
 scheduler: true
 worker: true
-dashboardHost: "http://localhost:1426"
+dashboardHost: "http://localhost:8081"
 id: 0
 alerterConfiguration:
   smtpConfiguration:

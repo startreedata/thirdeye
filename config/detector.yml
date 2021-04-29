@@ -3,16 +3,14 @@
 ######################################################
 
 server:
-  type: default
-  rootPath: '/api/*'
+  type: simple
   applicationContextPath: /
   adminContextPath: /admin
-  applicationConnectors:
-    - type: http
-      port: 1867
-  adminConnectors:
-    - type: http
-      port: 1868
+
+  connector:
+    type: http
+    port: 1867
+    idleTimeout: 620s
 
 swagger:
   # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default

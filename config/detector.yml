@@ -21,8 +21,10 @@ dashboardHost: "http://localhost:8081"
 id: 0
 alerterConfiguration:
   smtpConfiguration:
-    smtpHost: "localhost"
+    smtpHost: locahost
     smtpPort: 25
+    smtpUser: no-reply@thirdeye.startree.ai
+    smtpPassword: my-password
 #  jiraConfiguration:
 #    jiraUser: <REPLACE_ME>
 #    jiraPassword: <REPLACE_ME>

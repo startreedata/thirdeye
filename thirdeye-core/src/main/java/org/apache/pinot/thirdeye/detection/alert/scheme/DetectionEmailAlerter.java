@@ -240,7 +240,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     }
   }
 
-  private void buildAndSendEmail(
+  public void buildAndSendEmail(
       final SubscriptionGroupDTO sg,
       final List<AnomalyResult> anomalyResults) throws Exception {
 

@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
@@ -35,6 +37,9 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
   private DataAvailabilitySchedulingConfiguration
       dataAvailabilitySchedulingConfiguration = new DataAvailabilitySchedulingConfiguration();
   private List<String> holidayCountriesWhitelist;
+
+  @JsonProperty("swagger")
+  private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
   public boolean isScheduler() {
     return scheduler;
@@ -100,6 +105,16 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
   public ThirdEyeWorkerConfiguration setHolidayCountriesWhitelist(
       final List<String> holidayCountriesWhitelist) {
     this.holidayCountriesWhitelist = holidayCountriesWhitelist;
+    return this;
+  }
+
+  public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
+    return swaggerBundleConfiguration;
+  }
+
+  public ThirdEyeWorkerConfiguration setSwaggerBundleConfiguration(
+      final SwaggerBundleConfiguration swaggerBundleConfiguration) {
+    this.swaggerBundleConfiguration = swaggerBundleConfiguration;
     return this;
   }
 }

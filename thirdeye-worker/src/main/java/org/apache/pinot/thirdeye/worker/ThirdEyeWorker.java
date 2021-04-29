@@ -31,12 +31,13 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.common.ThirdEyeSwaggerBundle;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
@@ -48,6 +49,7 @@ import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.resources.RootResource;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SchedulerService;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
@@ -90,8 +92,13 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     bootstrap.setConfigurationSourceProvider(
         new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
             new EnvironmentVariableSubstitutor()));
-    bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
-    bootstrap.addBundle(new ThirdEyeSwaggerBundle());
+    bootstrap.addBundle(new SwaggerBundle<ThirdEyeWorkerConfiguration>() {
+      @Override
+      protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(
+          ThirdEyeWorkerConfiguration configuration) {
+        return configuration.getSwaggerBundleConfiguration();
+      }
+    });
   }
 
   @Override
@@ -115,6 +122,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     injector.getInstance(SubscriptionCronScheduler.class)
         .addToContext(CTX_INJECTOR, injector);
 
+    env.jersey().register(injector.getInstance(RootResource.class));
     env.lifecycle().manage(lifecycleManager(config));
   }
 

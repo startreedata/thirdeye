@@ -17,7 +17,7 @@ swagger:
   enabled: true
 
   # package to scan for jersey resources
-  resourcePackage: org.apache.pinot.thirdeye.resources
+  resourcePackage: org.apache.pinot.thirdeye.worker.resources
 
 scheduler: true
 worker: true

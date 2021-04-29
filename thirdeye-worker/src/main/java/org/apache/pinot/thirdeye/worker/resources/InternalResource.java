@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.resources;
+package org.apache.pinot.thirdeye.worker.resources;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 

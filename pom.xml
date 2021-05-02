@@ -78,6 +78,7 @@
     <testng.version>6.8</testng.version>
     <assertj.version>3.17.2</assertj.version>
     <mockito.version>1.8.4</mockito.version>
+    <testcontainers.version>1.15.2</testcontainers.version>
     <jcommander.version>1.35</jcommander.version>
     <hsqldb.version>2.3.4</hsqldb.version>
     <guice-persist.version>4.2.3</guice-persist.version>
@@ -220,6 +221,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.0.0-M1</version>
+          <configuration>
+            <excludes>
+              <exclude>**/*IntegrationTest.java</exclude>
+            </excludes>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -461,6 +467,12 @@
         <groupId>io.dropwizard</groupId>
         <artifactId>dropwizard-client</artifactId>
         <version>${dropwizard.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers</artifactId>
+        <version>${testcontainers.version}</version>
         <scope>test</scope>
       </dependency>
 

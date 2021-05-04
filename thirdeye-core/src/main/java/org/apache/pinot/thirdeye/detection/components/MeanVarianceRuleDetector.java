@@ -67,12 +67,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     BaselineProvider<MeanVarianceRuleDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
-  private InputDataFetcher dataFetcher;
-  private Pattern pattern;
-  private String monitoringGranularity;
-  private TimeGranularity timeGranularity;
-  private double sensitivity;
-  private int lookback;
 
   private static final String COL_CURR = "current";
   private static final String COL_ANOMALY = "anomaly";
@@ -81,6 +75,30 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private static final String COL_DIFF_VIOLATION = "diff_violation";
   private static final String COL_ERROR = "error";
   private static final String COL_CHANGE = "change";
+
+  private InputDataFetcher dataFetcher;
+  private Pattern pattern;
+  private String monitoringGranularity;
+  private TimeGranularity timeGranularity;
+  private double sensitivity;
+  private int lookback;
+
+  /**
+   * Mapping of sensitivity to sigma on range of 0.5 - 1.5
+   *
+   * @param sensitivity double from 0 to 10
+   * @return sigma
+   */
+  private static double sensitivityToSigma(double sensitivity) {
+    // If out of bound, use boundary sensitivity
+    if (sensitivity < 0) {
+      sensitivity = 0;
+    } else if (sensitivity > 10) {
+      sensitivity = 10;
+    }
+    double sigma = 0.5 + 0.1 * (10 - sensitivity);
+    return sigma;
+  }
 
   @Override
   public void init(MeanVarianceRuleDetectorSpec spec, InputDataFetcher dataFetcher) {
@@ -124,8 +142,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         .getDatasetForMetricId()
         .get(metricEntity.getId());
     DataFrame inputDf = fetchData(metricEntity, trainStart.getMillis(), window.getEndMillis());
-    DataFrame resultDF = computePredictionInterval(inputDf, window.getStartMillis(),
-        datasetConfig.getTimezone());
+    DataFrame resultDF = computePredictionInterval(inputDf, window.getStartMillis());
     resultDF = resultDF.joinLeft(inputDf.renameSeries(
         DataFrame.COL_VALUE, COL_CURR), DataFrame.COL_TIME);
 
@@ -160,8 +177,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     LOG.info("Getting data for" + slice.toString());
     DataFrame dfInput = fetchData(me, fetchStart.getMillis(), window.getEndMillis());
     DataFrame dfCurr = new DataFrame(dfInput).renameSeries(DataFrame.COL_VALUE, COL_CURR);
-    DataFrame dfBase = computePredictionInterval(dfInput, window.getStartMillis(),
-        datasetConfig.getTimezone());
+    DataFrame dfBase = computePredictionInterval(dfInput, window.getStartMillis());
     DataFrame df = new DataFrame(dfCurr).addSeries(dfBase, DataFrame.COL_VALUE, COL_ERROR);
     df.addSeries(COL_DIFF, df.getDoubles(COL_CURR).subtract(df.get(DataFrame.COL_VALUE)));
     df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
@@ -186,17 +202,13 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(dfBase));
   }
 
-  private DataFrame computePredictionInterval(DataFrame inputDF, long windowStartTime,
-      String timezone) {
+  private DataFrame computePredictionInterval(DataFrame inputDF, long windowStartTime) {
 
     DataFrame resultDF = new DataFrame();
     //filter the data inside window for current values.
-    DataFrame forecastDF = inputDF.filter(new LongConditional() {
-      @Override
-      public boolean apply(long... values) {
-        return values[0] >= windowStartTime;
-      }
-    }, DataFrame.COL_TIME).dropNull();
+    DataFrame forecastDF = inputDF
+        .filter((LongConditional) values -> values[0] >= windowStartTime, DataFrame.COL_TIME)
+        .dropNull();
 
     int size = forecastDF.size();
     double[] baselineArray = new double[size];
@@ -285,22 +297,5 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private boolean isMultiDayGranularity() {
     return !timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
         && timeGranularity.getUnit() == TimeUnit.DAYS;
-  }
-
-  /**
-   * Mapping of sensitivity to sigma on range of 0.5 - 1.5
-   *
-   * @param sensitivity double from 0 to 10
-   * @return sigma
-   */
-  private static double sensitivityToSigma(double sensitivity) {
-    // If out of bound, use boundary sensitivity
-    if (sensitivity < 0) {
-      sensitivity = 0;
-    } else if (sensitivity > 10) {
-      sensitivity = 10;
-    }
-    double sigma = 0.5 + 0.1 * (10 - sensitivity);
-    return sigma;
   }
 }

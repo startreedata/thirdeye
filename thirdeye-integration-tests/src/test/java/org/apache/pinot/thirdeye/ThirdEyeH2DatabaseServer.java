@@ -21,24 +21,34 @@ import org.slf4j.LoggerFactory;
 
 public class ThirdEyeH2DatabaseServer {
 
-  public static final Logger log = LoggerFactory.getLogger(ThirdEyeH2DatabaseServer.class);
-
-  public static final String DB_NAME = "thirdeye";
-  public static final String DB_PORT = "9124";
-  public static final DatabaseConfiguration DB_CONFIG = new DatabaseConfiguration()
-      .setUrl(String.format("jdbc:h2:tcp:localhost:%s/mem:%s;DB_CLOSE_DELAY=-1", DB_PORT, DB_NAME))
-      .setUser("user")
-      .setPassword("password")
-      .setDriver("org.h2.Driver");
+  private static final Logger log = LoggerFactory.getLogger(ThirdEyeH2DatabaseServer.class);
+  private String dbName = "thirdeye";
+  private String dbHost = "localhost";
+  private Integer dbPort = 9124;
+  private DatabaseConfiguration dbConfig;
   public static final String BASE_DIR = "../";
   public static final String CREATE_SCHEMA_SQL =
       BASE_DIR + "thirdeye-core/src/main/resources/schema/create-schema.sql";
   private final Server server;
   private Connection conn;
 
-  public ThirdEyeH2DatabaseServer() {
+  public ThirdEyeH2DatabaseServer(String host, Integer port, String dbName){
+    if(host != null) {
+      this.dbHost = host;
+    }
+    if(port != null) {
+      this.dbPort = port;
+    }
+    if(dbName != null) {
+      this.dbName = dbName;
+    }
     try {
-      this.server = Server.createTcpServer("-baseDir", BASE_DIR, "-tcpPort", DB_PORT);
+      dbConfig= new DatabaseConfiguration()
+              .setUrl(String.format("jdbc:h2:tcp:%s:%s/mem:%s;DB_CLOSE_DELAY=-1", dbHost, dbPort, dbName))
+              .setUser("user")
+              .setPassword("password")
+              .setDriver("org.h2.Driver");
+      this.server = Server.createTcpServer("-baseDir", BASE_DIR, "-tcpPort", Integer.toString(dbPort));
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -64,9 +74,9 @@ public class ThirdEyeH2DatabaseServer {
     try {
       org.h2.Driver.load();
       return DriverManager.getConnection(
-          DB_CONFIG.getUrl(),
-          DB_CONFIG.getUser(),
-          DB_CONFIG.getPassword()
+          dbConfig.getUrl(),
+          dbConfig.getUser(),
+          dbConfig.getPassword()
       );
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -81,9 +91,9 @@ public class ThirdEyeH2DatabaseServer {
       checkState(server.isRunning(true));
 
       execute(
-          DB_CONFIG.getUrl(),
-          DB_CONFIG.getUser(),
-          DB_CONFIG.getPassword(),
+          dbConfig.getUrl(),
+          dbConfig.getUser(),
+          dbConfig.getPassword(),
           CREATE_SCHEMA_SQL,
           StandardCharsets.UTF_8,
           true
@@ -119,5 +129,9 @@ public class ThirdEyeH2DatabaseServer {
     if (server != null) {
       server.shutdown();
     }
+  }
+
+  public DatabaseConfiguration getDbConfig() {
+    return dbConfig;
   }
 }

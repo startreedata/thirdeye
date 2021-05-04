@@ -26,30 +26,29 @@ public class CoordinatorTest {
 
   public static final String THIRDEYE_CONFIG = "./src/test/resources/e2e/config";
 
-  public static final DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT =
-      new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
-          resourceFilePath("e2e/config/coordinator.yaml"),
-          config("configPath", THIRDEYE_CONFIG),
-          config("server.connector.port", "0"), // port: 0 implies any port
-          config("database.url", ThirdEyeH2DatabaseServer.DB_CONFIG.getUrl()),
-          config("database.user", ThirdEyeH2DatabaseServer.DB_CONFIG.getUser()),
-          config("database.password", ThirdEyeH2DatabaseServer.DB_CONFIG.getPassword()),
-          config("database.driver", ThirdEyeH2DatabaseServer.DB_CONFIG.getDriver())
-      );
+  public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private Client client;
   private ThirdEyeH2DatabaseServer db;
 
-  private static String endPoint(final String pathFragment) {
+  private String endPoint(final String pathFragment) {
     return String.format("http://localhost:%d/%s", SUPPORT.getLocalPort(), pathFragment);
   }
 
   @BeforeClass
   public void beforeClass() {
-    db = new ThirdEyeH2DatabaseServer();
+    db = new ThirdEyeH2DatabaseServer("localhost", 7124, null);
     db.start();
-
+    SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
+      resourceFilePath("e2e/config/coordinator.yaml"),
+      config("configPath", THIRDEYE_CONFIG),
+      config("server.connector.port", "0"), // port: 0 implies any port
+      config("database.url", db.getDbConfig().getUrl()),
+      config("database.user", db.getDbConfig().getUser()),
+      config("database.password", db.getDbConfig().getPassword()),
+      config("database.driver", db.getDbConfig().getDriver())
+    );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
     jerseyClientConfiguration.setTimeout(Duration.minutes(1)); // for timeout issues

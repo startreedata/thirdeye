@@ -1,8 +1,11 @@
 package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_MISSING_ID;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
@@ -11,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -22,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.alert.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
+import org.apache.pinot.thirdeye.alert.AlertDeleter;
 import org.apache.pinot.thirdeye.alert.AlertEvaluator;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
@@ -48,6 +53,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertManager alertManager;
   private final MetricConfigManager metricConfigManager;
   private final AlertCreater alertCreater;
+  private final AlertDeleter alertDeleter;
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final AuthService authService;
   private final AlertEvaluator alertEvaluator;
@@ -57,6 +63,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertManager alertManager,
       final MetricConfigManager metricConfigManager,
       final AlertCreater alertCreater,
+      final AlertDeleter alertDeleter,
       final AlertApiBeanMapper alertApiBeanMapper,
       final AuthService authService,
       final AlertEvaluator alertEvaluator) {
@@ -64,6 +71,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     this.alertManager = alertManager;
     this.metricConfigManager = metricConfigManager;
     this.alertCreater = alertCreater;
+    this.alertDeleter = alertDeleter;
     this.alertApiBeanMapper = alertApiBeanMapper;
     this.authService = authService;
     this.alertEvaluator = alertEvaluator;
@@ -155,5 +163,25 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return Response
         .ok(evaluation)
         .build();
+  }
+
+  @DELETE
+  @Path("{id}")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  @Override
+  public Response delete(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @PathParam("id") Long id) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+    final AlertDTO dto = alertManager.findById(id);
+    if (dto != null) {
+      alertDeleter.delete(dto);
+      log.warn(String.format("Deleted id: %d by principal: %s", id, principal));
+
+      return respondOk(toApi(dto));
+    }
+
+    return respondOk(statusResponse(ERR_OBJECT_DOES_NOT_EXIST, id));
   }
 }

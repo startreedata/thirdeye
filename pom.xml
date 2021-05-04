@@ -52,7 +52,7 @@
     <mysql.connector.version>5.1.44</mysql.connector.version>
     <quartz.version>2.2.1</quartz.version>
     <httpclient.version>4.5.2</httpclient.version>
-    <commons.email.version>1.4</commons.email.version>
+    <commons.email.version>1.5</commons.email.version>
     <commons-math3.version>3.2</commons-math3.version>
     <commons-lang3.version>3.9</commons-lang3.version>
     <commons-io.version>2.4</commons-io.version>

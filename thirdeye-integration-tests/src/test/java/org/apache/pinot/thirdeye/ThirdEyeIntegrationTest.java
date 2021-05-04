@@ -57,22 +57,13 @@ public class ThirdEyeIntegrationTest {
     private static final String DATASOURCES_CONFIG_FILE_PATH = "config/data-sources/data-sources-config.yml";
     private static final String PINOT_DATASOURCE_CLASS = "org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource";
 
-    public static final DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT =
-            new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
-                    resourceFilePath("e2e/config/coordinator.yaml"),
-                    config("configPath", THIRDEYE_CONFIG),
-                    config("server.connector.port", "0"), // port: 0 implies any port
-                    config("database.url", ThirdEyeH2DatabaseServer.DB_CONFIG.getUrl()),
-                    config("database.user", ThirdEyeH2DatabaseServer.DB_CONFIG.getUser()),
-                    config("database.password", ThirdEyeH2DatabaseServer.DB_CONFIG.getPassword()),
-                    config("database.driver", ThirdEyeH2DatabaseServer.DB_CONFIG.getDriver())
-            );
+    public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
     private static PinotContainer container;
 
     private Client client;
     private ThirdEyeH2DatabaseServer db;
 
-    private static String thirdEyeEndPoint(final String pathFragment) {
+    private String thirdEyeEndPoint(final String pathFragment) {
         return String.format("http://localhost:%d/%s", SUPPORT.getLocalPort(), pathFragment);
     }
 
@@ -138,11 +129,20 @@ public class ThirdEyeIntegrationTest {
 
     @BeforeClass
     public void beforeClass() throws Exception {
-        db = new ThirdEyeH2DatabaseServer();
+        db = new ThirdEyeH2DatabaseServer("localhost", 7120, null);
         db.start();
         container = startPinot();
         container.addTables();
         modifyDataSourceConfig();
+        SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
+                resourceFilePath("e2e/config/coordinator.yaml"),
+                config("configPath", THIRDEYE_CONFIG),
+                config("server.connector.port", "0"), // port: 0 implies any port
+                config("database.url", db.getDbConfig().getUrl()),
+                config("database.user", db.getDbConfig().getUser()),
+                config("database.password", db.getDbConfig().getPassword()),
+                config("database.driver", db.getDbConfig().getDriver())
+        );
         SUPPORT.before();
         final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
         jerseyClientConfiguration.setTimeout(io.dropwizard.util.Duration.minutes(1)); // for timeout issues

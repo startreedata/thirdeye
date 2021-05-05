@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -78,5 +79,11 @@ public class InternalResource {
 
     instance.buildAndSendEmail(sg, new ArrayList<>(all));
     return Response.ok().build();
+  }
+
+  @GET
+  @Path("version")
+  public Response getVersion() {
+    return Response.ok(InternalResource.class.getPackage().getImplementationVersion()).build();
   }
 }

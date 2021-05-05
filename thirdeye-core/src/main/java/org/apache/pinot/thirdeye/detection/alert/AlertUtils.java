@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.detection.alert;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -29,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.mail.internet.InternetAddress;
@@ -66,22 +66,16 @@ public class AlertUtils {
       return Collections.emptySet();
     }
     return Collections2.filter(Collections2.transform(emailCollection,
-        new Function<String, InternetAddress>() {
-          @Override
-          public InternetAddress apply(String s) {
-            try {
-              return InternetAddress.parse(s)[0];
-            } catch (Exception e) {
-              return null;
-            }
-          }
-        }),
-        new Predicate<InternetAddress>() {
-          @Override
-          public boolean apply(InternetAddress internetAddress) {
-            return internetAddress != null;
-          }
-        });
+        AlertUtils::toInternetAddress),
+        Objects::nonNull);
+  }
+
+  private static InternetAddress toInternetAddress(final String s) {
+    try {
+      return new InternetAddress(s);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   private static long getLastTimeStamp(Collection<MergedAnomalyResultDTO> anomalies,

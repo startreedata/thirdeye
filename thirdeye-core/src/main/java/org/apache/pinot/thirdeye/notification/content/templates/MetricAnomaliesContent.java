@@ -25,7 +25,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -45,10 +44,9 @@ import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.datalayer.pojo.EventBean;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
-import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,12 +115,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     List<String> anomalyIds = new ArrayList<>();
 
     List<AnomalyResult> sortedAnomalies = new ArrayList<>(anomalies);
-    Collections.sort(sortedAnomalies, new Comparator<AnomalyResult>() {
-      @Override
-      public int compare(AnomalyResult o1, AnomalyResult o2) {
-        return Double.compare(o1.getWeight(), o2.getWeight());
-      }
-    });
+    sortedAnomalies.sort(Comparator.comparingDouble(AnomalyResult::getWeight));
 
     for (AnomalyResult anomalyResult : anomalies) {
       if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
@@ -209,12 +202,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
           .put(EVENT_FILTER_COUNTRY, thirdEyeAnomalyConfig.getHolidayCountriesWhitelist());
     }
     List<EventDTO> holidays = getHolidayEvents(eventStart, eventEnd, targetDimensions);
-    Collections.sort(holidays, new Comparator<EventDTO>() {
-      @Override
-      public int compare(EventDTO o1, EventDTO o2) {
-        return Long.compare(o1.getStartTime(), o2.getStartTime());
-      }
-    });
+    holidays.sort(Comparator.comparingLong(EventBean::getStartTime));
 
     // Insert anomaly snapshot image
     if (anomalyDetails.size() == 1) {

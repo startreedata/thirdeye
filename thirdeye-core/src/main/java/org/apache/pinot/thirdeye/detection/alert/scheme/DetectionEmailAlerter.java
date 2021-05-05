@@ -209,6 +209,11 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
       email.setSSLOnConnect(true);
       email.setSslSmtpPort(Integer.toString(config.getSmtpPort()));
     }
+
+    // This needs to be done after the configuration phase since getMailSession() creates
+    // a new mail session if required.
+    email.getMailSession().getProperties().put("mail.smtp.ssl.trust", config.getSmtpHost());
+
     email.send();
 
     int recipientCount =

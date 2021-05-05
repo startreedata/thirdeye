@@ -78,7 +78,7 @@
     <testng.version>6.8</testng.version>
     <assertj.version>3.17.2</assertj.version>
     <mockito.version>1.8.4</mockito.version>
-    <testcontainers.version>1.15.2</testcontainers.version>
+    <testcontainers.version>1.15.3</testcontainers.version>
     <jcommander.version>1.35</jcommander.version>
     <hsqldb.version>2.3.4</hsqldb.version>
     <guice-persist.version>4.2.3</guice-persist.version>

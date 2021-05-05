@@ -48,14 +48,18 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
     protected void configure() {
         super.configure();
 
-        for(AddTable addTable: this.addTables) {
-            withCopyFileToContainer(MountableFile.forHostPath(addTable.getSchemaFile().getAbsolutePath()), "/tmp/");
-            withCopyFileToContainer(MountableFile.forHostPath(addTable.getTableConfigFile().getAbsolutePath()), "/tmp/");
+        if(this.addTables != null) {
+            for (AddTable addTable : this.addTables) {
+                withCopyFileToContainer(MountableFile.forHostPath(addTable.getSchemaFile().getAbsolutePath()), "/tmp/");
+                withCopyFileToContainer(MountableFile.forHostPath(addTable.getTableConfigFile().getAbsolutePath()), "/tmp/");
+            }
         }
 
-        for(ImportData importData: this.importDataList) {
-            withCopyFileToContainer(MountableFile.forHostPath(importData.getBatchJobSpecFile().getAbsolutePath()), "/tmp/");
-            withCopyFileToContainer(MountableFile.forHostPath(importData.getDataFile().getAbsolutePath()), "/tmp/");
+        if(this.importDataList != null) {
+            for (ImportData importData : this.importDataList) {
+                withCopyFileToContainer(MountableFile.forHostPath(importData.getBatchJobSpecFile().getAbsolutePath()), "/tmp/");
+                withCopyFileToContainer(MountableFile.forHostPath(importData.getDataFile().getAbsolutePath()), "/tmp/");
+            }
         }
 
         withCreateContainerCmdModifier(createContainerCmd -> createContainerCmd.withName("pinot-quickstart"));

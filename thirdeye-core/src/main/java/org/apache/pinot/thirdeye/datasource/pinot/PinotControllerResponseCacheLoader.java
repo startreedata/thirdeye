@@ -37,7 +37,6 @@ import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.ConnectionFactory;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.Request;
-import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.slf4j.Logger;
@@ -49,7 +48,7 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
       .getLogger(PinotControllerResponseCacheLoader.class);
 
   private static final long CONNECTION_TIMEOUT = 60000;
-
+  private static final String BROKER_PREFIX = "Broker_";
   private static int MAX_CONNECTIONS;
 
   static {
@@ -60,11 +59,40 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
     }
   }
 
+  private final AtomicInteger activeConnections = new AtomicInteger();
   private Connection[] connections;
 
-  private static final String BROKER_PREFIX = "Broker_";
+  private static Connection[] fromHostList(final String[] thirdeyeBrokers) throws Exception {
+    Callable<Connection> callable = () -> ConnectionFactory.fromHostList(thirdeyeBrokers);
+    return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
+  }
 
-  private final AtomicInteger activeConnections = new AtomicInteger();
+  private static Connection[] fromZookeeper(
+      final PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
+    Callable<Connection> callable = () -> ConnectionFactory.fromZookeeper(
+        pinotThirdEyeDataSourceConfig.getZookeeperUrl()
+            + "/" + pinotThirdEyeDataSourceConfig.getClusterName());
+    return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
+  }
+
+  private static <T> Collection<Future<T>> executeReplicated(Callable<T> callable, int n) {
+    ExecutorService executor = Executors.newCachedThreadPool();
+    Collection<Future<T>> futures = new ArrayList<>();
+    for (int i = 0; i < n; i++) {
+      futures.add(executor.submit(callable));
+    }
+    executor.shutdown();
+    return futures;
+  }
+
+  private static Connection[] fromFutures(Collection<Future<Connection>> futures) throws Exception {
+    Connection[] connections = new Connection[futures.size()];
+    int i = 0;
+    for (Future<Connection> f : futures) {
+      connections[i++] = f.get(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
+    }
+    return connections;
+  }
 
   /**
    * Initializes the cache loader using the given property map.
@@ -125,9 +153,6 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
           long start = System.currentTimeMillis();
           ResultSetGroup resultSetGroup = connection
               .execute(pinotQuery.getTableName(), new Request("pql", pinotQuery.getQuery()));
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("Query:{}  response:{}", pinotQuery.getQuery(), format(resultSetGroup));
-          }
           long end = System.currentTimeMillis();
           LOG.info("Query:{}  took:{} ms  connections:{}", pinotQuery.getQuery(), (end - start),
               activeConnections);
@@ -146,53 +171,5 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   @Override
   public Connection getConnection() {
     return connections[(int) (Thread.currentThread().getId() % MAX_CONNECTIONS)];
-  }
-
-  private static String format(ResultSetGroup result) {
-    try {
-      StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < result.getResultSetCount(); i++) {
-        ResultSet resultSet = result.getResultSet(i);
-        for (int c = 0; c < resultSet.getColumnCount(); c++) {
-          sb.append(resultSet.getColumnName(c)).append("=").append(resultSet.getDouble(c));
-        }
-      }
-      return sb.toString();
-    } catch (Exception e) {
-      // ignoring exception in debug code.
-      return "";
-    }
-  }
-
-  private static Connection[] fromHostList(final String[] thirdeyeBrokers) throws Exception {
-    Callable<Connection> callable = () -> ConnectionFactory.fromHostList(thirdeyeBrokers);
-    return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
-  }
-
-  private static Connection[] fromZookeeper(
-      final PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
-    Callable<Connection> callable = () -> ConnectionFactory.fromZookeeper(
-        pinotThirdEyeDataSourceConfig.getZookeeperUrl()
-            + "/" + pinotThirdEyeDataSourceConfig.getClusterName());
-    return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
-  }
-
-  private static <T> Collection<Future<T>> executeReplicated(Callable<T> callable, int n) {
-    ExecutorService executor = Executors.newCachedThreadPool();
-    Collection<Future<T>> futures = new ArrayList<>();
-    for (int i = 0; i < n; i++) {
-      futures.add(executor.submit(callable));
-    }
-    executor.shutdown();
-    return futures;
-  }
-
-  private static Connection[] fromFutures(Collection<Future<Connection>> futures) throws Exception {
-    Connection[] connections = new Connection[futures.size()];
-    int i = 0;
-    for (Future<Connection> f : futures) {
-      connections[i++] = f.get(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-    }
-    return connections;
   }
 }

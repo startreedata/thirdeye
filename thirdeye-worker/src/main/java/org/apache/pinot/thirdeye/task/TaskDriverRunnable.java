@@ -210,8 +210,7 @@ public class TaskDriverRunnable implements Runnable {
       boolean orderAscending = System.currentTimeMillis() % 2 == 0;
 
       // find by task type to separate online task from a normal task
-      return taskManager.findByStatusAndTypeNotInOrderByCreateTime(TaskStatus.WAITING,
-          TaskType.DETECTION,
+      return taskManager.findByStatusOrderByCreateTime(TaskStatus.WAITING,
           config.getTaskFetchSizeCap(),
           orderAscending);
     } catch (Exception e) {

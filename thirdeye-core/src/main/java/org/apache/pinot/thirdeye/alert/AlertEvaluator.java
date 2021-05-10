@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.alert;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_TIMEOUT;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_UNKNOWN;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
@@ -166,6 +167,7 @@ public class AlertEvaluator {
     if (api.getId() != null) {
       dto = alertManager.findById(api.getId());
     } else {
+      ensureExists(api.getNodes(), ERR_OBJECT_DOES_NOT_EXIST, "alert.nodes missing");
       dto = alertApiBeanMapper.toAlertDTO(api);
       dto.setId(System.currentTimeMillis());
     }

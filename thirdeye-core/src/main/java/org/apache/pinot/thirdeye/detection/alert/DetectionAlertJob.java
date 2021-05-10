@@ -125,10 +125,13 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
   private boolean needNotification(SubscriptionGroupDTO configDTO,
       final MergedAnomalyResultManager anomalyDAO,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
-    Map<Long, Long> vectorLocks = configDTO.getVectorClocks();
-    for (Map.Entry<Long, Long> vectorLock : vectorLocks.entrySet()) {
-      long configId = vectorLock.getKey();
-      long lastNotifiedTime = vectorLock.getValue();
+    Map<Long, Long> vectorClocks = configDTO.getVectorClocks();
+    if (vectorClocks == null || vectorClocks.size() == 0) {
+      return true;
+    }
+    for (Map.Entry<Long, Long> e : vectorClocks.entrySet()) {
+      long configId = e.getKey();
+      long lastNotifiedTime = e.getValue();
       if (anomalyDAO.findByCreatedTimeInRangeAndDetectionConfigId(lastNotifiedTime,
           System.currentTimeMillis(), configId)
           .stream().anyMatch(x -> !x.isChild())) {
@@ -138,7 +141,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
     // in addition to checking the watermarks, check if any anomalies need to be re-notified by querying the anomaly subscription group notification table
     List<AnomalySubscriptionGroupNotificationDTO> anomalySubscriptionGroupNotifications =
         anomalySubscriptionGroupNotificationManager.findByPredicate(
-            Predicate.IN("detectionConfigId", vectorLocks.keySet().toArray()));
+            Predicate.IN("detectionConfigId", vectorClocks.keySet().toArray()));
     return !anomalySubscriptionGroupNotifications.isEmpty();
   }
 }

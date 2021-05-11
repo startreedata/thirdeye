@@ -1,0 +1,150 @@
+resource_types:
+- name: slack
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
+resources:
+- name: ci-src
+  type: git
+  icon: github
+  source:
+    uri: ((git-uri))
+    private_key: ((ssh-private-key))
+    branch: ((git-branch))
+
+- name: thirdeye-docker-image
+  type: docker-image
+  source:
+    repository: ((docker-registry))/thirdeye
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+
+- name: thirdeye-ui-docker-image
+  type: docker-image
+  source:
+    repository: ((docker-registry))/thirdeye-ui
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+
+- name: cortex-thirdeye-docker-image
+  type: docker-image
+  source:
+    repository: ((cortex-docker-registry))/thirdeye
+    username: ((github-username))
+    password: ((github-token))
+
+- name: cortex-thirdeye-ui-docker-image
+  type: docker-image
+  source:
+    repository: ((cortex-docker-registry))/thirdeye-ui
+    username: ((github-username))
+    password: ((github-token))
+
+- name: src
+  type: git
+  icon: github
+  source:
+    uri: ((git-uri))
+    branch: ((git-branch))
+    private_key: ((ssh-private-key))
+    ignore_paths:
+    - thirdeye-ui
+
+- name: ui-src
+  type: git
+  icon: github
+  source:
+    uri: ((git-uri))
+    branch: ((git-branch))
+    private_key: ((ssh-private-key))
+    paths:
+    - pom.xml
+    - thirdeye-ui
+
+- name: slack
+  type: slack
+  icon: slack
+  source:
+    url: ((slack-webhook-url))
+jobs:
+- name: build-thirdeye
+  plan:
+  - get: ci-src
+  - get: src
+    trigger: true
+  - task: Build Thirdeye
+    file: ci-src/.concourse/tasks/build-thirdeye/build-thirdeye.yml
+  - in_parallel:
+    - put: thirdeye-docker-image
+      params:
+        build: src
+        tag_file: version/version
+        tag_as_latest: ((docker-tag-as-latest))
+      get_params: 
+        skip_download: true
+    - put: cortex-thirdeye-docker-image
+      params:
+        build: src
+        tag_file: version/version
+        tag_as_latest: ((docker-tag-as-latest))
+      get_params: 
+        skip_download: true
+  on_success:
+    put: slack
+    params:
+      channel: ((slack-channel))
+      text: |
+        Branch ((git-branch)) of Thirdeye Server been successfully built.
+        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure:
+    put: slack
+    params:
+      channel: ((slack-channel))
+      text: |
+        <!channel> Failed to build branch ((git-branch)) of Thirdeye Server
+        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+        
+- name: build-thirdeye-ui
+  plan:
+  - get: ci-src
+  - get: ui-src
+    trigger: true
+  - task: Extract Thirdeye Version
+    file: ci-src/.concourse/tasks/extract-maven-version/extract-maven-version.yml
+    input_mapping:
+      src: ui-src
+  - task: Build Thirdeye UI
+    file: ci-src/.concourse/tasks/build-thirdeye-ui/build-thirdeye-ui.yml
+    input_mapping:
+      src: ui-src
+  - in_parallel:
+    - put: thirdeye-ui-docker-image
+      params:
+        build: ui-src/thirdeye-ui
+        tag_file: version/version
+        tag_as_latest: ((docker-tag-as-latest))
+      get_params: 
+        skip_download: true
+    - put: cortex-thirdeye-ui-docker-image
+      params:
+        build: ui-src/thirdeye-ui
+        tag_file: version/version
+        tag_as_latest: ((docker-tag-as-latest))
+      get_params: 
+        skip_download: true
+  on_success:
+    put: slack
+    params:
+      channel: ((slack-channel))
+      text: |
+        Ref ((git-branch)) of Thirdeye UI been successfully built.
+        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure:
+    put: slack
+    params:
+      channel: ((slack-channel))
+      text: |
+        <!channel> Failed to build branch ((git-branch)) of Thirdeye UI
+        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME

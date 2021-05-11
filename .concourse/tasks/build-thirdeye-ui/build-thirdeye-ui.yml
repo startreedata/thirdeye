@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: node
+    tag: 14
+
+caches:
+- path: src/thirdeye-ui/node
+- path: src/thirdeye-ui/node_modules
+
+inputs:
+- name: ci-src
+- name: src
+
+outputs:
+- name: src
+
+run:
+  path: ci-src/.concourse/tasks/build-thirdeye-ui/build-thirdeye-ui.sh

@@ -74,7 +74,7 @@ jobs:
   - get: ci-src
   - get: src
     trigger: true
-  - task: Build Thirdeye
+  - task: build-thirdeye
     file: ci-src/.concourse/tasks/build-thirdeye/build-thirdeye.yml
   - in_parallel:
     - put: thirdeye-docker-image
@@ -105,17 +105,17 @@ jobs:
       text: |
         <!channel> Failed to build branch ((git-branch)) of Thirdeye Server
         ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-        
+
 - name: build-thirdeye-ui
   plan:
   - get: ci-src
   - get: ui-src
     trigger: true
-  - task: Extract Thirdeye Version
+  - task: extract-thirdeye-version
     file: ci-src/.concourse/tasks/extract-maven-version/extract-maven-version.yml
     input_mapping:
       src: ui-src
-  - task: Build Thirdeye UI
+  - task: build-thirdeye-ui
     file: ci-src/.concourse/tasks/build-thirdeye-ui/build-thirdeye-ui.yml
     input_mapping:
       src: ui-src

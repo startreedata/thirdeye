@@ -110,7 +110,7 @@ public class ThirdEyeIntegrationTest {
         dataSourceConfigProperties
                 .put("zookeeperUrl", "localhost:" + container.getZookeeperPort());
         dataSourceConfigProperties
-                .put("controllerPort", container.getBrokerPort());
+                .put("controllerPort", container.getControllerPort());
         PrintWriter writer = new PrintWriter(dataSourcesConfigFile);
         Yaml dataSourcesYamlWriter = new Yaml(options);
         dataSourcesYamlWriter.dump(dataSourcesConfigurationMap, writer);

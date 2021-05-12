@@ -37,6 +37,7 @@
     <!--    Run the test modules -->
     <module>thirdeye-integration-tests</module>
     <module>thirdeye-deprecated-tests</module>
+    <module>pinot-test-container</module>
   </modules>
 
   <properties>
@@ -792,6 +793,12 @@
         <version>3.2.1</version>
       </dependency>
 
+      <!-- Test containers -->
+      <dependency>
+        <groupId>org.apache.pinot.thirdeye</groupId>
+        <artifactId>pinot-test-container</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

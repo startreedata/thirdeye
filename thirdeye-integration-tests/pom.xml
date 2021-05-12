@@ -40,6 +40,11 @@
       <artifactId>thirdeye-worker</artifactId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>pinot-test-container</artifactId>
+      <scope>compile</scope>
+    </dependency>
 
     <!-- test dependencies -->
     <dependency>
@@ -68,11 +73,6 @@
       <scope>test</scope>
     </dependency>
     <!-- https://mvnrepository.com/artifact/io.vertx/vertx-web-client -->
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>

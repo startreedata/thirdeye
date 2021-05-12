@@ -3,6 +3,9 @@ package org.apache.pinot.thirdeye;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
+import org.apache.pinot.testcontainer.AddTable;
+import org.apache.pinot.testcontainer.ImportData;
+import org.apache.pinot.testcontainer.PinotContainer;
 import org.apache.pinot.thirdeye.api.AlertApi;
 import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.api.AlertNodeApi;
@@ -12,7 +15,6 @@ import org.apache.pinot.thirdeye.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertNodeType;
 import org.assertj.core.api.Assertions;
-import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -135,7 +137,7 @@ public class ThirdEyeIntegrationTest {
         container.addTables();
         modifyDataSourceConfig();
         SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
-                resourceFilePath("e2e/config/coordinator.yaml"),
+                resourceFilePath("e2e/config/coordinator.yml"),
                 config("configPath", THIRDEYE_CONFIG),
                 config("server.connector.port", "0"), // port: 0 implies any port
                 config("database.url", db.getDbConfig().getUrl()),

@@ -5,6 +5,11 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
+- name: azure-blobstore
+  type: docker-image
+  source:
+    repository: pcfabr/azure-blobstore-resource
+
 resources:
 - name: ci-src
   type: git
@@ -170,7 +175,7 @@ jobs:
     input_mapping:
       version: chart-version
     params:
-      CHART_DIR: thirdeye
+      CHART_DIR: kubernetes/helm
   - put: chart-distrib
     params:
       file: build/*.tgz

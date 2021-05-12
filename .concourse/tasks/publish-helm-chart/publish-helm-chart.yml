@@ -19,7 +19,7 @@ outputs:
 params:
   CHART_PREFIX: thirdeye
   ARTIFACTORY_URL: ((chart-artifactory-url))
-  ARTIFACTORY_TOKEN: ((artifactory-token))
+  ARTIFACTORY_TOKEN: ((artifactory-password))
 
 run:
   path: ci-src/.concourse/tasks/publish-helm-chart/publish-helm-chart.sh

@@ -28,20 +28,6 @@ resources:
     username: ((artifactory-username))
     password: ((artifactory-password))
 
-- name: cortex-thirdeye-docker-image
-  type: docker-image
-  source:
-    repository: ((cortex-docker-registry))/thirdeye
-    username: ((github-username))
-    password: ((github-token))
-
-- name: cortex-thirdeye-ui-docker-image
-  type: docker-image
-  source:
-    repository: ((cortex-docker-registry))/thirdeye-ui
-    username: ((github-username))
-    password: ((github-token))
-
 - name: src
   type: git
   icon: github
@@ -51,6 +37,7 @@ resources:
     private_key: ((ssh-private-key))
     ignore_paths:
     - thirdeye-ui
+    - kubernetes/helm
 
 - name: ui-src
   type: git
@@ -63,6 +50,34 @@ resources:
     - pom.xml
     - thirdeye-ui
 
+- name: chart-src
+  type: git
+  icon: github
+  source:
+    uri: ((git-uri))
+    branch: ((git-branch))
+    private_key: ((ssh-private-key))
+    paths:
+    - kubernetes/helm
+
+- name: chart-version
+  type: semver
+  source:
+    driver: git
+    uri: ((git-uri))
+    branch: versions-((git-branch))
+    file: thirdeye-helm-version
+    private_key: |
+      ((ssh-private-key))
+
+- name: chart-distrib
+  type: azure-blobstore
+  source:
+    storage_account_name: ((azure-storage-account-name))
+    storage_account_key: ((azure-storage-access-key))
+    container: ((chart-azure-storage-container))
+    versioned_file: thirdeye-helm-chart-((git-branch)).tgz
+
 - name: slack
   type: slack
   icon: slack
@@ -71,26 +86,19 @@ resources:
 jobs:
 - name: build-thirdeye
   plan:
-  - get: ci-src
-  - get: src
-    trigger: true
+  - in_parallel:
+    - get: ci-src
+    - get: src
+      trigger: true
   - task: build-thirdeye
     file: ci-src/.concourse/tasks/build-thirdeye/build-thirdeye.yml
-  - in_parallel:
-    - put: thirdeye-docker-image
-      params:
-        build: src
-        tag_file: version/version
-        tag_as_latest: ((docker-tag-as-latest))
-      get_params: 
-        skip_download: true
-    - put: cortex-thirdeye-docker-image
-      params:
-        build: src
-        tag_file: version/version
-        tag_as_latest: ((docker-tag-as-latest))
-      get_params: 
-        skip_download: true
+  - put: thirdeye-docker-image
+    params:
+      build: src
+      tag_file: version/version
+      tag_as_latest: ((docker-tag-as-latest))
+    get_params: 
+      skip_download: true
   on_success:
     put: slack
     params:
@@ -108,38 +116,35 @@ jobs:
 
 - name: build-thirdeye-ui
   plan:
-  - get: ci-src
-  - get: ui-src
-    trigger: true
+  - in_parallel:
+    - get: ci-src
+    - get: ui-src
+      trigger: true
   - task: extract-thirdeye-version
     file: ci-src/.concourse/tasks/extract-maven-version/extract-maven-version.yml
     input_mapping:
+      src: ui-src
+    output_mapping:
       src: ui-src
   - task: build-thirdeye-ui
     file: ci-src/.concourse/tasks/build-thirdeye-ui/build-thirdeye-ui.yml
     input_mapping:
       src: ui-src
-  - in_parallel:
-    - put: thirdeye-ui-docker-image
-      params:
-        build: ui-src/thirdeye-ui
-        tag_file: version/version
-        tag_as_latest: ((docker-tag-as-latest))
-      get_params: 
-        skip_download: true
-    - put: cortex-thirdeye-ui-docker-image
-      params:
-        build: ui-src/thirdeye-ui
-        tag_file: version/version
-        tag_as_latest: ((docker-tag-as-latest))
-      get_params: 
-        skip_download: true
+    output_mapping:
+      src: ui-src
+  - put: thirdeye-ui-docker-image
+    params:
+      build: ui-src/thirdeye-ui
+      tag_file: version/version
+      tag_as_latest: ((docker-tag-as-latest))
+    get_params: 
+      skip_download: true
   on_success:
     put: slack
     params:
       channel: ((slack-channel))
       text: |
-        Ref ((git-branch)) of Thirdeye UI been successfully built.
+        Branch ((git-branch)) of Thirdeye UI been successfully built.
         ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
   on_failure:
     put: slack
@@ -147,4 +152,50 @@ jobs:
       channel: ((slack-channel))
       text: |
         <!channel> Failed to build branch ((git-branch)) of Thirdeye UI
+        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: build-helm-chart
+  plan:
+  - get: ci-src
+  - get: chart-version
+    params:
+      pre: build
+  - put: chart-version
+    params:
+      file: chart-version/version
+  - get: chart-src
+    trigger: true
+  - task: build-helm-chart
+    file: ci-src/.concourse/tasks/build-helm-chart/build-helm-chart.yml
+    input_mapping:
+      version: chart-version
+    params:
+      CHART_DIR: thirdeye
+  - put: chart-distrib
+    params:
+      file: build/*.tgz
+  on_failure:
+    put: slack
+    params:
+      channel: ((slack-channel))
+      text: |
+        <!channel> Failed to build ((helm-chart-name)) helm chart from ((git-branch)) branch.
+        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: publish-helm-chart
+  plan:
+  - get: ci-src
+  - get: chart-version
+    passed: ["build-helm-chart"]
+  - get: chart-distrib
+    trigger: true
+    passed: ["build-helm-chart"]
+  - task: publish-helm-chart
+    file: ci-src/.concourse/tasks/publish-helm-chart/publish-helm-chart.yml
+  on_failure:
+    put: slack
+    params:
+      channel: ((slack-channel))
+      text: |
+        <!channel> Failed to publish Thirdeye helm chart from ((git-branch)) branch.
         ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME

@@ -1,0 +1,5 @@
+databaseConfiguration:
+  url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true&useSSL=false
+  user: uthirdeye
+  password: pass
+  driver: com.mysql.jdbc.Driver

@@ -41,7 +41,7 @@ public class CoordinatorTest {
     db = new ThirdEyeH2DatabaseServer("localhost", 7124, null);
     db.start();
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
-      resourceFilePath("e2e/config/coordinator.yaml"),
+      resourceFilePath("e2e/config/coordinator.yml"),
       config("configPath", THIRDEYE_CONFIG),
       config("server.connector.port", "0"), // port: 0 implies any port
       config("database.url", db.getDbConfig().getUrl()),

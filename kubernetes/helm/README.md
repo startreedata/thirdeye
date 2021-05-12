@@ -29,12 +29,27 @@ It sets up the following components.
 - ThirdEye Backend server
 
 
-#### Prerequisites
+### Prerequisites
 
 - kubectl (<https://kubernetes.io/docs/tasks/tools/install-kubectl>)
 - Helm (<https://helm.sh/docs/using_helm/#installing-helm>)
 - Configure kubectl to connect to the Kubernetes cluster.
 - An already Setup Pinot quickstart cluster.
+- Docker Registry Credentials
+
+#### Docker Registry Credentials for Kubernetes
+
+To deploy thirdeye on Kubernetes, you may need access credentials to fetch the docker image from 
+the startree artifactory. To do that, simply create a kubernetes secret using the vault credentials.
+
+```bash
+kubectl create secret docker-registry startree \ 
+  --docker-server="repo.startreedata.io/external-docker-registry" \
+  --docker-username=<your-name> \
+  --docker-password=<your-pword> \
+  --docker-email=<your-email>
+```
+
 
 ## Installing ThirdEye
 

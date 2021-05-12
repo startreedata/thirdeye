@@ -20,17 +20,17 @@
 # Default values for ThirdEye Deployment
 
 image:
-  repository: docker.pkg.github.com/cortexdata/cortex-cloud-helm-releases/thirdeye
+  repository: repo.startreedata.io/external-docker-registry/thirdeye
   tag: latest
   pullPolicy: Always
-  pullSecretsName: cortex-cloud
+  pullSecretsName: startree
 
 ui:
   image:
-    repository: docker.pkg.github.com/cortexdata/cortex-cloud-helm-releases/thirdeye-ui
+    repository: repo.startreedata.io/external-docker-registry/thirdeye-ui
     tag: latest
     pullPolicy: Always
-    pullSecretsName: cortex-cloud
+    pullSecretsName: startree
   enabled: true
   name: ui
   port: 8081

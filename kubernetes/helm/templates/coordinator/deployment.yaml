@@ -1,0 +1,107 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "thirdeye.coordinator.fullname" . }}
+  labels:
+    app: {{ include "thirdeye.name" . }}
+    chart: {{ include "thirdeye.chart" . }}
+    component: {{ .Values.coordinator.name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "thirdeye.name" . }}
+      release: {{ .Release.Name }}
+      component: {{ .Values.coordinator.name }}
+  replicas: {{ .Values.coordinator.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "thirdeye.name" . }}
+        release: {{ .Release.Name }}
+        component: {{ .Values.coordinator.name }}
+      annotations:
+{{ toYaml .Values.coordinator.podAnnotations | indent 8 }}
+    spec:
+      {{- if .Values.image.pullSecretsName }}
+      imagePullSecrets:
+        - name: "{{ .Values.image.pullSecretsName }}"
+      {{- end }}
+      nodeSelector:
+{{ toYaml .Values.coordinator.nodeSelector | indent 8 }}
+      affinity:
+{{ toYaml .Values.coordinator.affinity | indent 8 }}
+      tolerations:
+{{ toYaml .Values.coordinator.tolerations | indent 8 }}
+      containers:
+      - name: coordinator
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args: [
+            "coordinator"
+        ]
+        ports:
+          - containerPort: {{ .Values.coordinator.port }}
+            protocol: TCP
+        volumeMounts:
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/data-sources/data-sources-config.yml"
+            subPath: "data-sources-config.yml"
+            readOnly: true
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/data-sources/cache-config.yml"
+            subPath: "cache-config.yml"
+            readOnly: true
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/detector.yml"
+            subPath: "detector.yml"
+            readOnly: true
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/persistence.yml"
+            subPath: "persistence.yml"
+            readOnly: true
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/coordinator.yaml"
+            subPath: "coordinator.yaml"
+            readOnly: true
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/scheduler.yaml"
+            subPath: "scheduler.yaml"
+            readOnly: true
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/rca.yml"
+            subPath: "rca.yml"
+            readOnly: true
+          {{- if .Values.config.holidayLoaderKey }}
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/holiday-loader-key.json"
+            subPath: "holiday-loader-key.json"
+            readOnly: true
+        {{- end }}
+        resources:
+{{ toYaml .Values.coordinator.resources | indent 12 }}
+      restartPolicy: Always
+      volumes:
+        - name: thirdeye-config
+          configMap:
+            name: thirdeye-config

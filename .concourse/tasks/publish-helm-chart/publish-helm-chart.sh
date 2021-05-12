@@ -19,4 +19,4 @@ fi
 curl \
   -H "X-JFrog-Art-Api:${ARTIFACTORY_TOKEN}" \
   -T chart-distrib/*.tgz \
-  "${ARTIFACTORY_URL}/$CHART_PREFIX-$(cat ../chart-version/version).tgz"
+  "${ARTIFACTORY_URL}/$CHART_PREFIX-$(cat chart-version/version).tgz"

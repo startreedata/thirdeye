@@ -18,6 +18,8 @@ resources:
     uri: ((git-uri))
     private_key: ((ssh-private-key))
     branch: ((git-branch))
+    path:
+    - .concourse
 
 - name: thirdeye-docker-image
   type: docker-image
@@ -41,6 +43,7 @@ resources:
     branch: ((git-branch))
     private_key: ((ssh-private-key))
     ignore_paths:
+    - .concourse
     - thirdeye-ui
     - kubernetes/helm
 
@@ -52,6 +55,7 @@ resources:
     branch: ((git-branch))
     private_key: ((ssh-private-key))
     paths:
+    - .concourse
     - pom.xml
     - thirdeye-ui
 
@@ -63,6 +67,7 @@ resources:
     branch: ((git-branch))
     private_key: ((ssh-private-key))
     paths:
+    - .concourse
     - kubernetes/helm
 
 - name: chart-version

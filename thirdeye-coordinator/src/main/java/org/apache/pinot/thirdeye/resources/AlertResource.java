@@ -1,8 +1,10 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
@@ -40,6 +42,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
+import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +52,8 @@ import org.slf4j.LoggerFactory;
 public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   private static final Logger log = LoggerFactory.getLogger(AlertResource.class);
+
+  public static final String DEFAULT_CRON = "0 */1 * * * ?";
 
   private final AlertManager alertManager;
   private final MetricConfigManager metricConfigManager;
@@ -82,6 +87,11 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(api.getName(), "Name must be present");
     ensureExists(api.getNodes(), "Exactly 1 detection must be present");
 
+    if (api.getCron() == null) {
+      api.setCron(DEFAULT_CRON);
+    }
+    ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
+
     return alertCreater.create(api
         .setOwner(new UserApi().setPrincipal(principal.getName()))
     );
@@ -96,6 +106,12 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     updated.setId(id);
     updated.setCreatedBy(existing.getCreatedBy());
     updated.setLastTimestamp(existing.getLastTimestamp());
+
+    optional(api.getCron())
+        .ifPresent(cron -> {
+          ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, cron);
+          updated.setCron(cron);
+        });
 
     alertManager.update(updated);
     return updated;

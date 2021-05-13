@@ -80,7 +80,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     int lastIndex = argList.size() - 1;
     String thirdEyeConfigDir = argList.get(lastIndex);
     System.setProperty("dw.rootDir", thirdEyeConfigDir);
-    String detectorApplicationConfigFile = thirdEyeConfigDir + "/" + "detector.yml";
+    String detectorApplicationConfigFile = thirdEyeConfigDir + "/" + "worker.yml";
     argList.set(lastIndex, detectorApplicationConfigFile); // replace config dir with the
     // actual config file
     new ThirdEyeWorker().run(argList.toArray(new String[argList.size()]));
@@ -104,7 +104,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
   public void run(final ThirdEyeWorkerConfiguration config, final Environment env) {
     LOG.info("Starting ThirdEye Worker : Scheduler {} Worker {}", config.isScheduler(),
         config.isWorker());
-    final DatabaseConfiguration dbConfig = getDatabaseConfiguration();
+    final DatabaseConfiguration dbConfig = config.getDatabaseConfiguration();
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
 
     injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource, config));
@@ -171,13 +171,5 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
       savedSession.setExpirationTime(expiryMillis);
       sessionManager.update(savedSession);
     }
-  }
-
-  public DatabaseConfiguration getDatabaseConfiguration() {
-    final String persistenceConfig = System.getProperty("dw.rootDir") + "/persistence.yml";
-    LOG.info("Loading persistence config from [{}]", persistenceConfig);
-
-    final PersistenceConfig configuration = readPersistenceConfig(new File(persistenceConfig));
-    return configuration.getDatabaseConfiguration();
   }
 }

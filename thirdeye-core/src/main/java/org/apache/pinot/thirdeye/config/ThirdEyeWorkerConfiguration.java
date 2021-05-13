@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
+import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 
 public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
 
@@ -37,6 +38,9 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
   private DataAvailabilitySchedulingConfiguration
       dataAvailabilitySchedulingConfiguration = new DataAvailabilitySchedulingConfiguration();
   private List<String> holidayCountriesWhitelist;
+
+  @JsonProperty("database")
+  private DatabaseConfiguration databaseConfiguration;
 
   @JsonProperty("swagger")
   private SwaggerBundleConfiguration swaggerBundleConfiguration;
@@ -115,6 +119,15 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
   public ThirdEyeWorkerConfiguration setSwaggerBundleConfiguration(
       final SwaggerBundleConfiguration swaggerBundleConfiguration) {
     this.swaggerBundleConfiguration = swaggerBundleConfiguration;
+    return this;
+  }
+
+  public DatabaseConfiguration getDatabaseConfiguration() {
+    return databaseConfiguration;
+  }
+
+  public ThirdEyeWorkerConfiguration setDatabaseConfiguration(DatabaseConfiguration databaseConfiguration) {
+    this.databaseConfiguration = databaseConfiguration;
     return this;
   }
 }

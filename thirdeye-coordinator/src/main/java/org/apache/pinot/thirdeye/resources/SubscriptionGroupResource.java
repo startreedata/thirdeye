@@ -32,7 +32,7 @@ import org.quartz.CronExpression;
 public class SubscriptionGroupResource extends
     CrudResource<SubscriptionGroupApi, SubscriptionGroupDTO> {
 
-  public static final String DEFAULT_CRON = "*/15 * * * * ?";
+  public static final String DEFAULT_CRON = "0 */5 * * * ?";
   private final SubscriptionGroupManager subscriptionGroupManager;
 
   @Inject

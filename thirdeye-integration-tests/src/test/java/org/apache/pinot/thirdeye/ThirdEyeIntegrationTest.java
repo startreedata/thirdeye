@@ -12,10 +12,8 @@ import org.apache.pinot.thirdeye.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.api.DatasetApi;
 import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.api.TimeColumnApi;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.pojo.AlertNodeType;
-import org.apache.pinot.thirdeye.worker.ThirdEyeWorker;
 import org.assertj.core.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,8 +50,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ThirdEyeIntegrationTest {
 
-    private static final Logger log = LoggerFactory.getLogger(ThirdEyeIntegrationTest.class);
-    private static final String THIRDEYE_CONFIG = "./src/test/resources/e2e/config";
+    public static final Logger log = LoggerFactory.getLogger(ThirdEyeIntegrationTest.class);
+    public static final String THIRDEYE_CONFIG = "./src/test/resources/e2e/config";
     private static final String INGESTION_JOB_SPEC_FILENAME = "batch-job-spec.yml";
     private static final String SCHEMA_FILENAME = "schema.json";
     private static final String TABLE_CONFIG_FILENAME = "table-config.json";
@@ -60,15 +59,14 @@ public class ThirdEyeIntegrationTest {
     private static final String DATASOURCES_CONFIG_FILE_PATH = "config/data-sources/data-sources-config.yml";
     private static final String PINOT_DATASOURCE_CLASS = "org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource";
 
-    private DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> COORDINATOR;
-    private DropwizardTestSupport<ThirdEyeWorkerConfiguration> WORKER;
+    public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
     private static PinotContainer container;
 
     private Client client;
     private ThirdEyeH2DatabaseServer db;
 
     private String thirdEyeEndPoint(final String pathFragment) {
-        return String.format("http://localhost:%d/%s", COORDINATOR.getLocalPort(), pathFragment);
+        return String.format("http://localhost:%d/%s", SUPPORT.getLocalPort(), pathFragment);
     }
 
     private PinotContainer startPinot() {
@@ -93,7 +91,7 @@ public class ThirdEyeIntegrationTest {
         return container;
     }
 
-    private void modifyDataSourceConfig() throws IOException {
+    private void modifyDataSourceConfig() throws IOException, URISyntaxException {
       //  URL e2eConfigurationResources = this.getClass().getClassLoader().getResource("e2e");
         Path resourceDirectory = Paths.get("src","test","resources", "e2e");
         File dataSourcesConfigFile = Paths.get(resourceDirectory.toFile().getAbsolutePath(), DATASOURCES_CONFIG_FILE_PATH).toFile();
@@ -138,7 +136,7 @@ public class ThirdEyeIntegrationTest {
         container = startPinot();
         container.addTables();
         modifyDataSourceConfig();
-        COORDINATOR = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
+        SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
                 resourceFilePath("e2e/config/coordinator.yml"),
                 config("configPath", THIRDEYE_CONFIG),
                 config("server.connector.port", "0"), // port: 0 implies any port
@@ -147,20 +145,10 @@ public class ThirdEyeIntegrationTest {
                 config("database.password", db.getDbConfig().getPassword()),
                 config("database.driver", db.getDbConfig().getDriver())
         );
-        // System.setProperty("dw.rootDir", "/home/kant/thirdeye/thirdeye-integration-tests/src/test/resources/e2e/config");
-        WORKER = new DropwizardTestSupport<>(ThirdEyeWorker.class,
-                resourceFilePath("e2e/config/worker.yml"),
-                config("server.connector.port", "0"),
-                config("database.url", db.getDbConfig().getUrl()),
-                config("database.user", db.getDbConfig().getUser()),
-                config("database.password", db.getDbConfig().getPassword()),
-                config("database.driver", db.getDbConfig().getDriver())
-        );
-        WORKER.before();
-        COORDINATOR.before();
+        SUPPORT.before();
         final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
         jerseyClientConfiguration.setTimeout(io.dropwizard.util.Duration.minutes(1)); // for timeout issues
-        client = new JerseyClientBuilder(COORDINATOR.getEnvironment())
+        client = new JerseyClientBuilder(SUPPORT.getEnvironment())
                 .using(jerseyClientConfiguration)
                 .build("test client");
     }
@@ -168,9 +156,8 @@ public class ThirdEyeIntegrationTest {
     @AfterClass
     public void afterClass() throws Exception {
         log.info("Pinot container port: {}", container.getPinotBrokerUrl());
-        log.info("Thirdeye port: {}", COORDINATOR.getLocalPort());
-        WORKER.after();
-        COORDINATOR.after();
+        log.info("Thirdeye port: {}", SUPPORT.getLocalPort());
+        SUPPORT.after();
         container.stop();
         db.stop();
     }
@@ -322,42 +309,6 @@ public class ThirdEyeIntegrationTest {
 
 /*        final List<AlertEvaluationApi> responseAlertEvaluationApi = response.readEntity(new GenericType<List<AlertEvaluationApi>>() {});
         assertThat(responseAlertEvaluationApi).isNotNull(); */
-    }
-
-    @Test(dependsOnMethods = "testDerivedMetrics")
-    public void testSaveAlert() {
-        final AlertApi alertApi = new AlertApi();
-        Map<String, AlertNodeApi> nodes = new HashMap<>();
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("offset", "wo1w");
-        params.put("percentageChange", 0.2);
-
-        AlertNodeApi alertNodeApi =
-                new AlertNodeApi()
-                        .setType(AlertNodeType.DETECTION)
-                        .setSubType("PERCENTAGE_RULE")
-                        .setMetric(
-                                new MetricApi()
-                                        .setName("metric_ratio")
-                                        .setDataset(
-                                                new DatasetApi()
-                                                        .setName("pageviews")
-                                        )
-                        ).setParams(params);
-
-        nodes.put("d1", alertNodeApi);
-
-        alertApi
-                .setName("derived_metric_alert")
-                .setDescription("Save Alert")
-                .setNodes(nodes)
-                .setLastTimestamp(Date.from(Instant.ofEpochMilli(0L)));
-
-        Response response = client.target(thirdEyeEndPoint("api/alerts"))
-                .request()
-                .post(Entity.json(Arrays.asList(alertApi)));
-        assertThat(response.getStatus()).isEqualTo(200);
     }
 }
 

@@ -23,10 +23,3 @@ server:
 #   adminConnectors:
 #     - type: http
 #       port: 11120
-
-database:
-  # Assuming a local MySQL server running on the default port 3306
-  url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true
-  user: uthirdeye
-  password: pass
-  driver: com.mysql.jdbc.Driver

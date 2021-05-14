@@ -88,8 +88,12 @@ spec:
             subPath: "cache-config.yml"
             readOnly: true
           - name: thirdeye-config
-            mountPath: "/home/thirdeye/thirdeye/config/worker.yml"
-            subPath: "worker.yml"
+            mountPath: "/home/thirdeye/thirdeye/config/detector.yml"
+            subPath: "detector.yml"
+            readOnly: true
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/persistence.yml"
+            subPath: "persistence.yml"
             readOnly: true
           - name: thirdeye-config
             mountPath: "/home/thirdeye/thirdeye/config/coordinator.yaml"

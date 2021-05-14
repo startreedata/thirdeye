@@ -1,4 +1,4 @@
-import { isNil } from "lodash";
+import { isFinite, isNil } from "lodash";
 import numbro from "numbro";
 
 const MANTISSA = 2;
@@ -17,7 +17,7 @@ export const formatNumber = (
     mantissa?: number,
     optionalMantissa?: boolean
 ): string => {
-    if (isNil(num)) {
+    if (isNil(num) || !isFinite(num)) {
         return "";
     }
 
@@ -52,7 +52,7 @@ export const formatLargeNumber = (
     mantissa?: number,
     optionalMantissa?: boolean
 ): string => {
-    if (isNil(num)) {
+    if (isNil(num) || !isFinite(num)) {
         return "";
     }
 
@@ -78,7 +78,7 @@ export const formatPercentage = (
     mantissa?: number,
     optionalMantissa?: boolean
 ): string => {
-    if (isNil(num)) {
+    if (isNil(num) || !isFinite(num)) {
         return "";
     }
 

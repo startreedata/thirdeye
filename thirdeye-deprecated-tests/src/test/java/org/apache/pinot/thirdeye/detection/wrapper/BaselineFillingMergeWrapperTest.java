@@ -32,7 +32,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.MockPipeline;
@@ -140,7 +140,7 @@ public class BaselineFillingMergeWrapperTest {
     // run baseline filling merge wrapper
     this.wrapper = new BaselineFillingMergeWrapper(provider, this.config, 2900, 3600);
     wrapper.setMockDetectionPipelineFactory(loader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     List<MergedAnomalyResultDTO> anomalyResults = output.getAnomalies();
     Assert.assertEquals(anomalyResults.size(), 1);

@@ -46,7 +46,7 @@ import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
@@ -287,10 +287,10 @@ public class DimensionWrapper extends DetectionPipeline {
   }
 
   @Override
-  public DetectionPipelineResult run() throws Exception {
+  public DetectionPipelineResultV1 run() throws Exception {
     List<MetricEntity> nestedMetrics = dimensionExplore();
     if (nestedMetrics.isEmpty()) {
-      return new DetectionPipelineResult(Collections.emptyList(), -1);
+      return new DetectionPipelineResultV1(Collections.emptyList(), -1);
     }
     if (nestedMetrics.size() > MAX_DIMENSION_COMBINATIONS) {
       throw new DetectionPipelineException(String.format(
@@ -365,7 +365,7 @@ public class DimensionWrapper extends DetectionPipeline {
         break;
       }
       for (Map<String, Object> properties : this.nestedProperties) {
-        DetectionPipelineResult intermediate;
+        DetectionPipelineResultV1 intermediate;
         try {
           properties.put(this.nestedMetricUrnKey, metric.getUrn());
           intermediate = this.runNested(properties, this.startTime, this.endTime);
@@ -390,7 +390,7 @@ public class DimensionWrapper extends DetectionPipeline {
 
     checkNestedMetricsStatus(totalNestedMetrics, successNestedMetrics, exceptions,
         predictionResults);
-    return new DetectionPipelineResult(anomalies,
+    return new DetectionPipelineResultV1(anomalies,
         DetectionUtils.consolidateNestedLastTimeStamps(lastTimeStamps),
         predictionResults, calculateEvaluationMetrics(predictionResults))
         .setDiagnostics(diagnostics);

@@ -33,7 +33,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detector.email.filter.BaseAlertFilter;
 import org.apache.pinot.thirdeye.detector.email.filter.DummyAlertFilter;
 
@@ -98,7 +98,7 @@ public class LegacyAlertFilterWrapper extends DetectionPipeline {
   }
 
   @Override
-  public DetectionPipelineResult run() throws Exception {
+  public DetectionPipelineResultV1 run() throws Exception {
     List<MergedAnomalyResultDTO> candidates = new ArrayList<>();
     for (Map<String, Object> properties : this.nestedProperties) {
       if (!properties.containsKey(PROP_SPEC)) {
@@ -108,7 +108,7 @@ public class LegacyAlertFilterWrapper extends DetectionPipeline {
         properties.put(PROP_ANOMALY_FUNCTION_CLASS,
             this.config.getProperties().get(PROP_ANOMALY_FUNCTION_CLASS));
       }
-      DetectionPipelineResult intermediate = this
+      DetectionPipelineResultV1 intermediate = this
           .runNested(properties, this.startTime - this.alertFilterLookBack, this.endTime);
       candidates.addAll(intermediate.getAnomalies());
     }
@@ -122,6 +122,6 @@ public class LegacyAlertFilterWrapper extends DetectionPipeline {
           }
         });
 
-    return new DetectionPipelineResult(new ArrayList<>(anomalies));
+    return new DetectionPipelineResultV1(new ArrayList<>(anomalies));
   }
 }

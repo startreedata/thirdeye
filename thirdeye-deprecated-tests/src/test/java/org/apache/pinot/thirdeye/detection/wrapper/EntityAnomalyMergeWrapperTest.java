@@ -30,7 +30,7 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.MockPipeline;
@@ -124,7 +124,7 @@ public class EntityAnomalyMergeWrapperTest {
 
     this.mergeWrapper = new EntityAnomalyMergeWrapper(this.provider, this.config, 1000, 4000);
     mergeWrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.mergeWrapper.run();
+    DetectionPipelineResultV1 output = this.mergeWrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 1);
     Assert.assertEquals(output.getLastTimestamp(), 3000);

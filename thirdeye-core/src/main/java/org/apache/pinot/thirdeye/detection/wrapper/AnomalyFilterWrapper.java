@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
 import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
@@ -76,7 +76,7 @@ public class AnomalyFilterWrapper extends DetectionPipeline {
    * @return the detection pipeline result
    */
   @Override
-  public final DetectionPipelineResult run() throws Exception {
+  public final DetectionPipelineResultV1 run() throws Exception {
     List<MergedAnomalyResultDTO> candidates = new ArrayList<>();
     List<PredictionResult> predictionResults = new ArrayList<>();
     Map<String, Object> diagnostics = new HashMap<>();
@@ -87,7 +87,7 @@ public class AnomalyFilterWrapper extends DetectionPipeline {
       if (this.metricUrn != null) {
         properties.put(PROP_METRIC_URN, this.metricUrn);
       }
-      DetectionPipelineResult intermediate = this
+      DetectionPipelineResultV1 intermediate = this
           .runNested(properties, this.startTime, this.endTime);
       lastTimeStamps.add(intermediate.getLastTimestamp());
       diagnostics.putAll(intermediate.getDiagnostics());
@@ -101,7 +101,7 @@ public class AnomalyFilterWrapper extends DetectionPipeline {
             mergedAnomaly -> mergedAnomaly != null && !mergedAnomaly.isChild() && anomalyFilter
                 .isQualified(mergedAnomaly));
 
-    return new DetectionPipelineResult(new ArrayList<>(anomalies),
+    return new DetectionPipelineResultV1(new ArrayList<>(anomalies),
         DetectionUtils.consolidateNestedLastTimeStamps(lastTimeStamps),
         predictionResults, evaluations).setDiagnostics(diagnostics);
   }

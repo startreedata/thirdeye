@@ -36,7 +36,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +90,7 @@ public class DataQualityPipelineTaskRunner implements TaskRunner {
           .setEnd(info.getEnd())
       );
 
-      DetectionPipelineResult result = pipeline.run();
+      DetectionPipelineResultV1 result = pipeline.run();
       // revert the properties field back to detection properties
       config.setProperties(props);
 

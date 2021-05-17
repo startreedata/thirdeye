@@ -94,7 +94,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           .setStart(info.getStart())
           .setEnd(info.getEnd())
       );
-      final DetectionPipelineResult result = pipeline.run();
+      final DetectionPipelineResultV1 result = pipeline.run();
 
       if (result.getLastTimestamp() < 0) {
         LOG.info("No detection ran for config {} between {} and {}",
@@ -119,7 +119,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   private void postExecution(final AlertDTO config,
-      final DetectionPipelineResult result) {
+      final DetectionPipelineResultV1 result) {
     config.setLastTimestamp(result.getLastTimestamp());
 
     for (MergedAnomalyResultDTO mergedAnomalyResultDTO : result.getAnomalies()) {

@@ -34,7 +34,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
 import org.apache.pinot.thirdeye.detection.spi.components.Labeler;
@@ -69,7 +69,7 @@ public class AnomalyLabelerWrapper extends DetectionPipeline {
   }
 
   @Override
-  public DetectionPipelineResult run() throws Exception {
+  public DetectionPipelineResultV1 run() throws Exception {
     List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
     Map<String, Object> diagnostics = new HashMap<>();
     List<PredictionResult> predictionResults = new ArrayList<>();
@@ -80,7 +80,7 @@ public class AnomalyLabelerWrapper extends DetectionPipeline {
       if (this.metricUrn != null) {
         properties.put(PROP_METRIC_URN, this.metricUrn);
       }
-      DetectionPipelineResult intermediate = this
+      DetectionPipelineResultV1 intermediate = this
           .runNested(properties, this.startTime, this.endTime);
       lastTimeStamps.add(intermediate.getLastTimestamp());
       predictionResults.addAll(intermediate.getPredictions());
@@ -99,7 +99,7 @@ public class AnomalyLabelerWrapper extends DetectionPipeline {
         anomaly.setSeverityLabel(newSeverity);
       }
     }
-    return new DetectionPipelineResult(anomalies,
+    return new DetectionPipelineResultV1(anomalies,
         DetectionUtils.consolidateNestedLastTimeStamps(lastTimeStamps),
         predictionResults, evaluations).setDiagnostics(diagnostics);
   }

@@ -37,7 +37,7 @@ import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +84,7 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
         .setAlert(config)
         .setStart(info.getStart())
         .setEnd(info.getEnd()));
-    DetectionPipelineResult result = pipeline.run();
+    DetectionPipelineResultV1 result = pipeline.run();
 
     if (result.getLastTimestamp() < 0) {
       return Collections.emptyList();

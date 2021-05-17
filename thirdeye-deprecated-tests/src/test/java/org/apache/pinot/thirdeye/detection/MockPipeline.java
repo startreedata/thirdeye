@@ -30,8 +30,8 @@ public class MockPipeline extends DetectionPipeline {
   }
 
   @Override
-  public DetectionPipelineResult run() {
-    return new DetectionPipelineResult(this.output.anomalies, this.output.lastTimestamp);
+  public DetectionPipelineResultV1 run() {
+    return new DetectionPipelineResultV1(this.output.anomalies, this.output.lastTimestamp);
   }
 
   @Override

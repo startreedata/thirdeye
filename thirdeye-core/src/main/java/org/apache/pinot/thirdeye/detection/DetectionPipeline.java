@@ -92,7 +92,7 @@ public abstract class DetectionPipeline {
    *
    * @return detection result
    */
-  public abstract DetectionPipelineResult run() throws Exception;
+  public abstract DetectionPipelineResultV1 run() throws Exception;
 
   /**
    * Initialize all components in the pipeline
@@ -276,7 +276,7 @@ public abstract class DetectionPipeline {
    * @param nestedProps nested properties
    * @return intermediate result of a detection pipeline
    */
-  protected DetectionPipelineResult runNested(
+  protected DetectionPipelineResultV1 runNested(
       Map<String, Object> nestedProps, final long startTime, final long endTime) throws Exception {
     Preconditions.checkArgument(nestedProps.containsKey(PROP_CLASS_NAME),
         "Nested missing " + PROP_CLASS_NAME);

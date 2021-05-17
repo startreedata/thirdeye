@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 
 /**
  * The F1 score function based on time bucket counting.
@@ -43,7 +43,7 @@ public class TimeBucketF1ScoreFunction implements ScoreFunction {
   private static final double beta = 3;
 
   @Override
-  public double calculateScore(DetectionPipelineResult detectionResult,
+  public double calculateScore(DetectionPipelineResultV1 detectionResult,
       Collection<MergedAnomalyResultDTO> testAnomalies) {
     List<MergedAnomalyResultDTO> anomalyResults = detectionResult.getAnomalies();
 

@@ -48,7 +48,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
@@ -109,7 +109,7 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
   }
 
   @Override
-  public DetectionPipelineResult run() throws Exception {
+  public DetectionPipelineResultV1 run() throws Exception {
     LOG.info("Running legacy anomaly detection for time range {} to {}", this.startTime,
         this.endTime);
 
@@ -157,7 +157,7 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
       }
 
       if (!this.dataFilter.isQualified(metricTimeSeries, dimension, this.startTime, this.endTime)) {
-        return new DetectionPipelineResult(Collections.emptyList());
+        return new DetectionPipelineResultV1(Collections.emptyList());
       }
 
       List<AnomalyResult> result = this.anomalyFunction.analyze(dimension, metricTimeSeries,
@@ -191,7 +191,7 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
     LOG.info("Detected {} anomalies for {}", mergedAnomalyResults.size(),
         this.metricEntity.getUrn());
 
-    return new DetectionPipelineResult(new ArrayList<>(mergedAnomalyResults));
+    return new DetectionPipelineResultV1(new ArrayList<>(mergedAnomalyResults));
   }
 
   private DimensionMap getDimensionMap() {

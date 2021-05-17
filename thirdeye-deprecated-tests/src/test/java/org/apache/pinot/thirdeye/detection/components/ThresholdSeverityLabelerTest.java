@@ -32,7 +32,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.MockPipeline;
@@ -121,7 +121,7 @@ public class ThresholdSeverityLabelerTest {
         1000L, 6000L);
     thresholdSeverityLabeler.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdSeverityLabeler.run();
+    DetectionPipelineResultV1 result = this.thresholdSeverityLabeler.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 4);
     Assert.assertEquals(anomalies.get(0).getSeverityLabel(), AnomalySeverity.CRITICAL);
@@ -141,7 +141,7 @@ public class ThresholdSeverityLabelerTest {
         1000L, 6000L);
     thresholdSeverityLabeler.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdSeverityLabeler.run();
+    DetectionPipelineResultV1 result = this.thresholdSeverityLabeler.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 4);
     Assert.assertEquals(anomalies.get(0).getSeverityLabel(), AnomalySeverity.HIGH);
@@ -169,7 +169,7 @@ public class ThresholdSeverityLabelerTest {
         1000L, 6000L);
     thresholdSeverityLabeler.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdSeverityLabeler.run();
+    DetectionPipelineResultV1 result = this.thresholdSeverityLabeler.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 4);
     Assert.assertEquals(anomalies.get(3).getSeverityLabel(), AnomalySeverity.CRITICAL);
@@ -195,7 +195,7 @@ public class ThresholdSeverityLabelerTest {
         1000L, 6000L);
     thresholdSeverityLabeler.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdSeverityLabeler.run();
+    DetectionPipelineResultV1 result = this.thresholdSeverityLabeler.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(anomalies.size(), 4);
     Assert.assertEquals(anomalies.get(3).getSeverityLabel(), AnomalySeverity.MEDIUM);

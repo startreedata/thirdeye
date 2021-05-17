@@ -32,7 +32,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.spi.components.AnomalyDetector;
 import org.apache.pinot.thirdeye.detection.spi.model.DetectionResult;
@@ -87,7 +87,7 @@ public class DataSlaWrapper extends DetectionPipeline {
   }
 
   @Override
-  public DetectionPipelineResult run() throws Exception {
+  public DetectionPipelineResultV1 run() throws Exception {
     LOG.info("Check data sla for config {} between {} and {}", config.getId(), startTime, endTime);
     Interval window = new Interval(startTime, endTime, DateTimeZone.forID(dataset.getTimezone()));
     DetectionResult detectionResult = qualityChecker.runDetection(window, this.metricUrn);
@@ -103,6 +103,6 @@ public class DataSlaWrapper extends DetectionPipeline {
       anomaly.getProperties().put(PROP_SUB_ENTITY_NAME, this.entityName);
     }
 
-    return new DetectionPipelineResult(anomalies);
+    return new DetectionPipelineResultV1(anomalies);
   }
 }

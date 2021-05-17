@@ -31,7 +31,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.MockPipeline;
@@ -125,7 +125,7 @@ public class ThresholdRuleAnomalyFilterTest {
             1551189600000L);
     thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdRuleFilter.run();
+    DetectionPipelineResultV1 result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(result.getLastTimestamp(), 1551200400000L);
     Assert.assertEquals(anomalies.size(), 4);
@@ -143,7 +143,7 @@ public class ThresholdRuleAnomalyFilterTest {
             1551189600000L);
     thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdRuleFilter.run();
+    DetectionPipelineResultV1 result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(result.getLastTimestamp(), 1551200400000L);
     Assert.assertEquals(anomalies.size(), 3);
@@ -160,7 +160,7 @@ public class ThresholdRuleAnomalyFilterTest {
             1551189600000L);
     thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdRuleFilter.run();
+    DetectionPipelineResultV1 result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(result.getLastTimestamp(), 1551200400000L);
     Assert.assertEquals(anomalies.size(), 3);
@@ -178,7 +178,7 @@ public class ThresholdRuleAnomalyFilterTest {
             1551189600000L);
     thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdRuleFilter.run();
+    DetectionPipelineResultV1 result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(result.getLastTimestamp(), 1551200400000L);
     Assert.assertEquals(anomalies.size(), 2);
@@ -194,7 +194,7 @@ public class ThresholdRuleAnomalyFilterTest {
             1551189600000L);
     thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdRuleFilter.run();
+    DetectionPipelineResultV1 result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(result.getLastTimestamp(), 1551200400000L);
     Assert.assertEquals(anomalies.size(), 3);
@@ -211,7 +211,7 @@ public class ThresholdRuleAnomalyFilterTest {
             1551189600000L);
     thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdRuleFilter.run();
+    DetectionPipelineResultV1 result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(result.getLastTimestamp(), 1551200400000L);
     Assert.assertEquals(anomalies.size(), 3);
@@ -229,7 +229,7 @@ public class ThresholdRuleAnomalyFilterTest {
             1551189600000L);
     thresholdRuleFilter.setMockDetectionPipelineFactory(loader);
 
-    DetectionPipelineResult result = this.thresholdRuleFilter.run();
+    DetectionPipelineResultV1 result = this.thresholdRuleFilter.run();
     List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     Assert.assertEquals(result.getLastTimestamp(), 1551200400000L);
     Assert.assertEquals(anomalies.size(), 1);

@@ -39,7 +39,7 @@ import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
 import org.slf4j.Logger;
@@ -80,7 +80,7 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
-      final DetectionPipelineResult result = runPipeline(request);
+      final DetectionPipelineResultV1 result = runPipeline(request);
       return toApi(result);
     } catch (ThirdEyeException e) {
       throw badRequest(statusListApi(e.getStatus(), e.getMessage()));
@@ -108,7 +108,7 @@ public class AlertEvaluator {
     }
   }
 
-  private DetectionPipelineResult runPipeline(final AlertEvaluationApi request)
+  private DetectionPipelineResultV1 runPipeline(final AlertEvaluationApi request)
       throws InterruptedException, ExecutionException, TimeoutException {
     final AlertDTO alert = getAlert(ensureExists(request.getAlert()));
     final DetectionPipeline pipeline = new DetectionPipelineFactory(dataProvider).get(
@@ -123,7 +123,7 @@ public class AlertEvaluator {
         .get(TIMEOUT, TimeUnit.MILLISECONDS);
   }
 
-  private AlertEvaluationApi toApi(final DetectionPipelineResult result) {
+  private AlertEvaluationApi toApi(final DetectionPipelineResultV1 result) {
 
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
 

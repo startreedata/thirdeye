@@ -42,7 +42,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.PredictionResult;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
@@ -168,7 +168,7 @@ public class AnomalyDetectorWrapper extends DetectionPipeline {
   }
 
   @Override
-  public DetectionPipelineResult run() throws Exception {
+  public DetectionPipelineResultV1 run() throws Exception {
     // pre-cache time series with default granularity. this is used in multiple places:
     // 1. get the last time stamp for the time series.
     // 2. to calculate current values and  baseline values for the anomalies detected
@@ -236,7 +236,7 @@ public class AnomalyDetectorWrapper extends DetectionPipeline {
     long lastTimeStamp = this.getLastTimeStamp();
     PredictionResult predictedTimeSeries = new PredictionResult(this.detectorName, this.metricUrn,
         predictedResult.getDataFrame());
-    return new DetectionPipelineResult(anomalies, lastTimeStamp,
+    return new DetectionPipelineResultV1(anomalies, lastTimeStamp,
         Collections.singletonList(predictedTimeSeries));
   }
 

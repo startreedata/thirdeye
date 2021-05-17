@@ -31,7 +31,7 @@ import org.apache.pinot.thirdeye.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.MockPipeline;
 import org.apache.pinot.thirdeye.detection.MockPipelineLoader;
@@ -124,7 +124,7 @@ public class MergeWrapperTest {
     this.config.getProperties().put(PROP_MAX_GAP, 0);
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
     Assert.assertTrue(output.getAnomalies().contains(setAnomalyId(makeAnomaly(50, 1250), 0L)));
@@ -140,7 +140,7 @@ public class MergeWrapperTest {
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     // anomaly [1500, 2000] is not modified
     Assert.assertEquals(output.getAnomalies().size(), 2);
@@ -158,7 +158,7 @@ public class MergeWrapperTest {
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
     Assert.assertEquals(output.getLastTimestamp(), 3000);
@@ -184,7 +184,7 @@ public class MergeWrapperTest {
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 4000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
     Assert.assertEquals(output.getLastTimestamp(), 3700);
@@ -211,7 +211,7 @@ public class MergeWrapperTest {
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 4000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
     Assert.assertEquals(output.getLastTimestamp(), 3700);
@@ -237,7 +237,7 @@ public class MergeWrapperTest {
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 4000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 6);
     Assert.assertEquals(output.getLastTimestamp(), 3700);
@@ -302,7 +302,7 @@ public class MergeWrapperTest {
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 6);
     Assert.assertEquals(output.getLastTimestamp(), 3000);
@@ -337,7 +337,7 @@ public class MergeWrapperTest {
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 4000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 1);
     Assert.assertEquals(output.getLastTimestamp(), 3700);
@@ -366,7 +366,7 @@ public class MergeWrapperTest {
 
     this.wrapper = new MergeWrapper(this.provider, this.config, 1000, 3000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     // trend anomaly was not merged with deviation Anomaly
     Assert.assertTrue(output.getAnomalies().contains(trendAnomaly));

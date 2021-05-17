@@ -32,7 +32,7 @@ import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.MockPipeline;
 import org.apache.pinot.thirdeye.detection.MockPipelineLoader;
@@ -113,7 +113,7 @@ public class ChildKeepingMergeWrapperTest {
     this.config.getProperties().put(PROP_MAX_GAP, 0);
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 5);
     Assert.assertEquals(output.getLastTimestamp(), 3000);
@@ -125,7 +125,7 @@ public class ChildKeepingMergeWrapperTest {
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
     Assert.assertEquals(output.getLastTimestamp(), 3000);
@@ -143,7 +143,7 @@ public class ChildKeepingMergeWrapperTest {
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 3);
     Assert.assertEquals(output.getLastTimestamp(), 3000);
@@ -172,7 +172,7 @@ public class ChildKeepingMergeWrapperTest {
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
     Assert.assertEquals(output.getLastTimestamp(), 3700);
@@ -203,7 +203,7 @@ public class ChildKeepingMergeWrapperTest {
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
     Assert.assertEquals(output.getLastTimestamp(), 3700);
@@ -272,7 +272,7 @@ public class ChildKeepingMergeWrapperTest {
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 3000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 6);
     Assert.assertEquals(output.getLastTimestamp(), 3000);
@@ -323,7 +323,7 @@ public class ChildKeepingMergeWrapperTest {
     final ChildKeepingMergeWrapper childKeepingMergeWrapper = new ChildKeepingMergeWrapper(provider,
         config, 1000, 3000);
     childKeepingMergeWrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = childKeepingMergeWrapper.run();
+    DetectionPipelineResultV1 output = childKeepingMergeWrapper.run();
 
     List<MergedAnomalyResultDTO> anomalyResults = output.getAnomalies();
     Assert.assertEquals(anomalyResults.size(), 1);
@@ -349,7 +349,7 @@ public class ChildKeepingMergeWrapperTest {
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 5);
     Assert.assertTrue(output.getAnomalies()
@@ -376,7 +376,7 @@ public class ChildKeepingMergeWrapperTest {
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 5);
     Assert.assertTrue(output.getAnomalies().contains(makeAnomaly(2800, 3600, null, 3, 2)));
@@ -401,7 +401,7 @@ public class ChildKeepingMergeWrapperTest {
 
     this.wrapper = new ChildKeepingMergeWrapper(this.provider, this.config, 1000, 4000);
     wrapper.setMockDetectionPipelineFactory(mockLoader);
-    DetectionPipelineResult output = this.wrapper.run();
+    DetectionPipelineResultV1 output = this.wrapper.run();
 
     Assert.assertEquals(output.getAnomalies().size(), 4);
     Assert.assertEquals(output.getAnomalies().get(3).getSeverityLabel(), AnomalySeverity.CRITICAL);

@@ -74,10 +74,10 @@ public abstract class StaticDetectionPipeline extends DetectionPipeline {
    * @return detection result
    * @throws Exception on execution errors
    */
-  public abstract DetectionPipelineResult run(InputData data) throws Exception;
+  public abstract DetectionPipelineResultV1 run(InputData data) throws Exception;
 
   @Override
-  public final DetectionPipelineResult run() throws Exception {
+  public final DetectionPipelineResultV1 run() throws Exception {
     InputDataSpec dataSpec = this.getInputDataSpec();
     Map<MetricSlice, DataFrame> timeseries = this.provider
         .fetchTimeseries(dataSpec.getTimeseriesSlices());

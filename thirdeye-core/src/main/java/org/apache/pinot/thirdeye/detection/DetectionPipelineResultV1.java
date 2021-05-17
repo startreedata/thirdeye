@@ -26,7 +26,7 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 
-public class DetectionPipelineResult {
+public class DetectionPipelineResultV1 {
 
   public static String DIAGNOSTICS_DATA = "data";
   public static String DIAGNOSTICS_CHANGE_POINTS = "changepoints";
@@ -41,22 +41,22 @@ public class DetectionPipelineResult {
   // evaluation metrics
   private final List<EvaluationDTO> evaluations;
 
-  public DetectionPipelineResult(List<MergedAnomalyResultDTO> anomalies) {
+  public DetectionPipelineResultV1(List<MergedAnomalyResultDTO> anomalies) {
     this(anomalies, getMaxTime(anomalies));
     this.diagnostics = new HashMap<>();
   }
 
-  public DetectionPipelineResult(List<MergedAnomalyResultDTO> anomalies, long lastTimestamp) {
+  public DetectionPipelineResultV1(List<MergedAnomalyResultDTO> anomalies, long lastTimestamp) {
     this(anomalies, lastTimestamp, Collections.emptyList());
     this.diagnostics = new HashMap<>();
   }
 
-  public DetectionPipelineResult(List<MergedAnomalyResultDTO> anomalies, long lastTimestamp,
+  public DetectionPipelineResultV1(List<MergedAnomalyResultDTO> anomalies, long lastTimestamp,
       List<PredictionResult> predictedTimeSeries) {
     this(anomalies, lastTimestamp, predictedTimeSeries, Collections.emptyList());
   }
 
-  public DetectionPipelineResult(List<MergedAnomalyResultDTO> anomalies, long lastTimestamp,
+  public DetectionPipelineResultV1(List<MergedAnomalyResultDTO> anomalies, long lastTimestamp,
       List<PredictionResult> predictedTimeSeries, List<EvaluationDTO> evaluations) {
     this.anomalies = anomalies;
     this.lastTimestamp = lastTimestamp;
@@ -85,7 +85,7 @@ public class DetectionPipelineResult {
     return diagnostics;
   }
 
-  public DetectionPipelineResult setDiagnostics(Map<String, Object> diagnostics) {
+  public DetectionPipelineResultV1 setDiagnostics(Map<String, Object> diagnostics) {
     this.diagnostics = diagnostics;
     return this;
   }

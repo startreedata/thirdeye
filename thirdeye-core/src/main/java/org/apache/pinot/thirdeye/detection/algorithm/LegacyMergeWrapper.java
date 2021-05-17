@@ -55,7 +55,7 @@ import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
@@ -142,7 +142,7 @@ public class LegacyMergeWrapper extends DetectionPipeline {
   }
 
   @Override
-  public DetectionPipelineResult run() throws Exception {
+  public DetectionPipelineResultV1 run() throws Exception {
     // generate anomalies
     List<MergedAnomalyResultDTO> generated = new ArrayList<>();
 
@@ -153,7 +153,7 @@ public class LegacyMergeWrapper extends DetectionPipeline {
       if (!properties.containsKey(PROP_ANOMALY_FUNCTION_CLASS)) {
         properties.put(PROP_ANOMALY_FUNCTION_CLASS, this.anomalyFunctionClassName);
       }
-      DetectionPipelineResult intermediate = this.runNested(properties, startTime, endTime);
+      DetectionPipelineResultV1 intermediate = this.runNested(properties, startTime, endTime);
       generated.addAll(intermediate.getAnomalies());
     }
 
@@ -167,7 +167,7 @@ public class LegacyMergeWrapper extends DetectionPipeline {
     retrieved.addAll(
         this.provider.fetchAnomalies(Collections.singleton(effectiveSlice)).get(effectiveSlice));
 
-    return new DetectionPipelineResult(this.merge(generated, retrieved));
+    return new DetectionPipelineResultV1(this.merge(generated, retrieved));
   }
 
   /**

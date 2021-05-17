@@ -30,7 +30,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
 
@@ -85,7 +85,7 @@ public class LegacyDimensionWrapper extends DimensionWrapper {
   }
 
   @Override
-  protected DetectionPipelineResult runNested(
+  protected DetectionPipelineResultV1 runNested(
       Map<String, Object> nestedProps, final long startTime, final long endTime) throws Exception {
     if (!nestedProps.containsKey(PROP_SPEC)) {
       nestedProps.put(PROP_SPEC, this.anomalyFunctionSpecs);

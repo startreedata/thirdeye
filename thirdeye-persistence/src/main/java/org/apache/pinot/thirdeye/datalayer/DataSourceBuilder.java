@@ -1,11 +1,11 @@
 package org.apache.pinot.thirdeye.datalayer;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
-import org.h2.store.fs.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ public class DataSourceBuilder {
       final DataSource dataSource,
       final DatabaseConfiguration dbConfig) {
     if (dbConfig.getUrl().equals(DEFAULT_DATABASE_PATH)
-        && !FileUtils.exists(DEFAULT_DATABASE_FILE)) {
+        && !new File(DEFAULT_DATABASE_FILE).exists()) {
       try {
         LOG.info("Creating database schema for default URL '{}'", DEFAULT_DATABASE_PATH);
         Connection conn = dataSource.getConnection();

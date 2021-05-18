@@ -436,6 +436,11 @@
       </dependency>
       <dependency>
         <groupId>io.dropwizard</groupId>
+        <artifactId>dropwizard-db</artifactId>
+        <version>${dropwizard.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.dropwizard</groupId>
         <artifactId>dropwizard-migrations</artifactId>
         <version>${dropwizard.version}</version>
       </dependency>
@@ -741,6 +746,11 @@
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
         <version>${json.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.yammer.metrics</groupId>
+        <artifactId>metrics-core</artifactId>
+        <version>2.2.0</version>
       </dependency>
 
       <!-- swagger -->

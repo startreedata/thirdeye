@@ -40,8 +40,10 @@ public class MetricFunction implements Comparable<MetricFunction> {
 
   }
 
-  public MetricFunction(@JsonProperty("functionName") MetricAggFunction functionName,
-      @JsonProperty("metricName") String metricName, @JsonProperty("metricId") Long metricId,
+  public MetricFunction(
+      @JsonProperty("functionName") MetricAggFunction functionName,
+      @JsonProperty("metricName") String metricName,
+      @JsonProperty("metricId") Long metricId,
       @JsonProperty("dataset") String dataset,
       @JsonProperty("metricConfig") MetricConfigDTO metricConfig,
       @JsonProperty("datasetConfig") DatasetConfigDTO datasetConfig) {

@@ -24,6 +24,8 @@ import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.lang.reflect.Array;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -39,8 +41,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.pinot.thirdeye.datalayer.DaoFilter;

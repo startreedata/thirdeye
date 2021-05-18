@@ -26,6 +26,7 @@
 
   <modules>
     <module>thirdeye-spi</module>
+    <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
     <module>thirdeye-coordinator</module>
     <module>thirdeye-worker</module>
@@ -329,6 +330,11 @@
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
         <artifactId>thirdeye-spi</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.pinot.thirdeye</groupId>
+        <artifactId>thirdeye-persistence</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

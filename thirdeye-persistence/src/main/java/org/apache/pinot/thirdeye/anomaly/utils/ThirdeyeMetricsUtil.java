@@ -22,13 +22,11 @@ package org.apache.pinot.thirdeye.anomaly.utils;
 import com.yammer.metrics.core.Counter;
 import com.yammer.metrics.core.MetricsRegistry;
 import com.yammer.metrics.reporting.JmxReporter;
-import org.apache.pinot.thirdeye.tracking.RequestLog;
 
 public class ThirdeyeMetricsUtil {
 
   private static final MetricsRegistry metricsRegistry = new MetricsRegistry();
   private static final JmxReporter jmxReporter = new JmxReporter(metricsRegistry);
-  private static final RequestLog requestLog = new RequestLog(1000000);
 
   static {
     jmxReporter.start();
@@ -189,9 +187,5 @@ public class ThirdeyeMetricsUtil {
 
   public static MetricsRegistry getMetricsRegistry() {
     return metricsRegistry;
-  }
-
-  public static RequestLog getRequestLog() {
-    return requestLog;
   }
 }

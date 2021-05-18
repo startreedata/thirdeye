@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.tracking;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +28,7 @@ import org.slf4j.LoggerFactory;
 public class RequestStatisticsLogger implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(RequestStatisticsLogger.class);
+  private static final RequestLog requestLog = new RequestLog(1000000);
 
   private final ScheduledExecutorService scheduledExecutorService;
   private final TimeGranularity runFrequency;
@@ -38,12 +38,16 @@ public class RequestStatisticsLogger implements Runnable {
     this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
   }
 
+  public static RequestLog getRequestLog() {
+    return requestLog;
+  }
+
   @Override
   public void run() {
     try {
       long timestamp = System.nanoTime();
-      RequestStatistics stats = ThirdeyeMetricsUtil.getRequestLog().getStatistics(timestamp);
-      ThirdeyeMetricsUtil.getRequestLog().truncate(timestamp);
+      RequestStatistics stats = getRequestLog().getStatistics(timestamp);
+      getRequestLog().truncate(timestamp);
 
       RequestStatisticsFormatter formatter = new RequestStatisticsFormatter();
       LOG.info("Recent request performance statistics:\n{}", formatter.format(stats));

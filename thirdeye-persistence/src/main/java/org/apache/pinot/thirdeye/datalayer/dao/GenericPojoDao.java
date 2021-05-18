@@ -43,8 +43,6 @@ import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
-import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
-import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
@@ -197,11 +195,6 @@ public class GenericPojoDao {
   }
 
   private String getCurrentPrincipal() {
-    // TODO use injection
-    ThirdEyePrincipal principal = ThirdEyeAuthFilter.getCurrentPrincipal();
-    if (principal != null) {
-      return principal.getName();
-    }
     return Constants.NO_AUTH_USER;
   }
 

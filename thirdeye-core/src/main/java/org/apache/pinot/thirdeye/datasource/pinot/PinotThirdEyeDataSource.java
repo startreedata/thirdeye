@@ -56,6 +56,7 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGro
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.rootcause.util.FilterPredicate;
+import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -249,13 +250,13 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         try {
           resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
           if (metricConfig != null) {
-            ThirdeyeMetricsUtil.getRequestLog()
+            RequestStatisticsLogger.getRequestLog()
                 .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
                     tStartFunction, System.nanoTime());
           }
         } catch (Exception e) {
           if (metricConfig != null) {
-            ThirdeyeMetricsUtil.getRequestLog()
+            RequestStatisticsLogger.getRequestLog()
                 .failure(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
                     tStartFunction, System.nanoTime(), e);
           }

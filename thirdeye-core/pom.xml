@@ -18,6 +18,10 @@
       <artifactId>thirdeye-spi</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>thirdeye-persistence</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
     </dependency>
@@ -160,22 +164,6 @@
       <groupId>io.prestosql</groupId>
       <artifactId>presto-jdbc</artifactId>
       <version>333</version>
-    </dependency>
-
-    <!-- DB specific -->
-    <dependency>
-      <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-persist</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.inject</groupId>
-          <artifactId>javax.inject</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
     </dependency>
 
     <!-- TODO: restructure this -->

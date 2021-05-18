@@ -22,11 +22,11 @@ package org.apache.pinot.thirdeye.datasource.pinot;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -96,12 +96,12 @@ public class PinotDataSourceTimeQuery {
       try {
         pinotThirdEyeDataSource.refreshSQL(maxTimePinotQuery);
         resultSetGroup = pinotThirdEyeDataSource.executeSQL(maxTimePinotQuery);
-        ThirdeyeMetricsUtil
+        RequestStatisticsLogger
             .getRequestLog()
             .success(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
                 tStart, System.nanoTime());
       } catch (ExecutionException e) {
-        ThirdeyeMetricsUtil.getRequestLog()
+        RequestStatisticsLogger.getRequestLog()
             .failure(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
                 tStart, System.nanoTime(), e);
         throw e;

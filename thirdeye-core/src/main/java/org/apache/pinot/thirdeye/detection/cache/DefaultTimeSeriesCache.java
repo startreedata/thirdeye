@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
+import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
@@ -219,7 +220,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
       for (int i = 0; i < response.getNumRowsFor(metric); i++) {
         Map<String, String> row = response.getRow(metric, i);
         TimeSeriesDataPoint dp = new TimeSeriesDataPoint(metricUrn,
-            Long.parseLong(row.get(CacheConstants.TIMESTAMP)), metric.getMetricId(),
+            Long.parseLong(row.get(Constants.TIMESTAMP)), metric.getMetricId(),
             row.get(metric.toString()));
         executor.execute(() -> this.cacheDAO.insertTimeSeriesDataPoint(dp));
       }

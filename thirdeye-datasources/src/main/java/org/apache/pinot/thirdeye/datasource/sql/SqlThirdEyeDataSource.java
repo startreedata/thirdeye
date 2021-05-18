@@ -39,13 +39,13 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   private static final Logger LOG = LoggerFactory.getLogger(SqlThirdEyeDataSource.class);
+
   private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> sqlResponseCache;
   private MetricConfigManager metricConfigManager;
   private SqlResponseCacheLoader sqlResponseCacheLoader;
@@ -60,7 +60,7 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
     sqlResponseCacheLoader = new SqlResponseCacheLoader(properties,
         metricConfigManager,
         datasetConfigManager);
-    sqlResponseCache = ThirdEyeUtils.buildResponseCache(sqlResponseCacheLoader);
+    sqlResponseCache = DataSourceUtils.buildResponseCache(sqlResponseCacheLoader);
     name = MapUtils.getString(properties, "name", SqlThirdEyeDataSource.class.getSimpleName());
   }
 

@@ -27,6 +27,14 @@ public interface Constants {
   // Used in Quartz Scheduler context
   String CTX_INJECTOR = "CTX_INJECTOR";
 
+  // Data Source Related Constants
+  int DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE = 50;
+  int DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 100;
+  int DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 8192;
+
+  // timestamp field used to get timestamp in RelationalThirdEyeResponse
+  String TIMESTAMP = "timestamp";
+
   enum JobStatus {
     SCHEDULED,
     COMPLETED,

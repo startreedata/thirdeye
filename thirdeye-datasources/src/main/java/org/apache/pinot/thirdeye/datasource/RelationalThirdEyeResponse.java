@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.client.TextTable;
+import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.detection.cache.CacheConstants;
 
 public class RelationalThirdEyeResponse extends BaseThirdEyeResponse {
 
@@ -77,7 +77,7 @@ public class RelationalThirdEyeResponse extends BaseThirdEyeResponse {
       rowMap.put(groupByKey, rowValues[i]);
     }
     rowMap.put(metricFunction.toString(), rowValues[metricFuncToIdMapping.get(metricFunction)]);
-    rowMap.put(CacheConstants.TIMESTAMP, rowValues[rowValues.length - 1]);
+    rowMap.put(Constants.TIMESTAMP, rowValues[rowValues.length - 1]);
     return rowMap;
   }
 

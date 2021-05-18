@@ -24,9 +24,6 @@ package org.apache.pinot.thirdeye.detection.cache;
  */
 public class CacheConstants {
 
-  // timestamp field used to get timestamp in RelationalThirdEyeResponse
-  public static final String TIMESTAMP = "timestamp";
-
   // couchbase document field names
   public static final String BUCKET = "bucket";
 

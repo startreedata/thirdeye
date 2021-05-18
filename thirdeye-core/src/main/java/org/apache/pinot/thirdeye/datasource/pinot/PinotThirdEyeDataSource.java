@@ -58,7 +58,6 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUti
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.rootcause.util.FilterPredicate;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,7 +180,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    pinotResponseCache = ThirdEyeUtils.buildResponseCache(pinotResponseCacheLoader);
+    pinotResponseCache = DataSourceUtils.buildResponseCache(pinotResponseCacheLoader);
 
     pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
     pinotDataSourceDimensionFilters = new PinotDataSourceDimensionFilters(this);

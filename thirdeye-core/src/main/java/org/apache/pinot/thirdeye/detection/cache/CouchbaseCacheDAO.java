@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.util.CacheUtils;
@@ -157,7 +158,7 @@ public class CouchbaseCacheDAO implements CacheDAO {
     List<TimeSeriesDataPoint> timeSeriesRows = new ArrayList<>();
 
     for (N1qlQueryRow row : queryResult) {
-      long timestamp = row.value().getLong(CacheConstants.TIMESTAMP);
+      long timestamp = row.value().getLong(Constants.TIMESTAMP);
       Double dataValue = row.value().getDouble(dimensionKey);
       timeSeriesRows.add(
           new TimeSeriesDataPoint(request.getMetricUrn(), timestamp, request.getMetricId(),

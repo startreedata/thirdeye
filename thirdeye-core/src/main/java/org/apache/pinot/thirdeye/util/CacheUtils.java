@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.CRC32;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.CacheConstants;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesDataPoint;
@@ -80,7 +81,7 @@ public class CacheUtils {
    */
   public static JsonObject buildDocumentStructure(TimeSeriesDataPoint point) {
     JsonObject body = JsonObject.create()
-        .put(CacheConstants.TIMESTAMP, point.getTimestamp())
+        .put(Constants.TIMESTAMP, point.getTimestamp())
         .put(CacheConstants.METRIC_ID, point.getMetricId())
         .put(point.getMetricUrnHash(), point.getDataValueAsDouble());
     return body;

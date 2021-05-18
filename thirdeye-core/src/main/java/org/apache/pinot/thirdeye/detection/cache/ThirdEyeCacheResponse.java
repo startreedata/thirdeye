@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.detection.cache;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
@@ -192,7 +193,7 @@ public class ThirdEyeCacheResponse {
           .fromMetric(slice.getRequest().getFilterSet().asMap(), metric.getMetricId()).getUrn();
       for (int i = 0; i < slice.getNumRowsFor(metric); i++) {
         Map<String, String> row = slice.getRow(metric, i);
-        long timestamp = Long.valueOf(row.get(CacheConstants.TIMESTAMP));
+        long timestamp = Long.valueOf(row.get(Constants.TIMESTAMP));
 
         if (timestamp < this.getFirstTimestamp()) {
           this.setFirstTimestamp(timestamp);

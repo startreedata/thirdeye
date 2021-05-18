@@ -34,7 +34,6 @@ import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
-import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -145,7 +144,7 @@ public class ThirdEyeResultSetUtils {
           String[] rowValues = dataMap.get(compositeGroupKey);
           if (rowValues == null) {
             // add one to include the timestamp, if applicable
-            if (timestamp != null && CacheConfig.getInstance().useCentralizedCache()) {
+            if (timestamp != null && useCentralizedCache()) {
               rowValues = new String[numCols + 1];
             } else {
               rowValues = new String[numCols];
@@ -172,7 +171,7 @@ public class ThirdEyeResultSetUtils {
                   sourceName
               ));
 
-          if (timestamp != null && CacheConfig.getInstance().useCentralizedCache()) {
+          if (timestamp != null && useCentralizedCache()) {
             rowValues[rowValues.length - 1] = timestamp;
           }
         }
@@ -182,6 +181,11 @@ public class ThirdEyeResultSetUtils {
     List<String[]> rows = new ArrayList<>();
     rows.addAll(dataMap.values());
     return rows;
+  }
+
+  private static boolean useCentralizedCache() {
+    // TODO fix caching
+    return false; // CacheConfig.getInstance().useCentralizedCache();
   }
 
   public static double reduce(double aggregate, double value, int prevCount,

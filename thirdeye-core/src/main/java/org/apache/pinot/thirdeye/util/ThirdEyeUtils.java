@@ -165,10 +165,6 @@ public abstract class ThirdEyeUtils {
     return metricThresholds;
   }
 
-  public static String constructMetricAlias(String datasetName, String metricName) {
-    return datasetName + MetricConfigBean.ALIAS_JOINER + metricName;
-  }
-
   public static DatasetConfigDTO getDatasetConfigFromName(String dataset,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     DatasetConfigDTO datasetConfig = null;

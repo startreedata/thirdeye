@@ -40,7 +40,6 @@ import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
 import org.apache.pinot.common.utils.DataSchema.ColumnDataType;
-import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
@@ -57,7 +56,6 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGro
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
 import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.rootcause.util.FilterPredicate;
-import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -250,15 +248,15 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         try {
           resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
           if (metricConfig != null) {
-            RequestStatisticsLogger.getRequestLog()
-                .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
-                    tStartFunction, System.nanoTime());
+//            RequestStatisticsLogger.getRequestLog()
+//                .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
+//                    tStartFunction, System.nanoTime());
           }
         } catch (Exception e) {
           if (metricConfig != null) {
-            RequestStatisticsLogger.getRequestLog()
-                .failure(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
-                    tStartFunction, System.nanoTime(), e);
+//            RequestStatisticsLogger.getRequestLog()
+//                .failure(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
+//                    tStartFunction, System.nanoTime(), e);
           }
           throw e;
         }
@@ -271,11 +269,11 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
               PINOT);
       return new RelationalThirdEyeResponse(request, resultRows, timeSpec);
     } catch (Exception e) {
-      ThirdeyeMetricsUtil.pinotExceptionCounter.inc();
+//      ThirdeyeMetricsUtil.pinotExceptionCounter.inc();
       throw e;
     } finally {
-      ThirdeyeMetricsUtil.pinotCallCounter.inc();
-      ThirdeyeMetricsUtil.pinotDurationCounter.inc(System.nanoTime() - tStart);
+//      ThirdeyeMetricsUtil.pinotCallCounter.inc();
+//      ThirdeyeMetricsUtil.pinotDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 

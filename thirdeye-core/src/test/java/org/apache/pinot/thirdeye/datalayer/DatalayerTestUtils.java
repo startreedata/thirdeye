@@ -20,7 +20,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
+import org.apache.pinot.thirdeye.util.SpiUtils;
 import org.joda.time.DateTime;
 
 public class DatalayerTestUtils {
@@ -33,7 +33,7 @@ public class DatalayerTestUtils {
     metricConfigDTO.setDataset(collection);
     metricConfigDTO.setDatatype(MetricType.LONG);
     metricConfigDTO.setName(metric);
-    metricConfigDTO.setAlias(ThirdEyeUtils.constructMetricAlias(collection, metric));
+    metricConfigDTO.setAlias(SpiUtils.constructMetricAlias(collection, metric));
     return metricConfigDTO;
   }
 

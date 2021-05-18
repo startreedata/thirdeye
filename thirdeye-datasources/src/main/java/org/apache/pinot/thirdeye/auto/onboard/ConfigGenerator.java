@@ -36,7 +36,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.DatasetConfigBean;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
+import org.apache.pinot.thirdeye.util.SpiUtils;
 
 public class ConfigGenerator {
 
@@ -127,7 +127,7 @@ public class ConfigGenerator {
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
     String metric = metricFieldSpec.getName();
     metricConfigDTO.setName(metric);
-    metricConfigDTO.setAlias(ThirdEyeUtils.constructMetricAlias(dataset, metric));
+    metricConfigDTO.setAlias(SpiUtils.constructMetricAlias(dataset, metric));
     metricConfigDTO.setDataset(dataset);
 
     String dataTypeStr = metricFieldSpec.getDataType().toString();

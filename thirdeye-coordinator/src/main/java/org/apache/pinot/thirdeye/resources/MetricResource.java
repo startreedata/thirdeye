@@ -20,7 +20,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.util.ApiBeanMapper;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
+import org.apache.pinot.thirdeye.util.SpiUtils;
 
 @Api(tags = "Metric")
 @Singleton
@@ -45,7 +45,7 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
     ensure(this.metricConfigManager.findByMetricName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME);
 
     final MetricConfigDTO dto = ApiBeanMapper.toMetricConfigDto(api);
-    dto.setAlias(ThirdEyeUtils.constructMetricAlias(api.getDataset().getName(), api.getName()));
+    dto.setAlias(SpiUtils.constructMetricAlias(api.getDataset().getName(), api.getName()));
     dto.setCreatedBy(principal.getName());
     dto.setDatasetConfig(ApiBeanMapper.toDatasetConfigDto(api.getDataset()));
 

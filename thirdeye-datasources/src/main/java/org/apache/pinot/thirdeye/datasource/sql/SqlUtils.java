@@ -199,7 +199,7 @@ public class SqlUtils {
     }
 
     datasetConfig.setDataset(datasetName);
-    datasetConfig.setDataSource("SqlThirdEyeDataSource");
+    datasetConfig.setDataSource(SqlThirdEyeDataSource.class.getSimpleName());
     datasetConfig.setDimensions(sortedDimensions);
     datasetConfig.setTimezone(dataset.getTimezone());
     datasetConfig.setTimeDuration(DataSourceUtils.getTimeDuration(granularity));

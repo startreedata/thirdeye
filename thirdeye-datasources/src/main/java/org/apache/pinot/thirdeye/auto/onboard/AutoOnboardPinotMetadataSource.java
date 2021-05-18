@@ -227,7 +227,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     checkMetricChanges(dataset, datasetConfig, schema);
     checkTimeFieldChanges(datasetConfig, schema, timeColumnName);
     appendNewCustomConfigs(datasetConfig, customConfigs);
-    checkNonAdditive(datasetConfig);
+    ConfigGenerator.checkNonAdditive(datasetConfig);
     datasetConfig.setActive(true);
   }
 

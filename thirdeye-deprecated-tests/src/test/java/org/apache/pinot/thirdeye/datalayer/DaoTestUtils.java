@@ -66,7 +66,7 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTransl
 import org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator;
 import org.apache.pinot.thirdeye.detector.email.filter.AlphaBetaAlertFilter;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
+import org.apache.pinot.thirdeye.util.SpiUtils;
 import org.joda.time.DateTime;
 
 public class DaoTestUtils {
@@ -197,7 +197,7 @@ public class DaoTestUtils {
     metricConfigDTO.setDataset(collection);
     metricConfigDTO.setDatatype(MetricType.LONG);
     metricConfigDTO.setName(metric);
-    metricConfigDTO.setAlias(ThirdEyeUtils.constructMetricAlias(collection, metric));
+    metricConfigDTO.setAlias(SpiUtils.constructMetricAlias(collection, metric));
     return metricConfigDTO;
   }
 

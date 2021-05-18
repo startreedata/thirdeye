@@ -30,7 +30,7 @@ import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
+import org.apache.pinot.thirdeye.util.SpiUtils;
 
 /**
  * A data holder to store the processed information per metric
@@ -59,7 +59,7 @@ public class DetectionMetricAttributeHolder {
   }
 
   public String loadMetricCache(final String metricName, final String datasetName, String cron) {
-    String metricAliasKey = ThirdEyeUtils.constructMetricAlias(datasetName, metricName);
+    String metricAliasKey = SpiUtils.constructMetricAlias(datasetName, metricName);
     if (metricAttributesMap.containsKey(metricAliasKey)) {
       return metricAliasKey;
     }

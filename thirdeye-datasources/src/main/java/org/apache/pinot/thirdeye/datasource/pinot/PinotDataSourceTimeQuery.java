@@ -26,7 +26,6 @@ import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
-import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -95,14 +94,14 @@ public class PinotDataSourceTimeQuery {
       try {
         pinotThirdEyeDataSource.refreshSQL(maxTimePinotQuery);
         resultSetGroup = pinotThirdEyeDataSource.executeSQL(maxTimePinotQuery);
-        RequestStatisticsLogger
-            .getRequestLog()
-            .success(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
-                tStart, System.nanoTime());
+//        RequestStatisticsLogger
+//            .getRequestLog()
+//            .success(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
+//                tStart, System.nanoTime());
       } catch (ExecutionException e) {
-        RequestStatisticsLogger.getRequestLog()
-            .failure(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
-                tStart, System.nanoTime(), e);
+//        RequestStatisticsLogger.getRequestLog()
+//            .failure(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
+//                tStart, System.nanoTime(), e);
         throw e;
       }
 

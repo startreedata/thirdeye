@@ -53,7 +53,6 @@ public interface DataProvider {
    * @param slices metric slices
    * @return map of timeseries (keyed by slice)
    * @see MetricSlice
-   * @see org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils
    */
   Map<MetricSlice, DataFrame> fetchTimeseries(Collection<MetricSlice> slices);
 
@@ -68,7 +67,6 @@ public interface DataProvider {
    *     no limitation if it is a non-positive number
    * @return map of aggregation values (keyed by slice)
    * @see MetricSlice
-   * @see org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils
    */
   Map<MetricSlice, DataFrame> fetchAggregates(Collection<MetricSlice> slices,
       List<String> dimensions, int limit);

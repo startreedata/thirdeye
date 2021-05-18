@@ -31,8 +31,8 @@ import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.dataframe.Grouping;
 import org.apache.pinot.thirdeye.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.dataframe.Series;
-import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -332,7 +332,7 @@ public class BaselineAggregate implements Baseline {
    */
   private LongSeries toVirtualSeries(long origin, LongSeries timestampSeries) {
     final DateTime dateOrigin = new DateTime(origin, this.timeZone)
-        .withFields(DataFrameUtils.makeOrigin(this.periodType));
+        .withFields(DataSourceUtils.makeOrigin(this.periodType));
     return timestampSeries.map(this.makeTimestampToVirtualFunction(dateOrigin));
   }
 
@@ -345,7 +345,7 @@ public class BaselineAggregate implements Baseline {
    */
   private LongSeries toTimestampSeries(long origin, LongSeries virtualSeries) {
     final DateTime dateOrigin = new DateTime(origin, this.timeZone)
-        .withFields(DataFrameUtils.makeOrigin(this.periodType));
+        .withFields(DataSourceUtils.makeOrigin(this.periodType));
     return virtualSeries.map(this.makeVirtualToTimestampFunction(dateOrigin));
   }
 

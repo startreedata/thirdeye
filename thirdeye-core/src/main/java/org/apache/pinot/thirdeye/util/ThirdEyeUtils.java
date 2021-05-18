@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
 import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
@@ -62,6 +61,7 @@ import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
@@ -71,7 +71,6 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter;
 import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
-import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,14 +117,6 @@ public abstract class ThirdEyeUtils {
     return filterToDecorate;
   }
 
-  private static String getTimeFormatString(DatasetConfigDTO datasetConfig) {
-    String timeFormat = datasetConfig.getTimeFormat();
-    if (timeFormat.startsWith(DateTimeFieldSpec.TimeFormat.SIMPLE_DATE_FORMAT.toString())) {
-      timeFormat = getSDFPatternFromTimeFormat(timeFormat);
-    }
-    return timeFormat;
-  }
-
   /**
    * Returns the time spec of the buckets (data points) in the specified dataset config. For
    * additive dataset, this
@@ -143,37 +134,9 @@ public abstract class ThirdEyeUtils {
    * @return the time spec of the buckets (data points) in the specified dataset config.
    */
   public static TimeSpec getTimeSpecFromDatasetConfig(DatasetConfigDTO datasetConfig) {
-    String timeFormat = getTimeFormatString(datasetConfig);
+    String timeFormat = DataSourceUtils.getTimeFormatString(datasetConfig);
     return new TimeSpec(datasetConfig.getTimeColumn(),
         new TimeGranularity(datasetConfig.bucketTimeGranularity()), timeFormat);
-  }
-
-  /**
-   * Returns the time spec of the timestamp in the specified dataset config. The timestamp time spec
-   * is mainly used
-   * for constructing the queries to backend database. For most use case, this method returns the
-   * same time spec as
-   * getTimeSpecFromDatasetConfig(); however, if the dataset is non-additive, then
-   * getTimeSpecFromDatasetConfig
-   * should be used unless the application is related to database queries.
-   *
-   * @param datasetConfig the given dataset config
-   * @return the time spec of the timestamp in the specified dataset config.
-   */
-  public static TimeSpec getTimestampTimeSpecFromDatasetConfig(DatasetConfigDTO datasetConfig) {
-    String timeFormat = getTimeFormatString(datasetConfig);
-    return new TimeSpec(datasetConfig.getTimeColumn(),
-        new TimeGranularity(datasetConfig.getTimeDuration(), datasetConfig.getTimeUnit()),
-        timeFormat);
-  }
-
-  private static String getSDFPatternFromTimeFormat(String timeFormat) {
-    String pattern = timeFormat;
-    String[] tokens = timeFormat.split(":", 2);
-    if (tokens.length == 2) {
-      pattern = tokens[1];
-    }
-    return pattern;
   }
 
   public static MetricExpression getMetricExpressionFromMetricConfig(MetricConfigDTO metricConfig) {
@@ -281,15 +244,6 @@ public abstract class ThirdEyeUtils {
     return maxExpectedDelay;
   }
 
-  public static MetricConfigDTO getMetricConfigFromId(Long metricId,
-      final MetricConfigManager metricConfigManager) {
-    MetricConfigDTO metricConfig = null;
-    if (metricId != null) {
-      metricConfig = metricConfigManager.findById(metricId);
-    }
-    return metricConfig;
-  }
-
   /**
    * Get rounded double value, according to the value of the double.
    * Max rounding will be up to 4 decimals
@@ -382,48 +336,6 @@ public abstract class ThirdEyeUtils {
       }
     }
     return message;
-  }
-
-  /**
-   * Guess time duration from period.
-   *
-   * @param granularity dataset granularity
-   */
-  public static int getTimeDuration(Period granularity) {
-    if (granularity.getDays() > 0) {
-      return granularity.getDays();
-    }
-    if (granularity.getHours() > 0) {
-      return granularity.getHours();
-    }
-    if (granularity.getMinutes() > 0) {
-      return granularity.getMinutes();
-    }
-    if (granularity.getSeconds() > 0) {
-      return granularity.getSeconds();
-    }
-    return granularity.getMillis();
-  }
-
-  /**
-   * Guess time unit from period.
-   *
-   * @param granularity dataset granularity
-   */
-  public static TimeUnit getTimeUnit(Period granularity) {
-    if (granularity.getDays() > 0) {
-      return TimeUnit.DAYS;
-    }
-    if (granularity.getHours() > 0) {
-      return TimeUnit.HOURS;
-    }
-    if (granularity.getMinutes() > 0) {
-      return TimeUnit.MINUTES;
-    }
-    if (granularity.getSeconds() > 0) {
-      return TimeUnit.SECONDS;
-    }
-    return TimeUnit.MILLISECONDS;
   }
 
   public static LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> buildResponseCache(

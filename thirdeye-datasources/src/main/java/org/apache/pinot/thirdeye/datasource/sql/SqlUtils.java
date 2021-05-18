@@ -44,10 +44,10 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -180,8 +180,6 @@ public class SqlUtils {
    * just update them.
    *
    * @param dataset SqlDataset Object
-   * @param metricConfigManager
-   * @param datasetConfigManager
    */
   public static void onBoardSqlDataset(SqlDataset dataset,
       final MetricConfigManager metricConfigManager,
@@ -201,11 +199,11 @@ public class SqlUtils {
     }
 
     datasetConfig.setDataset(datasetName);
-    datasetConfig.setDataSource(SqlThirdEyeDataSource.class.getSimpleName());
+    datasetConfig.setDataSource("SqlThirdEyeDataSource");
     datasetConfig.setDimensions(sortedDimensions);
     datasetConfig.setTimezone(dataset.getTimezone());
-    datasetConfig.setTimeDuration(ThirdEyeUtils.getTimeDuration(granularity));
-    datasetConfig.setTimeUnit(ThirdEyeUtils.getTimeUnit(granularity));
+    datasetConfig.setTimeDuration(DataSourceUtils.getTimeDuration(granularity));
+    datasetConfig.setTimeUnit(DataSourceUtils.getTimeUnit(granularity));
     datasetConfig.setTimeColumn(dataset.getTimeColumn());
     datasetConfig.setTimeFormat(dataset.getTimeFormat());
 
@@ -255,7 +253,7 @@ public class SqlUtils {
       String sourceName,
       final MetricConfigManager metricConfigManager) {
 
-    MetricConfigDTO metricConfig = ThirdEyeUtils
+    MetricConfigDTO metricConfig = DataSourceUtils
         .getMetricConfigFromId(metricFunction.getMetricId(),
             metricConfigManager);
     String dataset = metricFunction.getDataset();

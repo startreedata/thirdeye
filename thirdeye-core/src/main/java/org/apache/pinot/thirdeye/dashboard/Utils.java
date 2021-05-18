@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -132,14 +132,7 @@ public class Utils {
       datasetConfig = thirdEyeCacheRegistry.getDatasetConfigCache().get(collection); } catch (ExecutionException e) {
       LOG.error("Exception while getting dataset config for {}", collection);
     }
-    return getDateTimeZone(datasetConfig);
-  }
-
-  public static DateTimeZone getDateTimeZone(final DatasetConfigDTO datasetConfig) {
-    final String timezone = datasetConfig != null
-        ? datasetConfig.getTimezone()
-        : TimeSpec.DEFAULT_TIMEZONE;
-    return DateTimeZone.forID(timezone);
+    return DataSourceUtils.getDateTimeZone(datasetConfig);
   }
 
   public static <T> List<T> sublist(List<T> input, int startIndex, int length) {

@@ -30,9 +30,9 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +52,6 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
    * Constructor for dependency injection
    *
    * @param metadataSourceConfig meta data source config
-   * @param metricConfigManager
-   * @param datasetConfigManager
    */
   public AutoOnboardMockDataSource(MetadataSourceConfig metadataSourceConfig,
       final MetricConfigManager metricConfigManager,
@@ -91,8 +89,8 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
       datasetConfig.setDataSource(this.dataSourceName);
       datasetConfig.setDimensions(sortedDimensions);
       datasetConfig.setTimezone(MapUtils.getString(dataset, "timezone", "America/Los_Angeles"));
-      datasetConfig.setTimeDuration(ThirdEyeUtils.getTimeDuration(granularity));
-      datasetConfig.setTimeUnit(ThirdEyeUtils.getTimeUnit(granularity));
+      datasetConfig.setTimeDuration(DataSourceUtils.getTimeDuration(granularity));
+      datasetConfig.setTimeUnit(DataSourceUtils.getTimeUnit(granularity));
 
       datasetConfigs.add(datasetConfig);
 

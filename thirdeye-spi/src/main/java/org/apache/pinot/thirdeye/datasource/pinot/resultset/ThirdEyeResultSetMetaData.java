@@ -27,9 +27,9 @@ import java.util.Objects;
 
 public class ThirdEyeResultSetMetaData {
 
-  private List<String> groupKeyColumnNames = Collections.emptyList();
-  private List<String> metricColumnNames = Collections.emptyList();
-  private List<String> allColumnNames = Collections.emptyList();
+  private final List<String> groupKeyColumnNames;
+  private final List<String> metricColumnNames;
+  private final List<String> allColumnNames;
 
   public ThirdEyeResultSetMetaData(List<String> groupKeyColumnNames,
       List<String> metricColumnNames) {

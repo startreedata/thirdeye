@@ -21,14 +21,6 @@ package org.apache.pinot.thirdeye.datasource.mock;
 
 import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_VALUE;
-import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.ABANDONED_TIMEOUT;
-import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.DATASETS;
-import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.DB;
-import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.H2;
-import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.INIT_CONNECTIONS;
-import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.MAX_CONNECTIONS;
-import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.PASSWORD;
-import static org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader.USER;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
@@ -52,10 +44,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.StringSeries;
-import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
@@ -63,6 +55,7 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.sql.SqlDataset;
+import org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader;
 import org.apache.pinot.thirdeye.datasource.sql.SqlUtils;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -112,7 +105,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
 
     // datasets
     this.datasets = new HashMap<>();
-    Map<String, Object> config = ConfigUtils.getMap(properties.get(DATASETS));
+    Map<String, Object> config = ConfigUtils.getMap(properties.get(SqlResponseCacheLoader.DATASETS));
     for (Map.Entry<String, Object> entry : config.entrySet()) {
       this.datasets.put(entry.getKey(), MockDataset.fromMap(
           entry.getKey(), ConfigUtils.getMap(entry.getValue())
@@ -238,29 +231,29 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   private void loadMockCSVData(Map<String, Object> properties) {
-    if (properties.containsKey(H2)) {
+    if (properties.containsKey(SqlResponseCacheLoader.H2)) {
       DataSource h2DataSource = new DataSource();
-      Map<String, Object> objMap = ConfigUtils.getMap(properties.get(H2));
+      Map<String, Object> objMap = ConfigUtils.getMap(properties.get(SqlResponseCacheLoader.H2));
 
-      h2DataSource.setInitialSize(INIT_CONNECTIONS);
-      h2DataSource.setMaxActive(MAX_CONNECTIONS);
-      String h2User = (String) objMap.get(USER);
+      h2DataSource.setInitialSize(SqlResponseCacheLoader.INIT_CONNECTIONS);
+      h2DataSource.setMaxActive(SqlResponseCacheLoader.MAX_CONNECTIONS);
+      String h2User = (String) objMap.get(SqlResponseCacheLoader.USER);
       String h2Password = getPassword(objMap);
-      String h2Url = (String) objMap.get(DB);
+      String h2Url = (String) objMap.get(SqlResponseCacheLoader.DB);
       h2DataSource.setUsername(h2User);
       h2DataSource.setPassword(h2Password);
       h2DataSource.setUrl(h2Url);
 
       // Timeout before an abandoned(in use) connection can be removed.
-      h2DataSource.setRemoveAbandonedTimeout(ABANDONED_TIMEOUT);
+      h2DataSource.setRemoveAbandonedTimeout(SqlResponseCacheLoader.ABANDONED_TIMEOUT);
       h2DataSource.setRemoveAbandoned(true);
 
       DateTime maxDateTime = MIN_DATETIME;
       List<String[]> h2Rows = new ArrayList<>();
-      if (objMap.containsKey(DATASETS)) {
+      if (objMap.containsKey(SqlResponseCacheLoader.DATASETS)) {
         try {
           ObjectMapper mapper = new ObjectMapper();
-          List<Object> objs = (List) objMap.get(DATASETS);
+          List<Object> objs = (List) objMap.get(SqlResponseCacheLoader.DATASETS);
           for (Object obj : objs) {
             SqlDataset dataset = mapper.convertValue(obj, SqlDataset.class);
 
@@ -310,7 +303,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   private String getPassword(Map<String, Object> objMap) {
-    String password = (String) objMap.get(PASSWORD);
+    String password = (String) objMap.get(SqlResponseCacheLoader.PASSWORD);
     password = (password == null) ? "" : password;
     return password;
   }
@@ -370,7 +363,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
     double weekly = MapUtils.getDoubleValue(config, "weekly", daily);
     NormalDistribution dist = new NormalDistribution(mean, std);
 
-    DateTime origin = start.withFields(DataFrameUtils.makeOrigin(PeriodType.days()));
+    DateTime origin = start.withFields(DataSourceUtils.makeOrigin(PeriodType.days()));
     while (origin.isBefore(end)) {
       if (origin.isBefore(start)) {
         origin = origin.plus(interval);

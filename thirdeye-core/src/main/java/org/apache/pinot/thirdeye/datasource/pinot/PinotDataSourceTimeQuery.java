@@ -23,11 +23,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -79,7 +78,7 @@ public class PinotDataSourceTimeQuery {
     String dataset = datasetConfig.getName();
     try {
       // By default, query only offline, unless dataset has been marked as realtime
-      TimeSpec timeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
+      TimeSpec timeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 
       long cutoffTime = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
       String timeClause = SqlUtils.getBetweenClause(new DateTime(0, DateTimeZone.UTC),
@@ -111,7 +110,7 @@ public class PinotDataSourceTimeQuery {
         LOGGER.error("Failed to get latest max time for dataset {} with SQL: {}", dataset,
             maxTimePinotQuery.getQuery());
       } else {
-        DateTimeZone timeZone = Utils.getDateTimeZone(datasetConfig);
+        DateTimeZone timeZone = DataSourceUtils.getDateTimeZone(datasetConfig);
 
         long endTime = new Double(resultSetGroup.get(0).getDouble(0)).longValue();
         // endTime + 1 to make sure we cover the time range of that time value.

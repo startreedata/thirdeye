@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.datasource.sql;
 
-import static org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeDataFrameResultSet.fromSQLResultSet;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheLoader;
 import java.io.File;
@@ -35,14 +33,14 @@ import java.util.Map;
 import java.util.Scanner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
+import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeDataFrameResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -59,15 +57,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResultSetGroup> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SqlResponseCacheLoader.class);
-
-  private static final String PRESTO = "Presto";
-  private static final String MYSQL = "MySQL";
-  private static final String VERTICA = "Vertica";
-  private static final String BIGQUERY = "BigQuery";
-
   public static final int INIT_CONNECTIONS = 20;
-  public static int MAX_CONNECTIONS = 50;
   public static final String DATASETS = "datasets";
   public static final String H2 = "H2";
   public static final String USER = "user";
@@ -75,18 +65,21 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
   public static final String PASSWORD = "password";
   public static final String DRIVER = "driver";
   public static final int ABANDONED_TIMEOUT = 60000;
-
-  private final Map<String, DataSource> prestoDBNameToDataSourceMap = new HashMap<>();
-  private final Map<String, DataSource> mysqlDBNameToDataSourceMap = new HashMap<>();
-  private final Map<String, DataSource> verticaDBNameToDataSourceMap = new HashMap<>();
-  private final Map<String, DataSource> BigQueryDBNameToDataSourceMap = new HashMap<>();
-
+  private static final Logger LOG = LoggerFactory.getLogger(SqlResponseCacheLoader.class);
+  private static final String PRESTO = "Presto";
+  private static final String MYSQL = "MySQL";
+  private static final String VERTICA = "Vertica";
+  private static final String BIGQUERY = "BigQuery";
   private static final Map<String, String> prestoDBNameToURLMap = new HashMap<>();
   private static final Map<String, String> mysqlDBNameToURLMap = new HashMap<>();
   private static final Map<String, String> verticaDBNameToURLMap = new HashMap<>();
   private static final Map<String, String> BigQueryDBNameToURLMap = new HashMap<>();
-
+  public static int MAX_CONNECTIONS = 50;
   private static String h2Url;
+  private final Map<String, DataSource> prestoDBNameToDataSourceMap = new HashMap<>();
+  private final Map<String, DataSource> mysqlDBNameToDataSourceMap = new HashMap<>();
+  private final Map<String, DataSource> verticaDBNameToDataSourceMap = new HashMap<>();
+  private final Map<String, DataSource> BigQueryDBNameToDataSourceMap = new HashMap<>();
   DataSource h2DataSource;
 
   public SqlResponseCacheLoader(Map<String, Object> properties,
@@ -260,6 +253,26 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     }
   }
 
+  /**
+   * Return a DB name to URLs map
+   *
+   * @return a map: key is datasource name and value is a map with key is database name and value is
+   *     the url
+   */
+  public static Map<String, Map<String, String>> getDBNameToURLMap() {
+    Map<String, Map<String, String>> dbNameToURLMap = new LinkedHashMap<>();
+    dbNameToURLMap.put(PRESTO, prestoDBNameToURLMap);
+    dbNameToURLMap.put(MYSQL, mysqlDBNameToURLMap);
+    dbNameToURLMap.put(VERTICA, verticaDBNameToURLMap);
+    dbNameToURLMap.put(BIGQUERY, BigQueryDBNameToURLMap);
+
+    Map<String, String> h2ToURLMap = new HashMap<>();
+    h2ToURLMap.put(H2, h2Url);
+    dbNameToURLMap.put(H2, h2ToURLMap);
+
+    return dbNameToURLMap;
+  }
+
   private String getPassword(Map<String, Object> objMap) {
     String password = (String) objMap.get(PASSWORD);
     password = (password == null) ? "" : password;
@@ -306,8 +319,8 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
   public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
     String dataset = datasetConfig.getName();
     LOG.info("Getting max data time for " + dataset);
-    TimeSpec timeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
-    DateTimeZone timeZone = Utils.getDateTimeZone(datasetConfig);
+    TimeSpec timeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
+    DateTimeZone timeZone = DataSourceUtils.getDateTimeZone(datasetConfig);
     long maxTime = 0;
 
     String sourceName = dataset.split("\\.")[0];
@@ -365,8 +378,10 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(sqlQuery)) {
 
-      ThirdEyeResultSet resultSet = fromSQLResultSet(rs, SQLQuery.getMetric(),
-          SQLQuery.getGroupByKeys(), SQLQuery.getGranularity(),
+      ThirdEyeResultSet resultSet = ThirdEyeDataFrameResultSet.fromSQLResultSet(rs,
+          SQLQuery.getMetric(),
+          SQLQuery.getGroupByKeys(),
+          SQLQuery.getGranularity(),
           SQLQuery.getTimeSpec());
 
       List<ThirdEyeResultSet> thirdEyeResultSets = new ArrayList<>();
@@ -375,26 +390,6 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     } catch (Exception e) {
       throw e;
     }
-  }
-
-  /**
-   * Return a DB name to URLs map
-   *
-   * @return a map: key is datasource name and value is a map with key is database name and value is
-   *     the url
-   */
-  public static Map<String, Map<String, String>> getDBNameToURLMap() {
-    Map<String, Map<String, String>> dbNameToURLMap = new LinkedHashMap<>();
-    dbNameToURLMap.put(PRESTO, prestoDBNameToURLMap);
-    dbNameToURLMap.put(MYSQL, mysqlDBNameToURLMap);
-    dbNameToURLMap.put(VERTICA, verticaDBNameToURLMap);
-    dbNameToURLMap.put(BIGQUERY, BigQueryDBNameToURLMap);
-
-    Map<String, String> h2ToURLMap = new HashMap<>();
-    h2ToURLMap.put(H2, h2Url);
-    dbNameToURLMap.put(H2, h2ToURLMap);
-
-    return dbNameToURLMap;
   }
 
   /**

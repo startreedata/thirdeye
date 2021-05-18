@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.dataframe.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +35,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -45,11 +45,8 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeResponseRow;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Partial;
 import org.joda.time.Period;
-import org.joda.time.PeriodType;
 
 /**
  * Utility class for ThirdEye-specific parsers and transformers of data related to DataFrame.
@@ -283,8 +280,8 @@ public class DataFrameUtils {
     Period period = granularity.toPeriod();
 
     DateTime start = new DateTime(slice.start, timezone)
-        .withFields(makeOrigin(period.getPeriodType()));
-    DateTime end = new DateTime(slice.end, timezone).withFields(makeOrigin(period.getPeriodType()));
+        .withFields(DataSourceUtils.makeOrigin(period.getPeriodType()));
+    DateTime end = new DateTime(slice.end, timezone).withFields(DataSourceUtils.makeOrigin(period.getPeriodType()));
 
     MetricSlice alignedSlice = MetricSlice
         .from(slice.metricId, start.getMillis(), end.getMillis(), slice.filters, slice.granularity);
@@ -339,8 +336,8 @@ public class DataFrameUtils {
     Period period = granularity.toPeriod();
 
     DateTime start = new DateTime(slice.start, timezone)
-        .withFields(makeOrigin(period.getPeriodType()));
-    DateTime end = new DateTime(slice.end, timezone).withFields(makeOrigin(period.getPeriodType()));
+        .withFields(DataSourceUtils.makeOrigin(period.getPeriodType()));
+    DateTime end = new DateTime(slice.end, timezone).withFields(DataSourceUtils.makeOrigin(period.getPeriodType()));
 
     ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, dataset, expressions,
         thirdEyeCacheRegistry
@@ -397,52 +394,6 @@ public class DataFrameUtils {
         .build(reference);
 
     return new RequestContainer(request, expressions);
-  }
-
-  /**
-   * Returns partial to zero out date fields based on period type
-   *
-   * @return partial
-   */
-  public static Partial makeOrigin(PeriodType type) {
-    List<DateTimeFieldType> fields = new ArrayList<>();
-
-    if (PeriodType.millis().equals(type)) {
-      // left blank
-
-    } else if (PeriodType.seconds().equals(type)) {
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else if (PeriodType.minutes().equals(type)) {
-      fields.add(DateTimeFieldType.secondOfMinute());
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else if (PeriodType.hours().equals(type)) {
-      fields.add(DateTimeFieldType.minuteOfHour());
-      fields.add(DateTimeFieldType.secondOfMinute());
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else if (PeriodType.days().equals(type)) {
-      fields.add(DateTimeFieldType.hourOfDay());
-      fields.add(DateTimeFieldType.minuteOfHour());
-      fields.add(DateTimeFieldType.secondOfMinute());
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else if (PeriodType.months().equals(type)) {
-      fields.add(DateTimeFieldType.dayOfMonth());
-      fields.add(DateTimeFieldType.hourOfDay());
-      fields.add(DateTimeFieldType.minuteOfHour());
-      fields.add(DateTimeFieldType.secondOfMinute());
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else {
-      throw new IllegalArgumentException(String.format("Unsupported PeriodType '%s'", type));
-    }
-
-    int[] zeros = new int[fields.size()];
-    Arrays.fill(zeros, 0);
-
-    // workaround for dayOfMonth > 0 constraint
-    if (PeriodType.months().equals(type)) {
-      zeros[0] = 1;
-    }
-
-    return new Partial(fields.toArray(new DateTimeFieldType[fields.size()]), zeros);
   }
 
   /**

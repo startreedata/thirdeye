@@ -29,13 +29,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.dashboard.Utils;
 import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -81,10 +80,10 @@ public class ThirdEyeResultSetUtils {
       MetricFunction metricFunction = entry.getKey();
 
       DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
-      TimeSpec dataTimeSpec = ThirdEyeUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
+      TimeSpec dataTimeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 
       long startTime = request.getStartTimeInclusive().getMillis();
-      DateTimeZone dateTimeZone = Utils.getDateTimeZone(datasetConfig);
+      DateTimeZone dateTimeZone = DataSourceUtils.getDateTimeZone(datasetConfig);
       DateTime startDateTime = new DateTime(startTime, dateTimeZone);
 
       TimeGranularity dataGranularity = dataTimeSpec.getDataGranularity();

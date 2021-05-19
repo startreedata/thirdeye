@@ -100,7 +100,7 @@ module.exports = {
         }),
         // Build progress bar
         new WebpackBar({
-            name: "@cortexdata/thirdeye-ui [prod]",
+            name: "@startree/thirdeye-ui [prod]",
             color: "#15C39B",
         }),
         // Bundle analyzer

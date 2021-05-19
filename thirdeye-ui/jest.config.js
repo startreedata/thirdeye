@@ -1,6 +1,6 @@
 module.exports = {
     // Project name
-    displayName: "@cortexdata/thirdeye-ui",
+    displayName: "@startree/thirdeye-ui",
 
     // Working directory
     roots: ["<rootDir>/src/app"],

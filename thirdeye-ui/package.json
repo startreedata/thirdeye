@@ -1,29 +1,29 @@
 {
-    "name": "@cortexdata/thirdeye-ui",
+    "name": "@startreedata/thirdeye-ui",
     "version": "0.0.1",
-    "description": "UI project for CortexData ThirdEye",
+    "description": "UI project for StarTree ThirdEye",
     "keywords": [
-        "cortex",
-        "cortexdata",
-        "cortex-data",
+        "star",
+        "startree",
+        "star-tree",
         "ui",
-        "cortexui",
-        "cortex-ui",
-        "cortexdataui",
-        "cortexdata-ui",
-        "cortex-data-ui",
+        "starui",
+        "star-ui",
+        "startreeui",
+        "startree-ui",
+        "startree-ui",
         "thirdeye",
         "thirdeye-ui"
     ],
     "author": {
-        "name": "CortexData",
-        "url": "https://www.cortexdata.io"
+        "name": "StarTree",
+        "url": "https://startree.ai/"
     },
     "license": "UNLICENSED",
     "private": true,
     "repository": {
         "type": "git",
-        "url": "https://github.com/cortexdata/thirdeye.git",
+        "url": "https://github.com/startreedata/thirdeye.git",
         "directory": "thirdeye-ui"
     },
     "main": "dist/index.html",

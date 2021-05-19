@@ -6,7 +6,7 @@
 
 <br/>
 
-This is the UI project for CortexData ThirdEye.
+This is the UI project for StarTree ThirdEye.
 
 -   [Getting Started](#getting-started)
     -   [Prerequisites](#prerequisites)
@@ -83,7 +83,7 @@ This will build and deploy the project using [webpack-dev-server](https://github
 
 ## Supported Browsers
 
-CortexData ThirdEye UI is tested on latest, stable release of [Chrome](https://www.google.com/chrome), [Firefox](https://www.mozilla.org/firefox), [Safari](https://www.apple.com/safari) and [Edge](https://www.microsoft.com/edge).
+StarTree ThirdEye UI is tested on latest, stable release of [Chrome](https://www.google.com/chrome), [Firefox](https://www.mozilla.org/firefox), [Safari](https://www.apple.com/safari) and [Edge](https://www.microsoft.com/edge).
 
 ## Scripts
 

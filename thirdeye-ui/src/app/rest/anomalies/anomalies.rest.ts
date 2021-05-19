@@ -29,9 +29,12 @@ export const getAnomaliesByTime = async (
     startTime: number,
     endTime: number
 ): Promise<Anomaly[]> => {
-    const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?startTime=[gte]${startTime}&endTime=[lte]${endTime}`
-    );
+    const response = await axios.get(`${BASE_URL_ANOMALIES}`, {
+        params: {
+            startTime: `[gte]${startTime}`,
+            endTime: `[lte]${endTime}`,
+        },
+    });
 
     return response.data;
 };
@@ -41,9 +44,13 @@ export const getAnomaliesByAlertIdAndTime = async (
     startTime: number,
     endTime: number
 ): Promise<Anomaly[]> => {
-    const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?alert.id=${alertId}&startTime=[gte]${startTime}&endTime=[lte]${endTime}`
-    );
+    const response = await axios.get(`${BASE_URL_ANOMALIES}`, {
+        params: {
+            "alert.id": alertId,
+            startTime: `[gte]${startTime}`,
+            endTime: `[lte]${endTime}`,
+        },
+    });
 
     return response.data;
 };

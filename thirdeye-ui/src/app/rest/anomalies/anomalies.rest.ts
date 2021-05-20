@@ -18,9 +18,9 @@ export const getAllAnomalies = async (): Promise<Anomaly[]> => {
 export const getAnomaliesByAlertId = async (
     alertId: number
 ): Promise<Anomaly[]> => {
-    const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?alert.id=${alertId}`
-    );
+    const response = await axios.get(`${BASE_URL_ANOMALIES}`, {
+        params: { "alert.id": alertId },
+    });
 
     return response.data;
 };

@@ -54,7 +54,9 @@ describe("Anomalies REST", () => {
 
         await expect(getAnomaliesByAlertId(1)).resolves.toEqual([mockAnomaly]);
 
-        expect(axios.get).toHaveBeenCalledWith("/api/anomalies?alert.id=1");
+        expect(axios.get).toHaveBeenCalledWith("/api/anomalies", {
+            params: { "alert.id": 1 },
+        });
     });
 
     test("getAnomaliesByAlertId should throw encountered error", async () => {
@@ -70,9 +72,12 @@ describe("Anomalies REST", () => {
 
         await expect(getAnomaliesByTime(1, 2)).resolves.toEqual([mockAnomaly]);
 
-        expect(axios.get).toHaveBeenCalledWith(
-            "/api/anomalies?startTime=[gte]1&endTime=[lte]2"
-        );
+        expect(axios.get).toHaveBeenCalledWith("/api/anomalies", {
+            params: {
+                startTime: "[gte]1",
+                endTime: "[lte]2",
+            },
+        });
     });
 
     test("getAnomaliesByTime should throw encountered error", async () => {
@@ -90,9 +95,13 @@ describe("Anomalies REST", () => {
             mockAnomaly,
         ]);
 
-        expect(axios.get).toHaveBeenCalledWith(
-            "/api/anomalies?alert.id=1&startTime=[gte]2&endTime=[lte]3"
-        );
+        expect(axios.get).toHaveBeenCalledWith("/api/anomalies", {
+            params: {
+                "alert.id": 1,
+                startTime: "[gte]2",
+                endTime: "[lte]3",
+            },
+        });
     });
 
     test("getAnomaliesByAlertIdAndTime should throw encountered error", async () => {

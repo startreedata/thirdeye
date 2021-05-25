@@ -22,10 +22,10 @@ package org.apache.pinot.thirdeye.rootcause.timeseries;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 
 /**
  * Baseline that always returns an empty set of data

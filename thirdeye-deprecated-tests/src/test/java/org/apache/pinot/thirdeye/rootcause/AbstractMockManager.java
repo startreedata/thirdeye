@@ -21,10 +21,10 @@ package org.apache.pinot.thirdeye.rootcause;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.DaoFilter;
-import org.apache.pinot.thirdeye.datalayer.bao.AbstractManager;
-import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AbstractManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 public abstract class AbstractMockManager<T extends AbstractDTO> implements AbstractManager<T> {
 
@@ -74,7 +74,7 @@ public abstract class AbstractMockManager<T extends AbstractDTO> implements Abst
   }
 
   @Override
-  public int deleteByPredicate(org.apache.pinot.thirdeye.datalayer.util.Predicate predicate) {
+  public int deleteByPredicate(Predicate predicate) {
     throw new AssertionError("not implemented");
   }
 

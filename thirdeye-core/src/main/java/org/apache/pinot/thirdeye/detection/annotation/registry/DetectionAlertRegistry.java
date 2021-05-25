@@ -31,9 +31,9 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
-import org.apache.pinot.thirdeye.detection.annotation.AlertFilter;
-import org.apache.pinot.thirdeye.detection.annotation.AlertScheme;
-import org.apache.pinot.thirdeye.detection.annotation.AlertSuppressor;
+import org.apache.pinot.thirdeye.spi.detection.annotation.AlertFilter;
+import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
+import org.apache.pinot.thirdeye.spi.detection.annotation.AlertSuppressor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

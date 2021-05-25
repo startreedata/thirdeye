@@ -23,8 +23,8 @@
 package org.apache.pinot.thirdeye.scheduler;
 
 import java.util.Set;
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.datalayer.pojo.AbstractBean;
+import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;

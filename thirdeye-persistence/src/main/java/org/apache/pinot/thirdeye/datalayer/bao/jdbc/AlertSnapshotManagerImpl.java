@@ -20,10 +20,10 @@
 package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 
 import com.google.inject.Inject;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertSnapshotManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertSnapshotDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AlertSnapshotBean;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertSnapshotManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertSnapshotDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertSnapshotBean;
 
 public class AlertSnapshotManagerImpl extends AbstractManagerImpl<AlertSnapshotDTO>
     implements AlertSnapshotManager {

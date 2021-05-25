@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.common.utils;
 
-import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.SessionBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.SessionBean;
 
 public class SessionUtils {
 

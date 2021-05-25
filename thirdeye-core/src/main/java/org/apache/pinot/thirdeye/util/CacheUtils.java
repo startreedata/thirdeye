@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.CRC32;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.Constants;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.CacheConstants;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesDataPoint;
+import org.apache.pinot.thirdeye.spi.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -22,12 +22,12 @@ package org.apache.pinot.thirdeye.task;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorTaskRunner;
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskRunner;
 import org.apache.pinot.thirdeye.detection.dataquality.DataQualityPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskRunner;
+import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskType;
 
 @Singleton
 public class TaskRunnerFactory {

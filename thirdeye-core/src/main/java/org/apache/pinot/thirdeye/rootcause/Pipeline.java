@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.rootcause;
 
 import java.util.Set;
+import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
 
 /**
  * Interface for a named stateless pipeline as injected into {@code RCAFramework}. Holds the

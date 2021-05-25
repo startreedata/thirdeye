@@ -22,7 +22,8 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.spi.detection.Evaluation;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

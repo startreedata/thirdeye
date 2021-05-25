@@ -21,11 +21,13 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
-import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.rootcause.MaxScoreSet;
+import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.DimensionEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 /**
  * The MetricDimensionPipeline extracts filters of input metrics as DimensionEntities.

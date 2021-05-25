@@ -24,8 +24,8 @@ import com.google.common.collect.Collections2;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 
 public class MockDatasetConfigManager extends AbstractMockManager<DatasetConfigDTO> implements
     DatasetConfigManager {

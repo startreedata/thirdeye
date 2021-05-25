@@ -21,17 +21,18 @@ package org.apache.pinot.thirdeye.datasource.loader;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
-import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

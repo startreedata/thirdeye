@@ -23,7 +23,7 @@ package org.apache.pinot.thirdeye.detection.spi.model;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 
 /**
  * The detection result. Contains a list of anomalies detected and time series

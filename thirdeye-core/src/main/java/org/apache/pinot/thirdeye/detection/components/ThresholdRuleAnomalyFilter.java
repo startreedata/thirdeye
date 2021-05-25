@@ -22,15 +22,15 @@ package org.apache.pinot.thirdeye.detection.components;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.utils.MetricUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.detection.annotation.Components;
-import org.apache.pinot.thirdeye.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.detection.spec.ThresholdRuleFilterSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
-import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
-import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
+import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.Interval;
 
 /**

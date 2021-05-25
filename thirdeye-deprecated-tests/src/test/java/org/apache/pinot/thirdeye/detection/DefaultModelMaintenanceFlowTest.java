@@ -24,9 +24,11 @@ package org.apache.pinot.thirdeye.detection;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.MockModelEvaluator;
 import org.apache.pinot.thirdeye.detection.components.MockTunableDetector;

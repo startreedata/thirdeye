@@ -20,9 +20,9 @@
 package org.apache.pinot.thirdeye.datasource.sql;
 
 import java.util.List;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 
 public class SqlQuery extends RelationalQuery {
 

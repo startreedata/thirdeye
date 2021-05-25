@@ -20,9 +20,9 @@
 package org.apache.pinot.thirdeye.alert.feed;
 
 import java.util.Collection;
-import org.apache.pinot.thirdeye.alert.commons.AnomalyFeedConfig;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detector.email.filter.AlertFilterFactory;
+import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyFeedConfig;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 
 /**
  * AnomalyFeed aggregates the output from AnomalyFetchers, and filter the anomalies based on

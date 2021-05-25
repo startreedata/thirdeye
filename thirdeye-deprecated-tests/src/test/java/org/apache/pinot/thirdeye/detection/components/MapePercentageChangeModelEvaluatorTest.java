@@ -23,9 +23,9 @@
 package org.apache.pinot.thirdeye.detection.components;
 
 import java.util.Arrays;
-import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
-import org.apache.pinot.thirdeye.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.spec.MapeAveragePercentageChangeModelEvaluatorSpec;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;

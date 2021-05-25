@@ -20,8 +20,8 @@
 package org.apache.pinot.thirdeye.datasource.cache;
 
 import com.google.common.cache.CacheLoader;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

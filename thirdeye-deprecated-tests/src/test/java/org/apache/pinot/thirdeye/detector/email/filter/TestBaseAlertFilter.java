@@ -18,7 +18,7 @@ package org.apache.pinot.thirdeye.detector.email.filter;
 
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

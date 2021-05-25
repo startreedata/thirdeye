@@ -25,9 +25,9 @@ import com.google.common.util.concurrent.ListenableFutureTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

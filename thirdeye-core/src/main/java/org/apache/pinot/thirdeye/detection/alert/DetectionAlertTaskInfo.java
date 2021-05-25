@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
-import org.apache.pinot.thirdeye.anomaly.task.TaskInfo;
+import org.apache.pinot.thirdeye.spi.anomaly.task.TaskInfo;
 
 /**
  * The Detection alert task info.

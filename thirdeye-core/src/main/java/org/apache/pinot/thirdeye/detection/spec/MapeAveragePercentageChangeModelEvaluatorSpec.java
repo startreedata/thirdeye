@@ -22,6 +22,8 @@
 
 package org.apache.pinot.thirdeye.detection.spec;
 
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+
 /**
  * The spec class for MAPE change evaluator
  */

@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
-import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 
 /**
  * The Detection alert filter.

@@ -32,10 +32,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.detection.annotation.Components;
-import org.apache.pinot.thirdeye.detection.annotation.Tune;
-import org.apache.pinot.thirdeye.detection.spi.components.BaseComponent;
 import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
+import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
+import org.apache.pinot.thirdeye.spi.detection.annotation.Tune;
+import org.apache.pinot.thirdeye.spi.detection.spi.components.BaseComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

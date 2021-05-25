@@ -18,8 +18,9 @@
  */
 package org.apache.pinot.thirdeye.detection.spec;
 
-import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.detection.Pattern;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
 
 public class HoltWintersDetectorSpec extends AbstractSpec {
 

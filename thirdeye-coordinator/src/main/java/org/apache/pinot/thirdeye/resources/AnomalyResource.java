@@ -1,8 +1,8 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
-import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
+import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
+import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
@@ -17,14 +17,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.api.AnomalyApi;
-import org.apache.pinot.thirdeye.api.AnomalyFeedbackApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
-import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.util.ApiBeanMapper;
+import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
+import org.apache.pinot.thirdeye.spi.api.AnomalyFeedbackApi;
+import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 
 @Api(tags = "Anomaly")
 @Singleton

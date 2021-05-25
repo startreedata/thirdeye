@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.alert.suppress;
 
-import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 
 /**
  * The base alert suppressor whose purpose is to suppress the  actual  alert

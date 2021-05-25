@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.datasource.mock;
 
-import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_TIME;
-import static org.apache.pinot.thirdeye.dataframe.DataFrame.COL_VALUE;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
@@ -42,22 +42,22 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.StringSeries;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
-import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.sql.SqlDataset;
 import org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader;
 import org.apache.pinot.thirdeye.datasource.sql.SqlUtils;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.StringSeries;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;

@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 
 public class AlertUtils {
 

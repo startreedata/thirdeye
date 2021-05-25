@@ -23,7 +23,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.metric.MetricSchema;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.common.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

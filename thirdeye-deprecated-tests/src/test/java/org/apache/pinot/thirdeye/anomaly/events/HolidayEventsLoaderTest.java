@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.config.ConfigurationHolder;
 import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
-import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

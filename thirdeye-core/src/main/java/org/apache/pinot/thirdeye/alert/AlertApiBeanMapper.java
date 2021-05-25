@@ -1,15 +1,15 @@
 package org.apache.pinot.thirdeye.alert;
 
-import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
-import org.apache.pinot.thirdeye.api.AlertApi;
-import org.apache.pinot.thirdeye.api.UserApi;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.util.ApiBeanMapper;
+import org.apache.pinot.thirdeye.spi.api.AlertApi;
+import org.apache.pinot.thirdeye.spi.api.UserApi;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

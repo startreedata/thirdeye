@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Arrays;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

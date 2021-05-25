@@ -23,9 +23,10 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.ResultSet;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.ObjectSeries;
-import org.apache.pinot.thirdeye.dataframe.StringSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.ObjectSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.StringSeries;
+import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

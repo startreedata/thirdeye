@@ -1,9 +1,9 @@
 package org.apache.pinot.thirdeye;
 
-import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_INVALID_QUERY_PARAM_OPERATOR;
-import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_UNEXPECTED_QUERY_PARAM;
-import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_INVALID_QUERY_PARAM_OPERATOR;
+import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_UNEXPECTED_QUERY_PARAM;
+import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -15,10 +15,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.MultivaluedMap;
-import org.apache.pinot.thirdeye.datalayer.DaoFilter;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate.OPER;
-import org.apache.pinot.thirdeye.util.Pair;
+import org.apache.pinot.thirdeye.spi.ThirdEyeException;
+import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate.OPER;
+import org.apache.pinot.thirdeye.spi.util.Pair;
 
 public class DaoFilterBuilder {
 

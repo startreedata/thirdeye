@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.spec;
 
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+
 public class AbsoluteChangeRuleAnomalyFilterSpec extends AbstractSpec {
 
   private String timezone = DEFAULT_TIMEZONE;

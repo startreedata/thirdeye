@@ -25,18 +25,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
-import org.apache.pinot.thirdeye.detection.spi.model.EvaluationSlice;
-import org.apache.pinot.thirdeye.detection.spi.model.EventSlice;
-import org.apache.pinot.thirdeye.detection.spi.model.InputData;
-import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.EvaluationSlice;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.EventSlice;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.InputData;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
 
 /**
  * Input data fetcher.

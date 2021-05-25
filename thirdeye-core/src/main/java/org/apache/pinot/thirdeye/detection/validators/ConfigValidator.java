@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.validators;
 
-import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * Validate a config

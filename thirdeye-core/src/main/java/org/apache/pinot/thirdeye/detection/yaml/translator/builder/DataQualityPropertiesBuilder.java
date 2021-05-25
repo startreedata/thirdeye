@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.yaml.translator.builder;
 
-import static org.apache.pinot.thirdeye.detection.ConfigUtils.getList;
+import static org.apache.pinot.thirdeye.spi.detection.ConfigUtils.getList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,13 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.dataquality.wrapper.DataSlaWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.DataQualityMergeWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
-import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 /**
  * This class is responsible for translating the data quality properties

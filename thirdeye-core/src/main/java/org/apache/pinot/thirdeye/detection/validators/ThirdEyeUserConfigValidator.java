@@ -27,8 +27,8 @@ import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import io.swagger.util.Json;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.yaml.snakeyaml.Yaml;
 
 /**

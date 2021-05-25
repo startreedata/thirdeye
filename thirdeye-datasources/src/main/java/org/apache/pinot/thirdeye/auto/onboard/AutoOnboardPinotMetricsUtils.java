@@ -45,8 +45,8 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 import org.apache.pinot.spi.data.Schema;
-import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSourceConfig;
+import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

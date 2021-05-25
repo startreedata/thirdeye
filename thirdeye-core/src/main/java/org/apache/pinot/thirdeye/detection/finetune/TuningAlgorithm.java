@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.finetune;
 
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.detection.spi.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
 
 /**
  * The interface Tuning algorithm.

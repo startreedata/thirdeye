@@ -16,7 +16,6 @@ import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_EX
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_ONE_SIDE_ERROR;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_TIMEZONE_ID;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 
 import com.google.inject.Inject;
@@ -32,10 +31,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.api.DimensionAnalysisResultApi;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
+import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

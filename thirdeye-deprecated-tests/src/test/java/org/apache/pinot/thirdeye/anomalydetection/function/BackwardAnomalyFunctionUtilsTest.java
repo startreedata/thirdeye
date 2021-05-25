@@ -21,7 +21,7 @@ import java.util.List;
 import org.apache.pinot.thirdeye.anomalydetection.context.TimeSeries;
 import org.apache.pinot.thirdeye.common.metric.MetricSchema;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.common.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.joda.time.Interval;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;

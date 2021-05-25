@@ -17,11 +17,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.api.AuthApi;
-import org.apache.pinot.thirdeye.api.UserApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.GrantType;
-import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.api.AuthApi;
+import org.apache.pinot.thirdeye.spi.api.UserApi;
+import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
 
 @Singleton
 @Api(tags = " Auth")

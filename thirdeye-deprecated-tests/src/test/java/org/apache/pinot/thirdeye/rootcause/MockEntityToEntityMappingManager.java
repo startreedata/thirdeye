@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManager;
-import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 
 public class MockEntityToEntityMappingManager extends
     AbstractMockManager<EntityToEntityMappingDTO> implements EntityToEntityMappingManager {

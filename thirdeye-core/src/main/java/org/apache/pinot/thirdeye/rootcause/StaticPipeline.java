@@ -23,7 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 
 /**
  * StaticPipeline emits a fixed set of entities as a result, regardless of the input. It is

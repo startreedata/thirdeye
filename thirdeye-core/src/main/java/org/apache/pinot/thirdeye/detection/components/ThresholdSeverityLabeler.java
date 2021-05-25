@@ -26,13 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.detection.annotation.Components;
-import org.apache.pinot.thirdeye.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.detection.spec.SeverityThresholdLabelerSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.Labeler;
+import org.apache.pinot.thirdeye.spi.anomaly.AnomalySeverity;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
+import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

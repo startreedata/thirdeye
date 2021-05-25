@@ -19,11 +19,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.apache.pinot.thirdeye.ThirdEyeStatus;
-import org.apache.pinot.thirdeye.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.pojo.AbstractBean;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
+import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
+import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = "Entity")

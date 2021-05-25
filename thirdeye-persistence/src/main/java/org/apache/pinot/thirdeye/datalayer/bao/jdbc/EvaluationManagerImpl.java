@@ -24,10 +24,10 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.EvaluationBean;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.EvaluationBean;
 
 @Singleton
 public class EvaluationManagerImpl extends AbstractManagerImpl<EvaluationDTO> implements

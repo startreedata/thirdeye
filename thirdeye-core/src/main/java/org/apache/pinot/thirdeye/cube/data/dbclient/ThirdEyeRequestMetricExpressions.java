@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.cube.data.dbclient;
 
 import java.util.List;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 
 /**
  * Classes to keep the information that can be used to construct the metric value from Pinot

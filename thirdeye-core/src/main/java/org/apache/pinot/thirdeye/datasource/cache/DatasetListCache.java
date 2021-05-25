@@ -21,8 +21,8 @@ package org.apache.pinot.thirdeye.datasource.cache;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

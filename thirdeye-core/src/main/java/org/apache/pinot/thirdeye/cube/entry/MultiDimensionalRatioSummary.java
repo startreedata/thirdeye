@@ -4,14 +4,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.api.DatasetApi;
-import org.apache.pinot.thirdeye.api.DimensionAnalysisResultApi;
-import org.apache.pinot.thirdeye.api.MetricApi;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import org.apache.pinot.thirdeye.cube.data.cube.Cube;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.ratio.RatioDBClient;
 import org.apache.pinot.thirdeye.cube.summary.Summary;
+import org.apache.pinot.thirdeye.spi.api.DatasetApi;
+import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
+import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 

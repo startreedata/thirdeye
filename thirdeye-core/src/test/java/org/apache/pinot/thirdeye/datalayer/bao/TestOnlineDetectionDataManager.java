@@ -2,7 +2,8 @@ package org.apache.pinot.thirdeye.datalayer.bao;
 
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
-import org.apache.pinot.thirdeye.datalayer.dto.OnlineDetectionDataDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

@@ -20,7 +20,8 @@ import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestOnbo
 
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
-import org.apache.pinot.thirdeye.datalayer.dto.OnboardDatasetMetricDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.OnboardDatasetMetricManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

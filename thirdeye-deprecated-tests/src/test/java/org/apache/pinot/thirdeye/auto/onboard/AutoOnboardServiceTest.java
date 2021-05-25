@@ -21,9 +21,8 @@ import static org.mockito.Mockito.mock;
 
 import java.net.URL;
 import java.time.Duration;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.testng.annotations.Test;
 

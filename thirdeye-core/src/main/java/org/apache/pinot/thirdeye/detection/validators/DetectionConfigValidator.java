@@ -19,21 +19,21 @@
 
 package org.apache.pinot.thirdeye.detection.validators;
 
-import static org.apache.pinot.thirdeye.detection.ConfigUtils.fetchDatasetConfigDTO;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_CRON;
+import static org.apache.pinot.thirdeye.spi.detection.ConfigUtils.fetchDatasetConfigDTO;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

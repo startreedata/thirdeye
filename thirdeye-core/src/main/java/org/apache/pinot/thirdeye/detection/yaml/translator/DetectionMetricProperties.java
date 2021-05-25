@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.yaml.translator;
 
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 
 public class DetectionMetricProperties {
 

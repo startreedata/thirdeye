@@ -21,13 +21,13 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.MaxScoreSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
-import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
-import org.apache.pinot.thirdeye.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.rootcause.MaxScoreSet;
+import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
+import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

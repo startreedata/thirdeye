@@ -26,17 +26,18 @@ import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.anomaly.task.TaskInfo;
 import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.anomaly.task.TaskInfo;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,13 +82,13 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
     try {
       final DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
-      final AlertDTO config = requireNonNull(alertManager.findById(info.configId),
-          String.format("Could not resolve config id %d", info.configId));
+      final AlertDTO config = requireNonNull(alertManager.findById(info.getConfigId()),
+          String.format("Could not resolve config id %d", info.getConfigId()));
 
       LOG.info("Start detection for config {} between {} and {}",
           config.getId(),
-          info.start,
-          info.end);
+          info.getStart(),
+          info.getEnd());
 
       final DetectionPipeline pipeline = detectionPipelineFactory.get(new DetectionPipelineContext()
           .setAlert(config)
@@ -99,8 +100,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       if (result.getLastTimestamp() < 0) {
         LOG.info("No detection ran for config {} between {} and {}",
             config.getId(),
-            info.start,
-            info.end);
+            info.getStart(),
+            info.getEnd());
         return Collections.emptyList();
       }
 
@@ -108,8 +109,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
       ThirdeyeMetricsUtil.detectionTaskSuccessCounter.inc();
       LOG.info("End detection for config {} between {} and {}. Detected {} anomalies.",
-          config.getId(), info.start,
-          info.end, result.getAnomalies());
+          config.getId(), info.getStart(),
+          info.getEnd(), result.getAnomalies());
 
       return Collections.emptyList();
     } catch (Exception e) {

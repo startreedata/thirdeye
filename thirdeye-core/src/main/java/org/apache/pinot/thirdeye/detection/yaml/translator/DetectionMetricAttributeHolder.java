@@ -19,18 +19,18 @@
 
 package org.apache.pinot.thirdeye.detection.yaml.translator;
 
-import static org.apache.pinot.thirdeye.detection.ConfigUtils.fetchDatasetConfigDTO;
+import static org.apache.pinot.thirdeye.spi.detection.ConfigUtils.fetchDatasetConfigDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.detection.DataProvider;
-import org.apache.pinot.thirdeye.util.SpiUtils;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 /**
  * A data holder to store the processed information per metric

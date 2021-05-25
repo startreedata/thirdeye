@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.cache;
 
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 
 /**
  * Loads data from either the data source or the centralized cache.

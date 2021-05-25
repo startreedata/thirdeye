@@ -19,9 +19,9 @@
 
 package org.apache.pinot.thirdeye.detection.yaml.translator;
 
-import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidator;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.yaml.snakeyaml.Yaml;
 
 /**

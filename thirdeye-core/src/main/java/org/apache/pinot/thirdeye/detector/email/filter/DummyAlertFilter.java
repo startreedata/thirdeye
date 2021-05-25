@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.detector.email.filter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 
 public class DummyAlertFilter extends BaseAlertFilter {
 

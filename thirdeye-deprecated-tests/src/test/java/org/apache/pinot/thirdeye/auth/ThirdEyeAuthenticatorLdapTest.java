@@ -25,6 +25,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.spi.InitialContextFactory;
+import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.mockito.Mockito;
 import org.slf4j.Logger;

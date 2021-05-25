@@ -31,9 +31,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 
 @Singleton
 public class DataSourceCache {

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
 
 /**
  * Container object for framework execution results. Holds the results aggregated across all

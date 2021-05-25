@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.auth;
 
-import static org.apache.pinot.thirdeye.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.unauthenticatedException;
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -10,6 +10,7 @@ import io.dropwizard.auth.Authenticator;
 import java.util.Optional;
 import javax.ws.rs.NotAuthorizedException;
 import org.apache.pinot.thirdeye.resources.ResourceUtils;
+import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
 
 @Singleton
 public class AuthService {

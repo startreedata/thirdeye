@@ -24,8 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.client.TextTable;
-import org.apache.pinot.thirdeye.Constants;
-import org.apache.pinot.thirdeye.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.spi.Constants;
+import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponseRow;
 
 public class RelationalThirdEyeResponse extends BaseThirdEyeResponse {
 

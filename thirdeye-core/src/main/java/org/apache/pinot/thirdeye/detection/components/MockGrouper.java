@@ -22,14 +22,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.detection.annotation.Components;
-import org.apache.pinot.thirdeye.detection.annotation.DetectionTag;
-import org.apache.pinot.thirdeye.detection.annotation.Param;
-import org.apache.pinot.thirdeye.detection.annotation.PresentationOption;
 import org.apache.pinot.thirdeye.detection.spec.MockGrouperSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.Grouper;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
+import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
+import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
+import org.apache.pinot.thirdeye.spi.detection.annotation.PresentationOption;
 
 /**
  * A sample mock grouper to test the Grouper Interface

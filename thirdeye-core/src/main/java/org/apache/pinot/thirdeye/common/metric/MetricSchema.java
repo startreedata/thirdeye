@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 
 /**
  * Wrapper class to represent the metric schema <code>

@@ -22,11 +22,11 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.ApplicationBean;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.ApplicationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
+import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 public class ApplicationManagerImpl extends AbstractManagerImpl<ApplicationDTO>
     implements ApplicationManager {

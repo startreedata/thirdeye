@@ -23,8 +23,10 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.Map;
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
+import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyFeedback;
+import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 
 /**
  * An simple class for storing the detection result from anomaly functions. An instance of

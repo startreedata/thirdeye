@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.detection;
 
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 
 public class DetectionPipelineContext {
 

@@ -21,11 +21,11 @@
 package org.apache.pinot.thirdeye.detection.components;
 
 import java.time.Duration;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.detection.annotation.Components;
 import org.apache.pinot.thirdeye.detection.spec.DurationAnomalyFilterSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
 
 /**
  * Duration filter. Filter the anomaly based on the anomaly duration.

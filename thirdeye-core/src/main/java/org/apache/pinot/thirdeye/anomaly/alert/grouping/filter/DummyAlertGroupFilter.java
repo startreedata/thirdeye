@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.anomaly.alert.grouping.filter;
 
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.dto.GroupedAnomalyResultsDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsDTO;
 
 public class DummyAlertGroupFilter extends BaseAlertGroupFilter {
 

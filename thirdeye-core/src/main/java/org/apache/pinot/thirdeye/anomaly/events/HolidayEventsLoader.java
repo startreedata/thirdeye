@@ -48,8 +48,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.config.ConfigurationHolder;
 import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
-import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

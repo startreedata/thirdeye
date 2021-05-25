@@ -22,11 +22,11 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.bao.OnboardDatasetMetricManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.OnboardDatasetMetricDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.OnboardDatasetMetricBean;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.OnboardDatasetMetricManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.OnboardDatasetMetricBean;
+import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Singleton
 public class OnboardDatasetMetricManagerImpl extends AbstractManagerImpl<OnboardDatasetMetricDTO>

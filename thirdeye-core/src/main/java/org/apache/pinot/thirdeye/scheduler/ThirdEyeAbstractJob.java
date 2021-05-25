@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.scheduler;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.Constants.CTX_INJECTOR;
+import static org.apache.pinot.thirdeye.spi.Constants.CTX_INJECTOR;
 
 import com.google.inject.Injector;
 import org.quartz.Job;

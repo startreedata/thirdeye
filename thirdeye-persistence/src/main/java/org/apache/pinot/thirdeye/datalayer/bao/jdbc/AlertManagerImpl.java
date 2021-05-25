@@ -24,10 +24,10 @@ import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.DetectionConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
 
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements

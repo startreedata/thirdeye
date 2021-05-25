@@ -27,7 +27,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
 
 public class ThirdEyeResultSetDeserializer extends StdDeserializer<ThirdEyeResultSet> {
 

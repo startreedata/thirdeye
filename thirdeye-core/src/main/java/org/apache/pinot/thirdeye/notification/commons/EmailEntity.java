@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.notification.commons;
 
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
+import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 
 public class EmailEntity {
 

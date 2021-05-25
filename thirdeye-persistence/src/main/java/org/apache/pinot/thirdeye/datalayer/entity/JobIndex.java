@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.datalayer.entity;
 
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 
 public class JobIndex extends AbstractIndexEntity {
 

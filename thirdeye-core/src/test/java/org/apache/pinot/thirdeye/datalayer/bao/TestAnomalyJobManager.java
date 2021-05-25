@@ -20,9 +20,10 @@ import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestJobS
 
 import java.util.Arrays;
 import java.util.List;
-import org.apache.pinot.thirdeye.Constants.JobStatus;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
-import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
+import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.JobManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

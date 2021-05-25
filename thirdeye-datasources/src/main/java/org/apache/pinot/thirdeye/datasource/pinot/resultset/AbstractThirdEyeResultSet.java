@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot.resultset;
 
+import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
+
 public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
 
   public long getLong(int rowIndex) {

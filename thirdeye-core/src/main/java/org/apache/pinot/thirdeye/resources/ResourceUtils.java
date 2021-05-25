@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_UNEXPECTED;
+import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_UNEXPECTED;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
@@ -13,10 +13,10 @@ import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.apache.pinot.thirdeye.ThirdEyeStatus;
-import org.apache.pinot.thirdeye.api.StatusApi;
-import org.apache.pinot.thirdeye.api.StatusListApi;
-import org.apache.pinot.thirdeye.api.ThirdEyeApi;
+import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
+import org.apache.pinot.thirdeye.spi.api.StatusApi;
+import org.apache.pinot.thirdeye.spi.api.StatusListApi;
+import org.apache.pinot.thirdeye.spi.api.ThirdEyeApi;
 
 public class ResourceUtils {
 

@@ -20,6 +20,8 @@
 
 package org.apache.pinot.thirdeye.detection.spec;
 
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+
 public class DurationAnomalyFilterSpec extends AbstractSpec {
 
   private String minDuration = "PT0S"; // default value 0 seconds

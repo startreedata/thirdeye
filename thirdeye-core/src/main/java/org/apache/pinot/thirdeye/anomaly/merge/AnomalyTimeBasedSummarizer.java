@@ -27,8 +27,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.anomaly.merge.AnomalyMergeConfig;
+import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

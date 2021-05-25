@@ -25,12 +25,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.DataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
-import org.apache.pinot.thirdeye.datasource.MetadataSourceConfig;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
+import org.apache.pinot.thirdeye.spi.auto.onboard.AutoOnboard;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,7 +16,7 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
-import static org.apache.pinot.thirdeye.Constants.NO_AUTH_USER;
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
 import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionJiraAlerter.PROP_JIRA_SCHEME;
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_ASSIGNEE;
@@ -29,16 +29,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.anomaly.AnomalySeverity;
-import org.apache.pinot.thirdeye.anomaly.AnomalyType;
-import org.apache.pinot.thirdeye.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.spi.anomaly.AnomalySeverity;
+import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
+import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFeedbackDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
-import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 public class AlertFilterUtils {
 

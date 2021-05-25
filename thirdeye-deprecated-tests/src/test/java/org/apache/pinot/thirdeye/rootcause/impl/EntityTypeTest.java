@@ -21,8 +21,9 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
-import org.apache.pinot.thirdeye.rootcause.Entity;
-import org.apache.pinot.thirdeye.rootcause.util.ParsedUrn;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.EntityType;
+import org.apache.pinot.thirdeye.spi.rootcause.util.ParsedUrn;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

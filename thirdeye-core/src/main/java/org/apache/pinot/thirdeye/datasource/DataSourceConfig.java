@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
 
 /**
  * This class defines the config of a single datasource used in thirdeye

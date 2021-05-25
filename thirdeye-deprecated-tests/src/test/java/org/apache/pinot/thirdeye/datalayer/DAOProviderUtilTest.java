@@ -16,7 +16,7 @@
 
 package org.apache.pinot.thirdeye.datalayer;
 
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;

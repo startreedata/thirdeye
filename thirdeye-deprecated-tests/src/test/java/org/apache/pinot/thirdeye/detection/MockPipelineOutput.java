@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.detection;
 
 import java.util.List;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 
 public class MockPipelineOutput {
 

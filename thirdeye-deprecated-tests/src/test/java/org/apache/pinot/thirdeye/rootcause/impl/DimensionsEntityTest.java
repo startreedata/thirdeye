@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.DimensionsEntity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

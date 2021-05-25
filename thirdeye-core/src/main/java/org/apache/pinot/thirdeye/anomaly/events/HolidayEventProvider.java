@@ -20,8 +20,8 @@
 package org.apache.pinot.thirdeye.anomaly.events;
 
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

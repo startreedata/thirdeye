@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
-import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -43,16 +43,16 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.spi.utils.GroovyTemplateUtils;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean.DimensionAsMetricProperties;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
-import org.apache.pinot.thirdeye.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean.DimensionAsMetricProperties;
+import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;

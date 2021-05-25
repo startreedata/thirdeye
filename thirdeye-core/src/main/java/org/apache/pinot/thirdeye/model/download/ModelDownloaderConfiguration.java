@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.model.download;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 
 public class ModelDownloaderConfiguration {
 

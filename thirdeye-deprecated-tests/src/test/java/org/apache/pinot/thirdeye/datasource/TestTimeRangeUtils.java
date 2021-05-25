@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;

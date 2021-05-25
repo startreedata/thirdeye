@@ -19,15 +19,17 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
-import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.tracking;
 
-import static org.apache.pinot.thirdeye.Constants.NO_AUTH_USER;
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 
 import java.util.HashMap;
 import java.util.Iterator;

@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.datasource.csv;
 
-import static org.apache.pinot.thirdeye.dataframe.Series.SeriesType.STRING;
+import static org.apache.pinot.thirdeye.spi.dataframe.Series.SeriesType.STRING;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
@@ -36,23 +36,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.Grouping;
-import org.apache.pinot.thirdeye.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.dataframe.Series;
-import org.apache.pinot.thirdeye.dataframe.Series.LongConditional;
-import org.apache.pinot.thirdeye.dataframe.Series.StringConditional;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSource;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeDataSourceContext;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.Grouping;
+import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.Series;
+import org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
+import org.apache.pinot.thirdeye.spi.dataframe.Series.StringConditional;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 
 /**
  * The type CSV third eye data source, which can make CSV file the data source of ThirdEye.

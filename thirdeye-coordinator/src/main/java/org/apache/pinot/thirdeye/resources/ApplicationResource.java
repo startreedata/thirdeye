@@ -1,18 +1,18 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.google.common.collect.ImmutableMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.api.ApplicationApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
-import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManager;
-import org.apache.pinot.thirdeye.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.util.ApiBeanMapper;
+import org.apache.pinot.thirdeye.spi.api.ApplicationApi;
+import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.ApplicationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
+import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -20,9 +20,9 @@
 package org.apache.pinot.thirdeye.detection.spi.model;
 
 import com.google.common.base.Preconditions;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.dataframe.LongSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 
 /**
  * Time series. wrapper object of data frame. Used by baselineProvider to return the predicted time

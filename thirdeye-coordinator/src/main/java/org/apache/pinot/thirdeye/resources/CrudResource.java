@@ -1,10 +1,10 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_MISSING_ID;
-import static org.apache.pinot.thirdeye.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
+import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
+import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
@@ -26,11 +26,11 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.pinot.thirdeye.DaoFilterBuilder;
-import org.apache.pinot.thirdeye.api.ThirdEyeApi;
 import org.apache.pinot.thirdeye.auth.AuthService;
-import org.apache.pinot.thirdeye.auth.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.datalayer.bao.AbstractManager;
-import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.api.ThirdEyeApi;
+import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AbstractManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

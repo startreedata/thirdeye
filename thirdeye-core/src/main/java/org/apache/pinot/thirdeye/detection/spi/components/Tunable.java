@@ -20,7 +20,8 @@
 package org.apache.pinot.thirdeye.detection.spi.components;
 
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.spi.components.BaseComponent;
 import org.joda.time.Interval;
 
 /**

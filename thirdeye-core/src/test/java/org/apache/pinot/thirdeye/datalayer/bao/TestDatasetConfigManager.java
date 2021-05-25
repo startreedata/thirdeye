@@ -20,7 +20,8 @@ import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestData
 
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

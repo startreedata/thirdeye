@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.anomaly.monitor;
 
-import static org.apache.pinot.thirdeye.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_CONFIG_KEY;
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,28 +35,28 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.Constants.JobStatus;
 import org.apache.pinot.thirdeye.anomaly.alert.util.EmailHelper;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConstants.MonitorType;
-import org.apache.pinot.thirdeye.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.anomaly.task.TaskInfo;
 import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
-import org.apache.pinot.thirdeye.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManager;
-import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManager;
-import org.apache.pinot.thirdeye.datalayer.bao.JobManager;
-import org.apache.pinot.thirdeye.datalayer.bao.OnlineDetectionDataManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.JobDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
+import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
+import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
+import org.apache.pinot.thirdeye.spi.anomaly.task.TaskInfo;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DetectionStatusManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.JobManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
+import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

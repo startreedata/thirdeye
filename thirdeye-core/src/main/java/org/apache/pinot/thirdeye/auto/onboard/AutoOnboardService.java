@@ -27,10 +27,10 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
-import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
+import org.apache.pinot.thirdeye.spi.auto.onboard.AutoOnboard;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

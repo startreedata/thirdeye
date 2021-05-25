@@ -33,13 +33,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.detection.annotation.Components;
-import org.apache.pinot.thirdeye.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.detection.spec.TriggerConditionGrouperSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.Grouper;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
+import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

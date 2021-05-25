@@ -21,11 +21,11 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 
 import com.google.inject.Inject;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.SessionBean;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.SessionBean;
+import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 public class SessionManagerImpl extends AbstractManagerImpl<SessionDTO> implements SessionManager {
 

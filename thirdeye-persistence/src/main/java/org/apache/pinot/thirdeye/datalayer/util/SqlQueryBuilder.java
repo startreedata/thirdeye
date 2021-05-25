@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Sets;
@@ -43,9 +43,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.pinot.thirdeye.datalayer.DaoFilter;
-import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
+import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.entity.AbstractEntity;
+import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Singleton
 public class SqlQueryBuilder {

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection.spec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RuleBaselineProviderSpec extends AbstractSpec {

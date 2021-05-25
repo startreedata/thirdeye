@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.worker;
 
-import static org.apache.pinot.thirdeye.Constants.CTX_INJECTOR;
 import static org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.readPersistenceConfig;
+import static org.apache.pinot.thirdeye.spi.Constants.CTX_INJECTOR;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -38,12 +38,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
-import org.apache.pinot.thirdeye.datalayer.bao.SessionManager;
-import org.apache.pinot.thirdeye.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -51,6 +48,9 @@ import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SchedulerService;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionDTO;
 import org.apache.pinot.thirdeye.task.TaskDriver;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.apache.pinot.thirdeye.worker.resources.RootResource;

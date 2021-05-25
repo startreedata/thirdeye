@@ -19,11 +19,11 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import org.apache.pinot.thirdeye.rootcause.Entity;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
-import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineInitContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
 
 /**
  * NullPipeline serves as a dummy implementation or sink that emits as output any received inputs.

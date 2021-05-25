@@ -17,13 +17,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.api.DimensionAnalysisModuleConfig;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
-import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.RootcauseTemplateManager;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.RootcauseTemplateDTO;
-import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisModuleConfig;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseTemplateDTO;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton

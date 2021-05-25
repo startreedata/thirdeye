@@ -25,14 +25,14 @@ import java.util.Collections;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.datalayer.util.ThirdEyeSpiUtils;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
-import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 /**
  * The Legacy dimension wrapper. Do dimension exploration for existing anomaly functions.

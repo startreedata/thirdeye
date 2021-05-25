@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.events.EventFilter;
-import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

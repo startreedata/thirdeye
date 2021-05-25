@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.rca;
 
-import org.apache.pinot.thirdeye.api.RootCauseEntity;
-import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.api.RootCauseEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
 
 /**
  * Foundation class for building UI formatters for RCA Entities. Takes in RCA Entities and returns

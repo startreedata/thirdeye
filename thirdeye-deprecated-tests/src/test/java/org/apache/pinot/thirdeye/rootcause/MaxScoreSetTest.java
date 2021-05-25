@@ -20,6 +20,8 @@
 package org.apache.pinot.thirdeye.rootcause;
 
 import java.util.Collections;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.rootcause.MaxScoreSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

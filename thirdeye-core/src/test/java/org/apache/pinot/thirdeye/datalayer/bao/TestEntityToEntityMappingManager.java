@@ -20,7 +20,8 @@ import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestEnti
 
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
-import org.apache.pinot.thirdeye.datalayer.dto.EntityToEntityMappingDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

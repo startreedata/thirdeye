@@ -34,14 +34,14 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
-import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.HierarchicalAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

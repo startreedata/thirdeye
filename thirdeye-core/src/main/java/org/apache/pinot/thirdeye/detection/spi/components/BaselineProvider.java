@@ -19,10 +19,11 @@
 
 package org.apache.pinot.thirdeye.detection.spi.components;
 
-import org.apache.pinot.thirdeye.dataframe.Series;
-import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.detection.spec.AbstractSpec;
 import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.Series;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.spi.components.BaseComponent;
 
 /**
  * The baseline provider to calculate predicted baseline.

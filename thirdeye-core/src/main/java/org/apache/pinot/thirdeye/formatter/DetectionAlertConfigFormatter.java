@@ -23,7 +23,7 @@ package org.apache.pinot.thirdeye.formatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 
 /**
  * The detection alert config formatter

@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.detection;
 
 import java.util.Collections;
 import java.util.List;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 
 public class MockPipelineLoader extends DetectionPipelineFactory {
 

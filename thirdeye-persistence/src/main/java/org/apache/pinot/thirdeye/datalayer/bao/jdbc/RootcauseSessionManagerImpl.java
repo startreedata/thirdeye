@@ -27,12 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.datalayer.dto.RootcauseSessionDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.AbstractBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.RootcauseSessionBean;
-import org.apache.pinot.thirdeye.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.RootcauseSessionBean;
+import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Singleton
 public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSessionDTO> implements

@@ -24,8 +24,8 @@ import com.google.inject.Singleton;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.JobManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TaskManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.JobManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

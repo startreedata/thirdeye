@@ -29,14 +29,14 @@ import org.apache.pinot.spi.data.DateTimeFieldSpec.TimeFormat;
 import org.apache.pinot.spi.data.DateTimeFormatSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
 import org.apache.pinot.spi.data.Schema;
-import org.apache.pinot.thirdeye.common.metric.MetricType;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.DatasetConfigBean;
-import org.apache.pinot.thirdeye.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.util.SpiUtils;
+import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DatasetConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 public class ConfigGenerator {
 

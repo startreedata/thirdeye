@@ -20,7 +20,7 @@
 
 package org.apache.pinot.thirdeye.detection.onboard;
 
-import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskInfo;
+import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 
 public class YamlOnboardingTaskInfo extends DetectionPipelineTaskInfo {
 

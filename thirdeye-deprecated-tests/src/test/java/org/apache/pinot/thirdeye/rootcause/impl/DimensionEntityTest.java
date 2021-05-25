@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
+import org.apache.pinot.thirdeye.spi.rootcause.impl.DimensionEntity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

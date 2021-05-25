@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
+import org.apache.pinot.thirdeye.spi.datalayer.entity.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

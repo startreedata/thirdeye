@@ -21,7 +21,7 @@
 package org.apache.pinot.thirdeye.formatter;
 
 import java.util.Map;
-import org.apache.pinot.thirdeye.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * Class for building UI formatters for DTOs. Takes in a DTO and returns

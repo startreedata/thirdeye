@@ -21,8 +21,8 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import java.util.HashSet;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
-import org.apache.pinot.thirdeye.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
+import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
 
 /**
  * EmptyPipeline serves as a dummy implementation or sink that does not emit any output.

@@ -20,7 +20,8 @@ import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestDete
 
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
-import org.apache.pinot.thirdeye.datalayer.dto.DetectionStatusDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DetectionStatusManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;

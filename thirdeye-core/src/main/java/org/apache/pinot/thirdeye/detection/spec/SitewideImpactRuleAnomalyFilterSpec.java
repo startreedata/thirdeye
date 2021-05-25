@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.detection.spec;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
 
 public class SitewideImpactRuleAnomalyFilterSpec extends AbstractSpec {
 

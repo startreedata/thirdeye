@@ -21,8 +21,8 @@ package org.apache.pinot.thirdeye.rootcause.timeseries;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 
 /**
  * Interface for synthetic baselines constructed from one or multiple raw metric slices pointing to

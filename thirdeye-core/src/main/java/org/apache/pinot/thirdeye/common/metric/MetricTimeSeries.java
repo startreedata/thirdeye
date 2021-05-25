@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.pinot.thirdeye.common.time.TimeRange;
+import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.apache.pinot.thirdeye.util.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

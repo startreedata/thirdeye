@@ -26,15 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DataQualityPropertiesBuilder;
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder;
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionPropertiesBuilder;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 
 /**
  * The YAML translator of composite pipeline. Convert YAML file into detection pipeline properties.

@@ -21,8 +21,10 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.dto.EventDTO;
-import org.apache.pinot.thirdeye.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.EntityType;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.EventEntity;
 
 public class ThirdEyeEventEntity extends EventEntity {
 

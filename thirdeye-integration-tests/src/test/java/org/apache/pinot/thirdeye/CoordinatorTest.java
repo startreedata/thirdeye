@@ -16,7 +16,7 @@ import java.net.URL;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.api.AlertEvaluationApi;
+import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.datasource.timeseries;
 
 import java.util.List;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 
 public interface TimeSeriesResponseParser {
 

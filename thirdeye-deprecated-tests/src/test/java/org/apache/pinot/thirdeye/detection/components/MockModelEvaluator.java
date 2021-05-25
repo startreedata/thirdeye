@@ -22,7 +22,7 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
-import org.apache.pinot.thirdeye.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.detection.spec.MockModelEvaluatorSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.ModelEvaluator;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;

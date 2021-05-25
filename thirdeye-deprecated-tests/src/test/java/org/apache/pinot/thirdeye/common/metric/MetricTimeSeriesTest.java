@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.apache.pinot.thirdeye.common.time.TimeRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

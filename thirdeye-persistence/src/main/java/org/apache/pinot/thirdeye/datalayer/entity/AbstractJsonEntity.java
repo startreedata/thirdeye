@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.entity;
 
+import org.apache.pinot.thirdeye.spi.datalayer.entity.AbstractEntity;
+
 public abstract class AbstractJsonEntity extends AbstractEntity {
 
   protected String jsonVal;

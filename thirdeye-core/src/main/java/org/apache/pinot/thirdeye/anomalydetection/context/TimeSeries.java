@@ -28,6 +28,7 @@ import java.util.TreeMap;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.pinot.thirdeye.spi.anomalydetection.context.MetricTimeSeries;
 import org.joda.time.Interval;
 
 /**

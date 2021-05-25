@@ -17,7 +17,8 @@
 package org.apache.pinot.thirdeye.detection;
 
 import java.util.Objects;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 
 public class MockPipeline extends DetectionPipeline {
 

@@ -17,7 +17,8 @@
 package org.apache.pinot.thirdeye.datalayer.dto;
 
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

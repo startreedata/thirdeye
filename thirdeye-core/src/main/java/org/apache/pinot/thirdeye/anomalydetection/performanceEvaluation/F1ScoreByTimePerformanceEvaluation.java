@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.anomalydetection.performanceEvaluation;
 
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 
 /**
  * The f1 score of the cloned function with regarding to the labeled anomalies in original function.

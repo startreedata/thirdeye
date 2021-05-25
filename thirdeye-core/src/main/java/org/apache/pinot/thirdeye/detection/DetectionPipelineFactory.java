@@ -22,7 +22,8 @@ package org.apache.pinot.thirdeye.detection;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
-import org.apache.pinot.thirdeye.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 
 @Singleton
 public class DetectionPipelineFactory {

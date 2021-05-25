@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.detection.alert;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 
 /**
  * Container class for notification properties

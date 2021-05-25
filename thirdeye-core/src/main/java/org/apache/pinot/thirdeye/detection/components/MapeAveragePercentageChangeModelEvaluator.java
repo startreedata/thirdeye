@@ -27,15 +27,15 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.datalayer.dto.EvaluationDTO;
-import org.apache.pinot.thirdeye.datalayer.pojo.EvaluationBean;
-import org.apache.pinot.thirdeye.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.detection.spec.MapeAveragePercentageChangeModelEvaluatorSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.ModelEvaluator;
-import org.apache.pinot.thirdeye.detection.spi.model.EvaluationSlice;
-import org.apache.pinot.thirdeye.detection.spi.model.InputDataSpec;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelStatus;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.EvaluationBean;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.EvaluationSlice;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
 import org.joda.time.Instant;
 
 /**

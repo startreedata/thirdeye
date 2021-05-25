@@ -25,7 +25,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import org.apache.pinot.thirdeye.rootcause.impl.EntityType;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.EntityType;
+import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.spi.rootcause.util.FilterPredicate;
+import org.apache.pinot.thirdeye.spi.rootcause.util.ParsedUrn;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

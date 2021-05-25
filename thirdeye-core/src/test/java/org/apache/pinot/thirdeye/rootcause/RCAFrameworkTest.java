@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import org.apache.pinot.thirdeye.rootcause.impl.LinearAggregationPipeline;
+import org.apache.pinot.thirdeye.spi.rootcause.Entity;
+import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

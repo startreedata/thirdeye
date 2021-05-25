@@ -26,11 +26,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.dataframe.BooleanSeries;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.dataframe.Series;
+import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.joda.time.Duration;
 
 /**

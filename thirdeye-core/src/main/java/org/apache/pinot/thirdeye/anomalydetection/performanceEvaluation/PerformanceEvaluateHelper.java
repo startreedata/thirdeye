@@ -20,8 +20,8 @@
 package org.apache.pinot.thirdeye.anomalydetection.performanceEvaluation;
 
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.joda.time.Interval;
 
 public class PerformanceEvaluateHelper {

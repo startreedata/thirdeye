@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.yaml.translator.builder;
 
-import static org.apache.pinot.thirdeye.detection.ConfigUtils.getList;
-import static org.apache.pinot.thirdeye.detection.ConfigUtils.getMap;
+import static org.apache.pinot.thirdeye.spi.detection.ConfigUtils.getList;
+import static org.apache.pinot.thirdeye.spi.detection.ConfigUtils.getMap;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
@@ -32,11 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.algorithm.DimensionWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyDetectorWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyFilterWrapper;
@@ -45,7 +40,12 @@ import org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.EntityAnomalyMergeWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
-import org.apache.pinot.thirdeye.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 /**
  * This class is responsible for translating the detection properties

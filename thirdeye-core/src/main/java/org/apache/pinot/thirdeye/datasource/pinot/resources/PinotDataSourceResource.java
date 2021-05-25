@@ -37,9 +37,9 @@ import javax.ws.rs.core.MediaType;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotQuery;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetSerializer;
+import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.tracking;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import org.apache.pinot.thirdeye.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -18,8 +18,8 @@ package org.apache.pinot.thirdeye.detection.algorithm;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
-import org.apache.pinot.thirdeye.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.joda.time.Duration;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;

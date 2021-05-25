@@ -17,6 +17,7 @@
 package org.apache.pinot.thirdeye.detection.spec;
 
 import java.util.Map;
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
 import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
 
 public class TestSpec extends AbstractSpec {

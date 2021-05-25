@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import org.apache.commons.io.IOUtils;
-import org.apache.pinot.thirdeye.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.detection.algorithm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.pql.parsers.utils.Pair;
 import org.apache.pinot.thirdeye.anomalydetection.datafilter.DataFilter;
 import org.apache.pinot.thirdeye.anomalydetection.datafilter.DataFilterFactory;
 import org.apache.pinot.thirdeye.common.metric.MetricSchema;
@@ -52,6 +50,7 @@ import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.util.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,6 +105,10 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
     } else {
       this.metricEntity = makeEntity(this.anomalyFunction.getSpec());
     }
+  }
+
+  private static MetricEntity makeEntity(AnomalyFunctionDTO spec) {
+    return MetricEntity.fromMetric(1.0, spec.getMetricId(), spec.getFilterSet());
   }
 
   @Override
@@ -164,22 +167,18 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
           new DateTime(this.startTime), new DateTime(this.endTime),
           new ArrayList<>(historyMergedAnomalies));
 
-      mergedAnomalyResults = Collections2
-          .transform(result, new Function<AnomalyResult, MergedAnomalyResultDTO>() {
-            @Override
-            public MergedAnomalyResultDTO apply(AnomalyResult result) {
-              MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
-              anomaly.populateFrom(result);
-              anomaly.setFunctionId(null);
-              anomaly.setFunction(null);
-              anomaly.setDetectionConfigId(LegacyAnomalyFunctionAlgorithm.this.config.getId());
-              anomaly.setMetricUrn(metricEntity.getUrn());
-              anomaly.setMetric(metricConfig.getName());
-              anomaly.setCollection(metricConfig.getDataset());
-              anomaly.setDimensions(dimension);
-              return anomaly;
-            }
-          });
+      mergedAnomalyResults = Collections2.transform(result, result1 -> {
+        MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+        anomaly.populateFrom(result1);
+        anomaly.setFunctionId(null);
+        anomaly.setFunction(null);
+        anomaly.setDetectionConfigId(LegacyAnomalyFunctionAlgorithm.this.config.getId());
+        anomaly.setMetricUrn(metricEntity.getUrn());
+        anomaly.setMetric(metricConfig.getName());
+        anomaly.setCollection(metricConfig.getDataset());
+        anomaly.setDimensions(dimension);
+        return anomaly;
+      });
     } catch (Exception e) {
       if (this.failOnError) {
         throw e;
@@ -200,9 +199,5 @@ public class LegacyAnomalyFunctionAlgorithm extends DetectionPipeline {
       dimensionMap.put(entry.getKey(), entry.getValue());
     }
     return dimensionMap;
-  }
-
-  private static MetricEntity makeEntity(AnomalyFunctionDTO spec) {
-    return MetricEntity.fromMetric(1.0, spec.getMetricId(), spec.getFilterSet());
   }
 }

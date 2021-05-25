@@ -56,7 +56,7 @@ public class DaoFilterBuilder {
   static Predicate toPredicate(final String columnName, final Object[] objects) {
     final List<Predicate> predicates = Arrays.stream(objects)
         .map(DaoFilterBuilder::toPair)
-        .map(p -> new Predicate(columnName, p.get0(), p.get1()))
+        .map(p -> new Predicate(columnName, p.getFirst(), p.getSecond()))
         .collect(Collectors.toList());
 
     return Predicate.AND(predicates.toArray(new Predicate[]{}));

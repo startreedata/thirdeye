@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.detector.function;
 
 import java.util.List;
-import org.apache.pinot.pql.parsers.utils.Pair;
 import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
@@ -28,6 +27,7 @@ import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.util.Pair;
 import org.apache.pinot.thirdeye.util.AnomalyOffset;
 import org.joda.time.DateTime;
 

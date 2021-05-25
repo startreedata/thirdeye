@@ -37,9 +37,6 @@ public class ThirdEyeResultSetGroup {
 
   private ImmutableList<ThirdEyeResultSet> resultSets = ImmutableList.of();
 
-  public ThirdEyeResultSetGroup() {
-  }
-
   public ThirdEyeResultSetGroup(List<ThirdEyeResultSet> resultSets) {
     this.setResultSets(resultSets);
   }

@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.pql.parsers.utils.Pair;
 import org.apache.pinot.thirdeye.anomalydetection.AnomalyDetectionUtils;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyDetectionContext;
 import org.apache.pinot.thirdeye.anomalydetection.context.TimeSeries;
@@ -38,16 +37,6 @@ import org.joda.time.Interval;
 public class BackwardAnomalyFunctionUtils {
 
   private static final Double NULL_DOUBLE = Double.NaN;
-
-  public static List<Pair<Long, Long>> toBackwardCompatibleDataRanges(
-      List<Interval> timeSeriesIntervals) {
-    List<Pair<Long, Long>> dataRanges = new ArrayList<>();
-    for (Interval interval : timeSeriesIntervals) {
-      Pair<Long, Long> dataRange = new Pair<>(interval.getStartMillis(), interval.getEndMillis());
-      dataRanges.add(dataRange);
-    }
-    return dataRanges;
-  }
 
   /**
    * Splits a MetricTimeSeries to current (observed) time series and baselines. The list of time

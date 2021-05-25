@@ -16,11 +16,11 @@ public class Pair<K, V> {
     return new Pair<K, V>(k, v);
   }
 
-  public K get0() {
+  public K getFirst() {
     return k;
   }
 
-  public V get1() {
+  public V getSecond() {
     return v;
   }
 

@@ -23,11 +23,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
 
-public class DetectionPipelineResultV1 {
+public class DetectionPipelineResultV1 implements DetectionPipelineResult {
 
   public static String DIAGNOSTICS_DATA = "data";
   public static String DIAGNOSTICS_CHANGE_POINTS = "changepoints";

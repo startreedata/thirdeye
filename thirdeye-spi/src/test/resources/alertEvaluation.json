@@ -1,0 +1,104 @@
+{
+  "alert": {
+    "name": "percentage-change-template",
+    "description": "Percentage drop template",
+    "cron": "${cronExpr}"
+  },
+  "nodes": [
+    {
+      "planNodeName": "root",
+      "type": "ChildKeepingMerge",
+      "inputs": [
+        {
+          "targetProperty": "input",
+          "sourcePlanNode": "anomalyDetector",
+          "sourceProperty": "output"
+        }
+      ]
+    },
+    {
+      "planNodeName": "percentageChangeDetector",
+      "type": "AnomalyDetector",
+      "params": {
+        "detectorName": "PERCENTAGE_RULE",
+        "percentageChange": "${percent_change}",
+        "pattern": "down",
+        "dimensions": [],
+        "metric": "${metricName}",
+        "timestamp": "${timestamp}"
+      },
+      "inputs": [
+        {
+          "targetProperty": "baseline",
+          "sourcePlanNode": "baselineDataFetcher",
+          "sourceProperty": "baselineOutput"
+        },
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "currentDataFetcher",
+          "sourceProperty": "currentOutput"
+        }
+      ]
+    },
+    {
+      "planNodeName": "baselineDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "dataSource": "${dataSourceName}",
+        "startTime": "${baseline_start}",
+        "endTime": "${baseline_end}",
+        "pinot.zookeeper": "localhost:2123/QuickStartCluster",
+        "dataSource": "pinot",
+        "table": "${table}",
+        "query": "SELECT \"date\" as ${timestamp}, count(*) as ${metricName} FROM ${table} WHERE \"date\" >= ${baseline_start} AND \"date\" < ${baseline_end} GROUP BY \"date\" LIMIT 100"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "output",
+          "outputName": "baselineOutput"
+        }
+      ]
+    },
+    {
+      "planNodeName": "currentDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "dataSource": "${dataSourceName}",
+        "startTime": "${start}",
+        "endTime": "${end}",
+        "dataSource": "pinot",
+        "table": "${table}",
+        "query": "SELECT \"date\" as ${timestamp}, count(*) as ${metricName} FROM ${table} WHERE \"date\" >= ${current_start} AND \"date\" < ${current_end} GROUP BY \"date\" LIMIT 100"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "output",
+          "outputName": "currentOutput"
+        }
+      ]
+    },
+    {
+      "planNodeName": "sqlJoin",
+      "type": "SqlQueryExecutor",
+      "inputs": [
+        {
+          "targetProperty": "t1",
+          "sourcePlanNode": "baselineDataFetcher",
+          "sourceProperty": "baselineOutput"
+        },
+        {
+          "targetProperty": "t2",
+          "sourcePlanNode": "currentDataFetcher",
+          "sourceProperty": "currentOutput"
+        }
+      ],
+      "params": {
+        "sql": "SELECT t1.met/t2.met as met, t1.ts as ts FROM t1 JOIN t2 on t1.ts = t2.ts"
+      }
+    }
+  ],
+  "start": "${start}",
+  "end": "${end}"
+}

@@ -1,0 +1,23 @@
+{
+  "planNodeName": "percentageChangeDetector",
+  "type": "AnomalyDetector",
+  "params": {
+    "detectorName": "PERCENTAGE_RULE",
+    "percentageChange": "${percent_change}",
+    "pattern": "down",
+    "dimensions": [],
+    "metric": "${metricName}",
+    "timestamp": "${timestamp}"
+  },
+  "inputs": [
+    {
+      "targetProperty": "baseline",
+      "sourcePlanNode": "baselineDataFetcher",
+      "sourceProperty": "baselineOutput"
+    },{
+      "targetProperty": "current",
+      "sourcePlanNode": "currentDataFetcher",
+      "sourceProperty": "currentOutput"
+    }
+  ]
+}

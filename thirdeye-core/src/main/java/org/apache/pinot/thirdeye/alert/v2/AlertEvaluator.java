@@ -40,9 +40,12 @@ public class AlertEvaluator {
   private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(5);
 
   private final ExecutorService executorService;
+  private final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory;
 
   @Inject
-  public AlertEvaluator() {
+  public AlertEvaluator(
+      final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory) {
+    this.detectionPipelinePlanNodeFactory = detectionPipelinePlanNodeFactory;
     this.executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
 
@@ -90,7 +93,7 @@ public class AlertEvaluator {
     Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     for (DetectionPlanApi operator : request.getNodes()) {
       final String operatorName = operator.getPlanNodeName();
-      pipelinePlanNodes.put(operatorName, DetectionPipelinePlanNodeFactory
+      pipelinePlanNodes.put(operatorName, detectionPipelinePlanNodeFactory
           .get(operatorName,
               pipelinePlanNodes,
               operator,

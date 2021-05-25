@@ -26,6 +26,7 @@ import org.apache.pinot.thirdeye.api.v2.DetectionPlanApi;
 import org.apache.pinot.thirdeye.api.v2.DetectionPlanApi.InputApi;
 import org.apache.pinot.thirdeye.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.detection.v2.PlanNode;
+import org.apache.pinot.thirdeye.detection.v2.PlanNodeContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,31 +38,23 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelinePlanNode.class);
 
-  protected final String name;
-  protected final Map<String, PlanNode> pipelinePlanNodes;
-  protected final DetectionPlanApi detectionPlanApi;
-  protected final long startTime;
-  protected final long endTime;
-  protected final Map<String, DetectionPipelineResult> inputsMap;
+  protected String name = null;
+  protected Map<String, PlanNode> pipelinePlanNodes = null;
+  protected DetectionPlanApi detectionPlanApi = null;
+  protected long startTime = -1;
+  protected long endTime = -1;
+  protected Map<String, DetectionPipelineResult> inputsMap = new HashMap<>();
 
   protected DetectionPipelinePlanNode() {
-    this.name = null;
-    this.pipelinePlanNodes = null;
-    this.detectionPlanApi = null;
-    this.startTime = -1;
-    this.endTime = -1;
-    this.inputsMap = null;
   }
 
-  protected DetectionPipelinePlanNode(String name, Map<String, PlanNode> pipelinePlanNodes,
-      DetectionPlanApi detectionPlanApi, long startTime,
-      long endTime) {
-    this.name = name;
-    this.pipelinePlanNodes = pipelinePlanNodes;
-    this.detectionPlanApi = detectionPlanApi;
-    this.startTime = startTime;
-    this.endTime = endTime;
-    this.inputsMap = new HashMap<>();
+  @Override
+  public void init(final PlanNodeContext planNodeContext) {
+    this.name = planNodeContext.getName();
+    this.pipelinePlanNodes = planNodeContext.getPipelinePlanNodes();
+    this.detectionPlanApi = planNodeContext.getDetectionPlanApi();
+    this.startTime = planNodeContext.getStartTime();
+    this.endTime = planNodeContext.getEndTime();
   }
 
   /**

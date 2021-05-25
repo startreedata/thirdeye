@@ -5,6 +5,8 @@ import java.util.Map;
 
 public interface Operator<T extends DetectionPipelineResult> {
 
+  void init(OperatorContext context);
+
   void execute()
       throws Exception;
 

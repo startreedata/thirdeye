@@ -26,13 +26,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Grouping;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -332,7 +332,7 @@ public class BaselineAggregate implements Baseline {
    */
   private LongSeries toVirtualSeries(long origin, LongSeries timestampSeries) {
     final DateTime dateOrigin = new DateTime(origin, this.timeZone)
-        .withFields(DataSourceUtils.makeOrigin(this.periodType));
+        .withFields(SpiUtils.makeOrigin(this.periodType));
     return timestampSeries.map(this.makeTimestampToVirtualFunction(dateOrigin));
   }
 
@@ -345,7 +345,7 @@ public class BaselineAggregate implements Baseline {
    */
   private LongSeries toTimestampSeries(long origin, LongSeries virtualSeries) {
     final DateTime dateOrigin = new DateTime(origin, this.timeZone)
-        .withFields(DataSourceUtils.makeOrigin(this.periodType));
+        .withFields(SpiUtils.makeOrigin(this.periodType));
     return virtualSeries.map(this.makeVirtualToTimestampFunction(dateOrigin));
   }
 
@@ -358,79 +358,59 @@ public class BaselineAggregate implements Baseline {
    */
   private Series.LongFunction makeTimestampToVirtualFunction(final DateTime origin) {
     if (PeriodType.millis().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          return values[0] - origin.getMillis();
-        }
-      };
+      return values -> values[0] - origin.getMillis();
     } else if (PeriodType.seconds().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
-          long seconds = new Period(origin, dateTime, BaselineAggregate.this.periodType)
-              .getSeconds();
-          long millis = dateTime.getMillisOfSecond();
-          return seconds * 1000L + millis;
-        }
+      return values -> {
+        DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
+        long seconds = new Period(origin, dateTime, BaselineAggregate.this.periodType)
+            .getSeconds();
+        long millis = dateTime.getMillisOfSecond();
+        return seconds * 1000L + millis;
       };
     } else if (PeriodType.minutes().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
-          long minutes = new Period(origin, dateTime, BaselineAggregate.this.periodType)
-              .getMinutes();
-          long seconds = dateTime.getSecondOfMinute();
-          long millis = dateTime.getMillisOfSecond();
-          return minutes * 100000L + seconds * 1000L + millis;
-        }
+      return values -> {
+        DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
+        long minutes = new Period(origin, dateTime, BaselineAggregate.this.periodType)
+            .getMinutes();
+        long seconds = dateTime.getSecondOfMinute();
+        long millis = dateTime.getMillisOfSecond();
+        return minutes * 100000L + seconds * 1000L + millis;
       };
     } else if (PeriodType.hours().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
-          long hours = new Period(origin, dateTime, BaselineAggregate.this.periodType).getHours();
-          long minutes = dateTime.getMinuteOfHour();
-          long seconds = dateTime.getSecondOfMinute();
-          long millis = dateTime.getMillisOfSecond();
-          return hours * 10000000L + minutes * 100000L + seconds * 1000L + millis;
-        }
+      return values -> {
+        DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
+        long hours = new Period(origin, dateTime, BaselineAggregate.this.periodType).getHours();
+        long minutes = dateTime.getMinuteOfHour();
+        long seconds = dateTime.getSecondOfMinute();
+        long millis = dateTime.getMillisOfSecond();
+        return hours * 10000000L + minutes * 100000L + seconds * 1000L + millis;
       };
     } else if (PeriodType.days().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
-          long days = new Period(origin, dateTime, BaselineAggregate.this.periodType).getDays();
-          long hours = dateTime.getHourOfDay();
-          long minutes = dateTime.getMinuteOfHour();
-          long seconds = dateTime.getSecondOfMinute();
-          long millis = dateTime.getMillisOfSecond();
-          return days * 1000000000L + hours * 10000000L + minutes * 100000L + seconds * 1000L
-              + millis;
-        }
+      return values -> {
+        DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
+        long days = new Period(origin, dateTime, BaselineAggregate.this.periodType).getDays();
+        long hours = dateTime.getHourOfDay();
+        long minutes = dateTime.getMinuteOfHour();
+        long seconds = dateTime.getSecondOfMinute();
+        long millis = dateTime.getMillisOfSecond();
+        return days * 1000000000L + hours * 10000000L + minutes * 100000L + seconds * 1000L
+            + millis;
       };
     } else if (PeriodType.months().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
-          long months = new Period(origin, dateTime, BaselineAggregate.this.periodType).getMonths();
-          long days = dateTime.getDayOfMonth() - 1; // workaround for dayOfMonth > 0 constraint
-          if (days == dateTime.dayOfMonth().getMaximumValue() - 1) {
-            days = 99;
-          }
-
-          long hours = dateTime.getHourOfDay();
-          long minutes = dateTime.getMinuteOfHour();
-          long seconds = dateTime.getSecondOfMinute();
-          long millis = dateTime.getMillisOfSecond();
-          return months * 100000000000L + days * 1000000000L + hours * 10000000L + minutes * 100000L
-              + seconds * 1000L + millis;
+      return values -> {
+        DateTime dateTime = new DateTime(values[0], BaselineAggregate.this.timeZone);
+        long months = new Period(origin, dateTime, BaselineAggregate.this.periodType).getMonths();
+        long days = dateTime.getDayOfMonth() - 1; // workaround for dayOfMonth > 0 constraint
+        if (days == dateTime.dayOfMonth().getMaximumValue() - 1) {
+          days = 99;
         }
+
+        long hours = dateTime.getHourOfDay();
+        long minutes = dateTime.getMinuteOfHour();
+        long seconds = dateTime.getSecondOfMinute();
+        long millis = dateTime.getMillisOfSecond();
+        return months * 100000000000L + days * 1000000000L + hours * 10000000L + minutes * 100000L
+            + seconds * 1000L + millis;
       };
     } else {
       throw new IllegalArgumentException(
@@ -447,105 +427,85 @@ public class BaselineAggregate implements Baseline {
    */
   private Series.LongFunction makeVirtualToTimestampFunction(final DateTime origin) {
     if (PeriodType.millis().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          return values[0] + origin.getMillis();
-        }
-      };
+      return values -> values[0] + origin.getMillis();
     } else if (PeriodType.seconds().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          int seconds = (int) (values[0] / 1000L);
-          int millis = (int) (values[0] % 1000L);
-          return origin
-              .plusSeconds(seconds)
-              .plusMillis(millis)
-              .getMillis();
-        }
+      return values -> {
+        int seconds = (int) (values[0] / 1000L);
+        int millis = (int) (values[0] % 1000L);
+        return origin
+            .plusSeconds(seconds)
+            .plusMillis(millis)
+            .getMillis();
       };
     } else if (PeriodType.minutes().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          int minutes = (int) (values[0] / 100000L);
-          int seconds = (int) ((values[0] / 1000L) % 100L);
-          int millis = (int) (values[0] % 1000L);
-          return origin
-              .plusMinutes(minutes)
-              .plusSeconds(seconds)
-              .plusMillis(millis)
-              .getMillis();
-        }
+      return values -> {
+        int minutes = (int) (values[0] / 100000L);
+        int seconds = (int) ((values[0] / 1000L) % 100L);
+        int millis = (int) (values[0] % 1000L);
+        return origin
+            .plusMinutes(minutes)
+            .plusSeconds(seconds)
+            .plusMillis(millis)
+            .getMillis();
       };
     } else if (PeriodType.hours().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          int hours = (int) (values[0] / 10000000L);
-          int minutes = (int) ((values[0] / 100000L) % 100L);
-          int seconds = (int) ((values[0] / 1000L) % 100L);
-          int millis = (int) (values[0] % 1000L);
-          return origin
-              .plusHours(hours)
-              .plusMinutes(minutes)
-              .plusSeconds(seconds)
-              .plusMillis(millis)
-              .getMillis();
-        }
+      return values -> {
+        int hours = (int) (values[0] / 10000000L);
+        int minutes = (int) ((values[0] / 100000L) % 100L);
+        int seconds = (int) ((values[0] / 1000L) % 100L);
+        int millis = (int) (values[0] % 1000L);
+        return origin
+            .plusHours(hours)
+            .plusMinutes(minutes)
+            .plusSeconds(seconds)
+            .plusMillis(millis)
+            .getMillis();
       };
     } else if (PeriodType.days().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          int days = (int) (values[0] / 1000000000L);
-          int hours = (int) ((values[0] / 10000000L) % 100L);
-          int minutes = (int) ((values[0] / 100000L) % 100L);
-          int seconds = (int) ((values[0] / 1000L) % 100L);
-          int millis = (int) (values[0] % 1000L);
-          return origin
-              .plusDays(days)
-              .plusHours(hours)
-              .plusMinutes(minutes)
-              .plusSeconds(seconds)
-              .plusMillis(millis)
-              .getMillis();
-        }
+      return values -> {
+        int days = (int) (values[0] / 1000000000L);
+        int hours = (int) ((values[0] / 10000000L) % 100L);
+        int minutes = (int) ((values[0] / 100000L) % 100L);
+        int seconds = (int) ((values[0] / 1000L) % 100L);
+        int millis = (int) (values[0] % 1000L);
+        return origin
+            .plusDays(days)
+            .plusHours(hours)
+            .plusMinutes(minutes)
+            .plusSeconds(seconds)
+            .plusMillis(millis)
+            .getMillis();
       };
     } else if (PeriodType.months().equals(this.periodType)) {
-      return new Series.LongFunction() {
-        @Override
-        public long apply(long... values) {
-          int months = (int) (values[0] / 100000000000L);
-          int days = (int) ((values[0] / 1000000000L) % 100L);
-          int hours = (int) ((values[0] / 10000000L) % 100L);
-          int minutes = (int) ((values[0] / 100000L) % 100L);
-          int seconds = (int) ((values[0] / 1000L) % 100L);
-          int millis = (int) (values[0] % 1000L);
+      return values -> {
+        int months = (int) (values[0] / 100000000000L);
+        int days = (int) ((values[0] / 1000000000L) % 100L);
+        int hours = (int) ((values[0] / 10000000L) % 100L);
+        int minutes = (int) ((values[0] / 100000L) % 100L);
+        int seconds = (int) ((values[0] / 1000L) % 100L);
+        int millis = (int) (values[0] % 1000L);
 
-          DateTime originPlusMonth = origin.plusMonths(months);
+        DateTime originPlusMonth = origin.plusMonths(months);
 
-          // last day of source month
-          if (days >= 99) {
-            days = originPlusMonth.dayOfMonth().getMaximumValue() - 1;
-          }
-
-          // unsupported destination day (e.g. 31st of Feb)
-          if (originPlusMonth.dayOfMonth().getMaximumValue()
-              < originPlusMonth.getDayOfMonth() + days) {
-            return LongSeries.NULL;
-          }
-
-          DateTime target = originPlusMonth
-              .plusDays(days)
-              .plusHours(hours)
-              .plusMinutes(minutes)
-              .plusSeconds(seconds)
-              .plusMillis(millis);
-
-          return target.getMillis();
+        // last day of source month
+        if (days >= 99) {
+          days = originPlusMonth.dayOfMonth().getMaximumValue() - 1;
         }
+
+        // unsupported destination day (e.g. 31st of Feb)
+        if (originPlusMonth.dayOfMonth().getMaximumValue()
+            < originPlusMonth.getDayOfMonth() + days) {
+          return LongSeries.NULL;
+        }
+
+        DateTime target = originPlusMonth
+            .plusDays(days)
+            .plusHours(hours)
+            .plusMinutes(minutes)
+            .plusSeconds(seconds)
+            .plusMillis(millis);
+
+        return target.getMillis();
       };
     } else {
       throw new IllegalArgumentException(

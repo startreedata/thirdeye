@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
-import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
@@ -35,6 +34,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -83,7 +83,7 @@ public class ThirdEyeResultSetUtils {
       TimeSpec dataTimeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 
       long startTime = request.getStartTimeInclusive().getMillis();
-      DateTimeZone dateTimeZone = DataSourceUtils.getDateTimeZone(datasetConfig);
+      DateTimeZone dateTimeZone = SpiUtils.getDateTimeZone(datasetConfig);
       DateTime startDateTime = new DateTime(startTime, dateTimeZone);
 
       TimeGranularity dataGranularity = dataTimeSpec.getDataGranularity();
@@ -126,7 +126,7 @@ public class ThirdEyeResultSetUtils {
                   skipRowDueToError = true;
                   break;
                 }
-                timeBucket = TimeRangeUtils
+                timeBucket = SpiUtils
                     .computeBucketIndex(request.getGroupByTimeGranularity(), startDateTime,
                         new DateTime(millis, dateTimeZone));
                 groupKeyVal = String.valueOf(timeBucket);

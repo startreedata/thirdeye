@@ -19,8 +19,8 @@ package org.apache.pinot.thirdeye.datasource.pinot;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
+import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

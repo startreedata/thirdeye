@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomaly.override.OverrideConfigHelper;
-import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
 import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
@@ -45,7 +44,7 @@ public class DatalayerTestUtils {
     datasetConfigDTO.setTimeDuration(1);
     datasetConfigDTO.setTimeUnit(TimeUnit.HOURS);
     datasetConfigDTO.setActive(true);
-    datasetConfigDTO.setDataSource(PinotThirdEyeDataSource.class.getSimpleName());
+    datasetConfigDTO.setDataSource("PinotThirdEyeDataSource");
     datasetConfigDTO.setLastRefreshTime(System.currentTimeMillis());
     return datasetConfigDTO;
   }

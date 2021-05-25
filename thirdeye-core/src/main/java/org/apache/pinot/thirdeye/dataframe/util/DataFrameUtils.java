@@ -25,10 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.dashboard.Utils;
-import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -45,6 +43,7 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponseRow;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -190,10 +189,6 @@ public class DataFrameUtils {
    * @param rc RequestContainer
    * @param thirdEyeCacheRegistry
    * @return response as dataframe
-   * @see DataFrameUtils#makeAggregateRequest(MetricSlice, List, int, String, MetricConfigManager,
-   *     DatasetConfigManager)
-   * @see DataFrameUtils#makeTimeSeriesRequest(MetricSlice, String, MetricConfigManager,
-   *     DatasetConfigManager)
    */
   public static DataFrame evaluateResponse(ThirdEyeResponse response, RequestContainer rc,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
@@ -212,8 +207,6 @@ public class DataFrameUtils {
    * @param rc TimeSeriesRequestContainer
    * @param thirdEyeCacheRegistry
    * @return response as dataframe
-   * @see DataFrameUtils#makeTimeSeriesRequest(MetricSlice, String, MetricConfigManager,
-   *     DatasetConfigManager)
    */
   public static DataFrame evaluateResponse(ThirdEyeResponse response, TimeSeriesRequestContainer rc,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
@@ -281,8 +274,8 @@ public class DataFrameUtils {
     Period period = granularity.toPeriod();
 
     DateTime start = new DateTime(slice.start, timezone)
-        .withFields(DataSourceUtils.makeOrigin(period.getPeriodType()));
-    DateTime end = new DateTime(slice.end, timezone).withFields(DataSourceUtils.makeOrigin(period.getPeriodType()));
+        .withFields(SpiUtils.makeOrigin(period.getPeriodType()));
+    DateTime end = new DateTime(slice.end, timezone).withFields(SpiUtils.makeOrigin(period.getPeriodType()));
 
     MetricSlice alignedSlice = MetricSlice
         .from(slice.metricId, start.getMillis(), end.getMillis(), slice.filters, slice.granularity);
@@ -337,8 +330,8 @@ public class DataFrameUtils {
     Period period = granularity.toPeriod();
 
     DateTime start = new DateTime(slice.start, timezone)
-        .withFields(DataSourceUtils.makeOrigin(period.getPeriodType()));
-    DateTime end = new DateTime(slice.end, timezone).withFields(DataSourceUtils.makeOrigin(period.getPeriodType()));
+        .withFields(SpiUtils.makeOrigin(period.getPeriodType()));
+    DateTime end = new DateTime(slice.end, timezone).withFields(SpiUtils.makeOrigin(period.getPeriodType()));
 
     ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, dataset, expressions,
         thirdEyeCacheRegistry
@@ -440,79 +433,6 @@ public class DataFrameUtils {
         .setFilterSet(slice.filters)
         .setMetricFunctions(functions)
         .setDataSource(dataset.getDataSource());
-  }
-
-  /**
-   * Reads in a ThirdEyeResultSetGroup and returns it as a DataFrame.
-   * <br/><b>NOTE:</b> This code duplicates DataFrame.fromPinotResult() due to lack of interfaces in
-   * pinot
-   *
-   * @param resultSetGroup pinot query result
-   * @return Pinot query result as DataFrame
-   * @throws IllegalArgumentException if the result cannot be parsed
-   */
-  public static DataFrame fromThirdEyeResult(ThirdEyeResultSetGroup resultSetGroup) {
-    if (resultSetGroup.size() <= 0) {
-      throw new IllegalArgumentException("Query did not return any results");
-    }
-
-    if (resultSetGroup.size() == 1) {
-      ThirdEyeResultSet resultSet = resultSetGroup.getResultSets().get(0);
-
-      if (resultSet.getColumnCount() == 1 && resultSet.getRowCount() == 0) {
-        // empty result
-        return new DataFrame();
-      } else if (resultSet.getColumnCount() == 1 && resultSet.getRowCount() == 1
-          && resultSet.getGroupKeyLength() == 0) {
-        // aggregation result
-
-        DataFrame df = new DataFrame();
-        String function = resultSet.getColumnName(0);
-        String value = resultSet.getString(0, 0);
-        df.addSeries(function, DataFrame.toSeries(value));
-        return df;
-      } else if (resultSet.getColumnCount() >= 1 && resultSet.getGroupKeyLength() == 0) {
-        // selection result
-
-        DataFrame df = new DataFrame();
-        for (int i = 0; i < resultSet.getColumnCount(); i++) {
-          df.addSeries(resultSet.getColumnName(i), makeSelectionSeries(resultSet, i));
-        }
-        return df;
-      }
-    }
-
-    // group by result
-    ThirdEyeResultSet firstResultSet = resultSetGroup.getResultSets().get(0);
-    String[] groupKeyNames = new String[firstResultSet.getGroupKeyLength()];
-    for (int i = 0; i < firstResultSet.getGroupKeyLength(); i++) {
-      groupKeyNames[i] = firstResultSet.getGroupKeyColumnName(i);
-    }
-
-    DataFrame df = new DataFrame();
-    for (String groupKeyName : groupKeyNames) {
-      df.addSeries(groupKeyName, StringSeries.empty());
-    }
-    df.setIndex(groupKeyNames);
-
-    for (int i = 0; i < resultSetGroup.size(); i++) {
-      ThirdEyeResultSet resultSet = resultSetGroup.getResultSets().get(i);
-      String function = resultSet.getColumnName(0);
-
-      // group keys
-      DataFrame dfColumn = new DataFrame();
-      for (int j = 0; j < resultSet.getGroupKeyLength(); j++) {
-        dfColumn.addSeries(groupKeyNames[j], makeGroupByGroupSeries(resultSet, j));
-      }
-      dfColumn.setIndex(groupKeyNames);
-
-      // values
-      dfColumn.addSeries(function, makeGroupByValueSeries(resultSet));
-
-      df = df.joinOuter(dfColumn);
-    }
-
-    return df;
   }
 
   private static Series makeSelectionSeries(ThirdEyeResultSet resultSet, int colIndex) {

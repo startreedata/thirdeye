@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.rootcause.impl;
+package org.apache.pinot.thirdeye.rca;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -54,6 +54,7 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.apache.pinot.thirdeye.rootcause.RCAFrameworkExecutionResult;
+import org.apache.pinot.thirdeye.rootcause.impl.RCAFrameworkLoader;
 import org.apache.pinot.thirdeye.spi.rootcause.Entity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.TimeRangeEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;

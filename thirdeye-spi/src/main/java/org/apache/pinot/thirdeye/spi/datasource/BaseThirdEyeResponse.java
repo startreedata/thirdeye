@@ -17,16 +17,12 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource;
+package org.apache.pinot.thirdeye.spi.datasource;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponseRow;
 
 public abstract class BaseThirdEyeResponse implements ThirdEyeResponse {
 

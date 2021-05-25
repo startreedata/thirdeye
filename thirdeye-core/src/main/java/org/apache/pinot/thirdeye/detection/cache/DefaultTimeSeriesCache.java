@@ -29,9 +29,7 @@ import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
-import org.apache.pinot.thirdeye.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
@@ -40,9 +38,11 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -190,8 +190,9 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
     DateTimeZone timeZone = DateTimeZone.forID(datasetDTO.getTimezone());
 
     for (TimeSeriesDataPoint dataPoint : cacheResponse.getTimeSeriesRows()) {
-      int timeBucketIndex = TimeRangeUtils.computeBucketIndex(
-          request.getGroupByTimeGranularity(), request.getStartTimeInclusive(),
+      int timeBucketIndex = SpiUtils.computeBucketIndex(
+          request.getGroupByTimeGranularity(),
+          request.getStartTimeInclusive(),
           new DateTime(dataPoint.getTimestamp(), timeZone));
 
       String[] row = new String[2];

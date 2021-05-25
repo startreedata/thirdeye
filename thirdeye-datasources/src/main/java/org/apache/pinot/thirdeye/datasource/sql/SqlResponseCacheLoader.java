@@ -41,6 +41,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -320,7 +321,7 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     String dataset = datasetConfig.getName();
     LOG.info("Getting max data time for " + dataset);
     TimeSpec timeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
-    DateTimeZone timeZone = DataSourceUtils.getDateTimeZone(datasetConfig);
+    DateTimeZone timeZone = SpiUtils.getDateTimeZone(datasetConfig);
     long maxTime = 0;
 
     String sourceName = dataset.split("\\.")[0];

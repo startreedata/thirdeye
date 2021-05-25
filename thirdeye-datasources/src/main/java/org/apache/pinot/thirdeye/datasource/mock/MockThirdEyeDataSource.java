@@ -42,7 +42,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import org.apache.pinot.thirdeye.datasource.sql.SqlDataset;
 import org.apache.pinot.thirdeye.datasource.sql.SqlResponseCacheLoader;
@@ -58,6 +57,7 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -363,7 +363,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
     double weekly = MapUtils.getDoubleValue(config, "weekly", daily);
     NormalDistribution dist = new NormalDistribution(mean, std);
 
-    DateTime origin = start.withFields(DataSourceUtils.makeOrigin(PeriodType.days()));
+    DateTime origin = start.withFields(SpiUtils.makeOrigin(PeriodType.days()));
     while (origin.isBefore(end)) {
       if (origin.isBefore(start)) {
         origin = origin.plus(interval);

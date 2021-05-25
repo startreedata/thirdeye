@@ -34,6 +34,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
+import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
+import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
+import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
+import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
+import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
+import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
+import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
+import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
@@ -43,27 +56,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
-import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.datasource.cache.MetricDataset;
-import org.apache.pinot.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
-import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
-import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
-import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
-import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.EventSlice;
 import org.testng.Assert;
@@ -82,6 +82,100 @@ public class DataProviderTest {
   private List<Long> metricIds;
   private List<Long> datasetIds;
   private List<Long> detectionIds;
+
+  private static MergedAnomalyResultDTO makeAnomaly(Long id, Long configId, long start, long end,
+      Iterable<String> filterStrings) {
+    MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+    anomaly.setDetectionConfigId(configId);
+    anomaly.setStartTime(start);
+    anomaly.setEndTime(end);
+    anomaly.setId(id);
+    anomaly.setChildIds(new HashSet<>());
+    anomaly.setType(AnomalyType.DEVIATION);
+
+    StringBuilder filterUrn = new StringBuilder();
+    for (String fs : filterStrings) {
+      filterUrn.append(":").append(fs);
+    }
+
+    anomaly.setMetricUrn("thirdeye:metric:1234" + filterUrn.toString());
+    return anomaly;
+  }
+
+  private static EventDTO makeEvent(long start, long end) {
+    return makeEvent(null, start, end, Collections.emptyList());
+  }
+
+  //
+  // metric
+  //
+
+  private static EventDTO makeEvent(long start, long end, Iterable<String> filterStrings) {
+    return makeEvent(null, start, end, filterStrings);
+  }
+
+  private static EventDTO makeEvent(Long id, long start, long end, Iterable<String> filterStrings) {
+    EventDTO event = new EventDTO();
+    event.setId(id);
+    event.setName(String.format("event-%d-%d", start, end));
+    event.setStartTime(start);
+    event.setEndTime(end);
+
+    Map<String, List<String>> filters = new HashMap<>();
+    for (String fs : filterStrings) {
+      String[] parts = fs.split("=");
+      if (!filters.containsKey(parts[0])) {
+        filters.put(parts[0], new ArrayList<String>());
+      }
+      filters.get(parts[0]).add(parts[1]);
+    }
+
+    event.setTargetDimensionMap(filters);
+
+    return event;
+  }
+
+  private static EventSlice makeEventSlice(long start, long end, Iterable<String> filterStrings) {
+    SetMultimap<String, String> filters = HashMultimap.create();
+    for (String fs : filterStrings) {
+      String[] parts = fs.split("=");
+      filters.put(parts[0], parts[1]);
+    }
+    return new EventSlice(start, end, filters);
+  }
+
+  private static AnomalySlice makeAnomalySlice(long start, long end,
+      Iterable<String> filterStrings) {
+    SetMultimap<String, String> filters = HashMultimap.create();
+    for (String fs : filterStrings) {
+      String[] parts = fs.split("=");
+      filters.put(parts[0], parts[1]);
+    }
+    return new AnomalySlice().withStart(start).withEnd(end).withFilters(filters);
+  }
+
+  //
+  // datasets
+  //
+
+  private static MetricConfigDTO makeMetric(Long id, String metric, String dataset) {
+    MetricConfigDTO metricDTO = new MetricConfigDTO();
+    metricDTO.setId(id);
+    metricDTO.setName(metric);
+    metricDTO.setDataset(dataset);
+    metricDTO.setAlias(dataset + "::" + metric);
+    return metricDTO;
+  }
+
+  private static DatasetConfigDTO makeDataset(Long id, String dataset) {
+    DatasetConfigDTO datasetDTO = new DatasetConfigDTO();
+    datasetDTO.setId(id);
+    datasetDTO.setDataSource("myDataSource");
+    datasetDTO.setDataset(dataset);
+    datasetDTO.setTimeDuration(3600000);
+    datasetDTO.setTimeUnit(TimeUnit.MILLISECONDS);
+    return datasetDTO;
+  }
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
@@ -195,7 +289,6 @@ public class DataProviderTest {
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);
     cacheRegistry.registerDatasetMaxDataTimeCache(mockDatasetMaxDataTimeCache);
 
-
     // aggregation loader
     final AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO,
         datasetDAO,
@@ -221,14 +314,14 @@ public class DataProviderTest {
         new AnomaliesCacheBuilder(anomalyDAO, CacheConfig.getInstance()));
   }
 
+  //
+  // events
+  //
+
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     this.testBase.cleanup();
   }
-
-  //
-  // metric
-  //
 
   @Test
   public void testMetricInvalid() {
@@ -243,6 +336,10 @@ public class DataProviderTest {
     Assert.assertNotNull(metric);
     Assert.assertEquals(metric, makeMetric(this.metricIds.get(1), "myMetric2", "myDataset2"));
   }
+
+  //
+  // anomalies
+  //
 
   @Test
   public void testMetricMultiple() {
@@ -265,10 +362,6 @@ public class DataProviderTest {
     Assert.assertEquals(aggregates.keySet().size(), 1);
   }
 
-  //
-  // datasets
-  //
-
   @Test
   public void testDatasetInvalid() {
     Assert.assertTrue(this.provider.fetchDatasets(Collections.singleton("invalid")).isEmpty());
@@ -283,6 +376,10 @@ public class DataProviderTest {
     Assert.assertEquals(dataset, makeDataset(this.datasetIds.get(0), "myDataset1"));
   }
 
+  //
+  // utils
+  //
+
   @Test
   public void testDatasetMultiple() {
     Collection<DatasetConfigDTO> datasets = this.provider
@@ -292,10 +389,6 @@ public class DataProviderTest {
     Assert.assertTrue(datasets.contains(makeDataset(this.datasetIds.get(0), "myDataset1")));
     Assert.assertTrue(datasets.contains(makeDataset(this.datasetIds.get(1), "myDataset2")));
   }
-
-  //
-  // events
-  //
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testEventInvalid() {
@@ -329,10 +422,6 @@ public class DataProviderTest {
     Assert.assertTrue(events.contains(
         makeEvent(this.eventIds.get(3), 604800000L, 1209600000L, Arrays.asList("b=2", "c=3"))));
   }
-
-  //
-  // anomalies
-  //
 
   @Test(expectedExceptions = RuntimeException.class)
   public void testAnomalyInvalid() {
@@ -391,95 +480,5 @@ public class DataProviderTest {
     Assert.assertFalse(anomalies.contains(
         makeAnomaly(this.anomalyIds.get(5), detectionIds.get(1), 14400000L, 18000000L,
             Arrays.asList("a=1", "a=3", "c=3"))));
-  }
-
-  //
-  // utils
-  //
-
-  private static MergedAnomalyResultDTO makeAnomaly(Long id, Long configId, long start, long end,
-      Iterable<String> filterStrings) {
-    MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
-    anomaly.setDetectionConfigId(configId);
-    anomaly.setStartTime(start);
-    anomaly.setEndTime(end);
-    anomaly.setId(id);
-    anomaly.setChildIds(new HashSet<>());
-    anomaly.setType(AnomalyType.DEVIATION);
-
-    StringBuilder filterUrn = new StringBuilder();
-    for (String fs : filterStrings) {
-      filterUrn.append(":").append(fs);
-    }
-
-    anomaly.setMetricUrn("thirdeye:metric:1234" + filterUrn.toString());
-    return anomaly;
-  }
-
-  private static EventDTO makeEvent(long start, long end) {
-    return makeEvent(null, start, end, Collections.emptyList());
-  }
-
-  private static EventDTO makeEvent(long start, long end, Iterable<String> filterStrings) {
-    return makeEvent(null, start, end, filterStrings);
-  }
-
-  private static EventDTO makeEvent(Long id, long start, long end, Iterable<String> filterStrings) {
-    EventDTO event = new EventDTO();
-    event.setId(id);
-    event.setName(String.format("event-%d-%d", start, end));
-    event.setStartTime(start);
-    event.setEndTime(end);
-
-    Map<String, List<String>> filters = new HashMap<>();
-    for (String fs : filterStrings) {
-      String[] parts = fs.split("=");
-      if (!filters.containsKey(parts[0])) {
-        filters.put(parts[0], new ArrayList<String>());
-      }
-      filters.get(parts[0]).add(parts[1]);
-    }
-
-    event.setTargetDimensionMap(filters);
-
-    return event;
-  }
-
-  private static EventSlice makeEventSlice(long start, long end, Iterable<String> filterStrings) {
-    SetMultimap<String, String> filters = HashMultimap.create();
-    for (String fs : filterStrings) {
-      String[] parts = fs.split("=");
-      filters.put(parts[0], parts[1]);
-    }
-    return new EventSlice(start, end, filters);
-  }
-
-  private static AnomalySlice makeAnomalySlice(long start, long end,
-      Iterable<String> filterStrings) {
-    SetMultimap<String, String> filters = HashMultimap.create();
-    for (String fs : filterStrings) {
-      String[] parts = fs.split("=");
-      filters.put(parts[0], parts[1]);
-    }
-    return new AnomalySlice().withStart(start).withEnd(end).withFilters(filters);
-  }
-
-  private static MetricConfigDTO makeMetric(Long id, String metric, String dataset) {
-    MetricConfigDTO metricDTO = new MetricConfigDTO();
-    metricDTO.setId(id);
-    metricDTO.setName(metric);
-    metricDTO.setDataset(dataset);
-    metricDTO.setAlias(dataset + "::" + metric);
-    return metricDTO;
-  }
-
-  private static DatasetConfigDTO makeDataset(Long id, String dataset) {
-    DatasetConfigDTO datasetDTO = new DatasetConfigDTO();
-    datasetDTO.setId(id);
-    datasetDTO.setDataSource("myDataSource");
-    datasetDTO.setDataset(dataset);
-    datasetDTO.setTimeDuration(3600000);
-    datasetDTO.setTimeUnit(TimeUnit.MILLISECONDS);
-    return datasetDTO;
   }
 }

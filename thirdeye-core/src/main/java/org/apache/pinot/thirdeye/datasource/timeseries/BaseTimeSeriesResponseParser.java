@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
-import org.apache.pinot.thirdeye.datasource.TimeRangeUtils;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponseRow;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 
 public abstract class BaseTimeSeriesResponseParser implements TimeSeriesResponseParser {
@@ -138,6 +138,6 @@ public abstract class BaseTimeSeriesResponseParser implements TimeSeriesResponse
     DateTime start = request.getStartTimeInclusive();
     DateTime end = request.getEndTimeExclusive();
     TimeGranularity timeGranularity = request.getGroupByTimeGranularity();
-    return TimeRangeUtils.computeTimeRanges(timeGranularity, start, end);
+    return SpiUtils.computeTimeRanges(timeGranularity, start, end);
   }
 }

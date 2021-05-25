@@ -8,12 +8,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
-import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.MockGrouper;
@@ -22,6 +17,10 @@ import org.apache.pinot.thirdeye.detection.components.ThresholdRuleAnomalyFilter
 import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.detection.components.ThresholdSeverityLabeler;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -64,7 +63,7 @@ public class DetectionConfigTranslatorTest {
     datasetConfigDTO.setDataset("test_dataset");
     datasetConfigDTO.setTimeUnit(TimeUnit.DAYS);
     datasetConfigDTO.setTimeDuration(1);
-    datasetConfigDTO.setDataSource(PinotThirdEyeDataSource.class.getSimpleName());
+    datasetConfigDTO.setDataSource("PinotThirdEyeDataSource");
     daoRegistry.getDatasetConfigDAO().save(datasetConfigDTO);
 
     this.yaml = new Yaml();

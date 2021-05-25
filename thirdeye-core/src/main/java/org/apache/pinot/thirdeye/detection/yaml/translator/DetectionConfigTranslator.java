@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DataQualityPropertiesBuilder;
 import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder;
@@ -153,6 +152,13 @@ public class DetectionConfigTranslator extends
         provider);
   }
 
+  private static long longValue(final Object o) {
+    if (o instanceof Number) {
+      return ((Number) o).longValue();
+    }
+    return -1;
+  }
+
   @Override
   AlertDTO translateConfig() {
     Map<String, Object> yamlConfigMap = ConfigUtils.getMap(this.yaml.load(yamlConfig));
@@ -221,16 +227,9 @@ public class DetectionConfigTranslator extends
         && datasetConfigs.stream()
         .allMatch(c -> c.bucketTimeGranularity().getUnit().equals(TimeUnit.DAYS))
         && datasetConfigs.stream()
-        .allMatch(c -> c.getDataSource().equals(PinotThirdEyeDataSource.class.getSimpleName()))) {
+        .allMatch(c -> c.getDataSource().equals("PinotThirdEyeDataSource"))) {
       config.setDataAvailabilitySchedule(true);
     }
     return config;
-  }
-
-  private static long longValue(final Object o) {
-    if (o instanceof Number) {
-      return ((Number) o).longValue();
-    }
-    return -1;
   }
 }

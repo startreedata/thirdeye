@@ -27,13 +27,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -132,7 +132,7 @@ public class Utils {
       datasetConfig = thirdEyeCacheRegistry.getDatasetConfigCache().get(collection); } catch (ExecutionException e) {
       LOG.error("Exception while getting dataset config for {}", collection);
     }
-    return DataSourceUtils.getDateTimeZone(datasetConfig);
+    return SpiUtils.getDateTimeZone(datasetConfig);
   }
 
   public static <T> List<T> sublist(List<T> input, int startIndex, int length) {

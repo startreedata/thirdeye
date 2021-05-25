@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -33,7 +34,7 @@ public class TestTimeRangeUtils {
   @Test(dataProvider = "computeTimeRanges")
   public void computeTimeRanges(TimeGranularity granularity, DateTime start, DateTime end,
       List<Range<DateTime>> expected) {
-    List<Range<DateTime>> actual = TimeRangeUtils.computeTimeRanges(granularity, start, end);
+    List<Range<DateTime>> actual = SpiUtils.computeTimeRanges(granularity, start, end);
     Assert.assertEquals(actual, expected);
   }
 

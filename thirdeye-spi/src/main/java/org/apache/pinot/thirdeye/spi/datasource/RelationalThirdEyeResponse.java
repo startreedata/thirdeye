@@ -17,18 +17,14 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource;
+package org.apache.pinot.thirdeye.spi.datasource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.client.TextTable;
 import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
-import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponseRow;
 
 public class RelationalThirdEyeResponse extends BaseThirdEyeResponse {
 
@@ -82,16 +78,6 @@ public class RelationalThirdEyeResponse extends BaseThirdEyeResponse {
     rowMap.put(metricFunction.toString(), rowValues[metricFuncToIdMapping.get(metricFunction)]);
     rowMap.put(Constants.TIMESTAMP, rowValues[rowValues.length - 1]);
     return rowMap;
-  }
-
-  @Override
-  public String toString() {
-    TextTable textTable = new TextTable();
-    textTable.addHeader(allColumnNames);
-    for (String[] row : rows) {
-      textTable.addRow(row);
-    }
-    return textTable.toString();
   }
 
   @Override

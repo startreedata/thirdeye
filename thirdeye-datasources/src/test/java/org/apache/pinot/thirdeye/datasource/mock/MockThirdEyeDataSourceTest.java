@@ -47,7 +47,7 @@ public class MockThirdEyeDataSourceTest {
 
       this.dataSource = new MockThirdEyeDataSource();
       this.dataSource.init(new ThirdEyeDataSourceContext()
-      .setProperties(config.get("dataSourceConfigs").get(0).get("properties")));
+          .setProperties(config.get("dataSourceConfigs").get(0).get("properties")));
     }
   }
 

@@ -118,7 +118,7 @@ public class RCAFrameworkLoader {
     return frameworks;
   }
 
-  List<Pipeline> getPipelinesFromConfig(String frameworkName) {
+  public List<Pipeline> getPipelinesFromConfig(String frameworkName) {
     return getPipelines(frameworkName, configurationHolder.getPath());
   }
 

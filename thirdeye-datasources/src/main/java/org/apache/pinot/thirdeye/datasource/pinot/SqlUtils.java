@@ -43,7 +43,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.spi.utils.GroovyTemplateUtils;
-import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
@@ -53,6 +52,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean.DimensionAsMetricProperties;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -355,7 +355,7 @@ public class SqlUtils {
     // we maintain this behavior for backward compatibility.
 
     DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(timeFormat)
-        .withZone(DataSourceUtils.getDateTimeZone(datasetConfig));
+        .withZone(SpiUtils.getDateTimeZone(datasetConfig));
     String startUnits = inputDataDateTimeFormatter.print(start);
     String endUnits = inputDataDateTimeFormatter.print(endExclusive);
 

@@ -5,7 +5,6 @@ import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
-import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
@@ -20,7 +19,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
-import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 @Api(tags = "Metric")
 @Singleton
@@ -31,7 +29,9 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
   private final MetricConfigManager metricConfigManager;
 
   @Inject
-  public MetricResource(final AuthService authService, final MetricConfigManager metricConfigManager, final DatasetConfigManager datasetConfigManager) {
+  public MetricResource(final AuthService authService,
+      final MetricConfigManager metricConfigManager,
+      final DatasetConfigManager datasetConfigManager) {
     super(authService, metricConfigManager, ImmutableMap.of());
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
@@ -44,26 +44,15 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
     ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
     ensure(this.metricConfigManager.findByMetricName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME);
 
-    final MetricConfigDTO dto = ApiBeanMapper.toMetricConfigDto(api);
-    dto.setAlias(SpiUtils.constructMetricAlias(api.getDataset().getName(), api.getName()));
+    final MetricConfigDTO dto = toDto(api);
     dto.setCreatedBy(principal.getName());
-    dto.setDatasetConfig(ApiBeanMapper.toDatasetConfigDto(api.getDataset()));
 
     return dto;
   }
 
   @Override
-  protected MetricConfigDTO updateDto(final ThirdEyePrincipal principal, final MetricApi api) {
-    final Long id = api.getId();
-    final MetricConfigDTO dto = get(id);
-    optional(api.getName()).ifPresent(dto::setName);
-    optional(api.getDerivedMetricExpression()).ifPresent(dto::setDerivedMetricExpression);
-    optional(api.getRollupThreshold()).ifPresent(dto::setRollupThreshold);
-    optional(api.getActive()).ifPresent(dto::setActive);
-    optional(api.getViews()).ifPresent(dto::setViews);
-    optional(api.getWhere()).ifPresent(dto::setWhere);
-    optional(api.getAggregationFunction()).ifPresent(dto::setDefaultAggFunction);
-    return dto;
+  protected MetricConfigDTO toDto(final MetricApi api) {
+    return ApiBeanMapper.toMetricConfigDto(api);
   }
 
   @Override

@@ -9,7 +9,7 @@ import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.LogicalView;
 
 @JsonInclude(Include.NON_NULL)
-public class MetricApi implements ThirdEyeApi {
+public class MetricApi implements ThirdEyeCrudApi<MetricApi> {
 
   private Long id;
   private String name;

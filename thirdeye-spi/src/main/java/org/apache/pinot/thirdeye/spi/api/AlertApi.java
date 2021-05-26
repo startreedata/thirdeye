@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
-public class AlertApi implements ThirdEyeApi {
+public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
 
   private Long id;
   private String name;

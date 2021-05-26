@@ -1,7 +1,5 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
-
 import com.google.common.collect.ImmutableMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,19 +29,14 @@ public class ApplicationResource extends CrudResource<ApplicationApi, Applicatio
 
   @Override
   protected ApplicationDTO createDto(final ThirdEyePrincipal principal, final ApplicationApi api) {
-    final ApplicationDTO dto = ApiBeanMapper.toApplicationDto(api);
+    final ApplicationDTO dto = toDto(api);
     dto.setCreatedBy(principal.getName());
     return dto;
   }
 
   @Override
-  protected ApplicationDTO updateDto(final ThirdEyePrincipal principal, final ApplicationApi api) {
-    final Long id = api.getId();
-    final ApplicationDTO dto = get(id);
-
-    optional(api.getName())
-        .ifPresent(dto::setApplication);
-    return dto;
+  protected ApplicationDTO toDto(final ApplicationApi api) {
+    return ApiBeanMapper.toApplicationDto(api);
   }
 
   @Override

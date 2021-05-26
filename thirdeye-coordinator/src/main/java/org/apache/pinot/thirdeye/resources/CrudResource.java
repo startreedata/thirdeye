@@ -8,6 +8,8 @@ import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_E
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -27,14 +29,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.pinot.thirdeye.DaoFilterBuilder;
 import org.apache.pinot.thirdeye.auth.AuthService;
-import org.apache.pinot.thirdeye.spi.api.ThirdEyeApi;
+import org.apache.pinot.thirdeye.spi.api.ThirdEyeCrudApi;
 import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AbstractManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class CrudResource<ApiT extends ThirdEyeApi, DtoT extends AbstractDTO> {
+public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT extends AbstractDTO> {
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
@@ -54,7 +56,25 @@ public abstract class CrudResource<ApiT extends ThirdEyeApi, DtoT extends Abstra
 
   protected abstract DtoT createDto(final ThirdEyePrincipal principal, final ApiT api);
 
-  protected abstract DtoT updateDto(final ThirdEyePrincipal principal, final ApiT api);
+  protected DtoT updateDto(final ThirdEyePrincipal principal, final ApiT api) {
+    final Long id = ensureExists(api.getId(), ERR_MISSING_ID);
+    final DtoT existing = ensureExists(dtoManager.findById(id));
+
+    final DtoT updated = toDto(api);
+    updated
+        .setId(id)
+        .setCreateTime(existing.getCreateTime())
+        .setCreatedBy(existing.getCreatedBy())
+        .setUpdatedBy(principal.getName())
+        .setUpdateTime(new Timestamp(new Date().getTime()));
+
+    dtoManager.update(updated);
+    return updated;
+  }
+
+  protected DtoT toDto(final ApiT api) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
 
   protected abstract ApiT toApi(final DtoT dto);
 

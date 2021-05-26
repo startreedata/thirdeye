@@ -210,6 +210,7 @@ public abstract class ApiBeanMapper {
     dto.setId(api.getId());
     dto
         .setName(api.getName())
+        .setAlias(SpiUtils.constructMetricAlias(api.getDataset().getName(), api.getName()))
         .setDataset(optional(api.getDataset())
             .map(DatasetApi::getName)
             .orElse(null))

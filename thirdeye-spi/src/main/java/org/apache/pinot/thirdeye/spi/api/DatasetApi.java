@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
-public class DatasetApi implements ThirdEyeApi {
+public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
 
   private Long id;
   private String name;

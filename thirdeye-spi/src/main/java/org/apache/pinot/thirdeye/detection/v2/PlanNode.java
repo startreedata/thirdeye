@@ -8,6 +8,14 @@ import org.apache.pinot.thirdeye.api.v2.DetectionPlanApi.InputApi;
  * The <code>PlanNode</code> is a single execution plan node inside the Plan tree.
  */
 public interface PlanNode {
+
+  /**
+   * Initialize PlanNode with Context.
+   *
+   * @param planNodeContext
+   */
+  void init(PlanNodeContext planNodeContext);
+
   /**
    *
    * @return unique PlanNode name

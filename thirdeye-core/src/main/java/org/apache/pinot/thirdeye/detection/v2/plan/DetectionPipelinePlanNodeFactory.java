@@ -19,24 +19,38 @@
 
 package org.apache.pinot.thirdeye.detection.v2.plan;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.api.v2.DetectionPlanApi;
+import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.PlanNode;
+import org.apache.pinot.thirdeye.detection.v2.PlanNodeContext;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class DetectionPipelinePlanNodeFactory {
 
-  protected static final Logger LOG = LoggerFactory.getLogger(DetectionPipelinePlanNodeFactory.class);
-  private static final Map<String, Class<? extends PlanNode>> PLAN_NODE_TYPE_TO_CLASS_MAP = new HashMap<>();
   public static final String V2_DETECTION_PLAN_PACKAGE_NAME = "org.apache.pinot.thirdeye.detection.v2.plan";
+  public static final String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
+  protected static final Logger LOG = LoggerFactory.getLogger(DetectionPipelinePlanNodeFactory.class);
+  private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap = new HashMap<>();
+  private final DataSourceCache dataSourceCache;
 
-  static {
+  @Inject
+  public DetectionPipelinePlanNodeFactory(DataSourceCache dataSourceCache) {
+    this.dataSourceCache = dataSourceCache;
+    initPlanNodeTypeToClassMap();
+  }
+
+  private void initPlanNodeTypeToClassMap() {
     long startTimeMs = System.currentTimeMillis();
     Reflections reflections = new Reflections(V2_DETECTION_PLAN_PACKAGE_NAME);
     Set<Class<? extends PlanNode>> classes = reflections.getSubTypesOf(PlanNode.class);
@@ -51,43 +65,45 @@ public class DetectionPipelinePlanNodeFactory {
       } catch (Exception e) {
         throw new RuntimeException("Unable to init PlanNode Class - " + planNodeClass, e);
       }
-      if (!PLAN_NODE_TYPE_TO_CLASS_MAP.containsKey(typeKey)) {
-        PLAN_NODE_TYPE_TO_CLASS_MAP.put(typeKey, planNodeClass);
+      if (!planNodeTypeToClassMap.containsKey(typeKey)) {
+        planNodeTypeToClassMap.put(typeKey, planNodeClass);
       } else {
         LOG.error("Found duplicated type key: {}", typeKey);
         throw new RuntimeException("Found duplicated type key - " + typeKey);
       }
     }
     LOG.info("Initialized planNodeTypeToClassNameMap with {} functions: {} in {}ms",
-        PLAN_NODE_TYPE_TO_CLASS_MAP.size(),
-        PLAN_NODE_TYPE_TO_CLASS_MAP.keySet(),
+        planNodeTypeToClassMap.size(),
+        planNodeTypeToClassMap.keySet(),
         System.currentTimeMillis() - startTimeMs);
   }
 
-  public static PlanNode get(String name,
+  public PlanNode get(String name,
       Map<String, PlanNode> pipelinePlanNodes,
       DetectionPlanApi detectionPlanApi, long startTime, long endTime) {
     String typeKey = detectionPlanApi.getType();
-    Class<? extends PlanNode> planNodeClass = PLAN_NODE_TYPE_TO_CLASS_MAP.get(typeKey);
+    Class<? extends PlanNode> planNodeClass = planNodeTypeToClassMap.get(typeKey);
     if (planNodeClass == null) {
       throw new UnsupportedOperationException("Not supported type - " + typeKey);
     }
     try {
-      final Constructor<?> constructor = planNodeClass
-          .getConstructor(String.class,
-              Map.class,
-              DetectionPlanApi.class,
-              long.class,
-              long.class);
-      return (DetectionPipelinePlanNode) constructor
-          .newInstance(name, pipelinePlanNodes, detectionPlanApi, startTime, endTime);
+      final Constructor<?> constructor = planNodeClass.getConstructor();
+      PlanNode planNode = (PlanNode) constructor.newInstance();
+      planNode.init(new PlanNodeContext()
+          .setName(name)
+          .setPipelinePlanNodes(pipelinePlanNodes)
+          .setDetectionPlanApi(detectionPlanApi)
+          .setStartTime(startTime)
+          .setEndTime(endTime)
+          .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache)));
+      return planNode;
     } catch (Exception e) {
       throw new IllegalArgumentException("Failed to initialize the plan node: type - " + typeKey,
           e);
     }
   }
 
-  public static Map<String, Class<? extends PlanNode>> getAllPlanNodes() {
-    return PLAN_NODE_TYPE_TO_CLASS_MAP;
+  public Map<String, Class<? extends PlanNode>> getAllPlanNodes() {
+    return planNodeTypeToClassMap;
   }
 }

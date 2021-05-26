@@ -1,9 +1,11 @@
 package org.apache.pinot.thirdeye.spi.util;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -37,7 +39,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
 
 public abstract class ApiBeanMapper {
 
@@ -95,6 +96,7 @@ public abstract class ApiBeanMapper {
         .setDerivedMetricExpression(dto.getDerivedMetricExpression())
         .setWhere(dto.getWhere())
         .setAggregationColumn(dto.getAggregationColumn())
+        .setDatatype(dto.getDatatype())
         .setAggregationFunction(dto.getDefaultAggFunction())
         .setRollupThreshold(dto.getRollupThreshold())
         .setViews(dto.getViews())
@@ -108,7 +110,7 @@ public abstract class ApiBeanMapper {
         .setDescription(dto.getDescription())
         .setActive(dto.isActive())
         .setCron(dto.getCron())
-        .setNodes(ThirdEyeSpiUtils.optional(dto.getNodes())
+        .setNodes(optional(dto.getNodes())
             .map(ApiBeanMapper::toAlertNodeApiMap)
             .orElse(null))
         .setLastTimestamp(new Date(dto.getLastTimestamp()))
@@ -133,7 +135,7 @@ public abstract class ApiBeanMapper {
         .setSubType(dto.getSubType())
         .setDependsOn(dto.getDependsOn())
         .setParams(dto.getParams())
-        .setMetric(ThirdEyeSpiUtils.optional(dto.getMetric())
+        .setMetric(optional(dto.getMetric())
             .map(ApiBeanMapper::toApi)
             .map(m -> m // TODO suvodeep fix hack. The
                 .setRollupThreshold(null)
@@ -159,7 +161,7 @@ public abstract class ApiBeanMapper {
         .setSubType(api.getSubType())
         .setDependsOn(api.getDependsOn())
         .setParams(api.getParams())
-        .setMetric(ThirdEyeSpiUtils.optional(api.getMetric())
+        .setMetric(optional(api.getMetric())
             .map(ApiBeanMapper::toMetricConfigDto)
             .orElse(null)
         )
@@ -168,20 +170,38 @@ public abstract class ApiBeanMapper {
 
   public static DatasetConfigDTO toDatasetConfigDto(final DatasetApi api) {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
-    ThirdEyeSpiUtils.optional(api.getDataSource()).ifPresent(dto::setDataSource);
+    optional(api.getDataSource()).ifPresent(dto::setDataSource);
     dto.setDataset(api.getName());
     dto.setDisplayName(api.getName());
-    ThirdEyeSpiUtils.optional(api.getDimensions()).ifPresent(dto::setDimensions);
-    ThirdEyeSpiUtils.optional(api.getTimeColumn()).ifPresent(timeColumn -> {
+    optional(api.getDimensions()).ifPresent(dto::setDimensions);
+    optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
-      TimeGranularity timeGranularity = TimeGranularity.fromDuration(timeColumn.getInterval());
-      dto.setTimeDuration((int) timeGranularity.toDuration().getSeconds());
-      dto.setTimeUnit(TimeUnit.SECONDS);
-      ThirdEyeSpiUtils.optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
-      ThirdEyeSpiUtils.optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
+
+      updateTimeGranularityOnDataset(dto, timeColumn);
+      optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
+      optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
     });
 
     return dto;
+  }
+
+  private static void updateTimeGranularityOnDataset(final DatasetConfigDTO dto,
+      final TimeColumnApi timeColumn) {
+    TimeGranularity timeGranularity = TimeGranularity.fromDuration(timeColumn.getInterval());
+    /*
+     * TODO spyne fixme. this covers up the 86400 bug where 1_DAYS is different from 86400_SECONDS.
+     */
+    if (isDaily(timeGranularity)) {
+      dto.setTimeDuration((int) timeGranularity.toDuration().toDays());
+      dto.setTimeUnit(TimeUnit.DAYS);
+    } else {
+      dto.setTimeDuration((int) timeGranularity.toDuration().getSeconds());
+      dto.setTimeUnit(TimeUnit.SECONDS);
+    }
+  }
+
+  private static boolean isDaily(final TimeGranularity timeGranularity) {
+    return timeGranularity.toDuration().getSeconds() % Duration.ofDays(1).getSeconds() == 0;
   }
 
   public static MetricConfigDTO toMetricConfigDto(final MetricApi api) {
@@ -190,14 +210,15 @@ public abstract class ApiBeanMapper {
     dto.setId(api.getId());
     dto
         .setName(api.getName())
-        .setDataset(ThirdEyeSpiUtils.optional(api.getDataset())
+        .setDataset(optional(api.getDataset())
             .map(DatasetApi::getName)
             .orElse(null))
         .setRollupThreshold(api.getRollupThreshold())
         .setAggregationColumn(api.getAggregationColumn())
+        .setDatatype(api.getDatatype())
         .setDefaultAggFunction(api.getAggregationFunction())
         // TODO suvodeep Revisit this: Assume false if active is not set.
-        .setActive(ThirdEyeSpiUtils.optional(api.getActive()).orElse(false))
+        .setActive(optional(api.getActive()).orElse(false))
         .setViews(api.getViews())
         .setWhere(api.getWhere())
         .setDerivedMetricExpression(api.getDerivedMetricExpression());
@@ -224,7 +245,7 @@ public abstract class ApiBeanMapper {
   }
 
   public static SubscriptionGroupApi toApi(final SubscriptionGroupDTO dto) {
-    final List<AlertApi> alertApis = ThirdEyeSpiUtils.optional(dto.getProperties())
+    final List<AlertApi> alertApis = optional(dto.getProperties())
         .map(o1 -> o1.get("detectionConfigIds"))
         .map(l -> ((List<Number>) l).stream()
             .map(Number::longValue)
@@ -233,20 +254,20 @@ public abstract class ApiBeanMapper {
         .orElse(null);
 
     // TODO spyne This entire bean to be refactored, current optimistic conversion is a hack.
-    final EmailSchemeApi emailSchemeApi = ThirdEyeSpiUtils.optional(dto.getAlertSchemes())
+    final EmailSchemeApi emailSchemeApi = optional(dto.getAlertSchemes())
         .map(o -> o.get("emailScheme"))
         .map(o -> ((Map) o).get("recipients"))
         .map(m -> (Map) m)
         .map(m -> new EmailSchemeApi()
-            .setTo(ThirdEyeSpiUtils.optional(m.get("to"))
+            .setTo(optional(m.get("to"))
                 .map(l -> new ArrayList<>((List<String>) l))
                 .orElse(null)
             )
-            .setCc(ThirdEyeSpiUtils.optional(m.get("cc"))
+            .setCc(optional(m.get("cc"))
                 .map(l -> new ArrayList<>((List<String>) l))
                 .orElse(null)
             )
-            .setBcc(ThirdEyeSpiUtils.optional(m.get("bcc"))
+            .setBcc(optional(m.get("bcc"))
                 .map(l -> new ArrayList<>((List<String>) l))
                 .orElse(null)
             ))
@@ -268,18 +289,18 @@ public abstract class ApiBeanMapper {
     final SubscriptionGroupDTO dto = new SubscriptionGroupDTO();
     dto.setId(api.getId());
     dto.setName(api.getName());
-    dto.setActive(ThirdEyeSpiUtils.optional(api.getActive()).orElse(true));
+    dto.setActive(optional(api.getActive()).orElse(true));
 
-    ThirdEyeSpiUtils.optional(api.getApplication())
+    optional(api.getApplication())
         .map(ApplicationApi::getName)
         .ifPresent(dto::setApplication);
 
     // TODO spyne implement translation of alert schemes, suppressors etc.
 
-    dto.setType(ThirdEyeSpiUtils.optional(api.getType()).orElse(DEFAULT_ALERTER_PIPELINE));
+    dto.setType(optional(api.getType()).orElse(DEFAULT_ALERTER_PIPELINE));
     dto.setProperties(buildProperties());
 
-    final List<Long> alertIds = ThirdEyeSpiUtils.optional(api.getAlerts())
+    final List<Long> alertIds = optional(api.getAlerts())
         .orElse(Collections.emptyList())
         .stream()
         .map(AlertApi::getId)
@@ -318,9 +339,9 @@ public abstract class ApiBeanMapper {
     Map<String, Object> alertSchemes = new HashMap<>();
     Map<String, Object> emailNotificationInfo = new HashMap<>();
     Map<String, Object> recipientsInfo = ImmutableMap.of(
-        "to", ThirdEyeSpiUtils.optional(email.getTo()).orElse(Collections.emptyList()),
-        "cc", ThirdEyeSpiUtils.optional(email.getCc()).orElse(Collections.emptyList()),
-        "bcc", ThirdEyeSpiUtils.optional(email.getBcc()).orElse(Collections.emptyList())
+        "to", optional(email.getTo()).orElse(Collections.emptyList()),
+        "cc", optional(email.getCc()).orElse(Collections.emptyList()),
+        "bcc", optional(email.getBcc()).orElse(Collections.emptyList())
     );
     emailNotificationInfo.put("recipients", recipientsInfo);
     emailNotificationInfo.put(PROP_CLASS_NAME, DEFAULT_ALERT_SCHEME_CLASS_NAME);
@@ -332,7 +353,7 @@ public abstract class ApiBeanMapper {
   public static Map<String, Object> toAlertSuppressors(
       final TimeWindowSuppressorApi timeWindowSuppressorApi) {
     Map<String, Object> alertSuppressors = new HashMap<>();
-    if(timeWindowSuppressorApi != null) {
+    if (timeWindowSuppressorApi != null) {
       alertSuppressors = new ObjectMapper().convertValue(timeWindowSuppressorApi, Map.class);
     }
     //alertSuppressors.put(PROP_CLASS_NAME, DEFAULT_ALERT_SUPPRESSOR);
@@ -361,15 +382,15 @@ public abstract class ApiBeanMapper {
         )
         .setAlert(new AlertApi()
             .setId(dto.getDetectionConfigId())
-            .setName(ThirdEyeSpiUtils.optional(dto.getProperties())
+            .setName(optional(dto.getProperties())
                 .map(p -> p.get("subEntityName"))
                 .orElse(null))
         )
-        .setAlertNode(ThirdEyeSpiUtils.optional(dto.getProperties())
+        .setAlertNode(optional(dto.getProperties())
             .map(p -> p.get("detectorComponentName"))
             .map(ApiBeanMapper::toDetectionAlertNodeApi)
             .orElse(null))
-        .setFeedback(ThirdEyeSpiUtils.optional(dto.getFeedback())
+        .setFeedback(optional(dto.getFeedback())
             .map(ApiBeanMapper::toApi)
             .orElse(null))
         ;

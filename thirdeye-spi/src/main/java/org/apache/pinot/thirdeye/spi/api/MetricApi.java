@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import java.util.List;
+import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.LogicalView;
 
@@ -19,6 +20,7 @@ public class MetricApi implements ThirdEyeApi {
   private Date updated;
   private String derivedMetricExpression;
   private String aggregationColumn;
+  private MetricType datatype;
   private MetricAggFunction aggregationFunction;
   private Double rollupThreshold;
   private List<LogicalView> views;
@@ -102,6 +104,15 @@ public class MetricApi implements ThirdEyeApi {
 
   public MetricApi setAggregationColumn(String aggregationColumn) {
     this.aggregationColumn = aggregationColumn;
+    return this;
+  }
+
+  public MetricType getDatatype() {
+    return datatype;
+  }
+
+  public MetricApi setDatatype(final MetricType datatype) {
+    this.datatype = datatype;
     return this;
   }
 

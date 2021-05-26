@@ -1,0 +1,23 @@
+[
+  {
+    "name": "pageviews",
+    "active": true,
+    "additive": true,
+    "dimensions": [
+      "country",
+      "gender",
+      "browser",
+      "version",
+      "device",
+      "os"
+    ],
+    "timeColumn": {
+      "name": "date",
+      "interval": 86400,
+      "format": "SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "timezone": "US/Pacific"
+    },
+    "expectedDelay": 86400,
+    "dataSource": "PinotThirdEyeDataSource"
+  }
+]

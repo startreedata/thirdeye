@@ -1,0 +1,12 @@
+[
+  {
+    "name": "views",
+    "dataset": {
+      "name": "pageviews"
+    },
+    "active": true,
+    "datatype": "INT",
+    "aggregationFunction": "SUM",
+    "rollupThreshold": 0.01
+  }
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "id": 2,
+    "version": 0,
+    "updateTime": 1621988923000,
+    "createdBy": "no-auth-user",
+    "updatedBy": "no-auth-user",
+    "dataset": "pageviews",
+    "displayName": null,
+    "dimensions": [
+      "country",
+      "gender",
+      "browser",
+      "version",
+      "device",
+      "os"
+    ],
+    "timeColumn": "date",
+    "timeUnit": "DAYS",
+    "timeDuration": 1,
+    "timeFormat": "SIMPLE_DATE_FORMAT:yyyyMMdd",
+    "timezone": "US/Pacific",
+    "dataSource": "PinotThirdEyeDataSource",
+    "owners": null,
+    "active": true,
+    "additive": true,
+    "dimensionsHaveNoPreAggregation": [],
+    "preAggregatedKeyword": "all",
+    "nonAdditiveBucketSize": null,
+    "nonAdditiveBucketUnit": null,
+    "realtime": false,
+    "expectedDelay": {
+      "size": 24,
+      "unit": "HOURS"
+    },
+    "lastRefreshTime": 0,
+    "lastRefreshEventTime": 0,
+    "properties": null
+  }
+]

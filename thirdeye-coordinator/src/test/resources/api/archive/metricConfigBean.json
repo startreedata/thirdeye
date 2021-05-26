@@ -1,0 +1,27 @@
+[
+  {
+    "id": 2,
+    "version": 0,
+    "updateTime": 1621989103000,
+    "createdBy": "no-auth-user",
+    "updatedBy": "no-auth-user",
+    "name": "views",
+    "dataset": "pageviews",
+    "alias": "pageviews::views",
+    "tags": null,
+    "datatype": "INT",
+    "derivedMetricExpression": null,
+    "aggregationColumn": null,
+    "defaultAggFunction": "SUM",
+    "rollupThreshold": 0.01,
+    "inverseMetric": false,
+    "cellSizeExpression": null,
+    "active": true,
+    "extSourceLinkInfo": null,
+    "extSourceLinkTimeGranularity": null,
+    "metricProperties": null,
+    "dimensionAsMetric": false,
+    "views": null,
+    "where": null
+  }
+]

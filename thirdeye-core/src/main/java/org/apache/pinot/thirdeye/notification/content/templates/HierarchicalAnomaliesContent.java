@@ -54,8 +54,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.spi.util.Pair;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -184,7 +184,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
         getTimezoneString(dateTimeZone),
         getIssueType(anomaly),
         anomaly.getType().getLabel(),
-        ThirdEyeSpiUtils.encodeCompactedProperties(props),
+        SpiUtils.encodeCompactedProperties(props),
         anomaly.getMetricUrn()
     );
 

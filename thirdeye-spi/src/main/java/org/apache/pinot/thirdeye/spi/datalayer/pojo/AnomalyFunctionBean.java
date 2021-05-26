@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.anomaly.merge.AnomalyMergeConfig;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AnomalyFunctionBean extends AbstractBean {
@@ -286,13 +286,13 @@ public class AnomalyFunctionBean extends AbstractBean {
   @JsonIgnore
   @JsonProperty("wrapper")
   public Multimap<String, String> getFilterSet() {
-    return ThirdEyeSpiUtils.getFilterSet(filters);
+    return SpiUtils.getFilterSet(filters);
   }
 
   @JsonIgnore
   @JsonProperty("wrapper")
   public void setFilters(String filters) {
-    String sortedFilters = ThirdEyeSpiUtils.getSortedFilters(filters);
+    String sortedFilters = SpiUtils.getSortedFilters(filters);
     this.filters = sortedFilters;
   }
 

@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.spi.datasource;
 
-import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;

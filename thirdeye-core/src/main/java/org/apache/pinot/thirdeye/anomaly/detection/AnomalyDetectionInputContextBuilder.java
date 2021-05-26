@@ -52,8 +52,8 @@ import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.spi.util.Pair;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -87,7 +87,7 @@ public class AnomalyDetectionInputContextBuilder {
     // Get the original filter
     Multimap<String, String> filters;
     if (StringUtils.isNotBlank(filterString)) {
-      filters = ThirdEyeSpiUtils.getFilterSet(filterString);
+      filters = SpiUtils.getFilterSet(filterString);
     } else {
       filters = HashMultimap.create();
     }

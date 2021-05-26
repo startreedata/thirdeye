@@ -53,12 +53,12 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.util.Pair;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -412,7 +412,7 @@ public class LegacyMergeWrapper extends DetectionPipeline {
       throw new IllegalArgumentException("Different local and global metrics not supported");
     }
 
-    Multimap<String, String> globalFilters = ThirdEyeSpiUtils
+    Multimap<String, String> globalFilters = SpiUtils
         .getFilterSet(spec.getGlobalMetricFilters());
     MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
     return MetricSlice

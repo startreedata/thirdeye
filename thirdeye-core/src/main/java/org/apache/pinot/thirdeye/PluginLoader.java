@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

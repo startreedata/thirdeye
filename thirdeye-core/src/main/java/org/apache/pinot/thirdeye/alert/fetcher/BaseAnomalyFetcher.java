@@ -27,7 +27,7 @@ import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyFetcherConfig;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
   @Override
   public void init(AnomalyFetcherConfig anomalyFetcherConfig) {
     this.anomalyFetcherConfig = anomalyFetcherConfig;
-    this.properties = ThirdEyeSpiUtils
+    this.properties = SpiUtils
         .decodeCompactedProperties(anomalyFetcherConfig.getProperties());
   }
 

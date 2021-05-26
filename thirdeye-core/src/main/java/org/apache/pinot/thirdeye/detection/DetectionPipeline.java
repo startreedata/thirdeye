@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.detection;
 
 import static org.apache.pinot.thirdeye.detection.DetectionUtils.getSpecClassName;
-import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;

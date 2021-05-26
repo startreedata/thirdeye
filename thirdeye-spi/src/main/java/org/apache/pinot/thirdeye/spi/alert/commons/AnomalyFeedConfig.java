@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 public class AnomalyFeedConfig {
 
@@ -63,11 +63,11 @@ public class AnomalyFeedConfig {
       anomalyFetcherConfigs = Collections.emptyList();
     }
     for (AnomalyFetcherConfig anomalyFetcherConfig : anomalyFetcherConfigs) {
-      Properties properties = ThirdEyeSpiUtils
+      Properties properties = SpiUtils
           .decodeCompactedProperties(anomalyFetcherConfig.getProperties());
       anomalyFetcherConfig.setAnomalySourceType(anomalySourceType);
       anomalyFetcherConfig.setAnomalySource(anomalySource);
-      anomalyFetcherConfig.setProperties(ThirdEyeSpiUtils.encodeCompactedProperties(properties));
+      anomalyFetcherConfig.setProperties(SpiUtils.encodeCompactedProperties(properties));
     }
     return anomalyFetcherConfigs;
   }

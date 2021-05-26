@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
-import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

@@ -46,7 +46,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.EventBean;
-import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,7 +174,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
           getTimezoneString(dateTimeZone),
           getIssueType(anomaly),
           anomaly.getType().getLabel(),
-          ThirdEyeSpiUtils.encodeCompactedProperties(props),
+          SpiUtils.encodeCompactedProperties(props),
           anomaly.getMetricUrn()
       );
 

@@ -29,10 +29,10 @@ import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 /**
  * The Legacy dimension wrapper. Do dimension exploration for existing anomaly functions.
@@ -106,7 +106,7 @@ public class LegacyDimensionWrapper extends DimensionWrapper {
 
     if (!properties.containsKey(PROP_METRIC_URN)) {
       long metricId = MapUtils.getLongValue(spec, SPEC_METRIC_ID);
-      Multimap<String, String> filters = ThirdEyeSpiUtils
+      Multimap<String, String> filters = SpiUtils
           .getFilterSet(MapUtils.getString(spec, SPEC_FILTERS));
       properties.put(PROP_METRIC_URN, MetricEntity.fromMetric(1.0, metricId, filters).getUrn());
     }

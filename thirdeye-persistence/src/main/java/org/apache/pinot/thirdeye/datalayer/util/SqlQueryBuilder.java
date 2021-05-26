@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Sets;

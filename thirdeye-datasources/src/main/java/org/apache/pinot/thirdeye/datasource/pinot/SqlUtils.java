@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
-import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;

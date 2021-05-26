@@ -45,11 +45,15 @@ public class SubscriptionGroupResource extends
     if (api.getCron() == null) {
       api.setCron(DEFAULT_CRON);
     }
+    return toDto(api);
+  }
+
+  @Override
+  protected void validate(final SubscriptionGroupApi api) {
     ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
     ensure(subscriptionGroupManager.findByPredicate(
         Predicate.EQ("name", api.getName())).size() == 0,
         ERR_DUPLICATE_NAME);
-    return toDto(api);
   }
 
   @Override

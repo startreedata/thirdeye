@@ -54,6 +54,10 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     this.apiToBeanMap = apiToBeanMap;
   }
 
+  protected void validate(final ApiT api) {
+    // override and perform necessary validations
+  }
+
   protected abstract DtoT createDto(final ThirdEyePrincipal principal, final ApiT api);
 
   protected DtoT updateDto(final ThirdEyePrincipal principal, final ApiT api) {
@@ -110,7 +114,8 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     ensureExists(list, "Invalid request");
 
     return respondOk(list.stream()
-        .map(alertApi -> createDto(principal, alertApi))
+        .peek(this::validate)
+        .map(api -> createDto(principal, api))
         .peek(dtoManager::save)
         .map(this::toApi)
         .collect(Collectors.toList())
@@ -125,6 +130,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       List<ApiT> list) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     return respondOk(list.stream()
+        .peek(this::validate)
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .map(this::toApi)

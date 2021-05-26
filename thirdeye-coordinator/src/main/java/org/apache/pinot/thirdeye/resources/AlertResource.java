@@ -90,11 +90,15 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     if (api.getCron() == null) {
       api.setCron(DEFAULT_CRON);
     }
-    ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
 
     return alertCreater.create(api
         .setOwner(new UserApi().setPrincipal(principal.getName()))
     );
+  }
+
+  @Override
+  protected void validate(final AlertApi api) {
+    ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
   }
 
   @Override
@@ -108,10 +112,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     updated.setLastTimestamp(existing.getLastTimestamp());
 
     optional(api.getCron())
-        .ifPresent(cron -> {
-          ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, cron);
-          updated.setCron(cron);
-        });
+        .ifPresent(updated::setCron);
 
     alertManager.update(updated);
     return updated;

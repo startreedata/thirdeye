@@ -39,15 +39,18 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
 
   @Override
   protected MetricConfigDTO createDto(final ThirdEyePrincipal principal, final MetricApi api) {
-    ensureExists(api.getDataset(), "dataset");
-    ensureExists(this.datasetConfigManager.findByDataset(api.getDataset().getName()));
-    ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
-    ensure(this.metricConfigManager.findByMetricName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME);
-
     final MetricConfigDTO dto = toDto(api);
     dto.setCreatedBy(principal.getName());
 
     return dto;
+  }
+
+  @Override
+  protected void validate(final MetricApi api) {
+    ensureExists(api.getDataset(), "dataset");
+    ensureExists(datasetConfigManager.findByDataset(api.getDataset().getName()));
+    ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
+    ensure(metricConfigManager.findByMetricName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME);
   }
 
   @Override

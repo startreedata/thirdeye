@@ -30,9 +30,10 @@ public abstract class AbstractDTO implements Serializable {
 
   private Long id;
   private int version;
-  protected Timestamp updateTime;
-  protected String createdBy;
-  protected String updatedBy;
+  private Timestamp createTime;
+  private String createdBy;
+  private Timestamp updateTime;
+  private String updatedBy;
 
   public Long getId() {
     return id;
@@ -58,6 +59,15 @@ public abstract class AbstractDTO implements Serializable {
 
   public AbstractDTO setUpdateTime(final Timestamp updateTime) {
     this.updateTime = updateTime;
+    return this;
+  }
+
+  public Timestamp getCreateTime() {
+    return createTime;
+  }
+
+  public AbstractDTO setCreateTime(final Timestamp createTime) {
+    this.createTime = createTime;
     return this;
   }
 

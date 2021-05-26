@@ -61,8 +61,8 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   }
 
   @Override
-  protected MergedAnomalyResultDTO updateDto(final ThirdEyePrincipal principal,
-      final AnomalyApi api) {
+  protected MergedAnomalyResultDTO toDto(final AnomalyApi api) {
+    // For now, anomalies are to be created/edited by the system.
     throw badRequest(ERR_OPERATION_UNSUPPORTED);
   }
 

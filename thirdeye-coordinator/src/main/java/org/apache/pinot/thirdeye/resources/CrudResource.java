@@ -60,20 +60,40 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   protected abstract DtoT createDto(final ThirdEyePrincipal principal, final ApiT api);
 
-  protected DtoT updateDto(final ThirdEyePrincipal principal, final ApiT api) {
+  private DtoT updateDto(final ThirdEyePrincipal principal, final ApiT api) {
     final Long id = ensureExists(api.getId(), ERR_MISSING_ID);
     final DtoT existing = ensureExists(dtoManager.findById(id));
 
     final DtoT updated = toDto(api);
+    setSystemFields(principal, existing, updated);
+
+    dtoManager.update(updated);
+    return updated;
+  }
+
+  /**
+   * the PUT api performs an edit on an existing object by replacing its contents entirely.
+   * Override this method to choose which fields need to carry forward from the old object to the
+   * new.
+   *
+   * For example, after edit,
+   * - one cannot change the id, create time, etc.
+   * - also, the system decides the update time, updatedBy, etc.
+   *
+   * @param principal user performing the update
+   * @param existing the old object
+   * @param updated the updated object (which is yet to be persisted)
+   */
+  protected void setSystemFields(
+      final ThirdEyePrincipal principal,
+      final DtoT existing,
+      final DtoT updated) {
     updated
-        .setId(id)
+        .setId(existing.getId())
         .setCreateTime(existing.getCreateTime())
         .setCreatedBy(existing.getCreatedBy())
         .setUpdatedBy(principal.getName())
         .setUpdateTime(new Timestamp(new Date().getTime()));
-
-    dtoManager.update(updated);
-    return updated;
   }
 
   protected DtoT toDto(final ApiT api) {

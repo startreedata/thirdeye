@@ -5,7 +5,6 @@ import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
-import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.spi.datalayer.util.ThirdEyeSpiUtils.optional;
 
@@ -54,7 +53,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private static final Logger log = LoggerFactory.getLogger(AlertResource.class);
 
   public static final String DEFAULT_CRON = "0 */1 * * * ?";
-
   private final AlertManager alertManager;
   private final MetricConfigManager metricConfigManager;
   private final AlertCreater alertCreater;
@@ -97,25 +95,27 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void validate(final AlertApi api) {
-    ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
+  protected AlertDTO toDto(final AlertApi api) {
+    return alertApiBeanMapper.toAlertDTO(api);
   }
 
   @Override
-  protected AlertDTO updateDto(final ThirdEyePrincipal principal, final AlertApi api) {
-    final Long id = ensureExists(api.getId(), ERR_MISSING_ID);
-    final AlertDTO existing = ensureExists(alertManager.findById(id));
+  protected void validate(final AlertApi api) {
+    optional(api.getCron()).ifPresent(cron ->
+        ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
+  }
 
-    final AlertDTO updated = alertApiBeanMapper.toAlertDTO(api);
-    updated.setId(id);
-    updated.setCreatedBy(existing.getCreatedBy());
+  @Override
+  protected void setSystemFields(final ThirdEyePrincipal principal,
+      final AlertDTO existing,
+      final AlertDTO updated) {
+    super.setSystemFields(principal, existing, updated);
     updated.setLastTimestamp(existing.getLastTimestamp());
 
-    optional(api.getCron())
-        .ifPresent(updated::setCron);
-
-    alertManager.update(updated);
-    return updated;
+    // Always set a default cron if not present.
+    if (updated.getCron() == null) {
+      updated.setCron(DEFAULT_CRON);
+    }
   }
 
   @Override

@@ -29,8 +29,8 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.RootcauseSessionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
@@ -98,7 +98,7 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSe
         RootcauseSessionBean.class);
   }
 
-  private <B extends AbstractBean, D> List<D> findByLike(Set<String> fragments, String template,
+  private <B extends AbstractDTO, D> List<D> findByLike(Set<String> fragments, String template,
       String key,
       Class<D> dtoClass, Class<B> beanClass) {
     List<String> conditions = new ArrayList<>();

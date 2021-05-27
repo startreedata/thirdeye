@@ -21,9 +21,10 @@
 package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ApplicationBean extends AbstractBean {
+public class ApplicationBean extends AbstractDTO {
 
   String application;
   String recipients;

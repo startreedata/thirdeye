@@ -27,9 +27,10 @@ import java.util.Objects;
 import java.util.Set;
 import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MetricConfigBean extends AbstractBean {
+public class MetricConfigBean extends AbstractDTO {
 
   public static double DEFAULT_THRESHOLD = 0.01;
   public static final String ALIAS_JOINER = "::";

@@ -24,9 +24,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AnomalySubscriptionGroupNotificationBean extends AbstractBean {
+public class AnomalySubscriptionGroupNotificationBean extends AbstractDTO {
 
   private Long anomalyId;
   private Long detectionConfigId;

@@ -22,7 +22,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -46,8 +46,8 @@ public class EntityResource {
   @Path("types")
   public Response listEntities() {
     final Map<String, Long> entityCountMap = new TreeMap<>();
-    final Set<Class<? extends AbstractBean>> beanClasses = genericPojoDao.getAllBeanClasses();
-    for (Class<? extends AbstractBean> beanClass : beanClasses) {
+    final Set<Class<? extends AbstractDTO>> beanClasses = genericPojoDao.getAllBeanClasses();
+    for (Class<? extends AbstractDTO> beanClass : beanClasses) {
       final long count = genericPojoDao.count(beanClass);
       entityCountMap.put(beanClass.getName(), count);
     }
@@ -84,8 +84,8 @@ public class EntityResource {
         offset = Integer.parseInt(queryParameters.getFirst("offset"));
       }
 
-      final Class<? extends AbstractBean> beanClass =
-          (Class<? extends AbstractBean>) Class.forName(beanClassRef);
+      final Class<? extends AbstractDTO> beanClass =
+          (Class<? extends AbstractDTO>) Class.forName(beanClassRef);
       final List<String> indexedColumns = genericPojoDao.getIndexedColumns(beanClass);
 
       final List<Predicate> predicates = new ArrayList<>();
@@ -97,7 +97,7 @@ public class EntityResource {
         }
       }
 
-      final List<? extends AbstractBean> abstractBeans;
+      final List<? extends AbstractDTO> abstractBeans;
       if (!predicates.isEmpty()) {
         final DaoFilter daoFilter = new DaoFilter()
             .setBeanClass(beanClass)

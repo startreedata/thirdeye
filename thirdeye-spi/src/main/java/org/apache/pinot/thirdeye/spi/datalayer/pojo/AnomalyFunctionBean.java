@@ -31,10 +31,11 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.anomaly.merge.AnomalyMergeConfig;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AnomalyFunctionBean extends AbstractBean {
+public class AnomalyFunctionBean extends AbstractDTO {
 
   private String collection;
 

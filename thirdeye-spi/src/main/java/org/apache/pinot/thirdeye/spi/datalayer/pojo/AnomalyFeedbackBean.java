@@ -23,8 +23,9 @@ package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 import java.io.Serializable;
 import java.util.Objects;
 import org.apache.pinot.thirdeye.spi.constant.AnomalyFeedbackType;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
-public class AnomalyFeedbackBean extends AbstractBean implements Serializable {
+public class AnomalyFeedbackBean extends AbstractDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;
 

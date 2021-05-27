@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * ConfigBean holds namespaced key-value configuration values.  Values are serialized into the
@@ -31,7 +32,7 @@ import java.util.Objects;
  * to handle simple configuration tasks.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SessionBean extends AbstractBean {
+public class SessionBean extends AbstractDTO {
 
   public enum PrincipalType {
     SERVICE,

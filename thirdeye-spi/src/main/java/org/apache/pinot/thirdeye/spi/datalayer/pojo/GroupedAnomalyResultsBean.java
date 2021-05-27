@@ -23,8 +23,9 @@ package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
-public class GroupedAnomalyResultsBean extends AbstractBean {
+public class GroupedAnomalyResultsBean extends AbstractDTO {
 
   private long alertConfigId;
   private DimensionMap dimensions = new DimensionMap();

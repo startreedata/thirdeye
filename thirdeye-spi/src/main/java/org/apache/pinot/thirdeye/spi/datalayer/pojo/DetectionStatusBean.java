@@ -21,11 +21,12 @@
 package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * Bean to store the detection status
  */
-public class DetectionStatusBean extends AbstractBean implements Comparable<DetectionStatusBean> {
+public class DetectionStatusBean extends AbstractDTO implements Comparable<DetectionStatusBean> {
 
   private long functionId;
   private String dataset;

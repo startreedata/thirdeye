@@ -70,8 +70,8 @@ import org.apache.pinot.thirdeye.datalayer.util.GenericResultSetMapper;
 import org.apache.pinot.thirdeye.datalayer.util.SqlQueryBuilder;
 import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.entity.AbstractEntity;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalyFeedbackBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalySubscriptionGroupNotificationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
@@ -106,7 +106,7 @@ public class GenericPojoDao {
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
   private static final int MAX_BATCH_SIZE = 1000;
 
-  static Map<Class<? extends AbstractBean>, PojoInfo> pojoInfoMap = new HashMap<>();
+  static Map<Class<? extends AbstractDTO>, PojoInfo> pojoInfoMap = new HashMap<>();
   static String DEFAULT_BASE_TABLE_NAME = "GENERIC_JSON_ENTITY";
   static ModelMapper MODEL_MAPPER = new ModelMapper();
   static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -175,7 +175,7 @@ public class GenericPojoDao {
     return pojoInfo;
   }
 
-  public Set<Class<? extends AbstractBean>> getAllBeanClasses() {
+  public Set<Class<? extends AbstractDTO>> getAllBeanClasses() {
     return pojoInfoMap.keySet();
   }
 
@@ -202,7 +202,7 @@ public class GenericPojoDao {
     return Constants.NO_AUTH_USER;
   }
 
-  public <E extends AbstractBean> Long put(final E pojo) {
+  public <E extends AbstractDTO> Long put(final E pojo) {
     long tStart = System.nanoTime();
     String currentUser = getCurrentPrincipal();
     pojo.setCreatedBy(currentUser);
@@ -271,7 +271,7 @@ public class GenericPojoDao {
    *     ignored.
    * @return the number of rows that are affected.
    */
-  public <E extends AbstractBean> int update(final List<E> pojos) {
+  public <E extends AbstractDTO> int update(final List<E> pojos) {
     if (CollectionUtils.isEmpty(pojos)) {
       return 0;
     }
@@ -335,7 +335,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> int update(E pojo) {
+  public <E extends AbstractDTO> int update(E pojo) {
     if (pojo.getId() == null) {
       throw new IllegalArgumentException(String.format("Need an ID to update the DB entity: %s",
           pojo.toString()));
@@ -343,7 +343,7 @@ public class GenericPojoDao {
     return update(pojo, Predicate.EQ("id", pojo.getId()));
   }
 
-  public <E extends AbstractBean> int update(final E pojo, final Predicate predicate) {
+  public <E extends AbstractDTO> int update(final E pojo, final Predicate predicate) {
     long tStart = System.nanoTime();
     pojo.setUpdatedBy(getCurrentPrincipal());
     try {
@@ -354,7 +354,7 @@ public class GenericPojoDao {
     }
   }
 
-  private <E extends AbstractBean> int addUpdateToConnection(final E pojo,
+  private <E extends AbstractDTO> int addUpdateToConnection(final E pojo,
       final Predicate predicate,
       Connection connection)
       throws Exception {
@@ -394,7 +394,7 @@ public class GenericPojoDao {
     return affectedRows;
   }
 
-  public <E extends AbstractBean> List<E> getAll(final Class<E> beanClass) {
+  public <E extends AbstractDTO> List<E> getAll(final Class<E> beanClass) {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -425,7 +425,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> List<E> list(final Class<E> beanClass, long limit, long offset) {
+  public <E extends AbstractDTO> List<E> list(final Class<E> beanClass, long limit, long offset) {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -459,7 +459,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> long count(final Class<E> beanClass) {
+  public <E extends AbstractDTO> long count(final Class<E> beanClass) {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -481,7 +481,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> E get(final Long id, final Class<E> pojoClass) {
+  public <E extends AbstractDTO> E get(final Long id, final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -542,7 +542,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> List<E> get(final List<Long> idList, final Class<E> pojoClass) {
+  public <E extends AbstractDTO> List<E> get(final List<Long> idList, final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -575,12 +575,12 @@ public class GenericPojoDao {
   }
 
   @SuppressWarnings("unchecked")
-  public <E extends AbstractBean> List<E> filter(final DaoFilter daoFilter) {
+  public <E extends AbstractDTO> List<E> filter(final DaoFilter daoFilter) {
     requireNonNull(daoFilter.getPredicate(),
         "If the predicate is null, you can just do "
             + "getAll() which doesn't need to fetch IDs first");
 
-    final Class<? extends AbstractBean> beanClass = daoFilter.getBeanClass();
+    final Class<? extends AbstractDTO> beanClass = daoFilter.getBeanClass();
     final List<Long> ids = filterIds(daoFilter);
     if (ids.isEmpty()) {
       return Collections.emptyList();
@@ -623,7 +623,7 @@ public class GenericPojoDao {
   /**
    * @param parameterizedSQL second part of the sql (omit select from table section)
    */
-  public <E extends AbstractBean> List<E> executeParameterizedSQL(final String parameterizedSQL,
+  public <E extends AbstractDTO> List<E> executeParameterizedSQL(final String parameterizedSQL,
       final Map<String, Object> parameterMap, final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
@@ -674,7 +674,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> List<E> get(Map<String, Object> filterParams,
+  public <E extends AbstractDTO> List<E> get(Map<String, Object> filterParams,
       Class<E> pojoClass) {
     Predicate[] childPredicates = new Predicate[filterParams.size()];
     int index = 0;
@@ -685,7 +685,7 @@ public class GenericPojoDao {
     return get(Predicate.AND(childPredicates), pojoClass);
   }
 
-  public <E extends AbstractBean> List<E> get(final Predicate predicate, final Class<E> pojoClass) {
+  public <E extends AbstractDTO> List<E> get(final Predicate predicate, final Class<E> pojoClass) {
     final List<Long> idsToFind = getIdsByPredicate(predicate, pojoClass);
     long tStart = System.nanoTime();
     try {
@@ -722,7 +722,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> List<Long> getIdsByPredicate(final Predicate predicate,
+  public <E extends AbstractDTO> List<Long> getIdsByPredicate(final Predicate predicate,
       final Class<E> pojoClass) {
     return filterIds(new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
   }
@@ -787,7 +787,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> int delete(final Long id, final Class<E> pojoClass) {
+  public <E extends AbstractDTO> int delete(final Long id, final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -812,7 +812,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> int delete(final List<Long> idsToDelete,
+  public <E extends AbstractDTO> int delete(final List<Long> idsToDelete,
       final Class<E> pojoClass) {
     long tStart = System.nanoTime();
     try {
@@ -894,7 +894,7 @@ public class GenericPojoDao {
     }
   }
 
-  public <E extends AbstractBean> int deleteByPredicate(final Predicate predicate,
+  public <E extends AbstractDTO> int deleteByPredicate(final Predicate predicate,
       final Class<E> pojoClass) {
     List<Long> idsToDelete = getIdsByPredicate(predicate, pojoClass);
     return delete(idsToDelete, pojoClass);

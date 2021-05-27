@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.detection.health.DetectionHealth;
 
 /**
@@ -34,7 +35,7 @@ import org.apache.pinot.thirdeye.spi.detection.health.DetectionHealth;
  * to handle simple configuration tasks.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DetectionConfigBean extends AbstractBean {
+public class DetectionConfigBean extends AbstractDTO {
 
   String name;
   String description;

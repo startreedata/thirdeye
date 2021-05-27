@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * This class holds the mapping between entities
@@ -29,7 +30,7 @@ import java.util.Objects;
  * Each mapping can maintain a score, to say whay it the degree of correlation between the entities
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EntityToEntityMappingBean extends AbstractBean {
+public class EntityToEntityMappingBean extends AbstractDTO {
 
   String fromURN;
   String toURN;

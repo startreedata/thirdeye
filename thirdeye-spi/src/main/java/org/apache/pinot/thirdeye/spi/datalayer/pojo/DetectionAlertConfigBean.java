@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * ConfigBean holds namespaced key-value configuration values.  Values are serialized into the
@@ -34,7 +35,7 @@ import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
  * to handle simple configuration tasks.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DetectionAlertConfigBean extends AbstractBean {
+public class DetectionAlertConfigBean extends AbstractDTO {
 
   boolean active;
   String name;

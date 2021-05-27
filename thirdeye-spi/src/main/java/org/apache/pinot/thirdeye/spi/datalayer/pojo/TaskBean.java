@@ -24,13 +24,14 @@ import java.sql.Timestamp;
 import java.util.Objects;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * This class corresponds to anomaly tasks. An execution of an anomaly function creates an anomaly
  * job, which in turn spawns into 1 or more anomaly tasks. The anomaly tasks are picked by the
  * workers
  */
-public class TaskBean extends AbstractBean {
+public class TaskBean extends AbstractDTO {
 
   private TaskType taskType;
   private Long workerId;

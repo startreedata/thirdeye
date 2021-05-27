@@ -31,8 +31,9 @@ import org.apache.pinot.thirdeye.spi.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
-public class MergedAnomalyResultBean extends AbstractBean implements
+public class MergedAnomalyResultBean extends AbstractDTO implements
     Comparable<MergedAnomalyResultBean>, Serializable {
 
   private Long functionId;

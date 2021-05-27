@@ -22,12 +22,13 @@ package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * The class for evaluation metrics.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EvaluationBean extends AbstractBean {
+public class EvaluationBean extends AbstractDTO {
 
   private long detectionConfigId; // the detection config id
   private long startTime; // the start time for the detection window being monitored

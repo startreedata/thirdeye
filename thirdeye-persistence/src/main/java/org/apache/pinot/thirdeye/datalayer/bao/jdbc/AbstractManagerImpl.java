@@ -29,7 +29,6 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AbstractManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
 import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
@@ -44,11 +43,11 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   }
 
   private final Class<? extends AbstractDTO> dtoClass;
-  private final Class<? extends AbstractBean> beanClass;
+  private final Class<? extends AbstractDTO> beanClass;
   protected final GenericPojoDao genericPojoDao;
 
   protected AbstractManagerImpl(Class<? extends AbstractDTO> dtoClass,
-      Class<? extends AbstractBean> beanClass,
+      Class<? extends AbstractDTO> beanClass,
       final GenericPojoDao genericPojoDao) {
     this.dtoClass = dtoClass;
     this.beanClass = beanClass;
@@ -62,7 +61,7 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
       update(entity);
       return entity.getId();
     }
-    AbstractBean bean = convertDTO2Bean(entity, beanClass);
+    AbstractDTO bean = convertDTO2Bean(entity, beanClass);
     Long id = genericPojoDao.put(bean);
     entity.setId(id);
     return id;
@@ -70,20 +69,20 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
 
   @Override
   public int update(E entity, Predicate predicate) {
-    AbstractBean bean = convertDTO2Bean(entity, beanClass);
+    AbstractDTO bean = convertDTO2Bean(entity, beanClass);
     return genericPojoDao.update(bean, predicate);
   }
 
   @Override
   public int update(E entity) {
-    AbstractBean bean = convertDTO2Bean(entity, beanClass);
+    AbstractDTO bean = convertDTO2Bean(entity, beanClass);
     return genericPojoDao.update(bean);
   }
 
   // Test is located at TestAlertConfigManager.testBatchUpdate()
   @Override
   public int update(List<E> entities) {
-    ArrayList<AbstractBean> beans = new ArrayList<>();
+    ArrayList<AbstractDTO> beans = new ArrayList<>();
     for (E entity : entities) {
       beans.add(convertDTO2Bean(entity, beanClass));
     }
@@ -91,7 +90,7 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   }
 
   public E findById(Long id) {
-    AbstractBean abstractBean = genericPojoDao.get(id, beanClass);
+    AbstractDTO abstractBean = genericPojoDao.get(id, beanClass);
     if (abstractBean != null) {
       AbstractDTO abstractDTO = MODEL_MAPPER.map(abstractBean, dtoClass);
       return (E) abstractDTO;
@@ -102,10 +101,10 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
 
   @Override
   public List<E> findByIds(List<Long> ids) {
-    List<? extends AbstractBean> abstractBeans = genericPojoDao.get(ids, beanClass);
+    List<? extends AbstractDTO> abstractBeans = genericPojoDao.get(ids, beanClass);
     List<E> abstractDTOs = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(abstractBeans)) {
-      for (AbstractBean abstractBean : abstractBeans) {
+      for (AbstractDTO abstractBean : abstractBeans) {
         E abstractDTO = (E) MODEL_MAPPER.map(abstractBean, dtoClass);
         abstractDTOs.add(abstractDTO);
       }
@@ -145,9 +144,9 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
 
   @Override
   public List<E> findAll() {
-    List<? extends AbstractBean> list = genericPojoDao.getAll(beanClass);
+    List<? extends AbstractDTO> list = genericPojoDao.getAll(beanClass);
     List<E> result = new ArrayList<>();
-    for (AbstractBean bean : list) {
+    for (AbstractDTO bean : list) {
       AbstractDTO dto = MODEL_MAPPER.map(bean, dtoClass);
       result.add((E) dto);
     }
@@ -156,13 +155,13 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
 
   @Override
   public List<E> findByParams(Map<String, Object> filters) {
-    List<? extends AbstractBean> list = genericPojoDao.get(filters, beanClass);
+    List<? extends AbstractDTO> list = genericPojoDao.get(filters, beanClass);
     return convertBeanListToDTOList(list);
   }
 
   @Override
   public List<E> findByPredicate(Predicate predicate) {
-    List<? extends AbstractBean> list = genericPojoDao.get(predicate, beanClass);
+    List<? extends AbstractDTO> list = genericPojoDao.get(predicate, beanClass);
     return convertBeanListToDTOList(list);
   }
 
@@ -176,15 +175,15 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
     return genericPojoDao.count(beanClass);
   }
 
-  protected List<E> convertBeanListToDTOList(List<? extends AbstractBean> beans) {
+  protected List<E> convertBeanListToDTOList(List<? extends AbstractDTO> beans) {
     List<E> result = new ArrayList<>();
-    for (AbstractBean bean : beans) {
+    for (AbstractDTO bean : beans) {
       result.add((E) convertBean2DTO(bean, dtoClass));
     }
     return result;
   }
 
-  protected <T extends AbstractDTO> T convertBean2DTO(AbstractBean entity, Class<T> dtoClass) {
+  protected <T extends AbstractDTO> T convertBean2DTO(AbstractDTO entity, Class<T> dtoClass) {
     try {
       AbstractDTO dto = dtoClass.newInstance();
       MODEL_MAPPER.map(entity, dto);
@@ -194,9 +193,9 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
     }
   }
 
-  protected <T extends AbstractBean> T convertDTO2Bean(AbstractDTO entity, Class<T> beanClass) {
+  protected <T extends AbstractDTO> T convertDTO2Bean(AbstractDTO entity, Class<T> beanClass) {
     try {
-      AbstractBean bean = beanClass.newInstance();
+      AbstractDTO bean = beanClass.newInstance();
       MODEL_MAPPER.map(entity, bean);
       return (T) bean;
     } catch (Exception e) {

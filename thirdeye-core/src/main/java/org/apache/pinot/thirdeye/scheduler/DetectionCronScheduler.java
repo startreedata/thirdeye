@@ -34,8 +34,8 @@ import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.detection.dataquality.DataQualityPipelineJob;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -192,7 +192,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   @Override
-  public void startJob(AbstractBean config, JobDetail job) throws SchedulerException {
+  public void startJob(AbstractDTO config, JobDetail job) throws SchedulerException {
     Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
         CronScheduleBuilder.cronSchedule(((DetectionConfigBean) config).getCron())).build();
     this.scheduler.scheduleJob(job, trigger);

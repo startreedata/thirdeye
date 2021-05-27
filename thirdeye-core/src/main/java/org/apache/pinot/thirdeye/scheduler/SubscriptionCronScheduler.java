@@ -32,8 +32,8 @@ import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertJob;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionAlertConfigBean;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -143,7 +143,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   @Override
-  public void startJob(AbstractBean config, JobDetail job) throws SchedulerException {
+  public void startJob(AbstractDTO config, JobDetail job) throws SchedulerException {
     Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
         CronScheduleBuilder.cronSchedule(((DetectionAlertConfigBean) config).getCronExpression()))
         .build();
@@ -175,7 +175,8 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
     }
   }
 
-  private void createOrUpdateAlertJob(Set<JobKey> scheduledJobs, SubscriptionGroupDTO subscriptionGroupDTO)
+  private void createOrUpdateAlertJob(Set<JobKey> scheduledJobs,
+      SubscriptionGroupDTO subscriptionGroupDTO)
       throws SchedulerException {
     Long id = subscriptionGroupDTO.getId();
     boolean isActive = subscriptionGroupDTO.isActive();
@@ -213,6 +214,4 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
       // for all jobs with not isActive, and not isScheduled, no change required
     }
   }
-
-
 }

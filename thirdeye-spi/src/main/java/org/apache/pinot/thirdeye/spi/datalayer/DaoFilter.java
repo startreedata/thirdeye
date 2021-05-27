@@ -1,11 +1,11 @@
 package org.apache.pinot.thirdeye.spi.datalayer;
 
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 public class DaoFilter {
 
-  private Class<? extends AbstractBean> beanClass;
+  private Class<? extends AbstractDTO> beanClass;
   private Predicate predicate;
   private Integer limit;
   private Integer offset;
@@ -39,12 +39,12 @@ public class DaoFilter {
     return this;
   }
 
-  public Class<? extends AbstractBean> getBeanClass() {
+  public Class<? extends AbstractDTO> getBeanClass() {
     return beanClass;
   }
 
   public DaoFilter setBeanClass(
-      final Class<? extends AbstractBean> beanClass) {
+      final Class<? extends AbstractDTO> beanClass) {
     this.beanClass = beanClass;
     return this;
   }

@@ -23,8 +23,9 @@ package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
-public class OverrideConfigBean extends AbstractBean {
+public class OverrideConfigBean extends AbstractDTO {
 
   private long startTime;
 

@@ -23,6 +23,7 @@ package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 /**
@@ -31,7 +32,7 @@ import java.util.Objects;
  * The properties will be used to supply things required by the data sources to setup these datasets or metrics
  * Once the entry has been onboarded, we will not check it again
  */
-public class OnboardDatasetMetricBean extends AbstractBean {
+public class OnboardDatasetMetricBean extends AbstractDTO {
 
   private String datasetName;
 

@@ -30,9 +30,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DatasetConfigBean extends AbstractBean {
+public class DatasetConfigBean extends AbstractDTO {
 
   public static String DEFAULT_PREAGGREGATED_DIMENSION_VALUE = "all";
   // This is the expected delay for the hourly/daily data source.

@@ -21,8 +21,9 @@
 package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
-public class OnlineDetectionDataBean extends AbstractBean {
+public class OnlineDetectionDataBean extends AbstractDTO {
 
   private String dataset;
 

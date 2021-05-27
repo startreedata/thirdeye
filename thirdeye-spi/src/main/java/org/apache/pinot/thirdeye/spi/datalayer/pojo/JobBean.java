@@ -24,12 +24,13 @@ import java.sql.Timestamp;
 import java.util.Objects;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * This class corresponds to an anomaly job. An anomaly job is created for every execution of an
  * anomaly function spec An anomaly job consists of 1 or more anomaly tasks
  */
-public class JobBean extends AbstractBean {
+public class JobBean extends AbstractDTO {
 
   private String jobName;
   private JobStatus status;

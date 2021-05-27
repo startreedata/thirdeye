@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.collect.BiMap;
@@ -93,8 +94,8 @@ public class SqlQueryBuilder {
 
   public PreparedStatement createInsertStatement(Connection conn, AbstractEntity entity)
       throws Exception {
-    String tableName =
-        entityMappingHolder.tableToEntityNameMap.inverse().get(entity.getClass().getSimpleName());
+    String tableName = requireNonNull(
+        entityMappingHolder.tableToEntityNameMap.inverse().get(entity.getClass().getSimpleName()));
     return createInsertStatement(conn, tableName, entity);
   }
 

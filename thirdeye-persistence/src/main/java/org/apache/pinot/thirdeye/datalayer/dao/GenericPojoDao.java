@@ -47,6 +47,7 @@ import org.apache.pinot.thirdeye.datalayer.entity.AbstractJsonEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.ApplicationIndex;
+import org.apache.pinot.thirdeye.datalayer.entity.DataSourceIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.DatasetConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.DetectionConfigIndex;
@@ -74,6 +75,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.pojo.AbstractBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalyFeedbackBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalySubscriptionGroupNotificationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DatasetConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionAlertConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
@@ -117,6 +119,8 @@ public class GenericPojoDao {
     pojoInfoMap
         .put(MergedAnomalyResultBean.class,
             newPojoInfo(DEFAULT_BASE_TABLE_NAME, MergedAnomalyResultIndex.class));
+    pojoInfoMap.put(DataSourceBean.class,
+        newPojoInfo(DEFAULT_BASE_TABLE_NAME, DataSourceIndex.class));
     pojoInfoMap.put(DatasetConfigBean.class,
         newPojoInfo(DEFAULT_BASE_TABLE_NAME, DatasetConfigIndex.class));
     pojoInfoMap.put(MetricConfigBean.class,

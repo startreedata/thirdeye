@@ -15,6 +15,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertSnapshotManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalySubscriptionGroupNotificationManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ApplicationManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataSourceManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EntityToEntityMappingManagerImpl;
@@ -35,6 +36,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.TaskManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.ApplicationIndex;
+import org.apache.pinot.thirdeye.datalayer.entity.DataSourceIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.DatasetConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.DetectionConfigIndex;
@@ -59,6 +61,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertSnapshotManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.ApplicationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DetectionStatusManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
@@ -87,6 +90,7 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       JobIndex.class,
       MergedAnomalyResultIndex.class,
       TaskIndex.class,
+      DataSourceIndex.class,
       DatasetConfigIndex.class,
       MetricConfigIndex.class,
       OverrideConfigIndex.class,
@@ -125,6 +129,7 @@ public class ThirdEyePersistenceModule extends AbstractModule {
         Scopes.SINGLETON);
     bind(JobManager.class).to(JobManagerImpl.class).in(Scopes.SINGLETON);
     bind(TaskManager.class).to(TaskManagerImpl.class).in(Scopes.SINGLETON);
+    bind(DataSourceManager.class).to(DataSourceManagerImpl.class).in(Scopes.SINGLETON);
     bind(DatasetConfigManager.class).to(DatasetConfigManagerImpl.class).in(Scopes.SINGLETON);
     bind(MetricConfigManager.class).to(MetricConfigManagerImpl.class).in(Scopes.SINGLETON);
     bind(OverrideConfigManager.class).to(OverrideConfigManagerImpl.class).in(Scopes.SINGLETON);

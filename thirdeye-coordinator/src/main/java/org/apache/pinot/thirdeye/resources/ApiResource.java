@@ -7,6 +7,7 @@ public class ApiResource {
 
   private final AuthResource authResource;
   private final ApplicationResource applicationResource;
+  private final DataSourceResource dataSourceResource;
   private final DatasetResource datasetResource;
   private final MetricResource metricResource;
   private final AlertResource alertResource;
@@ -19,6 +20,7 @@ public class ApiResource {
   @Inject
   public ApiResource(final AuthResource authResource,
       final ApplicationResource applicationResource,
+      final DataSourceResource dataSourceResource,
       final DatasetResource datasetResource,
       final MetricResource metricResource,
       final AlertResource alertResource,
@@ -29,6 +31,7 @@ public class ApiResource {
       final EventResource eventResource) {
     this.authResource = authResource;
     this.applicationResource = applicationResource;
+    this.dataSourceResource = dataSourceResource;
     this.datasetResource = datasetResource;
     this.metricResource = metricResource;
     this.alertResource = alertResource;
@@ -47,6 +50,11 @@ public class ApiResource {
   @Path("applications")
   public ApplicationResource getApplicationResource() {
     return applicationResource;
+  }
+
+  @Path("data-sources")
+  public DataSourceResource getDataSourceResource() {
+    return dataSourceResource;
   }
 
   @Path("datasets")
@@ -80,7 +88,7 @@ public class ApiResource {
   }
 
   @Path("rca")
-  public RcaResource getRootCauseResource() {
+  public RcaResource getRcaResource() {
     return rcaResource;
   }
 

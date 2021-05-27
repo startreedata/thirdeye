@@ -20,6 +20,8 @@ import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyFeedbackApi;
 import org.apache.pinot.thirdeye.spi.api.ApplicationApi;
+import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
+import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
@@ -31,6 +33,7 @@ import org.apache.pinot.thirdeye.spi.api.UserApi;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -38,6 +41,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 
 public abstract class ApiBeanMapper {
@@ -64,6 +68,45 @@ public abstract class ApiBeanMapper {
     applicationDTO.setApplication(applicationApi.getName());
     applicationDTO.setRecipients("");
     return applicationDTO;
+  }
+
+  public static DataSourceApi toApi(final DataSourceDTO dto) {
+    return new DataSourceApi()
+        .setId(dto.getId())
+        .setName(dto.getName())
+        .setProperties(dto.getProperties())
+        .setClassRef(dto.getClassRef())
+        .setMetaList(optional(dto.getMetaList())
+            .map(l -> l.stream().map(ApiBeanMapper::toApi)
+                .collect(Collectors.toList()))
+            .orElse(null))
+        ;
+  }
+
+  private static DataSourceMetaApi toApi(final DataSourceMetaBean metaBean) {
+    return new DataSourceMetaApi()
+        .setClassRef(metaBean.getClassRef())
+        .setProperties(metaBean.getProperties());
+  }
+
+  public static DataSourceDTO toDataSourceDto(final DataSourceApi api) {
+    final DataSourceDTO dto = new DataSourceDTO();
+    dto
+        .setName(api.getName())
+        .setProperties(api.getProperties())
+        .setClassRef(api.getClassRef())
+        .setMetaList(optional(api.getMetaList())
+            .map(l -> l.stream().map(ApiBeanMapper::toDataSourceMetaBean)
+                .collect(Collectors.toList()))
+            .orElse(null));
+    dto.setId(api.getId());
+    return dto;
+  }
+
+  private static DataSourceMetaBean toDataSourceMetaBean(final DataSourceMetaApi api) {
+    return new DataSourceMetaBean()
+        .setClassRef(api.getClassRef())
+        .setProperties(api.getProperties());
   }
 
   public static DatasetApi toApi(final DatasetConfigDTO dto) {

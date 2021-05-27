@@ -1,0 +1,24 @@
+{
+  "id": 9337,
+  "version": 0,
+  "createTime": null,
+  "createdBy": "no-auth-user",
+  "updateTime": 1622149115274,
+  "updatedBy": "no-auth-user",
+  "name": "PinotThirdEyeDataSource1",
+  "classRef": "org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource",
+  "properties": {
+    "controllerConnectionScheme": "http",
+    "zookeeperUrl": "localhost:2123",
+    "clusterName": "QuickStartCluster",
+    "controllerHost": "localhost",
+    "controllerPort": 9000,
+    "cacheLoaderClassName": "org.apache.pinot.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader"
+  },
+  "metaList": [
+    {
+      "classRef": "org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource",
+      "properties": {}
+    }
+  ]
+}

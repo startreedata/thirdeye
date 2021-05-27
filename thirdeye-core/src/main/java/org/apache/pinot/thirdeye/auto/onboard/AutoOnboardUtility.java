@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datasource.DataSourceConfig;
 import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.spi.auto.onboard.AutoOnboard;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.slf4j.Logger;
@@ -40,16 +37,14 @@ public class AutoOnboardUtility {
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardUtility.class);
 
   public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(
-      final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager,
-      final DataSourcesConfiguration dataSourcesConfiguration) {
-    Map<String, List<AutoOnboard>> dataSourceToOnboardMap = new HashMap<>();
+      final DataSourcesConfiguration dataSourcesConfiguration,
+      final ThirdEyeDataSourceContext context) {
+    final Map<String, List<AutoOnboard>> dataSourceToOnboardMap = new HashMap<>();
 
     for (DataSourceConfig dataSourceConfig : dataSourcesConfiguration.getDataSourceConfigs()) {
       processDataSourceConfig(dataSourceToOnboardMap,
           dataSourceConfig,
-          metricConfigManager,
-          datasetConfigManager);
+          context);
     }
 
     return dataSourceToOnboardMap;
@@ -58,9 +53,8 @@ public class AutoOnboardUtility {
   private static void processDataSourceConfig(
       final Map<String, List<AutoOnboard>> dataSourceToOnboardMap,
       final DataSourceConfig dataSourceConfig,
-      final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
-    List<MetadataSourceConfig> metadataSourceConfigs = dataSourceConfig
+      final ThirdEyeDataSourceContext context) {
+    final List<MetadataSourceConfig> metadataSourceConfigs = dataSourceConfig
         .getMetadataSourceConfigs();
     if (metadataSourceConfigs == null) {
       return;
@@ -72,31 +66,31 @@ public class AutoOnboardUtility {
       metadataSourceConfig.getProperties().putAll(dataSourceConfig.getProperties());
       if (StringUtils.isNotBlank(metadataSourceClassName)) {
         try {
-          Constructor<?> constructor = Class.forName(metadataSourceClassName)
-              .getConstructor(MetadataSourceConfig.class);
-          AutoOnboard instance = (AutoOnboard) constructor
-              .newInstance(metadataSourceConfig);
-          instance.init(new ThirdEyeDataSourceContext()
-              .setMetricConfigManager(metricConfigManager)
-              .setDatasetConfigManager(datasetConfigManager)
-          );
+          final AutoOnboard instance = createAutoOnboardInstance(context,
+              metadataSourceConfig,
+              metadataSourceClassName);
           String datasourceClassName = dataSourceConfig.getClassName();
-          String dataSource =
-              datasourceClassName.substring(datasourceClassName.lastIndexOf(".") + 1
-              );
+          String dataSource = datasourceClassName.substring(
+              datasourceClassName.lastIndexOf(".") + 1);
 
-          if (dataSourceToOnboardMap.containsKey(dataSource)) {
-            dataSourceToOnboardMap.get(dataSource).add(instance);
-          } else {
-            List<AutoOnboard> autoOnboardServices = new ArrayList<>();
-            autoOnboardServices.add(instance);
-            dataSourceToOnboardMap.put(dataSource, autoOnboardServices);
-          }
+          dataSourceToOnboardMap
+              .computeIfAbsent(dataSource, k -> new ArrayList<>())
+              .add(instance);
         } catch (Exception e) {
-          LOG.error("Exception in creating metadata constructor {}", metadataSourceClassName,
-              e);
+          LOG.error("Exception in creating metadata constructor {}", metadataSourceClassName, e);
         }
       }
     }
+  }
+
+  private static AutoOnboard createAutoOnboardInstance(final ThirdEyeDataSourceContext context,
+      final MetadataSourceConfig metadataSourceConfig, final String metadataSourceClassName)
+      throws ReflectiveOperationException {
+    final AutoOnboard instance = (AutoOnboard) Class
+        .forName(metadataSourceClassName)
+        .getConstructor(MetadataSourceConfig.class)
+        .newInstance(metadataSourceConfig);
+    instance.init(context);
+    return instance;
   }
 }

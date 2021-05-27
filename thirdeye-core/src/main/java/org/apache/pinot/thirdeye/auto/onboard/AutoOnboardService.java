@@ -31,6 +31,7 @@ import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.spi.auto.onboard.AutoOnboard;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,11 +83,11 @@ public class AutoOnboardService implements Runnable {
 
   @Override
   public void run() {
-    Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
-        .getDataSourceToAutoOnboardMap(
-            metricConfigManager,
-            datasetConfigManager,
-            dataSourcesConfiguration);
+    final ThirdEyeDataSourceContext context = new ThirdEyeDataSourceContext()
+        .setMetricConfigManager(metricConfigManager)
+        .setDatasetConfigManager(datasetConfigManager);
+    final Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
+        .getDataSourceToAutoOnboardMap(dataSourcesConfiguration, context);
 
     for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {
       autoOnboardServices.addAll(autoOnboards);

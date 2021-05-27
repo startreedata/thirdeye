@@ -21,11 +21,12 @@ import static org.mockito.Mockito.mock;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.spi.auto.onboard.AutoOnboard;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.util.ConfigurationLoader;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -36,11 +37,13 @@ public class AutoOnboardUtilityTest {
   public void testDataSourceToAutoOnboardMap() {
     URL url = AutoOnboardUtilityTest.class.getResource("/data-sources/data-sources-config-1.yml");
 
+    final ThirdEyeDataSourceContext context = new ThirdEyeDataSourceContext()
+        .setMetricConfigManager(mock(MetricConfigManager.class))
+        .setDatasetConfigManager(mock(DatasetConfigManager.class));
     Map<String, List<AutoOnboard>> dsToOnboardsMap = AutoOnboardUtility
         .getDataSourceToAutoOnboardMap(
-            mock(MetricConfigManager.class),
-            mock(DatasetConfigManager.class), ConfigurationLoader.readConfig(url,
-                DataSourcesConfiguration.class));
+            ConfigurationLoader.readConfig(url,
+                DataSourcesConfiguration.class), context);
 
     // Assert two data sources (PinotThirdEyeDataSource, CSVThirdEyeDataSource)
     Assert.assertEquals(dsToOnboardsMap.keySet().size(), 2);
@@ -81,11 +84,13 @@ public class AutoOnboardUtilityTest {
   public void testAutoOnboardClassNotFoundService() {
     URL url = AutoOnboardUtilityTest.class.getResource("/data-sources/data-sources-config-2.yml");
 
+    final ThirdEyeDataSourceContext context = new ThirdEyeDataSourceContext()
+        .setMetricConfigManager(mock(MetricConfigManager.class))
+        .setDatasetConfigManager(mock(DatasetConfigManager.class));
     Map<String, List<AutoOnboard>> dsToOnboardsMap = AutoOnboardUtility
         .getDataSourceToAutoOnboardMap(
-            mock(MetricConfigManager.class),
-            mock(DatasetConfigManager.class), ConfigurationLoader.readConfig(url,
-                DataSourcesConfiguration.class));
+            ConfigurationLoader.readConfig(url,
+                DataSourcesConfiguration.class), context);
 
     // Assert no metadata loaders
     Assert.assertEquals(dsToOnboardsMap.keySet().size(), 0);

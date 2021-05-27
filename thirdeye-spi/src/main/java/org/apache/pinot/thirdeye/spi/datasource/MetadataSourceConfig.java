@@ -22,8 +22,6 @@ package org.apache.pinot.thirdeye.spi.datasource;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 
 /**
  * This class defines the config of a metadata loader used in thirdeye
@@ -31,8 +29,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
  */
 public class MetadataSourceConfig {
 
-  private MetricConfigManager metricConfigManager;
-  private DatasetConfigManager datasetConfigManager;
   private String className;
   private Map<String, Object> properties = new HashMap<>();
 
@@ -44,26 +40,6 @@ public class MetadataSourceConfig {
   public MetadataSourceConfig(String className, Map<String, Object> properties) {
     this.className = className;
     this.properties = properties;
-  }
-
-  public MetricConfigManager getMetricConfigManager() {
-    return metricConfigManager;
-  }
-
-  public MetadataSourceConfig setMetricConfigManager(
-      final MetricConfigManager metricConfigManager) {
-    this.metricConfigManager = metricConfigManager;
-    return this;
-  }
-
-  public DatasetConfigManager getDatasetConfigManager() {
-    return datasetConfigManager;
-  }
-
-  public MetadataSourceConfig setDatasetConfigManager(
-      final DatasetConfigManager datasetConfigManager) {
-    this.datasetConfigManager = datasetConfigManager;
-    return this;
   }
 
   public String getClassName() {

@@ -65,35 +65,39 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final DtoT existing = ensureExists(dtoManager.findById(id));
 
     final DtoT updated = toDto(api);
-    setSystemFields(principal, existing, updated);
 
-    dtoManager.update(updated);
-    return updated;
-  }
-
-  /**
-   * the PUT api performs an edit on an existing object by replacing its contents entirely.
-   * Override this method to choose which fields need to carry forward from the old object to the
-   * new.
-   *
-   * For example, after edit,
-   * - one cannot change the id, create time, etc.
-   * - also, the system decides the update time, updatedBy, etc.
-   *
-   * @param principal user performing the update
-   * @param existing the old object
-   * @param updated the updated object (which is yet to be persisted)
-   */
-  protected void setSystemFields(
-      final ThirdEyePrincipal principal,
-      final DtoT existing,
-      final DtoT updated) {
+    // Override system fields.
     updated
         .setId(existing.getId())
         .setCreateTime(existing.getCreateTime())
         .setCreatedBy(existing.getCreatedBy())
         .setUpdatedBy(principal.getName())
         .setUpdateTime(new Timestamp(new Date().getTime()));
+
+    // Allow downstream classes to process any additional changes
+    prepareUpdatedDto(principal, existing, updated);
+
+    // ready to be persisted to db.
+    return updated;
+  }
+
+  /**
+   * the PUT api performs an edit on an existing object by replacing its contents entirely.
+   * Override this method to choose which fields need to carry forward from the old object to the
+   * new. The system decides the update time, updatedBy, etc.
+   *
+   * For example, after edit,
+   * - An alert might need to have a default cron or have the lastTimestamp copied over.
+   *
+   * @param principal user performing the update
+   * @param existing the old object
+   * @param updated the updated object (which is yet to be persisted)
+   */
+  protected void prepareUpdatedDto(
+      final ThirdEyePrincipal principal,
+      final DtoT existing,
+      final DtoT updated) {
+    // By default, do nothing.
   }
 
   protected DtoT toDto(final ApiT api) {

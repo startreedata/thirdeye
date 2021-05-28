@@ -52,7 +52,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   private static final Logger log = LoggerFactory.getLogger(AlertResource.class);
 
-  public static final String DEFAULT_CRON = "0 */1 * * * ?";
+  private static final String CRON_EVERY_1MIN = "0 */1 * * * ?";
+
   private final AlertManager alertManager;
   private final MetricConfigManager metricConfigManager;
   private final AlertCreater alertCreater;
@@ -86,7 +87,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(api.getNodes(), "Exactly 1 detection must be present");
 
     if (api.getCron() == null) {
-      api.setCron(DEFAULT_CRON);
+      api.setCron(CRON_EVERY_1MIN);
     }
 
     return alertCreater.create(api
@@ -106,15 +107,14 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void setSystemFields(final ThirdEyePrincipal principal,
+  protected void prepareUpdatedDto(final ThirdEyePrincipal principal,
       final AlertDTO existing,
       final AlertDTO updated) {
-    super.setSystemFields(principal, existing, updated);
     updated.setLastTimestamp(existing.getLastTimestamp());
 
     // Always set a default cron if not present.
     if (updated.getCron() == null) {
-      updated.setCron(DEFAULT_CRON);
+      updated.setCron(CRON_EVERY_1MIN);
     }
   }
 

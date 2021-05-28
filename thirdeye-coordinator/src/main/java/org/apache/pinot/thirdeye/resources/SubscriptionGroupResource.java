@@ -5,6 +5,7 @@ import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
@@ -27,7 +28,7 @@ import org.quartz.CronExpression;
 public class SubscriptionGroupResource extends
     CrudResource<SubscriptionGroupApi, SubscriptionGroupDTO> {
 
-  public static final String DEFAULT_CRON = "0 */5 * * * ?";
+  private static final String CRON_EVERY_5MIN = "0 */5 * * * ?";
   private final SubscriptionGroupManager subscriptionGroupManager;
 
   @Inject
@@ -43,17 +44,28 @@ public class SubscriptionGroupResource extends
       final SubscriptionGroupApi api) {
     ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
     if (api.getCron() == null) {
-      api.setCron(DEFAULT_CRON);
+      api.setCron(CRON_EVERY_5MIN);
     }
     return toDto(api);
   }
 
   @Override
   protected void validate(final SubscriptionGroupApi api) {
-    ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
+    optional(api.getCron()).ifPresent(cron ->
+        ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
     ensure(subscriptionGroupManager.findByPredicate(
         Predicate.EQ("name", api.getName())).size() == 0,
         ERR_DUPLICATE_NAME);
+  }
+
+  @Override
+  protected void prepareUpdatedDto(final ThirdEyePrincipal principal,
+      final SubscriptionGroupDTO existing,
+      final SubscriptionGroupDTO updated) {
+    // Always set a default cron if not present.
+    if (updated.getCronExpression() == null) {
+      updated.setCronExpression(CRON_EVERY_5MIN);
+    }
   }
 
   @Override

@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2;
+package org.apache.pinot.thirdeye.spi.detection.v2;
 
 /**
  * Defines an input for any PlanNode, with plan node name and all the keys of outputs.

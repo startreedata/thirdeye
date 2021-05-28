@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.results;
 
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
-import org.apache.pinot.thirdeye.detection.v2.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 
 public class DataTable implements DetectionPipelineResult {
 

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import java.lang.reflect.Modifier;
 import java.util.Set;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.detection.v2.PlanNode;
+import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 import org.reflections.Reflections;
 import org.testng.Assert;
 import org.testng.annotations.Test;

@@ -7,11 +7,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.api.v2.DetectionPlanApi;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.detection.v2.BaseComponent;
-import org.apache.pinot.thirdeye.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.PinotDataFetcher;
+import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
+import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

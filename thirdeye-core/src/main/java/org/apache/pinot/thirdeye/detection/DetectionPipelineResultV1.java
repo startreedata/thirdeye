@@ -23,10 +23,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 
 public class DetectionPipelineResultV1 implements DetectionPipelineResult {
 

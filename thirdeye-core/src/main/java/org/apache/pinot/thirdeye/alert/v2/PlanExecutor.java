@@ -2,10 +2,10 @@ package org.apache.pinot.thirdeye.alert.v2;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.pinot.thirdeye.api.v2.DetectionPlanApi.InputApi;
-import org.apache.pinot.thirdeye.detection.v2.DetectionPipelineResult;
-import org.apache.pinot.thirdeye.detection.v2.Operator;
-import org.apache.pinot.thirdeye.detection.v2.PlanNode;
+import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.InputApi;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
+import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 
 public class PlanExecutor {
 

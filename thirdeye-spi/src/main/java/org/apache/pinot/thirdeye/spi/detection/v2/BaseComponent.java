@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.v2;
+package org.apache.pinot.thirdeye.spi.detection.v2;
 
 import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
 

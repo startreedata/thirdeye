@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.api.v2;
+package org.apache.pinot.thirdeye.spi.api.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

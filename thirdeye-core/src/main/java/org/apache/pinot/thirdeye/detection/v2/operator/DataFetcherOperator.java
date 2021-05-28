@@ -4,19 +4,19 @@ import static org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanN
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.api.v2.DetectionPlanApi.OutputApi;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.detection.v2.BaseComponent;
-import org.apache.pinot.thirdeye.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.DataFetcher;
 import org.apache.pinot.thirdeye.detection.v2.results.DataTable;
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
+import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.OutputApi;
 import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 
 public class DataFetcherOperator extends DetectionPipelineOperator<DataTable> {
 
   private DataSourceCache dataSourceCache;
-  private Map<String, String> outputKeyMap = new HashMap<>();
+  private final Map<String, String> outputKeyMap = new HashMap<>();
 
   public DataFetcherOperator() {
     super();

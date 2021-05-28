@@ -22,11 +22,11 @@ package org.apache.pinot.thirdeye.detection.v2.plan;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.api.v2.DetectionPlanApi;
-import org.apache.pinot.thirdeye.api.v2.DetectionPlanApi.InputApi;
-import org.apache.pinot.thirdeye.detection.v2.DetectionPipelineResult;
-import org.apache.pinot.thirdeye.detection.v2.PlanNode;
-import org.apache.pinot.thirdeye.detection.v2.PlanNodeContext;
+import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
+import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.InputApi;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
+import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

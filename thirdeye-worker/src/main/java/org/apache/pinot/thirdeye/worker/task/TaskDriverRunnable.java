@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.task;
+package org.apache.pinot.thirdeye.worker.task;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;

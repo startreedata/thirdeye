@@ -42,57 +42,16 @@ import java.util.Set;
 import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
+import org.apache.pinot.thirdeye.datalayer.dao.EntityInfoBuilder.EntityInfo;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractJsonEntity;
-import org.apache.pinot.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.ApplicationIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.DataSourceIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.DatasetConfigIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.DetectionConfigIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.DetectionStatusIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.EntityToEntityMappingIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.EvaluationIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.EventIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.GenericJsonEntity;
-import org.apache.pinot.thirdeye.datalayer.entity.JobIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.MetricConfigIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.OnboardDatasetMetricIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.OverrideConfigIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.RootcauseSessionIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.RootcauseTemplateIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.SessionIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.TaskIndex;
 import org.apache.pinot.thirdeye.datalayer.util.GenericResultSetMapper;
 import org.apache.pinot.thirdeye.datalayer.util.SqlQueryBuilder;
 import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.entity.AbstractEntity;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalyFeedbackBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalySubscriptionGroupNotificationBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DatasetConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionAlertConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionStatusBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EntityToEntityMappingBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EvaluationBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EventBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.JobBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.OnboardDatasetMetricBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.OnlineDetectionDataBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.OverrideConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.RootcauseSessionBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.RootcauseTemplateBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.SessionBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.TaskBean;
 import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 import org.modelmapper.ModelMapper;
 import org.reflections.ReflectionUtils;
@@ -106,56 +65,10 @@ public class GenericPojoDao {
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
   private static final int MAX_BATCH_SIZE = 1000;
 
-  static Map<Class<? extends AbstractDTO>, PojoInfo> pojoInfoMap = new HashMap<>();
-  static String DEFAULT_BASE_TABLE_NAME = "GENERIC_JSON_ENTITY";
-  static ModelMapper MODEL_MAPPER = new ModelMapper();
-  static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ModelMapper MODEL_MAPPER = new ModelMapper();
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  static {
-    pojoInfoMap.put(AnomalyFeedbackBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, AnomalyFeedbackIndex.class));
-    pojoInfoMap.put(JobBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, JobIndex.class));
-    pojoInfoMap.put(TaskBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, TaskIndex.class));
-    pojoInfoMap
-        .put(MergedAnomalyResultBean.class,
-            newPojoInfo(DEFAULT_BASE_TABLE_NAME, MergedAnomalyResultIndex.class));
-    pojoInfoMap.put(DataSourceBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, DataSourceIndex.class));
-    pojoInfoMap.put(DatasetConfigBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, DatasetConfigIndex.class));
-    pojoInfoMap.put(MetricConfigBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, MetricConfigIndex.class));
-    pojoInfoMap.put(OverrideConfigBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, OverrideConfigIndex.class));
-    pojoInfoMap.put(EventBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, EventIndex.class));
-    pojoInfoMap.put(DetectionStatusBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionStatusIndex.class));
-    pojoInfoMap
-        .put(EntityToEntityMappingBean.class,
-            newPojoInfo(DEFAULT_BASE_TABLE_NAME, EntityToEntityMappingIndex.class));
-    pojoInfoMap
-        .put(OnboardDatasetMetricBean.class,
-            newPojoInfo(DEFAULT_BASE_TABLE_NAME, OnboardDatasetMetricIndex.class));
-    pojoInfoMap.put(ApplicationBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, ApplicationIndex.class));
-    pojoInfoMap.put(RootcauseSessionBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, RootcauseSessionIndex.class));
-    pojoInfoMap.put(SessionBean.class, newPojoInfo(DEFAULT_BASE_TABLE_NAME, SessionIndex.class));
-    pojoInfoMap.put(DetectionConfigBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionConfigIndex.class));
-    pojoInfoMap
-        .put(DetectionAlertConfigBean.class,
-            newPojoInfo(DEFAULT_BASE_TABLE_NAME, DetectionAlertConfigIndex.class));
-    pojoInfoMap.put(EvaluationBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, EvaluationIndex.class));
-    pojoInfoMap.put(RootcauseTemplateBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, RootcauseTemplateIndex.class));
-    pojoInfoMap
-        .put(OnlineDetectionDataBean.class,
-            newPojoInfo(DEFAULT_BASE_TABLE_NAME, OnlineDetectionDataIndex.class));
-    pojoInfoMap.put(AnomalySubscriptionGroupNotificationBean.class,
-        newPojoInfo(DEFAULT_BASE_TABLE_NAME, AnomalySubscriptionGroupNotificationIndex.class));
-  }
+  private final Map<Class<? extends AbstractDTO>, EntityInfo> pojoInfoMap;
 
   @Inject
   DataSource dataSource;
@@ -165,14 +78,7 @@ public class GenericPojoDao {
   GenericResultSetMapper genericResultSetMapper;
 
   public GenericPojoDao() {
-  }
-
-  private static PojoInfo newPojoInfo(String baseTableName,
-      Class<? extends AbstractIndexEntity> indexEntityClass) {
-    PojoInfo pojoInfo = new PojoInfo();
-    pojoInfo.baseTableName = baseTableName;
-    pojoInfo.indexEntityClass = indexEntityClass;
-    return pojoInfo;
+    pojoInfoMap = new EntityInfoBuilder().getEntityInfoMap();
   }
 
   public Set<Class<? extends AbstractDTO>> getAllBeanClasses() {
@@ -212,7 +118,7 @@ public class GenericPojoDao {
       //get the generated id
       //update indexes
       return runTask(connection -> {
-        PojoInfo pojoInfo = pojoInfoMap.get(pojo.getClass());
+        EntityInfo entityInfo = pojoInfoMap.get(pojo.getClass());
         AbstractJsonEntity genericJsonEntity = new GenericJsonEntity();
         genericJsonEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
         genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
@@ -231,8 +137,8 @@ public class GenericPojoDao {
                 pojo.setId(generatedKeys.getLong(1));
               }
             }
-            if (pojoInfo.indexEntityClass != null) {
-              AbstractIndexEntity abstractIndexEntity = pojoInfo.indexEntityClass.newInstance();
+            if (entityInfo.indexEntityClass != null) {
+              AbstractIndexEntity abstractIndexEntity = entityInfo.indexEntityClass.newInstance();
               MODEL_MAPPER.map(pojo, abstractIndexEntity);
               abstractIndexEntity.setBaseId(pojo.getId());
               abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -365,7 +271,7 @@ public class GenericPojoDao {
     genericJsonEntity.setJsonVal(jsonVal);
     genericJsonEntity.setId(pojo.getId());
     genericJsonEntity.setVersion(pojo.getVersion());
-    PojoInfo pojoInfo = pojoInfoMap.get(pojo.getClass());
+    EntityInfo entityInfo = pojoInfoMap.get(pojo.getClass());
     Set<String> fieldsToUpdate = Sets.newHashSet("jsonVal", "updateTime", "version");
     int affectedRows;
     try (PreparedStatement baseTableInsertStmt = sqlQueryBuilder
@@ -376,8 +282,8 @@ public class GenericPojoDao {
     //update indexes
     if (affectedRows == 1) {
       ThirdeyeMetricsUtil.dbWriteByteCounter.inc(jsonVal.length());
-      if (pojoInfo.indexEntityClass != null) {
-        AbstractIndexEntity abstractIndexEntity = pojoInfo.indexEntityClass.newInstance();
+      if (entityInfo.indexEntityClass != null) {
+        AbstractIndexEntity abstractIndexEntity = entityInfo.indexEntityClass.newInstance();
         MODEL_MAPPER.map(pojo, abstractIndexEntity);
         abstractIndexEntity.setBaseId(pojo.getId());
         abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
@@ -463,9 +369,9 @@ public class GenericPojoDao {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        PojoInfo pojoInfo = pojoInfoMap.get(beanClass);
+        EntityInfo entityInfo = pojoInfoMap.get(beanClass);
         try (PreparedStatement selectStatement = sqlQueryBuilder
-            .createCountStatement(connection, pojoInfo.indexEntityClass)) {
+            .createCountStatement(connection, entityInfo.indexEntityClass)) {
           try (ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
               return resultSet.getInt(1);
@@ -628,15 +534,15 @@ public class GenericPojoDao {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        PojoInfo pojoInfo = pojoInfoMap.get(pojoClass);
+        EntityInfo entityInfo = pojoInfoMap.get(pojoClass);
         List<? extends AbstractIndexEntity> indexEntities;
         try (PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
             .createStatementFromSQL(connection,
                 parameterizedSQL,
                 parameterMap,
-                pojoInfo.indexEntityClass)) {
+                entityInfo.indexEntityClass)) {
           try (ResultSet rs = findMatchingIdsStatement.executeQuery()) {
-            indexEntities = genericResultSetMapper.mapAll(rs, pojoInfo.indexEntityClass);
+            indexEntities = genericResultSetMapper.mapAll(rs, entityInfo.indexEntityClass);
           }
         }
         List<Long> idsToFind = new ArrayList<>();
@@ -732,13 +638,13 @@ public class GenericPojoDao {
     try {
       //apply the predicates and fetch the primary key ids
       return runTask(connection -> {
-        PojoInfo pojoInfo = pojoInfoMap.get(daoFilter.getBeanClass());
+        EntityInfo entityInfo = pojoInfoMap.get(daoFilter.getBeanClass());
         //find the matching ids
         List<? extends AbstractIndexEntity> indexEntities;
         try (PreparedStatement findByParamsStatement = sqlQueryBuilder
-            .createStatement(connection, daoFilter, pojoInfo.indexEntityClass)) {
+            .createStatement(connection, daoFilter, entityInfo.indexEntityClass)) {
           try (ResultSet rs = findByParamsStatement.executeQuery()) {
-            indexEntities = genericResultSetMapper.mapAll(rs, pojoInfo.indexEntityClass);
+            indexEntities = genericResultSetMapper.mapAll(rs, entityInfo.indexEntityClass);
           }
         }
         List<Long> idsToReturn = new ArrayList<>();
@@ -791,7 +697,7 @@ public class GenericPojoDao {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        PojoInfo pojoInfo = pojoInfoMap.get(pojoClass);
+        EntityInfo entityInfo = pojoInfoMap.get(pojoClass);
         Map<String, Object> filters = new HashMap<>();
         filters.put("id", id);
         try (PreparedStatement deleteStatement = sqlQueryBuilder
@@ -802,7 +708,7 @@ public class GenericPojoDao {
         filters.put("baseId", id);
 
         try (PreparedStatement deleteIndexStatement = sqlQueryBuilder
-            .createDeleteByIdStatement(connection, pojoInfo.indexEntityClass, filters)) {
+            .createDeleteByIdStatement(connection, entityInfo.indexEntityClass, filters)) {
           return deleteIndexStatement.executeUpdate();
         }
       }, 0);
@@ -940,11 +846,5 @@ public class GenericPojoDao {
   private interface QueryTask<T> {
 
     T handle(Connection connection) throws Exception;
-  }
-
-  static class PojoInfo {
-
-    String baseTableName;
-    Class<? extends AbstractIndexEntity> indexEntityClass;
   }
 }

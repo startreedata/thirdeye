@@ -75,6 +75,12 @@ $ npm install
 
 This will install necessary dependencies for the project.
 
+:warning: In case `npm` errors out with `cb() never called` message, remove the **node-modules** directory, **package-lock.json** lockfile and run
+
+```
+$ npm cache clean --force
+```
+
 ### Run
 
 Once set up, go to the project directory and run

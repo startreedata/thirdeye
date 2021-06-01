@@ -22,7 +22,7 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import static org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil.detectionRetuneCounter;
+import static org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil.detectionRetuneCounter;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;

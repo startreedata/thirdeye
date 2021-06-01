@@ -37,7 +37,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
@@ -56,6 +55,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
+import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

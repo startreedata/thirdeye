@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.anomaly.utils;
+package org.apache.pinot.thirdeye.util;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -30,14 +30,6 @@ public class ThirdeyeMetricsUtil {
 
   private static final MetricRegistry metricRegistry = new MetricRegistry();
 
-  public static final Counter taskCounter =
-      metricRegistry.counter("taskCounter");
-  public static final Counter taskSuccessCounter =
-      metricRegistry.counter("taskSuccessCounter");
-  public static final Counter taskExceptionCounter =
-      metricRegistry.counter("taskExceptionCounter");
-  public static final Counter taskDurationCounter =
-      metricRegistry.counter("taskDurationCounter");
   public static final Counter detectionTaskCounter =
       metricRegistry.counter("detectionTaskCounter");
   public static final Counter detectionTaskSuccessCounter =

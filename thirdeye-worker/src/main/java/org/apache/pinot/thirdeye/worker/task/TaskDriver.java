@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.worker.task;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -50,12 +51,15 @@ public class TaskDriver {
   private final long workerId;
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
   private final TaskRunnerFactory taskRunnerFactory;
+  private final MetricRegistry metricRegistry;
 
   @Inject
   public TaskDriver(final ThirdEyeWorkerConfiguration workerConfiguration,
       final TaskManager taskManager,
-      final TaskRunnerFactory taskRunnerFactory) {
+      final TaskRunnerFactory taskRunnerFactory,
+      final MetricRegistry metricRegistry) {
     this.taskManager = taskManager;
+    this.metricRegistry = metricRegistry;
     config = workerConfiguration.getTaskDriverConfiguration();
     workerId = workerConfiguration.getId();
 
@@ -96,7 +100,8 @@ public class TaskDriver {
         taskExecutorService,
         config,
         workerId,
-        taskRunnerFactory
+        taskRunnerFactory,
+        metricRegistry
     );
   }
 

@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.worker.task;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -38,7 +40,6 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskInfoFactory;
 import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
-import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskInfo;
@@ -63,6 +64,10 @@ public class TaskDriverRunnable implements Runnable {
   private final TaskDriverConfiguration config;
   private final long workerId;
   private final TaskRunnerFactory taskRunnerFactory;
+  private final Counter taskDurationCounter;
+  private final Counter taskExceptionCounter;
+  private final Counter taskSuccessCounter;
+  private final Counter taskCounter;
 
   public TaskDriverRunnable(final TaskManager taskManager,
       final TaskContext taskContext,
@@ -70,7 +75,8 @@ public class TaskDriverRunnable implements Runnable {
       final ExecutorService taskExecutorService,
       final TaskDriverConfiguration config,
       final long workerId,
-      final TaskRunnerFactory taskRunnerFactory) {
+      final TaskRunnerFactory taskRunnerFactory,
+      final MetricRegistry metricRegistry) {
 
     this.taskManager = taskManager;
     this.taskContext = taskContext;
@@ -79,6 +85,11 @@ public class TaskDriverRunnable implements Runnable {
     this.config = config;
     this.workerId = workerId;
     this.taskRunnerFactory = taskRunnerFactory;
+
+    taskDurationCounter = metricRegistry.counter("taskDurationCounter");
+    taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
+    taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
+    taskCounter = metricRegistry.counter("taskCounter");
   }
 
   public void run() {
@@ -100,7 +111,7 @@ public class TaskDriverRunnable implements Runnable {
     LOG.info("Executing task {} {}", taskDTO.getId(), taskDTO.getTaskInfo());
 
     final long tStart = System.currentTimeMillis();
-    ThirdeyeMetricsUtil.taskCounter.inc();
+    taskCounter.inc();
 
     Future<List<TaskResult>> future = null;
     try {
@@ -114,7 +125,7 @@ public class TaskDriverRunnable implements Runnable {
           TaskStatus.COMPLETED,
           "");
 
-      ThirdeyeMetricsUtil.taskSuccessCounter.inc();
+      taskSuccessCounter.inc();
     } catch (TimeoutException e) {
       handleTimeout(taskDTO, future, e);
     } catch (Exception e) {
@@ -123,7 +134,7 @@ public class TaskDriverRunnable implements Runnable {
       MDC.clear();
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
-      ThirdeyeMetricsUtil.taskDurationCounter.inc(elapsedTime);
+      taskDurationCounter.inc(elapsedTime);
     }
   }
 
@@ -138,7 +149,7 @@ public class TaskDriverRunnable implements Runnable {
 
   private void handleTimeout(final TaskDTO taskDTO, final Future<List<TaskResult>> future,
       final TimeoutException e) {
-    ThirdeyeMetricsUtil.taskExceptionCounter.inc();
+    taskExceptionCounter.inc();
     LOG.error("Timeout on executing task", e);
     if (future != null) {
       future.cancel(true);
@@ -151,7 +162,7 @@ public class TaskDriverRunnable implements Runnable {
   }
 
   private void handleException(final TaskDTO taskDTO, final Exception e) {
-    ThirdeyeMetricsUtil.taskExceptionCounter.inc();
+    taskExceptionCounter.inc();
     LOG.error("Exception in electing and executing task", e);
 
     // update task status failed

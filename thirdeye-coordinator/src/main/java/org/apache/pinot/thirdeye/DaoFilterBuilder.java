@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.pinot.thirdeye.spi.ThirdEyeException;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate.OPER;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate.OPER;
 import org.apache.pinot.thirdeye.spi.util.Pair;
 
 public class DaoFilterBuilder {

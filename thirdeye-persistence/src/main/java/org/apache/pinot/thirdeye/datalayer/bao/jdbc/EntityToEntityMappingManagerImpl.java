@@ -25,10 +25,10 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.EntityToEntityMappingBean;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Singleton
 public class EntityToEntityMappingManagerImpl extends

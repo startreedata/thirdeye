@@ -47,7 +47,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 
 @Singleton
 public class SqlQueryBuilder {

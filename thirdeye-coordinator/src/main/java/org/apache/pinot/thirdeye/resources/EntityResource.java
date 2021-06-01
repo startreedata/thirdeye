@@ -22,8 +22,8 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = "Entity")

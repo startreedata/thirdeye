@@ -23,10 +23,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.RootcauseTemplateBean;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Singleton
 public class RootcauseTemplateManagerImpl extends

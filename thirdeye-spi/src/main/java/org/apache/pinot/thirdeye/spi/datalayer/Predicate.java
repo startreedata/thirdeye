@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.util;
+package org.apache.pinot.thirdeye.spi.datalayer;
 
 import com.google.common.base.MoreObjects;
 import java.util.Arrays;

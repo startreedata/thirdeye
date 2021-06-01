@@ -1,7 +1,6 @@
 package org.apache.pinot.thirdeye.spi.datalayer;
 
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 public class DaoFilter {
 

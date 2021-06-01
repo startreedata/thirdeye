@@ -25,10 +25,10 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DetectionStatusManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionStatusBean;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Singleton
 public class DetectionStatusManagerImpl extends AbstractManagerImpl<DetectionStatusDTO>

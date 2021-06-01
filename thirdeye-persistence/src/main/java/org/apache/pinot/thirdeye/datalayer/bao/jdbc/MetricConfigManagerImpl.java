@@ -28,10 +28,10 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 @Singleton
 public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO>

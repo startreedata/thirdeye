@@ -5,8 +5,8 @@ import static org.apache.pinot.thirdeye.DaoFilterBuilder.toPredicate;
 import static org.apache.pinot.thirdeye.spi.util.Pair.createPair;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate.OPER;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate.OPER;
 import org.testng.annotations.Test;
 
 public class DaoFilterBuilderTest {

@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.spi.alert.commons;
 
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 
 public enum AnomalySource {
   DATASET {

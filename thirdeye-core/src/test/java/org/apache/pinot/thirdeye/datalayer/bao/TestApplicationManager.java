@@ -20,9 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

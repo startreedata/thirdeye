@@ -27,13 +27,13 @@ import java.util.Comparator;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.GroupedAnomalyResultsManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.GroupedAnomalyResultsBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 import org.modelmapper.ModelMapper;
 
 @Singleton

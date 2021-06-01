@@ -23,10 +23,10 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 public class ApplicationManagerImpl extends AbstractManagerImpl<ApplicationDTO>
     implements ApplicationManager {

@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.util.Predicate;
 
 public interface AbstractManager<E extends AbstractDTO> {
 

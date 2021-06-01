@@ -19,173 +19,108 @@
 
 package org.apache.pinot.thirdeye.anomaly.utils;
 
-import com.yammer.metrics.core.Counter;
-import com.yammer.metrics.core.MetricsRegistry;
-import com.yammer.metrics.reporting.JmxReporter;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 
 public class ThirdeyeMetricsUtil {
 
-  private static final MetricsRegistry metricsRegistry = new MetricsRegistry();
-  private static final JmxReporter jmxReporter = new JmxReporter(metricsRegistry);
-
-  static {
-    jmxReporter.start();
-  }
-
-  private ThirdeyeMetricsUtil() {
-  }
+  private static final MetricRegistry metricRegistry = new MetricRegistry();
 
   public static final Counter taskCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "taskCounter");
-
+      metricRegistry.counter("taskCounter");
   public static final Counter taskSuccessCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "taskSuccessCounter");
-
+      metricRegistry.counter("taskSuccessCounter");
   public static final Counter taskExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "taskExceptionCounter");
-
+      metricRegistry.counter("taskExceptionCounter");
   public static final Counter taskDurationCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "taskDurationCounter");
-
+      metricRegistry.counter("taskDurationCounter");
   public static final Counter detectionTaskCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "detectionTaskCounter");
-
+      metricRegistry.counter("detectionTaskCounter");
   public static final Counter detectionTaskSuccessCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "detectionTaskSuccessCounter");
-
+      metricRegistry.counter("detectionTaskSuccessCounter");
   public static final Counter detectionTaskExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "detectionTaskExceptionCounter");
-
+      metricRegistry.counter("detectionTaskExceptionCounter");
   public static final Counter dataQualityTaskCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dataQualityTaskCounter");
-
+      metricRegistry.counter("dataQualityTaskCounter");
   public static final Counter dataQualityTaskSuccessCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dataQualityTaskSuccessCounter");
-
+      metricRegistry.counter("dataQualityTaskSuccessCounter");
   public static final Counter dataQualityTaskExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dataQualityTaskExceptionCounter");
-
+      metricRegistry.counter("dataQualityTaskExceptionCounter");
   public static final Counter alertTaskCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "alertTaskCounter");
-
+      metricRegistry.counter("alertTaskCounter");
   public static final Counter alertTaskSuccessCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "alertTaskSuccessCounter");
-
+      metricRegistry.counter("alertTaskSuccessCounter");
   public static final Counter alertTaskExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "alertTaskExceptionCounter");
-
+      metricRegistry.counter("alertTaskExceptionCounter");
   public static final Counter dbCallCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dbCallCounter");
-
+      metricRegistry.counter("dbCallCounter");
   public static final Counter dbExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dbExceptionCounter");
-
+      metricRegistry.counter("dbExceptionCounter");
   public static final Counter dbReadCallCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dbReadCallCounter");
-
+      metricRegistry.counter("dbReadCallCounter");
   public static final Counter dbReadByteCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dbReadByteCounter");
-
+      metricRegistry.counter("dbReadByteCounter");
   public static final Counter dbReadDurationCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dbReadDurationCounter");
-
+      metricRegistry.counter("dbReadDurationCounter");
   public static final Counter dbWriteCallCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dbWriteCallCounter");
-
+      metricRegistry.counter("dbWriteCallCounter");
   public static final Counter dbWriteByteCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dbWriteByteCounter");
-
+      metricRegistry.counter("dbWriteByteCounter");
   public static final Counter dbWriteDurationCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "dbWriteDurationCounter");
-
+      metricRegistry.counter("dbWriteDurationCounter");
   public static final Counter datasourceCallCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "datasourceCallCounter");
-
+      metricRegistry.counter("datasourceCallCounter");
   public static final Counter datasourceDurationCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "datasourceDurationCounter");
-
+      metricRegistry.counter("datasourceDurationCounter");
   public static final Counter datasourceExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "datasourceExceptionCounter");
-
+      metricRegistry.counter("datasourceExceptionCounter");
   public static final Counter couchbaseCallCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "couchbaseCallCounter");
-
+      metricRegistry.counter("couchbaseCallCounter");
   public static final Counter couchbaseWriteCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "couchbaseWriteCounter");
-
+      metricRegistry.counter("couchbaseWriteCounter");
   public static final Counter couchbaseExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "couchbaseExceptionCounter");
-
-  public static final Counter pinotCallCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "pinotCallCounter");
-
-  public static final Counter pinotDurationCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "pinotDurationCounter");
-
-  public static final Counter pinotExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "pinotExceptionCounter");
-
+      metricRegistry.counter("couchbaseExceptionCounter");
   public static final Counter rcaPipelineCallCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "rcaPipelineCallCounter");
-
+      metricRegistry.counter("rcaPipelineCallCounter");
   public static final Counter rcaPipelineDurationCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "rcaPipelineDurationCounter");
-
+      metricRegistry.counter("rcaPipelineDurationCounter");
   public static final Counter rcaPipelineExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "rcaPipelineExceptionCounter");
-
+      metricRegistry.counter("rcaPipelineExceptionCounter");
   public static final Counter rcaFrameworkCallCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "rcaFrameworkCallCounter");
-
+      metricRegistry.counter("rcaFrameworkCallCounter");
   public static final Counter rcaFrameworkDurationCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "rcaFrameworkDurationCounter");
-
+      metricRegistry.counter("rcaFrameworkDurationCounter");
   public static final Counter rcaFrameworkExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "rcaFrameworkExceptionCounter");
-
+      metricRegistry.counter("rcaFrameworkExceptionCounter");
   public static final Counter cubeCallCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "cubeCallCounter");
-
+      metricRegistry.counter("cubeCallCounter");
   public static final Counter cubeDurationCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "cubeDurationCounter");
-
+      metricRegistry.counter("cubeDurationCounter");
   public static final Counter cubeExceptionCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "cubeExceptionCounter");
-
+      metricRegistry.counter("cubeExceptionCounter");
   public static final Counter detectionRetuneCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "detectionRetuneCounter");
-
+      metricRegistry.counter("detectionRetuneCounter");
   public static final Counter triggerEventCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "triggerEventCounter");
-
+      metricRegistry.counter("triggerEventCounter");
   public static final Counter processedTriggerEventCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "processedTriggerEventCounter");
-
+      metricRegistry.counter("processedTriggerEventCounter");
   public static final Counter eventScheduledTaskCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "eventScheduledTaskCounter");
-
+      metricRegistry.counter("eventScheduledTaskCounter");
   public static final Counter eventScheduledTaskFallbackCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "eventScheduledTaskFallbackCounter");
-
+      metricRegistry.counter("eventScheduledTaskFallbackCounter");
   public static final Counter emailAlertsSucesssCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "emailAlertsSucesssCounter");
-
+      metricRegistry.counter("emailAlertsSucesssCounter");
   public static final Counter emailAlertsFailedCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "emailAlertsFailedCounter");
-
+      metricRegistry.counter("emailAlertsFailedCounter");
   public static final Counter jiraAlertsSuccessCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "jiraAlertsSuccessCounter");
-
+      metricRegistry.counter("jiraAlertsSuccessCounter");
   public static final Counter jiraAlertsFailedCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "jiraAlertsFailedCounter");
-
+      metricRegistry.counter("jiraAlertsFailedCounter");
   public static final Counter jiraAlertsNumTicketsCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "jiraAlertsNumTicketsCounter");
-
+      metricRegistry.counter("jiraAlertsNumTicketsCounter");
   public static final Counter jiraAlertsNumCommentsCounter =
-      metricsRegistry.newCounter(ThirdeyeMetricsUtil.class, "jiraAlertsNumCommentsCounter");
+      metricRegistry.counter("jiraAlertsNumCommentsCounter");
 
-  public static MetricsRegistry getMetricsRegistry() {
-    return metricsRegistry;
+  private ThirdeyeMetricsUtil() {
   }
 }

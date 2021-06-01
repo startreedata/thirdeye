@@ -110,8 +110,8 @@
   </licenses>
 
   <organization>
-    <name>CortexData</name>
-    <url>https://www.cortexdata.io</url>
+    <name>StarTree Inc</name>
+    <url>https://www.startree.ai/</url>
   </organization>
 
   <developers>
@@ -147,9 +147,9 @@
 
   <scm>
     <!-- This is used by maven-release-plugin -->
-    <url>https://github.com/cortexdata/thirdeye.git</url>
-    <connection>scm:git:git@github.com:cortexdata/thirdeye.git</connection>
-    <developerConnection>scm:git:git@github.com:cortexdata/thirdeye.git</developerConnection>
+    <url>https://github.com/startreedata/thirdeye.git</url>
+    <connection>scm:git:git@github.com:startreedata/thirdeye.git</connection>
+    <developerConnection>scm:git:git@github.com:startreedata/thirdeye.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 

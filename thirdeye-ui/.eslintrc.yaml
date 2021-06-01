@@ -11,6 +11,7 @@ extends:
     - plugin:jest/recommended
     - plugin:jest/style
     - plugin:jest-formatting/recommended
+    - plugin:cypress/recommended
     - plugin:@typescript-eslint/recommended
     - prettier
     - prettier/react
@@ -120,11 +121,11 @@ rules:
 
     # eslint-plugin-jest rules
 
-    # Prefer "test" over "it"
+    # Prefer "it" over "test"
     jest/consistent-test-it:
         - error
-        - fn: test
-          withinDescribe: test
+        - fn: it
+          withinDescribe: it
 
     # eslint-plugin-jest-formatting rules
 
@@ -137,6 +138,14 @@ rules:
     "@typescript-eslint/explicit-function-return-type":
         - error
         - allowExpressions: true
+
+overrides:
+    # Explicit assertions not required in most Cypress tests
+    - files:
+          - src/test/e2e/user-flows/*.test.js
+      rules:
+          jest/expect-expect:
+              - off
 
 settings:
     react:

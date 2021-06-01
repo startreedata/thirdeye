@@ -35,7 +35,7 @@ describe("Locale Util", () => {
         Settings.defaultLocale = systemLocale;
     });
 
-    test("initLocale should initialize appropriate locale", () => {
+    it("initLocale should initialize appropriate locale", () => {
         jest.spyOn(numbro, "setLanguage").mockImplementation();
         initLocale();
 

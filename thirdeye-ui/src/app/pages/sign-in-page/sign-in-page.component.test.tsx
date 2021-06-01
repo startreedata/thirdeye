@@ -29,7 +29,7 @@ jest.mock("../../components/page-contents/page-contents.component", () => ({
 }));
 
 describe("Sign In Page", () => {
-    test("should set appropriate page breadcrumbs", async () => {
+    it("should set appropriate page breadcrumbs", async () => {
         act(() => {
             render(<SignInPage />);
         });
@@ -37,7 +37,7 @@ describe("Sign In Page", () => {
         expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    test("should set appropriate page title", async () => {
+    it("should set appropriate page title", async () => {
         act(() => {
             render(<SignInPage />);
         });
@@ -52,7 +52,7 @@ describe("Sign In Page", () => {
         );
     });
 
-    test("should render sign in button", async () => {
+    it("should render sign in button", async () => {
         act(() => {
             render(<SignInPage />);
         });
@@ -60,7 +60,7 @@ describe("Sign In Page", () => {
         expect(screen.getByText("label.sign-in")).toBeInTheDocument();
     });
 
-    test("should sign in on sign in button click", async () => {
+    it("should sign in on sign in button click", async () => {
         act(() => {
             render(<SignInPage />);
         });

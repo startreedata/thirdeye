@@ -5,7 +5,7 @@ jest.mock("i18next", () => ({
 }));
 
 describe("Validation Util", () => {
-    test("validateEmail should return appropriate validation result for invalid email", () => {
+    it("validateEmail should return appropriate validation result for invalid email", () => {
         expect(validateEmail((null as unknown) as string)).toEqual({
             valid: false,
             message: "message.email-required",
@@ -20,7 +20,7 @@ describe("Validation Util", () => {
         });
     });
 
-    test("validateEmail should return appropriate validation result for valid email", () => {
+    it("validateEmail should return appropriate validation result for valid email", () => {
         expect(validateEmail("test@email.com")).toEqual({
             valid: true,
         });
@@ -29,7 +29,7 @@ describe("Validation Util", () => {
         });
     });
 
-    test("validateJSON should return appropriate validation result for invalid JSON", () => {
+    it("validateJSON should return appropriate validation result for invalid JSON", () => {
         expect(validateJSON((null as unknown) as string)).toEqual({
             valid: false,
             message: "message.json-input-required",
@@ -44,7 +44,7 @@ describe("Validation Util", () => {
         });
     });
 
-    test("validateJSON should return appropriate validation result for valid JSON", () => {
+    it("validateJSON should return appropriate validation result for valid JSON", () => {
         expect(
             validateJSON(`{
             "testKey1": {

@@ -39,7 +39,7 @@ jest.mock("../../components/page-contents/page-contents.component", () => ({
 }));
 
 describe("Home Page", () => {
-    test("should set appropriate page breadcrumbs", async () => {
+    it("should set appropriate page breadcrumbs", async () => {
         act(() => {
             render(<HomePage />);
         });
@@ -47,7 +47,7 @@ describe("Home Page", () => {
         expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    test("should set appropriate page title", async () => {
+    it("should set appropriate page title", async () => {
         act(() => {
             render(<HomePage />);
         });
@@ -63,7 +63,7 @@ describe("Home Page", () => {
         );
     });
 
-    test("should render all navigation buttons", async () => {
+    it("should render all navigation buttons", async () => {
         act(() => {
             render(<HomePage />);
         });
@@ -77,7 +77,7 @@ describe("Home Page", () => {
         expect(screen.getByText("label.metrics")).toBeInTheDocument();
     });
 
-    test("should navigate to alerts path on alerts button click", async () => {
+    it("should navigate to alerts path on alerts button click", async () => {
         act(() => {
             render(<HomePage />);
         });
@@ -87,7 +87,7 @@ describe("Home Page", () => {
         expect(mockPush).toHaveBeenCalledWith("testAlertsPath");
     });
 
-    test("should navigate to anomalies path on anomalies button click", async () => {
+    it("should navigate to anomalies path on anomalies button click", async () => {
         act(() => {
             render(<HomePage />);
         });
@@ -97,7 +97,7 @@ describe("Home Page", () => {
         expect(mockPush).toHaveBeenCalledWith("testAnomaliesPath");
     });
 
-    test("should navigate to configuartion path on configuration button click", async () => {
+    it("should navigate to configuartion path on configuration button click", async () => {
         act(() => {
             render(<HomePage />);
         });
@@ -107,7 +107,7 @@ describe("Home Page", () => {
         expect(mockPush).toHaveBeenCalledWith("testConfigurationPath");
     });
 
-    test("should navigate to subscription groups path on subscription groups button click", async () => {
+    it("should navigate to subscription groups path on subscription groups button click", async () => {
         act(() => {
             render(<HomePage />);
         });
@@ -117,7 +117,7 @@ describe("Home Page", () => {
         expect(mockPush).toHaveBeenCalledWith("testSubscriptionGroupsPath");
     });
 
-    test("should navigate to metrics path on metrics button click", async () => {
+    it("should navigate to metrics path on metrics button click", async () => {
         act(() => {
             render(<HomePage />);
         });

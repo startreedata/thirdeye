@@ -14,20 +14,20 @@ jest.mock("../number/number.util", () => ({
 }));
 
 describe("Search Util", () => {
-    test("deepSearchStringProperty should return null for invalid object", () => {
+    it("deepSearchStringProperty should return null for invalid object", () => {
         expect(deepSearchStringProperty(null, mockMatchFn)).toBeNull();
     });
 
-    test("deepSearchStringProperty should return null for empty object", () => {
+    it("deepSearchStringProperty should return null for empty object", () => {
         expect(deepSearchStringProperty({}, mockMatchFn)).toBeNull();
     });
 
-    test("deepSearchStringProperty should return null for primitive", () => {
+    it("deepSearchStringProperty should return null for primitive", () => {
         expect(deepSearchStringProperty(1, mockMatchFn)).toBeNull();
         expect(deepSearchStringProperty("testString", mockMatchFn)).toBeNull();
     });
 
-    test("deepSearchStringProperty should return appropriate string property for object", () => {
+    it("deepSearchStringProperty should return appropriate string property for object", () => {
         expect(
             deepSearchStringProperty(
                 mockObject,
@@ -42,7 +42,7 @@ describe("Search Util", () => {
         ).toEqual("testStringArrayProperty4");
     });
 
-    test("deepSearchStringProperty should invoke match function on all string properties of object", () => {
+    it("deepSearchStringProperty should invoke match function on all string properties of object", () => {
         deepSearchStringProperty(mockObject, mockMatchFn);
 
         expect(mockMatchFn).toHaveBeenCalledTimes(9);
@@ -75,7 +75,7 @@ describe("Search Util", () => {
         );
     });
 
-    test("deepSearchStringProperty should invoke match function on all string properties of object until it returns true", () => {
+    it("deepSearchStringProperty should invoke match function on all string properties of object until it returns true", () => {
         mockMatchFn
             .mockReturnValueOnce(false)
             .mockReturnValueOnce(false)
@@ -94,7 +94,7 @@ describe("Search Util", () => {
         );
     });
 
-    test("getSearchStatusLabel should return appropriate search status label for invalid count and total", () => {
+    it("getSearchStatusLabel should return appropriate search status label for invalid count and total", () => {
         expect(getSearchStatusLabel((null as unknown) as number, 1)).toEqual(
             "label.search-count"
         );
@@ -121,7 +121,7 @@ describe("Search Util", () => {
         });
     });
 
-    test("getSearchStatusLabel should return appropriate search status label for count and total", () => {
+    it("getSearchStatusLabel should return appropriate search status label for count and total", () => {
         expect(getSearchStatusLabel(0, 1)).toEqual("label.search-count");
         expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
             count: "0",
@@ -129,7 +129,7 @@ describe("Search Util", () => {
         });
     });
 
-    test("getSelectedStatusLabel should return appropriate selected status label for invalid count", () => {
+    it("getSelectedStatusLabel should return appropriate selected status label for invalid count", () => {
         expect(getSelectedStatusLabel((null as unknown) as number)).toEqual(
             "label.selected-count"
         );
@@ -138,7 +138,7 @@ describe("Search Util", () => {
         });
     });
 
-    test("getSelectedStatusLabel should return appropriate selected status label for count", () => {
+    it("getSelectedStatusLabel should return appropriate selected status label for count", () => {
         expect(getSelectedStatusLabel(1)).toEqual("label.selected-count");
         expect(i18n.t).toHaveBeenCalledWith("label.selected-count", {
             count: "1",

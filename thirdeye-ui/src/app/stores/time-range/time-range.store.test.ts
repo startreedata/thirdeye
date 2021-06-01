@@ -20,7 +20,7 @@ jest.mock("../../utils/time-range/time-range.util", () => ({
 }));
 
 describe("Time Range Store", () => {
-    test("should initialize default values", () => {
+    it("should initialize default values", () => {
         const { result } = renderHook(() => useTimeRangeStore());
 
         expect(result.current.timeRangeDuration).toEqual(
@@ -29,7 +29,7 @@ describe("Time Range Store", () => {
         expect(result.current.recentCustomTimeRangeDurations).toEqual([]);
     });
 
-    test("setTimeRangeDuration should not update store for invalid time range duration", () => {
+    it("setTimeRangeDuration should not update store for invalid time range duration", () => {
         const { result } = renderHook(() => useTimeRangeStore());
 
         expect(result.current.timeRangeDuration).toEqual(
@@ -49,7 +49,7 @@ describe("Time Range Store", () => {
         expect(result.current.recentCustomTimeRangeDurations).toEqual([]);
     });
 
-    test("setTimeRangeDuration should update store appropriately for predefined time range duration", () => {
+    it("setTimeRangeDuration should update store appropriately for predefined time range duration", () => {
         const { result } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration2);
@@ -61,7 +61,7 @@ describe("Time Range Store", () => {
         expect(result.current.recentCustomTimeRangeDurations).toEqual([]);
     });
 
-    test("setTimeRangeDuration should update store appropriately for custom time range duration", () => {
+    it("setTimeRangeDuration should update store appropriately for custom time range duration", () => {
         const { result } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration3);
@@ -80,7 +80,7 @@ describe("Time Range Store", () => {
         ]);
     });
 
-    test("refreshTimeRange should update store appropriately for predefined time range", () => {
+    it("refreshTimeRange should update store appropriately for predefined time range", () => {
         const { result } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration1);
@@ -92,7 +92,7 @@ describe("Time Range Store", () => {
         );
     });
 
-    test("refreshTimeRange should update store appropriately for custom time range", () => {
+    it("refreshTimeRange should update store appropriately for custom time range", () => {
         const { result } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration3);
@@ -104,7 +104,7 @@ describe("Time Range Store", () => {
         );
     });
 
-    test("should persist in browser local storage", async () => {
+    it("should persist in browser local storage", async () => {
         const { result, waitFor } = renderHook(() => useTimeRangeStore());
         act(() => {
             result.current.setTimeRangeDuration(mockTimeRangeDuration3);

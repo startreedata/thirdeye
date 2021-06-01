@@ -36,7 +36,7 @@ jest.mock("../../components/page-contents/page-contents.component", () => ({
 }));
 
 describe("Configuration Page", () => {
-    test("should set appropriate page breadcrumbs", async () => {
+    it("should set appropriate page breadcrumbs", async () => {
         act(() => {
             render(<ConfigurationPage />);
         });
@@ -44,7 +44,7 @@ describe("Configuration Page", () => {
         expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    test("should set appropriate page title", async () => {
+    it("should set appropriate page title", async () => {
         act(() => {
             render(<ConfigurationPage />);
         });
@@ -61,7 +61,7 @@ describe("Configuration Page", () => {
         );
     });
 
-    test("should render all navigation buttons", async () => {
+    it("should render all navigation buttons", async () => {
         act(() => {
             render(<ConfigurationPage />);
         });
@@ -72,7 +72,7 @@ describe("Configuration Page", () => {
         expect(screen.getByText("label.metrics")).toBeInTheDocument();
     });
 
-    test("should navigate to subscription groups path on subscription groups button click", async () => {
+    it("should navigate to subscription groups path on subscription groups button click", async () => {
         act(() => {
             render(<ConfigurationPage />);
         });
@@ -82,7 +82,7 @@ describe("Configuration Page", () => {
         expect(mockPush).toHaveBeenCalledWith("testSubscriptionGroupsPath");
     });
 
-    test("should navigate to metrics path on metrics button click", async () => {
+    it("should navigate to metrics path on metrics button click", async () => {
         act(() => {
             render(<ConfigurationPage />);
         });

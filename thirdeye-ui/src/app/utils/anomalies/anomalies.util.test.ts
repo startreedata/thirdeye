@@ -32,28 +32,28 @@ jest.mock("../number/number.util", () => ({
 }));
 
 describe("Anomalies Util", () => {
-    test("getAnomalyName should return appropriate name for invalid anomaly", () => {
+    it("getAnomalyName should return appropriate name for invalid anomaly", () => {
         expect(getAnomalyName((null as unknown) as Anomaly)).toEqual(
             "label.anomaly"
         );
     });
 
-    test("getAnomalyName should return appropriate name for anomaly with invalid id", () => {
+    it("getAnomalyName should return appropriate name for anomaly with invalid id", () => {
         expect(getAnomalyName({} as Anomaly)).toEqual("label.anomaly");
     });
 
-    test("getAnomalyName should return appropriate name for anomaly", () => {
+    it("getAnomalyName should return appropriate name for anomaly", () => {
         expect(getAnomalyName(mockAnomaly1)).toEqual(
             "label.anomaly label.entity-id"
         );
         expect(i18n.t).toHaveBeenCalledWith("label.entity-id", { id: 1 });
     });
 
-    test("createEmptyUiAnomaly should create appropriate UI anomaly", () => {
+    it("createEmptyUiAnomaly should create appropriate UI anomaly", () => {
         expect(createEmptyUiAnomaly()).toEqual(mockEmptyUiAnomaly);
     });
 
-    test("createAlertEvaluation should create appropriate alert evaluation", () => {
+    it("createAlertEvaluation should create appropriate alert evaluation", () => {
         expect(createAlertEvaluation(1, 2, 3)).toEqual({
             alert: {
                 id: 1,
@@ -63,66 +63,66 @@ describe("Anomalies Util", () => {
         });
     });
 
-    test("getUiAnomaly should return empty UI anomaly for invalid anomaly", () => {
+    it("getUiAnomaly should return empty UI anomaly for invalid anomaly", () => {
         expect(getUiAnomaly((null as unknown) as Anomaly)).toEqual(
             mockEmptyUiAnomaly
         );
     });
 
-    test("getUiAnomaly should return appropriate UI anomaly for anomaly", () => {
+    it("getUiAnomaly should return appropriate UI anomaly for anomaly", () => {
         expect(getUiAnomaly(mockAnomaly1)).toEqual(mockUiAnomaly1);
     });
 
-    test("getUiAnomalies should return empty array for invalid anomalies", () => {
+    it("getUiAnomalies should return empty array for invalid anomalies", () => {
         expect(getUiAnomalies((null as unknown) as Anomaly[])).toEqual([]);
     });
 
-    test("getUiAnomalies should return empty array for empty anomalies", () => {
+    it("getUiAnomalies should return empty array for empty anomalies", () => {
         expect(getUiAnomalies([])).toEqual([]);
     });
 
-    test("getUiAnomalies should return appropriate UI anomalies for anomalies", () => {
+    it("getUiAnomalies should return appropriate UI anomalies for anomalies", () => {
         expect(getUiAnomalies(mockAnomalies)).toEqual(mockUiAnomalies);
     });
 
-    test("filterAnomalies should return empty array for invalid UI anomalies", () => {
+    it("filterAnomalies should return empty array for invalid UI anomalies", () => {
         expect(
             filterAnomalies((null as unknown) as UiAnomaly[], mockSearchWords)
         ).toEqual([]);
     });
 
-    test("filterAnomalies should return empty array for empty UI anomalies", () => {
+    it("filterAnomalies should return empty array for empty UI anomalies", () => {
         expect(filterAnomalies([], mockSearchWords)).toEqual([]);
     });
 
-    test("filterAnomalies should return appropriate UI anomalies for UI anomalies and invalid search words", () => {
+    it("filterAnomalies should return appropriate UI anomalies for UI anomalies and invalid search words", () => {
         expect(
             filterAnomalies(mockUiAnomalies, (null as unknown) as string[])
         ).toEqual(mockUiAnomalies);
     });
 
-    test("filterAnomalies should return appropriate UI anomalies for UI anomalies and empty search words", () => {
+    it("filterAnomalies should return appropriate UI anomalies for UI anomalies and empty search words", () => {
         expect(filterAnomalies(mockUiAnomalies, [])).toEqual(mockUiAnomalies);
     });
 
-    test("filterAnomalies should return appropriate UI anomalies for UI anomalies and search words", () => {
+    it("filterAnomalies should return appropriate UI anomalies for UI anomalies and search words", () => {
         expect(filterAnomalies(mockUiAnomalies, mockSearchWords)).toEqual([
             mockUiAnomaly1,
             mockUiAnomaly2,
         ]);
     });
 
-    test("filterAnomaliesByTime should return empty array for invalid anomalies", () => {
+    it("filterAnomaliesByTime should return empty array for invalid anomalies", () => {
         expect(
             filterAnomaliesByTime((null as unknown) as Anomaly[], 1, 2)
         ).toEqual([]);
     });
 
-    test("filterAnomaliesByTime should return empty array for empty anomalies", () => {
+    it("filterAnomaliesByTime should return empty array for empty anomalies", () => {
         expect(filterAnomaliesByTime([], 1, 2)).toEqual([]);
     });
 
-    test("filterAnomaliesByTime should return appropriate anomalies for anomalies and invalid start and end time", () => {
+    it("filterAnomaliesByTime should return appropriate anomalies for anomalies and invalid start and end time", () => {
         expect(
             filterAnomaliesByTime(mockAnomalies, (null as unknown) as number, 1)
         ).toEqual(mockAnomalies);
@@ -138,7 +138,7 @@ describe("Anomalies Util", () => {
         ).toEqual(mockAnomalies);
     });
 
-    test("filterAnomaliesByTime should return appropriate anomalies for anomalies and start and end time", () => {
+    it("filterAnomaliesByTime should return appropriate anomalies for anomalies and start and end time", () => {
         expect(filterAnomaliesByTime(mockAnomalies, 2, 2)).toEqual([
             mockAnomaly1,
         ]);
@@ -170,23 +170,23 @@ describe("Anomalies Util", () => {
         expect(filterAnomaliesByTime(mockAnomalies, 10, 11)).toEqual([]);
     });
 
-    test("getAnomaliesAtTime should return empty array for invalid anomalies", () => {
+    it("getAnomaliesAtTime should return empty array for invalid anomalies", () => {
         expect(getAnomaliesAtTime((null as unknown) as Anomaly[], 1)).toEqual(
             []
         );
     });
 
-    test("getAnomaliesAtTime should return empty array for empty anomalies", () => {
+    it("getAnomaliesAtTime should return empty array for empty anomalies", () => {
         expect(getAnomaliesAtTime([], 1)).toEqual([]);
     });
 
-    test("getAnomaliesAtTime should return appropriate anomalies for anomalies and invalid time", () => {
+    it("getAnomaliesAtTime should return appropriate anomalies for anomalies and invalid time", () => {
         expect(
             getAnomaliesAtTime(mockAnomalies, (null as unknown) as number)
         ).toEqual(mockAnomalies);
     });
 
-    test("getAnomaliesAtTime should return appropriate anomalies for anomalies and time", () => {
+    it("getAnomaliesAtTime should return appropriate anomalies for anomalies and time", () => {
         expect(getAnomaliesAtTime(mockAnomalies, 2)).toEqual([mockAnomaly1]);
         expect(getAnomaliesAtTime(mockAnomalies, 2.5)).toEqual([mockAnomaly1]);
         expect(getAnomaliesAtTime(mockAnomalies, 3)).toEqual([

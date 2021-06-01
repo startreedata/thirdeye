@@ -6,13 +6,21 @@ build/
 dist/
 
 # Maven
+.mvn/
 target/
+
+# Docker
+docker/
+Dockerfile
 
 # TypeScript
 tsbuildinfo/
 
 # Jest
 src/test/unit/coverage/
+
+# Cypress
+src/test/e2e/downloads/
 
 # webpack
 webpack/

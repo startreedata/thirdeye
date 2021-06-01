@@ -6,7 +6,7 @@ jest.mock("i18next", () => ({
 }));
 
 describe("Page Util", () => {
-    test("getDocumentTitle should return appropriate document title for invalid router breadcrumb text, invalid page title and invalid page breadcrumb text", () => {
+    it("getDocumentTitle should return appropriate document title for invalid router breadcrumb text, invalid page title and invalid page breadcrumb text", () => {
         expect(
             getDocumentTitle(
                 (null as unknown) as string,
@@ -20,7 +20,7 @@ describe("Page Util", () => {
         expect(i18n.t).toHaveBeenNthCalledWith(2, "label.thirdeye");
     });
 
-    test("getDocumentTitle should return appropriate document title for router breadcrumb text, invalid page title and invalid page breadcrumb text", () => {
+    it("getDocumentTitle should return appropriate document title for router breadcrumb text, invalid page title and invalid page breadcrumb text", () => {
         expect(getDocumentTitle("testRouterBreadcrumbText", "", "")).toEqual(
             "label.document-title"
         );
@@ -31,7 +31,7 @@ describe("Page Util", () => {
         });
     });
 
-    test("getDocumentTitle should return appropriate document title for router breadcrumb text, same page title as router breadcrumb text and invalid page breadcrumb text", () => {
+    it("getDocumentTitle should return appropriate document title for router breadcrumb text, same page title as router breadcrumb text and invalid page breadcrumb text", () => {
         expect(
             getDocumentTitle(
                 "testRouterBreadcrumbText",
@@ -46,7 +46,7 @@ describe("Page Util", () => {
         });
     });
 
-    test("getDocumentTitle should return appropriate document title for router breadcrumb text, different page title from router breadcrumb text and invalid page breadcrumb text", () => {
+    it("getDocumentTitle should return appropriate document title for router breadcrumb text, different page title from router breadcrumb text and invalid page breadcrumb text", () => {
         expect(
             getDocumentTitle("testRouterBreadcrumbText", "testPageTitle", "")
         ).toEqual("label.document-title");
@@ -62,7 +62,7 @@ describe("Page Util", () => {
         });
     });
 
-    test("getDocumentTitle should return appropriate document title for invalid router breadcrumb text, invalid page title and page breadcrumb text", () => {
+    it("getDocumentTitle should return appropriate document title for invalid router breadcrumb text, invalid page title and page breadcrumb text", () => {
         expect(getDocumentTitle("", "", "testPageBreadcrumbText")).toEqual(
             "label.document-title"
         );
@@ -73,7 +73,7 @@ describe("Page Util", () => {
         });
     });
 
-    test("getDocumentTitle should return appropriate document title for invalid router breadcrumb text, page title and page breadcrumb text", () => {
+    it("getDocumentTitle should return appropriate document title for invalid router breadcrumb text, page title and page breadcrumb text", () => {
         expect(
             getDocumentTitle("", "testPageTitle", "testPageBreadcrumbText")
         ).toEqual("label.document-title");
@@ -89,7 +89,7 @@ describe("Page Util", () => {
         });
     });
 
-    test("getDocumentTitle should return appropriate document title for invalid router breadcrumb text, page title and invalid page breadcrumb text", () => {
+    it("getDocumentTitle should return appropriate document title for invalid router breadcrumb text, page title and invalid page breadcrumb text", () => {
         expect(getDocumentTitle("", "testPageTitle", "")).toEqual(
             "label.document-title"
         );
@@ -100,7 +100,7 @@ describe("Page Util", () => {
         });
     });
 
-    test("getDocumentTitle should return appropriate document title for router breadcrumb text, page title and page breadcrumb text", () => {
+    it("getDocumentTitle should return appropriate document title for router breadcrumb text, page title and page breadcrumb text", () => {
         expect(
             getDocumentTitle(
                 "testRouterBreadcrumbText",

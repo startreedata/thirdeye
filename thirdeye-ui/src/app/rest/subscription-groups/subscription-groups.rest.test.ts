@@ -17,7 +17,7 @@ describe("Subscription Groups REST", () => {
         jest.restoreAllMocks();
     });
 
-    test("getSubscriptionGroup should invoke axios.get with appropriate input and return appropriate subscription group", async () => {
+    it("getSubscriptionGroup should invoke axios.get with appropriate input and return appropriate subscription group", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: mockSubscriptionGroupResponse,
         });
@@ -29,13 +29,13 @@ describe("Subscription Groups REST", () => {
         expect(axios.get).toHaveBeenCalledWith("/api/subscription-groups/1");
     });
 
-    test("getSubscriptionGroup should throw encountered error", async () => {
+    it("getSubscriptionGroup should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getSubscriptionGroup(1)).rejects.toThrow("testError");
     });
 
-    test("getAllSubscriptionGroups should invoke axios.get with appropriate input and return appropriate subscription groups", async () => {
+    it("getAllSubscriptionGroups should invoke axios.get with appropriate input and return appropriate subscription groups", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });
@@ -47,13 +47,13 @@ describe("Subscription Groups REST", () => {
         expect(axios.get).toHaveBeenCalledWith("/api/subscription-groups");
     });
 
-    test("getAllSubscriptionGroups should throw encountered error", async () => {
+    it("getAllSubscriptionGroups should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getAllSubscriptionGroups()).rejects.toThrow("testError");
     });
 
-    test("createSubscriptionGroup should invoke axios.post with appropriate input and return appropriate subscription group", async () => {
+    it("createSubscriptionGroup should invoke axios.post with appropriate input and return appropriate subscription group", async () => {
         jest.spyOn(axios, "post").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });
@@ -67,7 +67,7 @@ describe("Subscription Groups REST", () => {
         ]);
     });
 
-    test("createSubscriptionGroup should throw encountered error", async () => {
+    it("createSubscriptionGroup should throw encountered error", async () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(
@@ -75,7 +75,7 @@ describe("Subscription Groups REST", () => {
         ).rejects.toThrow("testError");
     });
 
-    test("createSubscriptionGroups should invoke axios.post with appropriate input and return appropriate subscription groups", async () => {
+    it("createSubscriptionGroups should invoke axios.post with appropriate input and return appropriate subscription groups", async () => {
         jest.spyOn(axios, "post").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });
@@ -89,7 +89,7 @@ describe("Subscription Groups REST", () => {
         ]);
     });
 
-    test("createSubscriptionGroups should throw encountered error", async () => {
+    it("createSubscriptionGroups should throw encountered error", async () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(
@@ -97,7 +97,7 @@ describe("Subscription Groups REST", () => {
         ).rejects.toThrow("testError");
     });
 
-    test("updateSubscriptionGroup should invoke axios.put with appropriate input and return appropriate subscription group", async () => {
+    it("updateSubscriptionGroup should invoke axios.put with appropriate input and return appropriate subscription group", async () => {
         jest.spyOn(axios, "put").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });
@@ -111,7 +111,7 @@ describe("Subscription Groups REST", () => {
         ]);
     });
 
-    test("updateSubscriptionGroup should throw encountered error", async () => {
+    it("updateSubscriptionGroup should throw encountered error", async () => {
         jest.spyOn(axios, "put").mockRejectedValue(mockError);
 
         await expect(
@@ -119,7 +119,7 @@ describe("Subscription Groups REST", () => {
         ).rejects.toThrow("testError");
     });
 
-    test("updateSubscriptionGroups should invoke axios.put with appropriate input and return appropriate subscription groups", async () => {
+    it("updateSubscriptionGroups should invoke axios.put with appropriate input and return appropriate subscription groups", async () => {
         jest.spyOn(axios, "put").mockResolvedValue({
             data: [mockSubscriptionGroupResponse],
         });
@@ -133,7 +133,7 @@ describe("Subscription Groups REST", () => {
         ]);
     });
 
-    test("updateSubscriptionGroups should throw encountered error", async () => {
+    it("updateSubscriptionGroups should throw encountered error", async () => {
         jest.spyOn(axios, "put").mockRejectedValue(mockError);
 
         await expect(
@@ -141,7 +141,7 @@ describe("Subscription Groups REST", () => {
         ).rejects.toThrow("testError");
     });
 
-    test("deleteSubscriptionGroup should invoke axios.delete with appropriate input and return appropriate subscription group", async () => {
+    it("deleteSubscriptionGroup should invoke axios.delete with appropriate input and return appropriate subscription group", async () => {
         jest.spyOn(axios, "delete").mockResolvedValue({
             data: mockSubscriptionGroupResponse,
         });
@@ -153,7 +153,7 @@ describe("Subscription Groups REST", () => {
         expect(axios.delete).toHaveBeenCalledWith("/api/subscription-groups/1");
     });
 
-    test("deleteSubscriptionGroup should throw encountered error", async () => {
+    it("deleteSubscriptionGroup should throw encountered error", async () => {
         jest.spyOn(axios, "delete").mockRejectedValue(mockError);
 
         await expect(deleteSubscriptionGroup(1)).rejects.toThrow("testError");

@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { useAuthStore } from "./auth.store";
 
 describe("Auth Store", () => {
-    test("should initialize default values", () => {
+    it("should initialize default values", () => {
         const { result } = renderHook(() => useAuthStore());
 
         expect(result.current.authDisabled).toBeFalsy();
@@ -11,7 +11,7 @@ describe("Auth Store", () => {
         expect(result.current.redirectPath).toEqual("");
     });
 
-    test("disableAuth should update store appropriately", () => {
+    it("disableAuth should update store appropriately", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
             result.current.disableAuth();
@@ -23,7 +23,7 @@ describe("Auth Store", () => {
         expect(result.current.redirectPath).toEqual("");
     });
 
-    test("setAccessToken should update store appropriately for invalid token", () => {
+    it("setAccessToken should update store appropriately for invalid token", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
             result.current.setAccessToken((null as unknown) as string);
@@ -35,7 +35,7 @@ describe("Auth Store", () => {
         expect(result.current.redirectPath).toEqual("");
     });
 
-    test("setAccessToken should update store appropriately for empty token", () => {
+    it("setAccessToken should update store appropriately for empty token", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
             result.current.setAccessToken("");
@@ -47,7 +47,7 @@ describe("Auth Store", () => {
         expect(result.current.redirectPath).toEqual("");
     });
 
-    test("setAccessToken should update store appropriately for token", () => {
+    it("setAccessToken should update store appropriately for token", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
             result.current.setAccessToken("testToken");
@@ -59,7 +59,7 @@ describe("Auth Store", () => {
         expect(result.current.redirectPath).toEqual("");
     });
 
-    test("clearAccessToken should update store appropriately", () => {
+    it("clearAccessToken should update store appropriately", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
             result.current.clearAccessToken();
@@ -71,7 +71,7 @@ describe("Auth Store", () => {
         expect(result.current.redirectPath).toEqual("");
     });
 
-    test("setRedirectPath should update store appropriately for path", () => {
+    it("setRedirectPath should update store appropriately for path", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
             result.current.setRedirectPath("testPath");
@@ -83,7 +83,7 @@ describe("Auth Store", () => {
         expect(result.current.redirectPath).toEqual("testPath");
     });
 
-    test("clearRedirectPath should update store appropriately", () => {
+    it("clearRedirectPath should update store appropriately", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
             result.current.clearRedirectPath();
@@ -95,7 +95,7 @@ describe("Auth Store", () => {
         expect(result.current.redirectPath).toEqual("");
     });
 
-    test("should persist in browser local storage", async () => {
+    it("should persist in browser local storage", async () => {
         const { result, waitFor } = renderHook(() => useAuthStore());
         act(() => {
             result.current.setAccessToken("testToken");

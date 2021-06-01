@@ -67,7 +67,7 @@ jest.mock(
 );
 
 describe("Configuration Router", () => {
-    test("should have rendered loading indicator while loading", () => {
+    it("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
                 <ConfigurationRouter />
@@ -77,7 +77,7 @@ describe("Configuration Router", () => {
         expect(LoadingIndicator).toHaveBeenCalled();
     });
 
-    test("should set appropriate router breadcrumbs", () => {
+    it("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
                 <ConfigurationRouter />
@@ -100,7 +100,7 @@ describe("Configuration Router", () => {
         expect(mockPush).toHaveBeenCalledWith("testConfigurationPath");
     });
 
-    test("should render configuration page at exact configuration path", async () => {
+    it("should render configuration page at exact configuration path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
                 <ConfigurationRouter />
@@ -112,7 +112,7 @@ describe("Configuration Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid configuration path", async () => {
+    it("should render page not found page at invalid configuration path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.CONFIGURATION}/testPath`]}
@@ -126,7 +126,7 @@ describe("Configuration Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should direct exact subscription groups path to subscription groups router", async () => {
+    it("should direct exact subscription groups path to subscription groups router", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS]}>
                 <ConfigurationRouter />
@@ -138,7 +138,7 @@ describe("Configuration Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should direct subscription groups path to subscription groups router", async () => {
+    it("should direct subscription groups path to subscription groups router", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.SUBSCRIPTION_GROUPS}/testPath`]}
@@ -152,7 +152,7 @@ describe("Configuration Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should direct exact metrics path to metrics router", async () => {
+    it("should direct exact metrics path to metrics router", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.METRICS]}>
                 <ConfigurationRouter />
@@ -164,7 +164,7 @@ describe("Configuration Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should direct metrics path to metrics router", async () => {
+    it("should direct metrics path to metrics router", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.METRICS}/testPath`]}>
                 <ConfigurationRouter />
@@ -176,7 +176,7 @@ describe("Configuration Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", async () => {
+    it("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <ConfigurationRouter />
@@ -188,7 +188,7 @@ describe("Configuration Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page by default", async () => {
+    it("should render page not found page by default", async () => {
         render(
             <MemoryRouter>
                 <ConfigurationRouter />

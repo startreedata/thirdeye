@@ -37,7 +37,7 @@ jest.mock(
 );
 
 describe("General Authenticated Router", () => {
-    test("should have rendered loading indicator while loading", () => {
+    it("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
                 <GeneralAuthenticatedRouter />
@@ -47,7 +47,7 @@ describe("General Authenticated Router", () => {
         expect(LoadingIndicator).toHaveBeenCalled();
     });
 
-    test("should set appropriate router breadcrumbs", () => {
+    it("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
                 <GeneralAuthenticatedRouter />
@@ -57,7 +57,7 @@ describe("General Authenticated Router", () => {
         expect(mockSetRouterBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    test("should render home page at exact base path", async () => {
+    it("should render home page at exact base path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.BASE]}>
                 <GeneralAuthenticatedRouter />
@@ -69,7 +69,7 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid base path", async () => {
+    it("should render page not found page at invalid base path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.BASE}/testPath`]}>
                 <GeneralAuthenticatedRouter />
@@ -81,7 +81,7 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render home page at exact home path", async () => {
+    it("should render home page at exact home path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.HOME]}>
                 <GeneralAuthenticatedRouter />
@@ -93,7 +93,7 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid home path", async () => {
+    it("should render page not found page at invalid home path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.HOME}/testPath`]}>
                 <GeneralAuthenticatedRouter />
@@ -105,7 +105,7 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render home page at exact sign in path", async () => {
+    it("should render home page at exact sign in path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SIGN_IN]}>
                 <GeneralAuthenticatedRouter />
@@ -117,7 +117,7 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid sign in path", async () => {
+    it("should render page not found page at invalid sign in path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.SIGN_IN}/testPath`]}>
                 <GeneralAuthenticatedRouter />
@@ -129,7 +129,7 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render sign out page at exact sign out path", async () => {
+    it("should render sign out page at exact sign out path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SIGN_OUT]}>
                 <GeneralAuthenticatedRouter />
@@ -141,7 +141,7 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid sign out path", async () => {
+    it("should render page not found page at invalid sign out path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.SIGN_OUT}/testPath`]}>
                 <GeneralAuthenticatedRouter />
@@ -153,7 +153,7 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", async () => {
+    it("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <GeneralAuthenticatedRouter />
@@ -165,7 +165,7 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render home page by default", async () => {
+    it("should render home page by default", async () => {
         render(
             <MemoryRouter>
                 <GeneralAuthenticatedRouter />

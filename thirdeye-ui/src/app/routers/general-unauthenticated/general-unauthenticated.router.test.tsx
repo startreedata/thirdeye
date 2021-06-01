@@ -26,7 +26,7 @@ jest.mock("../../pages/sign-in-page/sign-in-page.component", () => ({
 }));
 
 describe("General Unauthenticated Router", () => {
-    test("should have rendered loading indicator while loading", () => {
+    it("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />
@@ -36,7 +36,7 @@ describe("General Unauthenticated Router", () => {
         expect(LoadingIndicator).toHaveBeenCalled();
     });
 
-    test("should set appropriate router breadcrumbs", () => {
+    it("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />
@@ -46,7 +46,7 @@ describe("General Unauthenticated Router", () => {
         expect(mockSetRouterBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    test("should render sign in page at exact sign in path", async () => {
+    it("should render sign in page at exact sign in path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SIGN_IN]}>
                 <GeneralUnauthenticatedRouter />
@@ -58,7 +58,7 @@ describe("General Unauthenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render sign in page at invalid sign in path", async () => {
+    it("should render sign in page at invalid sign in path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.SIGN_IN}/testPath`]}>
                 <GeneralUnauthenticatedRouter />
@@ -70,7 +70,7 @@ describe("General Unauthenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render sign in page at any other path", async () => {
+    it("should render sign in page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <GeneralUnauthenticatedRouter />
@@ -82,7 +82,7 @@ describe("General Unauthenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render sign in page by default", async () => {
+    it("should render sign in page by default", async () => {
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />

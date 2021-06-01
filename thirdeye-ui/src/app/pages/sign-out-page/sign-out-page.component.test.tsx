@@ -36,7 +36,7 @@ jest.mock(
 );
 
 describe("Sign Out Page", () => {
-    test("should set appropriate page breadcrumbs", async () => {
+    it("should set appropriate page breadcrumbs", async () => {
         act(() => {
             render(<SignOutPage />);
         });
@@ -44,7 +44,7 @@ describe("Sign Out Page", () => {
         expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    test("should set appropriate page title", async () => {
+    it("should set appropriate page title", async () => {
         act(() => {
             render(<SignOutPage />);
         });
@@ -59,7 +59,7 @@ describe("Sign Out Page", () => {
         );
     });
 
-    test("should sign out", async () => {
+    it("should sign out", async () => {
         act(() => {
             render(<SignOutPage />);
         });
@@ -67,7 +67,7 @@ describe("Sign Out Page", () => {
         expect(mockSignOut).toHaveBeenCalled();
     });
 
-    test("should render loading indicator", async () => {
+    it("should render loading indicator", async () => {
         act(() => {
             render(<SignOutPage />);
         });

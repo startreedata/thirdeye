@@ -72,7 +72,7 @@ jest.mock(
 );
 
 describe("Alerts Router", () => {
-    test("should have rendered loading indicator while loading", () => {
+    it("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
                 <AlertsRouter />
@@ -82,7 +82,7 @@ describe("Alerts Router", () => {
         expect(LoadingIndicator).toHaveBeenCalled();
     });
 
-    test("should set appropriate router breadcrumbs", () => {
+    it("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
                 <AlertsRouter />
@@ -105,7 +105,7 @@ describe("Alerts Router", () => {
         expect(mockPush).toHaveBeenCalledWith("testAlertsPath");
     });
 
-    test("should render alerts all page at exact alerts path", async () => {
+    it("should render alerts all page at exact alerts path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS]}>
                 <AlertsRouter />
@@ -117,7 +117,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts path", async () => {
+    it("should render page not found page at invalid alerts path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS}/testPath`]}>
                 <AlertsRouter />
@@ -129,7 +129,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render alerts all page at exact alerts all path", async () => {
+    it("should render alerts all page at exact alerts all path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_ALL]}>
                 <AlertsRouter />
@@ -141,7 +141,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts all path", async () => {
+    it("should render page not found page at invalid alerts all path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS_ALL}/testPath`]}>
                 <AlertsRouter />
@@ -153,7 +153,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render alerts view page at exact alerts view path", async () => {
+    it("should render alerts view page at exact alerts view path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_VIEW]}>
                 <AlertsRouter />
@@ -165,7 +165,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts view path", async () => {
+    it("should render page not found page at invalid alerts view path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS_VIEW}/testPath`]}>
                 <AlertsRouter />
@@ -177,7 +177,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render alerts create page at exact alerts create path", async () => {
+    it("should render alerts create page at exact alerts create path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_CREATE]}>
                 <AlertsRouter />
@@ -189,7 +189,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts create path", async () => {
+    it("should render page not found page at invalid alerts create path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_CREATE}/testPath`]}
@@ -203,7 +203,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render alerts update page at exact alerts update path", async () => {
+    it("should render alerts update page at exact alerts update path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_UPDATE]}>
                 <AlertsRouter />
@@ -215,7 +215,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid alerts update path", async () => {
+    it("should render page not found page at invalid alerts update path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_UPDATE}/testPath`]}
@@ -229,7 +229,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", async () => {
+    it("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <AlertsRouter />
@@ -241,7 +241,7 @@ describe("Alerts Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page by default", async () => {
+    it("should render page not found page by default", async () => {
         render(
             <MemoryRouter>
                 <AlertsRouter />

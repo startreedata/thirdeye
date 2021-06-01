@@ -59,7 +59,7 @@ jest.mock(
 );
 
 describe("Metrics Router", () => {
-    test("should have rendered loading indicator while loading", () => {
+    it("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
                 <MetricsRouter />
@@ -69,7 +69,7 @@ describe("Metrics Router", () => {
         expect(LoadingIndicator).toHaveBeenCalled();
     });
 
-    test("should set appropriate router breadcrumbs", () => {
+    it("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
                 <MetricsRouter />
@@ -99,7 +99,7 @@ describe("Metrics Router", () => {
         expect(mockPush).toHaveBeenNthCalledWith(2, "testMetricsPath");
     });
 
-    test("should render metrics all page at exact metrics path", async () => {
+    it("should render metrics all page at exact metrics path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.METRICS]}>
                 <MetricsRouter />
@@ -111,7 +111,7 @@ describe("Metrics Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid metrics path", async () => {
+    it("should render page not found page at invalid metrics path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.METRICS}/testPath`]}>
                 <MetricsRouter />
@@ -123,7 +123,7 @@ describe("Metrics Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render metrics all page at exact metrics all path", async () => {
+    it("should render metrics all page at exact metrics all path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.METRICS_ALL]}>
                 <MetricsRouter />
@@ -135,7 +135,7 @@ describe("Metrics Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid metrics all path", async () => {
+    it("should render page not found page at invalid metrics all path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.METRICS_ALL}/testPath`]}>
                 <MetricsRouter />
@@ -147,7 +147,7 @@ describe("Metrics Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render metrics view page at exact metrics view path", async () => {
+    it("should render metrics view page at exact metrics view path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.METRICS_VIEW]}>
                 <MetricsRouter />
@@ -159,7 +159,7 @@ describe("Metrics Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid metrics view path", async () => {
+    it("should render page not found page at invalid metrics view path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.METRICS_VIEW}/testPath`]}
@@ -173,7 +173,7 @@ describe("Metrics Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", async () => {
+    it("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <MetricsRouter />
@@ -185,7 +185,7 @@ describe("Metrics Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page by default", async () => {
+    it("should render page not found page by default", async () => {
         render(
             <MemoryRouter>
                 <MetricsRouter />

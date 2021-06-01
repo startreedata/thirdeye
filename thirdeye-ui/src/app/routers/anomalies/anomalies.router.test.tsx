@@ -64,7 +64,7 @@ jest.mock(
 );
 
 describe("Anomalies Router", () => {
-    test("should have rendered loading indicator while loading", () => {
+    it("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
                 <AnomaliesRouter />
@@ -74,7 +74,7 @@ describe("Anomalies Router", () => {
         expect(LoadingIndicator).toHaveBeenCalled();
     });
 
-    test("should set appropriate router breadcrumbs", () => {
+    it("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
                 <AnomaliesRouter />
@@ -97,7 +97,7 @@ describe("Anomalies Router", () => {
         expect(mockPush).toHaveBeenCalledWith("testAnomaliesPath");
     });
 
-    test("should render anomalies all page at exact anomalies path", async () => {
+    it("should render anomalies all page at exact anomalies path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ANOMALIES]}>
                 <AnomaliesRouter />
@@ -109,7 +109,7 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies path", async () => {
+    it("should render page not found page at invalid anomalies path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ANOMALIES}/testPath`]}>
                 <AnomaliesRouter />
@@ -121,7 +121,7 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render anomalies all page at exact anomalies all path", async () => {
+    it("should render anomalies all page at exact anomalies all path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ANOMALIES_ALL]}>
                 <AnomaliesRouter />
@@ -133,7 +133,7 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies all path", async () => {
+    it("should render page not found page at invalid anomalies all path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ANOMALIES_ALL}/testPath`]}
@@ -147,7 +147,7 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render anomalies view page at exact anomalies view path", async () => {
+    it("should render anomalies view page at exact anomalies view path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ANOMALIES_VIEW]}>
                 <AnomaliesRouter />
@@ -159,7 +159,7 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid anomalies view path", async () => {
+    it("should render page not found page at invalid anomalies view path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.ANOMALIES_VIEW}/testPath`]}
@@ -173,7 +173,7 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", async () => {
+    it("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <AnomaliesRouter />
@@ -185,7 +185,7 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page by default", async () => {
+    it("should render page not found page by default", async () => {
         render(
             <MemoryRouter>
                 <AnomaliesRouter />

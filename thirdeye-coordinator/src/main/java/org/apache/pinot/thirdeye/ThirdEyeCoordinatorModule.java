@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -14,17 +15,21 @@ public class ThirdEyeCoordinatorModule extends AbstractModule {
   private final ThirdEyeCoordinatorConfiguration configuration;
   private final ConfigurationHolder configurationHolder;
   private final DataSource dataSource;
+  private final MetricRegistry metricRegistry;
 
   public ThirdEyeCoordinatorModule(final ThirdEyeCoordinatorConfiguration configuration,
-      final DataSource dataSource) {
+      final DataSource dataSource, final MetricRegistry metricRegistry) {
     this.configuration = configuration;
     this.dataSource = dataSource;
     configurationHolder = new ConfigurationHolder(configuration.getConfigPath());
+    this.metricRegistry = metricRegistry;
   }
 
   @Override
   protected void configure() {
     install(new ThirdEyeCoreModule(dataSource, configurationHolder));
+
+    bind(MetricRegistry.class).toInstance(metricRegistry);
   }
 
   @Singleton

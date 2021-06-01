@@ -1,7 +1,9 @@
 package org.apache.pinot.thirdeye;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
@@ -29,8 +31,8 @@ public class ThirdEyeCoordinatorModuleTest {
 
     final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,
-        dataSource
-    ));
+        dataSource,
+        mock(MetricRegistry.class)));
 
     injector
         .getInstance(ThirdEyeCacheRegistry.class)

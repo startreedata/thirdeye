@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.datalayer.dao;
 
 import static java.util.Objects.requireNonNull;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -41,7 +43,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.pinot.thirdeye.anomaly.utils.ThirdeyeMetricsUtil;
 import org.apache.pinot.thirdeye.datalayer.dao.EntityInfoBuilder.EntityInfo;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractJsonEntity;
@@ -62,29 +63,52 @@ import org.slf4j.LoggerFactory;
 public class GenericPojoDao {
 
   private static final Logger LOG = LoggerFactory.getLogger(GenericPojoDao.class);
+
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
   private static final int MAX_BATCH_SIZE = 1000;
-
   private static final ModelMapper MODEL_MAPPER = new ModelMapper();
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  private final Counter dbReadCallCounter;
+  private final Counter dbWriteCallCounter;
+  private final Counter dbReadDurationCounter;
+  private final Counter dbWriteDurationCounter;
+  private final Counter dbReadByteCounter;
+  private final Counter dbWriteByteCounter;
+  private final Counter dbExceptionCounter;
+  private final Counter dbCallCounter;
+
   private final Map<Class<? extends AbstractDTO>, EntityInfo> pojoInfoMap;
 
-  @Inject
-  DataSource dataSource;
-  @Inject
-  SqlQueryBuilder sqlQueryBuilder;
-  @Inject
-  GenericResultSetMapper genericResultSetMapper;
+  private final DataSource dataSource;
+  private final SqlQueryBuilder sqlQueryBuilder;
+  private final GenericResultSetMapper genericResultSetMapper;
 
-  public GenericPojoDao() {
+  @Inject
+  public GenericPojoDao(final DataSource dataSource,
+      final SqlQueryBuilder sqlQueryBuilder,
+      final GenericResultSetMapper genericResultSetMapper,
+      final MetricRegistry metricRegistry) {
+    this.dataSource = dataSource;
+    this.sqlQueryBuilder = sqlQueryBuilder;
+    this.genericResultSetMapper = genericResultSetMapper;
     pojoInfoMap = new EntityInfoBuilder().getEntityInfoMap();
+
+    dbReadCallCounter = metricRegistry.counter("dbReadCallCounter");
+    dbWriteByteCounter = metricRegistry.counter("dbWriteByteCounter");
+    dbWriteDurationCounter = metricRegistry.counter("dbWriteDurationCounter");
+    dbWriteCallCounter = metricRegistry.counter("dbWriteCallCounter");
+    dbReadDurationCounter = metricRegistry.counter("dbReadDurationCounter");
+    dbReadByteCounter = metricRegistry.counter("dbReadByteCounter");
+    dbExceptionCounter = metricRegistry.counter("dbExceptionCounter");
+    dbCallCounter = metricRegistry.counter("dbCallCounter");
   }
 
   public Set<Class<? extends AbstractDTO>> getAllBeanClasses() {
     return pojoInfoMap.keySet();
   }
 
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public List<String> getIndexedColumns(Class beanClass) {
     Class<? extends AbstractIndexEntity> indexEntityClass = pojoInfoMap.get(beanClass).indexEntityClass;
     Set<Field> allFields = ReflectionUtils.getAllFields(indexEntityClass);
@@ -126,7 +150,7 @@ public class GenericPojoDao {
         genericJsonEntity.setBeanClass(pojo.getClass().getName());
         String jsonVal = OBJECT_MAPPER.writeValueAsString(pojo);
         genericJsonEntity.setJsonVal(jsonVal);
-        ThirdeyeMetricsUtil.dbWriteByteCounter.inc(jsonVal.length());
+        dbWriteByteCounter.inc(jsonVal.length());
 
         try (PreparedStatement baseTableInsertStmt = sqlQueryBuilder
             .createInsertStatement(connection, genericJsonEntity)) {
@@ -160,8 +184,8 @@ public class GenericPojoDao {
         return null;
       }, null);
     } finally {
-      ThirdeyeMetricsUtil.dbWriteCallCounter.inc();
-      ThirdeyeMetricsUtil.dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteCallCounter.inc();
+      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -236,8 +260,8 @@ public class GenericPojoDao {
         return updateCounter;
       }, 0);
     } finally {
-      ThirdeyeMetricsUtil.dbWriteCallCounter.inc();
-      ThirdeyeMetricsUtil.dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteCallCounter.inc();
+      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -255,8 +279,8 @@ public class GenericPojoDao {
     try {
       return runTask(connection -> addUpdateToConnection(pojo, predicate, connection), 0);
     } finally {
-      ThirdeyeMetricsUtil.dbWriteCallCounter.inc();
-      ThirdeyeMetricsUtil.dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteCallCounter.inc();
+      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -281,7 +305,7 @@ public class GenericPojoDao {
 
     //update indexes
     if (affectedRows == 1) {
-      ThirdeyeMetricsUtil.dbWriteByteCounter.inc(jsonVal.length());
+      dbWriteByteCounter.inc(jsonVal.length());
       if (entityInfo.indexEntityClass != null) {
         AbstractIndexEntity abstractIndexEntity = entityInfo.indexEntityClass.newInstance();
         MODEL_MAPPER.map(pojo, abstractIndexEntity);
@@ -315,7 +339,7 @@ public class GenericPojoDao {
         List<E> ret = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(entities)) {
           for (GenericJsonEntity entity : entities) {
-            ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
+            dbReadByteCounter.inc(entity.getJsonVal().length());
 
             E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
             e.setId(entity.getId());
@@ -326,8 +350,8 @@ public class GenericPojoDao {
         return ret;
       }, Collections.emptyList());
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -350,7 +374,7 @@ public class GenericPojoDao {
         List<E> result = new ArrayList<>();
         if (entities != null) {
           for (GenericJsonEntity entity : entities) {
-            ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
+            dbReadByteCounter.inc(entity.getJsonVal().length());
             E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
             e.setId(entity.getId());
             e.setUpdateTime(entity.getUpdateTime());
@@ -360,8 +384,8 @@ public class GenericPojoDao {
         return result;
       }, Collections.emptyList());
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -382,8 +406,8 @@ public class GenericPojoDao {
         }
       }, -1);
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -408,7 +432,7 @@ public class GenericPojoDao {
         if (genericJsonEntity == null) {
           return null;
         }
-        ThirdeyeMetricsUtil.dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
+        dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
 
         final E e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
         e.setId(genericJsonEntity.getId());
@@ -417,8 +441,8 @@ public class GenericPojoDao {
         return e;
       }, null);
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -437,14 +461,14 @@ public class GenericPojoDao {
         }
         Object e = null;
         if (genericJsonEntity != null) {
-          ThirdeyeMetricsUtil.dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
+          dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
           e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), Object.class);
         }
         return e;
       }, null);
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -463,7 +487,7 @@ public class GenericPojoDao {
         List<E> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(genericJsonEntities)) {
           for (GenericJsonEntity genericJsonEntity : genericJsonEntities) {
-            ThirdeyeMetricsUtil.dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
+            dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
 
             E e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
             e.setId(genericJsonEntity.getId());
@@ -475,8 +499,8 @@ public class GenericPojoDao {
         return result;
       }, Collections.emptyList());
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -508,7 +532,7 @@ public class GenericPojoDao {
           if (CollectionUtils.isNotEmpty(entities)) {
             for (GenericJsonEntity entity : entities) {
               final String json = entity.getJsonVal();
-              ThirdeyeMetricsUtil.dbReadByteCounter.inc(json.length());
+              dbReadByteCounter.inc(json.length());
 
               E bean = (E) OBJECT_MAPPER.readValue(json, beanClass);
               bean.setId(entity.getId())
@@ -521,8 +545,8 @@ public class GenericPojoDao {
         return results;
       }, Collections.emptyList());
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -563,7 +587,7 @@ public class GenericPojoDao {
           }
           if (CollectionUtils.isNotEmpty(entities)) {
             for (GenericJsonEntity entity : entities) {
-              ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
+              dbReadByteCounter.inc(entity.getJsonVal().length());
 
               E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
               bean.setId(entity.getId());
@@ -575,8 +599,8 @@ public class GenericPojoDao {
         return ret;
       }, Collections.emptyList());
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -609,7 +633,7 @@ public class GenericPojoDao {
             }
             if (CollectionUtils.isNotEmpty(entities)) {
               for (GenericJsonEntity entity : entities) {
-                ThirdeyeMetricsUtil.dbReadByteCounter.inc(entity.getJsonVal().length());
+                dbReadByteCounter.inc(entity.getJsonVal().length());
 
                 E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
                 bean.setId(entity.getId());
@@ -623,8 +647,8 @@ public class GenericPojoDao {
         return ret;
       }, Collections.emptyList());
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -656,8 +680,8 @@ public class GenericPojoDao {
         return idsToReturn;
       }, Collections.emptyList());
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -688,8 +712,8 @@ public class GenericPojoDao {
         }
       }
     } finally {
-      ThirdeyeMetricsUtil.dbReadCallCounter.inc();
-      ThirdeyeMetricsUtil.dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadCallCounter.inc();
+      dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -713,8 +737,8 @@ public class GenericPojoDao {
         }
       }, 0);
     } finally {
-      ThirdeyeMetricsUtil.dbWriteCallCounter.inc();
-      ThirdeyeMetricsUtil.dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteCallCounter.inc();
+      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -771,8 +795,8 @@ public class GenericPojoDao {
         return updateCounter;
       }, 0);
     } finally {
-      ThirdeyeMetricsUtil.dbWriteCallCounter.inc();
-      ThirdeyeMetricsUtil.dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteCallCounter.inc();
+      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
@@ -807,7 +831,7 @@ public class GenericPojoDao {
   }
 
   <T> T runTask(QueryTask<T> task, T defaultReturnValue) {
-    ThirdeyeMetricsUtil.dbCallCounter.inc();
+    dbCallCounter.inc();
 
     Connection connection = null;
     try {
@@ -820,7 +844,7 @@ public class GenericPojoDao {
       return t;
     } catch (Exception e) {
       LOG.error("Exception while executing query task", e);
-      ThirdeyeMetricsUtil.dbExceptionCounter.inc();
+      dbExceptionCounter.inc();
 
       // Rollback transaction in case json table is updated but index table isn't due to any errors (duplicate key, etc.)
       if (connection != null) {

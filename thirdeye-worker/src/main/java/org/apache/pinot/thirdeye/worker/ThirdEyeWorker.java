@@ -107,7 +107,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     final DatabaseConfiguration dbConfig = getDatabaseConfiguration();
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
 
-    injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource, config));
+    injector = Guice.createInjector(new ThirdEyeWorkerModule(dataSource, config, env.metrics()));
 
     // TODO remove hack and CacheConfig singleton
     CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));

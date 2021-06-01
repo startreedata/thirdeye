@@ -57,7 +57,8 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
     final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,
-        dataSource));
+        dataSource,
+        env.metrics()));
 
     // TODO remove hack and CacheConfig singleton
     CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));

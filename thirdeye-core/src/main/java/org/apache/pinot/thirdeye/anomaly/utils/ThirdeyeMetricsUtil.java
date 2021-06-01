@@ -22,6 +22,10 @@ package org.apache.pinot.thirdeye.anomaly.utils;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 
+/**
+ * Deprecated in favor of using injected {@link MetricRegistry}
+ */
+@Deprecated
 public class ThirdeyeMetricsUtil {
 
   private static final MetricRegistry metricRegistry = new MetricRegistry();
@@ -50,24 +54,6 @@ public class ThirdeyeMetricsUtil {
       metricRegistry.counter("alertTaskCounter");
   public static final Counter alertTaskSuccessCounter =
       metricRegistry.counter("alertTaskSuccessCounter");
-  public static final Counter alertTaskExceptionCounter =
-      metricRegistry.counter("alertTaskExceptionCounter");
-  public static final Counter dbCallCounter =
-      metricRegistry.counter("dbCallCounter");
-  public static final Counter dbExceptionCounter =
-      metricRegistry.counter("dbExceptionCounter");
-  public static final Counter dbReadCallCounter =
-      metricRegistry.counter("dbReadCallCounter");
-  public static final Counter dbReadByteCounter =
-      metricRegistry.counter("dbReadByteCounter");
-  public static final Counter dbReadDurationCounter =
-      metricRegistry.counter("dbReadDurationCounter");
-  public static final Counter dbWriteCallCounter =
-      metricRegistry.counter("dbWriteCallCounter");
-  public static final Counter dbWriteByteCounter =
-      metricRegistry.counter("dbWriteByteCounter");
-  public static final Counter dbWriteDurationCounter =
-      metricRegistry.counter("dbWriteDurationCounter");
   public static final Counter datasourceCallCounter =
       metricRegistry.counter("datasourceCallCounter");
   public static final Counter datasourceDurationCounter =

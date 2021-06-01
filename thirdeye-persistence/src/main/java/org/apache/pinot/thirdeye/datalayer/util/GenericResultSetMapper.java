@@ -49,17 +49,18 @@ import org.modelmapper.convention.NameTokenizers;
 @Singleton
 public class GenericResultSetMapper {
 
-  private final ModelMapper modelMapper = new ModelMapper();
+  private final ModelMapper modelMapper;
   private final EntityMappingHolder entityMappingHolder;
-
-  {
-    modelMapper.getConfiguration().setSourceNameTokenizer(NameTokenizers.CAMEL_CASE)
-        .setFieldMatchingEnabled(true).setFieldAccessLevel(AccessLevel.PRIVATE);
-  }
 
   @Inject
   public GenericResultSetMapper(EntityMappingHolder entityMappingHolder) {
     this.entityMappingHolder = entityMappingHolder;
+
+    modelMapper = new ModelMapper();
+    modelMapper.getConfiguration()
+        .setSourceNameTokenizer(NameTokenizers.CAMEL_CASE)
+        .setFieldMatchingEnabled(true)
+        .setFieldAccessLevel(AccessLevel.PRIVATE);
   }
 
   public <E extends AbstractEntity> E mapSingle(ResultSet rs,

@@ -6,6 +6,7 @@ build/
 dist/
 
 # Maven
+.mvn/
 target/
 
 # Docker (Prettier has trouble parsing docker files)
@@ -17,6 +18,11 @@ tsbuildinfo/
 
 # Jest
 src/test/unit/coverage/
+
+# Cypress
+src/test/e2e/downloads/
+src/test/e2e/screenshots/
+src/test/e2e/videos/
 
 # Assets
 *.svg

@@ -22,27 +22,27 @@ jest.mock("i18next", () => ({
 }));
 
 describe("Alerts Util", () => {
-    test("createDefaultAlert should create appropriate alert", () => {
+    it("createDefaultAlert should create appropriate alert", () => {
         expect(createDefaultAlert()).toEqual(mockDefaultAlert);
     });
 
-    test("createEmptyUiAlert should create appropriate UI alert", () => {
+    it("createEmptyUiAlert should create appropriate UI alert", () => {
         expect(createEmptyUiAlert()).toEqual(mockEmptyUiAlert);
     });
 
-    test("createEmptyUiAlertDatasetAndMetric should create appropriate UI alert dataset and metric", () => {
+    it("createEmptyUiAlertDatasetAndMetric should create appropriate UI alert dataset and metric", () => {
         expect(createEmptyUiAlertDatasetAndMetric()).toEqual(
             mockEmptyUiAlertDatasetAndMetric
         );
     });
 
-    test("createEmptyUiAlertSubscriptionGroup should create appropriate UI alert subscription group", () => {
+    it("createEmptyUiAlertSubscriptionGroup should create appropriate UI alert subscription group", () => {
         expect(createEmptyUiAlertSubscriptionGroup()).toEqual(
             mockEmptyUiAlertSubscriptionGroup
         );
     });
 
-    test("createAlertEvaluation should create appropriate alert evaluation", () => {
+    it("createAlertEvaluation should create appropriate alert evaluation", () => {
         expect(
             createAlertEvaluation(
                 {
@@ -60,13 +60,13 @@ describe("Alerts Util", () => {
         });
     });
 
-    test("getUiAlert should return empty UI alert for invalid alert", () => {
+    it("getUiAlert should return empty UI alert for invalid alert", () => {
         expect(
             getUiAlert((null as unknown) as Alert, mockSubscriptionGroups)
         ).toEqual(mockEmptyUiAlert);
     });
 
-    test("getUiAlert should return appropriate UI alert for alert and invalid subscription groups", () => {
+    it("getUiAlert should return appropriate UI alert for alert and invalid subscription groups", () => {
         const expectedUiAlert = cloneDeep(mockUiAlert1);
         expectedUiAlert.subscriptionGroups = [];
 
@@ -75,30 +75,30 @@ describe("Alerts Util", () => {
         ).toEqual(expectedUiAlert);
     });
 
-    test("getUiAlert should return appropriate UI alert for alert and empty subscription groups", () => {
+    it("getUiAlert should return appropriate UI alert for alert and empty subscription groups", () => {
         const expectedUiAlert = cloneDeep(mockUiAlert1);
         expectedUiAlert.subscriptionGroups = [];
 
         expect(getUiAlert(mockAlert1, [])).toEqual(expectedUiAlert);
     });
 
-    test("getUiAlert should return appropriate UI alert for alert and subscription groups", () => {
+    it("getUiAlert should return appropriate UI alert for alert and subscription groups", () => {
         expect(getUiAlert(mockAlert1, mockSubscriptionGroups)).toEqual(
             mockUiAlert1
         );
     });
 
-    test("getUiAlerts should return empty array for invalid alerts", () => {
+    it("getUiAlerts should return empty array for invalid alerts", () => {
         expect(
             getUiAlerts((null as unknown) as Alert[], mockSubscriptionGroups)
         ).toEqual([]);
     });
 
-    test("getUiAlerts should return empty array for empty alerts", () => {
+    it("getUiAlerts should return empty array for empty alerts", () => {
         expect(getUiAlerts([], mockSubscriptionGroups)).toEqual([]);
     });
 
-    test("getUiAlerts should return appropriate UI alerts for alerts and invalid subscription groups", () => {
+    it("getUiAlerts should return appropriate UI alerts for alerts and invalid subscription groups", () => {
         const expectedUiAlert1 = cloneDeep(mockUiAlert1);
         expectedUiAlert1.subscriptionGroups = [];
         const expectedUiAlert2 = cloneDeep(mockUiAlert2);
@@ -111,7 +111,7 @@ describe("Alerts Util", () => {
         ).toEqual([expectedUiAlert1, expectedUiAlert2, expectedUiAlert3]);
     });
 
-    test("getUiAlerts should return appropriate UI alerts for alerts and empty subscription groups", () => {
+    it("getUiAlerts should return appropriate UI alerts for alerts and empty subscription groups", () => {
         const expectedUiAlert1 = cloneDeep(mockUiAlert1);
         expectedUiAlert1.subscriptionGroups = [];
         const expectedUiAlert2 = cloneDeep(mockUiAlert2);
@@ -126,33 +126,33 @@ describe("Alerts Util", () => {
         ]);
     });
 
-    test("getUiAlerts should return appropriate UI alerts for alerts and subscription groups", () => {
+    it("getUiAlerts should return appropriate UI alerts for alerts and subscription groups", () => {
         expect(getUiAlerts(mockAlerts, mockSubscriptionGroups)).toEqual(
             mockUiAlerts
         );
     });
 
-    test("filterAlerts should return empty array for invalid UI alerts", () => {
+    it("filterAlerts should return empty array for invalid UI alerts", () => {
         expect(
             filterAlerts((null as unknown) as UiAlert[], mockSearchWords)
         ).toEqual([]);
     });
 
-    test("filterAlerts should return empty array for empty UI alerts", () => {
+    it("filterAlerts should return empty array for empty UI alerts", () => {
         expect(filterAlerts([], mockSearchWords)).toEqual([]);
     });
 
-    test("filterAlerts should return appropriate UI alerts for UI alerts and invalid search words", () => {
+    it("filterAlerts should return appropriate UI alerts for UI alerts and invalid search words", () => {
         expect(
             filterAlerts(mockUiAlerts, (null as unknown) as string[])
         ).toEqual(mockUiAlerts);
     });
 
-    test("filterAlerts should return appropriate UI alerts for UI alerts and empty search words", () => {
+    it("filterAlerts should return appropriate UI alerts for UI alerts and empty search words", () => {
         expect(filterAlerts(mockUiAlerts, [])).toEqual(mockUiAlerts);
     });
 
-    test("filterAlerts should return appropriate UI alerts for UI alerts and search words", () => {
+    it("filterAlerts should return appropriate UI alerts for UI alerts and search words", () => {
         expect(filterAlerts(mockUiAlerts, mockSearchWords)).toEqual([
             mockUiAlert1,
             mockUiAlert2,

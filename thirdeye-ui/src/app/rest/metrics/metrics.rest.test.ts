@@ -8,7 +8,7 @@ describe("Metrics REST", () => {
         jest.restoreAllMocks();
     });
 
-    test("getMetric should invoke axios.get with appropriate input and return appropriate metric", async () => {
+    it("getMetric should invoke axios.get with appropriate input and return appropriate metric", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: mockMetric,
         });
@@ -18,13 +18,13 @@ describe("Metrics REST", () => {
         expect(axios.get).toHaveBeenCalledWith("/api/metrics/1");
     });
 
-    test("getMetric should throw encountered error", async () => {
+    it("getMetric should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getMetric(1)).rejects.toThrow("testError");
     });
 
-    test("getAllMetrics should invoke axios.get with appropriate input and return appropriate metrics", async () => {
+    it("getAllMetrics should invoke axios.get with appropriate input and return appropriate metrics", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockMetric],
         });
@@ -34,13 +34,13 @@ describe("Metrics REST", () => {
         expect(axios.get).toHaveBeenCalledWith("/api/metrics");
     });
 
-    test("getAllMetrics should throw encountered error", async () => {
+    it("getAllMetrics should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getAllMetrics()).rejects.toThrow("testError");
     });
 
-    test("deleteMetric should invoke axios.delete with appropriate input and return appropriate metric", async () => {
+    it("deleteMetric should invoke axios.delete with appropriate input and return appropriate metric", async () => {
         jest.spyOn(axios, "delete").mockResolvedValue({
             data: mockMetric,
         });
@@ -50,7 +50,7 @@ describe("Metrics REST", () => {
         expect(axios.delete).toHaveBeenCalledWith("/api/metrics/1");
     });
 
-    test("deleteMetric should throw encountered error", async () => {
+    it("deleteMetric should throw encountered error", async () => {
         jest.spyOn(axios, "delete").mockRejectedValue(mockError);
 
         await expect(deleteMetric(1)).rejects.toThrow("testError");

@@ -2,11 +2,11 @@
 
 # ThirdEye UI
 
-[![ThirdEye UI Workflow](https://github.com/cortexdata/thirdeye/workflows/ThirdEye%20UI%20Workflow/badge.svg)](https://github.com/cortexdata/thirdeye/actions?query=workflow%3A%22ThirdEye+UI+Workflow%22)
+[![ThirdEye UI Workflow](https://github.com/startreedata/thirdeye/workflows/ThirdEye%20UI%20Workflow/badge.svg)](https://github.com/startreedata/thirdeye/actions?query=workflow%3A%22ThirdEye+UI+Workflow%22)
 
 <br/>
 
-This is the UI project for CortexData ThirdEye.
+This is the UI project for StarTree ThirdEye.
 
 -   [Getting Started](#getting-started)
     -   [Prerequisites](#prerequisites)
@@ -21,6 +21,8 @@ This is the UI project for CortexData ThirdEye.
     -   [`test`](#test)
     -   [`test-watch`](#test-watch)
     -   [`test-coverage`](#test-coverage)
+    -   [`test-e2e`](#test-e2e)
+    -   [`test-e2e-gui`](#test-e2e-gui)
     -   [`eslint`](#eslint)
     -   [`stylelint`](#stylelint)
     -   [`pretty`](#pretty)
@@ -34,7 +36,7 @@ These instructions will help you get the project up and running on your local ma
 
 #### [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm)
 
-The project uses nvm to maintain the [Node](https://nodejs.org) version. Compatible Node version is listed in project root [**.nvmrc**](/.nvmrc).
+The project uses nvm to maintain the [Node](https://nodejs.org) version. Compatible Node version is listed in project root [**.nvmrc**](/.nvmrc). Follow the instructions to install nvm for [Linux/macOS](https://github.com/nvm-sh/nvm#installing-and-updating) or [Windows](https://github.com/coreybutler/nvm-windows#installation--upgrades).
 
 Once you install nvm, go to the project directory and switch to the compatible Node version
 
@@ -47,7 +49,7 @@ This will switch to the required Node version if already installed and make `npm
 If required Node version is not installed, it will recommend the command to install it
 
 ```
-Found '/Users/default/thirdeye/thirdeye-ui/.nvmrc' with version <14.7.0>
+Found '/Users/default/cortex-data/cortex-data-ui/.nvmrc' with version <14.7.0>
 N/A: version "14.7.0 -> N/A" is not yet installed.
 
 You need to run "nvm install 14.7.0" to install it before using it.
@@ -55,11 +57,13 @@ You need to run "nvm install 14.7.0" to install it before using it.
 
 Following the installation, the command above will let you switch to the required Node version.
 
+:warning: `nvm use` (without version number) might not work when using nvm for [Windows](https://github.com/coreybutler/nvm-windows). You may need to specify precise Node version from project root [**.nvmrc**](/.nvmrc).
+
 #### Configure [Node Package Manager (npm)](https://www.npmjs.com) for use with GitHub Packages
 
 The project may depend on some GitHub Packages and npm needs to be configured to allow access to these packages using a GitHub account. The GitHub repository to install packages from is configured in project root [**.npmrc**](/.npmrc).
 
-Follow the official GitHub Docs [here](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-with-a-personal-access-token) to configure npm with a GitHub personal access token using **~/.npmrc**.
+Follow the official [GitHub Docs](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-with-a-personal-access-token) to configure npm with a GitHub personal access token using **~/.npmrc**.
 
 ### Setup
 
@@ -83,7 +87,7 @@ This will build and deploy the project using [webpack-dev-server](https://github
 
 ## Supported Browsers
 
-CortexData ThirdEye UI is tested on latest, stable release of [Chrome](https://www.google.com/chrome), [Firefox](https://www.mozilla.org/firefox), [Safari](https://www.apple.com/safari) and [Edge](https://www.microsoft.com/edge).
+StarTree ThirdEye UI is tested on latest, stable release of [Chrome](https://www.google.com/chrome), [Firefox](https://www.mozilla.org/firefox), [Safari](https://www.apple.com/safari) and [Edge](https://www.microsoft.com/edge).
 
 ## Scripts
 
@@ -127,6 +131,28 @@ Run all tests and generate coverage report in project root **src/test/unit/cover
 
 ```
 $ npm run test-coverage
+```
+
+### `test-e2e`
+
+Run all end to end tests headlessly using [Cypress](https://www.cypress.io)
+
+```
+$ npm run test-e2e
+```
+
+By default, tests are run in Electron headless browser. To change the browser, use [`--browser`](https://docs.cypress.io/guides/guides/command-line#cypress-run-browser-lt-browser-name-or-path-gt) command line option. Other than the default `electron` browser, `chrome`, `chromium`, `edge` and `firefox` browsers are supported as long as they are installed locally
+
+```
+$ npm run test-e2e -- --browser edge
+```
+
+### `test-e2e-gui`
+
+Run all end to end tests using [Cypress Test Runner](https://docs.cypress.io/guides/core-concepts/test-runner)
+
+```
+$ npm run test-e2e-gui
 ```
 
 ### `eslint`

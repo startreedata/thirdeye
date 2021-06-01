@@ -89,7 +89,7 @@ jest.mock(
 );
 
 describe("Subscription Groups Router", () => {
-    test("should have rendered loading indicator while loading", () => {
+    it("should have rendered loading indicator while loading", () => {
         render(
             <MemoryRouter>
                 <SubscriptionGroupsRouter />
@@ -99,7 +99,7 @@ describe("Subscription Groups Router", () => {
         expect(LoadingIndicator).toHaveBeenCalled();
     });
 
-    test("should set appropriate router breadcrumbs", () => {
+    it("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
                 <SubscriptionGroupsRouter />
@@ -132,7 +132,7 @@ describe("Subscription Groups Router", () => {
         );
     });
 
-    test("should render subscription groups all page at exact subscription groups path", async () => {
+    it("should render subscription groups all page at exact subscription groups path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS]}>
                 <SubscriptionGroupsRouter />
@@ -144,7 +144,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups path", async () => {
+    it("should render page not found page at invalid subscription groups path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.SUBSCRIPTION_GROUPS}/testPath`]}
@@ -158,7 +158,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render subscription groups all page at exact subscription groups all path", async () => {
+    it("should render subscription groups all page at exact subscription groups all path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_ALL]}>
                 <SubscriptionGroupsRouter />
@@ -170,7 +170,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups all path", async () => {
+    it("should render page not found page at invalid subscription groups all path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
@@ -186,7 +186,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render subscription groups view page at exact subscription groups view path", async () => {
+    it("should render subscription groups view page at exact subscription groups view path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_VIEW]}>
                 <SubscriptionGroupsRouter />
@@ -198,7 +198,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups view path", async () => {
+    it("should render page not found page at invalid subscription groups view path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
@@ -214,7 +214,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render subscription groups create page at exact subscription groups create path", async () => {
+    it("should render subscription groups create page at exact subscription groups create path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_CREATE]}
@@ -228,7 +228,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups create path", async () => {
+    it("should render page not found page at invalid subscription groups create path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
@@ -244,7 +244,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render subscription groups update page at exact subscription groups update path", async () => {
+    it("should render subscription groups update page at exact subscription groups update path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_UPDATE]}
@@ -258,7 +258,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at invalid subscription groups update path", async () => {
+    it("should render page not found page at invalid subscription groups update path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
@@ -274,7 +274,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page at any other path", async () => {
+    it("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <SubscriptionGroupsRouter />
@@ -286,7 +286,7 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    test("should render page not found page by default", async () => {
+    it("should render page not found page by default", async () => {
         render(
             <MemoryRouter>
                 <SubscriptionGroupsRouter />

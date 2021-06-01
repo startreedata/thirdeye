@@ -32,7 +32,7 @@ jest.mock(
 );
 
 describe("Page Not Found Page", () => {
-    test("should set appropriate page breadcrumbs", async () => {
+    it("should set appropriate page breadcrumbs", async () => {
         act(() => {
             render(<PageNotFoundPage />);
         });
@@ -40,7 +40,7 @@ describe("Page Not Found Page", () => {
         expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    test("should set appropriate page title", async () => {
+    it("should set appropriate page title", async () => {
         act(() => {
             render(<PageNotFoundPage />);
         });
@@ -55,7 +55,7 @@ describe("Page Not Found Page", () => {
         );
     });
 
-    test("should render page not found indicator", async () => {
+    it("should render page not found indicator", async () => {
         act(() => {
             render(<PageNotFoundPage />);
         });

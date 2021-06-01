@@ -7,7 +7,7 @@ describe("numbro Util", () => {
         jest.restoreAllMocks();
     });
 
-    test("registerLanguages should register appropriate languages", () => {
+    it("registerLanguages should register appropriate languages", () => {
         jest.spyOn(numbro, "registerLanguage").mockImplementation();
         registerLanguages();
 

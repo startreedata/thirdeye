@@ -3,14 +3,14 @@ import { Breadcrumb } from "../../components/breadcrumbs/breadcrumbs.interfaces"
 import { useAppBreadcrumbsStore } from "./app-breadcrumbs.store";
 
 describe("App Breadcrumbs Store", () => {
-    test("should initialize default values", () => {
+    it("should initialize default values", () => {
         const { result } = renderHook(() => useAppBreadcrumbsStore());
 
         expect(result.current.routerBreadcrumbs).toEqual([]);
         expect(result.current.pageBreadcrumbs).toEqual([]);
     });
 
-    test("setRouterBreadcrumbs should not update store for invalid breadcrumbs", () => {
+    it("setRouterBreadcrumbs should not update store for invalid breadcrumbs", () => {
         const { result } = renderHook(() => useAppBreadcrumbsStore());
 
         expect(result.current.routerBreadcrumbs).toEqual([]);
@@ -26,7 +26,7 @@ describe("App Breadcrumbs Store", () => {
         expect(result.current.pageBreadcrumbs).toEqual([]);
     });
 
-    test("setPageBreadcrumbs should not update store for invalid breadcrumbs", () => {
+    it("setPageBreadcrumbs should not update store for invalid breadcrumbs", () => {
         const { result } = renderHook(() => useAppBreadcrumbsStore());
 
         expect(result.current.routerBreadcrumbs).toEqual([]);
@@ -42,7 +42,7 @@ describe("App Breadcrumbs Store", () => {
         expect(result.current.pageBreadcrumbs).toEqual([]);
     });
 
-    test("pushPageBreadcrumb should not update store for invalid breadcrumb", () => {
+    it("pushPageBreadcrumb should not update store for invalid breadcrumb", () => {
         const { result } = renderHook(() => useAppBreadcrumbsStore());
 
         expect(result.current.routerBreadcrumbs).toEqual([]);
@@ -56,7 +56,7 @@ describe("App Breadcrumbs Store", () => {
         expect(result.current.pageBreadcrumbs).toEqual([]);
     });
 
-    test("setRouterBreadcrumbs should update store appropriately for breadcrumbs", () => {
+    it("setRouterBreadcrumbs should update store appropriately for breadcrumbs", () => {
         const { result } = renderHook(() => useAppBreadcrumbsStore());
         act(() => {
             result.current.setRouterBreadcrumbs([
@@ -73,7 +73,7 @@ describe("App Breadcrumbs Store", () => {
         expect(result.current.pageBreadcrumbs).toEqual([]);
     });
 
-    test("setPageBreadcrumbs should update store appropriately for braedcrumbs", () => {
+    it("setPageBreadcrumbs should update store appropriately for braedcrumbs", () => {
         const { result } = renderHook(() => useAppBreadcrumbsStore());
         act(() => {
             result.current.setRouterBreadcrumbs([]);
@@ -91,7 +91,7 @@ describe("App Breadcrumbs Store", () => {
     });
 });
 
-test("pushPageBreadcrumb should update store appropriately for breadcrumb", () => {
+it("pushPageBreadcrumb should update store appropriately for breadcrumb", () => {
     const { result } = renderHook(() => useAppBreadcrumbsStore());
     act(() => {
         result.current.setRouterBreadcrumbs([]);
@@ -106,7 +106,7 @@ test("pushPageBreadcrumb should update store appropriately for breadcrumb", () =
     ]);
 });
 
-test("popPageBreadcrumb should update empty store appropriately", () => {
+it("popPageBreadcrumb should update empty store appropriately", () => {
     const { result } = renderHook(() => useAppBreadcrumbsStore());
     act(() => {
         result.current.setRouterBreadcrumbs([]);
@@ -118,7 +118,7 @@ test("popPageBreadcrumb should update empty store appropriately", () => {
     expect(result.current.pageBreadcrumbs).toEqual([]);
 });
 
-test("popPageBreadcrumb should update store appropriately", () => {
+it("popPageBreadcrumb should update store appropriately", () => {
     const { result } = renderHook(() => useAppBreadcrumbsStore());
     act(() => {
         result.current.setRouterBreadcrumbs([]);

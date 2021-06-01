@@ -17,59 +17,59 @@ jest.mock("../number/number.util", () => ({
 }));
 
 describe("Metrics Util", () => {
-    test("createEmptyUiMetric should create appropriate UI metric", () => {
+    it("createEmptyUiMetric should create appropriate UI metric", () => {
         expect(createEmptyUiMetric()).toEqual(mockEmptyUiMetric);
     });
 
-    test("createEmptyMetricLogicalView should create appropriate metric logical view", () => {
+    it("createEmptyMetricLogicalView should create appropriate metric logical view", () => {
         expect(createEmptyMetricLogicalView()).toEqual(
             mockEmptyMetricLogicalView
         );
     });
 
-    test("getUiMetric should return empty UI metric for invalid metric", () => {
+    it("getUiMetric should return empty UI metric for invalid metric", () => {
         expect(getUiMetric((null as unknown) as Metric)).toEqual(
             mockEmptyUiMetric
         );
     });
 
-    test("getUiMetric should return appropriate UI metric for metric", () => {
+    it("getUiMetric should return appropriate UI metric for metric", () => {
         expect(getUiMetric(mockMetric1)).toEqual(mockUiMetric1);
     });
 
-    test("getUiMetrics should return empty array for invalid metric", () => {
+    it("getUiMetrics should return empty array for invalid metric", () => {
         expect(getUiMetrics((null as unknown) as Metric[])).toEqual([]);
     });
 
-    test("getUiMetrics should return empty array for empty metrics", () => {
+    it("getUiMetrics should return empty array for empty metrics", () => {
         expect(getUiMetrics([])).toEqual([]);
     });
 
-    test("getUiMetrics should return appropriate UI metrics for metrics", () => {
+    it("getUiMetrics should return appropriate UI metrics for metrics", () => {
         expect(getUiMetrics(mockMetrics)).toEqual(mockUiMetrics);
     });
 
-    test("filterMetrics should return empty array for invalid UI metrics", () => {
+    it("filterMetrics should return empty array for invalid UI metrics", () => {
         expect(
             filterMetrics((null as unknown) as UiMetric[], mockSearchWords)
         ).toEqual([]);
     });
 
-    test("filterMetrics should return empty array for empty UI metrics", () => {
+    it("filterMetrics should return empty array for empty UI metrics", () => {
         expect(filterMetrics([], mockSearchWords)).toEqual([]);
     });
 
-    test("filterMetrics should return appropriate UI metrics for UI metrics and invalid search words", () => {
+    it("filterMetrics should return appropriate UI metrics for UI metrics and invalid search words", () => {
         expect(
             filterMetrics(mockUiMetrics, (null as unknown) as string[])
         ).toEqual(mockUiMetrics);
     });
 
-    test("filterMetrics should return appropriate UI metrics for UI metrics and empty search words", () => {
+    it("filterMetrics should return appropriate UI metrics for UI metrics and empty search words", () => {
         expect(filterMetrics(mockUiMetrics, [])).toEqual(mockUiMetrics);
     });
 
-    test("filterMetrics should return appropriate UI metrics for UI metrics and search words", () => {
+    it("filterMetrics should return appropriate UI metrics for UI metrics and search words", () => {
         expect(filterMetrics(mockUiMetrics, mockSearchWords)).toEqual([
             mockUiMetric1,
         ]);

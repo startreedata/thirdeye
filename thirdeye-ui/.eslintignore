@@ -6,7 +6,12 @@ build/
 dist/
 
 # Maven
+.mvn/
 target/
+
+# Docker
+docker/
+Dockerfile
 
 # TypeScript
 tsbuildinfo/
@@ -15,6 +20,9 @@ tsbuildinfo/
 jest.config.js
 src/test/unit/coverage/
 src/test/unit/mocks/
+
+# Cypress
+src/test/e2e/downloads/
 
 # webpack (ESLint rules don't agree with how these configs are written)
 webpack.config.*.js

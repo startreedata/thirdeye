@@ -43,57 +43,57 @@ describe("Params Util", () => {
         Object.defineProperty(window, "location", { value: systemLocation });
     });
 
-    test("getAccessTokenFromHashParams should return empty string when access token is not found in hash params", () => {
+    it("getAccessTokenFromHashParams should return empty string when access token is not found in hash params", () => {
         location.hash = "";
 
         expect(getAccessTokenFromHashParams()).toEqual("");
     });
 
-    test("getAccessTokenFromHashParams should return appropriate access token from hash params", () => {
+    it("getAccessTokenFromHashParams should return appropriate access token from hash params", () => {
         location.hash = "#access_token=testAccessToken";
 
         expect(getAccessTokenFromHashParams()).toEqual("testAccessToken");
     });
 
-    test("setSearchInQueryString should set appropriate search in query string", () => {
+    it("setSearchInQueryString should set appropriate search in query string", () => {
         location.search = "";
         setSearchInQueryString("testSearchValue");
 
         expect(location.search).toEqual("search=testSearchValue");
     });
 
-    test("getSearchFromQueryString should return empty string when search is not found in query string", () => {
+    it("getSearchFromQueryString should return empty string when search is not found in query string", () => {
         location.search = "";
 
         expect(getSearchFromQueryString()).toEqual("");
     });
 
-    test("getSearchFromQueryString should return appropriate search from query string", () => {
+    it("getSearchFromQueryString should return appropriate search from query string", () => {
         location.search = "search=testSearchValue";
 
         expect(getSearchFromQueryString()).toEqual("testSearchValue");
     });
 
-    test("setSearchTextInQueryString should set appropriate search text in query string", () => {
+    it("setSearchTextInQueryString should set appropriate search text in query string", () => {
         location.search = "";
         setSearchTextInQueryString("testSearchTextValue");
 
         expect(location.search).toEqual("search_text=testSearchTextValue");
     });
 
-    test("getSearchTextFromQueryString should return empty string when search text is not found in query string", () => {
+    it("getSearchTextFromQueryString should return empty string when search text is not found in query string", () => {
         location.search = "";
 
         expect(getSearchTextFromQueryString()).toEqual("");
     });
 
-    test("getSearchTextFromQueryString should return appropriate search text from query string", () => {
+    it("getSearchTextFromQueryString should return appropriate search text from query string", () => {
         location.search = "search_text=testSearchTextValue";
 
         expect(getSearchTextFromQueryString()).toEqual("testSearchTextValue");
     });
 
-    test("setTimeRangeDurationInQueryString should not set invalid time range duration in query string", () => {
+    it("setTimeRangeDurationInQueryString should not set invalid time range duration in query string", () => {
         location.search = "";
         setTimeRangeDurationInQueryString(
             (null as unknown) as TimeRangeDuration
@@ -102,7 +102,7 @@ describe("Params Util", () => {
         expect(location.search).toEqual("");
     });
 
-    test("setTimeRangeDurationInQueryString should set appropriate time range duration in query string", () => {
+    it("setTimeRangeDurationInQueryString should set appropriate time range duration in query string", () => {
         location.search = "";
         setTimeRangeDurationInQueryString(mockTimeRangeDuration);
 
@@ -111,49 +111,49 @@ describe("Params Util", () => {
         );
     });
 
-    test("getTimeRangeDurationFromQueryString should return null when time range duration is not found in query string", () => {
+    it("getTimeRangeDurationFromQueryString should return null when time range duration is not found in query string", () => {
         location.search = "";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return null when time range is not found in query string", () => {
+    it("getTimeRangeDurationFromQueryString should return null when time range is not found in query string", () => {
         location.search = "start_time=1&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return null when start time is not found in query string", () => {
+    it("getTimeRangeDurationFromQueryString should return null when start time is not found in query string", () => {
         location.search = "time_range=CUSTOM&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return null when end time is not found in query string", () => {
+    it("getTimeRangeDurationFromQueryString should return null when end time is not found in query string", () => {
         location.search = "time_range=CUSTOM&start_time=1";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return null for invalid time range in query string", () => {
+    it("getTimeRangeDurationFromQueryString should return null for invalid time range in query string", () => {
         location.search = "time_range=testTimeRange&start_time=1&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return null for invalid start time in query string", () => {
+    it("getTimeRangeDurationFromQueryString should return null for invalid start time in query string", () => {
         location.search = "time_range=CUSTOM&start_time=-1&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return null for invalid end time in query string", () => {
+    it("getTimeRangeDurationFromQueryString should return null for invalid end time in query string", () => {
         location.search = "time_range=CUSTOM&start_time=1&end_time=testEndTime";
 
         expect(getTimeRangeDurationFromQueryString()).toBeNull();
     });
 
-    test("getTimeRangeDurationFromQueryString should return appropriate time range duration from query string", () => {
+    it("getTimeRangeDurationFromQueryString should return appropriate time range duration from query string", () => {
         location.search = "time_range=CUSTOM&start_time=1&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toEqual(
@@ -161,28 +161,28 @@ describe("Params Util", () => {
         );
     });
 
-    test("setQueryString should not set query string for invalid key", () => {
+    it("setQueryString should not set query string for invalid key", () => {
         location.search = "";
         setQueryString((null as unknown) as string, "testValue");
 
         expect(location.search).toEqual("");
     });
 
-    test("setQueryString should not set query string for empty key", () => {
+    it("setQueryString should not set query string for empty key", () => {
         location.search = "";
         setQueryString("", "testValue");
 
         expect(location.search).toEqual("");
     });
 
-    test("setQueryString should set appropriate query string for key", () => {
+    it("setQueryString should set appropriate query string for key", () => {
         location.search = "";
         setQueryString("testKey", "testValue");
 
         expect(location.search).toEqual("testKey=testValue");
     });
 
-    test("setQueryString should set appropriate query string for existing key", () => {
+    it("setQueryString should set appropriate query string for existing key", () => {
         location.search = "testKey1=testValue1&testKey2=testValue2";
         setQueryString("testKey1", "testValue3");
 
@@ -191,19 +191,19 @@ describe("Params Util", () => {
         );
     });
 
-    test("getQueryString should return empty string when key is not found in query string", () => {
+    it("getQueryString should return empty string when key is not found in query string", () => {
         location.search = "";
 
         expect(getQueryString("testKey")).toEqual("");
     });
 
-    test("getQueryString should return appropriate value from query string for key", () => {
+    it("getQueryString should return appropriate value from query string for key", () => {
         location.search = "testKey=testValue";
 
         expect(getQueryString("testKey")).toEqual("testValue");
     });
 
-    test("getRecognizedQueryString should return appropriate query string", () => {
+    it("getRecognizedQueryString should return appropriate query string", () => {
         location.search =
             "time_range=CUSTOM&start_time=1&end_time=2&search=testSearchValue&testKey=testValue";
 
@@ -212,31 +212,31 @@ describe("Params Util", () => {
         );
     });
 
-    test("isValidNumberId should return false for invalid string", () => {
+    it("isValidNumberId should return false for invalid string", () => {
         expect(isValidNumberId((null as unknown) as string)).toBeFalsy();
     });
 
-    test("isValidNumberId should return false for empty string", () => {
+    it("isValidNumberId should return false for empty string", () => {
         expect(isValidNumberId("")).toBeFalsy();
     });
 
-    test("isValidNumberId should return false for non-numeric string", () => {
+    it("isValidNumberId should return false for non-numeric string", () => {
         expect(isValidNumberId("testString")).toBeFalsy();
     });
 
-    test("isValidNumberId should return true for positive integer string", () => {
+    it("isValidNumberId should return true for positive integer string", () => {
         expect(isValidNumberId("1")).toBeTruthy();
     });
 
-    test("isValidNumberId should return true for 0 string", () => {
+    it("isValidNumberId should return true for 0 string", () => {
         expect(isValidNumberId("0")).toBeTruthy();
     });
 
-    test("isValidNumberId should return false for negative integer string", () => {
+    it("isValidNumberId should return false for negative integer string", () => {
         expect(isValidNumberId("-1")).toBeFalsy();
     });
 
-    test("isValidNumberId should return false for decimal number string", () => {
+    it("isValidNumberId should return false for decimal number string", () => {
         expect(isValidNumberId("1.1")).toBeFalsy();
     });
 });

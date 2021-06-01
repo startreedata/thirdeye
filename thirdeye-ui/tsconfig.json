@@ -32,5 +32,6 @@
         "forceConsistentCasingInFileNames": true,
         "allowUnreachableCode": false
     },
-    "include": ["./src/**/*"]
+    "include": ["./src/**/*"],
+    "exclude": ["./src/test/e2e/user-flows/**/*"] // Exclude Cypress end to end tests
 }

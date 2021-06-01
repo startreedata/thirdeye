@@ -8,7 +8,7 @@ describe("Auth REST", () => {
         jest.restoreAllMocks();
     });
 
-    test("login should invoke axios.post with appropriate input and return appropriate auth", async () => {
+    it("login should invoke axios.post with appropriate input and return appropriate auth", async () => {
         jest.spyOn(axios, "post").mockResolvedValue({
             data: mockAuthResponse,
         });
@@ -21,13 +21,13 @@ describe("Auth REST", () => {
         );
     });
 
-    test("login should throw encountered error", async () => {
+    it("login should throw encountered error", async () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(login()).rejects.toThrow("testError");
     });
 
-    test("logout should invoke axios.post with appropriate input", async () => {
+    it("logout should invoke axios.post with appropriate input", async () => {
         jest.spyOn(axios, "post").mockResolvedValue({});
 
         await logout();
@@ -35,7 +35,7 @@ describe("Auth REST", () => {
         expect(axios.post).toHaveBeenCalledWith("/api/auth/logout");
     });
 
-    test("logout should throw encountered error", async () => {
+    it("logout should throw encountered error", async () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(logout()).rejects.toThrow("testError");

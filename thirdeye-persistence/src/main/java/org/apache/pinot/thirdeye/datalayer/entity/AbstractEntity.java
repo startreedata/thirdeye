@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.entity;
+package org.apache.pinot.thirdeye.datalayer.entity;
 
 import java.sql.Timestamp;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -38,11 +38,7 @@ public abstract class AbstractEntity {
 
   protected AbstractEntity() {
   }
-
-  protected AbstractEntity(Long id) {
-    this.id = id;
-  }
-
+  
   public Long getId() {
     return id;
   }

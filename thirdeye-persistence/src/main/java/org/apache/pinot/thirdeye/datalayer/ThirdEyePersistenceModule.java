@@ -33,6 +33,7 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseTemplateManagerImpl
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SessionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.TaskManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.ApplicationIndex;
@@ -79,7 +80,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.spi.datalayer.entity.AbstractEntity;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyePersistenceModule extends AbstractModule {

@@ -17,6 +17,7 @@
 package org.apache.pinot.thirdeye.datasource.mock;
 
 import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
+import static org.mockito.Mockito.mock;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.HashMultimap;
@@ -38,6 +39,7 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -176,7 +178,10 @@ public class MockThirdEyeDataSourceIntegrationTest {
     final DataSourcesLoader dataSourcesLoader = new DataSourcesLoader(metricConfigDAO,
         datasetConfigDAO,
         readConfig(dataSourcesConfig, DataSourcesConfiguration.class));
-    dataSourceCache = new DataSourceCache(dataSourcesLoader, new MetricRegistry());
+    dataSourceCache = new DataSourceCache(
+        mock(DataSourceManager.class),
+        dataSourcesLoader,
+        new MetricRegistry());
     cacheRegistry = new ThirdEyeCacheRegistry(
         metricConfigDAO,
         datasetConfigDAO,

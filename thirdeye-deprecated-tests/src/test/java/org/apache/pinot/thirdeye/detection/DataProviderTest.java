@@ -52,6 +52,7 @@ import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
@@ -278,9 +279,10 @@ public class DataProviderTest {
     dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
 
     final DataSourcesLoader dataSourcesLoader = mock(DataSourcesLoader.class);
-    when(dataSourcesLoader.getDataSourceMap()).thenReturn(dataSourceMap);
+    when(dataSourcesLoader.getDataSourceMapFromConfig()).thenReturn(dataSourceMap);
 
-    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourcesLoader,
+    final DataSourceCache dataSourceCache = new DataSourceCache(mock(DataSourceManager.class),
+        dataSourcesLoader,
         new MetricRegistry());
     final ThirdEyeCacheRegistry cacheRegistry = new ThirdEyeCacheRegistry(
         metricDAO,

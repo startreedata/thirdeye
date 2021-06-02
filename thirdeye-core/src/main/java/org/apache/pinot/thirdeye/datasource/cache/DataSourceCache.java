@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.LinkedHashMap;
@@ -32,6 +33,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
@@ -39,26 +43,48 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 @Singleton
 public class DataSourceCache {
 
+  private final DataSourceManager dataSourceManager;
+  private final DataSourcesLoader dataSourcesLoader;
   private final ExecutorService executorService;
-  private final Map<String, ThirdEyeDataSource> dataSourceMap;
+  private final Map<String, ThirdEyeDataSource> dataSourcesFromConfig;
   private final Counter datasourceExceptionCounter;
   private final Counter datasourceDurationCounter;
   private final Counter datasourceCallCounter;
 
   @Inject
-  public DataSourceCache(final DataSourcesLoader dataSourcesLoader,
+  public DataSourceCache(
+      final DataSourceManager dataSourceManager,
+      final DataSourcesLoader dataSourcesLoader,
       final MetricRegistry metricRegistry) {
+    this.dataSourceManager = dataSourceManager;
+    this.dataSourcesLoader = dataSourcesLoader;
     this.executorService = Executors.newCachedThreadPool();
-    this.dataSourceMap = dataSourcesLoader.getDataSourceMap();
+    this.dataSourcesFromConfig = ImmutableMap.copyOf(dataSourcesLoader.getDataSourceMapFromConfig());
 
     datasourceExceptionCounter = metricRegistry.counter("datasourceExceptionCounter");
     datasourceDurationCounter = metricRegistry.counter("datasourceDurationCounter");
     datasourceCallCounter = metricRegistry.counter("datasourceCallCounter");
   }
 
-  public ThirdEyeDataSource getDataSource(String dataSource) {
-    checkState(dataSourceMap.size() > 0, "No data sources loaded!");
-    return dataSourceMap.get(dataSource);
+  public ThirdEyeDataSource getDataSource(String name) {
+    final List<DataSourceDTO> results = findByName(name);
+    if (results.size() == 1) {
+      final DataSourceDTO ds = results.iterator().next();
+      return dataSourcesLoader.loadDataSource(ds.getClassRef(), ds.getProperties());
+    }
+
+    // TODO spyne: remove data-source-config.yml. Keeping this temporarily for now.
+    // Fetch from config if not found in DB.
+    checkState(dataSourcesFromConfig.size() > 0, "No data sources loaded!");
+    return dataSourcesFromConfig.get(name);
+  }
+
+  private List<DataSourceDTO> findByName(final String name) {
+    final List<DataSourceDTO> results =
+        dataSourceManager.findByPredicate(Predicate.EQ("name", name));
+    checkState(results.size() <= 1, "Multiple data sources found with name: " + name);
+
+    return results;
   }
 
   public ThirdEyeResponse getQueryResult(ThirdEyeRequest request) throws Exception {
@@ -87,9 +113,5 @@ public class DataSourceCache {
       responseFuturesMap.put(request, getQueryResultAsync(request));
     }
     return responseFuturesMap;
-  }
-
-  public void clear() throws Exception {
-    dataSourceMap.clear();
   }
 }

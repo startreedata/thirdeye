@@ -19,12 +19,15 @@
 
 package org.apache.pinot.thirdeye.datasource;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -58,35 +61,51 @@ public class DataSourcesLoader {
   /**
    * Returns datasource name to datasource map
    */
-  public Map<String, ThirdEyeDataSource> getDataSourceMap() {
-    Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
-    if (!optional(dataSourcesConfiguration.getDataSourceConfigs()).filter(l -> l.size() > 0)
+  public Map<String, ThirdEyeDataSource> getDataSourceMapFromConfig() {
+    final List<DataSourceConfig> dataSourceConfigs = dataSourcesConfiguration.getDataSourceConfigs();
+    if (!optional(dataSourceConfigs)
+        .filter(l -> l.size() > 0)
         .isPresent()) {
-      return dataSourceMap;
+      return Collections.emptyMap();
     }
-    for (DataSourceConfig dataSourceConfig : dataSourcesConfiguration.getDataSourceConfigs()) {
-      String className = dataSourceConfig.getClassName();
-      Map<String, Object> properties = dataSourceConfig.getProperties();
-      try {
-        LOG.info("Creating thirdeye datasource {} with properties '{}'", className, properties);
-        Constructor<?> constructor = Class.forName(className).getConstructor();
-        ThirdEyeDataSource thirdeyeDataSource = (ThirdEyeDataSource) constructor
-            .newInstance();
-        thirdeyeDataSource.init(new ThirdEyeDataSourceContext()
-            .setProperties(properties)
-            .setMetricConfigManager(metricConfigManager)
-            .setDatasetConfigManager(datasetConfigManager)
-        );
-        // use class simple name as key, this enforces that there cannot be more than one data source of the same type
-        String name = thirdeyeDataSource.getName();
-        if (dataSourceMap.containsKey(name)) {
-          throw new IllegalStateException("Data source " + name + " already exists.");
-        }
-        dataSourceMap.put(name, thirdeyeDataSource);
-      } catch (Exception e) {
-        LOG.error("Exception in creating thirdeye data source {}", className, e);
+    return loadDataSources(dataSourceConfigs);
+  }
+
+  private Map<String, ThirdEyeDataSource> loadDataSources(
+      final List<DataSourceConfig> dataSourceConfigs) {
+    final Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
+    for (DataSourceConfig ds : dataSourceConfigs) {
+      final ThirdEyeDataSource thirdEyeDataSource = loadDataSource(
+          ds.getClassName(),
+          ds.getProperties());
+
+      if (thirdEyeDataSource != null) {
+        final String name = thirdEyeDataSource.getName();
+        checkState(!dataSourceMap.containsKey(name), "Data source " + name + " already exists.");
+        dataSourceMap.put(name, thirdEyeDataSource);
       }
     }
     return dataSourceMap;
+  }
+
+  public ThirdEyeDataSource loadDataSource(
+      final String classRef,
+      final Map<String, Object> properties) {
+    try {
+      LOG.info("Loading thirdeye datasource {} with properties '{}'", classRef, properties);
+      final Constructor<?> constructor = Class.forName(classRef).getConstructor();
+      final ThirdEyeDataSource thirdeyeDataSource = (ThirdEyeDataSource) constructor
+          .newInstance();
+      thirdeyeDataSource.init(new ThirdEyeDataSourceContext()
+          .setProperties(properties)
+          .setMetricConfigManager(metricConfigManager)
+          .setDatasetConfigManager(datasetConfigManager)
+      );
+      return thirdeyeDataSource;
+      // use class simple name as key, this enforces that there cannot be more than one data source of the same type
+    } catch (Exception e) {
+      LOG.error("Exception in creating thirdeye data source {}", classRef, e);
+    }
+    return null;
   }
 }

@@ -81,20 +81,6 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
   }
 
   @Override
-  public MetricConfigDTO findByAliasAndDataset(String alias, String dataset) {
-    Predicate datasetPredicate = Predicate.EQ("dataset", dataset);
-    Predicate aliasPredicate = Predicate.EQ("alias", alias);
-    List<MetricConfigBean> list = genericPojoDao
-        .get(Predicate.AND(datasetPredicate, aliasPredicate),
-            MetricConfigBean.class);
-    MetricConfigDTO result = null;
-    if (CollectionUtils.isNotEmpty(list)) {
-      result = MODEL_MAPPER.map(list.get(0), MetricConfigDTO.class);
-    }
-    return result;
-  }
-
-  @Override
   public List<MetricConfigDTO> findWhereNameOrAliasLikeAndActive(String name) {
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("name", name);

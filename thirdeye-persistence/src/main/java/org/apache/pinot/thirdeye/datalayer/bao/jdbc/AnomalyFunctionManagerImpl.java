@@ -22,12 +22,7 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalyFunctionManager;
@@ -37,9 +32,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalyFunctionBean;
 @Singleton
 public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunctionDTO>
     implements AnomalyFunctionManager {
-
-  private static final String FIND_BY_NAME_LIKE = " WHERE functionName like :functionName";
-  private static final String FIND_BY_NAME_EQUALS = " WHERE functionName = :functionName";
 
   @Inject
   public AnomalyFunctionManagerImpl(GenericPojoDao genericPojoDao) {
@@ -56,64 +48,5 @@ public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunct
       result.add(dto);
     }
     return result;
-  }
-
-  /**
-   * Get the list of anomaly functions under the given application
-   *
-   * @param application name of the application
-   * @return return the list of anomaly functions under the application
-   */
-  @Override
-  public List<AnomalyFunctionDTO> findAllByApplication(String application) {
-    if (StringUtils.isBlank(application)) {
-      throw new IllegalArgumentException("application is null or empty");
-    }
-    return new ArrayList<>();
-  }
-
-  @Override
-  public List<String> findDistinctTopicMetricsByCollection(String collection) {
-    Predicate predicate = Predicate.EQ("collection", collection);
-    List<AnomalyFunctionDTO> dtoList = findByPredicate(predicate);
-    Set<String> metrics = new HashSet<>();
-    for (AnomalyFunctionDTO dto : dtoList) {
-      metrics.add(dto.getTopicMetric());
-    }
-    return new ArrayList<>(metrics);
-  }
-
-  @Override
-  public List<AnomalyFunctionDTO> findAllActiveFunctions() {
-    Predicate predicate = Predicate.EQ("active", true);
-    return findByPredicate(predicate);
-  }
-
-  @Override
-  public List<AnomalyFunctionDTO> findWhereNameLike(String name) {
-    Map<String, Object> parameterMap = new HashMap<>();
-    parameterMap.put("functionName", name);
-    List<AnomalyFunctionBean> list =
-        genericPojoDao
-            .executeParameterizedSQL(FIND_BY_NAME_LIKE, parameterMap, AnomalyFunctionBean.class);
-    List<AnomalyFunctionDTO> result = new ArrayList<>();
-    for (AnomalyFunctionBean bean : list) {
-      result.add(MODEL_MAPPER.map(bean, AnomalyFunctionDTO.class));
-    }
-    return result;
-  }
-
-  @Override
-  public AnomalyFunctionDTO findWhereNameEquals(String name) {
-    Map<String, Object> parameterMap = new HashMap<>();
-    parameterMap.put("functionName", name);
-    List<AnomalyFunctionBean> list =
-        genericPojoDao
-            .executeParameterizedSQL(FIND_BY_NAME_EQUALS, parameterMap, AnomalyFunctionBean.class);
-    List<AnomalyFunctionDTO> result = new ArrayList<>();
-    for (AnomalyFunctionBean bean : list) {
-      result.add(MODEL_MAPPER.map(bean, AnomalyFunctionDTO.class));
-    }
-    return result.isEmpty() ? null : result.get(0);
   }
 }

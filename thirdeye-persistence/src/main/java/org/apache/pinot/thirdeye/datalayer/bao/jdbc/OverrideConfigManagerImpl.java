@@ -46,12 +46,4 @@ public class OverrideConfigManagerImpl extends AbstractManagerImpl<OverrideConfi
 
     return findByPredicate(predicate);
   }
-
-  @Override
-  public List<OverrideConfigDTO> findAllConflict(long windowStart, long windowEnd) {
-    Predicate predicate =
-        Predicate.AND(Predicate.LE("startTime", windowEnd), Predicate.GE("endTime", windowStart));
-
-    return findByPredicate(predicate);
-  }
 }

@@ -43,12 +43,6 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   List<TaskDTO> findByStatusOrderByCreateTime(TaskStatus status, int fetchSize, boolean asc);
 
-  List<TaskDTO> findByStatusAndTypeOrderByCreateTime(TaskStatus status, TaskConstants.TaskType type,
-      int fetchSize, boolean asc);
-
-  List<TaskDTO> findByStatusAndTypeNotInOrderByCreateTime(TaskStatus status,
-      TaskConstants.TaskType type, int fetchSize, boolean asc);
-
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 
   boolean updateStatusAndWorkerId(Long workerId, Long id, Set<TaskStatus> allowedOldStatus,
@@ -60,6 +54,4 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   void updateTaskStartTime(Long id, Long taskStartTime);
 
   int deleteRecordsOlderThanDaysWithStatus(int days, TaskStatus status);
-
-  int countWaiting();
 }

@@ -22,9 +22,6 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -131,40 +128,6 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   }
 
   @Override
-  public List<TaskDTO> findByStatusAndTypeOrderByCreateTime(TaskStatus status,
-      TaskConstants.TaskType type, int fetchSize, boolean asc) {
-    Map<String, Object> parameterMap = new HashMap<>();
-    parameterMap.put("status", status.toString());
-    parameterMap.put("type", type.toString());
-    List<TaskBean> list;
-    String queryClause = (asc) ? FIND_BY_STATUS_AND_TYPE_ORDER_BY_CREATE_TIME_ASC
-        : FIND_BY_STATUS_AND_TYPE_ORDER_BY_CREATE_TIME_DESC;
-    list = genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskBean.class);
-    List<TaskDTO> result = new ArrayList<>();
-    for (TaskBean bean : list) {
-      result.add(MODEL_MAPPER.map(bean, TaskDTO.class));
-    }
-    return result;
-  }
-
-  @Override
-  public List<TaskDTO> findByStatusAndTypeNotInOrderByCreateTime(TaskStatus status,
-      TaskConstants.TaskType type, int fetchSize, boolean asc) {
-    Map<String, Object> parameterMap = new HashMap<>();
-    parameterMap.put("status", status.toString());
-    parameterMap.put("type", type.toString());
-    List<TaskBean> list;
-    String queryClause = (asc) ? FIND_BY_STATUS_AND_TYPE_NOT_IN_ORDER_BY_CREATE_TIME_ASC
-        : FIND_BY_STATUS_AND_TYPE_NOT_IN_ORDER_BY_CREATE_TIME_DESC;
-    list = genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskBean.class);
-    List<TaskDTO> result = new ArrayList<>();
-    for (TaskBean bean : list) {
-      result.add(MODEL_MAPPER.map(bean, TaskDTO.class));
-    }
-    return result;
-  }
-
-  @Override
   public boolean updateStatusAndWorkerId(Long workerId, Long id, Set<TaskStatus> permittedOldStatus,
       int expectedVersion) {
     TaskDTO task = findById(id);
@@ -260,20 +223,5 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
     Predicate statusPredicate = Predicate.EQ("status", status.toString());
     Predicate workerIdPredicate = Predicate.EQ("workerId", workerId);
     return findByPredicate(Predicate.AND(statusPredicate, workerIdPredicate));
-  }
-
-  @Override
-  public int countWaiting() {
-    // NOTE: this aggregation should be supported by genericPojoDAO directly
-    // ensure each resource is closed at the end of the statement
-    try (Connection connection = this.genericPojoDao.getConnection();
-        PreparedStatement statement = connection.prepareStatement(COUNT_WAITING_TASKS);
-        ResultSet rs = statement.executeQuery()) {
-      rs.next();
-      return rs.getInt(1);
-    } catch (Exception e) {
-      LOG.warn("Could not retrieve task backlog size. Defaulting to -1.", e);
-      return -1;
-    }
   }
 }

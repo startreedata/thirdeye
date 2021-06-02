@@ -31,14 +31,7 @@ public interface OnboardDatasetMetricManager extends AbstractManager<OnboardData
 
   List<OnboardDatasetMetricDTO> findByDataset(String datasetName);
 
-  List<OnboardDatasetMetricDTO> findByDatasetAndOnboarded(String datasetName, boolean onboarded);
-
   List<OnboardDatasetMetricDTO> findByMetric(String metricName);
 
-  List<OnboardDatasetMetricDTO> findByMetricAndOnboarded(String metricName, boolean onboarded);
-
   List<OnboardDatasetMetricDTO> findByDatasetAndDatasource(String datasetName, String dataSource);
-
-  List<OnboardDatasetMetricDTO> findByDatasetAndDatasourceAndOnboarded(String datasetName,
-      String dataSource, boolean onboarded);
 }

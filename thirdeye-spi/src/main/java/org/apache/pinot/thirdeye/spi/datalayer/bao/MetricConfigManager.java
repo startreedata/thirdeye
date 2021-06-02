@@ -30,8 +30,6 @@ public interface MetricConfigManager extends AbstractManager<MetricConfigDTO> {
 
   MetricConfigDTO findByMetricAndDataset(String metricName, String dataset);
 
-  MetricConfigDTO findByAliasAndDataset(String alias, String dataset);
-
   List<MetricConfigDTO> findActiveByDataset(String dataset);
 
   List<MetricConfigDTO> findWhereNameOrAliasLikeAndActive(String name);

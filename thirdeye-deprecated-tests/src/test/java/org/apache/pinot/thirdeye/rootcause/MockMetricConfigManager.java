@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.rootcause;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,12 +39,7 @@ public class MockMetricConfigManager extends AbstractMockManager<MetricConfigDTO
   @Override
   public MetricConfigDTO findById(final Long id) {
     Collection<MetricConfigDTO> output = Collections2
-        .filter(this.metrics, new Predicate<MetricConfigDTO>() {
-          @Override
-          public boolean apply(MetricConfigDTO dto) {
-            return dto.getId().equals(id);
-          }
-        });
+        .filter(this.metrics, dto -> dto.getId().equals(id));
 
     if (output.isEmpty()) {
       return null;
@@ -60,21 +54,12 @@ public class MockMetricConfigManager extends AbstractMockManager<MetricConfigDTO
 
   @Override
   public List<MetricConfigDTO> findByDataset(final String dataset) {
-    return new ArrayList<>(Collections2.filter(this.metrics, new Predicate<MetricConfigDTO>() {
-      @Override
-      public boolean apply(MetricConfigDTO dto) {
-        return dto.getDataset().equals(dataset);
-      }
-    }));
+    return new ArrayList<>(Collections2.filter(this.metrics,
+        dto -> dto.getDataset().equals(dataset)));
   }
 
   @Override
   public MetricConfigDTO findByMetricAndDataset(String metricName, String dataset) {
-    throw new AssertionError("not implemented");
-  }
-
-  @Override
-  public MetricConfigDTO findByAliasAndDataset(String alias, String dataset) {
     throw new AssertionError("not implemented");
   }
 

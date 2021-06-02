@@ -59,26 +59,8 @@ public class OnboardDatasetMetricManagerImpl extends AbstractManagerImpl<Onboard
   }
 
   @Override
-  public List<OnboardDatasetMetricDTO> findByDatasetAndOnboarded(String datasetName,
-      boolean onboarded) {
-    Predicate datasetNamePredicate = Predicate.EQ("datasetName", datasetName);
-    Predicate onboardedPredicate = Predicate.EQ("onboarded", onboarded);
-    Predicate predicate = Predicate.AND(datasetNamePredicate, onboardedPredicate);
-    return findByPredicate(predicate);
-  }
-
-  @Override
   public List<OnboardDatasetMetricDTO> findByMetric(String metricName) {
     Predicate predicate = Predicate.EQ("metricName", metricName);
-    return findByPredicate(predicate);
-  }
-
-  @Override
-  public List<OnboardDatasetMetricDTO> findByMetricAndOnboarded(String metricName,
-      boolean onboarded) {
-    Predicate metricNamePredicate = Predicate.EQ("metricName", metricName);
-    Predicate onboardedPredicate = Predicate.EQ("onboarded", onboarded);
-    Predicate predicate = Predicate.AND(metricNamePredicate, onboardedPredicate);
     return findByPredicate(predicate);
   }
 
@@ -88,17 +70,6 @@ public class OnboardDatasetMetricManagerImpl extends AbstractManagerImpl<Onboard
     Predicate datasetNamePredicate = Predicate.EQ("datasetName", datasetName);
     Predicate dataSourcePredicate = Predicate.EQ("dataSource", dataSource);
     Predicate predicate = Predicate.AND(datasetNamePredicate, dataSourcePredicate);
-    return findByPredicate(predicate);
-  }
-
-  @Override
-  public List<OnboardDatasetMetricDTO> findByDatasetAndDatasourceAndOnboarded(String datasetName,
-      String dataSource, boolean onboarded) {
-    Predicate datasetNamePredicate = Predicate.EQ("datasetName", datasetName);
-    Predicate dataSourcePredicate = Predicate.EQ("dataSource", dataSource);
-    Predicate onboardedPredicate = Predicate.EQ("onboarded", onboarded);
-    Predicate predicate = Predicate
-        .AND(datasetNamePredicate, dataSourcePredicate, onboardedPredicate);
     return findByPredicate(predicate);
   }
 }

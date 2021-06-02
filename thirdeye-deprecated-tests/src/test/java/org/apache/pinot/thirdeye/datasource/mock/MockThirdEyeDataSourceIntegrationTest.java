@@ -18,6 +18,7 @@ package org.apache.pinot.thirdeye.datasource.mock;
 
 import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.inject.Injector;
@@ -27,21 +28,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.dataframe.util.RequestContainer;
 import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -175,7 +176,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     final DataSourcesLoader dataSourcesLoader = new DataSourcesLoader(metricConfigDAO,
         datasetConfigDAO,
         readConfig(dataSourcesConfig, DataSourcesConfiguration.class));
-    dataSourceCache = new DataSourceCache(dataSourcesLoader);
+    dataSourceCache = new DataSourceCache(dataSourcesLoader, new MetricRegistry());
     cacheRegistry = new ThirdEyeCacheRegistry(
         metricConfigDAO,
         datasetConfigDAO,

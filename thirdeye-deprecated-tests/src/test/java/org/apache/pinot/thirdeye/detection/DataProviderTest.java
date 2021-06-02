@@ -19,6 +19,7 @@ package org.apache.pinot.thirdeye.detection;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
@@ -279,7 +280,8 @@ public class DataProviderTest {
     final DataSourcesLoader dataSourcesLoader = mock(DataSourcesLoader.class);
     when(dataSourcesLoader.getDataSourceMap()).thenReturn(dataSourceMap);
 
-    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourcesLoader);
+    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourcesLoader,
+        new MetricRegistry());
     final ThirdEyeCacheRegistry cacheRegistry = new ThirdEyeCacheRegistry(
         metricDAO,
         datasetDAO,

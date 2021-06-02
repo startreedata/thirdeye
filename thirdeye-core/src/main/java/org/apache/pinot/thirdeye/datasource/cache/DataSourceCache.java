@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.datasource.cache;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.LinkedHashMap;
@@ -33,18 +35,25 @@ import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
-import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
 
 @Singleton
 public class DataSourceCache {
 
   private final ExecutorService executorService;
   private final Map<String, ThirdEyeDataSource> dataSourceMap;
+  private final Counter datasourceExceptionCounter;
+  private final Counter datasourceDurationCounter;
+  private final Counter datasourceCallCounter;
 
   @Inject
-  public DataSourceCache(final DataSourcesLoader dataSourcesLoader) {
+  public DataSourceCache(final DataSourcesLoader dataSourcesLoader,
+      final MetricRegistry metricRegistry) {
     this.executorService = Executors.newCachedThreadPool();
     this.dataSourceMap = dataSourcesLoader.getDataSourceMap();
+
+    datasourceExceptionCounter = metricRegistry.counter("datasourceExceptionCounter");
+    datasourceDurationCounter = metricRegistry.counter("datasourceDurationCounter");
+    datasourceCallCounter = metricRegistry.counter("datasourceCallCounter");
   }
 
   public ThirdEyeDataSource getDataSource(String dataSource) {
@@ -53,32 +62,29 @@ public class DataSourceCache {
   }
 
   public ThirdEyeResponse getQueryResult(ThirdEyeRequest request) throws Exception {
+    datasourceCallCounter.inc();
     long tStart = System.nanoTime();
     try {
       String dataSource = request.getDataSource();
 
       return getDataSource(dataSource).execute(request);
     } catch (Exception e) {
-      ThirdeyeMetricsUtil.datasourceExceptionCounter.inc();
+      datasourceExceptionCounter.inc();
       throw e;
     } finally {
-      ThirdeyeMetricsUtil.datasourceCallCounter.inc();
-      ThirdeyeMetricsUtil.datasourceDurationCounter.inc(System.nanoTime() - tStart);
+      datasourceDurationCounter.inc(System.nanoTime() - tStart);
     }
   }
 
-  public Future<ThirdEyeResponse> getQueryResultAsync(final ThirdEyeRequest request)
-      throws Exception {
+  public Future<ThirdEyeResponse> getQueryResultAsync(final ThirdEyeRequest request) {
     return executorService.submit(() -> getQueryResult(request));
   }
 
   public Map<ThirdEyeRequest, Future<ThirdEyeResponse>> getQueryResultsAsync(
-      final List<ThirdEyeRequest> requests) throws Exception {
+      final List<ThirdEyeRequest> requests) {
     Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();
     for (final ThirdEyeRequest request : requests) {
-      Future<ThirdEyeResponse> responseFuture =
-          executorService.submit(() -> getQueryResult(request));
-      responseFuturesMap.put(request, responseFuture);
+      responseFuturesMap.put(request, getQueryResultAsync(request));
     }
     return responseFuturesMap;
   }

@@ -39,9 +39,13 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DataSourceCache {
+
+  private static final Logger LOG = LoggerFactory.getLogger(DataSourceCache.class);
 
   private final DataSourceManager dataSourceManager;
   private final DataSourcesLoader dataSourcesLoader;
@@ -60,6 +64,9 @@ public class DataSourceCache {
     this.dataSourcesLoader = dataSourcesLoader;
     this.executorService = Executors.newCachedThreadPool();
     this.dataSourcesFromConfig = ImmutableMap.copyOf(dataSourcesLoader.getDataSourceMapFromConfig());
+    if (dataSourcesFromConfig.size() == 0) {
+      LOG.warn("No data sources loaded from config!");
+    }
 
     datasourceExceptionCounter = metricRegistry.counter("datasourceExceptionCounter");
     datasourceDurationCounter = metricRegistry.counter("datasourceDurationCounter");
@@ -75,8 +82,13 @@ public class DataSourceCache {
 
     // TODO spyne: remove data-source-config.yml. Keeping this temporarily for now.
     // Fetch from config if not found in DB.
-    checkState(dataSourcesFromConfig.size() > 0, "No data sources loaded!");
-    return dataSourcesFromConfig.get(name);
+    if (dataSourcesFromConfig.containsKey(name)) {
+      return dataSourcesFromConfig.get(name);
+    }
+
+    LOG.error("Data Source not found: " + name);
+    checkState(dataSourcesFromConfig.size() > 0, "No data sources loaded from config.");
+    return null;
   }
 
   private List<DataSourceDTO> findByName(final String name) {

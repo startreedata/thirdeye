@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.spi.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -34,8 +32,8 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
   private Long id;
   private String name;
   private String classRef;
-  private Map<String, Object> properties = new HashMap<>();
-  private List<DataSourceMetaApi> metaList = new ArrayList<>();
+  private Map<String, Object> properties;
+  private List<DataSourceMetaApi> metaList;
 
   @Override
   public Long getId() {

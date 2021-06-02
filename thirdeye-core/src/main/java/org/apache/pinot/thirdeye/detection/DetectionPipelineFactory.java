@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
@@ -38,7 +40,7 @@ public class DetectionPipelineFactory {
   }
 
   public DetectionPipeline get(DetectionPipelineContext context) {
-    final AlertDTO config = context.getAlert();
+    final AlertDTO config = requireNonNull(context.getAlert());
     final String className = config.getProperties().get(PROP_CLASS_NAME).toString();
     try {
       final Constructor<?> constructor = Class

@@ -15,7 +15,7 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
   private List<String> dimensions;
   private TimeColumnApi timeColumn;
   private Duration expectedDelay;
-  private String dataSource;
+  private DataSourceApi dataSource;
 
   public Long getId() {
     return id;
@@ -80,11 +80,11 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
     return this;
   }
 
-  public String getDataSource() {
+  public DataSourceApi getDataSource() {
     return dataSource;
   }
 
-  public DatasetApi setDataSource(String dataSource) {
+  public DatasetApi setDataSource(DataSourceApi dataSource) {
     this.dataSource = dataSource;
     return this;
   }

@@ -123,7 +123,8 @@ public abstract class ApiBeanMapper {
             .setTimezone(dto.getTimezone())
         )
         .setExpectedDelay(dto.getExpectedDelay().toDuration())
-        .setDataSource(dto.getDataSource())
+        .setDataSource(new DataSourceApi()
+            .setName(dto.getDataSource()))
         ;
   }
 
@@ -213,7 +214,9 @@ public abstract class ApiBeanMapper {
 
   public static DatasetConfigDTO toDatasetConfigDto(final DatasetApi api) {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
-    optional(api.getDataSource()).ifPresent(dto::setDataSource);
+    optional(api.getDataSource())
+        .map(DataSourceApi::getName)
+        .ifPresent(dto::setDataSource);
     dto.setDataset(api.getName());
     dto.setDisplayName(api.getName());
     optional(api.getDimensions()).ifPresent(dto::setDimensions);
@@ -224,6 +227,9 @@ public abstract class ApiBeanMapper {
       optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
       optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
     });
+    optional(api.getExpectedDelay())
+        .map(TimeGranularity::fromDuration)
+        .ifPresent(dto::setExpectedDelay);
 
     return dto;
   }

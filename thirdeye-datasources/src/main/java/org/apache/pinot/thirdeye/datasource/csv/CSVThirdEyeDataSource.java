@@ -52,7 +52,9 @@ import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
 /**
  * The type CSV third eye data source, which can make CSV file the data source of ThirdEye.
@@ -270,6 +272,11 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
     }
 
     return new CSVThirdEyeResponse(request, timeSpec, df);
+  }
+
+  @Override
+  public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
+    throw new UnsupportedOperationException();
   }
 
   @Override

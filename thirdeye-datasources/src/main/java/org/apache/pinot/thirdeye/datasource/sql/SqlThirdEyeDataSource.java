@@ -37,8 +37,10 @@ import org.apache.pinot.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,6 +112,11 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
     } catch (Exception e) {
       throw e;
     }
+  }
+
+  @Override
+  public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
+    throw new UnsupportedOperationException();
   }
 
   /**

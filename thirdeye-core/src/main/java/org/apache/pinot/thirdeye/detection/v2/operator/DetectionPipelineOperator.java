@@ -28,6 +28,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
+import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.OutputApi;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
@@ -53,6 +54,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
   protected Map<String, BaseComponent> instancesMap = new HashMap<>();
   protected Map<String, DetectionPipelineResult> inputMap;
+  protected Map<String, String> outputKeyMap = new HashMap<>();
 
   protected DetectionPipelineOperator() {
   }
@@ -62,8 +64,12 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     this.config = context.getDetectionPlanApi();
     this.startTime = context.getStartTime();
     this.endTime = context.getEndTime();
-    this.instancesMap = new HashMap<>();
     this.resultMap = new HashMap<>();
+    this.instancesMap = new HashMap<>();
+    this.inputMap = context.getInputsMap();
+    for (OutputApi outputApi : context.getDetectionPlanApi().getOutputs()) {
+      outputKeyMap.put(outputApi.getOutputKey(), outputApi.getOutputName());
+    }
     this.initComponents();
   }
 
@@ -157,6 +163,13 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
 
   public long getEndTime() {
     return endTime;
+  }
+
+  protected void setOutput(String key, DetectionPipelineResult output) {
+    if (outputKeyMap.containsKey(key)) {
+      key = outputKeyMap.get(key);
+    }
+    resultMap.put(key, output);
   }
 
   @Override

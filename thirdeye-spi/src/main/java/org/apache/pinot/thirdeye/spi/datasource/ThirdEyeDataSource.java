@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.spi.datasource;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
 public interface ThirdEyeDataSource {
 
@@ -40,6 +41,8 @@ public interface ThirdEyeDataSource {
   ThirdEyeResponse execute(ThirdEyeRequest request) throws Exception;
 
   List<String> getDatasets() throws Exception;
+
+  DataTable fetchDataTable(ThirdEyeRequestV2 request) throws Exception;
 
   /**
    * Clear any cached values.

@@ -55,8 +55,10 @@ import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
@@ -95,6 +97,126 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   CSVThirdEyeDataSource delegate;
   private MetricConfigManager metricConfigManager;
   private DatasetConfigManager datasetConfigManager;
+
+  /**
+   * Returns a DataFrame populated with mock data for a given config and time range.
+   *
+   * @param config metric generator config
+   * @param start start time
+   * @param end end time
+   * @param interval time granularity
+   * @return DataFrame with mock data
+   */
+  private static DataFrame makeData(Map<String, Object> config, DateTime start, DateTime end,
+      Period interval) {
+    List<Long> timestamps = new ArrayList<>();
+    List<Double> values = new ArrayList<>();
+
+    double mean = MapUtils.getDoubleValue(config, "mean", 0);
+    double std = MapUtils.getDoubleValue(config, "std", 1);
+    double daily = MapUtils.getDoubleValue(config, "daily", mean);
+    double weekly = MapUtils.getDoubleValue(config, "weekly", daily);
+    NormalDistribution dist = new NormalDistribution(mean, std);
+
+    DateTime origin = start.withFields(SpiUtils.makeOrigin(PeriodType.days()));
+    while (origin.isBefore(end)) {
+      if (origin.isBefore(start)) {
+        origin = origin.plus(interval);
+        continue;
+      }
+
+      timestamps.add(origin.getMillis());
+
+      double compDaily = weekly * (COMPONENT_ALPHA_WEEKLY
+          + Math.sin(origin.getDayOfWeek() / 7.0 * 2 * Math.PI + 1) / 2 * (1
+          - COMPONENT_ALPHA_WEEKLY));
+      double compHourly = daily * (COMPONENT_ALPHA_DAILY
+          + Math.sin(origin.getHourOfDay() / 24.0 * 2 * Math.PI + 1) / 2 * (1
+          - COMPONENT_ALPHA_DAILY));
+      double compEpsilon = dist.sample();
+
+      values.add((double) Math.max(Math.round(compDaily + compHourly + compEpsilon), 0));
+      origin = origin.plus(interval);
+    }
+
+    return new DataFrame()
+        .addSeries(COL_TIME, ArrayUtils.toPrimitive(timestamps.toArray(new Long[0])))
+        .addSeries(COL_VALUE, ArrayUtils.toPrimitive(values.toArray(new Double[0])))
+        .setIndex(COL_TIME);
+  }
+
+  /**
+   * Returns list of tuples for (a metric's) nested generator configs.
+   *
+   * @param map nested config with generator configs
+   * @param maxDepth max expected level of depth
+   * @return metric tuples
+   */
+  private static List<Tuple> makeTuples(Map<String, Object> map, String[] basePrefix,
+      int maxDepth) {
+    List<Tuple> tuples = new ArrayList<>();
+
+    LinkedList<MetricTuple> stack = new LinkedList<>();
+    stack.push(new MetricTuple(basePrefix, map));
+
+    while (!stack.isEmpty()) {
+      MetricTuple tuple = stack.pop();
+      if (tuple.prefix.length >= maxDepth) {
+        tuples.add(new Tuple(tuple.prefix));
+      } else {
+        for (Map.Entry<String, Object> entry : tuple.map.entrySet()) {
+          Map<String, Object> nested = (Map<String, Object>) entry.getValue();
+          String[] prefix = Arrays.copyOf(tuple.prefix, tuple.prefix.length + 1);
+          prefix[prefix.length - 1] = entry.getKey();
+
+          stack.push(new MetricTuple(prefix, nested));
+        }
+      }
+    }
+
+    return tuples;
+  }
+
+  /**
+   * Returns the bottom-level config for a given metric tuple from the root of a nested generator
+   * config
+   *
+   * @param map nested config with generator configs
+   * @param path metric generator path
+   * @return generator config
+   */
+  private static Map<String, Object> resolveTuple(Map<String, Object> map, Tuple path) {
+    for (String element : path.values) {
+      map = (Map<String, Object>) map.get(element);
+    }
+    return map;
+  }
+
+  /**
+   * Returns a filtered collection of tuples for a given prefix
+   *
+   * @param tuples collections of tuples
+   * @param prefix reuquired prefix
+   * @return filtered collection of tuples
+   */
+  private static Collection<Tuple> filterTuples(Collection<Tuple> tuples, final String[] prefix) {
+    return Collections2.filter(tuples, new Predicate<Tuple>() {
+      @Override
+      public boolean apply(@Nullable Tuple tuple) {
+        if (tuple == null || tuple.values.length < prefix.length) {
+          return false;
+        }
+
+        for (int i = 0; i < prefix.length; i++) {
+          if (!StringUtils.equals(tuple.values[i], prefix[i])) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+    });
+  }
 
   @Override
   public void init(final ThirdEyeDataSourceContext context) {
@@ -218,7 +340,8 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
       MetadataSourceConfig metadataSourceConfig = new MetadataSourceConfig();
       metadataSourceConfig.setProperties(properties);
 
-      metricConfigManager = context.getMetricConfigManager();;
+      metricConfigManager = context.getMetricConfigManager();
+      ;
       datasetConfigManager = context.getDatasetConfigManager();
       AutoOnboardMockDataSource onboarding = new AutoOnboardMockDataSource(metadataSourceConfig,
           metricConfigManager,
@@ -319,6 +442,11 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
+  public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public List<String> getDatasets() throws Exception {
     return new ArrayList<>(this.datasets.keySet());
   }
@@ -339,128 +467,9 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig) throws Exception {
+  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
+      throws Exception {
     return this.delegate.getDimensionFilters(datasetConfig);
-  }
-
-  /**
-   * Returns a DataFrame populated with mock data for a given config and time range.
-   *
-   * @param config metric generator config
-   * @param start start time
-   * @param end end time
-   * @param interval time granularity
-   * @return DataFrame with mock data
-   */
-  private static DataFrame makeData(Map<String, Object> config, DateTime start, DateTime end,
-      Period interval) {
-    List<Long> timestamps = new ArrayList<>();
-    List<Double> values = new ArrayList<>();
-
-    double mean = MapUtils.getDoubleValue(config, "mean", 0);
-    double std = MapUtils.getDoubleValue(config, "std", 1);
-    double daily = MapUtils.getDoubleValue(config, "daily", mean);
-    double weekly = MapUtils.getDoubleValue(config, "weekly", daily);
-    NormalDistribution dist = new NormalDistribution(mean, std);
-
-    DateTime origin = start.withFields(SpiUtils.makeOrigin(PeriodType.days()));
-    while (origin.isBefore(end)) {
-      if (origin.isBefore(start)) {
-        origin = origin.plus(interval);
-        continue;
-      }
-
-      timestamps.add(origin.getMillis());
-
-      double compDaily = weekly * (COMPONENT_ALPHA_WEEKLY
-          + Math.sin(origin.getDayOfWeek() / 7.0 * 2 * Math.PI + 1) / 2 * (1
-          - COMPONENT_ALPHA_WEEKLY));
-      double compHourly = daily * (COMPONENT_ALPHA_DAILY
-          + Math.sin(origin.getHourOfDay() / 24.0 * 2 * Math.PI + 1) / 2 * (1
-          - COMPONENT_ALPHA_DAILY));
-      double compEpsilon = dist.sample();
-
-      values.add((double) Math.max(Math.round(compDaily + compHourly + compEpsilon), 0));
-      origin = origin.plus(interval);
-    }
-
-    return new DataFrame()
-        .addSeries(COL_TIME, ArrayUtils.toPrimitive(timestamps.toArray(new Long[0])))
-        .addSeries(COL_VALUE, ArrayUtils.toPrimitive(values.toArray(new Double[0])))
-        .setIndex(COL_TIME);
-  }
-
-  /**
-   * Returns list of tuples for (a metric's) nested generator configs.
-   *
-   * @param map nested config with generator configs
-   * @param maxDepth max expected level of depth
-   * @return metric tuples
-   */
-  private static List<Tuple> makeTuples(Map<String, Object> map, String[] basePrefix,
-      int maxDepth) {
-    List<Tuple> tuples = new ArrayList<>();
-
-    LinkedList<MetricTuple> stack = new LinkedList<>();
-    stack.push(new MetricTuple(basePrefix, map));
-
-    while (!stack.isEmpty()) {
-      MetricTuple tuple = stack.pop();
-      if (tuple.prefix.length >= maxDepth) {
-        tuples.add(new Tuple(tuple.prefix));
-      } else {
-        for (Map.Entry<String, Object> entry : tuple.map.entrySet()) {
-          Map<String, Object> nested = (Map<String, Object>) entry.getValue();
-          String[] prefix = Arrays.copyOf(tuple.prefix, tuple.prefix.length + 1);
-          prefix[prefix.length - 1] = entry.getKey();
-
-          stack.push(new MetricTuple(prefix, nested));
-        }
-      }
-    }
-
-    return tuples;
-  }
-
-  /**
-   * Returns the bottom-level config for a given metric tuple from the root of a nested generator
-   * config
-   *
-   * @param map nested config with generator configs
-   * @param path metric generator path
-   * @return generator config
-   */
-  private static Map<String, Object> resolveTuple(Map<String, Object> map, Tuple path) {
-    for (String element : path.values) {
-      map = (Map<String, Object>) map.get(element);
-    }
-    return map;
-  }
-
-  /**
-   * Returns a filtered collection of tuples for a given prefix
-   *
-   * @param tuples collections of tuples
-   * @param prefix reuquired prefix
-   * @return filtered collection of tuples
-   */
-  private static Collection<Tuple> filterTuples(Collection<Tuple> tuples, final String[] prefix) {
-    return Collections2.filter(tuples, new Predicate<Tuple>() {
-      @Override
-      public boolean apply(@Nullable Tuple tuple) {
-        if (tuple == null || tuple.values.length < prefix.length) {
-          return false;
-        }
-
-        for (int i = 0; i < prefix.length; i++) {
-          if (!StringUtils.equals(tuple.values[i], prefix[i])) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-    });
   }
 
   /**

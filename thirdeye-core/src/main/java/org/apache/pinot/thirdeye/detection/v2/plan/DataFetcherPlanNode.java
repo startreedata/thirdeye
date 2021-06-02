@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.operator.DataFetcherOperator;
-import org.apache.pinot.thirdeye.detection.v2.results.DataTable;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;

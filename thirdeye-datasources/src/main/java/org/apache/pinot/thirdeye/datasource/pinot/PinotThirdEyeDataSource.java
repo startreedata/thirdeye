@@ -44,6 +44,7 @@ import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
+import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdeyeResultSetDataTable;
 import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -53,7 +54,9 @@ import org.apache.pinot.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.util.FilterPredicate;
 import org.slf4j.Logger;
@@ -447,6 +450,19 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public List<String> getDatasets() throws Exception {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
+    try {
+      // TODO: this resultSet is still using PQL, we should move to use pinot SQL.
+      ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
+          request.getQuery(),
+          request.getTable())).get(0);
+      return new ThirdeyeResultSetDataTable(thirdEyeResultSet);
+    } catch (ExecutionException e) {
+      throw e;
+    }
   }
 
   @Override

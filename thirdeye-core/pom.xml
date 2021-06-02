@@ -22,10 +22,6 @@
       <artifactId>thirdeye-persistence</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-datasources</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
     </dependency>

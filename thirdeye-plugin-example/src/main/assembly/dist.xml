@@ -29,36 +29,12 @@
     <format>dir</format>
     <format>tar.gz</format>
   </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
-    <fileSet>
-      <directory>${basedir}/src/main/bash</directory>
-      <outputDirectory>bin/</outputDirectory>
-      <includes>
-        <include>*.sh</include>
-      </includes>
-      <fileMode>0755</fileMode>
-    </fileSet>
-    <fileSet>
-      <directory>${thirdeye.root}/config</directory>
-      <outputDirectory>config/</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>${thirdeye.root}/scripts</directory>
-      <outputDirectory>bin/</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>${thirdeye.root}/thirdeye-ui/dist</directory>
-      <outputDirectory>ui/</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugin-example/target/thirdeye-plugin-example-${project.version}-dist</directory>
-      <outputDirectory>plugins/example/</outputDirectory>
-    </fileSet>
-
   </fileSets>
   <dependencySets>
     <dependencySet>
-      <outputDirectory>lib/</outputDirectory>
+      <outputDirectory>./</outputDirectory>
       <includes>
         <include>*:jar:*</include>
       </includes>

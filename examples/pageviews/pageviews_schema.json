@@ -1,0 +1,43 @@
+
+{
+  "schemaName": "pageviews",
+  "dimensionFieldSpecs": [
+    {
+      "name": "country",
+      "dataType": "STRING"
+    },
+    {
+      "name": "gender",
+      "dataType": "STRING"
+    },
+    {
+      "name": "browser",
+      "dataType": "STRING"
+    },
+    {
+      "name": "version",
+      "dataType": "STRING"
+    },
+    {
+      "name": "device",
+      "dataType": "STRING"
+    },
+    {
+      "name": "os",
+      "dataType": "STRING"
+    }
+
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "views",
+      "dataType": "INT"
+    }
+  ],
+  "dateTimeFieldSpecs": [{
+    "name": "date",
+    "dataType": "LONG",
+    "format" : "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+    "granularity": "1:DAYS"
+  }]
+}

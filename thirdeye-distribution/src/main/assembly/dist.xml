@@ -60,7 +60,7 @@
       <excludes>
         <exclude>*:sources</exclude>
       </excludes>
-      <fileMode>0444</fileMode>
+      <fileMode>0644</fileMode>
     </dependencySet>
   </dependencySets>
 </assembly>

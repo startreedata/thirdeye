@@ -42,11 +42,16 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>pinot-test-container</artifactId>
+      <artifactId>thirdeye-datasources</artifactId>
       <scope>compile</scope>
     </dependency>
 
     <!-- test dependencies -->
+    <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>pinot-test-container</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>

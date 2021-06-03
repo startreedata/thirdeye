@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.PinotDataFetcher;
+import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
 import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
@@ -43,7 +43,7 @@ public class DataFetcherOperatorTest {
     params.put("component.pinot.query", "SELECT * FROM myTable");
     params.put("component.pinot.tableName", "myTable");
     params.put("component.pinot.className",
-        "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.PinotDataFetcher");
+        "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher");
 
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final long startTime = System.currentTimeMillis();
@@ -65,8 +65,8 @@ public class DataFetcherOperatorTest {
     Assert.assertEquals(dataFetcherOperator.getEndTime(), endTime);
     Assert.assertEquals(dataFetcherOperator.getComponents().size(), 1);
     final BaseComponent pinotDataFetcher = dataFetcherOperator.getComponents().get("pinot");
-    Assert.assertTrue(pinotDataFetcher instanceof PinotDataFetcher);
-    Assert.assertEquals(((PinotDataFetcher) pinotDataFetcher).getQuery(), "SELECT * FROM myTable");
-    Assert.assertEquals(((PinotDataFetcher) pinotDataFetcher).getTableName(), "myTable");
+    Assert.assertTrue(pinotDataFetcher instanceof GenericDataFetcher);
+    Assert.assertEquals(((GenericDataFetcher) pinotDataFetcher).getQuery(), "SELECT * FROM myTable");
+    Assert.assertEquals(((GenericDataFetcher) pinotDataFetcher).getTableName(), "myTable");
   }
 }

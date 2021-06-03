@@ -9,6 +9,7 @@ public class OperatorContext {
   private long endTime;
   private DetectionPlanApi detectionPlanApi;
   private Map<String, Object> properties;
+  private Map<String, DetectionPipelineResult> inputsMap;
 
   public long getStartTime() {
     return startTime;
@@ -43,6 +44,15 @@ public class OperatorContext {
 
   public OperatorContext setProperties(final Map<String, Object> properties) {
     this.properties = properties;
+    return this;
+  }
+
+  public Map<String, DetectionPipelineResult> getInputsMap() {
+    return inputsMap;
+  }
+
+  public OperatorContext setInputsMap(final Map<String, DetectionPipelineResult> inputsMap) {
+    this.inputsMap = inputsMap;
     return this;
   }
 }

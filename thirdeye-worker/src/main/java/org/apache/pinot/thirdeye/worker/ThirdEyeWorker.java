@@ -67,6 +67,15 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
   private RequestStatisticsLogger requestStatisticsLogger = null;
   private Injector injector;
 
+  /**
+   * Use {@link ThirdEyeWorkerDebug} class for debugging purposes.
+   * The integration-tests/tools module will load all the thirdeye jars including datasources
+   * making it easier to debug.
+   *
+   * @param args
+   * @throws Exception
+   */
+
   public static void main(final String[] args) throws Exception {
     List<String> argList = new ArrayList<>(Arrays.asList(args));
     if (argList.isEmpty()) {

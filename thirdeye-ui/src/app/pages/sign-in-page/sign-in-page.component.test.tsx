@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import React from "react";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { SignInPage } from "./sign-in-page.component";
@@ -52,20 +52,10 @@ describe("Sign In Page", () => {
         );
     });
 
-    it("should render sign in button", async () => {
+    it("should sign in on render", async () => {
         act(() => {
             render(<SignInPage />);
         });
-
-        expect(screen.getByText("label.sign-in")).toBeInTheDocument();
-    });
-
-    it("should sign in on sign in button click", async () => {
-        act(() => {
-            render(<SignInPage />);
-        });
-
-        fireEvent.click(screen.getByText("label.sign-in"));
 
         expect(mockSignIn).toHaveBeenCalled();
     });

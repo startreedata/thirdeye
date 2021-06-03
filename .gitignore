@@ -12,7 +12,8 @@ test-output/
 *.log
 *.swp
 docs/_build
-
+examples/pageviews/segments/
+examples/batch/
 .DS_Store
 
 *.db

@@ -1,11 +1,6 @@
 package org.apache.pinot.thirdeye.alert.v2;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.serverError;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusListApi;
-import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
-import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_TIMEOUT;
-import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
+import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -15,11 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import org.apache.pinot.thirdeye.detection.DataProviderException;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
 import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
-import org.apache.pinot.thirdeye.spi.ThirdEyeException;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
@@ -59,33 +50,10 @@ public class AlertEvaluator {
     try {
       Map<String, DetectionPipelineResult> result = runPipeline(request);
       return toApi(result);
-    } catch (ThirdEyeException e) {
-      throw badRequest(statusListApi(e.getStatus(), e.getMessage()));
-    } catch (InterruptedException e) {
-      LOG.error("Error occurred during evaluate", e);
-      throw serverError(ERR_UNKNOWN, e.getMessage());
-    } catch (TimeoutException e) {
-      LOG.error("Error occurred during evaluate", e);
-      throw serverError(ERR_TIMEOUT);
-    } catch (ExecutionException e) {
-      LOG.error("Error occurred during evaluate", e);
-      handleExecutionException(e);
-      throw e;
     } catch (Exception e) {
-      LOG.error("Error occurred during evaluate", e);
-      throw serverError(ERR_UNKNOWN);
+      handleAlertEvaluationException(e);
     }
-  }
-
-  private void handleExecutionException(final ExecutionException e) {
-    final Throwable cause = e.getCause();
-    if (cause instanceof DetectionPipelineException) {
-      final Throwable innerCause = cause.getCause();
-      if (innerCause instanceof DataProviderException) {
-        throw serverError(ERR_DATA_UNAVAILABLE, innerCause.getMessage());
-      }
-      throw serverError(ERR_UNKNOWN, cause.getMessage());
-    }
+    return null;
   }
 
   private Map<String, DetectionPipelineResult> runPipeline(final AlertEvaluationPlanApi request)

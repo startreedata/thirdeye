@@ -26,7 +26,6 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -78,7 +77,8 @@ public class DefaultDataProvider implements DataProvider {
   private final AnomaliesCacheBuilder anomaliesCache;
 
   @Inject
-  public DefaultDataProvider(MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
+  public DefaultDataProvider(MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO,
       EventManager eventDAO,
       EvaluationManager evaluationDAO,
       AggregationLoader aggregationLoader,
@@ -125,8 +125,7 @@ public class DefaultDataProvider implements DataProvider {
       Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
       for (final MetricSlice slice : slices) {
         futures.put(slice, this.executor.submit(
-            () -> DefaultDataProvider.this.aggregationLoader
-                .loadAggregate(slice, dimensions, limit)));
+            () -> aggregationLoader.loadAggregate(slice, dimensions, limit)));
       }
 
       final long deadline = System.currentTimeMillis() + TIMEOUT;
@@ -184,13 +183,7 @@ public class DefaultDataProvider implements DataProvider {
         throw new IllegalArgumentException("Must provide at least one of start, or end");
       }
       List<EventDTO> events = this.eventDAO.findByPredicate(AND(predicates));
-      Iterator<EventDTO> itEvent = events.iterator();
-      while (itEvent.hasNext()) {
-        if (!slice.match(itEvent.next())) {
-          itEvent.remove();
-        }
-      }
-
+      events.removeIf(eventDTO -> !slice.match(eventDTO));
       output.putAll(slice, events);
     }
     return output;

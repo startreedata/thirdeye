@@ -85,6 +85,12 @@ public class ResourceUtils {
         ));
   }
 
+  public static StatusApi statusApi(final ThirdEyeStatus status, final Object... args) {
+    return new StatusApi()
+        .setCode(status)
+        .setMsg(String.format(status.getMessage(), args));
+  }
+
   public static BadRequestException badRequest(ThirdEyeStatus status, Object... args) {
     return badRequest(statusResponse(status, args));
   }
@@ -126,5 +132,4 @@ public class ResourceUtils {
       return params;
     return Arrays.asList(params.get(0).split(","));
   }
-
 }

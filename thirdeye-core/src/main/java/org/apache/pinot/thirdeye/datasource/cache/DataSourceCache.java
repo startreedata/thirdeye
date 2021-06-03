@@ -33,6 +33,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
+import org.apache.pinot.thirdeye.spi.ThirdEyeException;
+import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
@@ -86,9 +88,7 @@ public class DataSourceCache {
       return dataSourcesFromConfig.get(name);
     }
 
-    LOG.error("Data Source not found: " + name);
-    checkState(dataSourcesFromConfig.size() > 0, "No data sources loaded from config.");
-    return null;
+    throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
   }
 
   private List<DataSourceDTO> findByName(final String name) {

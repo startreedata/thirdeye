@@ -1,4 +1,4 @@
-useInMemoryCache: false
+useInMemoryCache: true
 useCentralizedCache: false
 
 centralizedCacheSettings:

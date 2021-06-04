@@ -62,12 +62,6 @@ export const MetricsViewPage: FunctionComponent = () => {
             .then((metric) => {
                 fetchedUiMetric = getUiMetric(metric);
             })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                )
-            )
             .finally(() => setUiMetric(fetchedUiMetric));
     };
 
@@ -81,22 +75,15 @@ export const MetricsViewPage: FunctionComponent = () => {
     };
 
     const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
-        deleteMetric(uiMetric.id)
-            .then(() => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.metric") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Redirect to metrics all path
-                history.push(getMetricsAllPath());
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.metric") }),
-                    getErrorSnackbarOption()
-                )
+        deleteMetric(uiMetric.id).then(() => {
+            enqueueSnackbar(
+                t("message.delete-success", { entity: t("label.metric") }),
+                getSuccessSnackbarOption()
             );
+
+            // Redirect to metrics all path
+            history.push(getMetricsAllPath());
+        });
     };
 
     return (

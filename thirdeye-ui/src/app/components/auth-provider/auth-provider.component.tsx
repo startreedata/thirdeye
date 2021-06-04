@@ -94,7 +94,10 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
         setAxiosResponseInterceptorId(
             axios.interceptors.response.use(
                 getFulfilledResponseInterceptor(),
-                getRejectedResponseInterceptor(handleUnauthenticatedAccess)
+                getRejectedResponseInterceptor(
+                    handleUnauthenticatedAccess,
+                    enqueueSnackbar
+                )
             )
         );
     };

@@ -63,8 +63,8 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             return;
         }
 
-        updateSubscriptionGroup(subscriptionGroup)
-            .then((subscriptionGroup: SubscriptionGroup): void => {
+        updateSubscriptionGroup(subscriptionGroup).then(
+            (subscriptionGroup: SubscriptionGroup): void => {
                 enqueueSnackbar(
                     t("message.update-success", {
                         entity: t("label.subscription-group"),
@@ -76,15 +76,8 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 history.push(
                     getSubscriptionGroupsViewPath(subscriptionGroup.id)
                 );
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.update-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                );
-            });
+            }
+        );
     };
 
     const fetchSubscriptionGroup = (): void => {

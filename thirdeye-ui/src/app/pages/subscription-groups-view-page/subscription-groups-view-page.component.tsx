@@ -126,26 +126,17 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const handleSubscriptionGroupDeleteOk = (
         uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
-        deleteSubscriptionGroup(uiSubscriptionGroup.id)
-            .then(() => {
-                enqueueSnackbar(
-                    t("message.delete-success", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Redirect to subscription groups all path
-                history.push(getSubscriptionGroupsAllPath());
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                )
+        deleteSubscriptionGroup(uiSubscriptionGroup.id).then(() => {
+            enqueueSnackbar(
+                t("message.delete-success", {
+                    entity: t("label.subscription-group"),
+                }),
+                getSuccessSnackbarOption()
             );
+
+            // Redirect to subscription groups all path
+            history.push(getSubscriptionGroupsAllPath());
+        });
     };
 
     const handleSubscriptionGroupAlertsChange = (alerts: Alert[]): void => {
@@ -195,28 +186,19 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const saveSubscriptionGroup = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
-        updateSubscriptionGroup(subscriptionGroup)
-            .then((subscriptionGroup) => {
-                enqueueSnackbar(
-                    t("message.update-success", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Replace updated subscription group as fetched subscription group
-                setUiSubscriptionGroup(
-                    getUiSubscriptionGroup(subscriptionGroup, alerts)
-                );
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.update-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                )
+        updateSubscriptionGroup(subscriptionGroup).then((subscriptionGroup) => {
+            enqueueSnackbar(
+                t("message.update-success", {
+                    entity: t("label.subscription-group"),
+                }),
+                getSuccessSnackbarOption()
             );
+
+            // Replace updated subscription group as fetched subscription group
+            setUiSubscriptionGroup(
+                getUiSubscriptionGroup(subscriptionGroup, alerts)
+            );
+        });
     };
 
     return (

@@ -46,32 +46,50 @@ describe("Axios Util", () => {
 
     it("getRejectedResponseInterceptor should return axios rejected response interceptor", () => {
         expect(
-            getRejectedResponseInterceptor(mockHandleUnauthenticatedAccess)
+            getRejectedResponseInterceptor(
+                mockHandleUnauthenticatedAccess,
+                mockEnqueueSnackbar
+            )
         ).toBeInstanceOf(Function);
     });
 
     it("axios rejected response interceptor should throw 401 error and invoke unauthenticated access function", () => {
         const responseInterceptor = getRejectedResponseInterceptor(
-            mockHandleUnauthenticatedAccess
+            mockHandleUnauthenticatedAccess,
+            mockEnqueueSnackbar
         );
 
         expect(() =>
             responseInterceptor(mockUnauthenticatedAccessError)
         ).toThrow();
         expect(mockHandleUnauthenticatedAccess).toHaveBeenCalled();
+        expect(mockEnqueueSnackbar).not.toHaveBeenCalled();
     });
 
     it("axios rejected response interceptor should throw any error other than 401 and not invoke unauthenticated access function", () => {
         const responseInterceptor = getRejectedResponseInterceptor(
-            mockHandleUnauthenticatedAccess
+            mockHandleUnauthenticatedAccess,
+            mockEnqueueSnackbar
         );
 
         expect(() => responseInterceptor(mockInternalServerError)).toThrow();
         expect(mockHandleUnauthenticatedAccess).not.toHaveBeenCalled();
     });
+
+    it("axios rejected response interceptor should throw 500 error and invoke unauthenticated access function", () => {
+        const responseInterceptor = getRejectedResponseInterceptor(
+            mockHandleUnauthenticatedAccess,
+            mockEnqueueSnackbar
+        );
+
+        expect(() => responseInterceptor(mockInternalServerError)).toThrow();
+        expect(mockEnqueueSnackbar).toHaveBeenCalled();
+        expect(mockHandleUnauthenticatedAccess).not.toHaveBeenCalled();
+    });
 });
 
 const mockHandleUnauthenticatedAccess = jest.fn();
+const mockEnqueueSnackbar = jest.fn();
 
 const mockUnauthenticatedAccessError = {
     response: {

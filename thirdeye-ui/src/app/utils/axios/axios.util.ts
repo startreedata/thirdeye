@@ -1,4 +1,6 @@
 import { AxiosError, AxiosRequestConfig } from "axios";
+import type { OptionsObject, SnackbarKey, SnackbarMessage } from "notistack";
+import { getErrorSnackbarOption } from "../snackbar/snackbar.util";
 
 // Returns axios request interceptor
 export const getRequestInterceptor = (
@@ -34,12 +36,20 @@ export const getFulfilledResponseInterceptor = (): (<T>(
 
 // Returns axios rejected response interceptor
 export const getRejectedResponseInterceptor = (
-    unauthenticatedAccessFn: () => void
+    unauthenticatedAccessFn: () => void,
+    enqueueSnackbar: (
+        message: SnackbarMessage,
+        options?: OptionsObject
+    ) => SnackbarKey
 ): ((error: AxiosError) => void) => {
     const rejectedResponseInterceptor = (error: AxiosError): void => {
         if (error && error.response && error.response.status === 401) {
             // Unauthenticated access
             unauthenticatedAccessFn && unauthenticatedAccessFn();
+        } else if (error && error.response && error.response.status === 500) {
+            // Toast error message
+            const erroMessage = error.response.data?.list[0]?.msg || "";
+            enqueueSnackbar(erroMessage, getErrorSnackbarOption());
         }
 
         throw error;

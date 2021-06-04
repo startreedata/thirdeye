@@ -90,8 +90,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const handleSubscriptionGroupDeleteOk = (
         uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
-        deleteSubscriptionGroup(uiSubscriptionGroup.id)
-            .then((subscriptionGroup) => {
+        deleteSubscriptionGroup(uiSubscriptionGroup.id).then(
+            (subscriptionGroup) => {
                 enqueueSnackbar(
                     t("message.delete-success", {
                         entity: t("label.subscription-group"),
@@ -101,15 +101,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
 
                 // Remove deleted subscription group from fetched subscription groups
                 removeUiSubscriptionGroup(subscriptionGroup);
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                )
-            );
+            }
+        );
     };
 
     const removeUiSubscriptionGroup = (

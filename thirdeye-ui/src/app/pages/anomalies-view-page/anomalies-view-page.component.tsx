@@ -78,12 +78,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             .then((anomaly) => {
                 fetchedUiAnomaly = getUiAnomaly(anomaly);
             })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                )
-            )
             .finally(() => setUiAnomaly(fetchedUiAnomaly));
     };
 
@@ -107,12 +101,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             .then((alertEvaluation) => {
                 fetchedAlertEvaluation = alertEvaluation;
             })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                )
-            )
             .finally(() => setAlertEvaluation(fetchedAlertEvaluation));
     };
 
@@ -126,22 +114,15 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     };
 
     const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
-        deleteAnomaly(uiAnomaly.id)
-            .then(() => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.anomaly") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Redirect to anomalies all path
-                history.push(getAnomaliesAllPath());
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.anomaly") }),
-                    getErrorSnackbarOption()
-                )
+        deleteAnomaly(uiAnomaly.id).then(() => {
+            enqueueSnackbar(
+                t("message.delete-success", { entity: t("label.anomaly") }),
+                getSuccessSnackbarOption()
             );
+
+            // Redirect to anomalies all path
+            history.push(getAnomaliesAllPath());
+        });
     };
 
     return (

@@ -83,22 +83,15 @@ export const AlertsAllPage: FunctionComponent = () => {
             return;
         }
 
-        updateAlert(uiAlert.alert)
-            .then((alert) => {
-                enqueueSnackbar(
-                    t("message.update-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Replace updated alert in fetched alerts
-                replaceUiAlert(alert);
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.update-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
-                )
+        updateAlert(uiAlert.alert).then((alert) => {
+            enqueueSnackbar(
+                t("message.update-success", { entity: t("label.alert") }),
+                getSuccessSnackbarOption()
             );
+
+            // Replace updated alert in fetched alerts
+            replaceUiAlert(alert);
+        });
     };
 
     const handleAlertDelete = (uiAlert: UiAlert): void => {
@@ -111,22 +104,15 @@ export const AlertsAllPage: FunctionComponent = () => {
     };
 
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
-        deleteAlert(uiAlert.id)
-            .then((alert) => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Remove deleted alert from fetched alerts
-                removeUiAlert(alert);
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
-                )
+        deleteAlert(uiAlert.id).then((alert) => {
+            enqueueSnackbar(
+                t("message.delete-success", { entity: t("label.alert") }),
+                getSuccessSnackbarOption()
             );
+
+            // Remove deleted alert from fetched alerts
+            removeUiAlert(alert);
+        });
     };
 
     const replaceUiAlert = (alert: Alert): void => {

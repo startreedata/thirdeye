@@ -1,7 +1,7 @@
 [
   {
     "name": "pinot1",
-    "classRef": "org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource",
+    "type": "pinot",
     "properties": {
       "zookeeperUrl": "localhost:2123",
       "clusterName": "QuickStartCluster",

@@ -88,7 +88,7 @@ CREATE INDEX merged_anomaly_result_detection_config_id_idx ON merged_anomaly_res
 CREATE TABLE IF NOT EXISTS data_source_index
 (
     name        varchar(200) NOT NULL,
-    class_ref   varchar(200) NOT NULL,
+    type        varchar(200) NOT NULL,
     base_id     bigint(20)   NOT NULL,
     create_time timestamp,
     update_time timestamp DEFAULT CURRENT_TIMESTAMP,
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS data_source_index
     CONSTRAINT uc_datasource UNIQUE (name)
 ) ENGINE = InnoDB;
 CREATE INDEX data_source_index_name_idx ON data_source_index (name);
-CREATE INDEX data_source_index_class_ref_idx ON data_source_index (class_ref);
+CREATE INDEX data_source_index_type_idx ON data_source_index (type);
 
 CREATE TABLE IF NOT EXISTS dataset_config_index
 (

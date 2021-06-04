@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.datalayer.entity;
 public class DataSourceIndex extends AbstractIndexEntity {
 
   private String name;
-  private String classRef;
+  private String type;
 
   public String getName() {
     return name;
@@ -33,12 +33,12 @@ public class DataSourceIndex extends AbstractIndexEntity {
     return this;
   }
 
-  public String getClassRef() {
-    return classRef;
+  public String getType() {
+    return type;
   }
 
-  public DataSourceIndex setClassRef(final String classRef) {
-    this.classRef = classRef;
+  public DataSourceIndex setType(final String type) {
+    this.type = type;
     return this;
   }
 }

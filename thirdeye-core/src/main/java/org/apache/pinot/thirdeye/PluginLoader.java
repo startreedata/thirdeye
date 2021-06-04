@@ -1,6 +1,5 @@
 package org.apache.pinot.thirdeye;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
@@ -43,16 +42,18 @@ public class PluginLoader {
   @Inject
   public PluginLoader(
       final DataSourcesLoader dataSourcesLoader,
-      PluginLoaderConfiguration config) {
+      final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
     pluginsDir = new File(config.getPluginsPath());
   }
 
   public void loadPlugins() {
-    if (loading.compareAndSet(false, true)) {
-      checkArgument(pluginsDir.exists() && pluginsDir.isDirectory(),
-          "Plugin dir not found! dir: " + pluginsDir);
+    if (!pluginsDir.exists() || !pluginsDir.isDirectory()) {
+      log.error("Skipping Plugin Loading. Plugin dir not found: " + pluginsDir);
+      return;
+    }
 
+    if (loading.compareAndSet(false, true)) {
       final File[] files = requireNonNull(pluginsDir.listFiles());
       for (File pluginDir : files) {
         if (pluginDir.isDirectory()) {

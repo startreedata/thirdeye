@@ -61,7 +61,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
   void afterMethod() {
   }
 
-  @Test
+  @Test(enabled = false)
   public void integrationTest() throws Exception {
     URL dataSourcesConfig = this.getClass().getResource("data-sources-config.yml");
 

@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.PluginLoader;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
@@ -120,6 +121,9 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
 
     // TODO remove hack and CacheConfig singleton
     CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));
+
+    // Load plugins
+    injector.getInstance(PluginLoader.class).loadPlugins();
 
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches();
     schedulerService = injector.getInstance(SchedulerService.class);

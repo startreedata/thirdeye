@@ -50,9 +50,15 @@
       <directory>${thirdeye.root}/thirdeye-ui/dist</directory>
       <outputDirectory>ui/</outputDirectory>
     </fileSet>
+
+    <!-- Copy all plugins -->
     <fileSet>
       <directory>${thirdeye.root}/thirdeye-plugin-example/target/thirdeye-plugin-example-${project.version}-dist</directory>
       <outputDirectory>plugins/example/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-datasources/target/thirdeye-datasources-${project.version}-dist</directory>
+      <outputDirectory>plugins/datasources-default/</outputDirectory>
     </fileSet>
 
   </fileSets>

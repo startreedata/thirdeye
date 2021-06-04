@@ -18,6 +18,8 @@
       "timezone": "US/Pacific"
     },
     "expectedDelay": 86400,
-    "dataSource": "PinotThirdEyeDataSource"
+    "dataSource":  {
+      "name": "PinotThirdEyeDataSource"
+    }
   }
 ]

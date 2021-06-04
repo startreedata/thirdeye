@@ -1,5 +1,8 @@
 package org.apache.pinot.thirdeye;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class PluginLoaderConfiguration {
 
   private String pluginsPath = "plugins";

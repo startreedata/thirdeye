@@ -32,9 +32,6 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
    * Use {@link ThirdEyeCoordinatorDebug} class for debugging purposes.
    * The integration-tests/tools module will load all the thirdeye jars including datasources
    * making it easier to debug.
-   *
-   * @param args
-   * @throws Exception
    */
   public static void main(String[] args) throws Exception {
     RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
@@ -70,6 +67,9 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
     // TODO remove hack and CacheConfig singleton
     CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));
+
+    // Load plugins
+    injector.getInstance(PluginLoader.class).loadPlugins();
 
     // Initialize ThirdEyeCacheRegistry
     injector

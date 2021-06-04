@@ -195,7 +195,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     this.testDAOProvider.cleanup();
   }
 
-  @Test
+  @Test(enabled = false)
   public void testAggregation() throws Exception {
     MetricSlice slice = MetricSlice
         .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
@@ -212,7 +212,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     Assert.assertTrue(df.getDouble(DataFrame.COL_VALUE, 0) > 0);
   }
 
-  @Test
+  @Test(enabled = false)
   public void testBreakdown() throws Exception {
     MetricSlice slice = MetricSlice
         .from(this.metricRevenueId, this.timestamp - TimeUnit.HOURS.toMillis(25),
@@ -237,7 +237,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testTimeSeries() throws Exception {
     MetricSlice slice = MetricSlice
         .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
@@ -253,7 +253,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     Assert.assertTrue(df.getDouble(DataFrame.COL_VALUE, 1) > 0);
   }
 
-  @Test
+  @Test(enabled = false)
   public void testAggregationWithFilter() throws Exception {
     SetMultimap<String, String> filtersBasic = HashMultimap.create();
     filtersBasic.put("browser", "safari");

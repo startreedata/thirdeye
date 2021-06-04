@@ -15,27 +15,24 @@ public class ExamplePlugin implements Plugin {
       final Class<?> aClass = Class.forName("org.apache.pinot.thirdeye.spi.api.AlertApi");
       final AlertApi api = (AlertApi) aClass.newInstance();
       System.out.println(api.setName("check").getName());
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    } catch (InstantiationException e) {
-      e.printStackTrace();
-    } catch (IllegalAccessException e) {
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
       e.printStackTrace();
     }
 
-    try {
-      final Class<?> bClass = Class.forName("org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig");
-      System.out.println(bClass);
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    }
+    checkClass("org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig");
+    checkClass("org.apache.pinot.thirdeye.datalayer.util.NonExistentClass");
+  }
 
-    final Class<?> cClass;
+  private void checkClass(final String classRef) {
+    System.out.printf("Class: %s isLoadable: %s %n", classRef, isLoadable(classRef));
+  }
+
+  private boolean isLoadable(final String className) {
     try {
-      cClass = Class.forName("org.apache.pinot.thirdeye.datalayer.util.NonExistentClass");
-      System.out.println(cClass);
+      Class.forName(className);
+      return true;
     } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+      return false;
     }
   }
 }

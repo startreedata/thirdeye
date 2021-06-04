@@ -14,8 +14,10 @@ import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.PluginClassLoader;
+import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,29 +35,23 @@ public class PluginLoader {
 
   private static final Logger log = LoggerFactory.getLogger(PluginLoader.class);
 
+  private final DataSourcesLoader dataSourcesLoader;
+
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
 
   @Inject
-  public PluginLoader(PluginLoaderConfiguration config) {
+  public PluginLoader(
+      final DataSourcesLoader dataSourcesLoader,
+      PluginLoaderConfiguration config) {
+    this.dataSourcesLoader = dataSourcesLoader;
     pluginsDir = new File(config.getPluginsPath());
   }
 
-  /**
-   * TODO spyne remove temporary code.
-   * @param args
-   * @throws Exception
-   */
-  public static void main(String[] args) throws Exception {
-    new PluginLoader(
-        new PluginLoaderConfiguration()
-            .setPluginsPath("/Users/spyne/repo/thirdeye/thirdeye-example-plugin/target/plugins")
-    ).loadPlugins();
-  }
-
-  public void loadPlugins() throws Exception {
+  public void loadPlugins() {
     if (loading.compareAndSet(false, true)) {
-      checkArgument(pluginsDir.exists() && pluginsDir.isDirectory());
+      checkArgument(pluginsDir.exists() && pluginsDir.isDirectory(),
+          "Plugin dir not found!" + pluginsDir);
 
       final File[] files = requireNonNull(pluginsDir.listFiles());
       for (File pluginDir : files) {
@@ -66,7 +62,7 @@ public class PluginLoader {
     }
   }
 
-  private void loadPlugin(final File pluginDir) throws Exception {
+  private void loadPlugin(final File pluginDir) {
     log.info("Loading plugin: " + pluginDir);
     final URLClassLoader pluginClassLoader = createPluginClassLoader(pluginDir);
     final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
@@ -82,13 +78,16 @@ public class PluginLoader {
 
   private void installPlugin(final Plugin plugin) {
     log.info("Installing plugin: " + plugin.getClass().getName());
+    for (ThirdEyeDataSourceFactory f : plugin.getDataSourceFactories()) {
+      dataSourcesLoader.addThirdEyeDataSourceFactory(f);
+    }
   }
 
   private URLClassLoader createPluginClassLoader(File dir) {
     final URL[] urls = Arrays.stream(optional(dir.listFiles()).orElse(new File[]{}))
+        .sorted()
         .map(File::toURI)
         .map(this::toUrl)
-        .sorted()
         .toArray(URL[]::new);
 
     return new PluginClassLoader(urls, getClass().getClassLoader());

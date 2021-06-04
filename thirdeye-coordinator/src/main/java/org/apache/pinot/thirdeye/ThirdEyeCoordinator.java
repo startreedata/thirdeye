@@ -1,5 +1,8 @@
 package org.apache.pinot.thirdeye;
 
+import static org.apache.pinot.thirdeye.spi.Constants.ENV_THIRDEYE_PLUGINS_DIR;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
@@ -34,8 +37,10 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
    * making it easier to debug.
    */
   public static void main(String[] args) throws Exception {
-    RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-    log.info(String.format("JVM arguments: %s", runtimeMxBean.getInputArguments()));
+    final RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+    log.info(String.format("JVM (%s) arguments: %s",
+        System.getProperty("java.version"),
+        runtimeMxBean.getInputArguments()));
 
     new ThirdEyeCoordinator().run(args);
   }
@@ -69,6 +74,11 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));
 
     // Load plugins
+    optional(System.getenv(ENV_THIRDEYE_PLUGINS_DIR))
+        .ifPresent(pluginsPath -> injector
+            .getInstance(PluginLoaderConfiguration.class)
+            .setPluginsPath(pluginsPath));
+
     injector.getInstance(PluginLoader.class).loadPlugins();
 
     // Initialize ThirdEyeCacheRegistry

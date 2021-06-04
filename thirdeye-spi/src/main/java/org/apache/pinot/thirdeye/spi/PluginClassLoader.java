@@ -34,6 +34,8 @@ public class PluginClassLoader extends URLClassLoader {
       .add("org.apache.pinot.thirdeye.spi")
       .add("com.google.common")
       .add("org.joda.time")
+      .add("org.h2")
+      .add("com.mysql")
       .build();
 
   private final ClassLoader parentClassLoader;

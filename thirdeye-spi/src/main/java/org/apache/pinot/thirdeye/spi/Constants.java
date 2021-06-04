@@ -35,6 +35,9 @@ public interface Constants {
   // timestamp field used to get timestamp in RelationalThirdEyeResponse
   String TIMESTAMP = "timestamp";
 
+  // Environment var to check for plugins. Default is "plugins"
+  String ENV_THIRDEYE_PLUGINS_DIR = "THIRDEYE_PLUGINS_DIR";
+
   enum JobStatus {
     SCHEDULED,
     COMPLETED,

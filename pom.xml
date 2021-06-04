@@ -755,6 +755,12 @@
         <artifactId>hsqldb</artifactId>
         <version>${hsqldb.version}</version>
       </dependency>
+      <!-- Used for demo setup and mock data source-->
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>1.4.192</version>
+      </dependency>
       <dependency>
         <!-- TODO: replace code dependencies and remove -->
         <groupId>org.json</groupId>

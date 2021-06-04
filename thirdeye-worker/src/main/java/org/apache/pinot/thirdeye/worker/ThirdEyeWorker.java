@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.worker;
 
 import static org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.readPersistenceConfig;
 import static org.apache.pinot.thirdeye.spi.Constants.CTX_INJECTOR;
+import static org.apache.pinot.thirdeye.spi.Constants.ENV_THIRDEYE_PLUGINS_DIR;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -33,11 +35,14 @@ import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.PluginLoader;
+import org.apache.pinot.thirdeye.PluginLoaderConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.common.utils.SessionUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
@@ -61,7 +66,7 @@ import org.slf4j.LoggerFactory;
 
 public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
 
-  protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
+  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeWorker.class);
 
   private TaskDriver taskDriver = null;
   private SchedulerService schedulerService;
@@ -72,12 +77,14 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
    * Use {@link ThirdEyeWorkerDebug} class for debugging purposes.
    * The integration-tests/tools module will load all the thirdeye jars including datasources
    * making it easier to debug.
-   *
-   * @param args
-   * @throws Exception
    */
 
   public static void main(final String[] args) throws Exception {
+    final RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+    LOG.info(String.format("JVM (%s) arguments: %s",
+        System.getProperty("java.version"),
+        runtimeMxBean.getInputArguments()));
+
     List<String> argList = new ArrayList<>(Arrays.asList(args));
     if (argList.isEmpty()) {
       argList.add("./config");
@@ -123,6 +130,11 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));
 
     // Load plugins
+    optional(System.getenv(ENV_THIRDEYE_PLUGINS_DIR))
+        .ifPresent(pluginsPath -> injector
+            .getInstance(PluginLoaderConfiguration.class)
+            .setPluginsPath(pluginsPath));
+
     injector.getInstance(PluginLoader.class).loadPlugins();
 
     injector.getInstance(ThirdEyeCacheRegistry.class).initializeCaches();

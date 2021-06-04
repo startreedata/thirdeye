@@ -51,7 +51,7 @@ public class PluginLoader {
   public void loadPlugins() {
     if (loading.compareAndSet(false, true)) {
       checkArgument(pluginsDir.exists() && pluginsDir.isDirectory(),
-          "Plugin dir not found!" + pluginsDir);
+          "Plugin dir not found! dir: " + pluginsDir);
 
       final File[] files = requireNonNull(pluginsDir.listFiles());
       for (File pluginDir : files) {

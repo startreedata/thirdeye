@@ -32,6 +32,8 @@ public class PluginClassLoader extends URLClassLoader {
 
   public static final ImmutableList<String> SHARED_PACKAGES = ImmutableList.<String>builder()
       .add("org.apache.pinot.thirdeye.spi")
+      .add("com.google.common")
+      .add("org.joda.time")
       .build();
 
   private final ClassLoader parentClassLoader;

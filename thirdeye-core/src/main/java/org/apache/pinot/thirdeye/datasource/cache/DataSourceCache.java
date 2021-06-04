@@ -52,10 +52,13 @@ public class DataSourceCache {
   private final DataSourceManager dataSourceManager;
   private final DataSourcesLoader dataSourcesLoader;
   private final ExecutorService executorService;
-  private final Map<String, ThirdEyeDataSource> dataSourcesFromConfig;
+
   private final Counter datasourceExceptionCounter;
   private final Counter datasourceDurationCounter;
   private final Counter datasourceCallCounter;
+
+  @Deprecated // To be removed in factor of having data source in db.
+  private Map<String, ThirdEyeDataSource> dataSourcesFromConfig;
 
   @Inject
   public DataSourceCache(
@@ -65,10 +68,6 @@ public class DataSourceCache {
     this.dataSourceManager = dataSourceManager;
     this.dataSourcesLoader = dataSourcesLoader;
     this.executorService = Executors.newCachedThreadPool();
-    this.dataSourcesFromConfig = ImmutableMap.copyOf(dataSourcesLoader.getDataSourceMapFromConfig());
-    if (dataSourcesFromConfig.size() == 0) {
-      LOG.warn("No data sources loaded from config!");
-    }
 
     datasourceExceptionCounter = metricRegistry.counter("datasourceExceptionCounter");
     datasourceDurationCounter = metricRegistry.counter("datasourceDurationCounter");
@@ -76,6 +75,15 @@ public class DataSourceCache {
   }
 
   public ThirdEyeDataSource getDataSource(String name) {
+    if (dataSourcesFromConfig == null) {
+      // First time load only
+      this.dataSourcesFromConfig =
+          ImmutableMap.copyOf(dataSourcesLoader.getDataSourceMapFromConfig());
+      if (dataSourcesFromConfig.size() == 0) {
+        LOG.warn("No data sources loaded from config!");
+      }
+    }
+
     final List<DataSourceDTO> results = findByName(name);
     if (results.size() == 1) {
       final DataSourceDTO ds = results.iterator().next();

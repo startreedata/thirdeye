@@ -40,8 +40,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.client.ResultSet;
-import org.apache.pinot.client.ResultSetGroup;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -2549,120 +2547,7 @@ public class DataFrame {
 
     return df;
   }
-
-  /**
-   * Reads in a Pinot ResultSetGroup and returns it as a DataFrame.
-   *
-   * @param resultSetGroup pinot query result
-   * @return Pinot query result as DataFrame
-   * @throws IllegalArgumentException if the result cannot be parsed
-   */
-  public static DataFrame fromPinotResult(ResultSetGroup resultSetGroup) {
-    if (resultSetGroup.getResultSetCount() <= 0) {
-      throw new IllegalArgumentException("Query did not return any results");
-    }
-
-    if (resultSetGroup.getResultSetCount() == 1) {
-      ResultSet resultSet = resultSetGroup.getResultSet(0);
-
-      if (resultSet.getColumnCount() == 1 && resultSet.getRowCount() == 0) {
-        // empty result
-        return new DataFrame();
-      } else if (resultSet.getColumnCount() == 1 && resultSet.getRowCount() == 1
-          && resultSet.getGroupKeyLength() == 0) {
-        // aggregation result
-
-        DataFrame df = new DataFrame();
-        String function = resultSet.getColumnName(0);
-        String value = resultSet.getString(0, 0);
-        df.addSeries(function, DataFrame.toSeries(value));
-        return df;
-      } else if (resultSet.getColumnCount() >= 1 && resultSet.getGroupKeyLength() == 0) {
-        // selection result
-
-        DataFrame df = new DataFrame();
-        for (int i = 0; i < resultSet.getColumnCount(); i++) {
-          df.addSeries(resultSet.getColumnName(i), makeSelectionSeries(resultSet, i));
-        }
-        return df;
-      }
-    }
-
-    // group by result
-    ResultSet firstResultSet = resultSetGroup.getResultSet(0);
-    String[] groupKeyNames = new String[firstResultSet.getGroupKeyLength()];
-    for (int i = 0; i < firstResultSet.getGroupKeyLength(); i++) {
-      groupKeyNames[i] = firstResultSet.getGroupKeyColumnName(i);
-    }
-
-    DataFrame df = new DataFrame();
-    for (String groupKeyName : groupKeyNames) {
-      df.addSeries(groupKeyName, StringSeries.empty());
-    }
-    df.setIndex(groupKeyNames);
-
-    for (int i = 0; i < resultSetGroup.getResultSetCount(); i++) {
-      ResultSet resultSet = resultSetGroup.getResultSet(i);
-      String function = resultSet.getColumnName(0);
-
-      // group keys
-      DataFrame dfColumn = new DataFrame();
-      for (int j = 0; j < resultSet.getGroupKeyLength(); j++) {
-        dfColumn.addSeries(groupKeyNames[j], makeGroupByGroupSeries(resultSet, j));
-      }
-      dfColumn.setIndex(groupKeyNames);
-
-      // values
-      dfColumn.addSeries(function, makeGroupByValueSeries(resultSet));
-
-      df = df.joinOuter(dfColumn);
-    }
-
-    return df;
-  }
-
-  private static Series makeSelectionSeries(ResultSet resultSet, int colIndex) {
-    int rowCount = resultSet.getRowCount();
-    if (rowCount <= 0) {
-      return StringSeries.empty();
-    }
-
-    String[] values = new String[rowCount];
-    for (int i = 0; i < rowCount; i++) {
-      values[i] = resultSet.getString(i, colIndex);
-    }
-
-    return DataFrame.toSeries(values);
-  }
-
-  private static Series makeGroupByValueSeries(ResultSet resultSet) {
-    int rowCount = resultSet.getRowCount();
-    if (rowCount <= 0) {
-      return StringSeries.empty();
-    }
-
-    String[] values = new String[rowCount];
-    for (int i = 0; i < rowCount; i++) {
-      values[i] = resultSet.getString(i, 0);
-    }
-
-    return DataFrame.toSeries(values);
-  }
-
-  private static Series makeGroupByGroupSeries(ResultSet resultSet, int keyIndex) {
-    int rowCount = resultSet.getRowCount();
-    if (rowCount <= 0) {
-      return StringSeries.empty();
-    }
-
-    String[] values = new String[rowCount];
-    for (int i = 0; i < rowCount; i++) {
-      values[i] = resultSet.getGroupKeyString(i, keyIndex);
-    }
-
-    return DataFrame.toSeries(values);
-  }
-
+  
   private static Set<String> getValidTypes() {
     Set<String> values = new HashSet<>();
     for (Series.SeriesType type : Series.SeriesType.values()) {

@@ -12,8 +12,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -30,6 +28,7 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfiguration> {
 
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeCoordinator.class);
+  private Injector injector;
 
   /**
    * Use {@link ThirdEyeCoordinatorDebug} class for debugging purposes.
@@ -37,10 +36,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
    * making it easier to debug.
    */
   public static void main(String[] args) throws Exception {
-    final RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-    log.info(String.format("JVM (%s) arguments: %s",
-        System.getProperty("java.version"),
-        runtimeMxBean.getInputArguments()));
+    AppUtils.logJvmSettings();
 
     new ThirdEyeCoordinator().run(args);
   }
@@ -65,7 +61,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
 
-    final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
+    injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,
         dataSource,
         env.metrics()));
@@ -107,5 +103,14 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
     // Add URL mapping
     cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+  }
+
+  /**
+   * Maintained for enabling debug tools.
+   *
+   * @return injector instance used by the coordinator.
+   */
+  public Injector getInjector() {
+    return injector;
   }
 }

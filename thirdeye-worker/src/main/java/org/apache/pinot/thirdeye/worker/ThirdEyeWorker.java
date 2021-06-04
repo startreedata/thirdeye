@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.worker;
 
+import static org.apache.pinot.thirdeye.AppUtils.logJvmSettings;
 import static org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig.readPersistenceConfig;
 import static org.apache.pinot.thirdeye.spi.Constants.CTX_INJECTOR;
 import static org.apache.pinot.thirdeye.spi.Constants.ENV_THIRDEYE_PLUGINS_DIR;
@@ -35,8 +36,6 @@ import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,11 +79,13 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
    */
 
   public static void main(final String[] args) throws Exception {
-    final RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-    LOG.info(String.format("JVM (%s) arguments: %s",
-        System.getProperty("java.version"),
-        runtimeMxBean.getInputArguments()));
+    logJvmSettings();
 
+    final String[] arguments = buildArgs(args);
+    new ThirdEyeWorker().run(arguments);
+  }
+
+  public static String[] buildArgs(final String[] args) {
     List<String> argList = new ArrayList<>(Arrays.asList(args));
     if (argList.isEmpty()) {
       argList.add("./config");
@@ -98,9 +99,9 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
     String thirdEyeConfigDir = argList.get(lastIndex);
     System.setProperty("dw.rootDir", thirdEyeConfigDir);
     String detectorApplicationConfigFile = thirdEyeConfigDir + "/" + "detector.yml";
-    argList.set(lastIndex, detectorApplicationConfigFile); // replace config dir with the
-    // actual config file
-    new ThirdEyeWorker().run(argList.toArray(new String[argList.size()]));
+    argList.set(lastIndex, detectorApplicationConfigFile);
+    final String[] arguments = argList.toArray(new String[argList.size()]);
+    return arguments;
   }
 
   @Override
@@ -204,5 +205,14 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
 
     final PersistenceConfig configuration = readPersistenceConfig(new File(persistenceConfig));
     return configuration.getDatabaseConfiguration();
+  }
+
+  /**
+   * Maintained for enabling debug tools.
+   *
+   * @return injector instance used by the coordinator.
+   */
+  public Injector getInjector() {
+    return injector;
   }
 }

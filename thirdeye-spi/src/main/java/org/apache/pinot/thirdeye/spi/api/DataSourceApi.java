@@ -31,7 +31,7 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
 
   private Long id;
   private String name;
-  private String classRef;
+  private String type;
   private Map<String, Object> properties;
   private List<DataSourceMetaApi> metaList;
 
@@ -55,12 +55,12 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
     return this;
   }
 
-  public String getClassRef() {
-    return classRef;
+  public String getType() {
+    return type;
   }
 
-  public DataSourceApi setClassRef(final String classRef) {
-    this.classRef = classRef;
+  public DataSourceApi setType(final String type) {
+    this.type = type;
     return this;
   }
 

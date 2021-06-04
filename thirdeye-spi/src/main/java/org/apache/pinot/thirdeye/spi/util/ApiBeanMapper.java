@@ -75,7 +75,7 @@ public abstract class ApiBeanMapper {
         .setId(dto.getId())
         .setName(dto.getName())
         .setProperties(dto.getProperties())
-        .setClassRef(dto.getClassRef())
+        .setType(dto.getType())
         .setMetaList(optional(dto.getMetaList())
             .map(l -> l.stream().map(ApiBeanMapper::toApi)
                 .collect(Collectors.toList()))
@@ -94,7 +94,7 @@ public abstract class ApiBeanMapper {
     dto
         .setName(api.getName())
         .setProperties(api.getProperties())
-        .setClassRef(api.getClassRef())
+        .setType(api.getType())
         .setMetaList(optional(api.getMetaList())
             .map(l -> l.stream().map(ApiBeanMapper::toDataSourceMetaBean)
                 .collect(Collectors.toList()))

@@ -33,7 +33,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 public class DataSourceBean extends AbstractDTO {
 
   private String name;
-  private String classRef;
+  private String type;
   private Map<String, Object> properties = new HashMap<>();
   private List<DataSourceMetaBean> metaList = new ArrayList<>();
 
@@ -46,12 +46,12 @@ public class DataSourceBean extends AbstractDTO {
     return this;
   }
 
-  public String getClassRef() {
-    return classRef;
+  public String getType() {
+    return type;
   }
 
-  public DataSourceBean setClassRef(final String classRef) {
-    this.classRef = classRef;
+  public DataSourceBean setType(final String type) {
+    this.type = type;
     return this;
   }
 

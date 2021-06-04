@@ -79,7 +79,7 @@ public class DataSourceCache {
     final List<DataSourceDTO> results = findByName(name);
     if (results.size() == 1) {
       final DataSourceDTO ds = results.iterator().next();
-      return dataSourcesLoader.loadDataSource(ds.getClassRef(), ds.getProperties());
+      return dataSourcesLoader.loadDataSource(ds.getType(), ds.getProperties());
     }
 
     // TODO spyne: remove data-source-config.yml. Keeping this temporarily for now.

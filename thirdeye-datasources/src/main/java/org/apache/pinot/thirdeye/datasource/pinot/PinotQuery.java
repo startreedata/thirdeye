@@ -25,9 +25,16 @@ public class PinotQuery extends RelationalQuery {
 
   private String tableName;
 
+  private boolean useSql = false;
+
   public PinotQuery(String pql, String tableName) {
-    super(pql);
+    this(pql, tableName, false);
+  }
+
+  public PinotQuery(String query, String tableName, boolean useSql) {
+    super(query);
     this.tableName = tableName;
+    this.useSql = useSql;
   }
 
   // TODO: Remove thirdeye-external's dependency on this method to getQuery() instead
@@ -43,11 +50,16 @@ public class PinotQuery extends RelationalQuery {
     this.tableName = tableName;
   }
 
+  public boolean isUseSql() {
+    return useSql;
+  }
+
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder("PinotQuery{");
-    sb.append("pql='").append(query).append('\'');
+    sb.append("query='").append(query).append('\'');
     sb.append(", tableName='").append(tableName).append('\'');
+    sb.append(", useSql='").append(useSql).append('\'');
     sb.append('}');
     return sb.toString();
   }

@@ -67,8 +67,10 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     this.resultMap = new HashMap<>();
     this.instancesMap = new HashMap<>();
     this.inputMap = context.getInputsMap();
-    for (OutputApi outputApi : context.getDetectionPlanApi().getOutputs()) {
-      outputKeyMap.put(outputApi.getOutputKey(), outputApi.getOutputName());
+    if (context.getDetectionPlanApi().getOutputs() != null) {
+      for (OutputApi outputApi : context.getDetectionPlanApi().getOutputs()) {
+        outputKeyMap.put(outputApi.getOutputKey(), outputApi.getOutputName());
+      }
     }
     this.initComponents();
   }

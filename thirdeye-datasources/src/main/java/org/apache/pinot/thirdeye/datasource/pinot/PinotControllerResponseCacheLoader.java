@@ -49,6 +49,8 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
 
   private static final long CONNECTION_TIMEOUT = 60000;
   private static final String BROKER_PREFIX = "Broker_";
+  private static final String SQL_QUERY_FORMAT = "sql";
+  private static final String PQL_QUERY_FORMAT = "pql";
   private static int MAX_CONNECTIONS;
 
   static {
@@ -149,10 +151,10 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
       try {
         synchronized (connection) {
           int activeConnections = this.activeConnections.incrementAndGet();
-
           long start = System.currentTimeMillis();
+          final String queryFormat = pinotQuery.isUseSql() ? SQL_QUERY_FORMAT : PQL_QUERY_FORMAT;
           ResultSetGroup resultSetGroup = connection
-              .execute(pinotQuery.getTableName(), new Request("pql", pinotQuery.getQuery()));
+              .execute(pinotQuery.getTableName(), new Request(queryFormat, pinotQuery.getQuery()));
           long end = System.currentTimeMillis();
           LOG.info("Query:{}  took:{} ms  connections:{}", pinotQuery.getQuery(), (end - start),
               activeConnections);

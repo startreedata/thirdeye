@@ -455,10 +455,11 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
     try {
-      // TODO: this resultSet is still using PQL, we should move to use pinot SQL.
+      // Use pinot SQL.
       ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
           request.getQuery(),
-          request.getTable())).get(0);
+          request.getTable(),
+          true)).get(0);
       return new ThirdeyeResultSetDataTable(thirdEyeResultSet);
     } catch (ExecutionException e) {
       throw e;

@@ -18,7 +18,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
    */
   private String tableName;
 
-  private ThirdEyeDataSource pinotDataSource;
+  private ThirdEyeDataSource thirdEyeDataSource;
 
   public String getQuery() {
     return query;
@@ -43,13 +43,13 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     this.query = dataFetcherSpec.getQuery();
     this.tableName = dataFetcherSpec.getTableName();
     if (dataFetcherSpec.getDataSourceCache() != null) {
-      this.pinotDataSource = dataFetcherSpec.getDataSourceCache()
+      this.thirdEyeDataSource = dataFetcherSpec.getDataSourceCache()
           .getDataSource(dataFetcherSpec.getDataSource());
     }
   }
 
   @Override
   public DataTable getDataTable() throws Exception {
-    return pinotDataSource.fetchDataTable(new ThirdEyeRequestV2(tableName, query, ImmutableMap.of()));
+    return thirdEyeDataSource.fetchDataTable(new ThirdEyeRequestV2(tableName, query, ImmutableMap.of()));
   }
 }

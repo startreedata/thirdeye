@@ -411,7 +411,7 @@ public abstract class ApiBeanMapper {
   }
 
   public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
-    return new AnomalyApi()
+    AnomalyApi anomalyApi = new AnomalyApi()
         .setId(dto.getId())
         .setStartTime(new Date(dto.getStartTime()))
         .setEndTime(new Date(dto.getEndTime()))
@@ -423,27 +423,30 @@ public abstract class ApiBeanMapper {
         .setImpactToGlobal(dto.getImpactToGlobal())
         .setSourceType(dto.getAnomalyResultSource())
         .setNotified(dto.isNotified())
-        .setMessage(dto.getMessage())
-        .setMetric(toMetricApi(dto.getMetricUrn())
-            .setName(dto.getMetric())
-            .setDataset(new DatasetApi()
-                .setName(dto.getCollection())
-            )
-        )
-        .setAlert(new AlertApi()
-            .setId(dto.getDetectionConfigId())
-            .setName(optional(dto.getProperties())
-                .map(p -> p.get("subEntityName"))
-                .orElse(null))
-        )
+        .setMessage(dto.getMessage());
+    if (dto.getMetricUrn() != null) {
+      anomalyApi
+          .setMetric(toMetricApi(dto.getMetricUrn())
+              .setName(dto.getMetric())
+              .setDataset(new DatasetApi()
+                  .setName(dto.getCollection())
+              )
+          );
+    }
+    anomalyApi.setAlert(new AlertApi()
+        .setId(dto.getDetectionConfigId())
+        .setName(optional(dto.getProperties())
+            .map(p -> p.get("subEntityName"))
+            .orElse(null))
+    )
         .setAlertNode(optional(dto.getProperties())
             .map(p -> p.get("detectorComponentName"))
             .map(ApiBeanMapper::toDetectionAlertNodeApi)
             .orElse(null))
         .setFeedback(optional(dto.getFeedback())
             .map(ApiBeanMapper::toApi)
-            .orElse(null))
-        ;
+            .orElse(null));
+    return anomalyApi;
   }
 
   private static AnomalyFeedbackApi toApi(final AnomalyFeedback feedbackDto) {

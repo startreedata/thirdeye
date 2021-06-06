@@ -24,7 +24,7 @@ public class ThirdeyeResultSetDataTable implements DataTable {
     }
     for (int i = 0; i < thirdEyeResultSet.getColumnCount(); i++) {
       columns.add(thirdEyeResultSet.getColumnName(i));
-      columnTypes.add(new ColumnType("STRING", false));
+      columnTypes.add(new ColumnType("DOUBLE", false));
     }
   }
 
@@ -101,7 +101,7 @@ public class ThirdeyeResultSetDataTable implements DataTable {
 
     for (int i = 0; i < getColumnCount(); i++) {
       if (i < groupKeyLength) {
-        columnNameWithDataType.add(getColumns().get(i) + ":STRING");
+        columnNameWithDataType.add(getColumns().get(i));
       } else {
         columnNameWithDataType.add(getColumns().get(i));
       }
@@ -114,12 +114,12 @@ public class ThirdeyeResultSetDataTable implements DataTable {
 
     outer:
     for (int rowIdx = 0; rowIdx < getRowCount(); rowIdx++) {
-      String[] columnsOfTheRow = new String[totalColumnCount];
+      Object[] columnsOfTheRow = new Object[totalColumnCount];
       // GroupBy column value(i.e., dimension values)
       for (int groupByColumnIdx = 1; groupByColumnIdx <= groupByColumnCount; groupByColumnIdx++) {
         String valueString = null;
         try {
-          valueString = thirdEyeResultSet.getString(rowIdx, groupByColumnIdx);
+          valueString = thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, groupByColumnIdx - 1);
         } catch (Exception e) {
           // Do nothing and subsequently insert a null value to the current series.
         }
@@ -127,16 +127,16 @@ public class ThirdeyeResultSetDataTable implements DataTable {
       }
       // Metric column's value
       for (int metricColumnIdx = 1; metricColumnIdx <= metricColumnCount; metricColumnIdx++) {
-        String valueString = null;
+        Double metricVal = null;
         try {
-          valueString = thirdEyeResultSet.getString(rowIdx, groupByColumnCount + metricColumnIdx);
-          if (valueString == null) {
+          metricVal = thirdEyeResultSet.getDouble(rowIdx, metricColumnIdx - 1);
+          if (metricVal == null) {
             break outer;
           }
         } catch (Exception e) {
           // Do nothing and subsequently insert a null value to the current series.
         }
-        columnsOfTheRow[metricColumnIdx + groupByColumnCount - 1] = valueString;
+        columnsOfTheRow[metricColumnIdx + groupByColumnCount - 1] = metricVal;
       }
       dfBuilder.append(columnsOfTheRow);
     }

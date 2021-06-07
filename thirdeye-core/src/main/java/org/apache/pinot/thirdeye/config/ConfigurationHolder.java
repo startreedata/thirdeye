@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 
@@ -19,7 +18,6 @@ public class ConfigurationHolder {
    */
   private Map<Class, String> configClassMap = new HashMap<>(ImmutableMap.<Class, String>builder()
       .put(ThirdEyeSchedulerConfiguration.class, "scheduler.yaml")
-      .put(DataSourcesConfiguration.class, "data-sources/data-sources-config.yml")
       .put(CacheConfig.class, "data-sources/cache-config.yml")
       .put(RCAConfiguration.class, "rca.yml")
       .build());

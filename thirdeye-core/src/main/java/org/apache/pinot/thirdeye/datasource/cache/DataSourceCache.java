@@ -23,12 +23,12 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -57,9 +57,6 @@ public class DataSourceCache {
   private final Counter datasourceDurationCounter;
   private final Counter datasourceCallCounter;
 
-  @Deprecated // To be removed in factor of having data source in db.
-  private Map<String, ThirdEyeDataSource> dataSourcesFromConfig;
-
   @Inject
   public DataSourceCache(
       final DataSourceManager dataSourceManager,
@@ -75,36 +72,19 @@ public class DataSourceCache {
   }
 
   public ThirdEyeDataSource getDataSource(String name) {
-    if (dataSourcesFromConfig == null) {
-      // First time load only
-      this.dataSourcesFromConfig =
-          ImmutableMap.copyOf(dataSourcesLoader.getDataSourceMapFromConfig());
-      if (dataSourcesFromConfig.size() == 0) {
-        LOG.warn("No data sources loaded from config!");
-      }
+    final Optional<DataSourceDTO> dataSource = findByName(name);
+    if (dataSource.isPresent()) {
+      return dataSourcesLoader.loadDataSource(dataSource.get());
     }
-
-    final List<DataSourceDTO> results = findByName(name);
-    if (results.size() == 1) {
-      final DataSourceDTO ds = results.iterator().next();
-      return dataSourcesLoader.loadDataSource(ds.getType(), ds.getProperties());
-    }
-
-    // TODO spyne: remove data-source-config.yml. Keeping this temporarily for now.
-    // Fetch from config if not found in DB.
-    if (dataSourcesFromConfig.containsKey(name)) {
-      return dataSourcesFromConfig.get(name);
-    }
-
     throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
   }
 
-  private List<DataSourceDTO> findByName(final String name) {
+  private Optional<DataSourceDTO> findByName(final String name) {
     final List<DataSourceDTO> results =
         dataSourceManager.findByPredicate(Predicate.EQ("name", name));
     checkState(results.size() <= 1, "Multiple data sources found with name: " + name);
 
-    return results;
+    return results.stream().findFirst();
   }
 
   public ThirdEyeResponse getQueryResult(ThirdEyeRequest request) throws Exception {

@@ -16,7 +16,6 @@
 
 package org.apache.pinot.thirdeye.datasource.csv;
 
-import static org.apache.pinot.thirdeye.util.ConfigurationLoader.readConfig;
 import static org.mockito.Mockito.mock;
 
 import com.codahale.metrics.MetricRegistry;
@@ -28,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
 import org.apache.pinot.thirdeye.dataframe.util.RequestContainer;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
-import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
@@ -84,8 +82,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     Assert.assertNotNull(configDTO.getId());
 
     final DataSourcesLoader dataSourcesLoader = new DataSourcesLoader(metricConfigDAO,
-        datasetConfigDAO,
-        readConfig(dataSourcesConfig, DataSourcesConfiguration.class));
+        datasetConfigDAO);
     final DataSourceCache dataSourceCache = new DataSourceCache(mock(DataSourceManager.class),
         dataSourcesLoader,
         new MetricRegistry());

@@ -46,7 +46,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.EntityInfoBuilder.EntityInfo;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
-import org.apache.pinot.thirdeye.datalayer.entity.AbstractJsonEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.GenericJsonEntity;
 import org.apache.pinot.thirdeye.datalayer.util.GenericResultSetMapper;
 import org.apache.pinot.thirdeye.datalayer.util.SqlQueryBuilder;
@@ -143,7 +142,7 @@ public class GenericPojoDao {
       //update indexes
       return runTask(connection -> {
         EntityInfo entityInfo = pojoInfoMap.get(pojo.getClass());
-        AbstractJsonEntity genericJsonEntity = new GenericJsonEntity();
+        GenericJsonEntity genericJsonEntity = new GenericJsonEntity();
         genericJsonEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
         genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         genericJsonEntity.setVersion(1);
@@ -290,7 +289,8 @@ public class GenericPojoDao {
       throws Exception {
     //update base table
     String jsonVal = OBJECT_MAPPER.writeValueAsString(pojo);
-    AbstractJsonEntity genericJsonEntity = new GenericJsonEntity();
+
+    GenericJsonEntity genericJsonEntity = new GenericJsonEntity();
     genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
     genericJsonEntity.setJsonVal(jsonVal);
     genericJsonEntity.setId(pojo.getId());

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datalayer.entity;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -81,7 +82,7 @@ public abstract class AbstractEntity {
     }
     AbstractEntity entity = (AbstractEntity) o;
 
-    return id != null ? id.equals(entity.id) : entity.id == null;
+    return Objects.equals(id, entity.id);
   }
 
   @Override

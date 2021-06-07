@@ -19,6 +19,25 @@
 
 package org.apache.pinot.thirdeye.datalayer.entity;
 
-public class GenericJsonEntity extends AbstractJsonEntity {
+public class GenericJsonEntity extends AbstractEntity {
 
+  protected String jsonVal;
+
+  protected String beanClass;
+
+  public String getJsonVal() {
+    return jsonVal;
+  }
+
+  public void setJsonVal(String jsonVal) {
+    this.jsonVal = jsonVal;
+  }
+
+  public String getBeanClass() {
+    return beanClass;
+  }
+
+  public void setBeanClass(String beanClass) {
+    this.beanClass = beanClass;
+  }
 }

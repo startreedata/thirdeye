@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.datasource.mock;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Arrays;
@@ -18,7 +19,6 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.yaml.snakeyaml.Yaml;
 
 public class MockThirdEyeDataSourceTest {
 
@@ -37,17 +37,12 @@ public class MockThirdEyeDataSourceTest {
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
-    Yaml yaml = new Yaml();
     try (Reader dataReader = new InputStreamReader(
-        this.getClass().getResourceAsStream("data-sources-config.yml"))) {
+        this.getClass().getResourceAsStream("mockThirdEyeDataSource-properties.json"))) {
 
-      // NOTE: Yes, static typing does this to you.
-      Map<String, List<Map<String, Map<String, Object>>>> config =
-          (Map<String, List<Map<String, Map<String, Object>>>>) yaml.load(dataReader);
-
+      final Map map = new ObjectMapper().readValue(dataReader, Map.class);
       this.dataSource = new MockThirdEyeDataSource();
-      this.dataSource.init(new ThirdEyeDataSourceContext()
-          .setProperties(config.get("dataSourceConfigs").get(0).get("properties")));
+      this.dataSource.init(new ThirdEyeDataSourceContext().setProperties(map));
     }
   }
 

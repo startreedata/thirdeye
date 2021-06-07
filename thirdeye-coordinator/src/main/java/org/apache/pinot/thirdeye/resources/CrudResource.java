@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
@@ -141,6 +142,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
         .peek(this::validate)
         .map(api -> createDto(principal, api))
         .peek(dtoManager::save)
+        .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
         .map(this::toApi)
         .collect(Collectors.toList())
     );

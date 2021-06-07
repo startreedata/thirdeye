@@ -31,7 +31,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.joda.time.Period;
 import org.slf4j.Logger;
@@ -51,26 +51,26 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
   /**
    * Constructor for dependency injection
    *
-   * @param metadataSourceConfig meta data source config
+   * @param meta meta data source config
    */
-  public AutoOnboardMockDataSource(MetadataSourceConfig metadataSourceConfig,
+  public AutoOnboardMockDataSource(DataSourceMetaBean meta,
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager) {
-    super(metadataSourceConfig);
+    super(meta);
     this.metricDAO = metricConfigManager;
     this.datasetDAO = datasetConfigManager;
-    this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
+    this.dataSourceName = MapUtils.getString(meta.getProperties(), "name",
         MockThirdEyeDataSource.class.getSimpleName());
   }
 
   @Override
   public void run() {
-    MetadataSourceConfig config = this.getMetadataSourceConfig();
+    DataSourceMetaBean meta = this.getMeta();
 
     List<DatasetConfigDTO> datasetConfigs = new ArrayList<>();
     List<MetricConfigDTO> metricConfigs = new ArrayList<>();
 
-    Map<String, Object> datasets = (Map<String, Object>) config.getProperties().get("datasets");
+    Map<String, Object> datasets = (Map<String, Object>) meta.getProperties().get("datasets");
     List<String> sortedDatasets = new ArrayList<>(datasets.keySet());
     Collections.sort(sortedDatasets);
 

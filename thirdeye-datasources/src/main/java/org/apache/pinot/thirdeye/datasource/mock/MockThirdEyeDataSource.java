@@ -51,7 +51,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.StringSeries;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
@@ -337,13 +337,11 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
 
     // auto onboarding support
     if (MapUtils.getBooleanValue(properties, PROP_POPULATE_META_DATA, false)) {
-      MetadataSourceConfig metadataSourceConfig = new MetadataSourceConfig();
-      metadataSourceConfig.setProperties(properties);
 
       metricConfigManager = context.getMetricConfigManager();
-      ;
       datasetConfigManager = context.getDatasetConfigManager();
-      AutoOnboardMockDataSource onboarding = new AutoOnboardMockDataSource(metadataSourceConfig,
+      AutoOnboardMockDataSource onboarding = new AutoOnboardMockDataSource(
+          new DataSourceMetaBean().setProperties(properties),
           metricConfigManager,
           datasetConfigManager);
 

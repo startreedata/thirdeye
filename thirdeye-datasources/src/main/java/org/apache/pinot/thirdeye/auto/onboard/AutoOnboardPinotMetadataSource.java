@@ -49,9 +49,9 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean.DimensionAsMetricProperties;
-import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,27 +76,27 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
 
   private final AutoOnboardPinotMetricsUtils autoLoadPinotMetricsUtils;
 
-  public AutoOnboardPinotMetadataSource(MetadataSourceConfig metadataSourceConfig)
+  public AutoOnboardPinotMetadataSource(DataSourceMetaBean dataSourceMeta)
       throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-    super(metadataSourceConfig);
+    super(dataSourceMeta);
     try {
-      autoLoadPinotMetricsUtils = new AutoOnboardPinotMetricsUtils(metadataSourceConfig);
+      autoLoadPinotMetricsUtils = new AutoOnboardPinotMetricsUtils(dataSourceMeta);
       LOG.info("Created {}", AutoOnboardPinotMetadataSource.class.getName());
     } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
       throw e;
     }
-    this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
+    this.dataSourceName = MapUtils.getString(dataSourceMeta.getProperties(), "name",
         PinotThirdEyeDataSource.class.getSimpleName());
   }
 
-  public AutoOnboardPinotMetadataSource(MetadataSourceConfig metadataSourceConfig,
+  public AutoOnboardPinotMetadataSource(DataSourceMetaBean dataSourceMeta,
       AutoOnboardPinotMetricsUtils utils, final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
-    super(metadataSourceConfig);
+    super(dataSourceMeta);
     autoLoadPinotMetricsUtils = utils;
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
-    this.dataSourceName = MapUtils.getString(metadataSourceConfig.getProperties(), "name",
+    this.dataSourceName = MapUtils.getString(dataSourceMeta.getProperties(), "name",
         PinotThirdEyeDataSource.class.getSimpleName());
   }
 

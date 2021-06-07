@@ -46,7 +46,7 @@ import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 import org.apache.pinot.spi.data.Schema;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSourceConfig;
-import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,10 +66,10 @@ public class AutoOnboardPinotMetricsUtils {
   private final CloseableHttpClient pinotControllerClient;
   private final HttpHost pinotControllerHost;
 
-  public AutoOnboardPinotMetricsUtils(MetadataSourceConfig metadataSourceConfig)
+  public AutoOnboardPinotMetricsUtils(DataSourceMetaBean dataSourceMeta)
       throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
     PinotThirdEyeDataSourceConfig pinotThirdeyeDataSourceConfig =
-        PinotThirdEyeDataSourceConfig.createFromMetadataSourceConfig(metadataSourceConfig);
+        PinotThirdEyeDataSourceConfig.createFromMetadataSourceConfig(dataSourceMeta);
 
     String controllerConnectionScheme = pinotThirdeyeDataSourceConfig
         .getControllerConnectionScheme();

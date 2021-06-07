@@ -30,7 +30,7 @@ import java.util.Objects;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource;
-import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,10 +236,11 @@ public class PinotThirdEyeDataSourceConfig {
   /**
    * Returns pinot thirdeye datasource config given metadatasource config. There can be only ONE
    * datasource of pinot type
+   * @param metadataSourceConfig
    */
   public static PinotThirdEyeDataSourceConfig createFromMetadataSourceConfig(
-      MetadataSourceConfig metadataSourceConfig) {
-    if (metadataSourceConfig == null || !metadataSourceConfig.getClassName()
+      DataSourceMetaBean metadataSourceConfig) {
+    if (metadataSourceConfig == null || !metadataSourceConfig.getClassRef()
         .equals(AutoOnboardPinotMetadataSource.class.getCanonicalName())) {
       throw new IllegalStateException(
           "Metadata source config is not of type pinot " + metadataSourceConfig);

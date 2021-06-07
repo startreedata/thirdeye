@@ -29,15 +29,15 @@ import org.apache.pinot.spi.data.DimensionFieldSpec;
 import org.apache.pinot.spi.data.FieldSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
 import org.apache.pinot.spi.data.Schema;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -61,9 +61,10 @@ public class AutoOnboardPinotMetricsServiceTest {
     DAORegistry daoRegistry = TestDbEnv.getInstance();
     datasetConfigDAO = daoRegistry.getDatasetConfigDAO();
     metricConfigDAO = daoRegistry.getMetricConfigDAO();
-    testAutoLoadPinotMetricsService = new AutoOnboardPinotMetadataSource(new MetadataSourceConfig(),
-        null, TestDbEnv.getInstance().getDatasetConfigDAO(),
-        TestDbEnv.getInstance().getMetricConfigDAO());
+    testAutoLoadPinotMetricsService = new AutoOnboardPinotMetadataSource(new DataSourceMetaBean(),
+        null,
+        datasetConfigDAO,
+        metricConfigDAO);
     schema = Schema
         .fromInputSteam(ClassLoader.getSystemResourceAsStream("sample-pinot-schema.json"));
     Map<String, String> pinotCustomConfigs = new HashMap<>();

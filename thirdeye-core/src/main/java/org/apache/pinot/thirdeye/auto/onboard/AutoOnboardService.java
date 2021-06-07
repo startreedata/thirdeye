@@ -22,15 +22,19 @@ package org.apache.pinot.thirdeye.auto.onboard;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.datasource.DataSourcesConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.spi.auto.onboard.AutoOnboard;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +54,7 @@ public class AutoOnboardService implements Runnable {
   private final AutoOnboardConfiguration autoOnboardConfiguration;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
-  private final DataSourcesConfiguration dataSourcesConfiguration;
+  private final DataSourceManager dataSourceManager;
 
   /**
    * Reads data sources configs and instantiates the constructors for auto load of all data sources,
@@ -61,13 +65,67 @@ public class AutoOnboardService implements Runnable {
       final AutoOnboardConfiguration autoOnboardConfiguration,
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager,
-      final DataSourcesConfiguration dataSourcesConfiguration) {
+      final DataSourceManager dataSourceManager) {
     this.autoOnboardConfiguration = autoOnboardConfiguration;
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
-    this.dataSourcesConfiguration = dataSourcesConfiguration;
+    this.dataSourceManager = dataSourceManager;
 
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+  }
+
+  public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(
+      final List<DataSourceDTO> dataSources,
+      final ThirdEyeDataSourceContext context) {
+    final Map<String, List<AutoOnboard>> dataSourceToOnboardMap = new HashMap<>();
+
+    for (DataSourceDTO dataSource : dataSources) {
+      processDataSourceConfig(dataSourceToOnboardMap,
+          dataSource,
+          context);
+    }
+
+    return dataSourceToOnboardMap;
+  }
+
+  private static void processDataSourceConfig(
+      final Map<String, List<AutoOnboard>> dataSourceToOnboardMap,
+      final DataSourceDTO dataSource,
+      final ThirdEyeDataSourceContext context) {
+    final List<DataSourceMetaBean> metaList = dataSource
+        .getMetaList();
+    if (metaList == null) {
+      return;
+    }
+
+    for (DataSourceMetaBean meta : metaList) {
+      String metaClassRef = meta.getClassRef();
+      // Inherit properties from Data Source
+      meta.getProperties().put("name", dataSource.getName());
+      meta.getProperties().putAll(dataSource.getProperties());
+      if (StringUtils.isNotBlank(metaClassRef)) {
+        try {
+          final AutoOnboard instance = createAutoOnboardInstance(context, meta);
+
+          dataSourceToOnboardMap
+              .computeIfAbsent(dataSource.getName(), k -> new ArrayList<>())
+              .add(instance);
+        } catch (Exception e) {
+          LOG.error("Exception in creating metadata constructor {}", metaClassRef, e);
+        }
+      }
+    }
+  }
+
+  private static AutoOnboard createAutoOnboardInstance(final ThirdEyeDataSourceContext context,
+      final DataSourceMetaBean meta)
+      throws ReflectiveOperationException {
+    final AutoOnboard instance = (AutoOnboard) Class
+        .forName(meta.getClassRef())
+        .getConstructor(DataSourceMetaBean.class)
+        .newInstance(meta);
+    instance.init(context);
+    return instance;
   }
 
   public void start() {
@@ -86,8 +144,9 @@ public class AutoOnboardService implements Runnable {
     final ThirdEyeDataSourceContext context = new ThirdEyeDataSourceContext()
         .setMetricConfigManager(metricConfigManager)
         .setDatasetConfigManager(datasetConfigManager);
-    final Map<String, List<AutoOnboard>> dataSourceToOnboardMap = AutoOnboardUtility
-        .getDataSourceToAutoOnboardMap(dataSourcesConfiguration, context);
+    final Map<String, List<AutoOnboard>> dataSourceToOnboardMap = getDataSourceToAutoOnboardMap(
+        dataSourceManager.findAll(),
+        context);
 
     for (List<AutoOnboard> autoOnboards : dataSourceToOnboardMap.values()) {
       autoOnboardServices.addAll(autoOnboards);

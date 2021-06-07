@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.spi.auto.onboard;
 
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.spi.datasource.MetadataSourceConfig;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 
 /**
@@ -29,16 +29,16 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
  */
 public abstract class AutoOnboard {
 
-  protected final MetadataSourceConfig metadataSourceConfig;
+  protected final DataSourceMetaBean meta;
   protected MetricConfigManager metricConfigManager;
   protected DatasetConfigManager datasetConfigManager;
 
-  public AutoOnboard(MetadataSourceConfig metadataSourceConfig) {
-    this.metadataSourceConfig = metadataSourceConfig;
+  public AutoOnboard(DataSourceMetaBean meta) {
+    this.meta = meta;
   }
 
-  public MetadataSourceConfig getMetadataSourceConfig() {
-    return metadataSourceConfig;
+  public DataSourceMetaBean getMeta() {
+    return meta;
   }
 
   public void init(ThirdEyeDataSourceContext context) {

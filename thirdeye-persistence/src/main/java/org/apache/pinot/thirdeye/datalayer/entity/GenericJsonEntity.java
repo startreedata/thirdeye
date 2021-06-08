@@ -23,7 +23,7 @@ public class GenericJsonEntity extends AbstractEntity {
 
   protected String jsonVal;
 
-  protected String beanClass;
+  protected String type;
 
   public String getJsonVal() {
     return jsonVal;
@@ -33,11 +33,11 @@ public class GenericJsonEntity extends AbstractEntity {
     this.jsonVal = jsonVal;
   }
 
-  public String getBeanClass() {
-    return beanClass;
+  public String getType() {
+    return type;
   }
 
-  public void setBeanClass(String beanClass) {
-    this.beanClass = beanClass;
+  public void setType(String type) {
+    this.type = type;
   }
 }

@@ -2,12 +2,12 @@ CREATE TABLE IF NOT EXISTS generic_json_entity
 (
     id          bigint(20) PRIMARY KEY AUTO_INCREMENT,
     json_val    text,
-    beanClass   varchar(200),
+    type        varchar(100),
     create_time timestamp,
     update_time timestamp DEFAULT CURRENT_TIMESTAMP,
     version     int(10)
 ) ENGINE = InnoDB;
-CREATE INDEX generic_json_entity_beanclass_idx ON generic_json_entity (beanClass);
+CREATE INDEX generic_json_entity_type_idx ON generic_json_entity (type);
 
 CREATE TABLE IF NOT EXISTS job_index
 (

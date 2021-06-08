@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS anomaly_feedback_index;
 DROP TABLE IF EXISTS anomaly_subscription_group_notification_index;
 DROP TABLE IF EXISTS application_index;
 DROP TABLE IF EXISTS autotune_config_index;
+DROP TABLE IF EXISTS data_source_index;
 DROP TABLE IF EXISTS dataset_config_index;
 DROP TABLE IF EXISTS detection_alert_config_index;
 DROP TABLE IF EXISTS detection_config_index;

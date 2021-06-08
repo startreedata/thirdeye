@@ -66,7 +66,7 @@ public class PinotDatasetOnboarderTest {
     datasetConfigDAO = injector.getInstance(DatasetConfigManager.class);
     metricConfigDAO = injector.getInstance(MetricConfigManager.class);
 
-    pinotDatasetOnboarder = new PinotDatasetOnboarder(mock(AutoOnboardPinotMetricsUtils.class),
+    pinotDatasetOnboarder = new PinotDatasetOnboarder(mock(ThirdEyePinotClient.class),
         datasetConfigDAO,
         metricConfigDAO);
     schema = Schema

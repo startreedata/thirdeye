@@ -53,9 +53,9 @@ import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AutoOnboardPinotMetricsUtils {
+public class ThirdEyePinotClient {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardPinotMetricsUtils.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyePinotClient.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final org.codehaus.jackson.map.ObjectMapper CODEHAUS_OBJECT_MAPPER =
       new org.codehaus.jackson.map.ObjectMapper();
@@ -69,8 +69,7 @@ public class AutoOnboardPinotMetricsUtils {
   private final CloseableHttpClient pinotControllerClient;
   private final HttpHost pinotControllerHost;
 
-  public AutoOnboardPinotMetricsUtils(DataSourceMetaBean dataSourceMeta)
-      throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+  public ThirdEyePinotClient(DataSourceMetaBean dataSourceMeta) {
     final PinotThirdEyeDataSourceConfig config = createFromMetadataSourceConfig(dataSourceMeta);
     final String controllerConnectionScheme = config.getControllerConnectionScheme();
 
@@ -80,8 +79,7 @@ public class AutoOnboardPinotMetricsUtils {
         controllerConnectionScheme);
   }
 
-  private CloseableHttpClient buildPinotControllerClient(final String controllerConnectionScheme)
-      throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
+  private CloseableHttpClient buildPinotControllerClient(final String controllerConnectionScheme) {
     if (HTTPS_SCHEME.equals(controllerConnectionScheme)) {
       try {
         // Accept all SSL certificate because we assume that the Pinot broker are setup in the
@@ -96,7 +94,7 @@ public class AutoOnboardPinotMetricsUtils {
       } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
         // This section shouldn't happen because we use Accept All Strategy
         LOG.error("Failed to start auto onboard for Pinot data source.");
-        throw e;
+        throw new RuntimeException(e);
       }
     }
     return HttpClients.createDefault();

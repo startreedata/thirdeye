@@ -19,9 +19,6 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.auto.onboard.AutoOnboard;
@@ -41,48 +38,34 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
 
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardPinotMetadataSource.class);
 
-  private final AutoOnboardPinotMetricsUtils autoLoadPinotMetricsUtils;
+  private final ThirdEyePinotClient thirdEyePinotClient;
   private final String dataSourceName;
 
-  public AutoOnboardPinotMetadataSource(DataSourceMetaBean dataSourceMeta)
-      throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+  public AutoOnboardPinotMetadataSource(DataSourceMetaBean dataSourceMeta) {
     super(dataSourceMeta);
-    autoLoadPinotMetricsUtils = createAutoOnboardPinotMetricsUtils(dataSourceMeta);
-
-    this.dataSourceName = MapUtils.getString(dataSourceMeta.getProperties(), "name",
+    thirdEyePinotClient = new ThirdEyePinotClient(dataSourceMeta);
+    dataSourceName = MapUtils.getString(dataSourceMeta.getProperties(), "name",
         PinotThirdEyeDataSource.class.getSimpleName());
   }
 
   public AutoOnboardPinotMetadataSource(DataSourceMetaBean dataSourceMeta,
-      final AutoOnboardPinotMetricsUtils utils,
+      final ThirdEyePinotClient thirdEyePinotClient,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
     super(dataSourceMeta);
-    autoLoadPinotMetricsUtils = utils;
+    this.thirdEyePinotClient = thirdEyePinotClient;
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
-    this.dataSourceName = MapUtils.getString(dataSourceMeta.getProperties(), "name",
-        PinotThirdEyeDataSource.class.getSimpleName());
-  }
 
-  private AutoOnboardPinotMetricsUtils createAutoOnboardPinotMetricsUtils(
-      final DataSourceMetaBean dataSourceMeta)
-      throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-    try {
-      final AutoOnboardPinotMetricsUtils autoLoadPinotMetricsUtils =
-          new AutoOnboardPinotMetricsUtils(dataSourceMeta);
-      LOG.info("Created {}", AutoOnboardPinotMetadataSource.class.getName());
-      return autoLoadPinotMetricsUtils;
-    } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-      throw e;
-    }
+    dataSourceName = MapUtils.getString(dataSourceMeta.getProperties(), "name",
+        PinotThirdEyeDataSource.class.getSimpleName());
   }
 
   public void run() {
     try {
       LOG.info("Checking all pinot tables");
       final PinotDatasetOnboarder pinotDatasetOnboarder = new PinotDatasetOnboarder(
-          autoLoadPinotMetricsUtils,
+          thirdEyePinotClient,
           datasetConfigManager,
           metricConfigManager);
       pinotDatasetOnboarder.onboardAll(dataSourceName);

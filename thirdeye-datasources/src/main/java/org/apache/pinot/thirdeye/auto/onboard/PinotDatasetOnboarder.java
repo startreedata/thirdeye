@@ -42,15 +42,15 @@ public class PinotDatasetOnboarder {
   private static final Set<String> DIMENSION_SUFFIX_BLACKLIST = new HashSet<>(
       Arrays.asList("_topk", "_approximate", "_tDigest"));
 
-  private final AutoOnboardPinotMetricsUtils autoLoadPinotMetricsUtils;
+  private final ThirdEyePinotClient thirdEyePinotClient;
   private final DatasetConfigManager datasetConfigManager;
   private final MetricConfigManager metricConfigManager;
 
   public PinotDatasetOnboarder(
-      final AutoOnboardPinotMetricsUtils autoLoadPinotMetricsUtils,
+      final ThirdEyePinotClient thirdEyePinotClient,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
-    this.autoLoadPinotMetricsUtils = autoLoadPinotMetricsUtils;
+    this.thirdEyePinotClient = thirdEyePinotClient;
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
   }
@@ -77,7 +77,7 @@ public class PinotDatasetOnboarder {
 
   public ImmutableList<String> getAllTables() throws IOException {
     final Builder<String> tables = ImmutableList.builder();
-    autoLoadPinotMetricsUtils.getAllTablesFromPinot()
+    thirdEyePinotClient.getAllTablesFromPinot()
         .forEach(table -> tables.add(table.asText()));
     return tables.build();
   }
@@ -93,27 +93,27 @@ public class PinotDatasetOnboarder {
 
   private void onboardTable(final String tableName, final String dataSourceName)
       throws IOException {
-    final Schema schema = autoLoadPinotMetricsUtils.getSchemaFromPinot(tableName);
+    final Schema schema = thirdEyePinotClient.getSchemaFromPinot(tableName);
     if (schema == null) {
       LOG.error("schema not found for pinot table: " + tableName);
       return;
     }
 
-    final JsonNode tableConfigJson = autoLoadPinotMetricsUtils
+    final JsonNode tableConfigJson = thirdEyePinotClient
         .getTableConfigFromPinotEndpoint(tableName);
     if (tableConfigJson == null || tableConfigJson.isNull()) {
       LOG.error("table config is null for pinot table: " + tableName);
       return;
     }
 
-    final String timeColumnName = autoLoadPinotMetricsUtils
+    final String timeColumnName = thirdEyePinotClient
         .extractTimeColumnFromPinotTable(tableConfigJson);
-    if (!autoLoadPinotMetricsUtils.verifySchemaCorrectness(schema, timeColumnName)) {
+    if (!thirdEyePinotClient.verifySchemaCorrectness(schema, timeColumnName)) {
       LOG.info("Incorrect schema in pinot table: " + tableName);
       return;
     }
 
-    final Map<String, String> pinotCustomProperties = autoLoadPinotMetricsUtils
+    final Map<String, String> pinotCustomProperties = thirdEyePinotClient
         .extractCustomConfigsFromPinotTable(tableConfigJson);
 
     final DatasetConfigDTO existingDataset = datasetConfigManager.findByDataset(tableName);

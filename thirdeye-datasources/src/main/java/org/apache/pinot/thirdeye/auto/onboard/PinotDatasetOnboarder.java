@@ -82,13 +82,18 @@ public class PinotDatasetOnboarder {
     return tables.build();
   }
 
-  public void onboardAll(final String dataSourceName) throws IOException {
+  public List<DatasetConfigDTO> onboardAll(final String dataSourceName) throws IOException {
     final List<String> allTables = getAllTables();
     deactivateDatasets(allTables, dataSourceName);
 
+    List<DatasetConfigDTO> onboarded = new ArrayList<>();
     for (String tableName : allTables) {
-      onboardTable(tableName, dataSourceName);
+      final DatasetConfigDTO datasetConfigDTO = onboardTable(tableName, dataSourceName);
+      if (datasetConfigDTO != null) {
+        onboarded.add(datasetConfigDTO);
+      }
     }
+    return onboarded;
   }
 
   public DatasetConfigDTO onboardTable(final String tableName, final String dataSourceName)

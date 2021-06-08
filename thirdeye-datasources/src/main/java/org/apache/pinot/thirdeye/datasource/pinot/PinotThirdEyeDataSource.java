@@ -490,18 +490,35 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
+  public List<DatasetConfigDTO> onboardAll() {
+    final PinotDatasetOnboarder pinotDatasetOnboarder = createPinotDatasetOnboarder();
+
+    try {
+      return pinotDatasetOnboarder.onboardAll(name);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  @Override
   public DatasetConfigDTO onboardDataset(final String datasetName) {
-    final ThirdEyePinotClient thirdEyePinotClient = new ThirdEyePinotClient(new DataSourceMetaBean()
-        .setProperties(context.getProperties()));
-    final PinotDatasetOnboarder pinotDatasetOnboarder = new PinotDatasetOnboarder(
-        thirdEyePinotClient,
-        context.getDatasetConfigManager(),
-        context.getMetricConfigManager());
+    final PinotDatasetOnboarder pinotDatasetOnboarder = createPinotDatasetOnboarder();
 
     try {
       return pinotDatasetOnboarder.onboardTable(datasetName, name);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private PinotDatasetOnboarder createPinotDatasetOnboarder() {
+    final ThirdEyePinotClient thirdEyePinotClient = new ThirdEyePinotClient(new DataSourceMetaBean()
+        .setProperties(context.getProperties()));
+    final PinotDatasetOnboarder pinotDatasetOnboarder = new PinotDatasetOnboarder(
+        thirdEyePinotClient,
+        context.getDatasetConfigManager(),
+        context.getMetricConfigManager());
+    return pinotDatasetOnboarder;
   }
 }

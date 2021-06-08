@@ -43,6 +43,15 @@ public interface ThirdEyeDataSource {
   List<String> getDatasets() throws Exception;
 
   /**
+   * Onboard all datasets available in the data source.
+   *
+   * @return ThirdEye dataset describing available dimensions and metrics.
+   */
+  default List<DatasetConfigDTO> onboardAll() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
    * Fetch metadata about the dataset.
    *
    * @param datasetName name of the table

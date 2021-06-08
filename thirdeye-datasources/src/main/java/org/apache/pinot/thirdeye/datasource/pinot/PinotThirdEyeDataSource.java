@@ -26,6 +26,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -40,6 +41,8 @@ import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
 import org.apache.pinot.common.utils.DataSchema.ColumnDataType;
+import org.apache.pinot.thirdeye.auto.onboard.PinotDatasetOnboarder;
+import org.apache.pinot.thirdeye.auto.onboard.ThirdEyePinotClient;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
@@ -48,6 +51,7 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdeyeResultSetDat
 import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.LogicalView;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.RelationalThirdEyeResponse;
@@ -76,6 +80,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
   private PinotDataSourceTimeQuery pinotDataSourceTimeQuery;
   private PinotDataSourceDimensionFilters pinotDataSourceDimensionFilters;
+  private ThirdEyeDataSourceContext context;
 
   /**
    * Constructs a PinotResponseCacheLoader from the given property map and initialize the loader
@@ -174,6 +179,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public void init(final ThirdEyeDataSourceContext context) {
     Map<String, Object> properties = requireNonNull(context.getProperties(),
         "Data source property cannot be empty.");
+
+    this.context = context;
 
     try {
       pinotResponseCacheLoader = getCacheLoaderInstance(properties);
@@ -483,7 +490,18 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public DatasetConfigDTO getDatasetMetadata(final String datasetName) {
-    return null;
+  public DatasetConfigDTO onboardDataset(final String datasetName) {
+    final ThirdEyePinotClient thirdEyePinotClient = new ThirdEyePinotClient(new DataSourceMetaBean()
+        .setProperties(context.getProperties()));
+    final PinotDatasetOnboarder pinotDatasetOnboarder = new PinotDatasetOnboarder(
+        thirdEyePinotClient,
+        context.getDatasetConfigManager(),
+        context.getMetricConfigManager());
+
+    try {
+      return pinotDatasetOnboarder.onboardTable(datasetName, name);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

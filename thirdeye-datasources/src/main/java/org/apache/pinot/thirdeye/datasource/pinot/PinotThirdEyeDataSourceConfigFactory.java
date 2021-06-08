@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,20 +24,6 @@ public class PinotThirdEyeDataSourceConfigFactory {
   }
 
   /**
-   * Returns pinot thirdeye datasource config given metadatasource config. There can be only ONE
-   * datasource of pinot type
-   */
-  public static PinotThirdEyeDataSourceConfig createFromMetadataSourceConfig(
-      DataSourceMetaBean metadataSourceConfig) {
-    if (metadataSourceConfig == null || !AutoOnboardPinotMetadataSource.class.getCanonicalName()
-        .equals(metadataSourceConfig.getClassRef())) {
-      throw new IllegalStateException(
-          "Metadata source config is not of type pinot " + metadataSourceConfig);
-    }
-    return createFromProperties(metadataSourceConfig.getProperties());
-  }
-
-  /**
    * Returns PinotThirdEyeDataSourceConfig from the given property map.
    *
    * @param properties the properties to setup a PinotThirdEyeDataSourceConfig.
@@ -48,7 +32,7 @@ public class PinotThirdEyeDataSourceConfigFactory {
    *     necessary fields, i.e.,
    *     controller host and port, cluster name, and the URL to zoo keeper.
    */
-  static PinotThirdEyeDataSourceConfig createFromProperties(Map<String, Object> properties) {
+  public static PinotThirdEyeDataSourceConfig createFromProperties(Map<String, Object> properties) {
     String dataSourceName = MapUtils
         .getString(properties, PinotThirdeyeDataSourceProperties.NAME.getValue(),
             PinotThirdEyeDataSource.class.getSimpleName());

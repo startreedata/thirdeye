@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.auto.onboard;
 
 import static org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSourceConfigFactory.HTTPS_SCHEME;
-import static org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSourceConfigFactory.createFromMetadataSourceConfig;
+import static org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSourceConfigFactory.createFromProperties;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -70,7 +70,7 @@ public class ThirdEyePinotClient {
   private final HttpHost pinotControllerHost;
 
   public ThirdEyePinotClient(DataSourceMetaBean dataSourceMeta) {
-    final PinotThirdEyeDataSourceConfig config = createFromMetadataSourceConfig(dataSourceMeta);
+    final PinotThirdEyeDataSourceConfig config = createFromProperties(dataSourceMeta.getProperties());
     final String controllerConnectionScheme = config.getControllerConnectionScheme();
 
     pinotControllerClient = buildPinotControllerClient(controllerConnectionScheme);

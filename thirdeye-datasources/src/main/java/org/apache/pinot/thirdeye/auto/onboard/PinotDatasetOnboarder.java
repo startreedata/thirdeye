@@ -1,14 +1,14 @@
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -91,33 +91,33 @@ public class PinotDatasetOnboarder {
     }
   }
 
-  private void onboardTable(final String tableName, final String dataSourceName)
+  public DatasetConfigDTO onboardTable(final String tableName, final String dataSourceName)
       throws IOException {
     final Schema schema = thirdEyePinotClient.getSchemaFromPinot(tableName);
     if (schema == null) {
       LOG.error("schema not found for pinot table: " + tableName);
-      return;
+      return null;
     }
 
     final JsonNode tableConfigJson = thirdEyePinotClient
         .getTableConfigFromPinotEndpoint(tableName);
     if (tableConfigJson == null || tableConfigJson.isNull()) {
       LOG.error("table config is null for pinot table: " + tableName);
-      return;
+      return null;
     }
 
     final String timeColumnName = thirdEyePinotClient
         .extractTimeColumnFromPinotTable(tableConfigJson);
     if (!thirdEyePinotClient.verifySchemaCorrectness(schema, timeColumnName)) {
       LOG.info("Incorrect schema in pinot table: " + tableName);
-      return;
+      return null;
     }
 
     final Map<String, String> pinotCustomProperties = thirdEyePinotClient
         .extractCustomConfigsFromPinotTable(tableConfigJson);
 
     final DatasetConfigDTO existingDataset = datasetConfigManager.findByDataset(tableName);
-    addPinotDataset(tableName,
+    return addPinotDataset(tableName,
         schema,
         timeColumnName,
         pinotCustomProperties,
@@ -126,27 +126,21 @@ public class PinotDatasetOnboarder {
   }
 
   void deactivateDatasets(List<String> allDatasets, final String dataSourceName) {
-    LOG.info("deactivating deleted Pinot datasets");
-    List<DatasetConfigDTO> allExistingDataset = datasetConfigManager.findAll();
-    Set<String> datasets = new HashSet<>(allDatasets);
+    requireNonNull(dataSourceName, "data source name is null");
 
-    Collection<DatasetConfigDTO> filtered = Collections2
-        .filter(allExistingDataset, datasetConfigDTO -> datasetConfigDTO.getDataSource()
-            .equals(dataSourceName));
-
-    for (DatasetConfigDTO datasetConfigDTO : filtered) {
-      if (shouldDeactivateDataset(datasetConfigDTO, datasets)) {
-        LOG.info("Deactivating pinot dataset '{}'", datasetConfigDTO.getDataset());
-        datasetConfigDTO.setActive(false);
-        datasetConfigManager.save(datasetConfigDTO);
-      }
-    }
+    final Set<String> datasets = new HashSet<>(allDatasets);
+    datasetConfigManager.findAll()
+        .stream()
+        .filter(dataset -> dataSourceName.equals(dataset.getDataSource()))
+        .filter(dataset -> shouldDeactivateDataset(dataset, datasets))
+        .peek(dataset -> dataset.setActive(false))
+        .forEach(datasetConfigManager::save);
   }
 
   /**
    * Adds a dataset to the thirdeye database
    */
-  public void addPinotDataset(String dataset,
+  public DatasetConfigDTO addPinotDataset(String dataset,
       Schema schema,
       String timeColumnName,
       Map<String, String> customConfigs,
@@ -154,17 +148,21 @@ public class PinotDatasetOnboarder {
       final String dataSourceName) {
     if (datasetConfig == null) {
       LOG.info("Dataset {} is new, adding it to thirdeye", dataset);
-      addNewDataset(dataset, schema, timeColumnName, customConfigs, dataSourceName);
+      return addNewDataset(dataset,
+          schema,
+          timeColumnName,
+          customConfigs,
+          dataSourceName);
     } else {
       LOG.info("Dataset {} already exists, checking for updates", dataset);
-      refreshOldDataset(dataset, schema, timeColumnName, customConfigs, datasetConfig);
+      return refreshOldDataset(dataset, schema, timeColumnName, customConfigs, datasetConfig);
     }
   }
 
   /**
    * Adds a new dataset to the thirdeye database
    */
-  private void addNewDataset(String dataset,
+  private DatasetConfigDTO addNewDataset(String dataset,
       Schema schema,
       String timeColumnName,
       Map<String, String> customConfigs,
@@ -184,13 +182,14 @@ public class PinotDatasetOnboarder {
       LOG.info("Creating metric {} for {}", metricConfigDTO.getName(), dataset);
       metricConfigManager.save(metricConfigDTO);
     }
+    return datasetConfigDTO;
   }
 
   /**
    * Refreshes an existing dataset in the thirdeye database
    * with any dimension/metric changes from pinot schema
    */
-  private void refreshOldDataset(String dataset,
+  private DatasetConfigDTO refreshOldDataset(String dataset,
       Schema schema,
       String timeColumnName,
       Map<String, String> customConfigs,
@@ -201,6 +200,7 @@ public class PinotDatasetOnboarder {
     appendNewCustomConfigs(datasetConfig, customConfigs);
     ConfigGenerator.checkNonAdditive(datasetConfig);
     datasetConfig.setActive(true);
+    return datasetConfig;
   }
 
   private void checkDimensionChanges(String dataset, DatasetConfigDTO datasetConfig,

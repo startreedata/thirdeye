@@ -48,7 +48,7 @@ public interface ThirdEyeDataSource {
    * @param datasetName name of the table
    * @return ThirdEye dataset describing available dimensions and metrics.
    */
-  default DatasetConfigDTO getDatasetMetadata(String datasetName) {
+  default DatasetConfigDTO onboardDataset(String datasetName) {
     throw new UnsupportedOperationException();
   }
 

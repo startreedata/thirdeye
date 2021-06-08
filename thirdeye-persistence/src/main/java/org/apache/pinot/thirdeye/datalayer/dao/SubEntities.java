@@ -1,7 +1,6 @@
 package org.apache.pinot.thirdeye.datalayer.dao;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
@@ -47,60 +46,40 @@ import org.apache.pinot.thirdeye.spi.datalayer.pojo.RootcauseTemplateBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.SessionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.TaskBean;
 
-public class EntityInfoBuilder {
+/**
+ * ThirdEye entities consists of GenericJsonEntity and the index tables of the sub entities.
+ * Sub Entities are the main business objects which are alerts, metrics, datasets, datasources, etc
+ */
+public class SubEntities {
 
-  private static final String DEFAULT_BASE_TABLE_NAME = "GENERIC_JSON_ENTITY";
-  private final Map<Class<? extends AbstractDTO>, EntityInfo> entityInfoMap;
+  static final ImmutableMap<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>
+      beanIndexMap = buildBeanIndexMap();
 
-  public EntityInfoBuilder() {
-    entityInfoMap = buildEntityInfoMap();
-  }
-
-  private static EntityInfo entityInfo(
-      final Class<? extends AbstractIndexEntity> indexEntityClass) {
-    return new EntityInfo(DEFAULT_BASE_TABLE_NAME, indexEntityClass);
-  }
-
-  public Map<Class<? extends AbstractDTO>, EntityInfo> getEntityInfoMap() {
-    return entityInfoMap;
-  }
-
-  private ImmutableMap<Class<? extends AbstractDTO>, EntityInfo> buildEntityInfoMap() {
-    return ImmutableMap.<Class<? extends AbstractDTO>, EntityInfo>builder()
-        .put(AnomalyFeedbackBean.class, entityInfo(AnomalyFeedbackIndex.class))
-        .put(JobBean.class, entityInfo(JobIndex.class))
-        .put(TaskBean.class, entityInfo(TaskIndex.class))
-        .put(MergedAnomalyResultBean.class, entityInfo(MergedAnomalyResultIndex.class))
-        .put(DataSourceBean.class, entityInfo(DataSourceIndex.class))
-        .put(DatasetConfigBean.class, entityInfo(DatasetConfigIndex.class))
-        .put(MetricConfigBean.class, entityInfo(MetricConfigIndex.class))
-        .put(OverrideConfigBean.class, entityInfo(OverrideConfigIndex.class))
-        .put(EventBean.class, entityInfo(EventIndex.class))
-        .put(DetectionStatusBean.class, entityInfo(DetectionStatusIndex.class))
-        .put(EntityToEntityMappingBean.class, entityInfo(EntityToEntityMappingIndex.class))
-        .put(OnboardDatasetMetricBean.class, entityInfo(OnboardDatasetMetricIndex.class))
-        .put(ApplicationBean.class, entityInfo(ApplicationIndex.class))
-        .put(RootcauseSessionBean.class, entityInfo(RootcauseSessionIndex.class))
-        .put(SessionBean.class, entityInfo(SessionIndex.class))
-        .put(DetectionConfigBean.class, entityInfo(DetectionConfigIndex.class))
-        .put(DetectionAlertConfigBean.class, entityInfo(DetectionAlertConfigIndex.class))
-        .put(EvaluationBean.class, entityInfo(EvaluationIndex.class))
-        .put(RootcauseTemplateBean.class, entityInfo(RootcauseTemplateIndex.class))
-        .put(OnlineDetectionDataBean.class, entityInfo(OnlineDetectionDataIndex.class))
+  private static ImmutableMap<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>
+  buildBeanIndexMap() {
+    return ImmutableMap.<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>builder()
+        .put(AnomalyFeedbackBean.class, AnomalyFeedbackIndex.class)
+        .put(JobBean.class, JobIndex.class)
+        .put(TaskBean.class, TaskIndex.class)
+        .put(MergedAnomalyResultBean.class, MergedAnomalyResultIndex.class)
+        .put(DataSourceBean.class, DataSourceIndex.class)
+        .put(DatasetConfigBean.class, DatasetConfigIndex.class)
+        .put(MetricConfigBean.class, MetricConfigIndex.class)
+        .put(OverrideConfigBean.class, OverrideConfigIndex.class)
+        .put(EventBean.class, EventIndex.class)
+        .put(DetectionStatusBean.class, DetectionStatusIndex.class)
+        .put(EntityToEntityMappingBean.class, EntityToEntityMappingIndex.class)
+        .put(OnboardDatasetMetricBean.class, OnboardDatasetMetricIndex.class)
+        .put(ApplicationBean.class, ApplicationIndex.class)
+        .put(RootcauseSessionBean.class, RootcauseSessionIndex.class)
+        .put(SessionBean.class, SessionIndex.class)
+        .put(DetectionConfigBean.class, DetectionConfigIndex.class)
+        .put(DetectionAlertConfigBean.class, DetectionAlertConfigIndex.class)
+        .put(EvaluationBean.class, EvaluationIndex.class)
+        .put(RootcauseTemplateBean.class, RootcauseTemplateIndex.class)
+        .put(OnlineDetectionDataBean.class, OnlineDetectionDataIndex.class)
         .put(AnomalySubscriptionGroupNotificationBean.class,
-            entityInfo(AnomalySubscriptionGroupNotificationIndex.class))
+            AnomalySubscriptionGroupNotificationIndex.class)
         .build();
-  }
-
-  static class EntityInfo {
-
-    final String baseTableName;
-    final Class<? extends AbstractIndexEntity> indexEntityClass;
-
-    public EntityInfo(final String baseTableName,
-        final Class<? extends AbstractIndexEntity> indexEntityClass) {
-      this.baseTableName = baseTableName;
-      this.indexEntityClass = indexEntityClass;
-    }
   }
 }

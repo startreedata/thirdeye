@@ -85,7 +85,10 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 public class ThirdEyePersistenceModule extends AbstractModule {
 
   private static final List<Class<? extends AbstractEntity>> ENTITY_CLASSES = Arrays.asList(
+      // Main data table
       GenericJsonEntity.class,
+
+      // All index tables
       AnomalyFeedbackIndex.class,
       JobIndex.class,
       MergedAnomalyResultIndex.class,

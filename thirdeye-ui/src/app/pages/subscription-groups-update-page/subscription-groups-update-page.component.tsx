@@ -100,17 +100,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             getAllAlerts(),
         ])
             .then(([subscriptionGroupResponse, alertsResponse]): void => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupResponse.status === "rejected" ||
-                    alertsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
                 // Attempt to gather data
                 if (subscriptionGroupResponse.status === "fulfilled") {
                     setSubscriptionGroup(subscriptionGroupResponse.value);

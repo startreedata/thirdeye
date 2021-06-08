@@ -76,15 +76,17 @@ describe("Axios Util", () => {
         expect(mockHandleUnauthenticatedAccess).not.toHaveBeenCalled();
     });
 
-    it("axios rejected response interceptor should throw 500 error and invoke unauthenticated access function", () => {
+    it("axios rejected response interceptor should throw any error other than 401 and invoke enqueue snackbar function", () => {
         const responseInterceptor = getRejectedResponseInterceptor(
             mockHandleUnauthenticatedAccess,
             mockEnqueueSnackbar
         );
 
         expect(() => responseInterceptor(mockInternalServerError)).toThrow();
-        expect(mockEnqueueSnackbar).toHaveBeenCalled();
-        expect(mockHandleUnauthenticatedAccess).not.toHaveBeenCalled();
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith("testError", {
+            preventDuplicate: false,
+            variant: "error",
+        });
     });
 });
 
@@ -100,5 +102,13 @@ const mockUnauthenticatedAccessError = {
 const mockInternalServerError = {
     response: {
         status: 500,
+        data: {
+            list: [
+                {
+                    code: "ERR_TEST",
+                    msg: "testError",
+                },
+            ],
+        },
     },
 } as AxiosError;

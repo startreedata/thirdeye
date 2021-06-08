@@ -1,4 +1,5 @@
 import { AxiosError, AxiosRequestConfig } from "axios";
+import { isEmpty } from "lodash";
 import type { OptionsObject, SnackbarKey, SnackbarMessage } from "notistack";
 import { getErrorSnackbarOption } from "../snackbar/snackbar.util";
 
@@ -46,10 +47,20 @@ export const getRejectedResponseInterceptor = (
         if (error && error.response && error.response.status === 401) {
             // Unauthenticated access
             unauthenticatedAccessFn && unauthenticatedAccessFn();
-        } else if (error && error.response && error.response.status === 500) {
-            // Toast error message
-            const erroMessage = error.response.data?.list[0]?.msg || "";
-            enqueueSnackbar(erroMessage, getErrorSnackbarOption());
+        } else if (
+            error &&
+            error.response &&
+            error.response.data &&
+            error.response.data.list.length
+        ) {
+            error.response.data.list.map(
+                (err: { code: string; msg: string }) => {
+                    // Toast error message
+                    if (!isEmpty(err.msg)) {
+                        enqueueSnackbar(err.msg, getErrorSnackbarOption());
+                    }
+                }
+            );
         }
 
         throw error;

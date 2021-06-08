@@ -128,10 +128,7 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
 
             setAccessToken(auth.accessToken);
         } catch (error) {
-            enqueueSnackbar(
-                t("message.sign-in-error"),
-                getErrorSnackbarOption()
-            );
+            console.error(error);
 
             return false;
         }

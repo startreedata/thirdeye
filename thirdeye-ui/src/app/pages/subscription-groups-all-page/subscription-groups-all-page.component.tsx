@@ -15,10 +15,7 @@ import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
+import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
@@ -47,17 +44,6 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         let fetchedAlerts: Alert[] = [];
         Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
             .then(([subscriptionGroupsResponse, alertsResponse]) => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupsResponse.status === "rejected" ||
-                    alertsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
                 // Attempt to gather data
                 if (alertsResponse.status === "fulfilled") {
                     fetchedAlerts = alertsResponse.value;

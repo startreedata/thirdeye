@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.auto.onboard;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -29,7 +31,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -120,26 +121,57 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
         String.format("Could not resolve column name for '%s'", metricConfig));
   }
 
+  public ImmutableList<String> getAllTables() throws IOException {
+    final Builder<String> tables = ImmutableList.builder();
+    autoLoadPinotMetricsUtils.getAllTablesFromPinot()
+        .forEach(table -> tables.add(table.asText()));
+    return tables.build();
+  }
+
   public void run() {
     try {
-      List<String> allDatasets = new ArrayList<>();
-      Map<String, Schema> allSchemas = new HashMap<>();
-      Map<String, Map<String, String>> allCustomConfigs = new HashMap<>();
-      Map<String, String> datasetToTimeColumn = new HashMap<>();
-      loadDatasets(allDatasets, allSchemas, allCustomConfigs, datasetToTimeColumn);
-      LOG.info("Checking all datasets");
-      deactivateDatasets(allDatasets);
-      for (String dataset : allDatasets) {
-        LOG.info("Checking dataset {}", dataset);
-        Schema schema = allSchemas.get(dataset);
-        Map<String, String> customConfigs = allCustomConfigs.get(dataset);
-        String timeColumnName = datasetToTimeColumn.get(dataset);
-        DatasetConfigDTO datasetConfig = datasetConfigManager.findByDataset(dataset);
-        addPinotDataset(dataset, schema, timeColumnName, customConfigs, datasetConfig);
-      }
+      LOG.info("Checking all pinot tables");
+      onboardAll();
     } catch (Exception e) {
       LOG.error("Exception in loading datasets", e);
     }
+  }
+
+  private void onboardAll() throws IOException {
+    final List<String> allTables = getAllTables();
+    deactivateDatasets(allTables);
+
+    for (String tableName : allTables) {
+      onboardTable(tableName);
+    }
+  }
+
+  private void onboardTable(final String tableName) throws IOException {
+    final Schema schema = autoLoadPinotMetricsUtils.getSchemaFromPinot(tableName);
+    if (schema == null) {
+      LOG.error("schema not found for pinot table: " + tableName);
+      return;
+    }
+
+    final JsonNode tableConfigJson = autoLoadPinotMetricsUtils
+        .getTableConfigFromPinotEndpoint(tableName);
+    if (tableConfigJson == null || tableConfigJson.isNull()) {
+      LOG.error("table config is null for pinot table: " + tableName);
+      return;
+    }
+
+    final String timeColumnName = autoLoadPinotMetricsUtils
+        .extractTimeColumnFromPinotTable(tableConfigJson);
+    if (!autoLoadPinotMetricsUtils.verifySchemaCorrectness(schema, timeColumnName)) {
+      LOG.info("Incorrect schema in pinot table: " + tableName);
+      return;
+    }
+
+    final Map<String, String> pinotCustomProperties = autoLoadPinotMetricsUtils
+        .extractCustomConfigsFromPinotTable(tableConfigJson);
+
+    final DatasetConfigDTO existingDataset = datasetConfigManager.findByDataset(tableName);
+    addPinotDataset(tableName, schema, timeColumnName, pinotCustomProperties, existingDataset);
   }
 
   void deactivateDatasets(List<String> allDatasets) {
@@ -180,10 +212,11 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
   /**
    * Adds a dataset to the thirdeye database
    */
-  public void addPinotDataset(String dataset, Schema schema, String timeColumnName,
+  public void addPinotDataset(String dataset,
+      Schema schema,
+      String timeColumnName,
       Map<String, String> customConfigs,
-      DatasetConfigDTO datasetConfig)
-      throws Exception {
+      DatasetConfigDTO datasetConfig) {
     if (datasetConfig == null) {
       LOG.info("Dataset {} is new, adding it to thirdeye", dataset);
       addNewDataset(dataset, schema, timeColumnName, customConfigs);
@@ -219,10 +252,13 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
    * Refreshes an existing dataset in the thirdeye database
    * with any dimension/metric changes from pinot schema
    */
-  private void refreshOldDataset(String dataset, Schema schema, String timeColumnName,
-      Map<String, String> customConfigs, DatasetConfigDTO datasetConfig) {
+  private void refreshOldDataset(String dataset,
+      Schema schema,
+      String timeColumnName,
+      Map<String, String> customConfigs,
+      DatasetConfigDTO datasetConfig) {
     checkDimensionChanges(dataset, datasetConfig, schema);
-    checkMetricChanges(dataset, datasetConfig, schema);
+    checkMetricChanges(dataset, schema);
     checkTimeFieldChanges(datasetConfig, schema, timeColumnName);
     appendNewCustomConfigs(datasetConfig, customConfigs);
     ConfigGenerator.checkNonAdditive(datasetConfig);
@@ -302,7 +338,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     }
   }
 
-  private void checkMetricChanges(String dataset, DatasetConfigDTO datasetConfig, Schema schema) {
+  private void checkMetricChanges(String dataset, Schema schema) {
     LOG.info("Checking for metric changes in {}", dataset);
 
     // Fetch metrics from Thirdeye
@@ -335,7 +371,8 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     // audit existing metrics in ThirdEye
     for (MetricConfigDTO metricConfig : datasetMetricConfigs) {
       if (!schemaMetricNames.contains(getColumnName(metricConfig))) {
-        if (metricConfig.getDerivedMetricExpression() == null && !metricConfig.getName().equals(ROW_COUNT)) {
+        if (metricConfig.getDerivedMetricExpression() == null && !metricConfig.getName()
+            .equals(ROW_COUNT)) {
           // if metric is removed from schema and not a derived/row_count metric, deactivate it
           LOG.info("Deactivating metric {} in {}", metricConfig.getName(), dataset);
           metricConfig.setActive(false);
@@ -411,44 +448,6 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
       if (hasUpdate) {
         datasetConfig.setProperties(properties);
         datasetConfigManager.update(datasetConfig);
-      }
-    }
-  }
-
-  /**
-   * For every table in Pinot, fetches the following:
-   * 1. Pinot schema
-   * 2. TimeColumnName from Pinot table config
-   * 3. Custom property map from Pinot table config
-   */
-  private void loadDatasets(List<String> allDatasets, Map<String, Schema> allSchemas,
-      Map<String, Map<String, String>> allCustomConfigs, Map<String, String> datasetToTimeColumnMap)
-      throws IOException {
-
-    JsonNode tables = autoLoadPinotMetricsUtils.getAllTablesFromPinot();
-    LOG.info("Getting all schemas");
-    for (JsonNode table : tables) {
-      String dataset = table.asText();
-      Schema schema = autoLoadPinotMetricsUtils.getSchemaFromPinot(dataset);
-      if (schema != null) {
-        JsonNode tableConfigJson = autoLoadPinotMetricsUtils
-            .getTableConfigFromPinotEndpoint(dataset);
-        String timeColumnName = null;
-        Map<String, String> pinotCustomProperty = null;
-        if (tableConfigJson != null && !tableConfigJson.isNull()) {
-          timeColumnName = autoLoadPinotMetricsUtils
-              .extractTimeColumnFromPinotTable(tableConfigJson);
-          pinotCustomProperty =
-              autoLoadPinotMetricsUtils.extractCustomConfigsFromPinotTable(tableConfigJson);
-        }
-        if (!autoLoadPinotMetricsUtils.verifySchemaCorrectness(schema, timeColumnName)) {
-          LOG.info("Skipping {} due to incorrect schema", dataset);
-          continue;
-        }
-        allDatasets.add(dataset);
-        allSchemas.put(dataset, schema);
-        allCustomConfigs.put(dataset, pinotCustomProperty);
-        datasetToTimeColumnMap.put(dataset, timeColumnName);
       }
     }
   }

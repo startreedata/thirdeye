@@ -42,20 +42,22 @@ public interface ThirdEyeDataSource {
 
   List<String> getDatasets() throws Exception;
 
-  DataTable fetchDataTable(ThirdEyeRequestV2 request) throws Exception;
-
   /**
-   * Clear any cached values.
+   * Fetch metadata about the dataset.
+   *
+   * @param datasetName name of the table
+   * @return ThirdEye dataset describing available dimensions and metrics.
    */
-  void clear() throws Exception;
+  default DatasetConfigDTO getDatasetMetadata(String datasetName) {
+    throw new UnsupportedOperationException();
+  }
 
-  void close() throws Exception;
+  DataTable fetchDataTable(ThirdEyeRequestV2 request) throws Exception;
 
   /**
    * Returns max dateTime in millis for the dataset
    *
    * @return the time corresponding to the earliest available data point.
-   * @param datasetConfig
    */
   default long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
     return -1L;
@@ -71,5 +73,17 @@ public interface ThirdEyeDataSource {
    *
    * @return dimension map
    */
-  Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig) throws Exception;
+  Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
+      throws Exception;
+
+  /**
+   * Clear any cached values.
+   */
+  default void clear() throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  default void close() throws Exception {
+    throw new UnsupportedOperationException();
+  }
 }

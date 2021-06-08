@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.auto.onboard;
 
 import com.google.common.base.Preconditions;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -140,13 +139,5 @@ public class ConfigGenerator {
     }
 
     return metricConfigDTO;
-  }
-
-  public static List<Long> getMetricIdsFromMetricConfigs(List<MetricConfigDTO> metricConfigs) {
-    List<Long> metricIds = new ArrayList<>();
-    for (MetricConfigDTO metricConfig : metricConfigs) {
-      metricIds.add(metricConfig.getId());
-    }
-    return metricIds;
   }
 }

@@ -103,7 +103,7 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
   public void init(Map<String, Object> properties) throws Exception {
-    PinotThirdEyeDataSourceConfig dataSourceConfig = PinotThirdEyeDataSourceConfig
+    PinotThirdEyeDataSourceConfig dataSourceConfig = PinotThirdEyeDataSourceConfigFactory
         .createFromProperties(properties);
     this.init(dataSourceConfig);
   }

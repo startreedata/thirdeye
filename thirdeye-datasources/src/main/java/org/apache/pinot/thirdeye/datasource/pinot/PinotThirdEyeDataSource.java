@@ -483,11 +483,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public void clear() throws Exception {
-  }
-
-  @Override
-  public void close() throws Exception {
-
+  public DatasetConfigDTO getDatasetMetadata(final String datasetName) {
+    return null;
   }
 }

@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import static org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSourceConfigFactory.HTTPS_SCHEME;
+import static org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSourceConfigFactory.createFromMetadataSourceConfig;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,30 +71,35 @@ public class AutoOnboardPinotMetricsUtils {
 
   public AutoOnboardPinotMetricsUtils(DataSourceMetaBean dataSourceMeta)
       throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-    PinotThirdEyeDataSourceConfig pinotThirdeyeDataSourceConfig =
-        PinotThirdEyeDataSourceConfig.createFromMetadataSourceConfig(dataSourceMeta);
+    final PinotThirdEyeDataSourceConfig config = createFromMetadataSourceConfig(dataSourceMeta);
+    final String controllerConnectionScheme = config.getControllerConnectionScheme();
 
-    String controllerConnectionScheme = pinotThirdeyeDataSourceConfig
-        .getControllerConnectionScheme();
-    if (PinotThirdEyeDataSourceConfig.HTTPS_SCHEME.equals(controllerConnectionScheme)) {
+    pinotControllerClient = buildPinotControllerClient(controllerConnectionScheme);
+    pinotControllerHost = new HttpHost(config.getControllerHost(),
+        config.getControllerPort(),
+        controllerConnectionScheme);
+  }
+
+  private CloseableHttpClient buildPinotControllerClient(final String controllerConnectionScheme)
+      throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
+    if (HTTPS_SCHEME.equals(controllerConnectionScheme)) {
       try {
-        // Accept all SSL certificate because we assume that the Pinot broker are setup in the same internal network
-        SSLContext sslContext = new SSLContextBuilder()
-            .loadTrustMaterial(null, new AcceptAllTrustStrategy()).build();
-        this.pinotControllerClient =
-            HttpClients.custom().setSSLContext(sslContext)
-                .setSSLHostnameVerifier(new NoopHostnameVerifier()).build();
+        // Accept all SSL certificate because we assume that the Pinot broker are setup in the
+        // same internal network
+        final SSLContext sslContext = new SSLContextBuilder()
+            .loadTrustMaterial(null, new AcceptAllTrustStrategy())
+            .build();
+        return HttpClients.custom()
+            .setSSLContext(sslContext)
+            .setSSLHostnameVerifier(new NoopHostnameVerifier())
+            .build();
       } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
         // This section shouldn't happen because we use Accept All Strategy
         LOG.error("Failed to start auto onboard for Pinot data source.");
         throw e;
       }
-    } else {
-      this.pinotControllerClient = HttpClients.createDefault();
     }
-
-    this.pinotControllerHost = new HttpHost(pinotThirdeyeDataSourceConfig.getControllerHost(),
-        pinotThirdeyeDataSourceConfig.getControllerPort(), controllerConnectionScheme);
+    return HttpClients.createDefault();
   }
 
   public JsonNode getAllTablesFromPinot() throws IOException {

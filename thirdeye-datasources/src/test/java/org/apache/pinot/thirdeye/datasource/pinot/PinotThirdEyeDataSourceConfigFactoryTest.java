@@ -19,10 +19,11 @@ package org.apache.pinot.thirdeye.datasource.pinot;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSourceConfigFactory.Builder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class PinotThirdEyeDataSourceConfigTest {
+public class PinotThirdEyeDataSourceConfigFactoryTest {
 
   private static final String CONTROLLER_HOST = "host";
   private static final String CONTROLLER_PORT = "1234";
@@ -58,7 +59,7 @@ public class PinotThirdEyeDataSourceConfigTest {
     builder.put(PinotThirdeyeDataSourceProperties.TAG.getValue(), TAG);
     ImmutableMap<String, Object> expectedProperties = builder.build();
 
-    processedProperties = PinotThirdEyeDataSourceConfig.processPropertyMap(properties);
+    processedProperties = PinotThirdEyeDataSourceConfigFactory.processPropertyMap(properties);
 
     Assert.assertEquals(processedProperties, expectedProperties);
   }
@@ -67,7 +68,7 @@ public class PinotThirdEyeDataSourceConfigTest {
   public void testCreateProcessedPropertyMapWithEmptyMap() throws Exception {
     Map<String, Object> properties = new HashMap<>();
 
-    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfig
+    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfigFactory
         .processPropertyMap(properties);
 
     Assert.assertNull(processPropertyMap);
@@ -75,7 +76,7 @@ public class PinotThirdEyeDataSourceConfigTest {
 
   @Test
   public void testCreateProcessedPropertyMapWithNullMap() throws Exception {
-    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfig
+    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfigFactory
         .processPropertyMap(null);
 
     Assert.assertNull(processPropertyMap);
@@ -92,7 +93,7 @@ public class PinotThirdEyeDataSourceConfigTest {
     properties.put(PinotThirdeyeDataSourceProperties.CLUSTER_NAME.getValue(),
         SPACE_STRING + CLUSTER_NAME);
     // Returned a null property map
-    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfig
+    ImmutableMap<String, Object> processPropertyMap = PinotThirdEyeDataSourceConfigFactory
         .processPropertyMap(properties);
 
     Assert.assertNull(processPropertyMap);
@@ -100,23 +101,23 @@ public class PinotThirdEyeDataSourceConfigTest {
 
   @Test(dependsOnMethods = "testCreateProcessedPropertyMap")
   public void testCreateFromProperties() throws Exception {
-    PinotThirdEyeDataSourceConfig.Builder builder =
-        PinotThirdEyeDataSourceConfig.builder().setControllerHost(CONTROLLER_HOST)
+    Builder builder =
+        PinotThirdEyeDataSourceConfigFactory.builder().setControllerHost(CONTROLLER_HOST)
             .setControllerPort(Integer.parseInt(CONTROLLER_PORT)).setZookeeperUrl(ZOOKEEPER_URL)
             .setClusterName(CLUSTER_NAME).setBrokerUrl(BROKER_URL).setTag(TAG);
 
     PinotThirdEyeDataSourceConfig expectedDataSourceConfig = builder.build();
 
     PinotThirdEyeDataSourceConfig actualDataSourceConfig =
-        PinotThirdEyeDataSourceConfig.createFromProperties(processedProperties);
+        PinotThirdEyeDataSourceConfigFactory.createFromProperties(processedProperties);
 
     Assert.assertEquals(actualDataSourceConfig, expectedDataSourceConfig);
   }
 
   @Test(expectedExceptions = {IllegalArgumentException.class})
   public void testBuilderWithIllegalArgument() throws Exception {
-    PinotThirdEyeDataSourceConfig.Builder builder =
-        PinotThirdEyeDataSourceConfig.builder().setControllerHost(CONTROLLER_HOST)
+    Builder builder =
+        PinotThirdEyeDataSourceConfigFactory.builder().setControllerHost(CONTROLLER_HOST)
             .setZookeeperUrl(ZOOKEEPER_URL)
             .setClusterName(CLUSTER_NAME);
 
@@ -125,8 +126,8 @@ public class PinotThirdEyeDataSourceConfigTest {
 
   @Test(expectedExceptions = {NullPointerException.class})
   public void testBuilderWithNullArgument() throws Exception {
-    PinotThirdEyeDataSourceConfig.Builder builder =
-        PinotThirdEyeDataSourceConfig.builder().setControllerHost(CONTROLLER_HOST)
+    Builder builder =
+        PinotThirdEyeDataSourceConfigFactory.builder().setControllerHost(CONTROLLER_HOST)
             .setControllerPort(Integer.parseInt(CONTROLLER_PORT)).setClusterName(CLUSTER_NAME);
 
     builder.build();

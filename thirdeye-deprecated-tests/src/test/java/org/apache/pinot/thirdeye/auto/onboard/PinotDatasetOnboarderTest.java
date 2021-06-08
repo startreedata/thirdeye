@@ -16,7 +16,10 @@
 
 package org.apache.pinot.thirdeye.auto.onboard;
 
+import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.Sets;
+import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,25 +33,26 @@ import org.apache.pinot.spi.data.FieldSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
 import org.apache.pinot.spi.data.Schema;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class AutoOnboardPinotMetricsServiceTest {
+public class PinotDatasetOnboarderTest {
 
-  private AutoOnboardPinotMetadataSource testAutoLoadPinotMetricsService;
+  public static final String DATA_SOURCE_NAME = PinotThirdEyeDataSource.class.getSimpleName();
   private final String dataset = "test-collection";
   private final String oldTimeColumnName = "time";
   private final String newTimeColumnName = "timestampInEpoch";
+
+  private PinotDatasetOnboarder pinotDatasetOnboarder;
   private Schema schema;
 
   private TestDbEnv testDAOProvider;
@@ -58,11 +62,11 @@ public class AutoOnboardPinotMetricsServiceTest {
   @BeforeMethod
   void beforeMethod() throws Exception {
     testDAOProvider = new TestDbEnv();
-    DAORegistry daoRegistry = TestDbEnv.getInstance();
-    datasetConfigDAO = daoRegistry.getDatasetConfigDAO();
-    metricConfigDAO = daoRegistry.getMetricConfigDAO();
-    testAutoLoadPinotMetricsService = new AutoOnboardPinotMetadataSource(new DataSourceMetaBean(),
-        null,
+    final Injector injector = testDAOProvider.getInjector();
+    datasetConfigDAO = injector.getInstance(DatasetConfigManager.class);
+    metricConfigDAO = injector.getInstance(MetricConfigManager.class);
+
+    pinotDatasetOnboarder = new PinotDatasetOnboarder(mock(AutoOnboardPinotMetricsUtils.class),
         datasetConfigDAO,
         metricConfigDAO);
     schema = Schema
@@ -70,8 +74,12 @@ public class AutoOnboardPinotMetricsServiceTest {
     Map<String, String> pinotCustomConfigs = new HashMap<>();
     pinotCustomConfigs.put("configKey1", "configValue1");
     pinotCustomConfigs.put("configKey2", "configValue2");
-    testAutoLoadPinotMetricsService
-        .addPinotDataset(dataset, schema, oldTimeColumnName, pinotCustomConfigs, null);
+    pinotDatasetOnboarder.addPinotDataset(dataset,
+        schema,
+        oldTimeColumnName,
+        pinotCustomConfigs,
+        null,
+        DATA_SOURCE_NAME);
   }
 
   @AfterMethod(alwaysRun = true)
@@ -123,9 +131,12 @@ public class AutoOnboardPinotMetricsServiceTest {
     Map<String, String> pinotCustomConfigs = new HashMap<>();
     pinotCustomConfigs.put("configKey1", "configValue1");
     pinotCustomConfigs.put("configKey2", "configValue2");
-    testAutoLoadPinotMetricsService
-        .addPinotDataset(dataset, schema, oldTimeColumnName, new HashMap<>(pinotCustomConfigs),
-            datasetConfig);
+    pinotDatasetOnboarder.addPinotDataset(dataset,
+        schema,
+        oldTimeColumnName,
+        new HashMap<>(pinotCustomConfigs),
+        datasetConfig,
+        DATA_SOURCE_NAME);
     Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
     DatasetConfigDTO newDatasetConfig1 = datasetConfigDAO.findByDataset(dataset);
     Assert.assertEquals(newDatasetConfig1.getDataset(), dataset);
@@ -137,9 +148,12 @@ public class AutoOnboardPinotMetricsServiceTest {
     schema.addField(metricFieldSpec);
     pinotCustomConfigs.put("configKey3", "configValue3");
     pinotCustomConfigs.remove("configKey2");
-    testAutoLoadPinotMetricsService
-        .addPinotDataset(dataset, schema, oldTimeColumnName, new HashMap<>(pinotCustomConfigs),
-            newDatasetConfig1);
+    pinotDatasetOnboarder.addPinotDataset(dataset,
+        schema,
+        oldTimeColumnName,
+        new HashMap<>(pinotCustomConfigs),
+        newDatasetConfig1,
+        DATA_SOURCE_NAME);
 
     Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
     List<MetricConfigDTO> metricConfigs = metricConfigDAO.findByDataset(dataset);
@@ -165,9 +179,12 @@ public class AutoOnboardPinotMetricsServiceTest {
         FieldSpec.DataType.LONG, "1:MILLISECONDS:EPOCH", "1:MILLISECONDS");
     schema.removeField(oldTimeColumnName);
     schema.addField(dateTimeFieldSpec);
-    testAutoLoadPinotMetricsService
-        .addPinotDataset(dataset, schema, newTimeColumnName, new HashMap<>(pinotCustomConfigs),
-            newDatasetConfig1);
+    pinotDatasetOnboarder.addPinotDataset(dataset,
+        schema,
+        newTimeColumnName,
+        new HashMap<>(pinotCustomConfigs),
+        newDatasetConfig1,
+        DATA_SOURCE_NAME);
     Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
     datasetConfig = datasetConfigDAO.findByDataset(dataset);
     Assert.assertEquals(datasetConfig.bucketTimeGranularity().getUnit(), TimeUnit.MINUTES);
@@ -182,7 +199,7 @@ public class AutoOnboardPinotMetricsServiceTest {
   @Test(dependsOnMethods = {"testRefreshDataset"})
   public void testDeactivate() throws Exception {
     Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
-    testAutoLoadPinotMetricsService.deactivateDatasets(Collections.emptyList());
+    pinotDatasetOnboarder.deactivateDatasets(Collections.emptyList(), DATA_SOURCE_NAME);
     List<DatasetConfigDTO> datasets = datasetConfigDAO.findAll();
     Assert.assertEquals(datasets.size(), 1);
     Assert.assertFalse(datasets.get(0).isActive());

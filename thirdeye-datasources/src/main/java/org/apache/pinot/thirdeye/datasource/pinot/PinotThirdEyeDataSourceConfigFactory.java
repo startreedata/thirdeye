@@ -31,8 +31,8 @@ public class PinotThirdEyeDataSourceConfigFactory {
    */
   public static PinotThirdEyeDataSourceConfig createFromMetadataSourceConfig(
       DataSourceMetaBean metadataSourceConfig) {
-    if (metadataSourceConfig == null || !metadataSourceConfig.getClassRef()
-        .equals(AutoOnboardPinotMetadataSource.class.getCanonicalName())) {
+    if (metadataSourceConfig == null || !AutoOnboardPinotMetadataSource.class.getCanonicalName()
+        .equals(metadataSourceConfig.getClassRef())) {
       throw new IllegalStateException(
           "Metadata source config is not of type pinot " + metadataSourceConfig);
     }

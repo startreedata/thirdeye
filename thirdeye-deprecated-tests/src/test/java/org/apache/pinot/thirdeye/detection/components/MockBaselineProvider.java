@@ -16,12 +16,12 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import org.apache.pinot.thirdeye.detection.spec.MockBaselineProviderSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.detection.spec.MockBaselineProviderSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
+import org.apache.pinot.thirdeye.spi.detection.spi.components.BaselineProvider;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.TimeSeries;
 
 public class MockBaselineProvider implements BaselineProvider<MockBaselineProviderSpec> {
 

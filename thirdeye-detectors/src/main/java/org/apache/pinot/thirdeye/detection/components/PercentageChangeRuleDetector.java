@@ -22,6 +22,9 @@ package org.apache.pinot.thirdeye.detection.components;
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
+import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
+import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
+import static org.apache.pinot.thirdeye.spi.detection.Pattern.valueOf;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
@@ -30,13 +33,7 @@ import java.util.List;
 import java.util.Objects;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.detection.Pattern;
 import org.apache.pinot.thirdeye.detection.spec.PercentageChangeRuleDetectorSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.AnomalyDetector;
-import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
-import org.apache.pinot.thirdeye.detection.spi.model.DetectionResult;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
-import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
@@ -47,28 +44,49 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
 import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
 import org.apache.pinot.thirdeye.spi.detection.annotation.PresentationOption;
+import org.apache.pinot.thirdeye.spi.detection.spi.components.AnomalyDetector;
+import org.apache.pinot.thirdeye.spi.detection.spi.components.BaselineProvider;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
-@Components(title = "Percentage change rule detection", type = "PERCENTAGE_RULE", tags = {
-    DetectionTag.RULE_DETECTION}, description =
-    "Computes a multi-week aggregate baseline and compares the current value "
-        + "based on relative change.", presentation = {
-    @PresentationOption(name = "percentage change", template = "comparing ${offset} is ${pattern} more than ${percentageChange}")}, params = {
-    @Param(name = "offset", defaultValue = "wo1w"),
-    @Param(name = "percentageChange", placeholder = "value"),
-    @Param(name = "pattern", allowableValues = {"up", "down"})})
+@Components(
+    title = "Percentage change rule detection",
+    type = "PERCENTAGE_RULE",
+    tags = {DetectionTag.RULE_DETECTION},
+    description = "Computes a multi-week aggregate baseline and compares the current value based "
+        + "on relative change.",
+    presentation = {
+        @PresentationOption(
+            name = "percentage change",
+            template = "comparing ${offset} is ${pattern} more than ${percentageChange}"
+        )},
+    params = {
+        @Param(name = "offset", defaultValue = "wo1w"),
+        @Param(name = "percentageChange", placeholder = "value"),
+        @Param(name = "pattern", allowableValues = {"up", "down"})
+    }
+)
 public class PercentageChangeRuleDetector implements
     AnomalyDetector<PercentageChangeRuleDetectorSpec>,
     BaselineProvider<PercentageChangeRuleDetectorSpec> {
+
+  private static final String COL_CURR = "current";
+  private static final String COL_CHANGE = "change";
+  private static final String COL_ANOMALY = "anomaly";
+  private static final String COL_PATTERN = "pattern";
+  private static final String COL_CHANGE_VIOLATION = "change_violation";
 
   private double percentageChange;
   private InputDataFetcher dataFetcher;
@@ -77,12 +95,6 @@ public class PercentageChangeRuleDetector implements
   private String monitoringGranularity;
   private TimeGranularity timeGranularity;
   private DayOfWeek weekStart;
-
-  private static final String COL_CURR = "current";
-  private static final String COL_CHANGE = "change";
-  private static final String COL_ANOMALY = "anomaly";
-  private static final String COL_PATTERN = "pattern";
-  private static final String COL_CHANGE_VIOLATION = "change_violation";
 
   @Override
   public DetectionResult runDetection(Interval window, String metricUrn) {
@@ -140,11 +152,11 @@ public class PercentageChangeRuleDetector implements
     // relative change
     if (!Double.isNaN(this.percentageChange)) {
       // consistent with pattern
-      if (pattern.equals(Pattern.UP_OR_DOWN)) {
+      if (pattern.equals(UP_OR_DOWN)) {
         df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
       } else {
         df.addSeries(COL_PATTERN,
-            this.pattern.equals(Pattern.UP) ? df.getDoubles(COL_CHANGE).gt(0)
+            this.pattern.equals(UP) ? df.getDoubles(COL_CHANGE).gt(0)
                 : df.getDoubles(COL_CHANGE).lt(0));
       }
       df.addSeries(COL_CHANGE_VIOLATION,
@@ -161,7 +173,7 @@ public class PercentageChangeRuleDetector implements
 
   @Override
   public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
-    DataFrame df = RuleBaselineProvider.buildBaselines(slice, this.baseline, this.dataFetcher);
+    DataFrame df = DetectionUtils.buildBaselines(slice, this.baseline, this.dataFetcher);
     return TimeSeries.fromDataFrame(constructPercentageChangeBoundaries(df));
   }
 
@@ -201,7 +213,7 @@ public class PercentageChangeRuleDetector implements
     String timezone = spec.getTimezone();
     String offset = spec.getOffset();
     this.baseline = BaselineParsingUtils.parseOffset(offset, timezone);
-    this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
+    this.pattern = valueOf(spec.getPattern().toUpperCase());
 
     this.monitoringGranularity = spec.getMonitoringGranularity();
     if (this.monitoringGranularity.endsWith(TimeGranularity.MONTHS) || this.monitoringGranularity

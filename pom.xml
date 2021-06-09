@@ -37,6 +37,7 @@
     <!--  Build plugins -->
     <module>thirdeye-plugin-example</module>
     <module>thirdeye-datasources</module>
+    <module>thirdeye-detectors</module>
 
     <!--  Kept for legacy reasons. Still has a bunch of useful tests. -->
     <module>thirdeye-deprecated-tests</module>
@@ -355,6 +356,11 @@
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
         <artifactId>thirdeye-datasources</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.pinot.thirdeye</groupId>
+        <artifactId>thirdeye-detectors</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

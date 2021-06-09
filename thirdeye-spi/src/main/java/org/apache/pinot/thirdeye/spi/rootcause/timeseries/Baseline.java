@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.rootcause.timeseries;
+package org.apache.pinot.thirdeye.spi.rootcause.timeseries;
 
 import java.util.List;
 import java.util.Map;

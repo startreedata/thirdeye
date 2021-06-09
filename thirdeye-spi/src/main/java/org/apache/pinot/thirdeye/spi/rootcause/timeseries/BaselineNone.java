@@ -17,35 +17,29 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.rootcause.timeseries;
+package org.apache.pinot.thirdeye.spi.rootcause.timeseries;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.Series;
+import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 
 /**
- * Aggregation types supported by BaselineAggregate.
- *
- * @see BaselineAggregate
+ * Baseline that always returns an empty set of data
  */
-public enum BaselineAggregateType {
-  SUM(DoubleSeries.SUM),
-  PRODUCT(DoubleSeries.PRODUCT),
-  MEAN(DoubleSeries.MEAN),
-  AVG(DoubleSeries.MEAN),
-  COUNT(DoubleSeries.SUM),
-  MEDIAN(DoubleSeries.MEDIAN),
-  MIN(DoubleSeries.MIN),
-  MAX(DoubleSeries.MAX),
-  STD(DoubleSeries.STD);
+public class BaselineNone implements Baseline {
 
-  final Series.DoubleFunction function;
-
-  BaselineAggregateType(Series.DoubleFunction function) {
-    this.function = function;
+  @Override
+  public List<MetricSlice> scatter(MetricSlice slice) {
+    return Collections.emptyList();
   }
 
-  public Series.DoubleFunction getFunction() {
-    return function;
+  @Override
+  public DataFrame gather(MetricSlice slice, Map<MetricSlice, DataFrame> data) {
+    return new DataFrame(COL_TIME, LongSeries.empty())
+        .addSeries(COL_VALUE, DoubleSeries.empty());
   }
 }
-

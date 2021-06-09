@@ -28,13 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.detection.Pattern;
 import org.apache.pinot.thirdeye.detection.spec.AbsoluteChangeRuleDetectorSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.AnomalyDetector;
-import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
-import org.apache.pinot.thirdeye.detection.spi.model.DetectionResult;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
-import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
@@ -43,13 +37,19 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
 import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
 import org.apache.pinot.thirdeye.spi.detection.annotation.PresentationOption;
+import org.apache.pinot.thirdeye.spi.detection.spi.components.AnomalyDetector;
+import org.apache.pinot.thirdeye.spi.detection.spi.components.BaselineProvider;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.Interval;
 
 @Components(title = "Absolute change rule detection",
@@ -123,7 +123,7 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
 
   @Override
   public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
-    DataFrame df = RuleBaselineProvider.buildBaselines(slice, this.baseline, this.dataFetcher);
+    DataFrame df = DetectionUtils.buildBaselines(slice, this.baseline, this.dataFetcher);
     return TimeSeries.fromDataFrame(constructAbsoluteChangeBoundaries(df));
   }
 

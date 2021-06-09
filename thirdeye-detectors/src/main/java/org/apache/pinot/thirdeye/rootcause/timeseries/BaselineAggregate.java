@@ -32,6 +32,8 @@ import org.apache.pinot.thirdeye.spi.dataframe.Grouping;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -58,6 +60,8 @@ public class BaselineAggregate implements Baseline {
     this.offsets = offsets;
     this.timeZone = timezone;
     this.periodType = periodType;
+
+
   }
 
   public BaselineAggregate withType(BaselineAggregateType type) {
@@ -142,7 +146,7 @@ public class BaselineAggregate implements Baseline {
     String[] arrNames = colNames.toArray(new String[colNames.size()]);
 
     // aggregation
-    output.addSeries(COL_VALUE, mapWithNull(output, this.type.function, arrNames));
+    output.addSeries(COL_VALUE, mapWithNull(output, this.type.getFunction(), arrNames));
 
     // alignment
     output.addSeries(COL_TIME, this.toTimestampSeries(slice.getStart(), output.getLongs(COL_TIME)));

@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
@@ -40,9 +41,11 @@ public class MockThirdEyeDataSourceTest {
     try (Reader dataReader = new InputStreamReader(
         this.getClass().getResourceAsStream("mockThirdEyeDataSource-properties.json"))) {
 
-      final Map map = new ObjectMapper().readValue(dataReader, Map.class);
+      final DataSourceDTO dataSourceDTO = new DataSourceDTO();
+      dataSourceDTO.setProperties(new ObjectMapper().readValue(dataReader, Map.class));
+
       this.dataSource = new MockThirdEyeDataSource();
-      this.dataSource.init(new ThirdEyeDataSourceContext().setProperties(map));
+      this.dataSource.init(new ThirdEyeDataSourceContext().setDataSourceDTO(dataSourceDTO));
     }
   }
 

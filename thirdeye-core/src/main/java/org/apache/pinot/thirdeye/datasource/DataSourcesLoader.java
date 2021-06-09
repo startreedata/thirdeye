@@ -64,27 +64,26 @@ public class DataSourcesLoader {
 
   public ThirdEyeDataSource loadDataSource(DataSourceDTO dataSource) {
     final String factoryName = dataSource.getType();
-    final Map<String, Object> properties = dataSource.getProperties();
     try {
       checkArgument(dataSourceFactoryMap.containsKey(factoryName),
           "Data Source type not loaded: " + factoryName);
 
       LOG.info("Creating thirdeye datasource type {} with properties '{}'",
           factoryName,
-          properties);
+          dataSource.getProperties());
 
       return dataSourceFactoryMap
           .get(factoryName)
-          .build(buildContext(properties));
+          .build(buildContext(dataSource));
     } catch (Exception e) {
       LOG.error("Exception in creating thirdeye data source type {}", factoryName, e);
     }
     return null;
   }
 
-  private ThirdEyeDataSourceContext buildContext(final Map<String, Object> properties) {
+  private ThirdEyeDataSourceContext buildContext(final DataSourceDTO dataSource) {
     return new ThirdEyeDataSourceContext()
-        .setProperties(properties)
+        .setDataSourceDTO(dataSource)
         .setMetricConfigManager(metricConfigManager)
         .setDatasetConfigManager(datasetConfigManager);
   }

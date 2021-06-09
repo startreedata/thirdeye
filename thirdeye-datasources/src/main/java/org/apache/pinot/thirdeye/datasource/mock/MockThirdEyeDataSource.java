@@ -220,7 +220,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public void init(final ThirdEyeDataSourceContext context) {
-    Map<String, Object> properties = context.getProperties();
+    Map<String, Object> properties = context.getDataSourceDTO().getProperties();
 
     this.name = MapUtils
         .getString(properties, "name", MockThirdEyeDataSource.class.getSimpleName());

@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
@@ -49,6 +48,7 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGro
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdeyeResultSetDataTable;
 import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
@@ -177,10 +177,14 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public void init(final ThirdEyeDataSourceContext context) {
-    Map<String, Object> properties = requireNonNull(context.getProperties(),
-        "Data source property cannot be empty.");
-
     this.context = context;
+    final DataSourceDTO dataSourceDTO = requireNonNull(context.getDataSourceDTO(),
+        "data source dto is null");
+
+    final Map<String, Object> properties = requireNonNull(dataSourceDTO.getProperties(),
+        "Data source property cannot be empty.");
+    name = requireNonNull(dataSourceDTO.getName(), "name of data source dto is null");
+
 
     try {
       pinotResponseCacheLoader = getCacheLoaderInstance(properties);
@@ -190,9 +194,9 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     }
     pinotResponseCache = DataSourceUtils.buildResponseCache(pinotResponseCacheLoader);
 
+    // TODO Refactor. remove inverse hierarchical dependency
     pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
     pinotDataSourceDimensionFilters = new PinotDataSourceDimensionFilters(this);
-    name = MapUtils.getString(properties, "name", PinotThirdEyeDataSource.class.getSimpleName());
   }
 
   @Override
@@ -514,7 +518,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   private PinotDatasetOnboarder createPinotDatasetOnboarder() {
     final ThirdEyePinotClient thirdEyePinotClient = new ThirdEyePinotClient(new DataSourceMetaBean()
-        .setProperties(context.getProperties()));
+        .setProperties(context.getDataSourceDTO().getProperties()));
     final PinotDatasetOnboarder pinotDatasetOnboarder = new PinotDatasetOnboarder(
         thirdEyePinotClient,
         context.getDatasetConfigManager(),

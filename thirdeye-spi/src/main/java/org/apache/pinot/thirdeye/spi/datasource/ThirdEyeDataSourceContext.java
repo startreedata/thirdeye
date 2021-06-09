@@ -1,8 +1,8 @@
 package org.apache.pinot.thirdeye.spi.datasource;
 
-import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 
 public class ThirdEyeDataSourceContext {
 
@@ -14,7 +14,7 @@ public class ThirdEyeDataSourceContext {
   @Deprecated
   private DatasetConfigManager datasetConfigManager;
 
-  private Map<String, Object> properties;
+  private DataSourceDTO dataSourceDTO;
 
   @Deprecated
   public MetricConfigManager getMetricConfigManager() {
@@ -38,13 +38,13 @@ public class ThirdEyeDataSourceContext {
     return this;
   }
 
-  public Map<String, Object> getProperties() {
-    return properties;
+  public DataSourceDTO getDataSourceDTO() {
+    return dataSourceDTO;
   }
 
-  public ThirdEyeDataSourceContext setProperties(
-      final Map<String, Object> properties) {
-    this.properties = properties;
+  public ThirdEyeDataSourceContext setDataSourceDTO(
+      final DataSourceDTO dataSourceDTO) {
+    this.dataSourceDTO = dataSourceDTO;
     return this;
   }
 }

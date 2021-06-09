@@ -91,7 +91,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public void init(ThirdEyeDataSourceContext context) {
-    Map<String, Object> properties = context.getProperties();
+    Map<String, Object> properties = context.getDataSourceDTO().getProperties();
     Map<String, DataFrame> dataframes = new HashMap<>();
     for (Map.Entry<String, Object> property : properties.entrySet()) {
       try (InputStreamReader reader = new InputStreamReader(

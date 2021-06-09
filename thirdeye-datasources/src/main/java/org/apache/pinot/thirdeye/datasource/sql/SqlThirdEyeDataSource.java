@@ -55,7 +55,7 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public void init(final ThirdEyeDataSourceContext context) {
-    Map<String, Object> properties = context.getProperties();
+    Map<String, Object> properties = context.getDataSourceDTO().getProperties();
 
     metricConfigManager = context.getMetricConfigManager();
     final DatasetConfigManager datasetConfigManager = context.getDatasetConfigManager();

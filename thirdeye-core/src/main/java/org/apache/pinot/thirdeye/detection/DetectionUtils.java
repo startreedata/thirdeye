@@ -158,6 +158,44 @@ public class DetectionUtils {
     return anomalies;
   }
 
+  public static List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice, DataFrame df,
+      String seriesName) {
+    if (df.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
+    LongSeries sTime = df.getLongs(DataFrame.COL_TIME);
+    BooleanSeries sVal = df.getBooleans(seriesName);
+
+    int lastStart = -1;
+    for (int i = 0; i < df.size(); i++) {
+      if (sVal.isNull(i) || !BooleanSeries.booleanValueOf(sVal.get(i))) {
+        // end of a run
+        if (lastStart >= 0) {
+          long start = sTime.get(lastStart);
+          long end = sTime.get(i);
+          anomalies.add(makeAnomaly(slice.withStart(start).withEnd(end)));
+        }
+        lastStart = -1;
+      } else {
+        // start of a run
+        if (lastStart < 0) {
+          lastStart = i;
+        }
+      }
+    }
+
+    // end of current run
+    if (lastStart >= 0) {
+      long start = sTime.get(lastStart);
+      long end = start + 1;
+      anomalies.add(makeAnomaly(slice.withStart(start).withEnd(end)));
+    }
+
+    return anomalies;
+  }
+
   /**
    * Helper for creating an anomaly for a given metric slice. Injects properties such as
    * metric name, filter dimensions, etc.

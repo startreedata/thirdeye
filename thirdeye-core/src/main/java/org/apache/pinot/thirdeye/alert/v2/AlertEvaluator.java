@@ -5,12 +5,15 @@ import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertE
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
+import org.apache.pinot.thirdeye.detection.v2.results.DetectionResult;
+import org.apache.pinot.thirdeye.detection.v2.results.GroupedDetectionResults;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
@@ -22,9 +25,8 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AlertEvaluator {
 
-  protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluator.class);
-
   public static final String ROOT_OPERATOR_KEY = "root";
+  protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluator.class);
   // 5 detection previews are running at the same time at most
   private static final int PARALLELISM = 5;
   // max time allowed for a preview task
@@ -72,7 +74,8 @@ public class AlertEvaluator {
       PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
       Map<String, DetectionPipelineResult> context = new HashMap<>();
       PlanExecutor.executePlanNode(pipelinePlanNodes, context, rootNode);
-      return getOutput(context, rootNode);
+      final Map<String, DetectionPipelineResult> output = getOutput(context, rootNode);
+      return output;
     }).get(TIMEOUT, TimeUnit.MILLISECONDS);
   }
 
@@ -101,7 +104,15 @@ public class AlertEvaluator {
 
   private Map<String, DetectionEvaluationApi> detectionPipelineResultToApi(
       final DetectionPipelineResult result) {
-    // TODO: implement this
-    throw new UnsupportedOperationException("Not yet implemented");
+    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
+    if (result instanceof GroupedDetectionResults) {
+      GroupedDetectionResults results = (GroupedDetectionResults) result;
+      final List<DetectionResult> detectionResults = results.getDetectionResults();
+      for (int i = 0; i < detectionResults.size(); i++) {
+        DetectionEvaluationApi detectionEvaluationApi = detectionResults.get(i).toApi();
+        map.put(String.valueOf(i), detectionEvaluationApi);
+      }
+    }
+    return map;
   }
 }

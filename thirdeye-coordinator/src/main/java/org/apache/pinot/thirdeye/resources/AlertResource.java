@@ -34,8 +34,10 @@ import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
+import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
+import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
 import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -61,6 +63,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final AuthService authService;
   private final AlertEvaluator alertEvaluator;
+  private org.apache.pinot.thirdeye.alert.v2.AlertEvaluator alertEvaluatorV2;
 
   @Inject
   public AlertResource(
@@ -70,7 +73,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertDeleter alertDeleter,
       final AlertApiBeanMapper alertApiBeanMapper,
       final AuthService authService,
-      final AlertEvaluator alertEvaluator) {
+      final AlertEvaluator alertEvaluator,
+      final org.apache.pinot.thirdeye.alert.v2.AlertEvaluator alertEvaluatorV2) {
     super(authService, alertManager, ImmutableMap.of());
     this.alertManager = alertManager;
     this.metricConfigManager = metricConfigManager;
@@ -79,6 +83,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     this.alertApiBeanMapper = alertApiBeanMapper;
     this.authService = authService;
     this.alertEvaluator = alertEvaluator;
+    this.alertEvaluatorV2 = alertEvaluatorV2;
   }
 
   @Override
@@ -159,6 +164,30 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
     return Response.ok().build();
   }
+
+  @Path("evaluateV2")
+  @POST
+  @Timed
+  public Response evaluate(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      final AlertEvaluationPlanApi request
+  ) throws ExecutionException {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+
+    ensureExists(request.getStart(), "start");
+    ensureExists(request.getEnd(), "end");
+
+    ensureExists(request.getAlert())
+        .setOwner(new UserApi()
+            .setPrincipal(principal.getName()));
+
+    final Map<String, Map<String, DetectionEvaluationApi>> evaluation = alertEvaluatorV2
+        .evaluate(request);
+    return Response
+        .ok(evaluation)
+        .build();
+  }
+
 
   @Path("evaluate")
   @POST

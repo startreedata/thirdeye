@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye;
 
 import static org.apache.pinot.thirdeye.spi.Constants.ENV_THIRDEYE_PLUGINS_DIR;
+import static org.apache.pinot.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.inject.Guice;
@@ -70,7 +71,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));
 
     // Load plugins
-    optional(System.getenv(ENV_THIRDEYE_PLUGINS_DIR))
+    optional(thirdEyePluginDirOverride())
         .ifPresent(pluginsPath -> injector
             .getInstance(PluginLoaderConfiguration.class)
             .setPluginsPath(pluginsPath));
@@ -89,6 +90,15 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
     // Load mock events if enabled.
     injector.getInstance(MockEventsLoader.class).run();
+  }
+
+  /**
+   * Prefer system property over env variable when overriding plugins Dir.
+   * @return overridden thirdEye plugins dir
+   */
+  private String thirdEyePluginDirOverride() {
+    return optional(System.getProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR))
+        .orElse(System.getenv(ENV_THIRDEYE_PLUGINS_DIR));
   }
 
   void addCorsFilter(final Environment environment) {

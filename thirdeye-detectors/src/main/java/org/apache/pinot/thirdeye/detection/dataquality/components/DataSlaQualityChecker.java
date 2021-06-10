@@ -79,6 +79,21 @@ public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityChec
   private String sla;
   private InputDataFetcher dataFetcher;
 
+  /**
+   * Align and round off timestamp to the upper boundary of the granularity
+   *
+   * Examples:
+   * a. 20th Aug 05:00 pm will be rounded up to 21th Aug 12:00 am
+   * b. 20th Aug 12:00 am will be rounded up to 21th Aug 12:00 am
+   */
+  private static long alignToUpperBoundary(long timestamp, DatasetConfigDTO datasetConfig) {
+    Period granularityPeriod = datasetConfig.bucketTimeGranularity().toPeriod();
+    DateTimeZone timezone = DateTimeZone.forID(datasetConfig.getTimezone());
+    DateTime startTime = new DateTime(timestamp, timezone).plus(granularityPeriod);
+    return (startTime.getMillis() / granularityPeriod.toStandardDuration().getMillis())
+        * granularityPeriod.toStandardDuration().getMillis();
+  }
+
   @Override
   public DetectionResult runDetection(Interval window, String metricUrn) {
     return DetectionResult.from(runSLACheck(MetricEntity.fromURN(metricUrn), window));
@@ -190,21 +205,6 @@ public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityChec
   private boolean isSLAViolated(long actualRefreshTime, long expectedRefreshTime) {
     long delay = TimeGranularity.fromString(this.sla).toPeriod().toStandardDuration().getMillis();
     return (expectedRefreshTime - actualRefreshTime) > delay;
-  }
-
-  /**
-   * Align and round off timestamp to the upper boundary of the granularity
-   *
-   * Examples:
-   * a. 20th Aug 05:00 pm will be rounded up to 21th Aug 12:00 am
-   * b. 20th Aug 12:00 am will be rounded up to 21th Aug 12:00 am
-   */
-  private static long alignToUpperBoundary(long timestamp, DatasetConfigDTO datasetConfig) {
-    Period granularityPeriod = datasetConfig.bucketTimeGranularity().toPeriod();
-    DateTimeZone timezone = DateTimeZone.forID(datasetConfig.getTimezone());
-    DateTime startTime = new DateTime(timestamp, timezone).plus(granularityPeriod);
-    return (startTime.getMillis() / granularityPeriod.toStandardDuration().getMillis())
-        * granularityPeriod.toStandardDuration().getMillis();
   }
 
   /**

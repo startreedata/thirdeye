@@ -26,7 +26,7 @@ rules:
     media-feature-name-case: lower
     at-rule-name-case: lower
     unit-case: lower
-    color-hex-case: upper
+    color-hex-case: lower
 
     # Require long notation for hex colors
     color-hex-length: long

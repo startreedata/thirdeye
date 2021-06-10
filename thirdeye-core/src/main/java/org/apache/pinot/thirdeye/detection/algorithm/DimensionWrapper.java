@@ -37,7 +37,6 @@ import org.apache.pinot.thirdeye.common.utils.MetricUtils;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
@@ -49,6 +48,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorDataInsufficientException;
 import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
@@ -361,7 +361,10 @@ public class DimensionWrapper extends DetectionPipeline {
         LOG.error(
             "Current thread is interrupted before running dimension {}/{} for detection {} metrics {}, "
                 + "so skip the rest of dimensions and return the intermediate",
-            i + 1, totalNestedMetrics, this.config.getId(), metric.getUrn());
+            i + 1,
+            totalNestedMetrics,
+            this.config.getId(),
+            metric.getUrn());
         break;
       }
       for (Map<String, Object> properties : this.nestedProperties) {
@@ -372,7 +375,11 @@ public class DimensionWrapper extends DetectionPipeline {
         } catch (Exception e) {
           LOG.warn(
               "[DetectionConfigID{}] detecting anomalies for window {} to {} failed for metric urn {}.",
-              this.config.getId(), this.start, this.end, metric.getUrn(), e);
+              this.config.getId(),
+              this.start,
+              this.end,
+              metric.getUrn(),
+              e);
           exceptionsForNestedMetric.add(e);
           continue;
         }
@@ -443,7 +450,10 @@ public class DimensionWrapper extends DetectionPipeline {
     if (i == earlyStopThreshold && successNestedMetrics == 0) {
       throw new DetectionPipelineException(String.format(
           "Detection failed for first %d out of %d metric dimensions for monitoring window %d to %d, stop processing.",
-          i, totalNestedMetrics, this.getStartTime(), this.getEndTime()),
+          i,
+          totalNestedMetrics,
+          this.getStartTime(),
+          this.getEndTime()),
           Iterables.getLast(exceptions));
     }
   }
@@ -479,11 +489,15 @@ public class DimensionWrapper extends DetectionPipeline {
         LOG.warn(
             "The detection pipeline {} for monitoring window {} to {} is having detectors throwing the DataInsufficientException, "
                 + "but the result for other successful detectors are preserved",
-            this.config.getId(), this.getStartTime(), this.getEndTime());
+            this.config.getId(),
+            this.getStartTime(),
+            this.getEndTime());
       } else {
         throw new DetectionPipelineException(String.format(
             "Detection failed for all nested dimensions for detection config id %d for monitoring window %d to %d.",
-            this.config.getId(), this.getStartTime(), this.getEndTime()),
+            this.config.getId(),
+            this.getStartTime(),
+            this.getEndTime()),
             Iterables.getLast(exceptions));
       }
     }

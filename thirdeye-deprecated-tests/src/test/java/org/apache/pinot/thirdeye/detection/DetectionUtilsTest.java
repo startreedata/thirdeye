@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

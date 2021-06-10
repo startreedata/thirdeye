@@ -37,7 +37,6 @@ import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
-import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregate;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -53,6 +52,7 @@ import org.apache.pinot.thirdeye.spi.rootcause.Entity;
 import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.TimeRangeEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -108,7 +108,6 @@ public class MetricAnalysisPipeline2 extends Pipeline {
    * @param cache query cache
    * @param metricDAO metric config DAO
    * @param datasetDAO datset config DAO
-   * @param thirdEyeCacheRegistry
    */
   public MetricAnalysisPipeline2(String outputName,
       Set<String> inputNames,

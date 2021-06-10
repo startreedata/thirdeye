@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.detectors.PercentageChangeRuleDetector;
@@ -35,6 +34,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
@@ -54,7 +54,7 @@ public class PercentageChangeRuleDetectorTest {
   @BeforeMethod
   public void beforeMethod() throws Exception {
     try (Reader dataReader = new InputStreamReader(
-        AlgorithmUtils.class.getResourceAsStream("timeseries-4w.csv"))) {
+        AlgorithmUtils.class.getResourceAsStream("/csv/timeseries-4w.csv"))) {
       this.data = DataFrame.fromCsv(dataReader);
       this.data.setIndex(DataFrame.COL_TIME);
       this.data
@@ -63,7 +63,7 @@ public class PercentageChangeRuleDetectorTest {
 
     DataFrame weeklyData;
     try (Reader dataReader = new InputStreamReader(
-        AlgorithmUtils.class.getResourceAsStream("timeseries-2y.csv"))) {
+        AlgorithmUtils.class.getResourceAsStream("/csv/timeseries-2y.csv"))) {
       weeklyData = DataFrame.fromCsv(dataReader);
       weeklyData.setIndex(DataFrame.COL_TIME);
     }

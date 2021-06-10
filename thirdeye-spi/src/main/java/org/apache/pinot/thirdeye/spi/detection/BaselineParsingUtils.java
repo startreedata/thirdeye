@@ -17,12 +17,12 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection;
+package org.apache.pinot.thirdeye.spi.detection;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregate;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineNone;
 import org.joda.time.DateTimeZone;
@@ -36,32 +36,10 @@ public class BaselineParsingUtils {
   private static final Pattern PATTERN_DAY_OVER_DAY = Pattern.compile("do([1-9][0-9]*)d");
   private static final Pattern PATTERN_WEEK_OVER_WEEK = Pattern.compile("wo([1-9][0-9]*)w");
   private static final Pattern PATTERN_MONTH_OVER_MONTH = Pattern.compile("mo([1-9][0-9]*)m");
-  private static final Pattern PATTERN_MEAN = Pattern.compile("mean([1-9][0-9]*)(h|d|w|m)");
-  private static final Pattern PATTERN_MEDIAN = Pattern.compile("median([1-9][0-9]*)(h|d|w|m)");
-  private static final Pattern PATTERN_MIN = Pattern.compile("min([1-9][0-9]*)(h|d|w|m)");
-  private static final Pattern PATTERN_MAX = Pattern.compile("max([1-9][0-9]*)(h|d|w|m)");
-
-  private enum Unit {
-    HOUR("h"),
-    DAY("d"),
-    WEEK("w"),
-    MONTH("m");
-
-    final String unit;
-
-    Unit(String unit) {
-      this.unit = unit;
-    }
-
-    static Unit fromUnit(String unit) {
-      for (Unit u : Unit.values()) {
-        if (u.unit.equals(unit)) {
-          return u;
-        }
-      }
-      throw new IllegalArgumentException(String.format("Unknown unit '%s'", unit));
-    }
-  }
+  private static final Pattern PATTERN_MEAN = Pattern.compile("mean([1-9][0-9]*)([hdwm])");
+  private static final Pattern PATTERN_MEDIAN = Pattern.compile("median([1-9][0-9]*)([hdwm])");
+  private static final Pattern PATTERN_MIN = Pattern.compile("min([1-9][0-9]*)([hdwm])");
+  private static final Pattern PATTERN_MAX = Pattern.compile("max([1-9][0-9]*)([hdwm])");
 
   /**
    * Returns a configured instance of Baseline for the given, named offset. The method uses slice
@@ -114,7 +92,7 @@ public class BaselineParsingUtils {
     Matcher mHourOverHour = PATTERN_HOUR_OVER_HOUR.matcher(offset);
     if (mHourOverHour.find()) {
       agg = BaselineAggregateType.SUM;
-      shift = Integer.valueOf(mHourOverHour.group(1));
+      shift = Integer.parseInt(mHourOverHour.group(1));
       count = 1;
       unit = Unit.HOUR;
     }
@@ -122,7 +100,7 @@ public class BaselineParsingUtils {
     Matcher mDayOverDay = PATTERN_DAY_OVER_DAY.matcher(offset);
     if (mDayOverDay.find()) {
       agg = BaselineAggregateType.SUM;
-      shift = Integer.valueOf(mDayOverDay.group(1));
+      shift = Integer.parseInt(mDayOverDay.group(1));
       count = 1;
       unit = Unit.DAY;
     }
@@ -130,7 +108,7 @@ public class BaselineParsingUtils {
     Matcher mWeekOverWeek = PATTERN_WEEK_OVER_WEEK.matcher(offset);
     if (mWeekOverWeek.find()) {
       agg = BaselineAggregateType.SUM;
-      shift = Integer.valueOf(mWeekOverWeek.group(1));
+      shift = Integer.parseInt(mWeekOverWeek.group(1));
       count = 1;
       unit = Unit.WEEK;
     }
@@ -138,7 +116,7 @@ public class BaselineParsingUtils {
     Matcher mMonthOverMonth = PATTERN_MONTH_OVER_MONTH.matcher(offset);
     if (mMonthOverMonth.find()) {
       agg = BaselineAggregateType.SUM;
-      shift = Integer.valueOf(mMonthOverMonth.group(1));
+      shift = Integer.parseInt(mMonthOverMonth.group(1));
       count = 1;
       unit = Unit.MONTH;
     }
@@ -147,7 +125,7 @@ public class BaselineParsingUtils {
     if (mMean.find()) {
       agg = BaselineAggregateType.MEAN;
       shift = 1;
-      count = Integer.valueOf(mMean.group(1));
+      count = Integer.parseInt(mMean.group(1));
       unit = Unit.fromUnit(mMean.group(2));
     }
 
@@ -155,7 +133,7 @@ public class BaselineParsingUtils {
     if (mMedian.find()) {
       agg = BaselineAggregateType.MEDIAN;
       shift = 1;
-      count = Integer.valueOf(mMedian.group(1));
+      count = Integer.parseInt(mMedian.group(1));
       unit = Unit.fromUnit(mMedian.group(2));
     }
 
@@ -163,7 +141,7 @@ public class BaselineParsingUtils {
     if (mMin.find()) {
       agg = BaselineAggregateType.MIN;
       shift = 1;
-      count = Integer.valueOf(mMin.group(1));
+      count = Integer.parseInt(mMin.group(1));
       unit = Unit.fromUnit(mMin.group(2));
     }
 
@@ -171,11 +149,11 @@ public class BaselineParsingUtils {
     if (mMax.find()) {
       agg = BaselineAggregateType.MAX;
       shift = 1;
-      count = Integer.valueOf(mMax.group(1));
+      count = Integer.parseInt(mMax.group(1));
       unit = Unit.fromUnit(mMax.group(2));
     }
 
-    if (agg == null || unit == null || shift == Integer.MIN_VALUE || count == Integer.MIN_VALUE) {
+    if (agg == null || shift == Integer.MIN_VALUE || count == Integer.MIN_VALUE) {
       throw new IllegalArgumentException(String.format("Unsupported offset '%s'", offset));
     }
 
@@ -190,6 +168,28 @@ public class BaselineParsingUtils {
         return BaselineAggregate.fromMonthOverMonth(agg, count, shift, timeZone);
       default:
         throw new IllegalArgumentException(String.format("Unsupported unit '%s'", unit));
+    }
+  }
+
+  private enum Unit {
+    HOUR("h"),
+    DAY("d"),
+    WEEK("w"),
+    MONTH("m");
+
+    final String unit;
+
+    Unit(String unit) {
+      this.unit = unit;
+    }
+
+    static Unit fromUnit(String unit) {
+      for (Unit u : Unit.values()) {
+        if (u.unit.equals(unit)) {
+          return u;
+        }
+      }
+      throw new IllegalArgumentException(String.format("Unknown unit '%s'", unit));
     }
   }
 }

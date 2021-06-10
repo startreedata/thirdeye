@@ -2,8 +2,8 @@ package org.apache.pinot.thirdeye.detection.v2.plan;
 
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.v2.operator.AnomalyDetectorOperator;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;

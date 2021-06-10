@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.detectors.MeanVarianceRuleDetector;
@@ -36,6 +35,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
@@ -55,7 +55,7 @@ public class MeanVarianceRuleDetectorTest {
   @BeforeMethod
   public void setUp() throws Exception {
     try (Reader dataReader = new InputStreamReader(
-        AlgorithmUtils.class.getResourceAsStream("timeseries-2y.csv"))) {
+        AlgorithmUtils.class.getResourceAsStream("/csv/timeseries-2y.csv"))) {
       this.data = DataFrame.fromCsv(dataReader);
       this.data.setIndex(DataFrame.COL_TIME);
     }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection;
+package org.apache.pinot.thirdeye.spi.detection;
 
 import com.google.common.collect.Multimap;
 import java.lang.reflect.ParameterizedType;
@@ -43,8 +43,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotif
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
-import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;

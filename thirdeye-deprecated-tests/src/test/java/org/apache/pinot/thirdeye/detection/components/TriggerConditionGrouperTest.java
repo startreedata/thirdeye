@@ -16,8 +16,8 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.mergeAndSortAnomalies;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.mergeAndSortAnomalies;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,9 +26,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.spec.TriggerConditionGrouperSpec;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

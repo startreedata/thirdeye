@@ -23,12 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.detection.spec.PercentageChangeRuleAnomalyFilterSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
@@ -83,8 +83,12 @@ public class PercentageChangeRuleAnomalyFilter implements
         baselineValue = anomaly.getAvgBaselineVal();
         LOG.warn(
             "Unable to fetch baseline for anomaly {}. start = {} end = {} filters = {}. Using anomaly"
-                + " baseline ", anomaly.getId(), anomaly.getStartTime(), anomaly.getEndTime(),
-            me.getFilters(), e);
+                + " baseline ",
+            anomaly.getId(),
+            anomaly.getStartTime(),
+            anomaly.getEndTime(),
+            me.getFilters(),
+            e);
       }
     }
 

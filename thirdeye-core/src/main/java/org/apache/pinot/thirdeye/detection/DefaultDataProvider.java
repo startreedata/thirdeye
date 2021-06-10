@@ -52,6 +52,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
 import org.apache.pinot.thirdeye.spi.detection.model.EvaluationSlice;
 import org.apache.pinot.thirdeye.spi.detection.model.EventSlice;

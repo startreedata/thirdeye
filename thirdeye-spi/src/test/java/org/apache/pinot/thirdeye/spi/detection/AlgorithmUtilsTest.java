@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.algorithm;
+package org.apache.pinot.thirdeye.spi.detection;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
-import org.apache.pinot.thirdeye.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.joda.time.Duration;
@@ -34,7 +33,7 @@ public class AlgorithmUtilsTest {
   @BeforeMethod
   public void beforeMethod() throws Exception {
     try (Reader dataReader = new InputStreamReader(
-        this.getClass().getResourceAsStream("timeseries-4w.csv"))) {
+        this.getClass().getResourceAsStream("/csv/timeseries-4w.csv"))) {
       this.data = DataFrame.fromCsv(dataReader);
       this.data.setIndex(DataFrame.COL_TIME);
       this.data

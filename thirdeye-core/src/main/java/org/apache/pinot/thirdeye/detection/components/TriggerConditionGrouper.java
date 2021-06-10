@@ -18,11 +18,11 @@
  */
 package org.apache.pinot.thirdeye.detection.components;
 
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.makeParentEntityAnomaly;
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.mergeAndSortAnomalies;
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.setEntityChildMapping;
 import static org.apache.pinot.thirdeye.detection.ExpressionParser.generateOperators;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.makeParentEntityAnomaly;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.mergeAndSortAnomalies;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.setEntityChildMapping;
 
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;

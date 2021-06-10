@@ -39,7 +39,6 @@ import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.anomaly.task.TaskInfoFactory;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.formatter.DetectionConfigFormatter;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
@@ -52,6 +51,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
 import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
@@ -80,7 +80,6 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   private final DatasetConfigManager datasetConfigManager;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final MetricConfigManager metricConfigManager;
-
 
   @Inject
   public DataAvailabilityTaskScheduler(
@@ -283,5 +282,4 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   public void shutdown() {
     executorService.shutdown();
   }
-
 }

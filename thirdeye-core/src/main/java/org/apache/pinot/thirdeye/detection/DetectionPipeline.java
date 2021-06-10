@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.getSpecClassName;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getSpecClassName;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.base.Preconditions;
@@ -44,6 +44,7 @@ import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.DateTime;
@@ -70,9 +71,6 @@ public abstract class DetectionPipeline {
 
   /**
    * Only used for testing. To be refactored. Please do not use.
-   *
-   * @param mockDetectionPipelineFactory
-   * @return
    */
   @Deprecated
   public DetectionPipeline setMockDetectionPipelineFactory(

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.rootcause.timeseries;
+package org.apache.pinot.thirdeye.spi.rootcause.timeseries;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +32,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.Grouping;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
-import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -60,107 +58,6 @@ public class BaselineAggregate implements Baseline {
     this.offsets = offsets;
     this.timeZone = timezone;
     this.periodType = periodType;
-
-
-  }
-
-  public BaselineAggregate withType(BaselineAggregateType type) {
-    return new BaselineAggregate(type, this.offsets, this.timeZone, this.periodType);
-  }
-
-  public BaselineAggregate withOffsets(List<Period> offsets) {
-    return new BaselineAggregate(this.type, offsets, this.timeZone, this.periodType);
-  }
-
-  public BaselineAggregate withTimeZone(DateTimeZone timeZone) {
-    return new BaselineAggregate(this.type, this.offsets, timeZone, this.periodType);
-  }
-
-  public BaselineAggregate withPeriodType(PeriodType periodType) {
-    return new BaselineAggregate(this.type, this.offsets, this.timeZone, periodType);
-  }
-
-  @Override
-  public List<MetricSlice> scatter(MetricSlice slice) {
-    List<MetricSlice> slices = new ArrayList<>();
-    for (Period offset : this.offsets) {
-      slices.add(slice
-          .withStart(new DateTime(slice.getStart(), this.timeZone).plus(offset).getMillis())
-          .withEnd(new DateTime(slice.getEnd(), this.timeZone).plus(offset).getMillis()));
-    }
-    return slices;
-  }
-
-  private Map<MetricSlice, DataFrame> filter(MetricSlice slice, Map<MetricSlice, DataFrame> data) {
-    Map<MetricSlice, DataFrame> output = new HashMap<>();
-    Set<MetricSlice> patterns = new HashSet<>(scatter(slice));
-
-    for (Map.Entry<MetricSlice, DataFrame> entry : data.entrySet()) {
-      if (patterns.contains(entry.getKey())) {
-        output.put(entry.getKey(), entry.getValue());
-      }
-    }
-
-    return output;
-  }
-
-  @Override
-  public DataFrame gather(final MetricSlice slice, Map<MetricSlice, DataFrame> data) {
-    Map<MetricSlice, DataFrame> filtered = this.filter(slice, data);
-
-    DataFrame output = new DataFrame(COL_TIME, LongSeries.empty());
-
-    List<String> colNames = new ArrayList<>();
-    for (Map.Entry<MetricSlice, DataFrame> entry : filtered.entrySet()) {
-      MetricSlice s = entry.getKey();
-
-      Period period = new Period(
-          new DateTime(slice.getStart(), this.timeZone),
-          new DateTime(s.getStart(), this.timeZone),
-          this.periodType);
-
-      if (!offsets.contains(period)) {
-        continue;
-      }
-
-      String colName = String.valueOf(s.getStart());
-      DataFrame df = new DataFrame(entry.getValue());
-
-      DataFrame dfTransform = new DataFrame(df);
-      dfTransform
-          .addSeries(COL_TIME, this.toVirtualSeries(s.getStart(), dfTransform.getLongs(COL_TIME)));
-      dfTransform = eliminateDuplicates(dfTransform);
-
-      dfTransform.renameSeries(COL_VALUE, colName);
-
-      if (output.isEmpty()) {
-        // handle multi-index via prototyping
-        output = dfTransform;
-      } else {
-        output = output.joinOuter(dfTransform);
-      }
-
-      colNames.add(colName);
-    }
-
-    String[] arrNames = colNames.toArray(new String[colNames.size()]);
-
-    // aggregation
-    output.addSeries(COL_VALUE, mapWithNull(output, this.type.getFunction(), arrNames));
-
-    // alignment
-    output.addSeries(COL_TIME, this.toTimestampSeries(slice.getStart(), output.getLongs(COL_TIME)));
-
-    // filter by original time range
-    List<String> dropNames = new ArrayList<>(output.getSeriesNames());
-    dropNames.removeAll(output.getIndexNames());
-
-    output = output.filter(
-        output.getLongs(COL_TIME).gte(slice.getStart()).and(
-            output.getLongs(COL_TIME).lt(slice.getEnd())))
-        .dropNull(output.getIndexNames());
-
-    return output;
   }
 
   /**
@@ -325,6 +222,105 @@ public class BaselineAggregate implements Baseline {
       offsets.add(new Period(0, 0, 0, 0, -1 * (i + offsetHours), 0, 0, 0, PeriodType.hours()));
     }
     return new BaselineAggregate(type, offsets, timeZone, PeriodType.hours());
+  }
+
+  public BaselineAggregate withType(BaselineAggregateType type) {
+    return new BaselineAggregate(type, this.offsets, this.timeZone, this.periodType);
+  }
+
+  public BaselineAggregate withOffsets(List<Period> offsets) {
+    return new BaselineAggregate(this.type, offsets, this.timeZone, this.periodType);
+  }
+
+  public BaselineAggregate withTimeZone(DateTimeZone timeZone) {
+    return new BaselineAggregate(this.type, this.offsets, timeZone, this.periodType);
+  }
+
+  public BaselineAggregate withPeriodType(PeriodType periodType) {
+    return new BaselineAggregate(this.type, this.offsets, this.timeZone, periodType);
+  }
+
+  @Override
+  public List<MetricSlice> scatter(MetricSlice slice) {
+    List<MetricSlice> slices = new ArrayList<>();
+    for (Period offset : this.offsets) {
+      slices.add(slice
+          .withStart(new DateTime(slice.getStart(), this.timeZone).plus(offset).getMillis())
+          .withEnd(new DateTime(slice.getEnd(), this.timeZone).plus(offset).getMillis()));
+    }
+    return slices;
+  }
+
+  private Map<MetricSlice, DataFrame> filter(MetricSlice slice, Map<MetricSlice, DataFrame> data) {
+    Map<MetricSlice, DataFrame> output = new HashMap<>();
+    Set<MetricSlice> patterns = new HashSet<>(scatter(slice));
+
+    for (Map.Entry<MetricSlice, DataFrame> entry : data.entrySet()) {
+      if (patterns.contains(entry.getKey())) {
+        output.put(entry.getKey(), entry.getValue());
+      }
+    }
+
+    return output;
+  }
+
+  @Override
+  public DataFrame gather(final MetricSlice slice, Map<MetricSlice, DataFrame> data) {
+    Map<MetricSlice, DataFrame> filtered = this.filter(slice, data);
+
+    DataFrame output = new DataFrame(COL_TIME, LongSeries.empty());
+
+    List<String> colNames = new ArrayList<>();
+    for (Map.Entry<MetricSlice, DataFrame> entry : filtered.entrySet()) {
+      MetricSlice s = entry.getKey();
+
+      Period period = new Period(
+          new DateTime(slice.getStart(), this.timeZone),
+          new DateTime(s.getStart(), this.timeZone),
+          this.periodType);
+
+      if (!offsets.contains(period)) {
+        continue;
+      }
+
+      String colName = String.valueOf(s.getStart());
+      DataFrame df = new DataFrame(entry.getValue());
+
+      DataFrame dfTransform = new DataFrame(df);
+      dfTransform
+          .addSeries(COL_TIME, this.toVirtualSeries(s.getStart(), dfTransform.getLongs(COL_TIME)));
+      dfTransform = eliminateDuplicates(dfTransform);
+
+      dfTransform.renameSeries(COL_VALUE, colName);
+
+      if (output.isEmpty()) {
+        // handle multi-index via prototyping
+        output = dfTransform;
+      } else {
+        output = output.joinOuter(dfTransform);
+      }
+
+      colNames.add(colName);
+    }
+
+    String[] arrNames = colNames.toArray(new String[colNames.size()]);
+
+    // aggregation
+    output.addSeries(COL_VALUE, mapWithNull(output, this.type.getFunction(), arrNames));
+
+    // alignment
+    output.addSeries(COL_TIME, this.toTimestampSeries(slice.getStart(), output.getLongs(COL_TIME)));
+
+    // filter by original time range
+    List<String> dropNames = new ArrayList<>(output.getSeriesNames());
+    dropNames.removeAll(output.getIndexNames());
+
+    output = output.filter(
+        output.getLongs(COL_TIME).gte(slice.getStart()).and(
+            output.getLongs(COL_TIME).lt(slice.getEnd())))
+        .dropNull(output.getIndexNames());
+
+    return output;
   }
 
   /**

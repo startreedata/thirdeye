@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.detectors.HoltWintersDetector;
@@ -37,6 +36,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
@@ -57,13 +57,13 @@ public class HoltWintersDetectorTest {
     DataFrame dailyData;
     DataFrame hourlyData;
     try (Reader dataReader = new InputStreamReader(
-        AlgorithmUtils.class.getResourceAsStream("daily.csv"))) {
+        AlgorithmUtils.class.getResourceAsStream("/csv/daily.csv"))) {
       dailyData = DataFrame.fromCsv(dataReader);
       dailyData.setIndex(DataFrame.COL_TIME);
     }
 
     try (Reader dataReader = new InputStreamReader(
-        AlgorithmUtils.class.getResourceAsStream("hourly.csv"))) {
+        AlgorithmUtils.class.getResourceAsStream("/csv/hourly.csv"))) {
       hourlyData = DataFrame.fromCsv(dataReader);
       hourlyData.setIndex(DataFrame.COL_TIME);
     }

@@ -19,18 +19,18 @@
 
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.getSpecClassName;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getSpecClassName;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.OutputApi;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;

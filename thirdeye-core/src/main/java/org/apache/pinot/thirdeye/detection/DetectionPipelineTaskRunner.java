@@ -37,6 +37,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
@@ -55,7 +56,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
 
   /**
-   * @param anomalySubscriptionGroupNotificationManager
    * @param alertManager detection config DAO
    * @param mergedAnomalyResultManager merged anomaly DAO
    * @param evaluationManager the evaluation DAO

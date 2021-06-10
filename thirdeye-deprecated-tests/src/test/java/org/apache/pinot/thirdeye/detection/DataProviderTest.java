@@ -249,7 +249,7 @@ public class DataProviderTest {
     // data
     DataFrame data;
     try (Reader dataReader = new InputStreamReader(
-        AlgorithmUtils.class.getResourceAsStream("timeseries-4w.csv"))) {
+        this.getClass().getResourceAsStream("/csv/timeseries-4w.csv"))) {
       data = DataFrame.fromCsv(dataReader);
       data.setIndex(DataFrame.COL_TIME);
       data

@@ -9,13 +9,7 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
@@ -47,8 +41,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
 
 public class ThirdEyeIntegrationTest {
 
@@ -59,12 +51,9 @@ public class ThirdEyeIntegrationTest {
   private static final String SCHEMA_FILENAME = "schema.json";
   private static final String TABLE_CONFIG_FILENAME = "table-config.json";
   private static final String DATA_FILENAME = "data.csv";
-  private static final String DATASOURCES_CONFIG_FILE_PATH = "config/data-sources/data-sources-config.yml";
-  private static final String PINOT_DATASOURCE_CLASS = "org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource";
-
-  public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
   private static PinotContainer container;
 
+  public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
   private Client client;
   private ThirdEyeH2DatabaseServer db;
 
@@ -100,37 +89,6 @@ public class ThirdEyeIntegrationTest {
     return container;
   }
 
-  private void modifyDataSourceConfig() throws IOException, URISyntaxException {
-    //  URL e2eConfigurationResources = this.getClass().getClassLoader().getResource("e2e");
-    Path resourceDirectory = Paths.get("src", "test", "resources", "e2e");
-    File dataSourcesConfigFile = Paths.get(resourceDirectory.toFile().getAbsolutePath(),
-        DATASOURCES_CONFIG_FILE_PATH).toFile();
-    InputStream inputStream = new FileInputStream(dataSourcesConfigFile);
-    DumperOptions options = new DumperOptions();
-    options.setIndent(2);
-    options.setPrettyFlow(true);
-    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-    Yaml dataSourcesYamlReader = new Yaml();
-    Map<String, Object> dataSourcesConfigurationMap = (Map<String, Object>) dataSourcesYamlReader.load(
-        inputStream);
-    List<Map<String, Object>> dataSourceConfigs = (List<Map<String, Object>>) dataSourcesConfigurationMap
-        .get("dataSourceConfigs");
-    int index = findIndex(dataSourceConfigs, PINOT_DATASOURCE_CLASS);
-    assert index >= 0;
-    Map<String, Object> dataSourceConfig = dataSourceConfigs.get(index);
-    Map<String, Object> dataSourceConfigProperties = (Map<String, Object>) dataSourceConfig.get(
-        "properties");
-    dataSourceConfigProperties
-        .put("zookeeperUrl", "localhost:" + container.getZookeeperPort());
-    dataSourceConfigProperties
-        .put("controllerPort", container.getControllerPort());
-    PrintWriter writer = new PrintWriter(dataSourcesConfigFile);
-    Yaml dataSourcesYamlWriter = new Yaml(options);
-    dataSourcesYamlWriter.dump(dataSourcesConfigurationMap, writer);
-    inputStream.close();
-    writer.close();
-  }
-
   private int findIndex(List<Map<String, Object>> dataSourceConfigs,
       String expectedDataSourceClassName) {
     for (int i = 0; i < dataSourceConfigs.size(); i++) {
@@ -149,7 +107,6 @@ public class ThirdEyeIntegrationTest {
     db.start();
     container = startPinot();
     container.addTables();
-    modifyDataSourceConfig();
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
         resourceFilePath("e2e/config/coordinator.yml"),
         config("configPath", THIRDEYE_CONFIG),
@@ -278,7 +235,7 @@ public class ThirdEyeIntegrationTest {
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
-  @Test(dependsOnMethods = "testDerivedMetrics")
+  @Test(dependsOnMethods = "testDerivedMetrics", enabled = false)
   public void testEvaluate() {
     final AlertEvaluationApi requestAlertEvaluationApi = new AlertEvaluationApi();
     final AlertApi alertApi = new AlertApi();

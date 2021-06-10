@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,9 +16,11 @@ import java.io.IOException;
 import java.net.URL;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
-import org.assertj.core.api.Assertions;
+import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,10 +28,9 @@ import org.testng.annotations.Test;
 public class CoordinatorTest {
 
   public static final String THIRDEYE_CONFIG = "./src/test/resources/e2e/config";
-
-  public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
   private Client client;
   private ThirdEyeH2DatabaseServer db;
 
@@ -41,13 +43,13 @@ public class CoordinatorTest {
     db = new ThirdEyeH2DatabaseServer("localhost", 7124, null);
     db.start();
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
-      resourceFilePath("e2e/config/coordinator.yml"),
-      config("configPath", THIRDEYE_CONFIG),
-      config("server.connector.port", "0"), // port: 0 implies any port
-      config("database.url", db.getDbConfig().getUrl()),
-      config("database.user", db.getDbConfig().getUser()),
-      config("database.password", db.getDbConfig().getPassword()),
-      config("database.driver", db.getDbConfig().getDriver())
+        resourceFilePath("e2e/config/coordinator.yml"),
+        config("configPath", THIRDEYE_CONFIG),
+        config("server.connector.port", "0"), // port: 0 implies any port
+        config("database.url", db.getDbConfig().getUrl()),
+        config("database.user", db.getDbConfig().getUser()),
+        config("database.password", db.getDbConfig().getPassword()),
+        config("database.driver", db.getDbConfig().getDriver())
     );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
@@ -66,33 +68,55 @@ public class CoordinatorTest {
 
   @Test
   public void testPing() {
-    Response response = client.target(endPoint("internal/ping"))
-        .request()
+    Response response = request("internal/ping")
         .get();
 
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test
-  public void testDataSourcesLoaded() {
+  public void testLoadMockDataSource() throws IOException {
+    final DataSourceApi entity = loadApiFromFile("data-source-mock.json",
+        DataSourceApi.class);
+    Response response;
+    response = request("api/data-sources")
+        .post(Entity.json(singletonList(entity)));
+
+    assertThat(response.getStatus()).isEqualTo(200);
+
     // A single datasource must exist in the db for the tests to proceed
-    Assertions.assertThat(db.executeSql("SELECT * From dataset_config_index").length())
-        .isGreaterThan(0);
+    assertThat(db.executeSql("SELECT * From data_source_index").length())
+        .isEqualTo(1);
+
+    response = request("api/data-sources/onboard-all")
+        .post(Entity.form(new Form().param("dataSourceName", entity.getName())));
+
+    //TODO spyne fix this.
+    // assertThat(response.getStatus()).isEqualTo(200);
+    // assertThat(db.executeSql("SELECT * From dataset_config_index").length()).isEqualTo(1);
   }
 
-  @Test(dependsOnMethods = "testDataSourcesLoaded")
+  @Test(dependsOnMethods = "testLoadMockDataSource", enabled = false)
   public void testEvaluate() throws IOException {
-    final URL url = Resources.getResource("e2e/payload_alerts_evaluate.json");
-    final AlertEvaluationApi entity = requireNonNull(
-        OBJECT_MAPPER.readValue(url, AlertEvaluationApi.class));
+    final AlertEvaluationApi entity = loadApiFromFile("payload_alerts_evaluate.json",
+        AlertEvaluationApi.class);
 
-    Response response = client.target(endPoint("api/alerts/evaluate"))
-        .request()
+    final Response response = request("api/alerts/evaluate")
         .post(Entity.json(entity));
 
     assertThat(response.getStatus()).isEqualTo(200);
 
     final AlertEvaluationApi alertEvaluationApi = response.readEntity(AlertEvaluationApi.class);
     assertThat(alertEvaluationApi).isNotNull();
+  }
+
+  private Builder request(final String urlFragment) {
+    return client.target(endPoint(urlFragment)).request();
+  }
+
+  private <T> T loadApiFromFile(final String filename, final Class<T> clazz)
+      throws IOException {
+    final URL url = Resources.getResource("e2e/" + filename);
+    return requireNonNull(OBJECT_MAPPER.readValue(url, clazz));
   }
 }

@@ -219,6 +219,11 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
+  public List<DatasetConfigDTO> onboardAll() {
+    return Collections.emptyList();
+  }
+
+  @Override
   public void init(final ThirdEyeDataSourceContext context) {
     Map<String, Object> properties = context.getDataSourceDTO().getProperties();
 

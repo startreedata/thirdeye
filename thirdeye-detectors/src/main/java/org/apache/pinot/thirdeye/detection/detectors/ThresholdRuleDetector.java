@@ -17,12 +17,11 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.components;
+package org.apache.pinot.thirdeye.detection.detectors;
 
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.detection.spec.ThresholdRuleDetectorSpec;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;

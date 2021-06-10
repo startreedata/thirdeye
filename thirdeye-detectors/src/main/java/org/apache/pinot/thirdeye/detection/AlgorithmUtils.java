@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.algorithm;
+package org.apache.pinot.thirdeye.detection;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.pinot.thirdeye.detection.components;
+package org.apache.pinot.thirdeye.detection.detectors;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
@@ -33,9 +33,8 @@ import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.apache.pinot.thirdeye.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.detection.algorithm.AlgorithmUtils;
-import org.apache.pinot.thirdeye.detection.spec.HoltWintersDetectorSpec;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;

@@ -17,18 +17,17 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.spec;
+package org.apache.pinot.thirdeye.detection.detectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
-public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ThresholdRuleDetectorSpec extends AbstractSpec {
 
-  private double percentageChange = Double.NaN;
-  private String offset = "wo1w";
-  private String timezone = DEFAULT_TIMEZONE;
-  private String pattern = "UP_OR_DOWN";
-  private String weekStart = "WEDNESDAY";
+  private double min = Double.NaN;
+  private double max = Double.NaN;
   private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY
       .toAggregationGranularityString(); // use native granularity by default
 
@@ -40,43 +39,19 @@ public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
     this.monitoringGranularity = monitoringGranularity;
   }
 
-  public String getPattern() {
-    return pattern;
+  public double getMin() {
+    return min;
   }
 
-  public void setPattern(String pattern) {
-    this.pattern = pattern;
+  public void setMin(double min) {
+    this.min = min;
   }
 
-  public String getTimezone() {
-    return timezone;
+  public double getMax() {
+    return max;
   }
 
-  public void setTimezone(String timezone) {
-    this.timezone = timezone;
-  }
-
-  public String getOffset() {
-    return offset;
-  }
-
-  public void setOffset(String offset) {
-    this.offset = offset;
-  }
-
-  public double getPercentageChange() {
-    return percentageChange;
-  }
-
-  public void setPercentageChange(double percentageChange) {
-    this.percentageChange = percentageChange;
-  }
-
-  public String getWeekStart() {
-    return weekStart;
-  }
-
-  public void setWeekStart(String weekStart) {
-    this.weekStart = weekStart;
+  public void setMax(double max) {
+    this.max = max;
   }
 }

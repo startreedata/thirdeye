@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.dashboard.resources.v2;
+package org.apache.pinot.thirdeye.detection;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

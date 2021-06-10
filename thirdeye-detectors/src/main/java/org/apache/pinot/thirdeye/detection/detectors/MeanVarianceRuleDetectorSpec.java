@@ -17,19 +17,19 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.spec;
+package org.apache.pinot.thirdeye.detection.detectors;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.Pattern;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ThresholdRuleDetectorSpec extends AbstractSpec {
+public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
 
-  private double min = Double.NaN;
-  private double max = Double.NaN;
   private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY
       .toAggregationGranularityString(); // use native granularity by default
+  private int lookback = 52; //default look back of 52 units
+  private double sensitivity = 5; //default sensitivity of 5, equals +/- 1 sigma
+  private Pattern pattern = Pattern.UP_OR_DOWN;
 
   public String getMonitoringGranularity() {
     return monitoringGranularity;
@@ -39,19 +39,27 @@ public class ThresholdRuleDetectorSpec extends AbstractSpec {
     this.monitoringGranularity = monitoringGranularity;
   }
 
-  public double getMin() {
-    return min;
+  public Pattern getPattern() {
+    return pattern;
   }
 
-  public void setMin(double min) {
-    this.min = min;
+  public void setPattern(Pattern pattern) {
+    this.pattern = pattern;
   }
 
-  public double getMax() {
-    return max;
+  public int getLookback() {
+    return lookback;
   }
 
-  public void setMax(double max) {
-    this.max = max;
+  public void setLookback(int lookback) {
+    this.lookback = lookback;
+  }
+
+  public double getSensitivity() {
+    return sensitivity;
+  }
+
+  public void setSensitivity(double sensitivity) {
+    this.sensitivity = sensitivity;
   }
 }

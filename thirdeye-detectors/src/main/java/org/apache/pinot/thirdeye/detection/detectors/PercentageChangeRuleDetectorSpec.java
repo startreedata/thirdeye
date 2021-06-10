@@ -17,19 +17,20 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.spec;
+package org.apache.pinot.thirdeye.detection.detectors;
 
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.Pattern;
 
-public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
+public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
 
+  private double percentageChange = Double.NaN;
+  private String offset = "wo1w";
+  private String timezone = DEFAULT_TIMEZONE;
+  private String pattern = "UP_OR_DOWN";
+  private String weekStart = "WEDNESDAY";
   private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY
       .toAggregationGranularityString(); // use native granularity by default
-  private int lookback = 52; //default look back of 52 units
-  private double sensitivity = 5; //default sensitivity of 5, equals +/- 1 sigma
-  private Pattern pattern = Pattern.UP_OR_DOWN;
 
   public String getMonitoringGranularity() {
     return monitoringGranularity;
@@ -39,27 +40,43 @@ public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
     this.monitoringGranularity = monitoringGranularity;
   }
 
-  public Pattern getPattern() {
+  public String getPattern() {
     return pattern;
   }
 
-  public void setPattern(Pattern pattern) {
+  public void setPattern(String pattern) {
     this.pattern = pattern;
   }
 
-  public int getLookback() {
-    return lookback;
+  public String getTimezone() {
+    return timezone;
   }
 
-  public void setLookback(int lookback) {
-    this.lookback = lookback;
+  public void setTimezone(String timezone) {
+    this.timezone = timezone;
   }
 
-  public double getSensitivity() {
-    return sensitivity;
+  public String getOffset() {
+    return offset;
   }
 
-  public void setSensitivity(double sensitivity) {
-    this.sensitivity = sensitivity;
+  public void setOffset(String offset) {
+    this.offset = offset;
+  }
+
+  public double getPercentageChange() {
+    return percentageChange;
+  }
+
+  public void setPercentageChange(double percentageChange) {
+    this.percentageChange = percentageChange;
+  }
+
+  public String getWeekStart() {
+    return weekStart;
+  }
+
+  public void setWeekStart(String weekStart) {
+    this.weekStart = weekStart;
   }
 }

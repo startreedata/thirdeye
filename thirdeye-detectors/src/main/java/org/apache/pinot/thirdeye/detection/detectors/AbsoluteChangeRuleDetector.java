@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.components;
+package org.apache.pinot.thirdeye.detection.detectors;
 
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
@@ -26,9 +26,8 @@ import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils;
+import org.apache.pinot.thirdeye.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.detection.spec.AbsoluteChangeRuleDetectorSpec;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;

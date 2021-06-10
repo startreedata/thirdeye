@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils;
+import org.apache.pinot.thirdeye.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.v2.results.DataTableUtils;
 import org.apache.pinot.thirdeye.detection.v2.results.DetectionResult;

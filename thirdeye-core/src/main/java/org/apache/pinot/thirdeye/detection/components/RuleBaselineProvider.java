@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
-import org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils;
+import org.apache.pinot.thirdeye.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.spec.RuleBaselineProviderSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;

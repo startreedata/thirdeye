@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.dataquality.components;
+package org.apache.pinot.thirdeye.detection.detectors;
 
 import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.detection.dataquality.spec.DataSlaQualityCheckerSpec;
 import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;

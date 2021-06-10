@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils.parseOffset;
+import static org.apache.pinot.thirdeye.detection.BaselineParsingUtils.parseOffset;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -30,7 +30,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils;
+import org.apache.pinot.thirdeye.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;

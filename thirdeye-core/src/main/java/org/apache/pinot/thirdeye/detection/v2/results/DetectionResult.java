@@ -23,12 +23,11 @@ package org.apache.pinot.thirdeye.detection.v2.results;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 
@@ -100,5 +99,4 @@ public class DetectionResult implements DetectionPipelineResult {
     api.setAnomalies(anomalyApis);
     return api;
   }
-
 }

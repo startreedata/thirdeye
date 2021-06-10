@@ -21,10 +21,10 @@ package org.apache.pinot.thirdeye.dashboard.resources.v2;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
 import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregate;
-import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
-import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineNone;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineNone;
 import org.joda.time.DateTimeZone;
 
 public class BaselineParsingUtils {

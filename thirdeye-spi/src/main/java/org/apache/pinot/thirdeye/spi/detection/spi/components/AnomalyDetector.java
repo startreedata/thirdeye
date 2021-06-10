@@ -17,13 +17,19 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection;
+package org.apache.pinot.thirdeye.spi.detection.spi.components;
 
-/**
- * Up or down detection pattern
- */
-public enum Pattern {
-  UP,
-  DOWN,
-  UP_OR_DOWN
+import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.spi.exception.DetectorException;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.DetectionResult;
+import org.joda.time.Interval;
+
+public interface AnomalyDetector<T extends AbstractSpec> extends BaseComponent<T> {
+
+  /**
+   * Run detection in the specified time range and return the detection result
+   *
+   * @return the detection result which contains anomalies and current, predicted baselines.
+   */
+  DetectionResult runDetection(Interval window, String metricUrn) throws DetectorException;
 }

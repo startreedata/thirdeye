@@ -42,22 +42,18 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.spi.components.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.InputData;
+import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 
 public class DetectionUtils {
-
-  private static final String PROP_BASELINE_PROVIDER_COMPONENT_NAME = "baselineProviderComponentName";
-
-  private static final Comparator<MergedAnomalyResultDTO> COMPARATOR = new Comparator<MergedAnomalyResultDTO>() {
-    @Override
-    public int compare(MergedAnomalyResultDTO o1, MergedAnomalyResultDTO o2) {
-      return Long.compare(o1.getStartTime(), o2.getStartTime());
-    }
-  };
 
   // TODO anomaly should support multimap
   public static DimensionMap toFilterMap(Multimap<String, String> filters) {
@@ -262,7 +258,7 @@ public class DetectionUtils {
     }
 
     // Sort by increasing order of anomaly start time
-    Collections.sort(anomalies, COMPARATOR);
+    anomalies.sort(Comparator.comparingLong(MergedAnomalyResultBean::getStartTime));
     return anomalies;
   }
 
@@ -424,5 +420,12 @@ public class DetectionUtils {
       anomalyNotificationDTO.setNotifiedSubscriptionGroupIds(Collections.emptyList());
     }
     anomalySubscriptionGroupNotificationManager.save(anomalyNotificationDTO);
+  }
+
+  public static DataFrame buildBaselines(MetricSlice slice, Baseline baseline,
+      InputDataFetcher dataFetcher) {
+    List<MetricSlice> slices = new ArrayList<>(baseline.scatter(slice));
+    InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices));
+    return baseline.gather(slice, data.getTimeseries());
   }
 }

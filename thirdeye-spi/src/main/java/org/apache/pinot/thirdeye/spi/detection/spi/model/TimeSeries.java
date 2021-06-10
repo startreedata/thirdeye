@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.spi.model;
+package org.apache.pinot.thirdeye.spi.detection.spi.model;
 
 import com.google.common.base.Preconditions;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;

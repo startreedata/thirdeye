@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 
 /**
  * Synthetic baseline from a single, given offset

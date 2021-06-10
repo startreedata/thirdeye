@@ -30,20 +30,20 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils;
-import org.apache.pinot.thirdeye.detection.Pattern;
 import org.apache.pinot.thirdeye.detection.spec.SitewideImpactRuleAnomalyFilterSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
-import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
 import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 
 /**
  * Site-wide impact anomaly filter

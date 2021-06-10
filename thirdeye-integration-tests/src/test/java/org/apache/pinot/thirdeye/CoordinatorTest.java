@@ -4,6 +4,7 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,15 +13,19 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.util.Duration;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
+import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -42,6 +47,10 @@ public class CoordinatorTest {
   public void beforeClass() {
     db = new ThirdEyeH2DatabaseServer("localhost", 7124, null);
     db.start();
+
+    // Setup plugins dir so ThirdEye can load it
+    setupPluginsDirAbsolutePath();
+
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
         resourceFilePath("e2e/config/coordinator.yml"),
         config("configPath", THIRDEYE_CONFIG),
@@ -59,6 +68,25 @@ public class CoordinatorTest {
         .build("test client");
   }
 
+  private void setupPluginsDirAbsolutePath() {
+    final String projectBuildDirectory = requireNonNull(System.getProperty("projectBuildDirectory"),
+        "project build dir not set");
+    final String projectVersion = requireNonNull(System.getProperty("projectVersion"),
+        "project version not set");
+    final String pluginsPath = new StringBuilder()
+        .append(projectBuildDirectory)
+        .append("/../../thirdeye-distribution/target/thirdeye-distribution-")
+        .append(projectVersion)
+        .append("-dist/thirdeye-distribution-")
+        .append(projectVersion)
+        .append("/plugins")
+        .toString();
+    final File pluginsDir = new File(pluginsPath);
+    assertThat(pluginsDir.exists() && pluginsDir.isDirectory()).isTrue();
+
+    System.setProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR, pluginsDir.getAbsolutePath());
+  }
+
   @AfterClass
   public void afterClass() {
     client.close();
@@ -74,13 +102,13 @@ public class CoordinatorTest {
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
-  @Test
+  @Test(dependsOnMethods = "testPing")
   public void testLoadMockDataSource() throws IOException {
-    final DataSourceApi entity = loadApiFromFile("data-source-mock.json",
+    final DataSourceApi dataSourceApi = loadApiFromFile("data-source-mock.json",
         DataSourceApi.class);
     Response response;
     response = request("api/data-sources")
-        .post(Entity.json(singletonList(entity)));
+        .post(Entity.json(singletonList(dataSourceApi)));
 
     assertThat(response.getStatus()).isEqualTo(200);
 
@@ -89,14 +117,26 @@ public class CoordinatorTest {
         .isEqualTo(1);
 
     response = request("api/data-sources/onboard-all")
-        .post(Entity.form(new Form().param("dataSourceName", entity.getName())));
+        .post(Entity.form(new Form().param("dataSourceName", dataSourceApi.getName())));
 
-    //TODO spyne fix this.
-    // assertThat(response.getStatus()).isEqualTo(200);
-    // assertThat(db.executeSql("SELECT * From dataset_config_index").length()).isEqualTo(1);
+    assertThat(response.getStatus()).isEqualTo(200);
+    assertThat(db.executeSql("SELECT * From dataset_config_index").length()).isEqualTo(2);
+
+    response = request("api/datasets").get();
+    assertThat(response.getStatus()).isEqualTo(200);
+
+    // validate all datasets should point to the same datasource
+    response
+        .readEntity(new GenericType<List<DatasetApi>>() {})
+        .stream()
+        .map(DatasetApi::getDataSource)
+        .map(DataSourceApi::getName)
+        .forEach(name -> assertThat(name).isEqualTo(dataSourceApi.getName()));
+
+    assertThat(db.executeSql("SELECT * From metric_config_index").length()).isEqualTo(4);
   }
 
-  @Test(dependsOnMethods = "testLoadMockDataSource", enabled = false)
+  @Test(dependsOnMethods = "testLoadMockDataSource")
   public void testEvaluate() throws IOException {
     final AlertEvaluationApi entity = loadApiFromFile("payload_alerts_evaluate.json",
         AlertEvaluationApi.class);

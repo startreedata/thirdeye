@@ -16,7 +16,9 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.pinot.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
@@ -32,17 +34,19 @@
     <module>thirdeye-worker</module>
     <module>thirdeye-ui</module>
 
-    <!-- Build plugins -->
+    <!--  Build plugins -->
     <module>thirdeye-plugin-example</module>
     <module>thirdeye-datasources</module>
 
-    <!--    Run the test modules -->
-    <module>thirdeye-integration-tests</module>
+    <!--  Kept for legacy reasons. Still has a bunch of useful tests. -->
     <module>thirdeye-deprecated-tests</module>
-    <module>pinot-test-container</module>
 
-    <!--    Build the distribution after everything -->
+    <!--  Build the distribution -->
     <module>thirdeye-distribution</module>
+
+    <!--  Run the Integration test modules after building the distribution (required for plugins) -->
+    <module>pinot-test-container</module>
+    <module>thirdeye-integration-tests</module>
   </modules>
 
   <properties>
@@ -227,6 +231,13 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.0.0-M1</version>
+          <configuration>
+            <threadCount>1</threadCount>
+            <systemPropertyVariables>
+              <projectVersion>${project.version}</projectVersion>
+              <projectBuildDirectory>${project.build.directory}</projectBuildDirectory>
+            </systemPropertyVariables>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

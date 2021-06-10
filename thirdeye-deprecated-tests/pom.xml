@@ -30,24 +30,27 @@
   <artifactId>thirdeye-deprecated-tests</artifactId>
 
   <dependencies>
+    <!-- test dependencies -->
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-coordinator</artifactId>
-      <scope>compile</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-worker</artifactId>
-      <scope>compile</scope>
+      <scope>test</scope>
     </dependency>
-
-    <!-- test dependencies -->
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-datasources</artifactId>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>thirdeye-detectors</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>

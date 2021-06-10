@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.pinot.thirdeye</groupId>
@@ -22,8 +24,8 @@
       <artifactId>thirdeye-persistence</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-detectors</artifactId>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -286,31 +288,31 @@
   </dependencies>
 
   <profiles>
-  <profile>
-    <id>bigquery</id>
-    <dependencies>
-      <dependency>
-        <groupId>com.google.auth</groupId>
-        <artifactId>google-auth-library-oauth2-http</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>com.google.api</groupId>
-        <artifactId>gax</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>com.google.apis</groupId>
-        <artifactId>google-api-services-bigquery</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.avro</groupId>
-        <artifactId>avro</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>com.simba.googlebigquery</groupId>
-        <artifactId>jdbc42</artifactId>
-      </dependency>
-    </dependencies>
-  </profile>
+    <profile>
+      <id>bigquery</id>
+      <dependencies>
+        <dependency>
+          <groupId>com.google.auth</groupId>
+          <artifactId>google-auth-library-oauth2-http</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.google.api</groupId>
+          <artifactId>gax</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.google.apis</groupId>
+          <artifactId>google-api-services-bigquery</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.simba.googlebigquery</groupId>
+          <artifactId>jdbc42</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
   </profiles>
 
   <build>

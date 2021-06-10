@@ -42,16 +42,13 @@ public class MockThirdEyeDataSourceTest {
         this.getClass().getResourceAsStream("mockThirdEyeDataSource-properties.json"))) {
 
       final DataSourceDTO dataSourceDTO = new DataSourceDTO();
-      dataSourceDTO.setProperties(new ObjectMapper().readValue(dataReader, Map.class));
+      dataSourceDTO
+          .setName("mock1")
+          .setProperties(new ObjectMapper().readValue(dataReader, Map.class));
 
       this.dataSource = new MockThirdEyeDataSource();
       this.dataSource.init(new ThirdEyeDataSourceContext().setDataSourceDTO(dataSourceDTO));
     }
-  }
-
-  @Test
-  public void testGetName() {
-    Assert.assertEquals(this.dataSource.getName(), "MockThirdEyeDataSource");
   }
 
   @Test

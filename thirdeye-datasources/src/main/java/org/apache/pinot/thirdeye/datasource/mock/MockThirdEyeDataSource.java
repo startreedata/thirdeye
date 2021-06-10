@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.datasource.mock;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 
@@ -50,6 +51,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.StringSeries;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -225,10 +227,10 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public void init(final ThirdEyeDataSourceContext context) {
-    Map<String, Object> properties = context.getDataSourceDTO().getProperties();
-
-    this.name = MapUtils
-        .getString(properties, "name", MockThirdEyeDataSource.class.getSimpleName());
+    final DataSourceDTO dataSourceDTO = context.getDataSourceDTO();
+    final Map<String, Object> properties = requireNonNull(dataSourceDTO.getProperties());
+    name = requireNonNull(dataSourceDTO.getName());
+    properties.put("name", name);
 
     // datasets
     this.datasets = new HashMap<>();

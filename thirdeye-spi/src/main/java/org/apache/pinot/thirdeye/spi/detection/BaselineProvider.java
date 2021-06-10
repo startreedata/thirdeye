@@ -17,12 +17,11 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.spi.detection.spi.components;
+package org.apache.pinot.thirdeye.spi.detection;
 
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.TimeSeries;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 
 /**
  * The baseline provider to calculate predicted baseline.

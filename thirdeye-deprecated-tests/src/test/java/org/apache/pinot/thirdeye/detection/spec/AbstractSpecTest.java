@@ -18,7 +18,7 @@ package org.apache.pinot.thirdeye.detection.spec;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

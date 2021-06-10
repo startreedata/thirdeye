@@ -23,7 +23,7 @@ package org.apache.pinot.thirdeye.spi.datalayer.dto;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
-import org.apache.pinot.thirdeye.spi.detection.spi.components.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 
 public class AlertDTO extends DetectionConfigBean {
 

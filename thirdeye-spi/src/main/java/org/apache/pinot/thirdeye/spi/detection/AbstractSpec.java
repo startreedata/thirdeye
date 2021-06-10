@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.detection.spec;
+package org.apache.pinot.thirdeye.spi.detection;
 
 import java.io.Serializable;
 import java.util.Map;

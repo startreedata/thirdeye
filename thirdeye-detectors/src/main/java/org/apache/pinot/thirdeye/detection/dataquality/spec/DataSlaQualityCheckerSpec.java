@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.detection.dataquality.spec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataSlaQualityCheckerSpec extends AbstractSpec {

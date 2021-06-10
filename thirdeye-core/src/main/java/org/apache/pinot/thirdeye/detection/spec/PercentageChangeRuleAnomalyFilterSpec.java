@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.spec;
 
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 public class PercentageChangeRuleAnomalyFilterSpec extends AbstractSpec {
 

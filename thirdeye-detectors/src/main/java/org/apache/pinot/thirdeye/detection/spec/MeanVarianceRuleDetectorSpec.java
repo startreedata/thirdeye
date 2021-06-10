@@ -20,8 +20,8 @@
 package org.apache.pinot.thirdeye.detection.spec;
 
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
 
 public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
 

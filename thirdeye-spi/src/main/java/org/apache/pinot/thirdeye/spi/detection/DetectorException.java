@@ -17,19 +17,26 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.spi.detection.spi.components;
+package org.apache.pinot.thirdeye.spi.detection;
 
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.spi.exception.DetectorException;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.DetectionResult;
-import org.joda.time.Interval;
+/**
+ * Base detector exception class.
+ */
+public class DetectorException extends Exception {
 
-public interface AnomalyDetector<T extends AbstractSpec> extends BaseComponent<T> {
+  public DetectorException(Throwable cause) {
+    super(cause);
+  }
 
-  /**
-   * Run detection in the specified time range and return the detection result
-   *
-   * @return the detection result which contains anomalies and current, predicted baselines.
-   */
-  DetectionResult runDetection(Interval window, String metricUrn) throws DetectorException;
+  public DetectorException() {
+    super();
+  }
+
+  public DetectorException(String message) {
+    super(message);
+  }
+
+  public DetectorException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

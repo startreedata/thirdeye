@@ -19,7 +19,7 @@
  *
  *
  */
-package org.apache.pinot.thirdeye.spi.detection.spi.model;
+package org.apache.pinot.thirdeye.spi.detection.model;
 
 import java.util.Collections;
 import java.util.List;

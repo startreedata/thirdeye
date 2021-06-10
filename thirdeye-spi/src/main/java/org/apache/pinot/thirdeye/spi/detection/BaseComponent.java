@@ -17,10 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.spi.detection.spi.components;
-
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+package org.apache.pinot.thirdeye.spi.detection;
 
 public interface BaseComponent<T extends AbstractSpec> {
 

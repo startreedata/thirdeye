@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.detection.spi.model;
+package org.apache.pinot.thirdeye.spi.detection.model;
 
 import static org.apache.pinot.thirdeye.spi.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
 

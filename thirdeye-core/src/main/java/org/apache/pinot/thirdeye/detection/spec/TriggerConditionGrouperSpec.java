@@ -18,7 +18,7 @@ package org.apache.pinot.thirdeye.detection.spec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TriggerConditionGrouperSpec extends AbstractSpec {

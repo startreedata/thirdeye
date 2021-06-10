@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.spi.detection.v2.components;
 
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.spi.detection.spi.model;
+package org.apache.pinot.thirdeye.spi.detection.model;
 
 import java.util.Collection;
 import java.util.Collections;

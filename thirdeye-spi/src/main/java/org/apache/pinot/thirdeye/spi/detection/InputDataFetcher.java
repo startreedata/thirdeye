@@ -20,8 +20,8 @@
 
 package org.apache.pinot.thirdeye.spi.detection;
 
-import org.apache.pinot.thirdeye.spi.detection.spi.model.InputData;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.detection.model.InputData;
+import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 
 /**
  * Input data fetcher interface.

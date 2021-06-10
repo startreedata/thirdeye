@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.spi.detection.spi.exception;
+package org.apache.pinot.thirdeye.spi.detection;
 
 /**
  * Data is insufficient to run detection.

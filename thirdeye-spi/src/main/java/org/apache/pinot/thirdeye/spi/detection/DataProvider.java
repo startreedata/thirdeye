@@ -31,9 +31,9 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.EvaluationSlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.EventSlice;
+import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.detection.model.EvaluationSlice;
+import org.apache.pinot.thirdeye.spi.detection.model.EventSlice;
 
 /**
  * Centralized data source for anomaly detection algorithms. All data used by any

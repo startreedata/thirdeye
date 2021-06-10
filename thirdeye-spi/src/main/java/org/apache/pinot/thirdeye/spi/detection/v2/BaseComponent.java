@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.spi.detection.v2;
 
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 public interface BaseComponent<T extends AbstractSpec> {
 

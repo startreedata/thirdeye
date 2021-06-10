@@ -20,7 +20,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.detection.spi.model;
+package org.apache.pinot.thirdeye.spi.detection.model;
 
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 

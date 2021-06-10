@@ -3,7 +3,7 @@ package org.apache.pinot.thirdeye.detection.v2.spec;
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
 

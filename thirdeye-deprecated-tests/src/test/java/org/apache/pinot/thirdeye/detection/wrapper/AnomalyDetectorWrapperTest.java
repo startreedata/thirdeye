@@ -37,7 +37,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.TimeSeries;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.Assert;

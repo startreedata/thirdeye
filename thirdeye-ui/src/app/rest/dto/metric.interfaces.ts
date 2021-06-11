@@ -1,3 +1,13 @@
+export interface LogicalMetric {
+    id?: number;
+    name: string;
+    dataset?: Dataset;
+    active: boolean;
+    aggregationFunction: MetricAggFunction;
+    rollupThreshold: number;
+    updated?: number;
+}
+
 export interface Metric {
     id: number;
     name: string;

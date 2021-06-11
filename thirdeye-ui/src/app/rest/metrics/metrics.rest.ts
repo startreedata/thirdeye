@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Metric } from "../dto/metric.interfaces";
+import { LogicalMetric, Metric } from "../dto/metric.interfaces";
 
 const BASE_URL_METRICS = "/api/metrics";
 
@@ -13,6 +13,18 @@ export const getAllMetrics = async (): Promise<Metric[]> => {
     const response = await axios.get(BASE_URL_METRICS);
 
     return response.data;
+};
+
+export const createMetric = async (metric: LogicalMetric): Promise<Metric> => {
+    const response = await axios.post(BASE_URL_METRICS, [metric]);
+
+    return response.data[0];
+};
+
+export const updateMetric = async (metric: LogicalMetric): Promise<Metric> => {
+    const response = await axios.put(BASE_URL_METRICS, [metric]);
+
+    return response.data[0];
 };
 
 export const deleteMetric = async (id: number): Promise<Metric> => {

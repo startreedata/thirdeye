@@ -59,6 +59,15 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
         handleMetricOptionsClose();
     };
 
+    const handleMetricEdit = (): void => {
+        if (!props.metric) {
+            return;
+        }
+
+        props.onEdit && props.onEdit(props.metric.id);
+        handleMetricOptionsClose();
+    };
+
     return (
         <Card variant="outlined">
             {props.metric && (
@@ -102,6 +111,13 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
                                             {t("label.view-details")}
                                         </MenuItem>
                                     )}
+
+                                    {/* Edit metric */}
+                                    <MenuItem onClick={handleMetricEdit}>
+                                        {t("label.edit-entity", {
+                                            entity: t("label.metric"),
+                                        })}
+                                    </MenuItem>
 
                                     {/* Delete metric */}
                                     <MenuItem onClick={handleMetricDelete}>

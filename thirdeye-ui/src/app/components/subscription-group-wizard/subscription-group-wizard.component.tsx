@@ -347,7 +347,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
 
                                 {/* Next button */}
                                 <Grid item>
-                                    {/* Submit button for subscription group properties form in 
+                                    {/* Submit button for subscription group properties form in
                                     first step */}
                                     {currentWizardStep ===
                                         SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (

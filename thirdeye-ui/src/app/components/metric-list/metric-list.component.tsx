@@ -19,7 +19,10 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { filterMetrics } from "../../utils/metrics/metrics.util";
-import { getMetricsViewPath } from "../../utils/routes/routes.util";
+import {
+    getMetricsUpdatePath,
+    getMetricsViewPath,
+} from "../../utils/routes/routes.util";
 import {
     getSearchStatusLabel,
     getSelectedStatusLabel,
@@ -133,15 +136,19 @@ export const MetricList: FunctionComponent<MetricListProps> = (
                     actionsCellRenderer(
                         params,
                         true,
-                        false,
+                        true,
                         true,
                         handleMetricViewDetailsById,
-                        undefined,
+                        handleMetricEdit,
                         handleMetricDelete
                     ),
             },
         ];
         setDataGridColumns(columns);
+    };
+
+    const handleMetricEdit = (id: number): void => {
+        history.push(getMetricsUpdatePath(id));
     };
 
     const metricStatusRenderer = (params: GridCellParams): ReactElement => {

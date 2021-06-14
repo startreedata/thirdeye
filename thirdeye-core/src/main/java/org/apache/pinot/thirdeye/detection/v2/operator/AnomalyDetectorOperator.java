@@ -2,9 +2,9 @@ package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.detection.v2.results.GroupedDetectionResults;
 import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.components.detector.AnomalyDetector;
 import org.joda.time.Interval;
@@ -31,7 +31,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable
       final BaseComponent component = this.getComponents().get(key);
       if (component instanceof AnomalyDetector) {
         for (Interval interval : getMonitoringWindows()) {
-          final GroupedDetectionResults detectionResult = (GroupedDetectionResults) ((AnomalyDetector) component)
+          DetectionPipelineResult detectionResult = ((AnomalyDetector) component)
               .runDetection(interval,
                   (DataTable) inputMap.get(BASELINE_KEY),
                   (DataTable) inputMap.get(CURRENT_KEY));

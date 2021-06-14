@@ -12,12 +12,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
-import org.apache.pinot.thirdeye.detection.v2.results.DetectionResult;
-import org.apache.pinot.thirdeye.detection.v2.results.GroupedDetectionResults;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,13 +104,10 @@ public class AlertEvaluator {
   private Map<String, DetectionEvaluationApi> detectionPipelineResultToApi(
       final DetectionPipelineResult result) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    if (result instanceof GroupedDetectionResults) {
-      GroupedDetectionResults results = (GroupedDetectionResults) result;
-      final List<DetectionResult> detectionResults = results.getDetectionResults();
-      for (int i = 0; i < detectionResults.size(); i++) {
-        DetectionEvaluationApi detectionEvaluationApi = detectionResults.get(i).toApi();
-        map.put(String.valueOf(i), detectionEvaluationApi);
-      }
+    final List<DetectionResult> detectionResults = result.getDetectionResults();
+    for (int i = 0; i < detectionResults.size(); i++) {
+      DetectionEvaluationApi detectionEvaluationApi = detectionResults.get(i).toApi();
+      map.put(String.valueOf(i), detectionEvaluationApi);
     }
     return map;
   }

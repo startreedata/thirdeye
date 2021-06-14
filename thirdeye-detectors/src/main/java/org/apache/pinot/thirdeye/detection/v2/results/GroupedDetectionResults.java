@@ -24,6 +24,7 @@ package org.apache.pinot.thirdeye.detection.v2.results;
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionResult;
 
 /**
  * The detection result. Contains a list of DetectionResult.

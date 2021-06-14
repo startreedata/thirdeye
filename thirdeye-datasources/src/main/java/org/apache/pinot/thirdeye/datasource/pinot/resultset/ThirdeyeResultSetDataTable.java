@@ -6,6 +6,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionResult;
 
 public class ThirdeyeResultSetDataTable implements DataTable {
 
@@ -142,5 +143,10 @@ public class ThirdeyeResultSetDataTable implements DataTable {
     }
     DataFrame dataFrame = dfBuilder.build().dropNull();
     return dataFrame;
+  }
+
+  @Override
+  public List<DetectionResult> getDetectionResults() {
+    throw new UnsupportedOperationException("Not supported");
   }
 }

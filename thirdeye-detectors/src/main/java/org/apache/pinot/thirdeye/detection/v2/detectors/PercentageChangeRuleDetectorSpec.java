@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2.spec;
+package org.apache.pinot.thirdeye.detection.v2.detectors;
 
 import java.util.Collections;
 import java.util.List;

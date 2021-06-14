@@ -33,7 +33,7 @@ export const MetricsCreatePage: FunctionComponent = () => {
         createMetric(metric).then((metric: LogicalMetric): void => {
             enqueueSnackbar(
                 t("message.create-success", {
-                    entity: t("label.subscription-group"),
+                    entity: t("label.metric"),
                 }),
                 getSuccessSnackbarOption()
             );

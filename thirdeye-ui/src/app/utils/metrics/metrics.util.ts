@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import { isEmpty } from "lodash";
 import {
+    Dataset,
     LogicalMetric,
     LogicalView,
     Metric,
@@ -32,6 +33,7 @@ export const createEmptyMetric = (): LogicalMetric => {
         name: "",
         active: true,
         aggregationFunction: "SUM" as MetricAggFunction,
+        dataset: { name: "" } as Dataset,
         rollupThreshold: 0,
     };
 };

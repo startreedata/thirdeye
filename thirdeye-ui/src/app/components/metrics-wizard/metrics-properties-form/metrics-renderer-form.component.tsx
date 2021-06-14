@@ -3,6 +3,7 @@ import {
     Checkbox,
     FormControl,
     FormControlLabel,
+    FormHelperText,
     Grid,
     InputLabel,
     MenuItem,
@@ -16,16 +17,15 @@ import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 import { LogicalMetric } from "../../../rest/dto/metric.interfaces";
 import { createEmptyMetric } from "../../../utils/metrics/metrics.util";
-import { useMetricsWizardStyles } from "../metrics-wizard.styles";
 import { MetricsPropertiesFormProps } from "./metrics-renderer-form.interfaces";
 
 export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps> = (
     props: MetricsPropertiesFormProps
 ) => {
-    const metricWizardClasses = useMetricsWizardStyles();
     const { t } = useTranslation();
+    const defaultValues = props.metric || createEmptyMetric();
     const { register, handleSubmit, errors, control } = useForm<LogicalMetric>({
-        defaultValues: props.metric || createEmptyMetric(),
+        defaultValues,
         resolver: yupResolver(
             yup.object().shape({
                 name: yup
@@ -41,9 +41,13 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
                     .required(
                         t("message.metrics-aggregation-function-required")
                     ),
-                active: yup
-                    .boolean()
-                    .required(t("message.metrics-active-required")),
+                active: yup.boolean(),
+                dataset: yup.object().shape({
+                    name: yup
+                        .string()
+                        .trim()
+                        .required(t("message.metrics-dataset-required")),
+                }),
             })
         ),
     });
@@ -51,7 +55,22 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
     const onSubmitSusbcriptionGroupPropertiesForm = (
         metric: LogicalMetric
     ): void => {
-        props.onSubmit && props.onSubmit(metric);
+        if (!props.onSubmit) {
+            return;
+        }
+
+        const dataset = props.datasets.find(
+            (dataset) => dataset.name === metric.dataset?.name
+        );
+
+        if (metric.dataset) {
+            props.onSubmit({
+                ...metric,
+                dataset,
+            });
+        } else {
+            props.onSubmit(metric);
+        }
     };
 
     return (
@@ -68,9 +87,6 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
                         <TextField
                             fullWidth
                             required
-                            classes={{
-                                root: metricWizardClasses.fieldContainer,
-                            }}
                             error={Boolean(errors && errors.name)}
                             helperText={
                                 errors && errors.name && errors.name.message
@@ -89,9 +105,6 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
                         <TextField
                             fullWidth
                             required
-                            classes={{
-                                root: metricWizardClasses.fieldContainer,
-                            }}
                             error={Boolean(
                                 errors && errors.aggregationFunction
                             )}
@@ -116,12 +129,18 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
                                 {t(`label.dataset`)}
                             </InputLabel>
                             <Controller
-                                as={
+                                control={control}
+                                name="dataset"
+                                render={({ onChange, value }) => (
                                     <Select
                                         fullWidth
-                                        label={t("label.time-range")}
+                                        label={t("label.dataset")}
                                         labelId="metrics-dataset"
+                                        value={value.name}
                                         variant="outlined"
+                                        onChange={(e) =>
+                                            onChange({ name: e.target.value })
+                                        }
                                     >
                                         {!_.isEmpty(props.datasets) &&
                                             props.datasets.map(
@@ -135,11 +154,13 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
                                                 )
                                             )}
                                     </Select>
-                                }
-                                control={control}
-                                inputRef={register}
-                                name="dataset"
+                                )}
                             />
+                            {errors.dataset?.name && (
+                                <FormHelperText error>
+                                    {errors.dataset.name.message}
+                                </FormHelperText>
+                            )}
                         </FormControl>
                     </Grid>
                 </Grid>
@@ -149,9 +170,6 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
                         <TextField
                             fullWidth
                             required
-                            classes={{
-                                root: metricWizardClasses.fieldContainer,
-                            }}
                             error={Boolean(errors && errors.rollupThreshold)}
                             helperText={
                                 errors &&

@@ -59,7 +59,7 @@ export const MetricsUpdatePage: FunctionComponent = () => {
         updateMetric(newMetric).then((newMetric: LogicalMetric): void => {
             enqueueSnackbar(
                 t("message.update-success", {
-                    entity: t("label.subscription-group"),
+                    entity: t("label.metric"),
                 }),
                 getSuccessSnackbarOption()
             );
@@ -74,7 +74,7 @@ export const MetricsUpdatePage: FunctionComponent = () => {
         if (!isValidNumberId(params.id)) {
             enqueueSnackbar(
                 t("message.invalid-id", {
-                    entity: t("label.subscription-group"),
+                    entity: t("label.metric"),
                     id: params.id,
                 }),
                 getErrorSnackbarOption()

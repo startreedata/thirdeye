@@ -43,7 +43,7 @@ export const MetricsWizard: FunctionComponent<MetricsWizardProps> = (
     }, [currentWizardStep]);
 
     const onSubmitMetricPropertiesForm = (metric: LogicalMetric): void => {
-        // Update subscription group with form inputs
+        // Update metric with form inputs
         setNewMetric((newMetrics) => Object.assign(newMetrics, metric));
 
         // Next step
@@ -127,10 +127,10 @@ export const MetricsWizard: FunctionComponent<MetricsWizardProps> = (
                 {/* Spacer */}
                 <Grid item sm={12} />
 
-                {/* Subscription group properties */}
+                {/* Metric properties */}
                 {currentWizardStep === MetricsWizardStep.METRIC_PROPERTIES && (
                     <>
-                        {/* Subscription group properties form */}
+                        {/* Metric properties form */}
                         <Grid item sm={12}>
                             <MetricsPropertiesForm
                                 datasets={props.datasets}
@@ -212,8 +212,7 @@ export const MetricsWizard: FunctionComponent<MetricsWizardProps> = (
 
                                 {/* Next button */}
                                 <Grid item>
-                                    {/* Submit button for subscription group properties form in
-                                    first step */}
+                                    {/* Submit button for metric properties form in first step */}
                                     {currentWizardStep ===
                                         MetricsWizardStep.METRIC_PROPERTIES && (
                                         <Button

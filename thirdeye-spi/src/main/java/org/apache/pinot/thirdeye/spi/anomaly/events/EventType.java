@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.anomaly.events;
+package org.apache.pinot.thirdeye.spi.anomaly.events;
 
 public enum EventType {
   HOLIDAY, DEPLOYMENT, HISTORICAL_ANOMALY, CUSTOM

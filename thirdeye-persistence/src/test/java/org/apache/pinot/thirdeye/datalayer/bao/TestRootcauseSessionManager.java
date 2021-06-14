@@ -16,11 +16,10 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestRootcauseSessionResult;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
@@ -33,7 +32,7 @@ public class TestRootcauseSessionManager {
   private RootcauseSessionManager sessionDAO;
 
   private static RootcauseSessionDTO makeDefault() {
-    return getTestRootcauseSessionResult(1000,
+    return DatalayerTestUtils.getTestRootcauseSessionResult(1000,
         1100,
         1500,
         2000,

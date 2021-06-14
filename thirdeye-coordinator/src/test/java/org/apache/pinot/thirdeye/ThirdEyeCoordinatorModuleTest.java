@@ -25,8 +25,7 @@ public class ThirdEyeCoordinatorModuleTest {
             .setJwtConfiguration(new JwtConfiguration()
                 .setSigningKey("abcd")
                 .setIssuer("issuer")))
-        .setConfigPath("../config")
-        ;
+        .setConfigPath("../config");
 
     final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,

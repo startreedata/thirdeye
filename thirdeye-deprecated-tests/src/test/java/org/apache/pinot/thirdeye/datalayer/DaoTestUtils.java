@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
-import org.apache.pinot.thirdeye.anomaly.override.OverrideConfigHelper;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
 import org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator;
@@ -42,7 +41,6 @@ import org.apache.pinot.thirdeye.detection.validators.SubscriptionConfigValidato
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator;
 import org.apache.pinot.thirdeye.detector.email.filter.AlphaBetaAlertFilter;
-import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
 import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyFeedConfig;
 import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyFetcherConfig;
@@ -51,6 +49,7 @@ import org.apache.pinot.thirdeye.spi.alert.commons.AnomalySource;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
@@ -204,17 +203,17 @@ public class DaoTestUtils {
     OverrideConfigDTO overrideConfigDTO = new OverrideConfigDTO();
     overrideConfigDTO.setStartTime(now.minusHours(8).getMillis());
     overrideConfigDTO.setEndTime(now.plusHours(8).getMillis());
-    overrideConfigDTO.setTargetEntity(OverrideConfigHelper.ENTITY_TIME_SERIES);
+    overrideConfigDTO.setTargetEntity(OverrideConfigManager.ENTITY_TIME_SERIES);
     overrideConfigDTO.setActive(true);
 
     Map<String, String> overrideProperties = new HashMap<>();
-    overrideProperties.put(ScalingFactor.SCALING_FACTOR, "1.2");
+    overrideProperties.put(Constants.SCALING_FACTOR, "1.2");
     overrideConfigDTO.setOverrideProperties(overrideProperties);
 
     Map<String, List<String>> overrideTarget = new HashMap<>();
     overrideTarget
-        .put(OverrideConfigHelper.TARGET_COLLECTION, Arrays.asList("collection1", "collection2"));
-    overrideTarget.put(OverrideConfigHelper.EXCLUDED_COLLECTION, Arrays.asList("collection3"));
+        .put(OverrideConfigManager.TARGET_COLLECTION, Arrays.asList("collection1", "collection2"));
+    overrideTarget.put(OverrideConfigManager.EXCLUDED_COLLECTION, Arrays.asList("collection3"));
     overrideConfigDTO.setTargetLevel(overrideTarget);
 
     return overrideConfigDTO;

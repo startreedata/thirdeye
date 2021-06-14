@@ -85,7 +85,7 @@
         <directory>src/test/resources</directory>
       </testResource>
       <testResource>
-        <directory>../thirdeye-core/src/main/resources</directory>
+        <directory>../thirdeye-persistence/src/main/resources</directory>
       </testResource>
     </testResources>
     <plugins>

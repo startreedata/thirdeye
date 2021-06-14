@@ -17,13 +17,13 @@
 package org.apache.pinot.thirdeye.datalayer.bao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.testng.Assert.assertEquals;
 
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -108,6 +108,6 @@ public class TestApplicationManager {
   public void testDeleteApplication() {
     assertThat(applicationManager.findAll().size()).isEqualTo(1);
     applicationManager.deleteById(applicationId);
-    Assert.assertEquals(applicationManager.findAll().size(), 0);
+    assertEquals(applicationManager.findAll().size(), 0);
   }
 }

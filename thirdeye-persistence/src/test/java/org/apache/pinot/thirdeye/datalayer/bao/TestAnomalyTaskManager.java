@@ -16,14 +16,13 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestJobSpec;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskType;
@@ -74,7 +73,7 @@ public class TestAnomalyTaskManager {
 
   @Test
   public void testCreate() throws JsonProcessingException {
-    JobDTO testAnomalyJobSpec = getTestJobSpec();
+    JobDTO testAnomalyJobSpec = DatalayerTestUtils.getTestJobSpec();
     anomalyJobId = jobDAO.save(testAnomalyJobSpec);
     anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
     Assert.assertNotNull(anomalyTaskId1);
@@ -146,7 +145,7 @@ public class TestAnomalyTaskManager {
 
   @Test(dependsOnMethods = {"testDeleteRecordOlderThanDaysWithStatus"})
   public void testFindByStatusWithinDays() throws JsonProcessingException, InterruptedException {
-    JobDTO testAnomalyJobSpec = getTestJobSpec();
+    JobDTO testAnomalyJobSpec = DatalayerTestUtils.getTestJobSpec();
     anomalyJobId = jobDAO.save(testAnomalyJobSpec);
     anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
     Assert.assertNotNull(anomalyTaskId1);

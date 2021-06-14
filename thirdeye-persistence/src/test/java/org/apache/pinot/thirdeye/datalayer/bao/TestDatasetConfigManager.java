@@ -16,9 +16,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestDatasetConfig;
-
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -49,11 +48,11 @@ public class TestDatasetConfigManager {
   @Test
   public void testCreate() {
 
-    DatasetConfigDTO datasetConfig1 = getTestDatasetConfig(collection1);
+    DatasetConfigDTO datasetConfig1 = DatalayerTestUtils.getTestDatasetConfig(collection1);
     datasetConfigId1 = datasetConfigDAO.save(datasetConfig1);
     Assert.assertNotNull(datasetConfigId1);
 
-    DatasetConfigDTO datasetConfig2 = getTestDatasetConfig(collection2);
+    DatasetConfigDTO datasetConfig2 = DatalayerTestUtils.getTestDatasetConfig(collection2);
     datasetConfig2.setActive(false);
     datasetConfigId2 = datasetConfigDAO.save(datasetConfig2);
     Assert.assertNotNull(datasetConfigId2);

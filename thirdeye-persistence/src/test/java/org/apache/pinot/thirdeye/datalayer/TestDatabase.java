@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.datalayer;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.FileReader;
@@ -57,7 +59,10 @@ public class TestDatabase {
 
     final Connection conn = ds.getConnection();
     // create schema
-    final URL createSchemaUrl = getClass().getResource("/schema/create-schema.sql");
+    final URL createSchemaUrl = requireNonNull(
+        ScriptRunner.class.getResource("/db/create-schema.sql"),
+        "failed to load createSchemaUrl");
+
     final ScriptRunner scriptRunner = new ScriptRunner(conn, true);
     scriptRunner.setDelimiter(";");
     scriptRunner.setLogWriter(new PrintWriter(new NullWriter()));

@@ -16,9 +16,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestOnboardConfig;
-
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OnboardDatasetMetricManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
@@ -51,17 +50,19 @@ public class TestOnboardDatasetMetricManager {
   @Test
   public void testCreateOnboardConfig() {
     // create just a dataset
-    OnboardDatasetMetricDTO dto = getTestOnboardConfig(dataset1, null, dataSource1);
+    OnboardDatasetMetricDTO dto = DatalayerTestUtils.getTestOnboardConfig(dataset1,
+        null,
+        dataSource1);
     id1 = onboardDatasetMetricDAO.save(dto);
     Assert.assertNotNull(id1);
 
     // create metric + dataset
-    dto = getTestOnboardConfig(dataset2, metric2, dataSource2);
+    dto = DatalayerTestUtils.getTestOnboardConfig(dataset2, metric2, dataSource2);
     id2 = onboardDatasetMetricDAO.save(dto);
     Assert.assertNotNull(id2);
 
     // add metric to existing dataset
-    dto = getTestOnboardConfig(dataset2, metric3, dataSource2);
+    dto = DatalayerTestUtils.getTestOnboardConfig(dataset2, metric3, dataSource2);
     id3 = onboardDatasetMetricDAO.save(dto);
     Assert.assertNotNull(id3);
   }

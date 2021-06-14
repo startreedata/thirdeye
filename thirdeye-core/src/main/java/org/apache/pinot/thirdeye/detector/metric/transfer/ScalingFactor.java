@@ -26,8 +26,6 @@ package org.apache.pinot.thirdeye.detector.metric.transfer;
  */
 public class ScalingFactor {
 
-  public static final String SCALING_FACTOR = "scalingFactor";
-
   /**
    * The time range of the scaling window
    */

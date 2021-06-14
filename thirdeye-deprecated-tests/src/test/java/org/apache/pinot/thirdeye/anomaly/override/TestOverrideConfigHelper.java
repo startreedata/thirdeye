@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -31,10 +32,10 @@ public class TestOverrideConfigHelper {
     OverrideConfigDTO overrideConfigDTO = new OverrideConfigDTO();
 
     Map<String, List<String>> overrideTarget = new HashMap<>();
-    overrideTarget.put(OverrideConfigHelper.TARGET_COLLECTION, Arrays.asList("collection1"));
-    overrideTarget.put(OverrideConfigHelper.TARGET_METRIC, Arrays.asList("metric1", "metric2"));
+    overrideTarget.put(OverrideConfigManager.TARGET_COLLECTION, Arrays.asList("collection1"));
+    overrideTarget.put(OverrideConfigManager.TARGET_METRIC, Arrays.asList("metric1", "metric2"));
 
-    overrideTarget.put(OverrideConfigHelper.EXCLUDED_METRIC, Arrays.asList("metric3"));
+    overrideTarget.put(OverrideConfigManager.EXCLUDED_METRIC, Arrays.asList("metric3"));
 
     overrideConfigDTO.setTargetLevel(overrideTarget);
 
@@ -58,8 +59,8 @@ public class TestOverrideConfigHelper {
 
     // Test "Only include any entity whose level has collection1, metric 1, metric 2"
     overrideTarget = new HashMap<>();
-    overrideTarget.put(OverrideConfigHelper.TARGET_COLLECTION, Arrays.asList("collection1"));
-    overrideTarget.put(OverrideConfigHelper.TARGET_METRIC, Arrays.asList("metric1", "metric2"));
+    overrideTarget.put(OverrideConfigManager.TARGET_COLLECTION, Arrays.asList("collection1"));
+    overrideTarget.put(OverrideConfigManager.TARGET_METRIC, Arrays.asList("metric1", "metric2"));
     overrideConfigDTO.setTargetLevel(overrideTarget);
 
     entityTargetLevel =
@@ -80,7 +81,7 @@ public class TestOverrideConfigHelper {
 
     // Test "Include everything but collection3"
     overrideTarget = new HashMap<>();
-    overrideTarget.put(OverrideConfigHelper.EXCLUDED_COLLECTION, Arrays.asList("collection3"));
+    overrideTarget.put(OverrideConfigManager.EXCLUDED_COLLECTION, Arrays.asList("collection3"));
     overrideConfigDTO.setTargetLevel(overrideTarget);
 
     entityTargetLevel =

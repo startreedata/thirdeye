@@ -16,9 +16,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestDetectionStatus;
-
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DetectionStatusManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
@@ -57,21 +56,41 @@ public class TestDetectionStatusManager {
     String dateString = dateTimeFormatter.print(now.getMillis());
     long dateMillis = dateTimeFormatter.parseMillis(dateString);
     detectionStatusId1 = detectionStatusDAO
-        .save(getTestDetectionStatus(collection1, dateMillis, dateString, false, 1));
+        .save(DatalayerTestUtils.getTestDetectionStatus(collection1,
+            dateMillis,
+            dateString,
+            false,
+            1));
     detectionStatusDAO
-        .save(getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
+        .save(DatalayerTestUtils.getTestDetectionStatus(collection1,
+            dateMillis,
+            dateString,
+            true,
+            2));
 
     dateMillis = new DateTime(dateMillis).minusHours(1).getMillis();
     dateString = dateTimeFormatter.print(dateMillis);
     detectionStatusId2 = detectionStatusDAO.
-        save(getTestDetectionStatus(collection1, dateMillis, dateString, true, 1));
+        save(DatalayerTestUtils.getTestDetectionStatus(collection1,
+            dateMillis,
+            dateString,
+            true,
+            1));
     detectionStatusDAO
-        .save(getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
+        .save(DatalayerTestUtils.getTestDetectionStatus(collection1,
+            dateMillis,
+            dateString,
+            true,
+            2));
 
     dateMillis = new DateTime(dateMillis).minusHours(1).getMillis();
     dateString = dateTimeFormatter.print(dateMillis);
     detectionStatusDAO
-        .save(getTestDetectionStatus(collection1, dateMillis, dateString, true, 2));
+        .save(DatalayerTestUtils.getTestDetectionStatus(collection1,
+            dateMillis,
+            dateString,
+            true,
+            2));
 
     Assert.assertNotNull(detectionStatusId1);
     Assert.assertNotNull(detectionStatusId2);

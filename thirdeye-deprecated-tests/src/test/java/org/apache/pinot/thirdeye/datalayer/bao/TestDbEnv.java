@@ -108,7 +108,7 @@ public class TestDbEnv {
     final Connection conn = ds.getConnection();
 
     // create schema
-    final URL createSchemaUrl = getClass().getResource("/schema/create-schema.sql");
+    final URL createSchemaUrl = getClass().getResource("/db/create-schema.sql");
     final ScriptRunner scriptRunner = new ScriptRunner(conn, true);
     scriptRunner.setDelimiter(";");
     scriptRunner.setLogWriter(new PrintWriter(new NullWriter()));

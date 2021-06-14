@@ -91,4 +91,9 @@ public class SimpleDataTable implements DataTable {
       return columns;
     }
   }
+
+  @Override
+  public List<DetectionResult> getDetectionResults() {
+    throw new UnsupportedOperationException("Not supported");
+  }
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.v2.components.detector;
+package org.apache.pinot.thirdeye.detection.v2.detectors;
 
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
@@ -29,10 +29,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.v2.results.DataTableUtils;
-import org.apache.pinot.thirdeye.detection.v2.results.DetectionResult;
 import org.apache.pinot.thirdeye.detection.v2.results.DimensionInfo;
 import org.apache.pinot.thirdeye.detection.v2.results.GroupedDetectionResults;
-import org.apache.pinot.thirdeye.detection.v2.spec.PercentageChangeRuleDetectorSpec;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
@@ -50,6 +48,7 @@ import org.apache.pinot.thirdeye.spi.detection.annotation.PresentationOption;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.components.detector.AnomalyDetector;
 import org.joda.time.Interval;
 

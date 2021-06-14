@@ -20,15 +20,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.io.output.NullWriter;
-import org.apache.pinot.thirdeye.datalayer.ScriptRunner;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatabaseAdministrator;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -49,6 +44,7 @@ public class TestDbEnv {
 
   /**
    * Legacy. To be deleted
+   *
    * @return the singleton instance maintained by the {@link TestDbEnv} class
    */
   @Deprecated
@@ -69,7 +65,7 @@ public class TestDbEnv {
         .setDriver("org.h2.Driver");
     final DataSource dataSource = createDataSource(dbConfig);
     try {
-      setupSchema(dataSource);
+      new DatabaseAdministrator(dataSource).createAllTables();
     } catch (SQLException | IOException e) {
       throw new RuntimeException(e);
     }
@@ -102,17 +98,6 @@ public class TestDbEnv {
     dataSource.setRemoveAbandonedTimeout(600_000);
     dataSource.setRemoveAbandoned(true);
     return dataSource;
-  }
-
-  private void setupSchema(final DataSource ds) throws SQLException, IOException {
-    final Connection conn = ds.getConnection();
-
-    // create schema
-    final URL createSchemaUrl = getClass().getResource("/db/create-schema.sql");
-    final ScriptRunner scriptRunner = new ScriptRunner(conn, true);
-    scriptRunner.setDelimiter(";");
-    scriptRunner.setLogWriter(new PrintWriter(new NullWriter()));
-    scriptRunner.runScript(new FileReader(createSchemaUrl.getFile()));
   }
 
   public Injector getInjector() {

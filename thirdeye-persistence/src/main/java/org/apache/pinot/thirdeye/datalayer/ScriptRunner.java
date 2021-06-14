@@ -48,26 +48,31 @@ public class ScriptRunner {
     this.autoCommit = autoCommit;
   }
 
-  public void setDelimiter(String delimiter) {
+  public ScriptRunner setDelimiter(String delimiter) {
     this.delimiter = delimiter;
+    return this;
   }
 
   /**
    * Setter for logWriter property
    *
    * @param logWriter - the new value of the logWriter property
+   * @return
    */
-  public void setLogWriter(PrintWriter logWriter) {
+  public ScriptRunner setLogWriter(PrintWriter logWriter) {
     this.logWriter = logWriter;
+    return this;
   }
 
   /**
    * Setter for errorLogWriter property
    *
    * @param errorLogWriter - the new value of the errorLogWriter property
+   * @return
    */
-  public void setErrorLogWriter(PrintWriter errorLogWriter) {
+  public ScriptRunner setErrorLogWriter(PrintWriter errorLogWriter) {
     this.errorLogWriter = errorLogWriter;
+    return this;
   }
 
   /**
@@ -102,23 +107,23 @@ public class ScriptRunner {
    * @throws IOException if there is an error reading from the Reader
    */
   private void runScript(Connection conn, Reader reader) throws IOException, SQLException {
-    StringBuffer command = null;
+    String sql = null;
     try {
+      StringBuilder command = null;
       final LineNumberReader lineReader = new LineNumberReader(reader);
-      String line = null;
+      String line;
       while ((line = lineReader.readLine()) != null) {
         if (command == null) {
-          command = new StringBuffer();
+          command = new StringBuilder();
         }
         if (line.startsWith("--")) {
           continue;
         }
         command.append(line).append(" ");
         if (line.endsWith(";")) {
-          final String sql = sanitize(command.toString());
+          sql = sanitize(command.toString());
 
           conn.prepareStatement(sql).executeUpdate();
-          this.logWriter.println(sql);
           command = null;
         }
       }
@@ -126,17 +131,22 @@ public class ScriptRunner {
         conn.commit();
       }
     } catch (SQLException e) {
+      if (!autoCommit) {
+        conn.rollback();
+      }
       // TODO spyne Ignores errors and keeps progressing. Could be dangerous.
       e.fillInStackTrace();
-      printlnError("Error executing: " + command);
+      printlnError("Error executing: " + sql);
       printlnError(e);
     } catch (IOException e) {
+      if (!autoCommit) {
+        conn.rollback();
+      }
       e.fillInStackTrace();
-      printlnError("Error executing: " + command);
+      printlnError("Error executing: " + sql);
       printlnError(e);
       throw e;
     } finally {
-      conn.rollback();
       flush();
     }
   }

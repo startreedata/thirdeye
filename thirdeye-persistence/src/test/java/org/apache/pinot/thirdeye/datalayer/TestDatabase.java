@@ -1,14 +1,8 @@
 package org.apache.pinot.thirdeye.datalayer;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.sql.Connection;
-import org.apache.commons.io.output.NullWriter;
+import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatabaseAdministrator;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -37,6 +31,15 @@ public class TestDatabase {
   public DataSource createDataSource(PersistenceConfig config) throws Exception {
     final DatabaseConfiguration dbConfig = config.getDatabaseConfiguration();
 
+    final DataSource ds = buildDataSource(dbConfig);
+
+    // Create tables
+    new DatabaseAdministrator(ds).createAllTables();
+
+    return ds;
+  }
+
+  private DataSource buildDataSource(final DatabaseConfiguration dbConfig) {
     final DataSource ds = new DataSource();
     ds.setUrl(dbConfig.getUrl());
     log.debug("Creating db with connection url : " + ds.getUrl());
@@ -57,16 +60,6 @@ public class TestDatabase {
     ds.setRemoveAbandonedTimeout(600_000);
     ds.setRemoveAbandoned(true);
 
-    final Connection conn = ds.getConnection();
-    // create schema
-    final URL createSchemaUrl = requireNonNull(
-        ScriptRunner.class.getResource("/db/create-schema.sql"),
-        "failed to load createSchemaUrl");
-
-    final ScriptRunner scriptRunner = new ScriptRunner(conn, true);
-    scriptRunner.setDelimiter(";");
-    scriptRunner.setLogWriter(new PrintWriter(new NullWriter()));
-    scriptRunner.runScript(new FileReader(createSchemaUrl.getFile()));
     return ds;
   }
 

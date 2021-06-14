@@ -70,12 +70,19 @@ public class DatabaseAdminResource {
         .build();
   }
 
-  @POST
+  @GET
   @Path("execute-query")
   public Response executeQuery(@QueryParam("sql") String sql) throws Exception {
     return Response
         .ok(resultSetToMap(databaseAdministrator.executeQuery(sql)))
         .build();
+  }
+
+  @POST
+  @Path("create-all-tables")
+  public Response createAllTables() throws Exception {
+    databaseAdministrator.createAllTables();
+    return Response.ok().build();
   }
 
   @DELETE

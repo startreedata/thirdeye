@@ -40,9 +40,6 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
@@ -53,15 +50,10 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Components(title = "History mean and standard deviation based forecasting and detection.",
-    type = "MEAN_VARIANCE_RULE",
-    tags = {DetectionTag.RULE_DETECTION},
-    description = "Forecast using history mean and standard deviation.",
-    params = {
-        @Param(name = "offset", defaultValue = "wo1w"),
-        @Param(name = "pattern", allowableValues = {"up", "down"}),
-        @Param(name = "lookback"),
-        @Param(name = "sensitivity")})
+/**
+ * History mean and standard deviation based forecasting and detection.
+ * Forecast using history mean and standard deviation.
+ */
 public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRuleDetectorSpec>,
     BaselineProvider<MeanVarianceRuleDetectorSpec> {
 

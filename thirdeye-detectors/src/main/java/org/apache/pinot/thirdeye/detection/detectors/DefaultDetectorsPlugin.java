@@ -9,7 +9,36 @@ public class DefaultDetectorsPlugin implements Plugin {
   @Override
   public Iterable<AnomalyDetectorFactory> getAnomalyDetectorFactories() {
     return ImmutableList.of(
-        new PercentageChangeRuleDetectorFactory()
+        new GenericAnomalyDetectorFactory<>(
+            "ABSOLUTE_CHANGE_RULE",
+            AbsoluteChangeRuleDetectorSpec.class,
+            AbsoluteChangeRuleDetector.class
+        ),
+        new GenericAnomalyDetectorFactory<>(
+            "HOLT_WINTERS_RULE",
+            HoltWintersDetectorSpec.class,
+            HoltWintersDetector.class
+        ),
+        new GenericAnomalyDetectorFactory<>(
+            "MEAN_VARIANCE_RULE",
+            MeanVarianceRuleDetectorSpec.class,
+            MeanVarianceRuleDetector.class
+        ),
+        new GenericAnomalyDetectorFactory<>(
+            "PERCENTAGE_RULE",
+            PercentageChangeRuleDetectorSpec.class,
+            PercentageChangeRuleDetector.class
+        ),
+        new GenericAnomalyDetectorFactory<>(
+            "THRESHOLD",
+            ThresholdRuleDetectorSpec.class,
+            ThresholdRuleDetector.class
+        ),
+        new GenericAnomalyDetectorFactory<>(
+            "DATA_SLA",
+            DataSlaQualityCheckerSpec.class,
+            DataSlaQualityChecker.class
+        )
     );
   }
 }

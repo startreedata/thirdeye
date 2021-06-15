@@ -32,10 +32,6 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
-import org.apache.pinot.thirdeye.spi.detection.annotation.PresentationOption;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
@@ -43,10 +39,9 @@ import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.Interval;
 
-@Components(title = "Threshold", type = "THRESHOLD", tags = {
-    DetectionTag.RULE_DETECTION}, description = "Simple threshold rule algorithm with (optional) upper and lower bounds on a metric value.", presentation = {
-    @PresentationOption(name = "absolute value", template = "is lower than ${min} or higher than ${max}")}, params = {
-    @Param(name = "min", placeholder = "value"), @Param(name = "max", placeholder = "value")})
+/**
+ * Simple threshold rule algorithm with (optional) upper and lower bounds on a metric value.
+ */
 public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetectorSpec>,
     BaselineProvider<ThresholdRuleDetectorSpec> {
 

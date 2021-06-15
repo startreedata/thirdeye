@@ -39,10 +39,6 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
-import org.apache.pinot.thirdeye.spi.detection.annotation.PresentationOption;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
@@ -51,19 +47,17 @@ import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.Interval;
 
-@Components(title = "Absolute change rule detection",
-    type = "ABSOLUTE_CHANGE_RULE",
-    tags = {DetectionTag.RULE_DETECTION},
-    presentation = {
-        @PresentationOption(name = "absolute value", template = "comparing ${offset} is ${pattern} more than ${difference}"),
-    },
-    params = {
-        @Param(name = "offset", defaultValue = "wo1w"),
-        @Param(name = "change", placeholder = "value"),
-        @Param(name = "pattern", allowableValues = {"up", "down"})
-    })
+/**
+ * Absolute change rule detection
+ */
 public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChangeRuleDetectorSpec>,
     BaselineProvider<AbsoluteChangeRuleDetectorSpec> {
+
+  private static final String COL_CURR = "current";
+  private static final String COL_ANOMALY = "anomaly";
+  private static final String COL_DIFF = "diff";
+  private static final String COL_PATTERN = "pattern";
+  private static final String COL_DIFF_VIOLATION = "diff_violation";
 
   private double absoluteChange;
   private InputDataFetcher dataFetcher;
@@ -71,12 +65,6 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
   private Pattern pattern;
   private String monitoringGranularity;
   private TimeGranularity timeGranularity;
-
-  private static final String COL_CURR = "current";
-  private static final String COL_ANOMALY = "anomaly";
-  private static final String COL_DIFF = "diff";
-  private static final String COL_PATTERN = "pattern";
-  private static final String COL_DIFF_VIOLATION = "diff_violation";
 
   @Override
   public DetectionResult runDetection(Interval window, String metricUrn) {

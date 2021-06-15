@@ -36,10 +36,6 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
-import org.apache.pinot.thirdeye.spi.detection.annotation.PresentationOption;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
@@ -60,16 +56,6 @@ import org.slf4j.LoggerFactory;
  * applicable).
  * b. Otherwise, we will query the data source and run sla checks.
  */
-@Components(title = "Data Sla Quality Checker",
-    type = "DATA_SLA",
-    tags = {DetectionTag.RULE_DETECTION},
-    description = "Checks if data is missing or not based on the configured sla",
-    presentation = {
-        @PresentationOption(name = "data sla", template = "is ${sla}")
-    },
-    params = {
-        @Param(name = "sla", placeholder = "value")
-    })
 public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityCheckerSpec>,
     BaselineProvider<DataSlaQualityCheckerSpec> {
 

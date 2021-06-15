@@ -1,7 +1,12 @@
 package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -10,6 +15,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
+import org.apache.pinot.thirdeye.datalayer.ScriptRunner;
 
 @Singleton
 public class DatabaseAdministrator {
@@ -59,6 +65,18 @@ public class DatabaseAdministrator {
             .createStatement()
             .executeUpdate(String.format("%s %s.%s", command, databaseName, table));
       }
+    }
+  }
+
+  public void createAllTables() throws SQLException, IOException {
+    try (Connection connection = dataSource.getConnection()) {
+      // create schema
+      final URL createSchemaUrl = requireNonNull(
+          getClass().getResource("/db/create-schema.sql"),
+          "failed to load createSchemaUrl");
+
+      final ScriptRunner scriptRunner = new ScriptRunner(connection, true);
+      scriptRunner.runScript(new FileReader(createSchemaUrl.getFile()));
     }
   }
 }

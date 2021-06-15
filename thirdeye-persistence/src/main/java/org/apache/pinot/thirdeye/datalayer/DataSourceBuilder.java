@@ -35,7 +35,7 @@ public class DataSourceBuilder {
         scriptRunner.setDelimiter(";");
 
         InputStream createSchema = this.getClass()
-            .getResourceAsStream("/schema/create-schema.sql");
+            .getResourceAsStream("/db/create-schema.sql");
         scriptRunner.runScript(new InputStreamReader(createSchema));
       } catch (Exception e) {
         LOG.error("Could not create database schema. Attempting to use existing.", e);

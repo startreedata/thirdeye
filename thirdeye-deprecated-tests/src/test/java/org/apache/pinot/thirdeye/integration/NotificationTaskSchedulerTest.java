@@ -156,6 +156,7 @@ public class NotificationTaskSchedulerTest {
   }
 
   @Test
+  // TODO spyne fixme test runs too long
   public void testNotificationJobCreation() throws Exception {
     // setup test environment
     setup();

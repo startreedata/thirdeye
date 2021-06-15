@@ -19,8 +19,9 @@
  *
  *
  */
-package org.apache.pinot.thirdeye.detection.v2.results;
+package org.apache.pinot.thirdeye.spi.detection.v2;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +29,6 @@ import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
-import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 
 /**
@@ -98,5 +98,10 @@ public class DetectionResult implements DetectionPipelineResult {
     }
     api.setAnomalies(anomalyApis);
     return api;
+  }
+
+  @Override
+  public List<DetectionResult> getDetectionResults() {
+    return ImmutableList.of(this);
   }
 }

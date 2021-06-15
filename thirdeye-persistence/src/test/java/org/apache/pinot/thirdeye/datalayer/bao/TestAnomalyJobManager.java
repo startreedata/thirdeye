@@ -16,10 +16,9 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestJobSpec;
-
 import java.util.Arrays;
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.JobManager;
@@ -49,11 +48,11 @@ public class TestAnomalyJobManager {
 
   @Test
   public void testCreate() {
-    anomalyJobId1 = jobDAO.save(getTestJobSpec());
+    anomalyJobId1 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId1);
-    anomalyJobId2 = jobDAO.save(getTestJobSpec());
+    anomalyJobId2 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId2);
-    anomalyJobId3 = jobDAO.save(getTestJobSpec());
+    anomalyJobId3 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId3);
     printAll("After insert");
   }
@@ -104,11 +103,11 @@ public class TestAnomalyJobManager {
 
   @Test(dependsOnMethods = {"testDeleteRecordsOlderThanDaysWithStatus"})
   public void testFindByStatusWithinDays() throws InterruptedException {
-    anomalyJobId1 = jobDAO.save(getTestJobSpec());
+    anomalyJobId1 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId1);
-    anomalyJobId2 = jobDAO.save(getTestJobSpec());
+    anomalyJobId2 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId2);
-    anomalyJobId3 = jobDAO.save(getTestJobSpec());
+    anomalyJobId3 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId3);
 
     Thread.sleep(100); // To ensure every job has been created more than 1 ms ago

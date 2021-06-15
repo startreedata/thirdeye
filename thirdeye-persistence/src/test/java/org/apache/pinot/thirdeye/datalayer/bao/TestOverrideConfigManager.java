@@ -16,15 +16,14 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestOverrideConfigForTimeSeries;
+import static org.apache.pinot.thirdeye.spi.Constants.SCALING_FACTOR;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.anomaly.override.OverrideConfigHelper;
+import org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
-import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import org.joda.time.DateTime;
@@ -47,7 +46,7 @@ public class TestOverrideConfigManager {
 
   @Test
   public void testCreate() {
-    OverrideConfigDTO overrideConfigDTO1 = getTestOverrideConfigForTimeSeries(now);
+    OverrideConfigDTO overrideConfigDTO1 = DatalayerTestUtils.getTestOverrideConfigForTimeSeries(now);
     overrideConfigId1 = overrideConfigDAO.save(overrideConfigDTO1);
     Assert.assertNotNull(overrideConfigId1);
     Assert.assertNotNull(overrideConfigDAO.findById(overrideConfigId1));
@@ -59,17 +58,17 @@ public class TestOverrideConfigManager {
     Assert.assertEquals(overrideConfigDTOs.size(), 1);
 
     overrideConfigDTOs = overrideConfigDAO
-        .findAllConflictByTargetType(OverrideConfigHelper.ENTITY_TIME_SERIES,
+        .findAllConflictByTargetType(OverrideConfigManager.ENTITY_TIME_SERIES,
             now.minusHours(5).getMillis(), now.minusHours(2).getMillis());
     Assert.assertEquals(overrideConfigDTOs.size(), 1);
 
     overrideConfigDTOs = overrideConfigDAO
-        .findAllConflictByTargetType(OverrideConfigHelper.ENTITY_ALERT_FILTER,
+        .findAllConflictByTargetType(OverrideConfigManager.ENTITY_ALERT_FILTER,
             now.minusHours(5).getMillis(), now.minusHours(2).getMillis());
     Assert.assertEquals(overrideConfigDTOs.size(), 0);
 
     overrideConfigDTOs = overrideConfigDAO
-        .findAllConflictByTargetType(OverrideConfigHelper.ENTITY_TIME_SERIES,
+        .findAllConflictByTargetType(OverrideConfigManager.ENTITY_TIME_SERIES,
             now.minusDays(100).getMillis(), now.minusDays(50).getMillis());
     Assert.assertEquals(overrideConfigDTOs.size(), 0);
   }
@@ -81,11 +80,11 @@ public class TestOverrideConfigManager {
     Assert.assertNotNull(overrideConfigDTO);
     Assert.assertNotNull(overrideConfigDTO.getOverrideProperties());
     Assert
-        .assertNotNull(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR));
-    Assert.assertEquals(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR),
+        .assertNotNull(overrideConfigDTO.getOverrideProperties().get(SCALING_FACTOR));
+    Assert.assertEquals(overrideConfigDTO.getOverrideProperties().get(SCALING_FACTOR),
         "1.2");
     Map<String, String> newOverrideProperties = new HashMap<>();
-    newOverrideProperties.put(ScalingFactor.SCALING_FACTOR, "0.8");
+    newOverrideProperties.put(SCALING_FACTOR, "0.8");
     overrideConfigDTO.setOverrideProperties(newOverrideProperties);
     overrideConfigDAO.update(overrideConfigDTO);
 
@@ -93,26 +92,26 @@ public class TestOverrideConfigManager {
     Assert.assertNotNull(overrideConfigDTO);
     Assert.assertNotNull(overrideConfigDTO.getOverrideProperties());
     Assert
-        .assertNotNull(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR));
-    Assert.assertEquals(overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR),
+        .assertNotNull(overrideConfigDTO.getOverrideProperties().get(SCALING_FACTOR));
+    Assert.assertEquals(overrideConfigDTO.getOverrideProperties().get(SCALING_FACTOR),
         "0.8");
 
     // Test update of target level
     overrideConfigDTO = overrideConfigDAO.findById(overrideConfigId1);
     Assert.assertNotNull(overrideConfigDTO);
     Assert.assertNotNull(overrideConfigDTO.getTargetLevel());
-    List<String> targetLevel = overrideConfigDTO.getTargetLevel().get(OverrideConfigHelper
+    List<String> targetLevel = overrideConfigDTO.getTargetLevel().get(OverrideConfigManager
         .TARGET_COLLECTION);
     Assert.assertNotNull(targetLevel);
     Assert.assertEquals(targetLevel, Arrays.asList("collection1", "collection2"));
     List<String> newTargetLevel = Arrays.asList("collection1", "collection4");
-    overrideConfigDTO.getTargetLevel().put(OverrideConfigHelper.TARGET_COLLECTION, newTargetLevel);
+    overrideConfigDTO.getTargetLevel().put(OverrideConfigManager.TARGET_COLLECTION, newTargetLevel);
     overrideConfigDAO.update(overrideConfigDTO);
 
     overrideConfigDTO = overrideConfigDAO.findById(overrideConfigId1);
     Assert.assertNotNull(overrideConfigDTO);
     Assert.assertNotNull(overrideConfigDTO.getTargetLevel());
-    targetLevel = overrideConfigDTO.getTargetLevel().get(OverrideConfigHelper.TARGET_COLLECTION);
+    targetLevel = overrideConfigDTO.getTargetLevel().get(OverrideConfigManager.TARGET_COLLECTION);
     Assert.assertNotNull(targetLevel);
     Assert.assertEquals(targetLevel, Arrays.asList("collection1", "collection4"));
   }

@@ -16,9 +16,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
-import static org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils.getTestEntityToEntityMapping;
-
 import java.util.List;
+import org.apache.pinot.thirdeye.datalayer.DatalayerTestUtils;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
@@ -59,14 +58,19 @@ public class TestEntityToEntityMappingManager {
 
   @Test
   public void testCreate() {
-    EntityToEntityMappingDTO dto = getTestEntityToEntityMapping(metricURN1, metricURN2,
+    EntityToEntityMappingDTO dto = DatalayerTestUtils.getTestEntityToEntityMapping(metricURN1,
+        metricURN2,
         METRIC_TO_METRIC);
     testId1 = entityToEntityMappingDAO.save(dto);
     Assert.assertNotNull(testId1);
-    dto = getTestEntityToEntityMapping(metricURN1, serviceURN1, METRIC_TO_SERVICE);
+    dto = DatalayerTestUtils.getTestEntityToEntityMapping(metricURN1,
+        serviceURN1,
+        METRIC_TO_SERVICE);
     testId2 = entityToEntityMappingDAO.save(dto);
     Assert.assertNotNull(testId2);
-    dto = getTestEntityToEntityMapping(dimensionURN1, dimensionURN2, DIMENSION_TO_DIMENSION);
+    dto = DatalayerTestUtils.getTestEntityToEntityMapping(dimensionURN1,
+        dimensionURN2,
+        DIMENSION_TO_DIMENSION);
     testId3 = entityToEntityMappingDAO.save(dto);
     Assert.assertNotNull(testId3);
   }

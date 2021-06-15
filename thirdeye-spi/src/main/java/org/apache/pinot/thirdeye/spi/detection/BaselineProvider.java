@@ -28,6 +28,10 @@ import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
  */
 public interface BaselineProvider<T extends AbstractSpec> extends BaseComponent<T> {
 
+  static boolean isBaselineProvider(Class<?> clazz) {
+    return BaselineProvider.class.isAssignableFrom(clazz);
+  }
+
   /**
    * Compute the baseline time series for the metric slice.
    *

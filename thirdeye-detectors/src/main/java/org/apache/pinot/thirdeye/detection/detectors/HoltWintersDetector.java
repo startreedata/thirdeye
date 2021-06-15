@@ -49,9 +49,6 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
@@ -67,20 +64,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Holt-Winters forecasting algorithm with multiplicative method
  * Supports seasonality and trend detection
+ * Forecast with holt winters triple exponential smoothing and generate anomalies
+ *
  * https://otexts.com/fpp2/holt-winters.html
  */
-@Components(title = "Holt Winters triple exponential smoothing forecasting and detection",
-    type = "HOLT_WINTERS_RULE",
-    tags = {DetectionTag.RULE_DETECTION},
-    description = "Forecast with holt winters triple exponential smoothing and generate anomalies",
-    params = {
-        @Param(name = "alpha"),
-        @Param(name = "beta"),
-        @Param(name = "gamma"),
-        @Param(name = "period"),
-        @Param(name = "pattern"),
-        @Param(name = "sensitivity"),
-        @Param(name = "kernelSmoothing")})
 public class HoltWintersDetector implements BaselineProvider<HoltWintersDetectorSpec>,
     AnomalyDetector<HoltWintersDetectorSpec> {
 

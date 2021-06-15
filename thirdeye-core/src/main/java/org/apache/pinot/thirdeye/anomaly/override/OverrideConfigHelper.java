@@ -28,6 +28,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
+import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.spi.util.Pair;
@@ -37,21 +38,6 @@ import org.slf4j.LoggerFactory;
 public class OverrideConfigHelper {
 
   private static final Logger LOG = LoggerFactory.getLogger(OverrideConfigHelper.class);
-
-  public static final String TARGET_COLLECTION = "collection";
-  public static final String TARGET_METRIC = "metric";
-  public static final String TARGET_FUNCTION_ID = "functionId";
-  public static final String EXCLUDED_COLLECTION = "excludedCollection";
-  public static final String EXCLUDED_METRIC = "excludedMetric";
-  public static final String EXCLUDED_FUNCTION_ID = "excludedFunctionId";
-
-  private static final String[] TARGET_KEYS =
-      new String[]{TARGET_COLLECTION, TARGET_METRIC, TARGET_FUNCTION_ID};
-  private static final String[] EXCLUDED_KEYS =
-      new String[]{EXCLUDED_COLLECTION, EXCLUDED_METRIC, EXCLUDED_FUNCTION_ID};
-
-  public static final String ENTITY_TIME_SERIES = "TimeSeries";
-  public static final String ENTITY_ALERT_FILTER = "AlertFilter";
 
   /**
    * Check if the override configuration should be enabled for the given collection name, metric
@@ -72,7 +58,7 @@ public class OverrideConfigHelper {
     }
 
     // Check if the given entity should be excluded
-    for (String excludedKey : EXCLUDED_KEYS) {
+    for (String excludedKey : OverrideConfigManager.EXCLUDED_KEYS) {
       List<String> elements = targetLevel.get(excludedKey);
       if (CollectionUtils.isNotEmpty(elements) && elements
           .contains(entityTargetLevel.get(excludedKey))) {
@@ -82,7 +68,7 @@ public class OverrideConfigHelper {
 
     // If the entire include level is empty, then enable the override rule for everything
     boolean includeAll = true;
-    for (String targetKey : TARGET_KEYS) {
+    for (String targetKey : OverrideConfigManager.TARGET_KEYS) {
       if (targetLevel.containsKey(targetKey)) {
         includeAll = false;
         break;
@@ -93,7 +79,7 @@ public class OverrideConfigHelper {
     }
 
     // Check if the override rule should be enabled for the given entity
-    for (String targetKey : TARGET_KEYS) {
+    for (String targetKey : OverrideConfigManager.TARGET_KEYS) {
       List<String> elements = targetLevel.get(targetKey);
       if (CollectionUtils.isNotEmpty(elements) && elements
           .contains(entityTargetLevel.get(targetKey))) {
@@ -116,13 +102,13 @@ public class OverrideConfigHelper {
       long functionId) {
 
     Map<String, String> targetEntity = new HashMap<>();
-    targetEntity.put(TARGET_COLLECTION, collection);
-    targetEntity.put(EXCLUDED_COLLECTION, collection);
-    targetEntity.put(TARGET_METRIC, metric);
-    targetEntity.put(EXCLUDED_METRIC, metric);
+    targetEntity.put(OverrideConfigManager.TARGET_COLLECTION, collection);
+    targetEntity.put(OverrideConfigManager.EXCLUDED_COLLECTION, collection);
+    targetEntity.put(OverrideConfigManager.TARGET_METRIC, metric);
+    targetEntity.put(OverrideConfigManager.EXCLUDED_METRIC, metric);
     String functionIdString = Long.toString(functionId);
-    targetEntity.put(TARGET_FUNCTION_ID, functionIdString);
-    targetEntity.put(EXCLUDED_FUNCTION_ID, functionIdString);
+    targetEntity.put(OverrideConfigManager.TARGET_FUNCTION_ID, functionIdString);
+    targetEntity.put(OverrideConfigManager.EXCLUDED_FUNCTION_ID, functionIdString);
     return targetEntity;
   }
 
@@ -147,7 +133,7 @@ public class OverrideConfigHelper {
           try {
             double scalingFactor =
                 Double.parseDouble(
-                    overrideConfigDTO.getOverrideProperties().get(ScalingFactor.SCALING_FACTOR));
+                    overrideConfigDTO.getOverrideProperties().get(Constants.SCALING_FACTOR));
             ScalingFactor sf = new ScalingFactor(startTime, endTime, scalingFactor);
             results.add(sf);
           } catch (Exception e) {
@@ -180,7 +166,7 @@ public class OverrideConfigHelper {
 
     for (Pair<Long, Long> startEndTimeRange : startEndTimeRanges) {
       List<OverrideConfigDTO> overrideConfigDTOList = overrideConfigDAO
-          .findAllConflictByTargetType(OverrideConfigHelper.ENTITY_TIME_SERIES,
+          .findAllConflictByTargetType(OverrideConfigManager.ENTITY_TIME_SERIES,
               startEndTimeRange.getFirst(), startEndTimeRange.getSecond());
       for (OverrideConfigDTO overrideConfig : overrideConfigDTOList) {
         if (overrideConfig.isActive()) {

@@ -28,7 +28,7 @@ public class ThirdEyeH2DatabaseServer {
   private DatabaseConfiguration dbConfig;
   public static final String BASE_DIR = "../";
   public static final String CREATE_SCHEMA_SQL =
-      BASE_DIR + "thirdeye-core/src/main/resources/schema/create-schema.sql";
+      BASE_DIR + "thirdeye-persistence/src/main/resources/db/create-schema.sql";
   private final Server server;
   private Connection conn;
 

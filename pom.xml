@@ -735,7 +735,7 @@
       <!-- test dependencies -->
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
-        <artifactId>thirdeye-core</artifactId>
+        <artifactId>thirdeye-persistence</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
         <scope>test</scope>

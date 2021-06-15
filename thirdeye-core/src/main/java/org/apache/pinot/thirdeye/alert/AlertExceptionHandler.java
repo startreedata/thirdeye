@@ -21,6 +21,7 @@ public class AlertExceptionHandler {
   protected static final Logger LOG = LoggerFactory.getLogger(AlertExceptionHandler.class);
 
   public static void handleAlertEvaluationException(final Exception e) {
+    LOG.error("Error in Alert Evaluation", e);
     final StatusListApi statusListApi = new StatusListApi().setList(new ArrayList<>());
 
     populateStatusListApi(e, statusListApi);

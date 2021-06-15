@@ -19,8 +19,12 @@
 
 package org.apache.pinot.thirdeye.detection.annotation.registry;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
@@ -32,6 +36,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
@@ -41,24 +49,37 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The detection registry.
+ *
+ * TODO spyne Guicify class instead of using 'static' except annotation scan
  */
+@Singleton
 public class DetectionRegistry {
 
+  private static final Logger LOG = LoggerFactory.getLogger(DetectionRegistry.class);
+
   // component type to component class name and annotation
+  // Deprecated in favor of new plugin implementation
+  @Deprecated
   private static final Map<String, Map> REGISTRY_MAP = new HashMap<>();
+
   // component class name to tuner annotation
+  // Deprecated in favor of new plugin implementation
+  @Deprecated
   private static final Map<String, Tune> TUNE_MAP = new HashMap<>();
+
   // yaml pipeline type to yaml converter class name
   private static final Map<String, String> YAML_MAP = new HashMap<>();
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionRegistry.class);
+
   private static final String KEY_CLASS_NAME = "className";
   private static final String KEY_ANNOTATION = "annotation";
   private static final String KEY_IS_BASELINE_PROVIDER = "isBaselineProvider";
+  private static final Map<String, AnomalyDetectorFactory> anomalyDetectorFactoryMap = new HashMap<>();
 
   static {
     init();
   }
 
+  @Inject
   public DetectionRegistry() {
 
   }
@@ -77,8 +98,12 @@ public class DetectionRegistry {
           if (annotation instanceof Components) {
             Components componentsAnnotation = (Components) annotation;
             REGISTRY_MAP.put(componentsAnnotation.type(),
-                ImmutableMap.of(KEY_CLASS_NAME, className, KEY_ANNOTATION, componentsAnnotation,
-                    KEY_IS_BASELINE_PROVIDER, isBaselineProvider(Class.forName(className))));
+                ImmutableMap.of(KEY_CLASS_NAME,
+                    className,
+                    KEY_ANNOTATION,
+                    componentsAnnotation,
+                    KEY_IS_BASELINE_PROVIDER,
+                    BaselineProvider.isBaselineProvider(Class.forName(className))));
             LOG.info("Registered component {} - {}", componentsAnnotation.type(), className);
           }
           if (annotation instanceof Tune) {
@@ -98,7 +123,10 @@ public class DetectionRegistry {
       Class<? extends BaseComponent> clazz = (Class<? extends BaseComponent>) Class
           .forName(className);
       REGISTRY_MAP.put(type, ImmutableMap
-          .of(KEY_CLASS_NAME, className, KEY_IS_BASELINE_PROVIDER, isBaselineProvider(clazz)));
+          .of(KEY_CLASS_NAME,
+              className,
+              KEY_IS_BASELINE_PROVIDER,
+              BaselineProvider.isBaselineProvider(clazz)));
       LOG.info("Registered component {} {}", type, className);
     } catch (Exception e) {
       LOG.warn("Encountered exception when registering component {}", className, e);
@@ -110,7 +138,10 @@ public class DetectionRegistry {
       Class<? extends BaseComponent> clazz = (Class<? extends BaseComponent>) Class
           .forName(className);
       REGISTRY_MAP.put(type, ImmutableMap
-          .of(KEY_CLASS_NAME, className, KEY_IS_BASELINE_PROVIDER, isBaselineProvider(clazz)));
+          .of(KEY_CLASS_NAME,
+              className,
+              KEY_IS_BASELINE_PROVIDER,
+              BaselineProvider.isBaselineProvider(clazz)));
       Tune tune = new Tune() {
         @Override
         public String tunable() {
@@ -129,9 +160,17 @@ public class DetectionRegistry {
     }
   }
 
-  public static void registerYamlConvertor(String className, String type) {
-    YAML_MAP.put(type, className);
-    LOG.info("Registered yaml convertor {} {}", type, className);
+  public void addAnomalyDetectorFactory(final AnomalyDetectorFactory f) {
+    anomalyDetectorFactoryMap.put(f.name(), f);
+  }
+
+  public AnomalyDetector<AbstractSpec> buildDetector(
+      String factoryName,
+      AnomalyDetectorFactoryContext context) {
+    if (anomalyDetectorFactoryMap.containsKey(factoryName)) {
+      return anomalyDetectorFactoryMap.get(factoryName).build(context);
+    }
+    return null;
   }
 
   /**
@@ -141,8 +180,27 @@ public class DetectionRegistry {
    * @return component class name
    */
   public String lookup(String type) {
-    Preconditions.checkArgument(REGISTRY_MAP.containsKey(type), type + " not found in registry");
+    validate(type);
     return MapUtils.getString(REGISTRY_MAP.get(type), KEY_CLASS_NAME);
+  }
+
+  /**
+   * is type contained in REGISTRY_MAP.
+   * REGISTRY_MAP is built from annotated classes and doesn't contain any plugins
+   *
+   * @param type
+   * @return
+   */
+  public boolean isAnnotatedType(String type) {
+    validate(type);
+    return REGISTRY_MAP.containsKey(type);
+  }
+
+  private void validate(final String type) {
+    requireNonNull(type, "type is null");
+    checkArgument(
+        REGISTRY_MAP.containsKey(type) || anomalyDetectorFactoryMap.containsKey(type),
+        type + " not found in registry");
   }
 
   /**
@@ -151,19 +209,8 @@ public class DetectionRegistry {
    * @return tunable class name
    */
   public String lookupTunable(String type) {
-    Preconditions.checkArgument(TUNE_MAP.containsKey(type), type + " not found in registry");
+    checkArgument(TUNE_MAP.containsKey(type), type + " not found in registry");
     return this.lookup(TUNE_MAP.get(type).tunable());
-  }
-
-  /**
-   * Look up the yaml converter class name for a pipeline type
-   *
-   * @return yaml converter class name
-   */
-  public String lookupYamlConverter(String pipelineType) {
-    Preconditions
-        .checkArgument(YAML_MAP.containsKey(pipelineType), pipelineType + " not found in registry");
-    return YAML_MAP.get(pipelineType);
   }
 
   public boolean isTunable(String className) {
@@ -171,7 +218,10 @@ public class DetectionRegistry {
   }
 
   public boolean isBaselineProvider(String type) {
-    Preconditions.checkArgument(REGISTRY_MAP.containsKey(type), type + " not found in registry");
+    validate(type);
+    if (anomalyDetectorFactoryMap.containsKey(type)) {
+      return anomalyDetectorFactoryMap.get(type).isBaselineProvider();
+    }
     return MapUtils.getBooleanValue(REGISTRY_MAP.get(type), KEY_IS_BASELINE_PROVIDER);
   }
 
@@ -193,9 +243,5 @@ public class DetectionRegistry {
 
   public String printAnnotations() {
     return String.join(", ", YAML_MAP.keySet());
-  }
-
-  private static boolean isBaselineProvider(Class<?> clazz) {
-    return BaselineProvider.class.isAssignableFrom(clazz);
   }
 }

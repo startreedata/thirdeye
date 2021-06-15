@@ -60,6 +60,10 @@
       <directory>${thirdeye.root}/thirdeye-datasources/target/thirdeye-datasources-${project.version}-dist</directory>
       <outputDirectory>plugins/datasources-default/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-detectors/target/thirdeye-detectors-${project.version}-dist</directory>
+      <outputDirectory>plugins/detectors-default/</outputDirectory>
+    </fileSet>
 
   </fileSets>
   <dependencySets>

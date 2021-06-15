@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.algorithm.DimensionWrapper;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
+import org.apache.pinot.thirdeye.detection.detectors.PercentageChangeRuleDetectorFactory;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyDetectorWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyFilterWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper;
@@ -97,6 +99,8 @@ public class AlertExecutionPlanBuilderTest {
 
     when(dataProvider.fetchDatasetByDisplayName(datasetConfigDTO.getName()))
         .thenReturn(singletonList(datasetConfigDTO));
+
+    new DetectionRegistry().addAnomalyDetectorFactory(new PercentageChangeRuleDetectorFactory());
   }
 
   @Test

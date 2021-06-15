@@ -14,9 +14,11 @@ import java.util.Arrays;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.PluginClassLoader;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +37,7 @@ public class PluginLoader {
   private static final Logger log = LoggerFactory.getLogger(PluginLoader.class);
 
   private final DataSourcesLoader dataSourcesLoader;
+  private final DetectionRegistry detectionRegistry;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -42,8 +45,10 @@ public class PluginLoader {
   @Inject
   public PluginLoader(
       final DataSourcesLoader dataSourcesLoader,
+      final DetectionRegistry detectionRegistry,
       final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
+    this.detectionRegistry = detectionRegistry;
     pluginsDir = new File(config.getPluginsPath());
   }
 
@@ -81,6 +86,9 @@ public class PluginLoader {
     log.info("Installing plugin: " + plugin.getClass().getName());
     for (ThirdEyeDataSourceFactory f : plugin.getDataSourceFactories()) {
       dataSourcesLoader.addThirdEyeDataSourceFactory(f);
+    }
+    for (AnomalyDetectorFactory f : plugin.getAnomalyDetectorFactories()) {
+      detectionRegistry.addAnomalyDetectorFactory(f);
     }
   }
 

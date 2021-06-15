@@ -86,7 +86,6 @@
     <hadoop.version>2.7.0</hadoop.version>
     <avro.version>1.7.7</avro.version>
     <avro-mapred.version>1.7.4</avro-mapred.version>
-    <testng.version>6.8</testng.version>
     <assertj.version>3.17.2</assertj.version>
     <mockito.version>1.8.4</mockito.version>
     <testcontainers.version>1.15.3</testcontainers.version>
@@ -743,7 +742,7 @@
       <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
-        <version>${testng.version}</version>
+        <version>7.4.0</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>

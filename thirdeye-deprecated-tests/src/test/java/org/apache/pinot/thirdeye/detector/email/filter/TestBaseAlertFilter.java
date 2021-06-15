@@ -16,10 +16,11 @@
 
 package org.apache.pinot.thirdeye.detector.email.filter;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class TestBaseAlertFilter {
@@ -36,24 +37,24 @@ public class TestBaseAlertFilter {
     Map<String, String> alertfilter = anomalyFunctionSpec.getAlertFilter();
     AlphaBetaAlertFilter alphaBetaAlertFilter = new AlphaBetaAlertFilter();
     alphaBetaAlertFilter.setParameters(alertfilter);
-    Assert.assertEquals(alphaBetaAlertFilter.getAlpha(), Double.valueOf(alertfilter.get("alpha")));
-    Assert.assertEquals(alphaBetaAlertFilter.getBeta(), Double.valueOf(alertfilter.get("beta")));
-    Assert.assertEquals(alphaBetaAlertFilter.getType(), alertfilter.get("type"));
-    Assert.assertEquals(alphaBetaAlertFilter.getThreshold(),
+    assertThat(alphaBetaAlertFilter.getAlpha()).isEqualTo(Double.valueOf(alertfilter.get("alpha")));
+    assertThat(alphaBetaAlertFilter.getBeta()).isEqualTo(Double.valueOf(alertfilter.get("beta")));
+    assertThat(alphaBetaAlertFilter.getType()).isEqualTo(alertfilter.get("type"));
+    assertThat(alphaBetaAlertFilter.getThreshold()).isEqualTo(
         Double.valueOf(alertfilter.get("threshold")));
 
     // test scientific decimal
     double threshold = 1E-10;
     alertfilter.put("threshold", String.valueOf(threshold));
     alphaBetaAlertFilter.setParameters(alertfilter);
-    Assert.assertEquals(alphaBetaAlertFilter.getThreshold(),
+    assertThat(alphaBetaAlertFilter.getThreshold()).isEqualTo(
         Double.valueOf(alertfilter.get("threshold")));
 
     // test missing field
     alertfilter.remove("threshold");
     AlphaBetaAlertFilter alphaBetaAlertFilter1 = new AlphaBetaAlertFilter();
     alphaBetaAlertFilter1.setParameters(alertfilter);
-    Assert.assertEquals(alphaBetaAlertFilter1.getThreshold(),
+    assertThat(alphaBetaAlertFilter1.getThreshold()).isEqualTo(
         Double.valueOf(AlphaBetaAlertFilter.DEFAULT_THRESHOLD));
   }
 }

@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.util;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -117,9 +119,9 @@ public class ThirdEyeUtilsTest {
   @Test
   public void testGetRoundedDouble() {
     double value = 123.456789;
-    Assert.assertEquals(ThirdEyeUtils.getRoundedDouble(value), 123.46);
+    assertThat(ThirdEyeUtils.getRoundedDouble(value)).isEqualTo(123.46);
     value = 0.056789;
-    Assert.assertEquals(ThirdEyeUtils.getRoundedDouble(value), 0.057);
+    assertThat(ThirdEyeUtils.getRoundedDouble(value)).isEqualTo(0.057);
   }
 
   @Test

@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.spi.dataframe;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -63,6 +65,119 @@ public class DataFrameTest {
   // TODO fill double, long, boolean
 
   private DataFrame df;
+
+  private static void assertEquals(Series actual, Series expected) {
+    Assert.assertEquals(actual, expected);
+  }
+
+  private static void assertEquals(DoubleSeries actual, double... expected) {
+    assertEquals(actual.getDoubles().values(), expected);
+  }
+
+  private static void assertEquals(double[] actual, double... expected) {
+    if (actual.length != expected.length) {
+      Assert.fail(String
+          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
+    }
+    for (int i = 0; i < actual.length; i++) {
+      if (Double.isNaN(actual[i]) && Double.isNaN(expected[i])) {
+        continue;
+      }
+      Assert.assertEquals(actual[i], expected[i], COMPARE_DOUBLE_DELTA, "index=" + i);
+    }
+  }
+
+  private static void assertEquals(LongSeries actual, long... expected) {
+    assertEquals(actual.getLongs().values(), expected);
+  }
+
+  private static void assertEquals(long[] actual, long... expected) {
+    if (actual.length != expected.length) {
+      Assert.fail(String
+          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
+    }
+    for (int i = 0; i < actual.length; i++) {
+      Assert.assertEquals(actual[i], expected[i], "index=" + i);
+    }
+  }
+
+  private static void assertEquals(StringSeries actual, String... expected) {
+    assertEquals(actual.getStrings().values(), expected);
+  }
+
+  private static void assertEquals(String[] actual, String... expected) {
+    if (actual.length != expected.length) {
+      Assert.fail(String
+          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
+    }
+    for (int i = 0; i < actual.length; i++) {
+      Assert.assertEquals(actual[i], expected[i], "index=" + i);
+    }
+  }
+
+  private static void assertEquals(BooleanSeries actual, byte... expected) {
+    assertEquals(actual.getBooleans().values(), expected);
+  }
+
+  private static void assertEquals(BooleanSeries actual, boolean... expected) {
+    BooleanSeries s = actual.getBooleans();
+    if (s.hasNull()) {
+      Assert.fail("Encountered NULL when comparing against booleans");
+    }
+    assertEquals(s.valuesBoolean(), expected);
+  }
+
+  private static void assertEquals(byte[] actual, byte... expected) {
+    if (actual.length != expected.length) {
+      Assert.fail(String
+          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
+    }
+    for (int i = 0; i < actual.length; i++) {
+      Assert.assertEquals(actual[i], expected[i], "index=" + i);
+    }
+  }
+
+  private static void assertEquals(boolean[] actual, boolean... expected) {
+    if (actual.length != expected.length) {
+      Assert.fail(String
+          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
+    }
+    for (int i = 0; i < actual.length; i++) {
+      Assert.assertEquals(actual[i], expected[i], "index=" + i);
+    }
+  }
+
+  private static void assertEquals(ObjectSeries actual, Object... expected) {
+    assertEqualsObjects(actual.getObjects().values(), expected);
+  }
+
+  private static void assertEqualsObjects(Object[] actual, Object... expected) {
+    if (actual.length != expected.length) {
+      Assert.fail(String
+          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
+    }
+    for (int i = 0; i < actual.length; i++) {
+      Assert.assertEquals(actual[i], expected[i], "index=" + i);
+    }
+  }
+
+  private static void assertEmpty(Series series) {
+    if (!series.isEmpty()) {
+      Assert.fail("expected series to be empty, but wasn't");
+    }
+  }
+
+  private static CompTestTuple tup(int a, int b) {
+    return new CompTestTuple(a, b);
+  }
+
+  private static DateTime parseDate(String date) {
+    return DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss z").parseDateTime(date);
+  }
+
+  private static long parseDateMillis(String date) {
+    return parseDate(date).getMillis();
+  }
 
   @BeforeMethod
   public void before() {
@@ -1357,11 +1472,12 @@ public class DataFrameTest {
   public void testCopy() {
     DataFrame ndf = df.copy();
 
-    Assert.assertNotSame(df.getDoubles("double"), ndf.getDoubles("double"));
-    Assert.assertNotSame(df.getLongs("long"), ndf.getLongs("long"));
-    Assert.assertNotSame(df.getStrings("string"), ndf.getStrings("string"));
-    Assert.assertNotSame(df.getBooleans("boolean"), ndf.getBooleans("boolean"));
-    Assert.assertNotSame(df.getObjects("object"), ndf.getObjects("object"));
+    assertThat(df.getDoubles("double")).isNotSameAs(ndf.getDoubles("double"));
+    assertThat(df.getDoubles("double")).isNotSameAs(ndf.getDoubles("double"));
+    assertThat(df.getLongs("long")).isNotSameAs(ndf.getLongs("long"));
+    assertThat(df.getStrings("string")).isNotSameAs(ndf.getStrings("string"));
+    assertThat(df.getBooleans("boolean")).isNotSameAs(ndf.getBooleans("boolean"));
+    assertThat(df.getObjects("object")).isNotSameAs(ndf.getObjects("object"));
   }
 
   @Test
@@ -3273,8 +3389,8 @@ public class DataFrameTest {
     }
     StringSeries s = StringSeries.buildFrom(values);
 
-    Assert.assertNotSame(s.getString(0), s.getString(2));
-    Assert.assertNotSame(s.getString(1), s.getString(3));
+    assertThat(s.getString(0)).isNotSameAs(s.getString(2));
+    assertThat(s.getString(1)).isNotSameAs(s.getString(3));
   }
 
   @Test
@@ -3908,6 +4024,10 @@ public class DataFrameTest {
     Assert.assertEquals(df.toString(), expected);
   }
 
+  /* **************************************************************************
+   * Helpers
+   ***************************************************************************/
+
   @Test
   public void testSliceRows() {
     DataFrame df = new DataFrame();
@@ -4072,6 +4192,10 @@ public class DataFrameTest {
         new HashSet<>(Arrays.asList("double", "string", "object", "index")));
   }
 
+  /* **************************************************************************
+   * Test classes
+   ***************************************************************************/
+
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testDropSeriesFail() {
     new DataFrame("a", LongSeries.empty()).dropSeries("b");
@@ -4087,115 +4211,6 @@ public class DataFrameTest {
   public void testRetainSeriesFail() {
     new DataFrame("a", LongSeries.empty()).retainSeries("b");
   }
-
-  /* **************************************************************************
-   * Helpers
-   ***************************************************************************/
-
-  private static void assertEquals(Series actual, Series expected) {
-    Assert.assertEquals(actual, expected);
-  }
-
-  private static void assertEquals(DoubleSeries actual, double... expected) {
-    assertEquals(actual.getDoubles().values(), expected);
-  }
-
-  private static void assertEquals(double[] actual, double... expected) {
-    if (actual.length != expected.length) {
-      Assert.fail(String
-          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
-    }
-    for (int i = 0; i < actual.length; i++) {
-      if (Double.isNaN(actual[i]) && Double.isNaN(expected[i])) {
-        continue;
-      }
-      Assert.assertEquals(actual[i], expected[i], COMPARE_DOUBLE_DELTA, "index=" + i);
-    }
-  }
-
-  private static void assertEquals(LongSeries actual, long... expected) {
-    assertEquals(actual.getLongs().values(), expected);
-  }
-
-  private static void assertEquals(long[] actual, long... expected) {
-    if (actual.length != expected.length) {
-      Assert.fail(String
-          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
-    }
-    for (int i = 0; i < actual.length; i++) {
-      Assert.assertEquals(actual[i], expected[i], "index=" + i);
-    }
-  }
-
-  private static void assertEquals(StringSeries actual, String... expected) {
-    assertEquals(actual.getStrings().values(), expected);
-  }
-
-  private static void assertEquals(String[] actual, String... expected) {
-    if (actual.length != expected.length) {
-      Assert.fail(String
-          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
-    }
-    for (int i = 0; i < actual.length; i++) {
-      Assert.assertEquals(actual[i], expected[i], "index=" + i);
-    }
-  }
-
-  private static void assertEquals(BooleanSeries actual, byte... expected) {
-    assertEquals(actual.getBooleans().values(), expected);
-  }
-
-  private static void assertEquals(BooleanSeries actual, boolean... expected) {
-    BooleanSeries s = actual.getBooleans();
-    if (s.hasNull()) {
-      Assert.fail("Encountered NULL when comparing against booleans");
-    }
-    assertEquals(s.valuesBoolean(), expected);
-  }
-
-  private static void assertEquals(byte[] actual, byte... expected) {
-    if (actual.length != expected.length) {
-      Assert.fail(String
-          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
-    }
-    for (int i = 0; i < actual.length; i++) {
-      Assert.assertEquals(actual[i], expected[i], "index=" + i);
-    }
-  }
-
-  private static void assertEquals(boolean[] actual, boolean... expected) {
-    if (actual.length != expected.length) {
-      Assert.fail(String
-          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
-    }
-    for (int i = 0; i < actual.length; i++) {
-      Assert.assertEquals(actual[i], expected[i], "index=" + i);
-    }
-  }
-
-  private static void assertEquals(ObjectSeries actual, Object... expected) {
-    assertEqualsObjects(actual.getObjects().values(), expected);
-  }
-
-  private static void assertEqualsObjects(Object[] actual, Object... expected) {
-    if (actual.length != expected.length) {
-      Assert.fail(String
-          .format("expected array length [%d] but found [%d]", expected.length, actual.length));
-    }
-    for (int i = 0; i < actual.length; i++) {
-      Assert.assertEquals(actual[i], expected[i], "index=" + i);
-    }
-  }
-
-  private static void assertEmpty(Series series) {
-    if (!series.isEmpty()) {
-      Assert.fail("expected series to be empty, but wasn't");
-    }
-  }
-
-  /* **************************************************************************
-   * Test classes
-   ***************************************************************************/
 
   private static class TestTuple {
 
@@ -4273,17 +4288,5 @@ public class DataFrameTest {
       }
       return Integer.compare(this.a, o.a);
     }
-  }
-
-  private static CompTestTuple tup(int a, int b) {
-    return new CompTestTuple(a, b);
-  }
-
-  private static DateTime parseDate(String date) {
-    return DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss z").parseDateTime(date);
-  }
-
-  private static long parseDateMillis(String date) {
-    return parseDate(date).getMillis();
   }
 }

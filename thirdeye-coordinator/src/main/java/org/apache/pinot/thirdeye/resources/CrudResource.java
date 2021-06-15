@@ -2,8 +2,10 @@ package org.apache.pinot.thirdeye.resources;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
+import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 
@@ -13,6 +15,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -55,8 +58,16 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     this.apiToBeanMap = apiToBeanMap;
   }
 
-  protected void validate(final ApiT api) {
-    // override and perform necessary validations
+  /**
+   * Validate create/edit. On Creation the existing dto will be null
+   *
+   * @param api The request api object
+   * @param existing the existing dto. On Creation the existing dto will be null
+   */
+  protected void validate(final ApiT api, @Nullable final DtoT existing) {
+    if (existing == null) {
+      ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
+    }
   }
 
   protected abstract DtoT createDto(final ThirdEyePrincipal principal, final ApiT api);
@@ -64,6 +75,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   private DtoT updateDto(final ThirdEyePrincipal principal, final ApiT api) {
     final Long id = ensureExists(api.getId(), ERR_MISSING_ID);
     final DtoT existing = ensureExists(dtoManager.findById(id));
+    validate(api, existing);
 
     final DtoT updated = toDto(api);
 
@@ -139,7 +151,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     ensureExists(list, "Invalid request");
 
     return respondOk(list.stream()
-        .peek(this::validate)
+        .peek(api1 -> validate(api1, null))
         .map(api -> createDto(principal, api))
         .peek(dtoManager::save)
         .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
@@ -156,7 +168,6 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       List<ApiT> list) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     return respondOk(list.stream()
-        .peek(this::validate)
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .map(this::toApi)

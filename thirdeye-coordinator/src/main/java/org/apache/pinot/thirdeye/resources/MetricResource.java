@@ -2,9 +2,8 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
+import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
-import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
@@ -46,11 +45,17 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
   }
 
   @Override
-  protected void validate(final MetricApi api) {
+  protected void validate(final MetricApi api, final MetricConfigDTO existing) {
+    super.validate(api, existing);
+
     ensureExists(api.getDataset(), "dataset");
-    ensureExists(datasetConfigManager.findByDataset(api.getDataset().getName()));
-    ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
-    ensure(metricConfigManager.findByMetricName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME);
+    ensureExists(datasetConfigManager.findByDataset(api.getDataset().getName()),
+        ERR_DATASET_NOT_FOUND, api.getDataset().getName());
+
+    // For new Metric or existing metric with different name
+    if (existing == null || !existing.getName().equals(api.getName())) {
+      ensure(metricConfigManager.findByMetricName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME);
+    }
   }
 
   @Override

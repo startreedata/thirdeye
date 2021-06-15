@@ -106,7 +106,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void validate(final AlertApi api) {
+  protected void validate(final AlertApi api, final AlertDTO existing) {
+    super.validate(api, existing);
     optional(api.getCron()).ifPresent(cron ->
         ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
   }
@@ -187,7 +188,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
         .ok(evaluation)
         .build();
   }
-
 
   @Path("evaluate")
   @POST

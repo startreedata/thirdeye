@@ -50,7 +50,8 @@ public class SubscriptionGroupResource extends
   }
 
   @Override
-  protected void validate(final SubscriptionGroupApi api) {
+  protected void validate(final SubscriptionGroupApi api, final SubscriptionGroupDTO existing) {
+    super.validate(api, existing);
     optional(api.getCron()).ifPresent(cron ->
         ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
     ensure(subscriptionGroupManager.findByPredicate(

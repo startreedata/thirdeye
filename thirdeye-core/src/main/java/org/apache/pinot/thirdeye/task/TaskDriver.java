@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.task;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
@@ -61,7 +64,10 @@ public class TaskDriver {
     this.taskManager = taskManager;
     this.metricRegistry = metricRegistry;
     config = workerConfiguration.getTaskDriverConfiguration();
-    workerId = workerConfiguration.getId();
+    workerId = requireNonNull(config.getId(),
+        "worker id must be provided and unique for every worker");
+    checkArgument(workerId >= 0,
+        "worker id is expected to be a non negative integer");
 
     taskExecutorService = Executors.newFixedThreadPool(
         config.getMaxParallelTasks(),

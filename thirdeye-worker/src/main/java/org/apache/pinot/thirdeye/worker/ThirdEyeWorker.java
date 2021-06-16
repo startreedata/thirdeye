@@ -121,7 +121,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
   @Override
   public void run(final ThirdEyeWorkerConfiguration config, final Environment env) {
     LOG.info("Starting ThirdEye Worker : Scheduler {} Worker {}", config.isScheduler(),
-        config.isWorker());
+        config.getTaskDriverConfiguration().isEnabled());
     final DatabaseConfiguration dbConfig = getDatabaseConfiguration();
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
 
@@ -160,7 +160,7 @@ public class ThirdEyeWorker extends Application<ThirdEyeWorkerConfiguration> {
             new TimeGranularity(1, TimeUnit.DAYS));
         requestStatisticsLogger.start();
 
-        if (config.isWorker()) {
+        if (config.getTaskDriverConfiguration().isEnabled()) {
           taskDriver = injector.getInstance(TaskDriver.class);
           taskDriver.start();
         }

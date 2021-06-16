@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.config.MockEventsConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
@@ -21,9 +22,11 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   @JsonProperty("mockEvents")
   private MockEventsConfiguration mockEventsConfiguration = new MockEventsConfiguration();
 
+  @JsonProperty("taskDriver")
+  private TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration();
+
   private String configPath = "config";
   private boolean schedulerEnabled = false;
-  private boolean taskDriverEnabled = false;
 
   public AuthConfiguration getAuthConfiguration() {
     return authConfiguration;
@@ -82,12 +85,13 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return this;
   }
 
-  public boolean isTaskDriverEnabled() {
-    return taskDriverEnabled;
+  public TaskDriverConfiguration getTaskDriverConfiguration() {
+    return taskDriverConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setTaskDriverEnabled(final boolean taskDriverEnabled) {
-    this.taskDriverEnabled = taskDriverEnabled;
+  public ThirdEyeCoordinatorConfiguration setTaskDriverConfiguration(
+      final TaskDriverConfiguration taskDriverConfiguration) {
+    this.taskDriverConfiguration = taskDriverConfiguration;
     return this;
   }
 }

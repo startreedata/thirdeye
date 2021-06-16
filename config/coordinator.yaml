@@ -47,7 +47,9 @@ swagger:
   resourcePackage: org.apache.pinot.thirdeye.resources
 
 # Start the Task Driver. This module runs the detection and notification tasks
-taskDriverEnabled: false
+taskDriver:
+  enabled: false
+  id: 0 # must be unique per instance/worker
 
 # Run the Quartz Scheduler.
 # Only 1 instance of scheduler should run. This responsibility is currently on the user!!

@@ -23,6 +23,8 @@ import java.time.Duration;
 
 public class TaskDriverConfiguration {
 
+  private Long id;
+  private boolean enabled = false;
   private Duration noTaskDelay = Duration.ofSeconds(15);
   private Duration taskFailureDelay = Duration.ofSeconds(30);
   private Duration randomDelayCap = Duration.ofSeconds(15);
@@ -30,6 +32,24 @@ public class TaskDriverConfiguration {
 
   private int taskFetchSizeCap = 50;
   private int maxParallelTasks = 5;
+
+  public Long getId() {
+    return id;
+  }
+
+  public TaskDriverConfiguration setId(final Long id) {
+    this.id = id;
+    return this;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public TaskDriverConfiguration setEnabled(final boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
 
   public Duration getNoTaskDelay() {
     return noTaskDelay;

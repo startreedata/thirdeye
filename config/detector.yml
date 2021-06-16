@@ -20,9 +20,12 @@ swagger:
   resourcePackage: org.apache.pinot.thirdeye.worker.resources
 
 scheduler: true
-worker: true
 dashboardHost: "http://localhost:8081"
-id: 0
+
+taskDriver:
+  id: 1
+  enabled: true
+
 alerterConfiguration:
   smtpConfiguration:
     smtpHost: localhost

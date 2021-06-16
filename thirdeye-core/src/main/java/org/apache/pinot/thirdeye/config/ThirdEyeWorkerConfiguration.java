@@ -29,10 +29,10 @@ import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfigurati
 public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
 
   private boolean scheduler = false;
-  private boolean worker = false;
 
-  private long id;
+  @JsonProperty("taskDriver")
   private TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration();
+
   private ThirdEyeRestClientConfiguration teRestConfig = new ThirdEyeRestClientConfiguration();
   private DataAvailabilitySchedulingConfiguration
       dataAvailabilitySchedulingConfiguration = new DataAvailabilitySchedulingConfiguration();
@@ -47,24 +47,6 @@ public class ThirdEyeWorkerConfiguration extends ThirdEyeConfiguration {
 
   public ThirdEyeWorkerConfiguration setScheduler(final boolean scheduler) {
     this.scheduler = scheduler;
-    return this;
-  }
-
-  public boolean isWorker() {
-    return worker;
-  }
-
-  public ThirdEyeWorkerConfiguration setWorker(final boolean worker) {
-    this.worker = worker;
-    return this;
-  }
-
-  public long getId() {
-    return id;
-  }
-
-  public ThirdEyeWorkerConfiguration setId(final long id) {
-    this.id = id;
     return this;
   }
 

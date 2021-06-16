@@ -128,7 +128,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
             new TimeGranularity(1, TimeUnit.DAYS));
         requestStatisticsLogger.start();
 
-        if (config.isTaskDriverEnabled()) {
+        if (config.getTaskDriverConfiguration().isEnabled()) {
           taskDriver = injector.getInstance(TaskDriver.class);
           taskDriver.start();
         }

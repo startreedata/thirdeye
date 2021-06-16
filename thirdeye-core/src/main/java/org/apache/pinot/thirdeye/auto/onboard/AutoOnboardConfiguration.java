@@ -23,7 +23,7 @@ import java.time.Duration;
 
 public class AutoOnboardConfiguration {
 
-  private boolean enabled = true;
+  private boolean enabled = false;
   private Duration frequency = Duration.ofMinutes(5);
 
   public Duration getFrequency() {

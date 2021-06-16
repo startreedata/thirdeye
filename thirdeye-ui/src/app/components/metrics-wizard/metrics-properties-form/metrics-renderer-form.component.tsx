@@ -34,6 +34,7 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
                     .required(t("message.metrics-name-required")),
                 rollupThreshold: yup
                     .number()
+                    .typeError(t("message.metrics-threshold-required"))
                     .required(t("message.metrics-threshold-required")),
                 aggregationFunction: yup
                     .string()

@@ -32,7 +32,7 @@ public class CacheConfig {
   @JsonProperty("centralizedCacheSettings")
   private CentralizedCacheConfig centralizedCacheConfig = new CentralizedCacheConfig();
 
-  private boolean useInMemoryCache = false;
+  private boolean useInMemoryCache = true;
   private boolean useCentralizedCache = false;
 
   /**

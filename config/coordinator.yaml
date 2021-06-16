@@ -53,7 +53,7 @@ taskDriver:
 
 # Run the Quartz Scheduler.
 # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
-schedulerEnabled: false
+schedulerEnabled: true
 
 mockEvents:
   enabled: true

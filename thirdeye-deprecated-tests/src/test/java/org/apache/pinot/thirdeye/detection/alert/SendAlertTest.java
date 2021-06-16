@@ -20,19 +20,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -131,9 +131,9 @@ public class SendAlertTest {
     Map<String, Map<String, Object>> alerterProps = new HashMap<>();
     alerterProps.put("smtpConfiguration", smtpProperties);
 
-    ThirdEyeWorkerConfiguration thirdEyeConfig = new ThirdEyeWorkerConfiguration();
+    ThirdEyeCoordinatorConfiguration thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
     thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
-    thirdEyeConfig.setAlerterConfiguration(alerterProps);
+    thirdEyeConfig.setAlerterConfigurations(alerterProps);
 
     final TaskContext taskContext = new TaskContext()
         .setThirdEyeWorkerConfiguration(thirdEyeConfig);

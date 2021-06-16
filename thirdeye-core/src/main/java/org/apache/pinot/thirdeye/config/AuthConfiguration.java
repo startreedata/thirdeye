@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.auth;
+package org.apache.pinot.thirdeye.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

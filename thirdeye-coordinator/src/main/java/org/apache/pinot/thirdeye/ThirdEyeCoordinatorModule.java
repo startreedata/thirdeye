@@ -6,10 +6,11 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
-import org.apache.pinot.thirdeye.auth.AuthConfiguration;
-import org.apache.pinot.thirdeye.auth.JwtConfiguration;
+import org.apache.pinot.thirdeye.config.AuthConfiguration;
 import org.apache.pinot.thirdeye.config.ConfigurationHolder;
+import org.apache.pinot.thirdeye.config.JwtConfiguration;
 import org.apache.pinot.thirdeye.config.MockEventsConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeCoordinatorModule extends AbstractModule {
@@ -32,11 +33,11 @@ public class ThirdEyeCoordinatorModule extends AbstractModule {
     install(new ThirdEyeCoreModule(dataSource, configurationHolder));
 
     bind(MetricRegistry.class).toInstance(metricRegistry);
+    bind(ThirdEyeCoordinatorConfiguration.class).toInstance(configuration);
 
     bind(TaskDriverConfiguration.class)
         .toProvider(configuration::getTaskDriverConfiguration)
         .in(Scopes.SINGLETON);
-
   }
 
   @Singleton

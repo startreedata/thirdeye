@@ -42,7 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.anomaly.events.EventFilter;
 import org.apache.pinot.thirdeye.anomaly.events.HolidayEventProvider;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detector.email.filter.DummyAlertFilter;
 import org.apache.pinot.thirdeye.detector.email.filter.PrecisionRecallEvaluator;
 import org.apache.pinot.thirdeye.spi.Constants.CompareMode;
@@ -101,7 +101,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
   protected Period preEventCrawlOffset;
   protected Period postEventCrawlOffset;
   protected String imgPath = null;
-  protected ThirdEyeWorkerConfiguration thirdEyeAnomalyConfig;
+  protected ThirdEyeCoordinatorConfiguration thirdEyeAnomalyConfig;
   protected Properties properties;
 
   protected BaseNotificationContent(final MetricConfigManager metricConfigManager,
@@ -326,7 +326,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
     }
   }
 
-  public void init(Properties properties, ThirdEyeWorkerConfiguration config) {
+  public void init(Properties properties, ThirdEyeCoordinatorConfiguration config) {
     this.properties = properties;
     this.thirdEyeAnomalyConfig = config;
 

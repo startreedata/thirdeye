@@ -9,17 +9,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
@@ -101,7 +101,7 @@ public class DetectionAlertTaskFactoryTest {
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     Set<DetectionAlertScheme> detectionAlertSchemes = detectionAlertTaskFactory
         .loadAlertSchemes(alertConfig,
-            new ThirdEyeWorkerConfiguration(), null);
+            new ThirdEyeCoordinatorConfiguration(), null);
 
     Assert.assertEquals(detectionAlertSchemes.size(), 2);
     Iterator<DetectionAlertScheme> alertSchemeIterator = detectionAlertSchemes.iterator();
@@ -117,8 +117,8 @@ public class DetectionAlertTaskFactoryTest {
   @Test(expectedExceptions = NullPointerException.class)
   public void testDefaultAlertSchemes() throws Exception {
 
-    ThirdEyeWorkerConfiguration teConfig = new ThirdEyeWorkerConfiguration();
-    teConfig.setAlerterConfiguration(new HashMap<>());
+    ThirdEyeCoordinatorConfiguration teConfig = new ThirdEyeCoordinatorConfiguration();
+    teConfig.setAlerterConfigurations(new HashMap<>());
 
     detectionAlertTaskFactory.loadAlertSchemes(null, teConfig, null);
   }
@@ -131,8 +131,8 @@ public class DetectionAlertTaskFactoryTest {
     SubscriptionGroupDTO alertConfig = createAlertConfig(Collections.emptyMap(),
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
 
-    ThirdEyeWorkerConfiguration teConfig = new ThirdEyeWorkerConfiguration();
-    teConfig.setAlerterConfiguration(new HashMap<>());
+    ThirdEyeCoordinatorConfiguration teConfig = new ThirdEyeCoordinatorConfiguration();
+    teConfig.setAlerterConfigurations(new HashMap<>());
 
     Set<DetectionAlertScheme> detectionAlertSchemes = detectionAlertTaskFactory
         .loadAlertSchemes(alertConfig,

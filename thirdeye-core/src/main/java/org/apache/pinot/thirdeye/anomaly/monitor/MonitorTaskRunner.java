@@ -41,7 +41,7 @@ import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.anomaly.task.TaskResult;
 import org.apache.pinot.thirdeye.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
@@ -69,7 +69,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
   private final TaskManager taskManager;
   private final JobManager jobManager;
-  private final ThirdEyeWorkerConfiguration workerConfiguration;
+  private final ThirdEyeCoordinatorConfiguration configuration;
   private final AlertManager alertManager;
   private final DetectionStatusManager detectionStatusManager;
   private final EvaluationManager evaluationManager;
@@ -77,7 +77,7 @@ public class MonitorTaskRunner implements TaskRunner {
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
 
   @Inject
-  public MonitorTaskRunner(final ThirdEyeWorkerConfiguration workerConfiguration,
+  public MonitorTaskRunner(final ThirdEyeCoordinatorConfiguration configuration,
       final TaskManager taskManager,
       final JobManager jobManager,
       final AlertManager alertManager,
@@ -87,7 +87,7 @@ public class MonitorTaskRunner implements TaskRunner {
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
     this.taskManager = taskManager;
     this.jobManager = jobManager;
-    this.workerConfiguration = workerConfiguration;
+    this.configuration = configuration;
     this.alertManager = alertManager;
     this.detectionStatusManager = detectionStatusManager;
     this.evaluationManager = evaluationManager;
@@ -217,7 +217,7 @@ public class MonitorTaskRunner implements TaskRunner {
             + "Here is the link for your alert: https://thirdeye.corp.linkedin.com/app/#/manage/explore/%d",
         MAX_FAILED_DISABLE_DAYS, config.getId());
     Set<String> recipients = EmailUtils
-        .getValidEmailAddresses(workerConfiguration.getFailureToAddress());
+        .getValidEmailAddresses(configuration.getFailureToAddress());
     if (config.getCreatedBy() != null && !config.getCreatedBy().equals(NO_AUTH_USER)) {
       recipients.add(config.getCreatedBy());
     }
@@ -227,9 +227,9 @@ public class MonitorTaskRunner implements TaskRunner {
     EmailHelper.sendEmailWithTextBody(email,
         SmtpConfiguration
             .createFromProperties(
-                workerConfiguration.getAlerterConfiguration().get(SMTP_CONFIG_KEY)),
+                configuration.getAlerterConfigurations().get(SMTP_CONFIG_KEY)),
         subject,
-        textBody, workerConfiguration.getFailureFromAddress(),
+        textBody, configuration.getFailureFromAddress(),
         new DetectionAlertFilterRecipients(recipients));
   }
 

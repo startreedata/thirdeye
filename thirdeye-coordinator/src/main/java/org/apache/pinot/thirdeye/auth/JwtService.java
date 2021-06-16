@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 import javax.inject.Inject;
+import org.apache.pinot.thirdeye.config.JwtConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

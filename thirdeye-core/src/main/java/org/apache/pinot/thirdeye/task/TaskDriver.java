@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -51,19 +51,19 @@ public class TaskDriver {
   private final TaskManager taskManager;
   private final TaskContext taskContext;
   private final TaskDriverConfiguration config;
-  private final long workerId;
+  private final Long workerId;
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
   private final TaskRunnerFactory taskRunnerFactory;
   private final MetricRegistry metricRegistry;
 
   @Inject
-  public TaskDriver(final ThirdEyeWorkerConfiguration workerConfiguration,
+  public TaskDriver(final ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration,
       final TaskManager taskManager,
       final TaskRunnerFactory taskRunnerFactory,
       final MetricRegistry metricRegistry) {
     this.taskManager = taskManager;
     this.metricRegistry = metricRegistry;
-    config = workerConfiguration.getTaskDriverConfiguration();
+    config = thirdEyeCoordinatorConfiguration.getTaskDriverConfiguration();
     workerId = requireNonNull(config.getId(),
         "worker id must be provided and unique for every worker");
     checkArgument(workerId >= 0,
@@ -82,7 +82,7 @@ public class TaskDriver {
             .setDaemon(true)
             .build());
 
-    taskContext = new TaskContext().setThirdEyeWorkerConfiguration(workerConfiguration);
+    taskContext = new TaskContext().setThirdEyeWorkerConfiguration(thirdEyeCoordinatorConfiguration);
 
     this.taskRunnerFactory = taskRunnerFactory;
   }

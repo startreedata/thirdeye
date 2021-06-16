@@ -16,7 +16,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
@@ -38,7 +38,7 @@ public class InternalResource {
   private final AlertManager detectionConfigManager;
   private final MetricConfigManager metricConfigManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration;
+  private final ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration;
 
   @Inject
   public InternalResource(
@@ -47,13 +47,13 @@ public class InternalResource {
       final AlertManager detectionConfigManager,
       final MetricConfigManager metricConfigManager,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final ThirdEyeWorkerConfiguration thirdEyeWorkerConfiguration) {
+      final ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.eventManager = eventManager;
     this.detectionConfigManager = detectionConfigManager;
     this.metricConfigManager = metricConfigManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.thirdEyeWorkerConfiguration = thirdEyeWorkerConfiguration;
+    this.thirdEyeCoordinatorConfiguration = thirdEyeCoordinatorConfiguration;
   }
 
   @POST
@@ -70,7 +70,7 @@ public class InternalResource {
     );
     DetectionEmailAlerter instance = new DetectionEmailAlerter(
         sg,
-        thirdEyeWorkerConfiguration,
+        thirdEyeCoordinatorConfiguration,
         result,
         metricConfigManager,
         detectionConfigManager,

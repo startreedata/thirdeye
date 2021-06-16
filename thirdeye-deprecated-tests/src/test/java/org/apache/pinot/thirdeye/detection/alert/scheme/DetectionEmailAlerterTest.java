@@ -37,7 +37,13 @@ import javax.mail.Session;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.common.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
+import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
+import org.apache.pinot.thirdeye.detection.alert.filter.SubscriptionUtils;
+import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
+import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -46,12 +52,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
-import org.apache.pinot.thirdeye.detection.alert.filter.SubscriptionUtils;
-import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
-import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
-import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -69,7 +69,7 @@ public class DetectionEmailAlerterTest {
 
   private MergedAnomalyResultManager anomalyDAO;
   private SubscriptionGroupDTO subscriptionGroupDTO;
-  private ThirdEyeWorkerConfiguration thirdEyeConfig;
+  private ThirdEyeCoordinatorConfiguration thirdEyeConfig;
   private AlertManager detectionConfigManager;
 
   @BeforeMethod
@@ -121,14 +121,14 @@ public class DetectionEmailAlerterTest {
     anomalyResultDTO.setId(12L);
     when(anomalyDAO.findAll()).thenReturn(Arrays.asList(anomalyResultDTO, anomalyResultDTO2));
 
-    thirdEyeConfig = new ThirdEyeWorkerConfiguration();
+    thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
     thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
     Map<String, Object> smtpProperties = new HashMap<>();
     smtpProperties.put("smtpHost", "test");
     smtpProperties.put("smtpPort", 25);
     Map<String, Map<String, Object>> alerterProps = new HashMap<>();
     alerterProps.put("smtpConfiguration", smtpProperties);
-    thirdEyeConfig.setAlerterConfiguration(alerterProps);
+    thirdEyeConfig.setAlerterConfigurations(alerterProps);
   }
 
   @AfterClass(alwaysRun = true)

@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
@@ -74,7 +74,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionJiraAlerter.class);
 
-  private final ThirdEyeWorkerConfiguration teConfig;
+  private final ThirdEyeCoordinatorConfiguration teConfig;
   private final ThirdEyeJiraClient jiraClient;
   private final JiraConfiguration jiraAdminConfig;
 
@@ -83,7 +83,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
   public static final int JIRA_ONE_LINE_COMMENT_LENGTH = 250;
 
   public DetectionJiraAlerter(SubscriptionGroupDTO subsConfig,
-      ThirdEyeWorkerConfiguration thirdeyeConfig,
+      ThirdEyeCoordinatorConfiguration thirdeyeConfig,
       DetectionAlertFilterResult result,
       ThirdEyeJiraClient jiraClient,
       final MetricConfigManager metricConfigManager,
@@ -95,7 +95,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
     this.teConfig = thirdeyeConfig;
 
     this.jiraAdminConfig = JiraConfiguration
-        .createFromProperties(this.teConfig.getAlerterConfiguration().get(JIRA_CONFIG_KEY));
+        .createFromProperties(this.teConfig.getAlerterConfigurations().get(JIRA_CONFIG_KEY));
     this.jiraClient = jiraClient;
   }
 

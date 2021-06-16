@@ -38,7 +38,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.anomaly.detection.AnomalyDetectionInputContextBuilder;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
@@ -94,7 +94,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
   }
 
   @Override
-  public void init(Properties properties, ThirdEyeWorkerConfiguration config) {
+  public void init(Properties properties, ThirdEyeCoordinatorConfiguration config) {
     super.init(properties, config);
     relatedEvents = new HashSet<>();
     presentSeasonalValues = Boolean.parseBoolean(

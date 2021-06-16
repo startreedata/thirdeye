@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class AlertScreenshotHelper {
   private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
   public static String takeGraphScreenShot(final String anomalyId,
-      final ThirdEyeConfiguration configuration) throws JobExecutionException {
+      final ThirdEyeCoordinatorConfiguration configuration) throws JobExecutionException {
     return takeGraphScreenShot(anomalyId, configuration.getDashboardHost(),
         configuration.getRootDir(),
         configuration.getPhantomJsPath());

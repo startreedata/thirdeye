@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.pinot.thirdeye.anomaly.alert.util.AlertScreenshotHelper;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
@@ -89,7 +89,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
   }
 
   @Override
-  public void init(Properties properties, ThirdEyeWorkerConfiguration config) {
+  public void init(Properties properties, ThirdEyeCoordinatorConfiguration config) {
     super.init(properties, config);
     if (properties.containsKey(PROP_ENTITY_WHITELIST)) {
       // Support only one whitelist entity. This can be extended in the future.

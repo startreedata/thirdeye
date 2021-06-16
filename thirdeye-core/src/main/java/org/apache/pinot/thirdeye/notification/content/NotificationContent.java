@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.notification.content;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 
@@ -34,7 +34,7 @@ public interface NotificationContent {
   /**
    * Initialize the content formatter
    */
-  void init(Properties properties, ThirdEyeWorkerConfiguration configuration);
+  void init(Properties properties, ThirdEyeCoordinatorConfiguration configuration);
 
   /**
    * Generate the template dictionary from the list of anomaly results to render in the template

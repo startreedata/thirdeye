@@ -1,13 +1,13 @@
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 
 /** Used in tests
  *
@@ -16,7 +16,7 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 public class AnotherRandomAlerter extends DetectionAlertScheme {
 
   public AnotherRandomAlerter(SubscriptionGroupDTO subsConfig,
-                              ThirdEyeWorkerConfiguration thirdeyeConfig,
+                              ThirdEyeCoordinatorConfiguration thirdeyeConfig,
                               DetectionAlertFilterResult result,
                               final MetricConfigManager metricConfigManager, final AlertManager detectionConfigManager,
                               final EventManager eventManager,

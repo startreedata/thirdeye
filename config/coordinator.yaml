@@ -48,8 +48,8 @@ swagger:
 
 # Start the Task Driver. This module runs the detection and notification tasks
 taskDriver:
-  enabled: false
-  id: 0 # must be unique per instance/worker
+  enabled: true
+  id: 0 # must be a non-negative integer unique per instance/worker
 
 # Run the Quartz Scheduler.
 # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
@@ -97,3 +97,20 @@ mockEvents:
       seed: 4
       namePrefixes: [System, Model, Campaign, Welcome, Pinot, ThirdEye]
       nameSuffixes: [tuning, bugfix, rollout, test]
+
+dashboardHost: "http://localhost:8081"
+alerterConfigurations:
+  smtpConfiguration:
+    smtpHost: localhost
+    smtpPort: 25
+    smtpUser: no-reply@thirdeye.startree.ai
+    smtpPassword: my-password
+#  jiraConfiguration:
+#    jiraUser: <REPLACE_ME>
+#    jiraPassword: <REPLACE_ME>
+#    jiraUrl: <REPLACE_ME>
+#    jiraDefaultProject: <REPLACE_ME>
+#    jiraIssueTypeId: 19
+failureFromAddress: "thirdeye@localhost"
+failureToAddress: "thirdeye@localhost"
+phantomJsPath: "/usr/local/bin/jstf"

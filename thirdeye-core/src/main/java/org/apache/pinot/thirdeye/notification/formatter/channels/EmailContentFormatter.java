@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
@@ -66,7 +66,7 @@ public class EmailContentFormatter extends AlertContentFormatter {
   }
 
   public EmailContentFormatter(Properties emailClientConfig, BaseNotificationContent content,
-      ThirdEyeWorkerConfiguration teConfig, SubscriptionGroupDTO subsConfig) {
+      ThirdEyeCoordinatorConfiguration teConfig, SubscriptionGroupDTO subsConfig) {
     super(emailClientConfig, content, teConfig, subsConfig);
   }
 

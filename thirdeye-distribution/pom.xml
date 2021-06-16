@@ -38,10 +38,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-worker</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-detectors</artifactId>
     </dependency>
   </dependencies>

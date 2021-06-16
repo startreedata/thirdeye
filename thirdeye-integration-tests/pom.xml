@@ -37,11 +37,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-worker</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-datasources</artifactId>
     </dependency>
     <dependency>

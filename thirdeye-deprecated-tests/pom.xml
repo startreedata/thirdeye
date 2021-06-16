@@ -38,11 +38,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-worker</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-datasources</artifactId>
       <scope>test</scope>
     </dependency>

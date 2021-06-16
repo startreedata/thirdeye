@@ -31,7 +31,6 @@
     <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
     <module>thirdeye-coordinator</module>
-    <module>thirdeye-worker</module>
     <module>thirdeye-ui</module>
 
     <!--  Build plugins -->
@@ -375,11 +374,6 @@
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
         <artifactId>thirdeye-dashboard</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
-        <artifactId>thirdeye-worker</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

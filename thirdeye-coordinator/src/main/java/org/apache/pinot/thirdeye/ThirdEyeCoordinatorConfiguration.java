@@ -22,6 +22,8 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   private MockEventsConfiguration mockEventsConfiguration = new MockEventsConfiguration();
 
   private String configPath = "config";
+  private boolean schedulerEnabled = false;
+  private boolean taskDriverEnabled = false;
 
   public AuthConfiguration getAuthConfiguration() {
     return authConfiguration;
@@ -68,6 +70,24 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   public ThirdEyeCoordinatorConfiguration setMockEventsConfiguration(
       final MockEventsConfiguration mockEventsConfiguration) {
     this.mockEventsConfiguration = mockEventsConfiguration;
+    return this;
+  }
+
+  public boolean isSchedulerEnabled() {
+    return schedulerEnabled;
+  }
+
+  public ThirdEyeCoordinatorConfiguration setSchedulerEnabled(final boolean schedulerEnabled) {
+    this.schedulerEnabled = schedulerEnabled;
+    return this;
+  }
+
+  public boolean isTaskDriverEnabled() {
+    return taskDriverEnabled;
+  }
+
+  public ThirdEyeCoordinatorConfiguration setTaskDriverEnabled(final boolean taskDriverEnabled) {
+    this.taskDriverEnabled = taskDriverEnabled;
     return this;
   }
 }

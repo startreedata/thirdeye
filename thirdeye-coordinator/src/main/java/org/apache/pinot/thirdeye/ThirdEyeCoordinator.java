@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye;
 
+import static org.apache.pinot.thirdeye.spi.Constants.CTX_INJECTOR;
 import static org.apache.pinot.thirdeye.spi.Constants.ENV_THIRDEYE_PLUGINS_DIR;
 import static org.apache.pinot.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
@@ -9,11 +10,13 @@ import com.google.inject.Injector;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.util.EnumSet;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
@@ -21,6 +24,12 @@ import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.resources.RootResource;
+import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
+import org.apache.pinot.thirdeye.scheduler.SchedulerService;
+import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
+import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.task.TaskDriver;
+import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.slf4j.Logger;
@@ -29,7 +38,11 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfiguration> {
 
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeCoordinator.class);
+
   private Injector injector;
+  private RequestStatisticsLogger requestStatisticsLogger = null;
+  private TaskDriver taskDriver = null;
+  private SchedulerService schedulerService = null;
 
   /**
    * Use {@link ThirdEyeCoordinatorDebug} class for debugging purposes.
@@ -90,10 +103,55 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
     // Load mock events if enabled.
     injector.getInstance(MockEventsLoader.class).run();
+    env.lifecycle().manage(lifecycleManager(configuration));
+  }
+
+  private Managed lifecycleManager(ThirdEyeCoordinatorConfiguration config) {
+    return new Managed() {
+      @Override
+      public void start() throws Exception {
+        if (config.isSchedulerEnabled()) {
+          // Allow the jobs to use the injector
+          injector.getInstance(DetectionCronScheduler.class)
+              .addToContext(CTX_INJECTOR, injector);
+
+          injector.getInstance(SubscriptionCronScheduler.class)
+              .addToContext(CTX_INJECTOR, injector);
+
+          schedulerService = injector.getInstance(SchedulerService.class);
+
+          // Start the scheduler
+          schedulerService.start();
+        }
+
+        requestStatisticsLogger = new RequestStatisticsLogger(
+            new TimeGranularity(1, TimeUnit.DAYS));
+        requestStatisticsLogger.start();
+
+        if (config.isTaskDriverEnabled()) {
+          taskDriver = injector.getInstance(TaskDriver.class);
+          taskDriver.start();
+        }
+      }
+
+      @Override
+      public void stop() throws Exception {
+        if (requestStatisticsLogger != null) {
+          requestStatisticsLogger.shutdown();
+        }
+        if (taskDriver != null) {
+          taskDriver.shutdown();
+        }
+        if (schedulerService != null) {
+          schedulerService.stop();
+        }
+      }
+    };
   }
 
   /**
    * Prefer system property over env variable when overriding plugins Dir.
+   *
    * @return overridden thirdEye plugins dir
    */
   private String thirdEyePluginDirOverride() {

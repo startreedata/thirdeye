@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.worker.task;
+package org.apache.pinot.thirdeye.task;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;

@@ -55,9 +55,9 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
 
   static {
     try {
-      MAX_CONNECTIONS = Integer.parseInt(System.getProperty("max_pinot_connections", "25"));
+      MAX_CONNECTIONS = Integer.parseInt(System.getProperty("max_pinot_connections", "2"));
     } catch (Exception e) {
-      MAX_CONNECTIONS = 25;
+      MAX_CONNECTIONS = 2;
     }
   }
 

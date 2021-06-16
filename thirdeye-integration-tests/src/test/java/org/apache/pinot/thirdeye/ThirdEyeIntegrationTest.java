@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.testcontainer.AddTable;
 import org.apache.pinot.testcontainer.ImportData;
 import org.apache.pinot.testcontainer.PinotContainer;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;

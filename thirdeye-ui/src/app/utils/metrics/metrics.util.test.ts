@@ -1,6 +1,7 @@
 import { Metric, MetricAggFunction } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import {
+    createEmptyMetric,
     createEmptyMetricLogicalView,
     createEmptyUiMetric,
     filterMetrics,
@@ -19,6 +20,10 @@ jest.mock("../number/number.util", () => ({
 describe("Metrics Util", () => {
     it("createEmptyUiMetric should create appropriate UI metric", () => {
         expect(createEmptyUiMetric()).toEqual(mockEmptyUiMetric);
+    });
+
+    it("createEmptyMetric should create appropriate metric", () => {
+        expect(createEmptyMetric()).toEqual(mockEmptyMetric);
     });
 
     it("createEmptyMetricLogicalView should create appropriate metric logical view", () => {
@@ -75,6 +80,16 @@ describe("Metrics Util", () => {
         ]);
     });
 });
+
+const mockEmptyMetric = {
+    name: "",
+    active: true,
+    aggregationFunction: MetricAggFunction.SUM,
+    dataset: {
+        name: "",
+    },
+    rollupThreshold: 0,
+};
 
 const mockEmptyUiMetric = {
     id: -1,

@@ -47,6 +47,9 @@
     <!--  Run the Integration test modules after building the distribution (required for plugins) -->
     <module>pinot-test-container</module>
     <module>thirdeye-integration-tests</module>
+
+    <!-- Build ThirdEye Documentation -->
+    <module>thirdeye-docs</module>
   </modules>
 
   <properties>
@@ -334,7 +337,6 @@
             </formats>
           </configuration>
         </plugin>
-
       </plugins>
     </pluginManagement>
   </build>

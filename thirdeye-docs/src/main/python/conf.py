@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'ThirdEye'
-copyright = '2019, ThirdEye Team'
+copyright = 'Startree Inc 2021'
 author = 'ThirdEye Team'
 
 # The short X.Y version

@@ -23,9 +23,15 @@
 
 This directory contains the documentation for ThirdEye. It is available online at https://thirdeye.readthedocs.io. 
 
-### Building docs
+### Build
 
-The documentation is built using the [sphinx](https://www.sphinx-doc.org/) framework.
+ThirdEye documentation is built using [sphinx](https://www.sphinx-doc.org/). It gets built along with the install phase.
+```bash
+mvn install -pl 'thirdeye-docs' -am
+```
+
+**NOTE. This section below requires update and is a WIP**
+
 
 If you have python/pip, you can install the dependencies using the command below.
 ```

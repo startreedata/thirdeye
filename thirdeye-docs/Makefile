@@ -5,8 +5,8 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXAUTOBUILD   = sphinx-autobuild
-SOURCEDIR     = .
-BUILDDIR      = _build
+SOURCEDIR     = src/main/sphinx
+BUILDDIR      = target/docs
 
 # Put it first so that "make" without argument is like "make help".
 help:

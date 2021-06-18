@@ -104,7 +104,6 @@
     <swagger-annotation.version>1.5.22</swagger-annotation.version>
     <calendar-api.version>v3-rev300-1.23.0</calendar-api.version>
     <json.version>20170516</json.version>
-    <log4j2.version>2.12.0</log4j2.version>
     <json-schema-validator.version>2.2.14</json-schema-validator.version>
   </properties>
 
@@ -121,37 +120,6 @@
     <name>StarTree Inc</name>
     <url>https://www.startree.ai/</url>
   </organization>
-
-  <developers>
-    <developer>
-      <id>akshayrai</id>
-      <name>Akshay Rai</name>
-    </developer>
-    <developer>
-      <id>jihaozh</id>
-      <name>Jihao Zhang</name>
-    </developer>
-    <developer>
-      <id>newsummit</id>
-      <name>Steve McClung</name>
-    </developer>
-    <developer>
-      <id>aaronucsd</id>
-      <name>Long Huynh</name>
-    </developer>
-    <developer>
-      <id>kgopalak</id>
-      <name>Kishore Gopalakrishna</name>
-    </developer>
-    <developer>
-      <id>apucher</id>
-      <name>Alexander Pucher</name>
-    </developer>
-    <developer>
-      <id>suvodeep-pyne</id>
-      <name>Suvodeep Pyne</name>
-    </developer>
-  </developers>
 
   <scm>
     <!-- This is used by maven-release-plugin -->
@@ -800,23 +768,6 @@
         <groupId>com.google.apis</groupId>
         <artifactId>google-api-services-calendar</artifactId>
         <version>${calendar-api.version}</version>
-      </dependency>
-
-      <!-- log4j2 -->
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-api</artifactId>
-        <version>${log4j2.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
-        <version>${log4j2.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-slf4j-impl</artifactId>
-        <version>${log4j2.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>

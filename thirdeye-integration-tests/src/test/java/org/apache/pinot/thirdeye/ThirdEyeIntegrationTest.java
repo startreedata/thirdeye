@@ -109,7 +109,7 @@ public class ThirdEyeIntegrationTest {
     container = startPinot();
     container.addTables();
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
-        resourceFilePath("e2e/config/coordinator.yml"),
+        resourceFilePath("e2e/config/coordinator.yaml"),
         config("configPath", THIRDEYE_CONFIG),
         config("server.connector.port", "0"), // port: 0 implies any port
         config("database.url", db.getDbConfig().getUrl()),

@@ -16,6 +16,7 @@
 
 package org.apache.pinot.thirdeye.auth;
 
+import com.google.inject.Injector;
 import io.dropwizard.auth.AuthenticationException;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -25,8 +26,9 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.spi.InitialContextFactory;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +53,10 @@ public class ThirdEyeAuthenticatorLdapTest {
   @BeforeClass
   public void setup() {
     List<String> domains = Arrays.asList(DOMAIN1, DOMAIN2);
+    TestDbEnv testDbEnv = new TestDbEnv();
+    final Injector injector = testDbEnv.getInjector();
     thirdEyeAuthenticatorLdap = new ThirdEyeLdapAuthenticator(domains, "ldaps://someLdap",
-        TestDbEnv.getInstance().getSessionDAO());
+        injector.getInstance(SessionManager.class));
     thirdEyeAuthenticatorLdap
         .setInitialContextFactory(MockInitialDirContextFactory.class.getName());
   }

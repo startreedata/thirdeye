@@ -9,6 +9,8 @@ import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilit
 import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
+import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 
 public class ThirdEyeCoordinatorConfiguration extends Configuration {
 
@@ -26,6 +28,15 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
 
   @JsonProperty("taskDriver")
   private TaskDriverConfiguration taskDriverConfiguration = new TaskDriverConfiguration();
+
+  @JsonProperty("scheduler")
+  private ThirdEyeSchedulerConfiguration schedulerConfiguration = new ThirdEyeSchedulerConfiguration();
+
+  @JsonProperty("cache")
+  private CacheConfig cacheConfig = new CacheConfig();
+
+  @JsonProperty("rca")
+  private RCAConfiguration rcaConfiguration = new RCAConfiguration();
 
   private String configPath = "config";
   private boolean schedulerEnabled = false;
@@ -191,6 +202,36 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
 
   public ThirdEyeCoordinatorConfiguration setRootDir(final String rootDir) {
     this.rootDir = rootDir;
+    return this;
+  }
+
+  public ThirdEyeSchedulerConfiguration getSchedulerConfiguration() {
+    return schedulerConfiguration;
+  }
+
+  public ThirdEyeCoordinatorConfiguration setSchedulerConfiguration(
+      final ThirdEyeSchedulerConfiguration schedulerConfiguration) {
+    this.schedulerConfiguration = schedulerConfiguration;
+    return this;
+  }
+
+  public CacheConfig getCacheConfig() {
+    return cacheConfig;
+  }
+
+  public ThirdEyeCoordinatorConfiguration setCacheConfig(
+      final CacheConfig cacheConfig) {
+    this.cacheConfig = cacheConfig;
+    return this;
+  }
+
+  public RCAConfiguration getRcaConfiguration() {
+    return rcaConfiguration;
+  }
+
+  public ThirdEyeCoordinatorConfiguration setRcaConfiguration(
+      final RCAConfiguration rcaConfiguration) {
+    this.rcaConfiguration = rcaConfiguration;
     return this;
   }
 }

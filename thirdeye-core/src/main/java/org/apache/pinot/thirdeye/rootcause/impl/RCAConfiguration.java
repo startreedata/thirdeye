@@ -19,7 +19,8 @@
 
 package org.apache.pinot.thirdeye.rootcause.impl;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,10 +31,9 @@ import java.util.Map;
  */
 public class RCAConfiguration {
 
-  private Map<String, List<PipelineConfiguration>> frameworks;
+  private Map<String, List<PipelineConfiguration>> frameworks = new HashMap<>();
+  private List<String> formatters = Collections.emptyList();
   private int parallelism = 1;
-  private String definitionsPath = "rca.yml";
-  private List<String> formatters = Arrays.asList();
 
   public Map<String, List<PipelineConfiguration>> getFrameworks() {
     return frameworks;
@@ -51,15 +51,6 @@ public class RCAConfiguration {
 
   public RCAConfiguration setParallelism(final int parallelism) {
     this.parallelism = parallelism;
-    return this;
-  }
-
-  public String getDefinitionsPath() {
-    return definitionsPath;
-  }
-
-  public RCAConfiguration setDefinitionsPath(final String definitionsPath) {
-    this.definitionsPath = definitionsPath;
     return this;
   }
 

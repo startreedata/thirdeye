@@ -2,28 +2,40 @@ package org.apache.pinot.thirdeye.config;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
+import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardConfiguration;
+import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 
 public class ThirdEyeConfigurationModule extends AbstractModule {
 
-  private final ConfigurationHolder configurationHolder;
+  private final ThirdEyeCoordinatorConfiguration configuration;
 
-  public ThirdEyeConfigurationModule(final ConfigurationHolder configurationHolder) {
-    this.configurationHolder = configurationHolder;
+  public ThirdEyeConfigurationModule(
+      final ThirdEyeCoordinatorConfiguration configuration) {
+    this.configuration = configuration;
   }
 
   @Override
   protected void configure() {
-    bind(ConfigurationHolder.class).toInstance(configurationHolder);
+    bind(CacheConfig.class)
+        .toProvider(configuration::getCacheConfig)
+        .in(Scopes.SINGLETON);
 
-    // Create bindings for all declared configurations
-    //noinspection unchecked
-    configurationHolder
-        .getConfigClassMap()
-        .keySet()
-        .forEach(c -> bind(c).toInstance(configurationHolder.createConfigurationInstance(c)));
+    bind(RCAConfiguration.class)
+        .toProvider(configuration::getRcaConfiguration)
+        .in(Scopes.SINGLETON);
+
+    bind(ThirdEyeSchedulerConfiguration.class)
+        .toProvider(configuration::getSchedulerConfiguration)
+        .in(Scopes.SINGLETON);
+
+    bind(TaskDriverConfiguration.class)
+        .toProvider(configuration::getTaskDriverConfiguration)
+        .in(Scopes.SINGLETON);
   }
 
   @Singleton

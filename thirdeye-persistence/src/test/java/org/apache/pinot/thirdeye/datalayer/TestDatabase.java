@@ -4,7 +4,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatabaseAdministrator;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
-import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,18 +17,15 @@ public class TestDatabase {
     /* tmp file gets deleted automatically */
   }
 
-  public PersistenceConfig testPersistenceConfig() {
-    final DatabaseConfiguration databaseConfiguration = new DatabaseConfiguration()
+  public DatabaseConfiguration testDatabaseConfiguration() {
+    return new DatabaseConfiguration()
         .setUrl(String.format("jdbc:h2:mem:testdb%d;DB_CLOSE_DELAY=-1", counter++))
         .setUser("ignoreUser")
         .setPassword("ignorePassword")
         .setDriver("org.h2.Driver");
-
-    return new PersistenceConfig().setDatabaseConfiguration(databaseConfiguration);
   }
 
-  public DataSource createDataSource(PersistenceConfig config) throws Exception {
-    final DatabaseConfiguration dbConfig = config.getDatabaseConfiguration();
+  public DataSource createDataSource(final DatabaseConfiguration dbConfig) throws Exception {
 
     final DataSource ds = buildDataSource(dbConfig);
 
@@ -65,7 +61,7 @@ public class TestDatabase {
 
   public Injector createInjector() {
     try {
-      final PersistenceConfig configuration = testPersistenceConfig();
+      final DatabaseConfiguration configuration = testDatabaseConfiguration();
       final DataSource dataSource = createDataSource(configuration);
 
       return Guice.createInjector(new ThirdEyePersistenceModule(dataSource));

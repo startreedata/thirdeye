@@ -19,7 +19,7 @@ public class ExamplePlugin implements Plugin {
       e.printStackTrace();
     }
 
-    checkClass("org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig");
+    checkClass("org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration");
     checkClass("org.apache.pinot.thirdeye.datalayer.util.NonExistentClass");
   }
 

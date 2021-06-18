@@ -29,17 +29,16 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.anomaly.utils.AbstractResourceHttpUtils;
+import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
+import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
+import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
-import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
-import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -131,8 +130,7 @@ public class FetchMetricDataAndExistingAnomaliesTool extends AbstractResourceHtt
    * @throws Exception
    */
   public void init(File configFile) throws Exception {
-    final PersistenceConfig configuration = PersistenceConfig.readPersistenceConfig(configFile);
-    final DatabaseConfiguration dbConfig = configuration.getDatabaseConfiguration();
+    final DatabaseConfiguration dbConfig = new DatabaseConfiguration();
 
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
     Injector injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));

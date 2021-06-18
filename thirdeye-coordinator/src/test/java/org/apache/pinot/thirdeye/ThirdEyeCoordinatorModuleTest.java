@@ -19,7 +19,7 @@ public class ThirdEyeCoordinatorModuleTest {
   @Test
   public void testRootResourceInjection() throws Exception {
     TestDatabase db = new TestDatabase();
-    final DataSource dataSource = db.createDataSource(db.testPersistenceConfig());
+    final DataSource dataSource = db.createDataSource(db.testDatabaseConfiguration());
 
     final ThirdEyeCoordinatorConfiguration configuration = new ThirdEyeCoordinatorConfiguration()
         .setAuthConfiguration(new AuthConfiguration()

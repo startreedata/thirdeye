@@ -114,14 +114,14 @@ public class CoordinatorTest {
     assertThat(response.getStatus()).isEqualTo(200);
 
     // A single datasource must exist in the db for the tests to proceed
-    assertThat(db.executeSql("SELECT * From data_source_index").length())
+    assertThat(db.executeSql("SELECT * From data_source_index").size())
         .isEqualTo(1);
 
     response = request("api/data-sources/onboard-all")
         .post(Entity.form(new Form().param("dataSourceName", dataSourceApi.getName())));
 
     assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(db.executeSql("SELECT * From dataset_config_index").length()).isEqualTo(2);
+    assertThat(db.executeSql("SELECT * From dataset_config_index").size()).isEqualTo(2);
 
     response = request("api/datasets").get();
     assertThat(response.getStatus()).isEqualTo(200);
@@ -134,7 +134,7 @@ public class CoordinatorTest {
         .map(DataSourceApi::getName)
         .forEach(name -> assertThat(name).isEqualTo(dataSourceApi.getName()));
 
-    assertThat(db.executeSql("SELECT * From metric_config_index").length()).isEqualTo(4);
+    assertThat(db.executeSql("SELECT * From metric_config_index").size()).isEqualTo(4);
   }
 
   @Test(dependsOnMethods = "testLoadMockDataSource")

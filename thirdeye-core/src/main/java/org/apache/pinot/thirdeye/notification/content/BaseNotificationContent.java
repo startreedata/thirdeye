@@ -36,7 +36,6 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-import joptsimple.internal.Strings;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.anomaly.events.EventFilter;
@@ -222,7 +221,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
         || anomaly.getProperties() == null || anomaly.getProperties().isEmpty()
         || !anomaly.getProperties().containsKey("sla")
         || !anomaly.getProperties().containsKey("datasetLastRefreshTime")) {
-      return Strings.EMPTY;
+      return "";
     }
 
     long delayInMillis = anomaly.getEndTime() - Long
@@ -572,7 +571,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
         this.swi = String.format(PERCENTAGE_FORMAT, swi * 100);
       }
       if (baselineVal.equals("-")) {
-        this.lift = Strings.EMPTY;
+        this.lift = "";
       } else {
         this.lift = lift;
       }

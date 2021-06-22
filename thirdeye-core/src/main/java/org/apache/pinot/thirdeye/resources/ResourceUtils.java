@@ -2,11 +2,19 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_UNEXPECTED;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
@@ -19,6 +27,8 @@ import org.apache.pinot.thirdeye.spi.api.StatusListApi;
 import org.apache.pinot.thirdeye.spi.api.ThirdEyeApi;
 
 public class ResourceUtils {
+
+  private final static ObjectMapper J = new ObjectMapper();
 
   public static Response respondOk(ThirdEyeApi api) {
     return Response.ok(api).build();
@@ -131,5 +141,30 @@ public class ResourceUtils {
     if (params.size() != 1)
       return params;
     return Arrays.asList(params.get(0).split(","));
+  }
+
+  public static List<Map<String, Object>> resultSetToMap(final ResultSet rs) throws SQLException {
+    List<Map<String, Object>> list = new ArrayList<>();
+    ResultSetMetaData rsmd = rs.getMetaData();
+    while (rs.next()) {
+      final Map<String, Object> map = new HashMap<>();
+      for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+        final String columnName = rsmd.getColumnName(i);
+        map.put(columnName, handleObject(rs.getObject(columnName)));
+      }
+      list.add(map);
+    }
+    return list;
+  }
+
+  private static Object handleObject(final Object object) {
+    if (object instanceof String) {
+      try {
+        return J.readValue(object.toString(), Map.class);
+      } catch (JsonProcessingException e) {
+        return object;
+      }
+    }
+    return object;
   }
 }

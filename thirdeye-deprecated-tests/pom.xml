@@ -71,6 +71,12 @@
       <artifactId>dropwizard-client</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+      <version>1.3.7</version>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 

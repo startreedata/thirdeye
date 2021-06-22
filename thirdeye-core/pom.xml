@@ -28,36 +28,8 @@
       <artifactId>httpclient</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-auth</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-migrations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-assets</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-views-freemarker</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard-bundles</groupId>
-      <artifactId>dropwizard-redirect-bundle</artifactId>
     </dependency>
 
     <!-- Pin jackson version and omit from third party dependencies-->
@@ -96,22 +68,6 @@
     <dependency>
       <groupId>io.github.classgraph</groupId>
       <artifactId>classgraph</artifactId>
-    </dependency>
-    <dependency>
-      <!-- TODO: replace code dependencies and remove -->
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.prestosql</groupId>
-      <artifactId>presto-jdbc</artifactId>
-      <version>333</version>
-    </dependency>
-
-    <!-- TODO: restructure this -->
-    <dependency>
-      <groupId>com.jayway.jsonpath</groupId>
-      <artifactId>json-path</artifactId>
     </dependency>
 
     <!--UI dependencies -->
@@ -195,10 +151,6 @@
       <groupId>io.swagger</groupId>
       <artifactId>swagger-annotations</artifactId>
     </dependency>
-    <dependency>
-      <groupId>javassist</groupId>
-      <artifactId>javassist</artifactId>
-    </dependency>
 
     <!-- Holiday loader dependencies -->
     <dependency>
@@ -233,11 +185,6 @@
       <artifactId>fugue</artifactId>
       <version>4.7.2</version>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.jettison</groupId>
-      <artifactId>jettison</artifactId>
-      <version>1.3.7</version>
-    </dependency>
 
     <!-- yaml validator -->
     <dependency>
@@ -246,32 +193,4 @@
       <version>${json-schema-validator.version}</version>
     </dependency>
   </dependencies>
-
-  <profiles>
-    <profile>
-      <id>bigquery</id>
-      <dependencies>
-        <dependency>
-          <groupId>com.google.auth</groupId>
-          <artifactId>google-auth-library-oauth2-http</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>com.google.api</groupId>
-          <artifactId>gax</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>com.google.apis</groupId>
-          <artifactId>google-api-services-bigquery</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.avro</groupId>
-          <artifactId>avro</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>com.simba.googlebigquery</groupId>
-          <artifactId>jdbc42</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
 </project>

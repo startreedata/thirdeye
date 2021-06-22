@@ -36,7 +36,6 @@ import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
-import org.assertj.core.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -181,7 +180,7 @@ public class ThirdEyeIntegrationTest {
   @Test(dependsOnMethods = "testDataset")
   public void testDataSourcesLoaded() {
     // A single datasource must exist in the db for the tests to proceed
-    Assertions.assertThat(db.executeSql("SELECT * From dataset_config_index").length())
+    assertThat(db.executeSql("SELECT * From dataset_config_index").size())
         .isGreaterThan(0);
   }
 

@@ -1,15 +1,8 @@
 package org.apache.pinot.thirdeye.resources;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.apache.pinot.thirdeye.resources.ResourceUtils.resultSetToMap;
+
 import com.google.inject.Inject;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -27,39 +20,12 @@ public class DatabaseAdminResource {
 
   private static final Logger log = LoggerFactory.getLogger(DatabaseAdminResource.class);
 
-  private final static ObjectMapper J = new ObjectMapper();
-
   private final DatabaseAdministrator databaseAdministrator;
 
   @Inject
   public DatabaseAdminResource(
       final DatabaseAdministrator databaseAdministrator) {
     this.databaseAdministrator = databaseAdministrator;
-  }
-
-  private static List<Map<String, Object>> resultSetToMap(final ResultSet rs) throws SQLException {
-    List<Map<String, Object>> list = new ArrayList<>();
-    ResultSetMetaData rsmd = rs.getMetaData();
-    while (rs.next()) {
-      final Map<String, Object> map = new HashMap<>();
-      for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-        final String columnName = rsmd.getColumnName(i);
-        map.put(columnName, handleObject(rs.getObject(columnName)));
-      }
-      list.add(map);
-    }
-    return list;
-  }
-
-  private static Object handleObject(final Object object) {
-    if (object instanceof String) {
-      try {
-        return J.readValue(object.toString(), Map.class);
-      } catch (JsonProcessingException e) {
-        return object;
-      }
-    }
-    return object;
   }
 
   @GET

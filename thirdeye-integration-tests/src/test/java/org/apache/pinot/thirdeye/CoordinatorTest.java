@@ -135,7 +135,7 @@ public class CoordinatorTest {
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(columnValueList(db.executeSql("SELECT dataset From dataset_config_index")))
-        .isEqualTo(Arrays.asList("business", "tracking"));
+        .containsAll(Arrays.asList("business", "tracking"));
 
     response = request("api/datasets").get();
     assertThat(response.getStatus()).isEqualTo(200);

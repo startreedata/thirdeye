@@ -4,6 +4,7 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.apache.pinot.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,7 +17,10 @@ import io.dropwizard.util.Duration;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -39,6 +43,15 @@ public class CoordinatorTest {
   public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
   private Client client;
   private ThirdEyeH2DatabaseServer db;
+
+  private static List<String> columnValueList(final List<Map<String, Object>> results) {
+    return results.stream()
+        .map(Map::values)
+        .flatMap(Collection::stream)
+        .map(Object::toString)
+        .sorted()
+        .collect(toList());
+  }
 
   private String endPoint(final String pathFragment) {
     return String.format("http://localhost:%d/%s", SUPPORT.getLocalPort(), pathFragment);
@@ -114,14 +127,15 @@ public class CoordinatorTest {
     assertThat(response.getStatus()).isEqualTo(200);
 
     // A single datasource must exist in the db for the tests to proceed
-    assertThat(db.executeSql("SELECT * From data_source_index").size())
-        .isEqualTo(1);
+    assertThat(columnValueList(db.executeSql("SELECT name From data_source_index")))
+        .isEqualTo(singletonList("mock1"));
 
     response = request("api/data-sources/onboard-all")
         .post(Entity.form(new Form().param("dataSourceName", dataSourceApi.getName())));
 
     assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(db.executeSql("SELECT * From dataset_config_index").size()).isEqualTo(2);
+    assertThat(columnValueList(db.executeSql("SELECT dataset From dataset_config_index")))
+        .isEqualTo(Arrays.asList("business", "tracking"));
 
     response = request("api/datasets").get();
     assertThat(response.getStatus()).isEqualTo(200);

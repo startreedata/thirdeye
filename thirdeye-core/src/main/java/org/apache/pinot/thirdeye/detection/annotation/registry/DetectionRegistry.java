@@ -40,6 +40,7 @@ import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
@@ -74,6 +75,7 @@ public class DetectionRegistry {
   private static final String KEY_ANNOTATION = "annotation";
   private static final String KEY_IS_BASELINE_PROVIDER = "isBaselineProvider";
   private static final Map<String, AnomalyDetectorFactory> anomalyDetectorFactoryMap = new HashMap<>();
+  private static final Map<String, AnomalyDetectorV2Factory> anomalyDetectorV2FactoryMap = new HashMap<>();
 
   static {
     init();
@@ -164,11 +166,24 @@ public class DetectionRegistry {
     anomalyDetectorFactoryMap.put(f.name(), f);
   }
 
+  public void addAnomalyDetectorV2Factory(final AnomalyDetectorV2Factory f) {
+    anomalyDetectorV2FactoryMap.put(f.name(), f);
+  }
+
   public AnomalyDetector<AbstractSpec> buildDetector(
       String factoryName,
       AnomalyDetectorFactoryContext context) {
     if (anomalyDetectorFactoryMap.containsKey(factoryName)) {
       return anomalyDetectorFactoryMap.get(factoryName).build(context);
+    }
+    return null;
+  }
+
+  public org.apache.pinot.thirdeye.spi.detection.v2.components.detector.AnomalyDetector<AbstractSpec> buildDetectorV2(
+      String factoryName,
+      AnomalyDetectorFactoryContext context) {
+    if (anomalyDetectorV2FactoryMap.containsKey(factoryName)) {
+      return anomalyDetectorV2FactoryMap.get(factoryName).build(context);
     }
     return null;
   }
@@ -187,9 +202,6 @@ public class DetectionRegistry {
   /**
    * is type contained in REGISTRY_MAP.
    * REGISTRY_MAP is built from annotated classes and doesn't contain any plugins
-   *
-   * @param type
-   * @return
    */
   public boolean isAnnotatedType(String type) {
     validate(type);

@@ -20,15 +20,18 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getSpecClassName;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.OutputApi;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
@@ -45,6 +48,7 @@ import org.slf4j.LoggerFactory;
 public abstract class DetectionPipelineOperator<T extends DetectionPipelineResult> implements
     Operator {
 
+  private static final String PROP_TYPE = "type";
   private static final String PROP_CLASS_NAME = "className";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineOperator.class);
 
@@ -97,8 +101,14 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
       }
 
       for (String componentKey : componentSpecs.keySet()) {
-        // Initialize the components
-        instancesMap.get(componentKey).init(getComponentSpec(componentSpecs, componentKey));
+        // Initialize the components if not loaded by factory
+        if (!optional(componentSpecs.get(componentKey))
+            .filter(o -> o instanceof Map)
+            .map(Map.class::cast)
+            .filter(o -> o.containsKey(PROP_TYPE))
+            .isPresent()) {
+          instancesMap.get(componentKey).init(getComponentSpec(componentSpecs, componentKey));
+        }
       }
     }
   }
@@ -145,6 +155,11 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   }
 
   private BaseComponent createComponent(Map<String, Object> componentSpec) {
+    String type = MapUtils.getString(componentSpec, PROP_TYPE);
+    if (type != null) {
+      return createComponentUsingFactory(type, componentSpec);
+    }
+
     String className = MapUtils.getString(componentSpec, PROP_CLASS_NAME);
     try {
       Class<BaseComponent> clazz = (Class<BaseComponent>) Class.forName(className);
@@ -153,6 +168,12 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
       throw new IllegalArgumentException("Failed to create component for " + className,
           e.getCause());
     }
+  }
+
+  private BaseComponent createComponentUsingFactory(final String type,
+      final Map<String, Object> componentSpec) {
+    return new DetectionRegistry().buildDetectorV2(type, new AnomalyDetectorFactoryContext()
+        .setProperties(componentSpec));
   }
 
   public DetectionPlanApi getConfig() {

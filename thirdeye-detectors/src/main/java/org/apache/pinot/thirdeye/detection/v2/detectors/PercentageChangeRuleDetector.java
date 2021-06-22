@@ -41,10 +41,6 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
-import org.apache.pinot.thirdeye.spi.detection.annotation.PresentationOption;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -52,14 +48,6 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.components.detector.AnomalyDetector;
 import org.joda.time.Interval;
 
-@Components(title = "Percentage change rule detection", type = "PERCENTAGE_RULE", tags = {
-    DetectionTag.RULE_DETECTION}, description =
-    "Computes a multi-week aggregate baseline and compares the current value "
-        + "based on relative change.", presentation = {
-    @PresentationOption(name = "percentage change", template = "comparing ${offset} is ${pattern} more than ${percentageChange}")}, params = {
-    @Param(name = "offset", defaultValue = "wo1w"),
-    @Param(name = "percentageChange", placeholder = "value"),
-    @Param(name = "pattern", allowableValues = {"up", "down"})})
 public class PercentageChangeRuleDetector implements
     AnomalyDetector<PercentageChangeRuleDetectorSpec> {
 

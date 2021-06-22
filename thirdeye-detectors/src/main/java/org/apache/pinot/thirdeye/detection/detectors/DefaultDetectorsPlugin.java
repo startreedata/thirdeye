@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.detection.detectors;
 import com.google.common.collect.ImmutableList;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 
 public class DefaultDetectorsPlugin implements Plugin {
 
@@ -39,6 +40,13 @@ public class DefaultDetectorsPlugin implements Plugin {
             DataSlaQualityCheckerSpec.class,
             DataSlaQualityChecker.class
         )
+    );
+  }
+
+  @Override
+  public Iterable<AnomalyDetectorV2Factory> getAnomalyDetectorV2Factories() {
+    return ImmutableList.of(
+        new PercentageChangeRuleDetectorV2Factory()
     );
   }
 }

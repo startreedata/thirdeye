@@ -39,7 +39,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
-import org.apache.pinot.common.utils.DataSchema.ColumnDataType;
 import org.apache.pinot.thirdeye.auto.onboard.PinotDatasetOnboarder;
 import org.apache.pinot.thirdeye.auto.onboard.ThirdEyePinotClient;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
@@ -184,7 +183,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     final Map<String, Object> properties = requireNonNull(dataSourceDTO.getProperties(),
         "Data source property cannot be empty.");
     name = requireNonNull(dataSourceDTO.getName(), "name of data source dto is null");
-
 
     try {
       pinotResponseCacheLoader = getCacheLoaderInstance(properties);
@@ -502,7 +500,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-
   }
 
   @Override
@@ -524,5 +521,9 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         context.getDatasetConfigManager(),
         context.getMetricConfigManager());
     return pinotDatasetOnboarder;
+  }
+
+  public enum ColumnDataType {
+    INT, LONG, FLOAT, DOUBLE, STRING, BYTES, OBJECT, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, STRING_ARRAY;
   }
 }

@@ -202,7 +202,7 @@ public class DetectionConfigValidatorTest {
     Yaml yaml = new Yaml();
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("detection-config-good-1.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     Map<String, Object> configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     JsonNode config = Json.mapper().convertValue(configObject, JsonNode.class);
     ProcessingReport report = schema.validate(config);
@@ -210,7 +210,7 @@ public class DetectionConfigValidatorTest {
 
     yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("composite-detection-config-good-1.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     config = Json.mapper().convertValue(configObject, JsonNode.class);
     report = schema.validate(config);
@@ -226,7 +226,7 @@ public class DetectionConfigValidatorTest {
     Yaml yaml = new Yaml();
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("detection-config-bad-1.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     Map<String, Object> configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     JsonNode config = Json.mapper().convertValue(configObject, JsonNode.class);
 
@@ -277,7 +277,7 @@ public class DetectionConfigValidatorTest {
     Yaml yaml = new Yaml();
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("composite-detection-config-bad-1.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     Map<String, Object> configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     JsonNode config = Json.mapper().convertValue(configObject, JsonNode.class);
 

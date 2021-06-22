@@ -125,7 +125,7 @@ public class DataQualityTaskRunnerTest {
    */
   private AlertDTO translateSlaConfig(long detectionId, String filePath) throws Exception {
     String yamlConfig = IOUtils
-        .toString(this.getClass().getResourceAsStream(filePath), StandardCharsets.UTF_8);
+        .toString(this.getClass().getResourceAsStream(filePath), StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO alertDTO = translator.translate();
     if (detectionId < 0) {

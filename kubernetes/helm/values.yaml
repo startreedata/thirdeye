@@ -56,20 +56,6 @@ coordinator:
   affinity: {}
   podAnnotations: {}
 
-
-worker:
-  enabled: true
-  name: worker
-  replicaCount: 1
-  port: 1867
-  serviceType: LoadBalancer
-
-  resources: {}
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-  podAnnotations: {}
-
 # Persistence layer configuration
 mysql:
   mysqlRootPassword: password
@@ -93,8 +79,8 @@ smtp:
   password: tobefedexternally
   secretKeyRef:
     name: smtp-credentials
-  
-  # Do not remove me.
+
+# Do not remove me.
 config:
   description: placeholder for common configs accross coordinator and worker
 

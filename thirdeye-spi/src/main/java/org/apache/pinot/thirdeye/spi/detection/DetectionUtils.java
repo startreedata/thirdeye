@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
@@ -328,7 +327,7 @@ public class DetectionUtils {
         return df.groupByPeriod(df.getLongs(DataFrame.COL_TIME), origin, granularityPeriod).mean(
             DataFrame.COL_TIME, DataFrame.COL_VALUE);
       default:
-        throw new NotImplementedException(String
+        throw new UnsupportedOperationException(String
             .format("The aggregate by period for %s is not supported in DataFrame.",
                 aggregationFunction));
     }

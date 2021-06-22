@@ -39,7 +39,6 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   private RCAConfiguration rcaConfiguration = new RCAConfiguration();
 
   private String configPath = "config";
-  private boolean schedulerEnabled = false;
 
   // TODO spyne refactor legacy configs.
   private Map<String, Map<String, Object>> alerterConfigurations;
@@ -98,15 +97,6 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   public ThirdEyeCoordinatorConfiguration setMockEventsConfiguration(
       final MockEventsConfiguration mockEventsConfiguration) {
     this.mockEventsConfiguration = mockEventsConfiguration;
-    return this;
-  }
-
-  public boolean isSchedulerEnabled() {
-    return schedulerEnabled;
-  }
-
-  public ThirdEyeCoordinatorConfiguration setSchedulerEnabled(final boolean schedulerEnabled) {
-    this.schedulerEnabled = schedulerEnabled;
     return this;
   }
 

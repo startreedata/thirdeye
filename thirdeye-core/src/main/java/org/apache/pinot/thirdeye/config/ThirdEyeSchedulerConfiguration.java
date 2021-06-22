@@ -8,6 +8,7 @@ import org.apache.pinot.thirdeye.model.download.ModelDownloaderConfiguration;
 
 public class ThirdEyeSchedulerConfiguration {
 
+  private boolean enabled = false;
   private boolean monitor = false;
   private boolean detectionPipeline = false;
   private boolean detectionAlert = false;
@@ -22,6 +23,15 @@ public class ThirdEyeSchedulerConfiguration {
 
   private MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
   private List<ModelDownloaderConfiguration> modelDownloaderConfigs;
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public ThirdEyeSchedulerConfiguration setEnabled(final boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
 
   public HolidayEventsLoaderConfiguration getHolidayEventsLoaderConfiguration() {
     return holidayEventsLoaderConfiguration;

@@ -111,7 +111,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     return new Managed() {
       @Override
       public void start() throws Exception {
-        if (config.isSchedulerEnabled()) {
+        if (config.getSchedulerConfiguration().isEnabled()) {
           // Allow the jobs to use the injector
           injector.getInstance(DetectionCronScheduler.class)
               .addToContext(CTX_INJECTOR, injector);

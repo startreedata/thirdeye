@@ -111,10 +111,11 @@ failureFromAddress: "thirdeye@localhost"
 failureToAddress: "thirdeye@localhost"
 phantomJsPath: "/usr/local/bin/jstf"
 
-# Run the Quartz Scheduler.
-# Only 1 instance of scheduler should run. This responsibility is currently on the user!!
-schedulerEnabled: true
 scheduler:
+  # Run the Quartz Scheduler.
+  # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
+  enabled: true
+
   detectionPipeline: true
   detectionAlert: true
 

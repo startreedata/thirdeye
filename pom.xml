@@ -31,7 +31,6 @@
     <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
     <module>thirdeye-coordinator</module>
-    <module>thirdeye-ui</module>
 
     <!--  Build plugins -->
     <module>thirdeye-plugin-example</module>
@@ -47,6 +46,9 @@
     <!--  Run the Integration test modules after building the distribution (required for plugins) -->
     <module>pinot-test-container</module>
     <module>thirdeye-integration-tests</module>
+
+    <!-- Build ThirdEye UI -->
+    <module>thirdeye-ui</module>
 
     <!-- Build ThirdEye Documentation -->
     <module>thirdeye-docs</module>
@@ -589,6 +591,21 @@
         <groupId>org.jfree</groupId>
         <artifactId>jfreechart</artifactId>
         <version>${jfreechart.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.groovy</groupId>
+        <artifactId>groovy-all</artifactId>
+        <version>2.4.21</version>
+      </dependency>
+      <dependency>
+        <groupId>org.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>0.9.11</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.4</version>
       </dependency>
 
       <!-- database -->

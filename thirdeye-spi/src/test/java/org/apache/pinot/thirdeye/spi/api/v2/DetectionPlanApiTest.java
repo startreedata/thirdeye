@@ -1,9 +1,10 @@
 package org.apache.pinot.thirdeye.spi.api.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
-import org.apache.commons.io.IOUtils;
+import java.nio.charset.StandardCharsets;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -12,7 +13,8 @@ public class DetectionPlanApiTest {
   @Test
   public void testInputNode() throws IOException {
     URL resource = DetectionPlanApiTest.class.getClassLoader().getResource("inputNode.json");
-    final DetectionPlanApi inputNode = new ObjectMapper().readValue(IOUtils.toString(resource),
+    final DetectionPlanApi inputNode = new ObjectMapper().readValue(
+        Resources.toString(resource, StandardCharsets.UTF_8),
         DetectionPlanApi.class);
     Assert.assertEquals(inputNode.getPlanNodeName(), "baselineDataFetcher");
     Assert.assertEquals(inputNode.getType(), "DataFetcher");
@@ -25,7 +27,8 @@ public class DetectionPlanApiTest {
   @Test
   public void testDetectionNode() throws IOException {
     URL resource = DetectionPlanApiTest.class.getClassLoader().getResource("detectionNode.json");
-    final DetectionPlanApi inputNode = new ObjectMapper().readValue(IOUtils.toString(resource),
+    final DetectionPlanApi inputNode = new ObjectMapper().readValue(Resources.toString(resource,
+        StandardCharsets.UTF_8),
         DetectionPlanApi.class);
     Assert.assertEquals(inputNode.getPlanNodeName(), "percentageChangeDetector");
     Assert.assertEquals(inputNode.getType(), "AnomalyDetector");

@@ -22,12 +22,8 @@ package org.apache.pinot.thirdeye.spi.api.v2;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import org.apache.pinot.spi.utils.GroovyTemplateUtils;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 
 /**
@@ -76,11 +72,5 @@ public class AlertEvaluationPlanApi {
   public AlertEvaluationPlanApi setAlert(final AlertApi alert) {
     this.alert = alert;
     return this;
-  }
-
-  public static AlertEvaluationPlanApi applyContextToTemplate(String template,
-      Map<String, Object> context) throws IOException, ClassNotFoundException {
-    return new ObjectMapper().readValue(
-        GroovyTemplateUtils.renderTemplate(template, context), AlertEvaluationPlanApi.class);
   }
 }

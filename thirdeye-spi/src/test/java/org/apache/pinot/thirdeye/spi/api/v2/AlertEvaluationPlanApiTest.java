@@ -1,11 +1,15 @@
 package org.apache.pinot.thirdeye.spi.api.v2;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
-import org.apache.commons.io.IOUtils;
+import org.apache.pinot.thirdeye.spi.util.GroovyTemplateUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -14,13 +18,13 @@ public class AlertEvaluationPlanApiTest {
   @Test
   public void testAlertEvaluationPlan() throws IOException, ClassNotFoundException {
     final ClassLoader classLoader = AlertEvaluationPlanApiTest.class.getClassLoader();
-    URL resource = classLoader.getResource("alertEvaluation.json");
-    String alertEvaluationPlanApiTemplate = IOUtils.toString(resource);
+    URL resource = requireNonNull(classLoader.getResource("alertEvaluation.json"));
+    String alertEvaluationPlanApiTemplate = Resources.toString(resource, StandardCharsets.UTF_8);
     resource = classLoader.getResource("alertEvaluation-context.json");
     Map<String, Object> alertEvaluationPlanApiContext = new ObjectMapper().readValue(resource.openStream(),
         Map.class);
 
-    final AlertEvaluationPlanApi alertEvaluationPlanApi = AlertEvaluationPlanApi.applyContextToTemplate(
+    final AlertEvaluationPlanApi alertEvaluationPlanApi = GroovyTemplateUtils.applyContextToTemplate(
         alertEvaluationPlanApiTemplate,
         alertEvaluationPlanApiContext);
 

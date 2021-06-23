@@ -14,7 +14,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
@@ -48,7 +47,7 @@ public class SpiUtils {
 
   public static String getTimeFormatString(DatasetConfigDTO datasetConfig) {
     String timeFormat = datasetConfig.getTimeFormat();
-    if (timeFormat.startsWith(DateTimeFieldSpec.TimeFormat.SIMPLE_DATE_FORMAT.toString())) {
+    if (timeFormat.startsWith(TimeFormat.SIMPLE_DATE_FORMAT.toString())) {
       timeFormat = getSDFPatternFromTimeFormat(timeFormat);
     }
     return timeFormat;
@@ -275,5 +274,9 @@ public class SpiUtils {
       }
     }
     return props;
+  }
+
+  public enum TimeFormat {
+    EPOCH, SIMPLE_DATE_FORMAT
   }
 }

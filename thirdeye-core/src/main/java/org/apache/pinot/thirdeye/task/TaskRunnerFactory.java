@@ -27,7 +27,7 @@ import org.apache.pinot.thirdeye.detection.DetectionPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskRunner;
 import org.apache.pinot.thirdeye.detection.dataquality.DataQualityPipelineTaskRunner;
 import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskRunner;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
 
 @Singleton
 public class TaskRunnerFactory {

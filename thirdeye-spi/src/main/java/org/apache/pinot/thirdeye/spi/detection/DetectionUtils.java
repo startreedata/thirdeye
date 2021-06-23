@@ -28,9 +28,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
@@ -42,6 +39,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotif
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;

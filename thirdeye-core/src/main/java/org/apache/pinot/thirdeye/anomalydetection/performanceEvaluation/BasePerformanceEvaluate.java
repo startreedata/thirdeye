@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.joda.time.Interval;
 
 public abstract class BasePerformanceEvaluate implements PerformanceEvaluate {

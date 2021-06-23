@@ -19,8 +19,8 @@
 
 package org.apache.pinot.thirdeye.common.utils;
 
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 
 /**
  * Utility class for ThirdEye metrics

@@ -24,12 +24,12 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionProp
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -28,7 +28,7 @@ import org.apache.pinot.thirdeye.resources.RootResource;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SchedulerService;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.task.TaskDriver;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.apache.tomcat.jdbc.pool.DataSource;

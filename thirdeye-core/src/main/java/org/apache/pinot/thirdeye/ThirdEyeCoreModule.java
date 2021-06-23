@@ -21,7 +21,7 @@ import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.CacheDAO;
 import org.apache.pinot.thirdeye.detection.cache.DefaultTimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;

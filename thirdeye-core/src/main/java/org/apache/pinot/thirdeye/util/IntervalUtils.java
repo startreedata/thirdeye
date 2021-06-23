@@ -24,7 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.joda.time.Interval;
 
 public class IntervalUtils {

@@ -22,9 +22,9 @@ package org.apache.pinot.thirdeye.spi.datalayer.bao;
 
 import java.util.List;
 import java.util.Set;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskStatus;
 
 public interface TaskManager extends AbstractManager<TaskDTO> {
 

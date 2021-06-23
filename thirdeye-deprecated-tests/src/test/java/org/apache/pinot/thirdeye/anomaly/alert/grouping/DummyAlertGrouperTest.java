@@ -20,9 +20,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

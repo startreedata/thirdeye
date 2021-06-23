@@ -40,11 +40,11 @@ import org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.EntityAnomalyMergeWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 /**

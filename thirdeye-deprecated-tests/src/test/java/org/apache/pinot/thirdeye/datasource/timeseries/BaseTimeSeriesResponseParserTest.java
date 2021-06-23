@@ -20,13 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponseRow;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

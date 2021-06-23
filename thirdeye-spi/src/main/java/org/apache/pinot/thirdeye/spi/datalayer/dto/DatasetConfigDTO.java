@@ -22,8 +22,8 @@ package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DatasetConfigBean;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 
 public class DatasetConfigDTO extends DatasetConfigBean {
 

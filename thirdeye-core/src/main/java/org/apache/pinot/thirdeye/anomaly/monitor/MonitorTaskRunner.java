@@ -44,8 +44,6 @@ import org.apache.pinot.thirdeye.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskInfo;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DetectionStatusManager;
@@ -57,6 +55,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

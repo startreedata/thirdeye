@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.anomalydetection.context;
 
 import java.util.Objects;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 
 public class TimeSeriesKey {
 

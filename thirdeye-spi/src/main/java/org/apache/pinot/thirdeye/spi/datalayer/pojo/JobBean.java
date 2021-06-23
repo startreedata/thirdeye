@@ -23,8 +23,8 @@ package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 import java.sql.Timestamp;
 import java.util.Objects;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
 
 /**
  * This class corresponds to an anomaly job. An anomaly job is created for every execution of an

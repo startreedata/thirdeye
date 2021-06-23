@@ -28,7 +28,7 @@ import java.util.TreeMap;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

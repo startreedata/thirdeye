@@ -28,11 +28,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyFeedback;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedbackType;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 
 /**
  * Utility class to evaluate the performance of a list of merged anomalies

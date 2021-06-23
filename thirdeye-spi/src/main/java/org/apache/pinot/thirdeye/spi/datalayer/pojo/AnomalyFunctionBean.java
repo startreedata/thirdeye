@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.anomaly.merge.AnomalyMergeConfig;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.merge.AnomalyMergeConfig;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

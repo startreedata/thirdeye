@@ -22,8 +22,8 @@ package org.apache.pinot.thirdeye.spi.datalayer.bao;
 
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 
 public interface JobManager extends AbstractManager<JobDTO> {
 

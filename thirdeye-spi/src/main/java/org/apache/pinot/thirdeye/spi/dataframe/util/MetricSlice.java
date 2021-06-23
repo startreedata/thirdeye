@@ -24,7 +24,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.joda.time.DateTime;
 
 /**

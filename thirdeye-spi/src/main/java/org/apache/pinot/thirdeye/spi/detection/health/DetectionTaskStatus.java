@@ -27,9 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.TaskBean;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 
 /**
  * The detection task status for a detection config

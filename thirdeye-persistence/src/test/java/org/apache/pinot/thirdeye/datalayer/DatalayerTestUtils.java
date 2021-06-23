@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.Constants;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
@@ -20,6 +18,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
+import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 

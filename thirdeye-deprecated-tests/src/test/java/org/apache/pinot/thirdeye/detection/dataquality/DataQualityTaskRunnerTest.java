@@ -35,8 +35,6 @@ import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry
 import org.apache.pinot.thirdeye.detection.detectors.DataSlaQualityChecker;
 import org.apache.pinot.thirdeye.detection.detectors.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
@@ -47,6 +45,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyType;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.joda.time.DateTime;

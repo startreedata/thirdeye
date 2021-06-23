@@ -32,13 +32,13 @@ import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskInfo;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

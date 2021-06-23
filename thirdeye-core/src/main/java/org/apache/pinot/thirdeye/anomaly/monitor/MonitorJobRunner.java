@@ -26,12 +26,12 @@ import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.job.JobRunner;
 import org.apache.pinot.thirdeye.anomaly.task.TaskGenerator;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.JobManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 
 /**
  * Defines the notification content interface.

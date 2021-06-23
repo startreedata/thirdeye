@@ -39,7 +39,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 
 /**
  * ThirdEye API Client to communicate with ThirdEye RCA services

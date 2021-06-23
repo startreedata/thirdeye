@@ -20,7 +20,7 @@
 
 package org.apache.pinot.thirdeye.spi.detection;
 
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskInfo;
+import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 
 public class DetectionPipelineTaskInfo implements TaskInfo {
 

@@ -20,8 +20,8 @@
 package org.apache.pinot.thirdeye.anomaly.alert.grouping.auxiliary_info_provider;
 
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 
 public class DummyAlertGroupAuxiliaryInfoProvider extends BaseAlertGroupAuxiliaryInfoProvider {
 

@@ -30,7 +30,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionDTO;
 import org.slf4j.Logger;

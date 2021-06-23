@@ -27,11 +27,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalySeverity;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
+import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyType;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 
 public class MergedAnomalyResultBean extends AbstractDTO implements
     Comparable<MergedAnomalyResultBean>, Serializable {

@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.anomalydetection.context.TimeSeries;
 import org.apache.pinot.thirdeye.common.metric.MetricSchema;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
 import org.joda.time.Interval;
 import org.testng.annotations.Test;
 

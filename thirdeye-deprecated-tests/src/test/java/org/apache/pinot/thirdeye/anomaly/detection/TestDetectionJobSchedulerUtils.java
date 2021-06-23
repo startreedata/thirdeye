@@ -18,10 +18,10 @@ package org.apache.pinot.thirdeye.anomaly.detection;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;

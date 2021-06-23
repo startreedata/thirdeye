@@ -22,9 +22,9 @@ package org.apache.pinot.thirdeye.anomalydetection.function;
 import java.util.List;
 import org.apache.pinot.thirdeye.anomaly.views.AnomalyTimelinesView;
 import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyDetectionContext;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.joda.time.Interval;
 
 /**

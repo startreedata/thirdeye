@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 
 public class AnomalyDetectionInputContext {
 

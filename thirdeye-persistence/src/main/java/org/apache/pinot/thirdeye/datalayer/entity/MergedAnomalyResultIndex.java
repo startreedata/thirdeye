@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.datalayer.entity;
 
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 
 public class MergedAnomalyResultIndex extends AbstractIndexEntity {
 

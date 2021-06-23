@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.pinot.client.ResultSet;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 
 /**
  * An unified container that store Select, Aggregation, and Group-By {@link ResultSet} in a data

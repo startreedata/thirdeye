@@ -32,7 +32,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.InitialDirContext;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionDTO;
 import org.slf4j.Logger;

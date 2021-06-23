@@ -21,9 +21,9 @@ package org.apache.pinot.thirdeye.detection.spi.components;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 
 public interface Labeler<T extends AbstractSpec> extends BaseComponent<T> {

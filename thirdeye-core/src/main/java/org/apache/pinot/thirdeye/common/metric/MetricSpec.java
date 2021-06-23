@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.common.metric;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
 
 public class MetricSpec {
 

@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatasetConfigBean extends AbstractDTO {

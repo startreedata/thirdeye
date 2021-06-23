@@ -21,9 +21,9 @@ package org.apache.pinot.thirdeye.anomaly.alert.grouping;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 
 public interface AlertGrouper {
 

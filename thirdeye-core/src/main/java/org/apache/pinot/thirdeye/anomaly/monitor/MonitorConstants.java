@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.anomaly.monitor;
 
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 
 public class MonitorConstants {
 

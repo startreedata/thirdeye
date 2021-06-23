@@ -42,13 +42,6 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTransl
 import org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator;
 import org.apache.pinot.thirdeye.detector.email.filter.AlphaBetaAlertFilter;
 import org.apache.pinot.thirdeye.spi.Constants;
-import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyFeedConfig;
-import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyFetcherConfig;
-import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyNotifiedStatus;
-import org.apache.pinot.thirdeye.spi.alert.commons.AnomalySource;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertSnapshotDTO;
@@ -63,7 +56,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedConfig;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFetcherConfig;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyNotifiedStatus;
+import org.apache.pinot.thirdeye.spi.detection.AnomalySource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 

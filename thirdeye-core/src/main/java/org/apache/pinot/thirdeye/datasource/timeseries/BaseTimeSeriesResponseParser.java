@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datasource.ResponseParserUtils;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponseRow;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 

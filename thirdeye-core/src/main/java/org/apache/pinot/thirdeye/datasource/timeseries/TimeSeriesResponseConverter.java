@@ -35,8 +35,8 @@ import org.apache.commons.collections4.map.MultiKeyMap;
 import org.apache.pinot.thirdeye.common.metric.MetricSchema;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.datasource.timeseries.TimeSeriesRow.TimeSeriesMetric;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionKey;
-import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionKey;
+import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
 
 /**
  * Util class to support the older ThirdEyeDataSource API for time series responses. See

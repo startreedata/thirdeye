@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.anomaly.task;
 
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskInfo;
+import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 
 /**
  * Interface for task runner of various types of executors

@@ -19,9 +19,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.auth.GrantType;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AuthApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
 
 @Singleton
 @Api(tags = " Auth")

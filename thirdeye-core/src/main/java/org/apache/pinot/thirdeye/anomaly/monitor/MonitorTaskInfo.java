@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.anomaly.monitor;
 import com.google.common.base.MoreObjects;
 import java.util.Objects;
 import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConstants.MonitorType;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskInfo;
+import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 
 public class MonitorTaskInfo implements TaskInfo {
 

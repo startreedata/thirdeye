@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.spi.datasource;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 
 /**
  * The result of calling {@link ThirdEyeDataSource#execute(ThirdEyeRequest)}.

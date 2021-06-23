@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyFeedback;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
@@ -30,7 +29,6 @@ import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.spi.api.TimeWindowSuppressorApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
@@ -43,6 +41,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 
 public abstract class ApiBeanMapper {
 

@@ -23,9 +23,9 @@ import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 
 public class MetricFunction implements Comparable<MetricFunction> {
 

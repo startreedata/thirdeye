@@ -36,9 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.Grouping;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
@@ -54,6 +51,9 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
 /**

@@ -24,12 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.datasource.BaseThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponseRow;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 

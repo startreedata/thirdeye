@@ -29,8 +29,8 @@ import org.apache.pinot.thirdeye.anomalydetection.context.AnomalyDetectionContex
 import org.apache.pinot.thirdeye.anomalydetection.context.TimeSeries;
 import org.apache.pinot.thirdeye.anomalydetection.context.TimeSeriesKey;
 import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 

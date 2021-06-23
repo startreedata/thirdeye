@@ -102,7 +102,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
                 getSuccessSnackbarOption()
             );
         } catch (error) {
-            console.error(error);
+            // Empty
         }
 
         return newSubscriptionGroup;
@@ -115,7 +115,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedSubscriptionGroups = await getAllSubscriptionGroups();
         } catch (error) {
-            console.error(error);
+            // Empty
         }
 
         return fetchedSubscriptionGroups;
@@ -126,7 +126,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedAlerts = await getAllAlerts();
         } catch (error) {
-            console.error(error);
+            // Empty
         }
 
         return fetchedAlerts;
@@ -145,7 +145,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
                 )
             );
         } catch (error) {
-            console.error(error);
+            // Empty
         }
 
         return fetchedAlertEvaluation;

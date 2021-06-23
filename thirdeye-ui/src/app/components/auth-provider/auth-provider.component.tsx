@@ -128,8 +128,6 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
 
             setAccessToken(auth.accessToken);
         } catch (error) {
-            console.error(error);
-
             return false;
         }
 

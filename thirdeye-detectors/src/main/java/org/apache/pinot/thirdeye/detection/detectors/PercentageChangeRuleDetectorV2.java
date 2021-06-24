@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.v2.detectors;
+package org.apache.pinot.thirdeye.detection.detectors;
 
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
@@ -28,9 +28,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.v2.results.DataTableUtils;
-import org.apache.pinot.thirdeye.detection.v2.results.DimensionInfo;
-import org.apache.pinot.thirdeye.detection.v2.results.GroupedDetectionResults;
+import org.apache.pinot.thirdeye.detection.detectors.results.DataTableUtils;
+import org.apache.pinot.thirdeye.detection.detectors.results.DimensionInfo;
+import org.apache.pinot.thirdeye.detection.detectors.results.GroupedDetectionResults;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -48,8 +48,8 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.components.detector.AnomalyDetector;
 import org.joda.time.Interval;
 
-public class PercentageChangeRuleDetector implements
-    AnomalyDetector<PercentageChangeRuleDetectorSpec> {
+public class PercentageChangeRuleDetectorV2 implements
+    AnomalyDetector<PercentageChangeRuleDetectorSpecV2> {
 
   private static final String COL_CURR = "current";
   private static final String COL_CHANGE = "change";
@@ -66,7 +66,7 @@ public class PercentageChangeRuleDetector implements
   private List<String> dimensions = Collections.emptyList();
 
   @Override
-  public void init(PercentageChangeRuleDetectorSpec spec) {
+  public void init(PercentageChangeRuleDetectorSpecV2 spec) {
     this.percentageChange = spec.getPercentageChange();
     String timezone = spec.getTimezone();
     String offset = spec.getOffset();

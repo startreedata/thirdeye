@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2.results;
+package org.apache.pinot.thirdeye.detection.detectors.results;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;

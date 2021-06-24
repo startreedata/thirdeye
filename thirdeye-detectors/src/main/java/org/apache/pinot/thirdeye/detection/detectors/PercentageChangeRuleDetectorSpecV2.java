@@ -1,11 +1,11 @@
-package org.apache.pinot.thirdeye.detection.v2.detectors;
+package org.apache.pinot.thirdeye.detection.detectors;
 
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
-public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
+public class PercentageChangeRuleDetectorSpecV2 extends AbstractSpec {
 
   private double percentageChange = Double.NaN;
   private String offset = "wo1w";
@@ -70,7 +70,7 @@ public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
     return timestamp;
   }
 
-  public PercentageChangeRuleDetectorSpec setTimestamp(final String timestamp) {
+  public PercentageChangeRuleDetectorSpecV2 setTimestamp(final String timestamp) {
     this.timestamp = timestamp;
     return this;
   }
@@ -79,7 +79,7 @@ public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
     return metric;
   }
 
-  public PercentageChangeRuleDetectorSpec setMetric(final String metric) {
+  public PercentageChangeRuleDetectorSpecV2 setMetric(final String metric) {
     this.metric = metric;
     return this;
   }
@@ -88,7 +88,7 @@ public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
     return dimensions;
   }
 
-  public PercentageChangeRuleDetectorSpec setDimensions(final List<String> dimensions) {
+  public PercentageChangeRuleDetectorSpecV2 setDimensions(final List<String> dimensions) {
     this.dimensions = dimensions;
     return this;
   }

@@ -19,7 +19,7 @@
  *
  *
  */
-package org.apache.pinot.thirdeye.detection.v2.results;
+package org.apache.pinot.thirdeye.detection.detectors.results;
 
 import java.util.Collections;
 import java.util.List;

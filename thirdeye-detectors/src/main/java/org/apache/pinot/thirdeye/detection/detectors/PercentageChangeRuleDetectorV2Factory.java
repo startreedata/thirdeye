@@ -16,18 +16,16 @@ class PercentageChangeRuleDetectorV2Factory implements AnomalyDetectorV2Factory 
   @Override
   public <T extends AbstractSpec> AnomalyDetector<T> build(
       final AnomalyDetectorFactoryContext context) {
-    final org.apache.pinot.thirdeye.detection.v2.detectors.PercentageChangeRuleDetectorSpec spec = AbstractSpec
-        .fromProperties(
-            context.getProperties(),
-            org.apache.pinot.thirdeye.detection.v2.detectors.PercentageChangeRuleDetectorSpec.class);
-    final org.apache.pinot.thirdeye.detection.v2.detectors.PercentageChangeRuleDetector percentageChangeRuleDetector = new org.apache.pinot.thirdeye.detection.v2.detectors.PercentageChangeRuleDetector();
-    percentageChangeRuleDetector.init(spec);
-    return (AnomalyDetector<T>) percentageChangeRuleDetector;
+    final PercentageChangeRuleDetectorSpecV2 spec = AbstractSpec.fromProperties(
+        context.getProperties(),
+        PercentageChangeRuleDetectorSpecV2.class);
+    final PercentageChangeRuleDetectorV2 percentageChangeRuleDetectorV2 = new PercentageChangeRuleDetectorV2();
+    percentageChangeRuleDetectorV2.init(spec);
+    return (AnomalyDetector<T>) percentageChangeRuleDetectorV2;
   }
 
   @Override
   public boolean isBaselineProvider() {
-    return BaselineProvider.isBaselineProvider(
-        org.apache.pinot.thirdeye.detection.v2.detectors.PercentageChangeRuleDetector.class);
+    return BaselineProvider.isBaselineProvider(PercentageChangeRuleDetectorV2.class);
   }
 }

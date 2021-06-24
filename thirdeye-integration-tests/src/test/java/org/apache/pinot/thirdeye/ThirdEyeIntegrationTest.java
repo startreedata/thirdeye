@@ -89,22 +89,12 @@ public class ThirdEyeIntegrationTest {
     return container;
   }
 
-  private int findIndex(List<Map<String, Object>> dataSourceConfigs,
-      String expectedDataSourceClassName) {
-    for (int i = 0; i < dataSourceConfigs.size(); i++) {
-      Map<String, Object> datasourceConfig = dataSourceConfigs.get(i);
-      String actualDataSourceClassName = (String) datasourceConfig.get("className");
-      if (actualDataSourceClassName.equals(expectedDataSourceClassName)) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
   @BeforeClass
   public void beforeClass() throws Exception {
     db = new ThirdEyeH2DatabaseServer("localhost", 7120, null);
     db.start();
+    db.truncateAllTables();
+
     container = startPinot();
     container.addTables();
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,

@@ -10,6 +10,8 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +121,29 @@ public class ThirdEyeH2DatabaseServer {
     }
     if (server != null) {
       server.shutdown();
+    }
+  }
+
+  public void truncateAllTables() throws SQLException {
+    try (Connection connection = createConnection();
+        PreparedStatement setChecks = connection.prepareStatement(
+            "SET FOREIGN_KEY_CHECKS = ?");
+        PreparedStatement getTables = connection.prepareStatement(
+            "SELECT table_name FROM information_schema.tables WHERE table_schema = SCHEMA()")) {
+      try (ResultSet tablesRes = getTables.executeQuery()) {
+        setChecks.setBoolean(1, false);
+        setChecks.executeUpdate();
+        while (tablesRes.next()) {
+          String table = tablesRes.getString(1);
+          try (PreparedStatement truncateTable = connection.prepareStatement(
+              "TRUNCATE TABLE " + table + " RESTART IDENTITY")) {
+            truncateTable.executeUpdate();
+          }
+        }
+      } finally {
+        setChecks.setBoolean(1, true);
+        setChecks.executeUpdate();
+      }
     }
   }
 

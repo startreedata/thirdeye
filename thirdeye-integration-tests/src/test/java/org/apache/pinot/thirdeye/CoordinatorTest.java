@@ -17,6 +17,7 @@ import io.dropwizard.util.Duration;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -58,9 +59,10 @@ public class CoordinatorTest {
   }
 
   @BeforeClass
-  public void beforeClass() {
+  public void beforeClass() throws SQLException {
     db = new ThirdEyeH2DatabaseServer("localhost", 7124, null);
     db.start();
+    db.truncateAllTables();
 
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();

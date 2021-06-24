@@ -91,7 +91,7 @@ public class ThirdEyeIntegrationTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    db = new ThirdEyeH2DatabaseServer("localhost", 7120, null);
+    db = new ThirdEyeH2DatabaseServer("localhost", 7120, "ThirdEyeIntegrationTest");
     db.start();
     db.truncateAllTables();
 

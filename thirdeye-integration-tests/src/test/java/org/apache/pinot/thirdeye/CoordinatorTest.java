@@ -60,7 +60,7 @@ public class CoordinatorTest {
 
   @BeforeClass
   public void beforeClass() throws SQLException {
-    db = new ThirdEyeH2DatabaseServer("localhost", 7124, null);
+    db = new ThirdEyeH2DatabaseServer("localhost", 7124, "CoordinatorTest");
     db.start();
     db.truncateAllTables();
 

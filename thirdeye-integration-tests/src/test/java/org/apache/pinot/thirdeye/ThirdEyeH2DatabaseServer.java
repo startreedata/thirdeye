@@ -5,7 +5,11 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.resources.ResourceUtils.resultSetToMap;
 import static org.h2.tools.RunScript.execute;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -13,10 +17,14 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
+import org.h2.engine.Constants;
+import org.h2.store.fs.FileUtils;
 import org.h2.tools.Server;
+import org.h2.util.ScriptReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,39 +36,37 @@ public class ThirdEyeH2DatabaseServer {
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeH2DatabaseServer.class);
 
   private final Server server;
-  private String dbName = "thirdeye";
-  private String dbHost = "localhost";
-  private Integer dbPort = 9124;
-  private DatabaseConfiguration dbConfig;
-  private Connection conn;
+  private final DatabaseConfiguration dbConfig;
 
-  public ThirdEyeH2DatabaseServer(String host, Integer port, String dbName) {
-    if (host != null) {
-      this.dbHost = host;
-    }
-    if (port != null) {
-      this.dbPort = port;
-    }
-    if (dbName != null) {
-      this.dbName = dbName;
-    }
+  public ThirdEyeH2DatabaseServer(String dbHost, Integer dbPort, String dbName) {
     try {
-      dbConfig = new DatabaseConfiguration()
-          .setUrl(String.format("jdbc:h2:tcp:%s:%s/mem:%s;DB_CLOSE_DELAY=-1",
-              dbHost,
-              dbPort,
-              dbName))
-          .setUser("user")
-          .setPassword("password")
-          .setDriver("org.h2.Driver");
+      dbConfig = buildDbConfig(dbHost, dbPort, dbName);
       this.server = Server.createTcpServer("-baseDir",
           BASE_DIR,
           "-tcpPort",
-          Integer.toString(dbPort));
+          Integer.toString(dbPort),
+          "-ifNotExists");
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    conn = null;
+  }
+
+  private static DatabaseConfiguration buildDbConfig(final String dbHost, final Integer dbPort,
+      final String dbName) {
+    return new DatabaseConfiguration()
+        .setUrl(buildConnectionUrl(dbHost, dbPort, dbName))
+        .setUser("user")
+        .setPassword("password")
+        .setDriver("org.h2.Driver");
+  }
+
+  private static String buildConnectionUrl(final String dbHost, final Integer dbPort,
+      final String dbName) {
+    return String.format("jdbc:h2:tcp:%s:%s/mem:%s;DB_CLOSE_DELAY=-1",
+        requireNonNull(dbHost),
+        requireNonNull(dbPort),
+        requireNonNull(dbName)
+    );
   }
 
   private Connection createConnection() {
@@ -83,18 +89,35 @@ public class ThirdEyeH2DatabaseServer {
       checkState(new File(CREATE_SCHEMA_SQL).canRead());
       checkState(server.isRunning(true));
 
-      execute(
-          dbConfig.getUrl(),
-          dbConfig.getUser(),
-          dbConfig.getPassword(),
-          CREATE_SCHEMA_SQL,
-          StandardCharsets.UTF_8,
-          true
-      );
-      conn = createConnection();
-    } catch (SQLException e) {
+      try (
+          final Connection connection = createConnection();
+          final InputStream in = FileUtils.newInputStream(CREATE_SCHEMA_SQL);
+          final Reader reader = new InputStreamReader(
+              new BufferedInputStream(in, Constants.IO_BUFFER_SIZE),
+              StandardCharsets.UTF_8)
+      ) {
+        final ScriptReader r = new ScriptReader(reader);
+        String sql;
+        while ((sql = r.readStatement()) != null) {
+          process(connection, sql);
+        }
+      }
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private void process(final Connection connection, final String sql) throws SQLException {
+    final String sqlProcessed = sql
+        .replaceAll("\\s+", " ")
+        .replaceAll("ENGINE\\s*=\\s*InnoDB", "")
+        .trim();
+    if (sqlProcessed.isEmpty()) {
+      return;
+    }
+
+    final Statement statement = connection.createStatement();
+    statement.executeUpdate(sqlProcessed);
   }
 
   /**
@@ -104,21 +127,14 @@ public class ThirdEyeH2DatabaseServer {
    * @return JSONArray
    */
   public List<Map<String, Object>> executeSql(String query) {
-    try {
-      return resultSetToMap(execute(requireNonNull(conn), new StringReader(query)));
+    try (final Connection connection = createConnection()) {
+      return resultSetToMap(execute(requireNonNull(connection), new StringReader(query)));
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }
 
   public void stop() {
-    if (conn != null) {
-      try {
-        conn.close();
-      } catch (SQLException e) {
-        // ignored
-      }
-    }
     if (server != null) {
       server.shutdown();
     }

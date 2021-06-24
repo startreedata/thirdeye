@@ -131,7 +131,7 @@ public class TimeSeriesCacheTest {
     reset(cacheDAO, datasetDAO, metricDAO);
   }
 
-  @Test
+  @Test(enabled = false)
   public void testInsertTimeSeriesIntoCache() throws InterruptedException {
     List<String[]> rows = buildRawResponseRowsWithTimestamps(0, 10);
 

@@ -35,7 +35,7 @@
     <!--  Build plugins -->
     <module>thirdeye-plugin-example</module>
     <module>thirdeye-datasources</module>
-    <module>thirdeye-detectors</module>
+    <module>thirdeye-detection-components</module>
 
     <!--  Kept for legacy reasons. Still has a bunch of useful tests. -->
     <module>thirdeye-deprecated-tests</module>
@@ -785,6 +785,7 @@
             <format>html</format>
             <format>xml</format>
           </formats>
+          <check/>
         </configuration>
       </plugin>
       <plugin>

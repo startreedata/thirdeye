@@ -17,28 +17,28 @@
       "name": "slaRule1",
       "type": "DATA_SLA",
       "sla": "2_DAYS",
-      "className": "org.apache.pinot.thirdeye.detection.detectors.DataSlaQualityChecker",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.DataSlaQualityChecker",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "maxThreshold_1:THRESHOLD": {
       "name": "maxThreshold_1",
       "type": "THRESHOLD",
       "max": 100,
-      "className": "org.apache.pinot.thirdeye.detection.detectors.ThresholdRuleDetector",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "maxThreshold_2:THRESHOLD": {
       "name": "maxThreshold_2",
       "type": "THRESHOLD",
       "max": 100,
-      "className": "org.apache.pinot.thirdeye.detection.detectors.ThresholdRuleDetector",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "maxThreshold_3:THRESHOLD": {
       "name": "maxThreshold_3",
       "type": "THRESHOLD",
       "max": 100,
-      "className": "org.apache.pinot.thirdeye.detection.detectors.ThresholdRuleDetector",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "thresholdFilter_1:THRESHOLD_RULE_FILTER": {

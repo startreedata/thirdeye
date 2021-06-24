@@ -7,7 +7,7 @@ import org.apache.pinot.thirdeye.ThirdEyeCoordinator;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.DefaultDataSourcesPlugin;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.detection.detectors.DefaultDetectorsPlugin;
+import org.apache.pinot.thirdeye.detection.components.DetectionComponentsPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +48,12 @@ public class ThirdEyeCoordinatorDebug {
 
     // Load the default data sources.
     // If there are duplicate additions, this will throw an error.
-    final DefaultDetectorsPlugin defaultDetectorsPlugin = new DefaultDetectorsPlugin();
-    defaultDetectorsPlugin
+    final DetectionComponentsPlugin detectionComponentsPlugin = new DetectionComponentsPlugin();
+    detectionComponentsPlugin
         .getAnomalyDetectorFactories()
         .forEach(detectionRegistry::addAnomalyDetectorFactory);
 
-    defaultDetectorsPlugin
+    detectionComponentsPlugin
         .getAnomalyDetectorV2Factories()
         .forEach(detectionRegistry::addAnomalyDetectorV2Factory);
   }

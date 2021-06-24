@@ -9,7 +9,7 @@
       "planNodeName": "root",
       "type": "AnomalyDetector",
       "params": {
-        "component.detector.className": "org.apache.pinot.thirdeye.detection.v2.detectors.PercentageChangeRuleDetector",
+        "component.detector.type": "PERCENTAGE_RULE",
         "component.detector.percentageChange": "0.1",
         "component.detector.offset": "mo1m",
         "component.detector.pattern": "down",
@@ -38,7 +38,7 @@
       "type": "DataFetcher",
       "params": {
         "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-        "component.pinot.dataSource": "PinotThirdEyeDataSource",
+        "component.pinot.dataSource": "pinot1",
         "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" < 20200214 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
         "component.pinot.tableName": "pageviews",
         "startTime": "20200202",
@@ -57,7 +57,7 @@
       "type": "DataFetcher",
       "params": {
         "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-        "component.pinot.dataSource": "PinotThirdEyeDataSource",
+        "component.pinot.dataSource": "pinot1",
         "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200302 AND \"date\" < 20200314 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
         "component.pinot.tableName": "pageviews",
         "startTime": "20200202",

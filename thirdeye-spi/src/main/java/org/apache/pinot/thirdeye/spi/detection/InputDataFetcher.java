@@ -26,8 +26,11 @@ import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 /**
  * Input data fetcher interface.
  * For components to fetch the input data it need.
+ *
+ * Deprecated in favor of {@link DataFetcher}
+ * This is used by the v2 pipeline
  */
-
+@Deprecated
 public interface InputDataFetcher {
 
   /**

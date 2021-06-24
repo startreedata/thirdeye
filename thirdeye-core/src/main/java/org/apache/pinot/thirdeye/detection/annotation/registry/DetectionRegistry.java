@@ -40,6 +40,7 @@ import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
@@ -179,7 +180,7 @@ public class DetectionRegistry {
     return null;
   }
 
-  public org.apache.pinot.thirdeye.spi.detection.v2.components.detector.AnomalyDetector<AbstractSpec> buildDetectorV2(
+  public AnomalyDetectorV2<AbstractSpec> buildDetectorV2(
       String factoryName,
       AnomalyDetectorFactoryContext context) {
     if (anomalyDetectorV2FactoryMap.containsKey(factoryName)) {

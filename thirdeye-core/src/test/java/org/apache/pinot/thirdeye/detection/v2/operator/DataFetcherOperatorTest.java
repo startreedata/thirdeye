@@ -10,7 +10,7 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
-import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;

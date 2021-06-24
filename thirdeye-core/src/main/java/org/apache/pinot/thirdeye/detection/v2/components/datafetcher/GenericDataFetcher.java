@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
+import org.apache.pinot.thirdeye.spi.detection.DataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.detection.v2.components.DataFetcher;
 
 public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
 

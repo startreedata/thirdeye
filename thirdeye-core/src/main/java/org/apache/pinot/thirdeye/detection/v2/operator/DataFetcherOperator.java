@@ -7,10 +7,10 @@ import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.OutputApi;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.DataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
-import org.apache.pinot.thirdeye.spi.detection.v2.components.DataFetcher;
 
 public class DataFetcherOperator extends DetectionPipelineOperator<DataTable> {
 

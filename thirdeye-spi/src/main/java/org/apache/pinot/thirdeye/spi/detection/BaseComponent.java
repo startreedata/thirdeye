@@ -21,5 +21,22 @@ package org.apache.pinot.thirdeye.spi.detection;
 
 public interface BaseComponent<T extends AbstractSpec> {
 
-  void init(T spec, InputDataFetcher dataFetcher);
+  /**
+   * This is the v2 interface and should be only used with the v2 pipeline
+   * @param spec
+   */
+  default void init(T spec) {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Legacy interface to initialize the base component.
+   *
+   * @param spec
+   * @param dataFetcher
+   */
+  @Deprecated
+  default void init(T spec, InputDataFetcher dataFetcher) {
+    throw new UnsupportedOperationException();
+  }
 }

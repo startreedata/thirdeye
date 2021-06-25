@@ -18,12 +18,11 @@
  *
  */
 
-package org.apache.pinot.thirdeye.detection.components;
+package org.apache.pinot.thirdeye.detection.components.filters;
 
 import java.time.Duration;
-import org.apache.pinot.thirdeye.detection.spec.DurationAnomalyFilterSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFilter;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
 

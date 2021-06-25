@@ -15,7 +15,9 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.joda.time.DateTime;
@@ -274,6 +276,14 @@ public class SpiUtils {
       }
     }
     return props;
+  }
+
+  /**
+   * check if the metric aggregation is cumulative
+   */
+  public static boolean isAggCumulative(MetricConfigDTO metric) {
+    MetricAggFunction aggFunction = metric.getDefaultAggFunction();
+    return aggFunction.equals(MetricAggFunction.SUM) || aggFunction.equals(MetricAggFunction.COUNT);
   }
 
   public enum TimeFormat {

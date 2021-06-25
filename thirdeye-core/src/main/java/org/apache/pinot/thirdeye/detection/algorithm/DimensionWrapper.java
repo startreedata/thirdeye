@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.common.utils.MetricUtils;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
@@ -53,6 +52,7 @@ import org.apache.pinot.thirdeye.spi.detection.DetectorDataInsufficientException
 import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -216,10 +216,10 @@ public class DimensionWrapper extends DetectionPipeline {
             .filter(aggregates.getDoubles(DataFrame.COL_VALUE).gte(this.minValue)).dropNull();
       }
 
-      double hourlyMultiplier = MetricUtils.isAggCumulative(metricConfig) ?
+      double hourlyMultiplier = SpiUtils.isAggCumulative(metricConfig) ?
           (TimeUnit.HOURS.toMillis(1) / (double) testPeriod.toDurationFrom(start).getMillis())
           : 1.0;
-      double dailyMultiplier = MetricUtils.isAggCumulative(metricConfig) ?
+      double dailyMultiplier = SpiUtils.isAggCumulative(metricConfig) ?
           (TimeUnit.DAYS.toMillis(1) / (double) testPeriod.toDurationFrom(start).getMillis()) : 1.0;
 
       if (!Double.isNaN(this.minValueHourly)) {

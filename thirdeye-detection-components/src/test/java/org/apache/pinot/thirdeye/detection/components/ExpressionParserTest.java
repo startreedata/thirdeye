@@ -18,7 +18,6 @@ package org.apache.pinot.thirdeye.detection.components;
 
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.detection.ExpressionParser;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

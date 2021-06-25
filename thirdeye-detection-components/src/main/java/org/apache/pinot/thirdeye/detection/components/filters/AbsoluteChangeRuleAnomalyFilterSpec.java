@@ -17,22 +17,46 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.spi.components;
+package org.apache.pinot.thirdeye.detection.components.filters;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
-import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 
-public interface Labeler<T extends AbstractSpec> extends BaseComponent<T> {
+public class AbsoluteChangeRuleAnomalyFilterSpec extends AbstractSpec {
 
-  /**
-   * Calculate the severity for list of anomalies
-   *
-   * @param anomalies input anoamlies
-   * @return mapping from anomaly to severity
-   */
-  Map<MergedAnomalyResultDTO, AnomalySeverity> label(List<MergedAnomalyResultDTO> anomalies);
+  private String timezone = DEFAULT_TIMEZONE;
+  private double threshold = Double.NaN;
+  private String offset;
+  private String pattern = "UP_OR_DOWN";
+
+  public String getTimezone() {
+    return timezone;
+  }
+
+  public void setTimezone(String timezone) {
+    this.timezone = timezone;
+  }
+
+  public double getThreshold() {
+    return threshold;
+  }
+
+  public void setThreshold(double threshold) {
+    this.threshold = threshold;
+  }
+
+  public String getOffset() {
+    return offset;
+  }
+
+  public void setOffset(String offset) {
+    this.offset = offset;
+  }
+
+  public String getPattern() {
+    return pattern;
+  }
+
+  public void setPattern(String pattern) {
+    this.pattern = pattern;
+  }
 }

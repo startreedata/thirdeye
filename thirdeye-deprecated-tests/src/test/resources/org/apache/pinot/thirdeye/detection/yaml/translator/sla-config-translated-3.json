@@ -45,21 +45,21 @@
       "name": "thresholdFilter_1",
       "type": "THRESHOLD_RULE_FILTER",
       "min": 50,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleAnomalyFilter",
+      "className": "org.apache.pinot.thirdeye.detection.components.filters.ThresholdRuleAnomalyFilter",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "thresholdFilter_2:THRESHOLD_RULE_FILTER": {
       "name": "thresholdFilter_2",
       "type": "THRESHOLD_RULE_FILTER",
       "min": 50,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleAnomalyFilter",
+      "className": "org.apache.pinot.thirdeye.detection.components.filters.ThresholdRuleAnomalyFilter",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "thresholdFilter_3:THRESHOLD_RULE_FILTER": {
       "name": "thresholdFilter_3",
       "type": "THRESHOLD_RULE_FILTER",
       "min": 50,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleAnomalyFilter",
+      "className": "org.apache.pinot.thirdeye.detection.components.filters.ThresholdRuleAnomalyFilter",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "test_grouper:MOCK_GROUPER": {

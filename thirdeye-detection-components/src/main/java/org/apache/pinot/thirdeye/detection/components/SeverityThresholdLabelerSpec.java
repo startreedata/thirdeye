@@ -15,31 +15,27 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
-package org.apache.pinot.thirdeye.detection.spec;
+package org.apache.pinot.thirdeye.detection.components;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.Map;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
-public class DurationAnomalyFilterSpec extends AbstractSpec {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class SeverityThresholdLabelerSpec extends AbstractSpec {
 
-  private String minDuration = "PT0S"; // default value 0 seconds
-  private String maxDuration = "P365D"; // default value 1 year
+  public static final String CHANGE_KEY = "change";
+  public static final String DURATION_KEY = "duration";
 
-  public String getMinDuration() {
-    return minDuration;
+  private Map<String, Map<String, Object>> severity;
+
+  public Map<String, Map<String, Object>> getSeverity() {
+    return severity;
   }
 
-  public void setMinDuration(String minDuration) {
-    this.minDuration = minDuration;
-  }
-
-  public String getMaxDuration() {
-    return maxDuration;
-  }
-
-  public void setMaxDuration(String maxDuration) {
-    this.maxDuration = maxDuration;
+  public void setSeverity(Map<String, Map<String, Object>> severity) {
+    this.severity = severity;
   }
 }

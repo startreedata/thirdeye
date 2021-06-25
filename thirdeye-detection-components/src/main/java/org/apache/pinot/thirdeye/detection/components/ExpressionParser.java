@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.pinot.thirdeye.detection;
+package org.apache.pinot.thirdeye.detection.components;
 
 import java.util.ArrayList;
 import java.util.HashMap;

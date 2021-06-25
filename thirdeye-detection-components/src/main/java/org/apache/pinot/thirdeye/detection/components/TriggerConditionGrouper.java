@@ -18,11 +18,10 @@
  */
 package org.apache.pinot.thirdeye.detection.components;
 
-import static org.apache.pinot.thirdeye.detection.ExpressionParser.generateOperators;
-import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.makeParentEntityAnomaly;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.mergeAndSortAnomalies;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.setEntityChildMapping;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -32,11 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.detection.spec.TriggerConditionGrouperSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.Grouper;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.Grouper;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
 import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
@@ -52,17 +49,19 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
 
   protected static final Logger LOG = LoggerFactory.getLogger(TriggerConditionGrouper.class);
 
-  private String expression;
-  private String operator;
-  private Map<String, Object> leftOp;
-  private Map<String, Object> rightOp;
-  private InputDataFetcher dataFetcher;
-
   static final String PROP_AND = "and";
   static final String PROP_OR = "or";
   static final String PROP_OPERATOR = "operator";
   static final String PROP_LEFT_OP = "leftOp";
   static final String PROP_RIGHT_OP = "rightOp";
+
+  private static final String PROP_SUB_ENTITY_NAME = "subEntityName";
+
+  private String expression;
+  private String operator;
+  private Map<String, Object> leftOp;
+  private Map<String, Object> rightOp;
+  private InputDataFetcher dataFetcher;
 
   /**
    * Group based on 'AND' criteria - Entity has anomaly if both sub-entities A and B have anomalies
@@ -147,16 +146,18 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
     Preconditions.checkNotNull(operatorNode);
 
     // Base condition - If reached leaf node of operator tree, then return the anomalies corresponding to the entity/metric
-    String value = MapUtils.getString(operatorNode, "value");
+    String value = getString(operatorNode, "value");
     if (value != null) {
       return anomalies.stream().filter(anomaly ->
           anomaly.getProperties() != null
               && anomaly.getProperties().containsKey(PROP_SUB_ENTITY_NAME)
-              && anomaly.getProperties().get(PROP_SUB_ENTITY_NAME).equals(value)
+              && anomaly.getProperties()
+              .get(PROP_SUB_ENTITY_NAME)
+              .equals(value)
       ).collect(Collectors.toList());
     }
 
-    String operator = MapUtils.getString(operatorNode, PROP_OPERATOR);
+    String operator = getString(operatorNode, PROP_OPERATOR);
     Preconditions.checkNotNull(operator, "No operator provided!");
     Map<String, Object> leftOp = ConfigUtils.getMap(operatorNode.get(PROP_LEFT_OP));
     Map<String, Object> rightOp = ConfigUtils.getMap(operatorNode.get(PROP_RIGHT_OP));
@@ -173,6 +174,12 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
     }
   }
 
+  private String getString(final Map<String, Object> operatorNode, final String value) {
+    return optional(operatorNode.get(value))
+        .map(Object::toString)
+        .orElse(null);
+  }
+
   @Override
   public List<MergedAnomalyResultDTO> group(List<MergedAnomalyResultDTO> anomalies) {
     Map<String, Object> operatorTreeRoot = new HashMap<>();
@@ -181,7 +188,7 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
       operatorTreeRoot.put(PROP_LEFT_OP, leftOp);
       operatorTreeRoot.put(PROP_RIGHT_OP, rightOp);
     } else {
-      operatorTreeRoot = generateOperators(expression);
+      operatorTreeRoot = ExpressionParser.generateOperators(expression);
     }
     return groupAnomaliesByOperator(operatorTreeRoot, anomalies);
   }

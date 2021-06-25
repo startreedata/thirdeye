@@ -17,13 +17,16 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.common.utils;
+package org.apache.pinot.thirdeye.spi.detection;
 
-/**
- * Utility class for ThirdEye metrics
- */
-public class MetricUtils {
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 
-  private MetricUtils() {
-  }
+public interface AnomalyFilter<T extends AbstractSpec> extends BaseComponent<T> {
+
+  /**
+   * Check if an anomaly is qualified to pass the filter
+   *
+   * @return a boolean value to suggest if the anomaly should be filtered
+   */
+  boolean isQualified(MergedAnomalyResultDTO anomaly);
 }

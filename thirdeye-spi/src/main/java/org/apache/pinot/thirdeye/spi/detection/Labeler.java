@@ -17,19 +17,19 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.spi.components;
+package org.apache.pinot.thirdeye.spi.detection;
 
 import java.util.List;
+import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 
-public interface Grouper<T extends AbstractSpec> extends BaseComponent<T> {
+public interface Labeler<T extends AbstractSpec> extends BaseComponent<T> {
 
   /**
-   * group anomalies.
+   * Calculate the severity for list of anomalies
    *
-   * @return list of anomalies, with grouped dimensions
+   * @param anomalies input anoamlies
+   * @return mapping from anomaly to severity
    */
-  List<MergedAnomalyResultDTO> group(List<MergedAnomalyResultDTO> anomalies);
+  Map<MergedAnomalyResultDTO, AnomalySeverity> label(List<MergedAnomalyResultDTO> anomalies);
 }

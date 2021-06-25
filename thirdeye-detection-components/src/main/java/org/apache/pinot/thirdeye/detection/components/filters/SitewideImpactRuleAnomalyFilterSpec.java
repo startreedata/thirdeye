@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.spec;
+package org.apache.pinot.thirdeye.detection.components.filters;
 
 import java.util.Collection;
 import java.util.HashMap;

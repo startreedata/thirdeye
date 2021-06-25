@@ -17,18 +17,17 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.spi.components;
+package org.apache.pinot.thirdeye.spi.detection;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 
-public interface AnomalyFilter<T extends AbstractSpec> extends BaseComponent<T> {
+public interface Grouper<T extends AbstractSpec> extends BaseComponent<T> {
 
   /**
-   * Check if an anomaly is qualified to pass the filter
+   * group anomalies.
    *
-   * @return a boolean value to suggest if the anomaly should be filtered
+   * @return list of anomalies, with grouped dimensions
    */
-  boolean isQualified(MergedAnomalyResultDTO anomaly);
+  List<MergedAnomalyResultDTO> group(List<MergedAnomalyResultDTO> anomalies);
 }

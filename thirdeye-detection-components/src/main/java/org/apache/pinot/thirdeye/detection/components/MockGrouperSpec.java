@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.spec;
+package org.apache.pinot.thirdeye.detection.components;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.anomaly.events.EventFilter;
+import org.apache.pinot.thirdeye.detection.anomaly.events.EventFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.testng.Assert;
 import org.testng.annotations.Test;

@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.unauthenticatedException;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.unauthenticatedException;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
@@ -22,6 +22,7 @@ import org.apache.pinot.thirdeye.auth.GrantType;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AuthApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
+import org.apache.pinot.thirdeye.util.ResourceUtils;
 
 @Singleton
 @Api(tags = " Auth")

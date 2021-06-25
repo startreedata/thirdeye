@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
-import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
@@ -53,6 +51,8 @@ import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.DimensionEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.TimeRangeEntity;
+import org.apache.pinot.thirdeye.util.DataFrameUtils;
+import org.apache.pinot.thirdeye.util.TimeSeriesRequestContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

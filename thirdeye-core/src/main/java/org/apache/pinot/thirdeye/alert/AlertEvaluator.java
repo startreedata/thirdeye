@@ -2,8 +2,8 @@ package org.apache.pinot.thirdeye.alert;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;

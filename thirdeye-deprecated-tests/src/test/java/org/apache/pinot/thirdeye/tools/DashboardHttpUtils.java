@@ -20,7 +20,7 @@ import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.pinot.thirdeye.anomaly.utils.AbstractResourceHttpUtils;
+import org.apache.pinot.thirdeye.detection.anomaly.utils.AbstractResourceHttpUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 

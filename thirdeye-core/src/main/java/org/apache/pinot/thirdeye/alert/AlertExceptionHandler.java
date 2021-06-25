@@ -1,10 +1,10 @@
 package org.apache.pinot.thirdeye.alert;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.serverError;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusApi;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_TIMEOUT;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.serverError;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.statusApi;
 
 import java.util.ArrayList;
 import java.util.List;

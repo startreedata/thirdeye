@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -10,8 +10,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.anomaly.events.HolidayEventsLoader;
 import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
+import org.apache.pinot.thirdeye.detection.anomaly.events.HolidayEventsLoader;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 
 @Singleton

@@ -1,12 +1,12 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;

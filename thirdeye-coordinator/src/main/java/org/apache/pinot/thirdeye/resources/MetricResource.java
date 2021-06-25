@@ -1,9 +1,9 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;

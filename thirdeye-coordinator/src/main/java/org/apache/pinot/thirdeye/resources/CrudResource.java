@@ -1,13 +1,13 @@
 package org.apache.pinot.thirdeye.resources;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureNull;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;

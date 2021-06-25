@@ -97,7 +97,7 @@ public class EmailContentFormatter extends AlertContentFormatter {
     try (Writer out = new OutputStreamWriter(baos, CHARSET)) {
       Configuration freemarkerConfig = new Configuration(Configuration.VERSION_2_3_21);
       freemarkerConfig
-          .setClassForTemplateLoading(getClass(), "/org/apache/pinot/thirdeye/detector");
+          .setClassForTemplateLoading(getClass(), "/org/apache/pinot/thirdeye/detection/detector");
       freemarkerConfig.setDefaultEncoding(CHARSET);
       freemarkerConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
       Template template = freemarkerConfig.getTemplate(emailTemplate);

@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.resultSetToMap;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.resultSetToMap;
 
 import com.google.inject.Inject;
 import javax.ws.rs.DELETE;

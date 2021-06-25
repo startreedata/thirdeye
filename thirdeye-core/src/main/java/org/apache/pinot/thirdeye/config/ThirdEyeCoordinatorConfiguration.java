@@ -5,11 +5,11 @@ import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
-import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
-import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
+import org.apache.pinot.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
+import org.apache.pinot.thirdeye.detection.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 
 public class ThirdEyeCoordinatorConfiguration extends Configuration {

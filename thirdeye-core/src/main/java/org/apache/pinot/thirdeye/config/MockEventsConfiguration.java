@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.config;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
+import org.apache.pinot.thirdeye.detection.anomaly.events.MockEventsLoader;
 
 /**
  * Configuration container for generating series of mock events

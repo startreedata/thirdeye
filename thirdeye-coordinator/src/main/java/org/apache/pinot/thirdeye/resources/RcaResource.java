@@ -1,8 +1,8 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.parseListParams;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.parseListParams;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

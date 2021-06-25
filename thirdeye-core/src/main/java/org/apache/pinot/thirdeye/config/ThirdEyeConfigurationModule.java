@@ -4,9 +4,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
-import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
-import org.apache.pinot.thirdeye.anomaly.task.TaskDriverConfiguration;
-import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardConfiguration;
+import org.apache.pinot.thirdeye.datasource.AutoOnboardConfiguration;
+import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
+import org.apache.pinot.thirdeye.detection.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 

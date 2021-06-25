@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.resultSetToMap;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.resultSetToMap;
 import static org.h2.tools.RunScript.execute;
 
 import java.io.BufferedInputStream;

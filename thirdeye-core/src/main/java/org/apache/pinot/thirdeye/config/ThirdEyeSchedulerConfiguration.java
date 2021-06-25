@@ -2,9 +2,9 @@ package org.apache.pinot.thirdeye.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import org.apache.pinot.thirdeye.anomaly.monitor.MonitorConfiguration;
-import org.apache.pinot.thirdeye.auto.onboard.AutoOnboardConfiguration;
-import org.apache.pinot.thirdeye.model.download.ModelDownloaderConfiguration;
+import org.apache.pinot.thirdeye.datasource.AutoOnboardConfiguration;
+import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
+import org.apache.pinot.thirdeye.detection.download.ModelDownloaderConfiguration;
 
 public class ThirdEyeSchedulerConfiguration {
 

@@ -2,8 +2,8 @@ package org.apache.pinot.thirdeye.alert;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.CoreConstants.ONBOARDING_REPLAY_LOOKBACK;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -8,9 +8,13 @@ export interface UiAlert {
     userId: number;
     createdBy: string;
     detectionTypes: string[];
+    detectionTypesCount: string;
     filteredBy: string[];
+    filteredByCount: string;
     datasetAndMetrics: UiAlertDatasetAndMetric[];
+    datasetAndMetricsCount: string;
     subscriptionGroups: UiAlertSubscriptionGroup[];
+    subscriptionGroupsCount: string;
     alert: Alert | null;
 }
 

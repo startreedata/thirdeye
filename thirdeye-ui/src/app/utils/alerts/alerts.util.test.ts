@@ -189,9 +189,13 @@ const mockEmptyUiAlert = {
     userId: -1,
     createdBy: "label.no-data-marker",
     detectionTypes: [],
+    detectionTypesCount: "0",
     filteredBy: [],
+    filteredByCount: "0",
     datasetAndMetrics: [],
+    datasetAndMetricsCount: "0",
     subscriptionGroups: [],
+    subscriptionGroupsCount: "0",
     alert: null,
 };
 
@@ -311,7 +315,9 @@ const mockUiAlert1 = {
     userId: 2,
     createdBy: "testPrincipalOwner2",
     detectionTypes: ["testSubTypeAlertNode1", "testSubTypeAlertNode2"],
+    detectionTypesCount: "2",
     filteredBy: ["testSubTypeAlertNode3"],
+    filteredByCount: "1",
     datasetAndMetrics: [
         {
             datasetId: 4,
@@ -332,6 +338,7 @@ const mockUiAlert1 = {
             metricName: "testNameMetric7",
         },
     ],
+    datasetAndMetricsCount: "3",
     subscriptionGroups: [
         {
             id: 11,
@@ -342,6 +349,7 @@ const mockUiAlert1 = {
             name: "label.no-data-marker",
         },
     ],
+    subscriptionGroupsCount: "2",
     alert: mockAlert1,
 };
 
@@ -353,14 +361,18 @@ const mockUiAlert2 = {
     userId: 9,
     createdBy: "label.no-data-marker",
     detectionTypes: [],
+    detectionTypesCount: "0",
     filteredBy: [],
+    filteredByCount: "0",
     datasetAndMetrics: [],
+    datasetAndMetricsCount: "0",
     subscriptionGroups: [
         {
             id: 11,
             name: "testNameSubscriptionGroup11",
         },
     ],
+    subscriptionGroupsCount: "1",
     alert: mockAlert2,
 };
 
@@ -372,9 +384,13 @@ const mockUiAlert3 = {
     userId: -1,
     createdBy: "label.no-data-marker",
     detectionTypes: [],
+    detectionTypesCount: "0",
     filteredBy: [],
+    filteredByCount: "0",
     datasetAndMetrics: [],
+    datasetAndMetricsCount: "0",
     subscriptionGroups: [],
+    subscriptionGroupsCount: "0",
     alert: mockAlert3,
 };
 

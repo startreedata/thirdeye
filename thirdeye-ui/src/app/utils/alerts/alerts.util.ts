@@ -12,6 +12,7 @@ import {
     UiAlertDatasetAndMetric,
     UiAlertSubscriptionGroup,
 } from "../../rest/dto/ui-alert.interfaces";
+import { formatNumber } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const createDefaultAlert = (): Alert => {
@@ -48,9 +49,13 @@ export const createEmptyUiAlert = (): UiAlert => {
         userId: -1,
         createdBy: noDataMarker,
         detectionTypes: [],
+        detectionTypesCount: "0",
         filteredBy: [],
+        filteredByCount: "0",
         datasetAndMetrics: [],
+        datasetAndMetricsCount: "0",
         subscriptionGroups: [],
+        subscriptionGroupsCount: "0",
         alert: null,
     };
 };
@@ -193,6 +198,10 @@ const getUiAlertInternal = (
             subscriptionGroupsToAlertIdsMap.get(alert.id)) ||
         [];
 
+    uiAlert.subscriptionGroupsCount = formatNumber(
+        uiAlert.subscriptionGroups.length
+    );
+
     // Detection, dataset and metric properties
     if (isEmpty(alert.nodes)) {
         return uiAlert;
@@ -226,6 +235,11 @@ const getUiAlertInternal = (
 
         uiAlert.datasetAndMetrics.push(uiAlertDatasetAndMetric);
     }
+
+    uiAlert.datasetAndMetricsCount = formatNumber(
+        uiAlert.datasetAndMetrics.length
+    );
+    uiAlert.filteredByCount = formatNumber(uiAlert.filteredBy.length);
 
     return uiAlert;
 };

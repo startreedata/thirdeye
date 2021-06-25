@@ -1,7 +1,5 @@
 package org.apache.pinot.thirdeye.detection.components.detectors;
 
-import java.util.Collections;
-import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
@@ -12,9 +10,6 @@ public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
   private String timezone = DEFAULT_TIMEZONE;
   private String pattern = "UP_OR_DOWN";
   private String weekStart = "WEDNESDAY";
-  private String timestamp = "timestamp";
-  private String metric = "value";
-  private List<String> dimensions = Collections.emptyList();
   private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY
       .toAggregationGranularityString(); // use native granularity by default
 
@@ -70,33 +65,6 @@ public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
   public PercentageChangeRuleDetectorSpec setMonitoringGranularity(
       final String monitoringGranularity) {
     this.monitoringGranularity = monitoringGranularity;
-    return this;
-  }
-
-  public String getTimestamp() {
-    return timestamp;
-  }
-
-  public PercentageChangeRuleDetectorSpec setTimestamp(final String timestamp) {
-    this.timestamp = timestamp;
-    return this;
-  }
-
-  public String getMetric() {
-    return metric;
-  }
-
-  public PercentageChangeRuleDetectorSpec setMetric(final String metric) {
-    this.metric = metric;
-    return this;
-  }
-
-  public List<String> getDimensions() {
-    return dimensions;
-  }
-
-  public PercentageChangeRuleDetectorSpec setDimensions(final List<String> dimensions) {
-    this.dimensions = dimensions;
     return this;
   }
 }

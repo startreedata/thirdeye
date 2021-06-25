@@ -18,7 +18,6 @@
  */
 package org.apache.pinot.thirdeye.detection.components.detectors;
 
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 
@@ -31,79 +30,77 @@ public class HoltWintersDetectorSpec extends AbstractSpec {
   private double sensitivity = 5;
   private Pattern pattern = Pattern.UP_OR_DOWN;
   private boolean smoothing = true;
-  private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY
-      .toAggregationGranularityString(); // use native granularity by default
   private String weekStart = "WEDNESDAY";
-
-  public boolean getSmoothing() {
-    return smoothing;
-  }
-
-  public Pattern getPattern() {
-    return pattern;
-  }
-
-  public double getSensitivity() {
-    return sensitivity;
-  }
 
   public double getAlpha() {
     return alpha;
+  }
+
+  public HoltWintersDetectorSpec setAlpha(final double alpha) {
+    this.alpha = alpha;
+    return this;
   }
 
   public double getBeta() {
     return beta;
   }
 
+  public HoltWintersDetectorSpec setBeta(final double beta) {
+    this.beta = beta;
+    return this;
+  }
+
   public double getGamma() {
     return gamma;
+  }
+
+  public HoltWintersDetectorSpec setGamma(final double gamma) {
+    this.gamma = gamma;
+    return this;
   }
 
   public int getPeriod() {
     return period;
   }
 
-  public String getMonitoringGranularity() {
-    return monitoringGranularity;
-  }
-
-  public void setAlpha(double alpha) {
-    this.alpha = alpha;
-  }
-
-  public void setBeta(double beta) {
-    this.beta = beta;
-  }
-
-  public void setGamma(double gamma) {
-    this.gamma = gamma;
-  }
-
-  public void setPeriod(int period) {
+  public HoltWintersDetectorSpec setPeriod(final int period) {
     this.period = period;
+    return this;
   }
 
-  public void setPattern(Pattern pattern) {
-    this.pattern = pattern;
+  public double getSensitivity() {
+    return sensitivity;
   }
 
-  public void setSensitivity(double sensitivity) {
+  public HoltWintersDetectorSpec setSensitivity(final double sensitivity) {
     this.sensitivity = sensitivity;
+    return this;
   }
 
-  public void setSmoothing(boolean smoothing) {
+  public Pattern getPattern() {
+    return pattern;
+  }
+
+  public HoltWintersDetectorSpec setPattern(final Pattern pattern) {
+    this.pattern = pattern;
+    return this;
+  }
+
+  public boolean isSmoothing() {
+    return smoothing;
+  }
+
+  public HoltWintersDetectorSpec setSmoothing(final boolean smoothing) {
     this.smoothing = smoothing;
-  }
-
-  public void setMonitoringGranularity(String monitoringGranularity) {
-    this.monitoringGranularity = monitoringGranularity;
+    return this;
   }
 
   public String getWeekStart() {
     return weekStart;
   }
 
-  public void setWeekStart(String weekStart) {
+  public HoltWintersDetectorSpec setWeekStart(final String weekStart) {
     this.weekStart = weekStart;
+    return this;
   }
 }

@@ -23,9 +23,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFI
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 
-import java.time.DayOfWeek;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils;
@@ -51,19 +49,15 @@ import org.joda.time.Interval;
 public class PercentageChangeRuleDetectorV2 implements
     AnomalyDetectorV2<PercentageChangeRuleDetectorSpec> {
 
-  private static final String COL_CURR = "current";
   private static final String COL_CHANGE = "change";
   private static final String COL_ANOMALY = "anomaly";
   private static final String COL_PATTERN = "pattern";
   private static final String COL_CHANGE_VIOLATION = "change_violation";
   private double percentageChange;
   private Pattern pattern;
-  private String monitoringGranularity;
   private TimeGranularity timeGranularity;
-  private DayOfWeek weekStart;
   private String timestamp = "timestamp";
   private String metric = "value";
-  private List<String> dimensions = Collections.emptyList();
 
   @Override
   public void init(PercentageChangeRuleDetectorSpec spec) {
@@ -72,20 +66,16 @@ public class PercentageChangeRuleDetectorV2 implements
     String offset = spec.getOffset();
     this.timestamp = spec.getTimestamp();
     this.metric = spec.getMetric();
-    this.dimensions = spec.getDimensions();
 
     BaselineParsingUtils.parseOffset(offset, timezone);
     this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
 
-    this.monitoringGranularity = spec.getMonitoringGranularity();
-    if (this.monitoringGranularity.endsWith(TimeGranularity.MONTHS) || this.monitoringGranularity
+    String monitoringGranularity = spec.getMonitoringGranularity();
+    if (monitoringGranularity.endsWith(TimeGranularity.MONTHS) || monitoringGranularity
         .endsWith(TimeGranularity.WEEKS)) {
       this.timeGranularity = MetricSlice.NATIVE_GRANULARITY;
     } else {
       this.timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
-    }
-    if (this.monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      this.weekStart = DayOfWeek.valueOf(spec.getWeekStart());
     }
   }
 
@@ -150,9 +140,7 @@ public class PercentageChangeRuleDetectorV2 implements
 
     List<MergedAnomalyResultDTO> anomalies = DetectionUtils.makeAnomalies(slice, df, COL_ANOMALY);
     DataFrame baselineWithBoundaries = constructPercentageChangeBoundaries(df);
-    final DetectionResult detectionResult = DetectionResult.from(anomalies,
-        TimeSeries.fromDataFrame(baselineWithBoundaries));
-    return detectionResult;
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(baselineWithBoundaries));
   }
 
   private DataFrame constructPercentageChangeBoundaries(DataFrame dfBase) {

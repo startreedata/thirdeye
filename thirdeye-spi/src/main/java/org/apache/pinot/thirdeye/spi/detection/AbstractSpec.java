@@ -21,7 +21,10 @@
 package org.apache.pinot.thirdeye.spi.detection;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 
@@ -32,6 +35,21 @@ public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
 
+  private String timestamp = "timestamp";
+  private String metric = "value";
+  private List<String> dimensions = Collections.emptyList();
+  private String monitoringGranularity = MetricSlice
+      .NATIVE_GRANULARITY
+      .toAggregationGranularityString(); // use native granularity by default
+
+  /**
+   * Helper for creating spec pojos from Map.class
+   *
+   * @param properties a map containing parameters
+   * @param specClass the POJO class to be serialized into
+   * @param <T> Generic Param. Accepts classes which extend this class
+   * @return pojo created from properties map
+   */
   public static <T extends AbstractSpec> T fromProperties(Map<String, Object> properties,
       Class<T> specClass) {
     // don't reuse model mapper instance. It caches typeMaps and will result in unexpected mappings
@@ -39,5 +57,41 @@ public abstract class AbstractSpec implements Serializable {
     // use strict mapping to ensure no mismatches or ambiguity occurs
     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
     return modelMapper.map(properties, specClass);
+  }
+
+  public String getTimestamp() {
+    return timestamp;
+  }
+
+  public AbstractSpec setTimestamp(final String timestamp) {
+    this.timestamp = timestamp;
+    return this;
+  }
+
+  public String getMetric() {
+    return metric;
+  }
+
+  public AbstractSpec setMetric(final String metric) {
+    this.metric = metric;
+    return this;
+  }
+
+  public List<String> getDimensions() {
+    return dimensions;
+  }
+
+  public AbstractSpec setDimensions(final List<String> dimensions) {
+    this.dimensions = dimensions;
+    return this;
+  }
+
+  public String getMonitoringGranularity() {
+    return monitoringGranularity;
+  }
+
+  public AbstractSpec setMonitoringGranularity(final String monitoringGranularity) {
+    this.monitoringGranularity = monitoringGranularity;
+    return this;
   }
 }

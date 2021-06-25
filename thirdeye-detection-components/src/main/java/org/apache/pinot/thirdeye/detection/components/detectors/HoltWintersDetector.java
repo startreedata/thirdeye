@@ -101,7 +101,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     this.gamma = spec.getGamma();
     this.dataFetcher = dataFetcher;
     this.pattern = spec.getPattern();
-    this.smoothing = spec.getSmoothing();
+    this.smoothing = spec.isSmoothing();
     this.sensitivity = spec.getSensitivity();
     this.monitoringGranularity = spec.getMonitoringGranularity();
 

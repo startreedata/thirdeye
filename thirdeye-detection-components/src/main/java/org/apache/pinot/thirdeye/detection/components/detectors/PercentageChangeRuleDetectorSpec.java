@@ -1,24 +1,7 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package org.apache.pinot.thirdeye.detection.components.detectors;
 
+import java.util.Collections;
+import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
@@ -29,54 +12,91 @@ public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
   private String timezone = DEFAULT_TIMEZONE;
   private String pattern = "UP_OR_DOWN";
   private String weekStart = "WEDNESDAY";
+  private String timestamp = "timestamp";
+  private String metric = "value";
+  private List<String> dimensions = Collections.emptyList();
   private String monitoringGranularity = MetricSlice.NATIVE_GRANULARITY
       .toAggregationGranularityString(); // use native granularity by default
 
-  public String getMonitoringGranularity() {
-    return monitoringGranularity;
+  public double getPercentageChange() {
+    return percentageChange;
   }
 
-  public void setMonitoringGranularity(String monitoringGranularity) {
-    this.monitoringGranularity = monitoringGranularity;
-  }
-
-  public String getPattern() {
-    return pattern;
-  }
-
-  public void setPattern(String pattern) {
-    this.pattern = pattern;
-  }
-
-  public String getTimezone() {
-    return timezone;
-  }
-
-  public void setTimezone(String timezone) {
-    this.timezone = timezone;
+  public PercentageChangeRuleDetectorSpec setPercentageChange(final double percentageChange) {
+    this.percentageChange = percentageChange;
+    return this;
   }
 
   public String getOffset() {
     return offset;
   }
 
-  public void setOffset(String offset) {
+  public PercentageChangeRuleDetectorSpec setOffset(final String offset) {
     this.offset = offset;
+    return this;
   }
 
-  public double getPercentageChange() {
-    return percentageChange;
+  public String getTimezone() {
+    return timezone;
   }
 
-  public void setPercentageChange(double percentageChange) {
-    this.percentageChange = percentageChange;
+  public PercentageChangeRuleDetectorSpec setTimezone(final String timezone) {
+    this.timezone = timezone;
+    return this;
+  }
+
+  public String getPattern() {
+    return pattern;
+  }
+
+  public PercentageChangeRuleDetectorSpec setPattern(final String pattern) {
+    this.pattern = pattern;
+    return this;
   }
 
   public String getWeekStart() {
     return weekStart;
   }
 
-  public void setWeekStart(String weekStart) {
+  public PercentageChangeRuleDetectorSpec setWeekStart(final String weekStart) {
     this.weekStart = weekStart;
+    return this;
+  }
+
+  public String getMonitoringGranularity() {
+    return monitoringGranularity;
+  }
+
+  public PercentageChangeRuleDetectorSpec setMonitoringGranularity(
+      final String monitoringGranularity) {
+    this.monitoringGranularity = monitoringGranularity;
+    return this;
+  }
+
+  public String getTimestamp() {
+    return timestamp;
+  }
+
+  public PercentageChangeRuleDetectorSpec setTimestamp(final String timestamp) {
+    this.timestamp = timestamp;
+    return this;
+  }
+
+  public String getMetric() {
+    return metric;
+  }
+
+  public PercentageChangeRuleDetectorSpec setMetric(final String metric) {
+    this.metric = metric;
+    return this;
+  }
+
+  public List<String> getDimensions() {
+    return dimensions;
+  }
+
+  public PercentageChangeRuleDetectorSpec setDimensions(final List<String> dimensions) {
+    this.dimensions = dimensions;
+    return this;
   }
 }

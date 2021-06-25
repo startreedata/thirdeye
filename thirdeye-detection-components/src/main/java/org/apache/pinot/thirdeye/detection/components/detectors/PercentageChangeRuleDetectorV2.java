@@ -49,7 +49,7 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DetectionResult;
 import org.joda.time.Interval;
 
 public class PercentageChangeRuleDetectorV2 implements
-    AnomalyDetectorV2<PercentageChangeRuleDetectorSpecV2> {
+    AnomalyDetectorV2<PercentageChangeRuleDetectorSpec> {
 
   private static final String COL_CURR = "current";
   private static final String COL_CHANGE = "change";
@@ -66,7 +66,7 @@ public class PercentageChangeRuleDetectorV2 implements
   private List<String> dimensions = Collections.emptyList();
 
   @Override
-  public void init(PercentageChangeRuleDetectorSpecV2 spec) {
+  public void init(PercentageChangeRuleDetectorSpec spec) {
     this.percentageChange = spec.getPercentageChange();
     String timezone = spec.getTimezone();
     String offset = spec.getOffset();

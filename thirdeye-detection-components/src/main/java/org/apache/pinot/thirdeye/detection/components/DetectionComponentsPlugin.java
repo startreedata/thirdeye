@@ -11,7 +11,6 @@ import org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRule
 import org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetectorSpec;
 import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetector;
 import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetectorSpec;
-import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetectorSpecV2;
 import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetectorV2;
 import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetectorSpec;
@@ -63,7 +62,7 @@ public class DetectionComponentsPlugin implements Plugin {
     return ImmutableList.of(
         new GenericAnomalyDetectorV2Factory<>(
             "PERCENTAGE_RULE",
-            PercentageChangeRuleDetectorSpecV2.class,
+            PercentageChangeRuleDetectorSpec.class,
             PercentageChangeRuleDetectorV2.class
         ),
         new GenericAnomalyDetectorV2Factory<>(
